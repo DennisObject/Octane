@@ -12,6 +12,10 @@ export const LayoutRoomPreviewerView: FC<{
     const { roomPreviewer = null, height = 0, fitParent = false, onPreviewClick } = props;
     const elementRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    // Consecutive render failures before the preview stops rendering: a transient bad
+    // frame recovers, a wedged previewer stops throwing every animation frame.
+    const renderFailuresRef = useRef(0);
+    const MAX_RENDER_FAILURES = 6;
 
     const onClick = () => {
         if (onPreviewClick) {
@@ -39,6 +43,19 @@ export const LayoutRoomPreviewerView: FC<{
         let texture: ReturnType<typeof TextureUtils.createRenderTexture> = null;
         let roomCanvasInitialized = false;
         let frameImageData: ImageData = null;
+
+        renderFailuresRef.current = 0;
+
+        const noteFailure = (label: string, error: unknown) => {
+            renderFailuresRef.current += 1;
+
+            if (renderFailuresRef.current >= MAX_RENDER_FAILURES) {
+                OctaneLogger.error(
+                    `LayoutRoomPreviewerView ${label} failed ${renderFailuresRef.current} times; disabling further renders for this preview`,
+                    error
+                );
+            }
+        };
 
         const paintToDOM = () => {
             if (!texture) return;
