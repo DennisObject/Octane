@@ -996,5 +996,10 @@
     "wiredmenu.chests.chest_control.result.locked": "%count% coffres verrouilles.",
     "wiredmenu.chests.chest_control.result.unlocked": "%count% coffres deverrouilles.",
     "wiredmenu.chests.chest_control.result.none": "Rien n'a change : les coffres etaient deja dans cet etat.",
-    "wiredmenu.chests.chest_control.owner_only": "Seul le proprietaire de l'appart peut verrouiller tous les coffres."
+    "wiredmenu.chests.chest_control.owner_only": "Seul le proprietaire de l'appart peut verrouiller tous les coffres.",
+    "wiredfurni.web_api.error.own_room_only": "Tu ne peux placer l'add-on Variables Web API que dans ton propre appart.",
+    "wiredfurni.web_api.error.max_per_user": "Tu possèdes déjà le nombre maximum d'add-ons Variables Web API.",
+    "wiredmenu.variables_explorer.empty.user": "Aucune variable utilisateur permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici.",
+    "wiredmenu.variables_explorer.empty.furni": "Aucune variable de mobi permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici.",
+    "wiredmenu.variables_explorer.empty.global": "Aucune variable globale permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici."
 }

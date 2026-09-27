@@ -19,7 +19,7 @@ import {
     RoomWidgetUpdateRentableBotChatEvent
 } from '../../../../api';
 import { Column, LayoutFurniIconImageView } from '../../../../common';
-import { useAvatarInfoWidget, useOctaneEvent, useRoom, useUiEvent } from '../../../../hooks';
+import { useAvatarInfoWidget, useFurniPickupGuard, useOctaneEvent, useRoom, useUiEvent } from '../../../../hooks';
 import { AvatarInfoPetTrainingPanelView } from './AvatarInfoPetTrainingPanelView';
 import { AvatarInfoRentableBotChatView } from './AvatarInfoRentableBotChatView';
 import { AvatarInfoUseProductConfirmView } from './AvatarInfoUseProductConfirmView';
@@ -42,6 +42,7 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
     const BLOCK_MENU_WINDOW_MS = 500;
     const BLOCK_ROTATE_WINDOW_MS = 500;
     const [isGameMode, setGameMode] = useState(false);
+    const { pickupRoomObject } = useFurniPickupGuard();
     const [isDancing, setIsDancing] = useState(false);
     const [isTouchLayout, setIsTouchLayout] = useState(false);
     const [mobileFurniDetailsOpen, setMobileFurniDetailsOpen] = useState(false);
@@ -101,6 +102,8 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
     });
 
     useUiEvent<RoomWidgetUpdateRentableBotChatEvent>(RoomWidgetUpdateRentableBotChatEvent.UPDATE_CHAT, (event) => setRentableBotChatEvent(event));
+
+    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_PICKUP, (event) => pickupRoomObject(event.objectId, event.category));
 
     useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_MANIPULATION, (event) => {
         if (!(avatarInfo instanceof AvatarInfoFurni)) return;

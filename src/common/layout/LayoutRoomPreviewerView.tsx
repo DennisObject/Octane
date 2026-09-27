@@ -1,5 +1,6 @@
-import { GetRenderer, GetTicker, RoomPreviewer, TextureUtils } from '@octane/renderer';
+import { GetRenderer, GetTicker, OctaneLogger, OctaneTicker, RoomPreviewer, TextureUtils } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
+import { GetAnimationFrameInterval } from '../../api/octane/room/AddAnimationTickerCallback';
 import { PIXEL_ART_RENDERING } from './PixelArtRendering';
 
 export const LayoutRoomPreviewerView: FC<{
@@ -68,10 +69,28 @@ export const LayoutRoomPreviewerView: FC<{
             context.putImageData(frameImageData, 0, 0);
         };
 
-        const update = () => {
+        // Repositioning follows the room's animation clock; the DOM paint below
+        // still checks every frame so no rendered canvas update is skipped.
+        const repositionInterval = GetAnimationFrameInterval();
+        let repositionElapsed = repositionInterval;
+
+        const update = (ticker: OctaneTicker) => {
+            if (renderFailuresRef.current >= MAX_RENDER_FAILURES) return;
+
             const wasUpdated = !!roomPreviewer.getRenderingCanvas()?.canvasUpdated;
 
-            roomPreviewer.updatePreviewRoomView();
+            repositionElapsed += ticker.deltaMS;
+
+            if (repositionElapsed >= repositionInterval) {
+                repositionElapsed %= repositionInterval;
+
+                try {
+                    roomPreviewer.updatePreviewRoomView();
+                } catch (error) {
+                    noteFailure('update', error);
+                    return;
+                }
+            }
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 

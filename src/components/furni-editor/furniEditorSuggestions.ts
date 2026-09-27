@@ -13,7 +13,6 @@ export interface EditableFields {
     allowLay: boolean;
     allowTrade: boolean;
     allowRecycle: boolean;
-    description: string;
     interactionType: string;
     interactionModesCount: number;
     vendingIds: string;
@@ -93,9 +92,6 @@ export const suggestFromFurnidata = (entry: Record<string, unknown> | null, form
         const value = asBool(entry[key]);
         if (value !== null && value !== form[field]) out.push({ field, value, reason: `${from} ${key}` });
     }
-
-    const description = typeof entry.description === 'string' ? entry.description.trim() : '';
-    if (description && !form.description.trim()) out.push({ field: 'description', value: description, reason: `${from} description, DB is empty` });
 
     return out;
 };

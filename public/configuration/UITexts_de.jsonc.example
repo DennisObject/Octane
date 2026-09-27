@@ -991,5 +991,10 @@
     "wiredmenu.chests.chest_control.result.locked": "%count% Truhen gesperrt.",
     "wiredmenu.chests.chest_control.result.unlocked": "%count% Truhen entsperrt.",
     "wiredmenu.chests.chest_control.result.none": "Nichts hat sich geändert - die Truhen waren bereits in diesem Zustand.",
-    "wiredmenu.chests.chest_control.owner_only": "Nur der Raumbesitzer kann alle Truhen sperren."
+    "wiredmenu.chests.chest_control.owner_only": "Nur der Raumbesitzer kann alle Truhen sperren.",
+    "wiredfurni.web_api.error.own_room_only": "Du kannst das Variables-Web-API-Add-on nur in deinem eigenen Raum platzieren.",
+    "wiredfurni.web_api.error.max_per_user": "Du besitzt bereits die maximale Anzahl an Variables-Web-API-Add-ons.",
+    "wiredmenu.variables_explorer.empty.user": "Keine dauerhaften Benutzer-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen.",
+    "wiredmenu.variables_explorer.empty.furni": "Keine dauerhaften Möbel-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen.",
+    "wiredmenu.variables_explorer.empty.global": "Keine dauerhaften globalen-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen."
 }

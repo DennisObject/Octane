@@ -92,7 +92,6 @@ describe('FurniEditorEditView', () => {
         expect(screen.getByLabelText('Clothing on walk')).toHaveValue('ch-210');
         expect(screen.getByLabelText('Vending IDs')).toHaveValue('1,2');
         expect(screen.getByLabelText('Multiheight')).toHaveValue('0.5,1.0');
-        expect(screen.getByLabelText('Description (DB)')).toHaveValue('Royal seat');
     });
 
     it('confirms a save through a diff of the changed fields only, without the immutable identity columns', () => {
@@ -281,7 +280,7 @@ describe('FurniEditorEditView', () => {
         expect(screen.getByRole('button', { name: 'Save (1)' })).toBeEnabled();
     });
 
-    it('offers what furnidata says about footprint, flags and description, one click each or all at once', () => {
+    it('offers what furnidata says about footprint and flags, one click each or all at once', () => {
         renderView({
             furniDataEntry: {
                 classname: 'throne',
@@ -293,22 +292,20 @@ describe('FurniEditorEditView', () => {
                 tradeable: true,
                 recyclable: false,
                 description: 'Royal seat'
-            },
-            item: { ...item, description: '' }
+            }
         });
 
-        expect(screen.getByRole('button', { name: '4 suggestions ›' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '3 suggestions ›' })).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Apply Width 2' }));
         expect(screen.getByRole('spinbutton', { name: 'Width' })).toHaveValue(2);
         expect(screen.queryByRole('button', { name: 'Apply Width 2' })).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: 'apply all' }));
-        expect(screen.getByLabelText('Description (DB)')).toHaveValue('Royal seat');
         expect(screen.getByRole('button', { name: 'Walk', pressed: true })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Recycle', pressed: false })).toBeInTheDocument();
         expect(screen.queryByText(/suggestion/)).toBeNull();
-        expect(screen.getByRole('button', { name: 'Save (4)' })).toBeEnabled();
+        expect(screen.getByRole('button', { name: 'Save (3)' })).toBeEnabled();
     });
 
     it('ignores a furnidata entry that belongs to another classname', () => {

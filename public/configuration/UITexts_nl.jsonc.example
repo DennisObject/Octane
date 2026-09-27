@@ -996,5 +996,10 @@
     "wiredmenu.chests.chest_control.result.locked": "%count% kisten vergrendeld.",
     "wiredmenu.chests.chest_control.result.unlocked": "%count% kisten ontgrendeld.",
     "wiredmenu.chests.chest_control.result.none": "Er is niets veranderd - de kisten stonden al zo.",
-    "wiredmenu.chests.chest_control.owner_only": "Alleen de eigenaar van de kamer kan alle kisten vergrendelen."
+    "wiredmenu.chests.chest_control.owner_only": "Alleen de eigenaar van de kamer kan alle kisten vergrendelen.",
+    "wiredfurni.web_api.error.own_room_only": "Je kunt de Variables Web API-add-on alleen in je eigen kamer plaatsen.",
+    "wiredfurni.web_api.error.max_per_user": "Je hebt al het maximale aantal Variables Web API-add-ons.",
+    "wiredmenu.variables_explorer.empty.user": "Geen permanente gebruikersvariabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken.",
+    "wiredmenu.variables_explorer.empty.furni": "Geen permanente meubelvariabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken.",
+    "wiredmenu.variables_explorer.empty.global": "Geen permanente globale variabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken."
 }

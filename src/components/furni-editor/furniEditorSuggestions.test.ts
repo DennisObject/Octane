@@ -24,7 +24,6 @@ const form: EditableFields = {
     allowLay: false,
     allowTrade: true,
     allowRecycle: true,
-    description: '',
     interactionType: 'default',
     interactionModesCount: 1,
     vendingIds: '',
@@ -62,15 +61,14 @@ describe('suggestFromFurnidata', () => {
             { field: 'width', value: 2, reason: 'furnidata xdim' },
             { field: 'length', value: 3, reason: 'furnidata ydim' },
             { field: 'allowWalk', value: true, reason: 'furnidata canstandon' },
-            { field: 'allowTrade', value: false, reason: 'furnidata tradeable' },
-            { field: 'description', value: 'Royal seat', reason: 'furnidata description, DB is empty' }
+            { field: 'allowTrade', value: false, reason: 'furnidata tradeable' }
         ]);
     });
 
-    it('keeps quiet when everything agrees, the DB description is set, or the entry is missing', () => {
+    it('keeps quiet when everything agrees or the entry is missing', () => {
         const entry = { xdim: 1, ydim: 1, canstandon: false, cansiton: true, canlayon: false, tradeable: true, recyclable: true, description: 'x' };
 
-        expect(suggestFromFurnidata(entry, { ...form, description: 'already here' })).toEqual([]);
+        expect(suggestFromFurnidata(entry, form)).toEqual([]);
         expect(suggestFromFurnidata(null, form)).toEqual([]);
     });
 

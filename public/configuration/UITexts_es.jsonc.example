@@ -996,5 +996,10 @@
     "wiredmenu.chests.chest_control.result.locked": "%count% cofres bloqueados.",
     "wiredmenu.chests.chest_control.result.unlocked": "%count% cofres desbloqueados.",
     "wiredmenu.chests.chest_control.result.none": "No ha cambiado nada: los cofres ya estaban asi.",
-    "wiredmenu.chests.chest_control.owner_only": "Solo el propietario de la sala puede bloquear todos los cofres."
+    "wiredmenu.chests.chest_control.owner_only": "Solo el propietario de la sala puede bloquear todos los cofres.",
+    "wiredfurni.web_api.error.own_room_only": "Solo puedes colocar el complemento Variables Web API en tu propia sala.",
+    "wiredfurni.web_api.error.max_per_user": "Ya tienes el número máximo de complementos Variables Web API.",
+    "wiredmenu.variables_explorer.empty.user": "No hay variables de usuario permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí.",
+    "wiredmenu.variables_explorer.empty.furni": "No hay variables de furni permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí.",
+    "wiredmenu.variables_explorer.empty.global": "No hay variables globales permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí."
 }

@@ -1002,5 +1002,10 @@
     "image.position.editor.offsetx": "Offset X",
     "image.position.editor.offsety": "Offset Y",
     "image.position.editor.offsetz": "Depth",
-    "image.position.editor.cancel": "Cancel"
+    "image.position.editor.cancel": "Cancel",
+    "wiredfurni.web_api.error.own_room_only": "You can only place the Variables Web API add-on in your own room.",
+    "wiredfurni.web_api.error.max_per_user": "You already own the maximum number of Variables Web API add-ons.",
+    "wiredmenu.variables_explorer.empty.user": "No permanent user variables in this room. Set a variable to Permanent in its wired box to use it here.",
+    "wiredmenu.variables_explorer.empty.furni": "No permanent furni variables in this room. Set a variable to Permanent in its wired box to use it here.",
+    "wiredmenu.variables_explorer.empty.global": "No permanent global variables in this room. Set a variable to Permanent in its wired box to use it here."
 }
