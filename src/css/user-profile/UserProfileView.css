@@ -204,8 +204,10 @@
 
 .octane-extended-profile__relationship-box {
   min-height: 22px;
-  border: 1px solid #b4b4b4;
-  background: linear-gradient(180deg, #fdfdfb 0%, #ecebe3 100%);
+  /* Skin border style 2: a rounded, near-white field. */
+  border: 1px solid #c3c3c3;
+  border-radius: 8px;
+  background: #fbfbfa;
   display: flex;
   align-items: center;
   padding: 0 7px;
@@ -310,6 +312,12 @@
 
 .octane-extended-profile__summary-value {
   font-weight: 700;
+  line-height: 1;
+}
+
+/* Official badgeRank "(#N)" after the badge count. */
+.octane-extended-profile__summary-rank {
+  margin-left: 3px;
   line-height: 1;
 }
 

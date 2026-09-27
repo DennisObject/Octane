@@ -1,6 +1,6 @@
 import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { FriendlyTime, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
+import { ensureBadgeLeaderboardLoaded, FriendlyTime, getBadgesRank, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
 import { LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../common';
@@ -11,13 +11,15 @@ interface UserContainerViewProps {
     userBadges?: string[];
     userRelationships?: RelationshipStatusInfoMessageParser;
     onOpenRooms?: () => void;
+    /** Closes the profile window (the official find-friends link closes it). */
+    onClose?: () => void;
     /** Official block_button / blocked_container: the user is on the session block list. */
     isBlocked?: boolean;
     onToggleBlock?: () => void;
 }
 
 export const UserContainerView: FC<UserContainerViewProps> = (props) => {
-    const { userProfile = null, userBadges = [], userRelationships = null, onOpenRooms = null, isBlocked = false, onToggleBlock = null } = props;
+    const { userProfile = null, userBadges = [], userRelationships = null, onOpenRooms = null, onClose = null, isBlocked = false, onToggleBlock = null } = props;
 
     const [requestSent, setRequestSent] = useState(userProfile.requestSent);
     const isOwnProfile = userProfile.id === GetSessionDataManager().userId;
@@ -27,6 +29,27 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const infostandOverlayClass = `overlay-${userProfile.overlayId ?? 'default'}`;
     const selectedBadges = useMemo(() => [...userBadges].slice(0, 5), [userBadges]);
     const totalBadges = (userProfile as any).totalBadges ?? userBadges.length ?? 0;
+
+    // Official badgeRank "(#N)" next to the badge count, read from the badge leaderboard.
+    const [badgesRank, setBadgesRank] = useState(-1);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        setBadgesRank(-1);
+
+        ensureBadgeLeaderboardLoaded()
+            .then((leaderboard) => {
+                if (!cancelled) setBadgesRank(getBadgesRank(leaderboard, userProfile.id));
+            })
+            .catch(() => {
+                if (!cancelled) setBadgesRank(-1);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [userProfile.id]);
 
     const addFriend = () => {
         setRequestSent(true);
@@ -142,7 +165,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                         }}
                     />
                     <p className="octane-extended-profile__relationships-label">{LocalizeText('extendedprofile.relstatus')}</p>
-                    {userRelationships && <RelationshipsContainerView relationships={userRelationships} />}
+                    {userRelationships && <RelationshipsContainerView relationships={userRelationships} onClose={onClose} />}
                     {!userRelationships && (
                         <Text small variant="muted">
                             {LocalizeText('generic.loading')}
@@ -164,6 +187,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     <img className="octane-extended-profile__summary-icon octane-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
                     <span className="octane-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
                     <span className="octane-extended-profile__summary-value">{totalBadges}</span>
+                    {badgesRank > 0 && <span className="octane-extended-profile__summary-rank">(#{badgesRank})</span>}
                 </button>
                 <button
                     className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center"

@@ -164,6 +164,7 @@ export const UserProfileView: FC<{}> = () => {
                         isBlocked={isBlocked}
                         onToggleBlock={toggleBlock}
                         onOpenRooms={onOpenRooms}
+                        onClose={onClose}
                     />
                 </div>
                 <div className="octane-extended-profile-window__body octane-extended-profile-window__body--groups flex-1 overflow-hidden px-[10px] pb-[10px] pt-[6px]">
