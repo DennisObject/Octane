@@ -1,6 +1,6 @@
 import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { ensureBadgeLeaderboardLoaded, FriendlyTime, GetConfigurationValue, getBadgesRank, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
+import { ensureBadgeLeaderboardLoaded, FriendlyTime, GetConfigurationValue, getBadgesRank, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
 import { LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../common';
@@ -111,10 +111,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             )}
                             <div className="octane-extended-profile__status">
                                 <div className="octane-extended-profile__presence">
-                                    <i
-                                        className={`octane-icon ${isOnline ? 'icon-pf-online' : 'icon-pf-offline'}${isHidden ? ' octane-extended-profile__presence--hidden' : ''}`}
-                                        title={isHidden ? localizeWithFallback('extendedprofile.hidden', 'Hidden') : undefined}
-                                    />
+                                    <i className={`octane-icon ${isOnline ? 'icon-pf-online' : 'icon-pf-offline'}${isHidden ? ' octane-extended-profile__presence--hidden' : ''}`} />
                                 </div>
                                 <div className="octane-extended-profile__status-copy">
                                     {canSendFriendRequest && (
