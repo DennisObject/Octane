@@ -139,14 +139,19 @@ export class WiredActionLayoutCode {
     public static VARIABLE_FX_NUMBER_DISPLAY_EXTRA: number = 135;
 
     public static PROJECTILE_EXTRA: number = 136;
+    /** Habbo's "write to logs" (wf_act_log / wf_act_neg_log): a message at a log level into the room log. */
     public static WRITE_TO_LOGS: number = 137;
+    /** Habbo's "teleport to room": a typed room, or the room a picked room link or teleporter leads to. */
     public static TELEPORT_TO_ROOM: number = 138;
 
+    /** Habbo's achievement and reward-track boxes; hotel-wide rewards, gated by the hotel. */
     public static PROGRESS_ACHIEVEMENT: number = 150;
     public static ACHIEVEMENT_ENABLER_EXTRA: number = 151;
     public static PROGRESS_REWARD_TRACK: number = 152;
     public static RESET_REWARD_TRACK: number = 153;
 
+    /** Global placeholder add-on (wf_xtra_text_output_global); the upstream addon code. */
     public static GLOBAL_PLACEHOLDER_EXTRA: number = 2000;
+    /** Daily task variable box (wf_var_daily_task); upstream variable code 8 in the same band. */
     public static DAILY_TASK_EXTRA: number = 2008;
 }

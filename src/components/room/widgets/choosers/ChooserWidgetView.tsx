@@ -1,8 +1,8 @@
-import { FurniturePickupAllComposer } from '@octane/renderer';
+import { FurniturePickupAllComposer, RoomObjectCategory } from '@octane/renderer';
 import { FC, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { chooserSelectionVisualizer, LocalizeText, RoomObjectItem, SendMessageComposer } from '../../../../api';
 import { Button, Flex, InfiniteScroll, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
-import { useHasPermission } from '../../../../hooks';
+import { useFurniPickupGuard, useHasPermission } from '../../../../hooks';
 import { classNames, OctaneInput } from '../../../../layout';
 
 const LIMIT_FURNI_PICKALL = 100;
@@ -23,6 +23,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = (props) => {
     const [checkAll, setCheckAll] = useState(false);
     const [checkedIds, setCheckedIds] = useState<number[]>([]);
     const canSeeId = useHasPermission('acc_supporttool');
+    const { confirmIfWebApiBox } = useFurniPickupGuard();
 
     const ownerNames = useMemo(() => {
         const names = Array.from(new Set(items.map((item) => item.ownerName || 'Unknown')));
@@ -60,11 +61,15 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = (props) => {
     const isChecked = (id: number) => checkedIds.includes(id);
 
     const onClickPickAll = () => {
-        SendMessageComposer(new FurniturePickupAllComposer(...checkedIds));
-        setCheckedIds([]);
-        setCheckAll(false);
-        chooserSelectionVisualizer.clearAll();
-        setSelectedItems([]);
+        const ids = [...checkedIds];
+
+        confirmIfWebApiBox(ids, RoomObjectCategory.FLOOR, () => {
+            SendMessageComposer(new FurniturePickupAllComposer(...ids));
+            setCheckedIds([]);
+            setCheckAll(false);
+            chooserSelectionVisualizer.clearAll();
+            setSelectedItems([]);
+        });
     };
 
     const filteredItems = useMemo(() => {

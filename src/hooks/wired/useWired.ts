@@ -26,6 +26,7 @@ import {
     GetRoomSession,
     IsOwnerOfFloorFurniture,
     LocalizeText,
+    localizeWithFallback,
     pasteTriggerableData,
     resetTriggerableData,
     SendMessageComposer,
@@ -38,6 +39,11 @@ import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
 import { useLiveState } from '../useLiveState';
 import { useWiredTools } from '../wired-tools/useWiredTools';
+
+/** English for server error keys a hotel's texts may not have yet. */
+const WIRED_ERROR_FALLBACKS: Record<string, string> = {
+    'wiredfurni.error.invalid_api_keys': 'Invalid Web API keys'
+};
 
 /** Whether a clicked floor furni may be picked, from its room object and furnidata. */
 export type WiredFurniPickCheck = (roomObject: IRoomObject, furniData: IFurnitureData) => boolean;
@@ -378,7 +384,9 @@ const useWiredState = () => {
         const parser = event.getParser();
 
         if (parser.info && parser.info.length) {
-            const message = /^[a-z0-9_.]+$/i.test(parser.info) ? LocalizeText(parser.info) : parser.info;
+            const message = /^[a-z0-9_.]+$/i.test(parser.info)
+                ? localizeWithFallback(parser.info, WIRED_ERROR_FALLBACKS[parser.info] ?? parser.info)
+                : parser.info;
 
             simpleAlert(message, null, null, null, LocalizeText('wiredfurni.title'));
         }

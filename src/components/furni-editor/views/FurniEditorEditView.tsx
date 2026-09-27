@@ -45,8 +45,7 @@ const FIELD_TIPS: Record<string, string> = {
     multiheight: 'Comma separated stack heights, one per state, for adjustable-height furniture',
     effectIdMale: 'Avatar effect applied to male avatars on use (0 = none)',
     effectIdFemale: 'Avatar effect applied to female avatars on use (0 = none)',
-    clothingOnWalk: 'Figure parts worn while walking on this furniture (clothing items)',
-    description: 'Server-side note kept in items_base; clients show the furnidata description instead'
+    clothingOnWalk: 'Figure parts worn while walking on this furniture (clothing items)'
 };
 
 // The editable subset of items_base. Identity columns (id, classname, sprite,
@@ -72,8 +71,7 @@ const editableForm = (item: FurniDetail) => ({
     multiheight: item.multiheight || '',
     effectIdMale: item.effectIdMale || 0,
     effectIdFemale: item.effectIdFemale || 0,
-    clothingOnWalk: item.clothingOnWalk || '',
-    description: item.description || ''
+    clothingOnWalk: item.clothingOnWalk || ''
 });
 
 type EditForm = ReturnType<typeof editableForm>;
@@ -99,8 +97,7 @@ const FIELD_LABELS: Record<EditField, string> = {
     multiheight: 'Multiheight',
     effectIdMale: 'Effect ID (male)',
     effectIdFemale: 'Effect ID (female)',
-    clothingOnWalk: 'Clothing on walk',
-    description: 'Description (DB)'
+    clothingOnWalk: 'Clothing on walk'
 };
 
 // Mirrors FurniEditorUpdatePayload.validateValue on the emulator: a value the
@@ -122,7 +119,6 @@ const validateForm = (form: EditForm): Partial<Record<EditField, string>> => {
     maxLen('vendingIds', 255);
     maxLen('clothingOnWalk', 255);
     maxLen('multiheight', 50);
-    maxLen('description', 500);
 
     return errors;
 };
@@ -177,8 +173,7 @@ const FIELD_GROUP: Record<EditField, GroupId> = {
     multiheight: 'behaviour',
     effectIdMale: 'behaviour',
     effectIdFemale: 'behaviour',
-    clothingOnWalk: 'behaviour',
-    description: 'names'
+    clothingOnWalk: 'behaviour'
 };
 
 interface InteractionTypePickerProps {
@@ -1245,23 +1240,6 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = (props) => {
                                     <label className={labelClass}>Type</label>
                                     <CopyValue value={item.type === 's' ? 'Floor (s)' : 'Wall (i)'} />
                                 </div>
-                            </div>
-                            <div className="mt-2">
-                                <label className={labelClass} htmlFor="furni-editor-description">
-                                    Description (DB)
-                                    <Tip field="description" />
-                                    {revert('description')}
-                                </label>
-                                <textarea
-                                    id="furni-editor-description"
-                                    aria-label={FIELD_LABELS.description}
-                                    rows={2}
-                                    className={`${inputClass('description')} resize-y min-h-[2.25rem]`}
-                                    value={form.description}
-                                    onChange={(e) => setField('description', e.target.value)}
-                                />
-                                {fieldError('description')}
-                                {chipsFor('description')}
                             </div>
                         </Section>
                     </div>

@@ -262,90 +262,91 @@ export const WiredActionGiveRewardView: FC<{}> = (props) => {
                     <FaPlus className="fa-icon" />
                 </Button>
             </div>
-            <div className="flex flex-col gap-1">
-                <div className="grid grid-cols-[1.2fr_1fr_110px_150px_42px] gap-1 px-1">
-                    <Text small bold>
-                        Type
-                    </Text>
-                    <Text small bold>
-                        Amount / Value
-                    </Text>
-                    <Text small bold>
-                        {uniqueRewards ? 'Mode' : 'Chance %'}
-                    </Text>
-                    <Text small bold>
-                        {hasCustomCurrencyReward ? 'Currency Type' : 'Extra / Info'}
-                    </Text>
-                    <Text small bold>
-                        Action
-                    </Text>
-                </div>
+            <div className="flex flex-col gap-2">
                 {rewards &&
                     rewards.map((reward, index) => {
                         const rewardTypeOptions = reward.rewardType === 'respect' ? REWARD_TYPES : SELECTABLE_REWARD_TYPES;
 
                         return (
-                            <div key={index} className="grid grid-cols-[1.2fr_1fr_110px_150px_42px] gap-1">
-                                <select
-                                    className="w-full form-select form-select-sm"
-                                    value={reward.rewardType}
-                                    onChange={(event) =>
-                                        updateReward(index, (prevValue) => ({ ...prevValue, rewardType: event.target.value as RewardType, rewardValue: '' }))
-                                    }
-                                >
-                                    {rewardTypeOptions.map((entry) => (
-                                        <option key={entry.value} value={entry.value}>
-                                            {localizeWithFallback(entry.key, entry.label)}
-                                        </option>
-                                    ))}
-                                </select>
-                                <OctaneInput
-                                    placeholder={getRewardValuePlaceholder(reward.rewardType)}
-                                    type={reward.rewardType === 'badge' ? 'text' : 'number'}
-                                    value={reward.rewardValue}
-                                    onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, rewardValue: event.target.value }))}
-                                />
-                                {uniqueRewards ? (
-                                    <div className="flex items-center px-2 rounded bg-muted">
-                                        <Text small>Unique</Text>
-                                    </div>
-                                ) : (
-                                    <OctaneInput
-                                        min={0}
-                                        max={100}
-                                        placeholder="Chance %"
-                                        type="number"
-                                        value={reward.probability}
-                                        onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, probability: Number(event.target.value) }))}
-                                    />
-                                )}
-                                {reward.rewardType === 'points' ? (
-                                    <OctaneInput
-                                        min={0}
-                                        placeholder={getExtraFieldPlaceholder(reward.rewardType)}
-                                        type="number"
-                                        value={reward.pointsType}
-                                        onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, pointsType: Number(event.target.value) }))}
-                                    />
-                                ) : (
-                                    <div className="flex items-center px-2 rounded bg-muted">
-                                        <Text small>{getExtraFieldLabel(reward.rewardType)}</Text>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-end">
+                            <div key={index} className="flex flex-col gap-1 p-1 rounded bg-muted">
+                                <div className="flex items-center gap-1">
+                                    <select
+                                        aria-label="Reward type"
+                                        className="min-w-0 grow form-select form-select-sm"
+                                        value={reward.rewardType}
+                                        onChange={(event) =>
+                                            updateReward(index, (prevValue) => ({ ...prevValue, rewardType: event.target.value as RewardType, rewardValue: '' }))
+                                        }
+                                    >
+                                        {rewardTypeOptions.map((entry) => (
+                                            <option key={entry.value} value={entry.value}>
+                                                {localizeWithFallback(entry.key, entry.label)}
+                                            </option>
+                                        ))}
+                                    </select>
                                     {index > 0 && (
-                                        <Button variant="danger" onClick={(event) => removeReward(index)}>
+                                        <Button variant="danger" onClick={() => removeReward(index)}>
                                             <FaTrash className="fa-icon" />
                                         </Button>
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-[2px]">
+                                    <Text small bold>
+                                        {getRewardValuePlaceholder(reward.rewardType)}
+                                    </Text>
+                                    <OctaneInput
+                                        aria-label={getRewardValuePlaceholder(reward.rewardType)}
+                                        placeholder={getRewardValuePlaceholder(reward.rewardType)}
+                                        type={reward.rewardType === 'badge' ? 'text' : 'number'}
+                                        value={reward.rewardValue}
+                                        onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, rewardValue: event.target.value }))}
+                                    />
+                                </div>
+                                <div className="flex gap-1">
+                                    <div className="flex flex-col gap-[2px] min-w-0 grow">
+                                        <Text small bold>
+                                            Chance %
+                                        </Text>
+                                        {uniqueRewards ? (
+                                            <Text small className="px-1">
+                                                Unique
+                                            </Text>
+                                        ) : (
+                                            <OctaneInput
+                                                aria-label="Chance %"
+                                                min={0}
+                                                max={100}
+                                                type="number"
+                                                value={reward.probability}
+                                                onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, probability: Number(event.target.value) }))}
+                                            />
+                                        )}
+                                    </div>
+                                    {reward.rewardType === 'points' && (
+                                        <div className="flex flex-col gap-[2px] min-w-0 grow">
+                                            <Text small bold>
+                                                {getExtraFieldLabel(reward.rewardType)}
+                                            </Text>
+                                            <OctaneInput
+                                                aria-label={getExtraFieldLabel(reward.rewardType)}
+                                                min={0}
+                                                placeholder={getExtraFieldPlaceholder(reward.rewardType)}
+                                                type="number"
+                                                value={reward.pointsType}
+                                                onChange={(event) => updateReward(index, (prevValue) => ({ ...prevValue, pointsType: Number(event.target.value) }))}
+                                            />
+                                        </div>
                                     )}
                                 </div>
                             </div>
                         );
                     })}
             </div>
-            <Text center small className="p-1 rounded bg-muted">
-                Extra Currency uses Amount as the quantity and Currency Type as the purse type id. Example: amount 200 + type 105.
-            </Text>
+            {hasCustomCurrencyReward && (
+                <Text center small className="p-1 rounded bg-muted">
+                    Extra Currency uses Amount as the quantity and Currency Type as the purse type id. Example: amount 200 + type 105.
+                </Text>
+            )}
         </WiredActionBaseView>
     );
 };

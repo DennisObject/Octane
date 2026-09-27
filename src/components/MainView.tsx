@@ -60,6 +60,7 @@ import { TraxEditorView } from './trax-editor/TraxEditorView';
 import { UserProfileView } from './user-profile/UserProfileView';
 import { UserAccountSettingsView } from './user-settings/UserAccountSettingsView';
 import { UserSettingsView } from './user-settings/UserSettingsView';
+import { VariablesExplorerView } from './variables-explorer/VariablesExplorerView';
 import { VaultView } from './vault/VaultView';
 import { WiredView } from './wired/WiredView';
 import { WiredCreatorToolsView } from './wired-tools/WiredCreatorToolsView';
@@ -204,6 +205,7 @@ export const MainView: FC<{}> = (props) =>
             <ModToolsView />
             <HousekeepingView />
             <WiredCreatorToolsView />
+            <VariablesExplorerView />
             <RoomView />
             <ChatHistoryView />
             <CustomizeNickIconView />
