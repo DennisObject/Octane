@@ -64,6 +64,12 @@ read that before starting anything non-trivial.
    cd octane-renderer && yarn install
    ```
 
+   `pixi.js` resolves to the renderer's `node_modules`, so
+   `vite.config.mjs` also checks that the installed copy matches the
+   version the renderer's `package.json` pins and fails fast telling you
+   to rerun `yarn install` there. Re-run it whenever the renderer bumps
+   Pixi.
+
 2. **Install client deps.**
    ```sh
    cd ../octane
@@ -430,11 +436,49 @@ See `docs/ARCHITECTURE.md` "Recently fixed" for fix shapes.
   `useNavigatorSearch.ts` (filters), `navigatorUiStore.ts` (Zustand UI
   flags + `setTab`/`setFilter`). Door lifecycle: `src/hooks/rooms/widgets/useDoorState.ts`.
   Specs/plans: `docs/superpowers/specs/2026-05-2*-navigator-*.md`
+- Avatar editor thumbnails: `src/api/avatar/avatarThumbnailUrls.ts` (blob/object-URL cache, canvas shaping)
+  behind `AvatarEditorThumbnailsHelper`. Part thumbnails go render target -> canvas -> one PNG encode;
+  they are never turned into a `data:` URL in between. The LRU budgets real image bytes (48 MB, was
+  200 MB of base64 characters) and revokes evicted URLs after a grace period, so a render already in
+  flight keeps its image. A browser without `toBlob`/`createObjectURL` falls back to a data URL.
+- Floorplan editor preview panel defaults to the flat `FloorplanPreviewSVG`; the 2D/3D switch in its head mounts
+  the WebGL view on demand and remembers the choice in localStorage (`octane.floorplan.preview3d`), so legacy
+  devices never pay for a second GL context unless asked.
 - Floorplan editor 3D preview (PixiJS 8, own WebGL context): `src/components/floorplan-editor/views/Floorplan3DView.tsx`
   (React panel + orbit controls) over `src/components/floorplan-editor/scene3d/`
   (`FloorplanScene.ts` instanced heightmap mesh + GLSL, `heightmap.ts` tile columns
   and camera, `mat4.ts`). PixiJS is `await import`ed so the editor bundle and jsdom
   never load it unless the panel is open; Vitest aliases `pixi.js` to `src/pixi.mock.ts`.
+- Floorplan editor look (official-client "Éditeur Sol" layout): scoped `.octane-floorplan-window`
+  styles in `src/css/floorplan-editor/FloorplanEditorView.css` (imported from `src/index.tsx`);
+  labels fall back to English through `src/components/floorplan-editor/state/localize.ts`
+  when the external texts lack a key.
+- Wired creator tools paged windows: `src/components/wired-tools/WiredRoomLogsView.tsx` (room log,
+  `WiredRoomLogsPageComposer` / `WiredLogPageEvent`) and `WiredVariableOwnersView.tsx` (holders of a
+  variable, `WiredVariableHoldersPageComposer` / `WiredVariableHoldersPageEvent`), both on
+  `WiredPagedTable.tsx` + `WiredPaging.helpers.ts` (pure paging and rate limiter) and
+  `src/hooks/wired-tools/useWiredPageRequests.ts`. The "Manage" button of the Variables tab opens the
+  owners window; its "Manage" links feed the existing holder detail panel in `WiredCreatorToolsView.tsx`.
+- Wired settings tab (`src/components/wired-tools/WiredToolsSettingsTabView.tsx`): permissions and timezone go
+  through the official `WiredMenuPermissionsSaveComposer`, reload/rollback through `WiredRoomStateActionComposer`
+  (store actions `saveRoomTimezone`, `reloadRoomWired`, `rollbackRoomWired`). Client config: `wired.timezones`
+  (comma list; empty = browser list), `wired.selfdonation.enabled` shows the sandbox donation button that opens
+  `WiredSelfDonationView.tsx` (`SelfDonationMessageComposer`; the server gates on `hotel.selfdonation.enabled` + `acc_debug`).
+- Wired variable fx (layout codes 130-135, `wf_xtra_varfx_*`, with `wf_xtra_var_fx_*` as aliases): one editor
+  `src/components/wired/views/extras/WiredExtraVariableFxView.tsx` (prop `category`) on the pure tables and
+  param/token codecs in `src/api/wired/WiredVariableFx.ts`, which mirror the server's `WiredVariableFxStyles` /
+  `WiredExtraVariableFx`. The four server packets (`WiredVariableFxConfigs/ConfigsRemoved/Status/StatusRemoved`)
+  feed `src/hooks/wired/wiredVariableFxStore.ts` through `useWiredVariableFxEvents`; the room draws them as DOM
+  overlays from `src/components/room/widgets/wired-fx/WiredVariableFxOverlayView.tsx` (mounted in `RoomView`,
+  ticker-positioned over avatars/furni like `ObjectLocationView`, boss bars fixed at the top; css in
+  `src/css/room/WiredVariableFx.css`). Only `custom:<id>` variable tokens are offered for overrides/audience,
+  since that is what the server resolves.
+- Wired setup quick menu (`src/components/wired/views/WiredBaseView.tsx`, the ≡ button): copy / paste /
+  paste-into / clear picks / reset / save-without-closing, backed by `useWired` (`clipboardEntry`,
+  `copyWiredToClipboard`, `pasteWiredFromClipboard`, `resetWiredToDefault`, `clearWiredPicks`,
+  `saveWiredAndKeepOpen`) and the pure helpers in `src/api/wired/WiredClipboard.ts`. Paste and reset work by
+  handing the views a cloned definition object (prototype kept, data fields replaced), so every view re-reads
+  it through its `[trigger]` effect; the clipboard is one entry per holder+code for the session.
 - Renderer-SDK mock for Vitest: `src/octane-renderer.mock.ts`
   (aliased over `@octane/renderer` via `vitest.config.mts`).
   Hosts the explicit `OctaneLogger` mock, the `mockEventDispatcher` /

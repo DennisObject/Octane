@@ -12,7 +12,7 @@ export const TABS: Array<{ key: WiredToolsTab; label: string }> = [
     { key: 'settings', label: 'Settings' }
 ];
 
-export const MONITOR_LOG_ORDER: string[] = ['EXECUTION_CAP', 'DELAYED_EVENTS_CAP', 'EXECUTOR_OVERLOAD', 'MARKED_AS_HEAVY', 'KILLED', 'RECURSION_TIMEOUT', 'NO_TARGETS', 'UNREACHABLE'];
+export const MONITOR_LOG_ORDER: string[] = ['EXECUTION_CAP', 'DELAYED_EVENTS_CAP', 'EXECUTOR_OVERLOAD', 'MARKED_AS_HEAVY', 'KILLED', 'RECURSION_TIMEOUT', 'NO_TARGETS', 'UNREACHABLE', 'WIRED_LOG'];
 
 export const WIRED_MONITOR_ACTION_FETCH = 0;
 export const WIRED_MONITOR_ACTION_CLEAR_LOGS = 1;
@@ -22,6 +22,15 @@ export const WIRED_INSPECTION_REFRESH_MS = 50;
 export const WIRED_CLOCK_REFRESH_MS = 50;
 
 export const MONITOR_ERROR_INFO: Record<string, { description: string[]; severity: string; title: string }> = {
+    WIRED_LOG: {
+        title: 'WIRED_LOG',
+        severity: 'INFO',
+        description: [
+            'A line a "write to logs" box in this room wrote, at the level the box was set to.',
+            'Nothing is wrong with the engine: the room itself asked for this line, usually to show what a setup is doing while it is being built.',
+            'Open the room log to read the lines and filter them by level.'
+        ]
+    },
     UNREACHABLE: {
         title: 'UNREACHABLE',
         severity: 'WARNING',
@@ -159,7 +168,14 @@ export const VARIABLE_DEFINITIONS: Record<VariablesElementType, VariableDefiniti
         createVariableDefinition('@is_stackable', 'Furni', 'Conditional'),
         createVariableDefinition('@dimensions.x', 'Furni'),
         createVariableDefinition('@dimensions.y', 'Furni'),
-        createVariableDefinition('@owner_id', 'Furni')
+        createVariableDefinition('@owner_id', 'Furni'),
+        createVariableDefinition('@projectile.animation.position.x', 'Furni', 'Conditional'),
+        createVariableDefinition('@projectile.animation.position.y', 'Furni', 'Conditional'),
+        createVariableDefinition('@projectile.animation.position.altitude', 'Furni', 'Conditional'),
+        { ...createVariableDefinition('@projectile.animation.is_traveling', 'Furni', 'Conditional'), hasValue: false },
+        createVariableDefinition('@projectile.animation.tiles_traveled', 'Furni', 'Conditional'),
+        createVariableDefinition('@projectile.animation.furni_collisions', 'Furni', 'Conditional'),
+        createVariableDefinition('@projectile.animation.user_collisions', 'Furni', 'Conditional')
     ],
     user: [
         createVariableDefinition('@index', 'User'),

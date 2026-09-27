@@ -145,6 +145,7 @@ export const useChatInputActions = () => {
                             (async () => {
                                 try {
                                     const imageUrl = await TextureUtils.generateImageUrl(texture);
+                                    texture?.destroy?.(true);
                                     if (!imageUrl) return;
 
                                     const link = document.createElement('a');

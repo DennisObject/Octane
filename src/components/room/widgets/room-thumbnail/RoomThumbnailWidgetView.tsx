@@ -58,6 +58,9 @@ export const RoomThumbnailWidgetView: FC<{}> = (props) => {
             clearUploadTimeout();
             setIsSaving(false);
             simpleAlert(LocalizeText('camera.error.creation'));
+        } finally {
+            // createTextureFromRoom hands us a fresh render texture; it is ours to release.
+            texture?.destroy?.(true);
         }
     };
 

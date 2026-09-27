@@ -14,9 +14,10 @@ export const WIRED_ROOM_LOGS_PAGE_SIZE = 50;
 const REQUEST_PAGE_RATELIMIT = 300;
 const REFRESH_TIME_MS = 2500;
 const FILTER_MAX_CHARS = 400;
-/** The server's log levels are its diagnostic severities, in enum order. */
-const LOG_LEVELS = ['WARNING', 'ERROR'];
-const LEVEL_CLASS: Record<number, string> = { 0: 'text-[#b36b00]', 1: 'text-[#c70d0d]' };
+/** Habbo's log levels, by the number the server sends: engine notes are warnings and errors, and
+ * "write to logs" boxes can write at any of the four. */
+const LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR'];
+const LEVEL_CLASS: Record<number, string> = { 0: 'text-[#6b6b6b]', 1: 'text-[#1f5fa8]', 2: 'text-[#b36b00]', 3: 'text-[#c70d0d]' };
 
 interface LogPage {
     totalEntries: number;

@@ -1199,5 +1199,10 @@
     "image.position.editor.offsetx": "Scostamento X",
     "image.position.editor.offsety": "Scostamento Y",
     "image.position.editor.offsetz": "Profondità",
-    "image.position.editor.cancel": "Annulla"
+    "image.position.editor.cancel": "Annulla",
+    "wiredfurni.web_api.error.own_room_only": "Puoi posizionare l'add-on Variables Web API solo nella tua stanza.",
+    "wiredfurni.web_api.error.max_per_user": "Possiedi già il numero massimo di add-on Variables Web API.",
+    "wiredmenu.variables_explorer.empty.user": "Nessuna variabile utente permanente in questa stanza. Imposta una variabile su Permanente nel suo box wired per usarla qui.",
+    "wiredmenu.variables_explorer.empty.furni": "Nessuna variabile furni permanente in questa stanza. Imposta una variabile su Permanente nel suo box wired per usarla qui.",
+    "wiredmenu.variables_explorer.empty.global": "Nessuna variabile globale permanente in questa stanza. Imposta una variabile su Permanente nel suo box wired per usarla qui."
 }

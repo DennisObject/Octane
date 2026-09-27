@@ -114,6 +114,36 @@ if(!existsSync(rendererRoot))
     );
 }
 
+// `pixi.js` is aliased to the renderer's own node_modules below, so the copy
+// installed there must be the version the renderer pins. A stale install
+// otherwise fails at runtime (or worse, renders subtly wrong) instead of here.
+const readPackageVersion = (packageJsonPath) =>
+{
+    try
+    {
+        return JSON.parse(readFileSync(packageJsonPath, 'utf8')).version ?? '';
+    }
+    catch
+    {
+        return '';
+    }
+};
+
+const rendererPackage = JSON.parse(readFileSync(resolve(rendererRoot, 'package.json'), 'utf8'));
+const pinnedPixiVersion = (rendererPackage.dependencies?.['pixi.js'] ?? '').replace(/^[\^~=v]+/, '');
+const installedPixiVersion = readPackageVersion(resolve(rendererRoot, 'node_modules', 'pixi.js', 'package.json'));
+
+if(pinnedPixiVersion && (installedPixiVersion !== pinnedPixiVersion))
+{
+    throw new Error(
+        '\n  Octane Renderer node_modules are out of date.\n\n' +
+        `  ${ rendererRoot }/package.json pins pixi.js ${ pinnedPixiVersion }, but ` +
+        (installedPixiVersion ? `${ installedPixiVersion } is installed.` : 'it is not installed.') + '\n\n' +
+        '  Run yarn install in the renderer and retry:\n' +
+        `    cd ${ rendererRoot } && yarn install\n`
+    );
+}
+
 const ReactCompilerConfig = {
     target: '19'
 };

@@ -1,4 +1,9 @@
 import { WiredActionLayoutCode, WIRED_FX_CATEGORY } from '../../../../api';
+import { WiredExtraAchievementEnablerView } from '../extras/WiredExtraAchievementEnablerView';
+import { WiredExtraArrayCaptureView } from '../extras/WiredExtraArrayCaptureView';
+import { WiredExtraDailyTaskView } from '../extras/WiredExtraDailyTaskView';
+import { WiredExtraGlobalPlaceholderView } from '../extras/WiredExtraGlobalPlaceholderView';
+import { WiredExtraProjectileView } from '../extras/WiredExtraProjectileView';
 import { WiredChestCurrencyView } from '../extras/WiredChestCurrencyView';
 import { WiredChestFurniView } from '../extras/WiredChestFurniView';
 import { WiredContractPaymentView } from '../extras/WiredContractPaymentView';
@@ -94,14 +99,18 @@ import { WiredActionMoveFurniToView } from './WiredActionMoveFurniToView';
 import { WiredActionMoveFurniView } from './WiredActionMoveFurniView';
 import { WiredActionMoveRotateUserView } from './WiredActionMoveRotateUserView';
 import { WiredActionClickSettingsView } from './WiredActionClickSettingsView';
+import { WiredActionModifyArrayView } from './WiredActionModifyArrayView';
 import { WiredActionMuteUserView } from './WiredActionMuteUserView';
 import { WiredActionNegativeCallAnotherStackView } from './WiredActionNegativeCallAnotherStackView';
 import { WiredActionPlaceFurniView } from './WiredActionPlaceFurniView';
 import { WiredActionPlayYoutubeView } from './WiredActionPlayYoutubeView';
+import { WiredActionProgressAchievementView } from './WiredActionProgressAchievementView';
+import { WiredActionProgressRewardTrackView } from './WiredActionProgressRewardTrackView';
 import { WiredActionQuickBopperView } from './WiredActionQuickBopperView';
 import { WiredActionRelativeMoveView } from './WiredActionRelativeMoveView';
 import { WiredActionRemoveFurniView } from './WiredActionRemoveFurniView';
 import { WiredActionRemoveVariableView } from './WiredActionRemoveVariableView';
+import { WiredActionResetRewardTrackView } from './WiredActionResetRewardTrackView';
 import { WiredActionResetView } from './WiredActionResetView';
 import { WiredActionSendSignalView } from './WiredActionSendSignalView';
 import { WiredActionSetAltitudeView } from './WiredActionSetAltitudeView';
@@ -109,10 +118,12 @@ import { WiredActionSetFurniStateToView } from './WiredActionSetFurniStateToView
 import { WiredActionOverrideHeightView } from './WiredActionOverrideHeightView';
 import { WiredActionSetRollerSpeedView } from './WiredActionSetRollerSpeedView';
 import { WiredActionSetRoomAdView } from './WiredActionSetRoomAdView';
+import { WiredActionTeleportToRoomView } from './WiredActionTeleportToRoomView';
 import { WiredActionTeleportView } from './WiredActionTeleportView';
 import { WiredActionToggleFurniStateView } from './WiredActionToggleFurniStateView';
 import { WiredActionToggleToRandomStateView } from './WiredActionToggleToRandomStateView';
 import { WiredActionUnfreezeView } from './WiredActionUnfreezeView';
+import { WiredActionWriteToLogsView } from './WiredActionWriteToLogsView';
 
 export const WiredActionLayoutView = (code: number) => {
     switch (code) {
@@ -196,6 +207,28 @@ export const WiredActionLayoutView = (code: number) => {
             return <WiredActionMuteUserView />;
         case WiredActionLayoutCode.CLICK_SETTINGS:
             return <WiredActionClickSettingsView />;
+        case WiredActionLayoutCode.MODIFY_ARRAY:
+            return <WiredActionModifyArrayView />;
+        case WiredActionLayoutCode.ARRAY_CAPTURE_VARIABLE_EXTRA:
+            return <WiredExtraArrayCaptureView />;
+        case WiredActionLayoutCode.WRITE_TO_LOGS:
+            return <WiredActionWriteToLogsView />;
+        case WiredActionLayoutCode.TELEPORT_TO_ROOM:
+            return <WiredActionTeleportToRoomView />;
+        case WiredActionLayoutCode.PROJECTILE_EXTRA:
+            return <WiredExtraProjectileView />;
+        case WiredActionLayoutCode.PROGRESS_ACHIEVEMENT:
+            return <WiredActionProgressAchievementView />;
+        case WiredActionLayoutCode.ACHIEVEMENT_ENABLER_EXTRA:
+            return <WiredExtraAchievementEnablerView />;
+        case WiredActionLayoutCode.PROGRESS_REWARD_TRACK:
+            return <WiredActionProgressRewardTrackView />;
+        case WiredActionLayoutCode.RESET_REWARD_TRACK:
+            return <WiredActionResetRewardTrackView />;
+        case WiredActionLayoutCode.GLOBAL_PLACEHOLDER_EXTRA:
+            return <WiredExtraGlobalPlaceholderView />;
+        case WiredActionLayoutCode.DAILY_TASK_EXTRA:
+            return <WiredExtraDailyTaskView />;
         case WiredActionLayoutCode.RELATIVE_MOVE:
             return <WiredActionRelativeMoveView />;
         case WiredActionLayoutCode.RESET:

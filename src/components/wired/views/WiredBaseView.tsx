@@ -17,6 +17,8 @@ export interface WiredBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    /** False keeps furni picking on but leaves its section out, for views that show it elsewhere. */
+    showSelection?: boolean;
 }
 
 export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) => {
@@ -31,7 +33,8 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         cardStyle = undefined,
         footer = null,
         footerCollapsible = true,
-        selectionPreview = null
+        selectionPreview = null,
+        showSelection = true
     } = props;
     const [wiredName, setWiredName] = useState<string>(null);
     const [needsSave, setNeedsSave] = useState<boolean>(false);
@@ -258,7 +261,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                 <div className="octane-wired__body">
                     {!!children && <div className="octane-wired__divider" />}
                     {!!children && <div className="octane-wired__section octane-wired__section--body">{children}</div>}
-                    {requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
+                    {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
                         <>
                             <div className="octane-wired__divider" />
                             <div className="octane-wired__section octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>

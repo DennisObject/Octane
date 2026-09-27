@@ -42,7 +42,10 @@ import {
     LocalizeText,
     localizeWithFallback,
     NotificationAlertType,
+    decodeUserVariableHolder,
+    findUserVariableHolderData,
     SendMessageComposer,
+    userVariableHolderKey,
     WiredSelectionVisualizer
 } from '../../api';
 import wiredGlobalPlaceholderImage from '../../assets/images/wiredtools/wired_global_placeholder.png';
@@ -124,13 +127,17 @@ import { WiredMonitorTabView } from './WiredMonitorTabView';
 import { WiredRoomLogsView } from './WiredRoomLogsView';
 import { WiredSelfDonationView } from './WiredSelfDonationView';
 import { WiredToolsSettingsTabView } from './WiredToolsSettingsTabView';
+import { WiredArrayInspectorView, wiredArrayVariableTypeOf } from './WiredArrayInspectorView';
 import { HOLDER_TYPE_FURNI, HOLDER_TYPE_USER, WiredHolderDescription, WiredVariableOwnersView, wiredVariableIdOf } from './WiredVariableOwnersView';
+import { useVariablesExplorerStore } from '../../state/variablesExplorer';
+import { WiredVariableHolderPanelView } from './WiredVariableHolderPanelView';
 import { WiredVariablesTabView } from './WiredVariablesTabView';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
 
 const WIRED_FURNI_GRAVITY_MODEL_KEY = 'wired_furni_gravity';
 
 export const WiredCreatorToolsView: FC<{}> = () => {
+    const openVariablesExplorer = useVariablesExplorerStore((s) => s.open);
     const isVisible = useWiredCreatorToolsUiStore((s) => s.isVisible);
     const setIsVisible = useWiredCreatorToolsUiStore((s) => s.setIsVisible);
     const activeTab = useWiredCreatorToolsUiStore((s) => s.activeTab);
@@ -189,6 +196,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const setInspectionGiveValue = useWiredCreatorToolsUiStore((s) => s.setInspectionGiveValue);
     const isVariableManageOpen = useWiredCreatorToolsUiStore((s) => s.isVariableManageOpen);
     const setIsVariableManageOpen = useWiredCreatorToolsUiStore((s) => s.setIsVariableManageOpen);
+    const isArrayInspectorOpen = useWiredCreatorToolsUiStore((s) => s.isArrayInspectorOpen);
+    const setIsArrayInspectorOpen = useWiredCreatorToolsUiStore((s) => s.setIsArrayInspectorOpen);
     const selectedManagedVariableEntry = useWiredCreatorToolsUiStore((s) => s.selectedManagedVariableEntry);
     const setSelectedManagedVariableEntry = useWiredCreatorToolsUiStore((s) => s.setSelectedManagedVariableEntry);
     const selectedManagedHolderVariableId = useWiredCreatorToolsUiStore((s) => s.selectedManagedHolderVariableId);
@@ -1337,11 +1346,12 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const canEditSelectedUser = useMemo(() => {
         return !!selectedUser && !!roomSession && roomSettings.canModify;
     }, [selectedUser, roomSession, roomSettings.canModify]);
+    const selectedUserHolderKey = selectedUser ? userVariableHolderKey(selectedUser.kind, selectedUser.userId) : 0;
     const selectedUserAssignments = useMemo(() => {
-        if (!selectedUser) return [];
+        if (!selectedUserHolderKey) return [];
 
-        return userVariableAssignments[selectedUser.userId] ?? [];
-    }, [selectedUser, userVariableAssignments]);
+        return userVariableAssignments[selectedUserHolderKey] ?? [];
+    }, [selectedUserHolderKey, userVariableAssignments]);
     const selectedUserAssignmentMap = useMemo(() => {
         return new Map(selectedUserAssignments.map((assignment) => [assignment.variableItemId, assignment]));
     }, [selectedUserAssignments]);
@@ -1434,7 +1444,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             ...(selectedUser.roomEntryMethod === 'teleport' && Number(selectedUser.roomEntryTeleportId ?? 0) > 0
                 ? [{ key: '@room_entry.teleport_id', value: String(selectedUser.roomEntryTeleportId) }]
                 : []),
-            { key: identityKey, value: String(selectedUser.userId ?? 0) },
+            { key: identityKey, value: String(selectedUser.kind === 'bot' || selectedUser.kind === 'rentable_bot' ? Math.abs(selectedUser.userId ?? 0) : (selectedUser.userId ?? 0)) },
             ...(petOwnerId > 0 ? [{ key: '@pet_owner_id', value: String(petOwnerId) }] : [])
         ];
     }, [
@@ -1789,7 +1799,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             case '@room_entry.method':
                 return [
                     { value: 'door', text: 'Door' },
-                    { value: 'teleport', text: 'Teleport' }
+                    { value: 'teleport', text: 'Teleport' },
+                    { value: 'room_network', text: 'Room network' }
                 ];
             case '@team_color':
                 return [1, 2, 3, 4].map((value) => ({
@@ -1870,12 +1881,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const describeVariableHolder = useCallback(
         (entityType: number, entityId: number, entityName: string): WiredHolderDescription => {
             if (entityType === HOLDER_TYPE_USER) {
-                const userData = roomSession
-                    ? (roomSession.userDataManager.getUserData(entityId) ??
-                      roomSession.userDataManager.getBotData(entityId) ??
-                      roomSession.userDataManager.getRentableBotData(entityId) ??
-                      roomSession.userDataManager.getPetData(entityId))
-                    : null;
+                const userData = findUserVariableHolderData(roomSession?.userDataManager, entityId);
                 let categoryLabel = 'Habbo';
 
                 switch (userData?.type) {
@@ -1890,7 +1896,10 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                         break;
                 }
 
-                return { categoryLabel, entityName: userData?.name || entityName || `#${entityId}` };
+                return {
+                    categoryLabel,
+                    entityName: userData?.name || entityName || `#${decodeUserVariableHolder(entityId)?.id ?? entityId}`
+                };
             }
 
             if (entityType === HOLDER_TYPE_FURNI) {
@@ -1931,12 +1940,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
                 if (!assignment) continue;
 
-                const userId = Number(userIdString);
-                const userData =
-                    roomSession.userDataManager.getUserData(userId) ??
-                    roomSession.userDataManager.getBotData(userId) ??
-                    roomSession.userDataManager.getRentableBotData(userId) ??
-                    roomSession.userDataManager.getPetData(userId);
+                const userData = findUserVariableHolderData(roomSession.userDataManager, Number(userIdString));
                 const roomIndex = Number(userData?.roomIndex ?? -1);
 
                 if (roomIndex < 0) continue;
@@ -2185,24 +2189,30 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         if (!selectedManagedVariableEntry || !roomSession) return [];
 
         if (variablesType === 'user') {
-            const userData =
-                roomSession.userDataManager.getUserData(selectedManagedVariableEntry.entityId) ??
-                roomSession.userDataManager.getBotData(selectedManagedVariableEntry.entityId) ??
-                roomSession.userDataManager.getRentableBotData(selectedManagedVariableEntry.entityId) ??
-                roomSession.userDataManager.getPetData(selectedManagedVariableEntry.entityId);
+            const userData = findUserVariableHolderData(roomSession.userDataManager, selectedManagedVariableEntry.entityId);
+            const holder = decodeUserVariableHolder(selectedManagedVariableEntry.entityId);
+            const idLabel = holder?.kind === 'pet' ? 'Pet id' : holder?.kind === 'bot' ? 'Bot id' : 'User id';
 
             return [
                 `${variableManageCategoryHeader}: ${selectedManagedVariableEntry.categoryLabel}`,
                 `Name: ${selectedManagedVariableEntry.entityName}`,
-                `User id: ${selectedManagedVariableEntry.entityId}`,
+                ...(holder?.kind !== 'user' && userData?.ownerName ? [`Owner: ${userData.ownerName}`] : []),
+                `${idLabel}: ${holder?.id ?? selectedManagedVariableEntry.entityId}`,
                 ...(userData?.type === RoomObjectType.PET ? [`Pet level: ${Number(userData.petLevel ?? 0)}`] : [])
             ];
         }
 
         if (variablesType === 'furni') {
+            const category = selectedManagedVariableEntry.categoryLabel === 'Wall furni' ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR;
+            const owner =
+                GetRoomEngine()
+                    .getRoomObject(roomSession.roomId, selectedManagedVariableEntry.entityId, category)
+                    ?.model?.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME) || '';
+
             return [
                 `${variableManageCategoryHeader}: ${selectedManagedVariableEntry.categoryLabel}`,
                 `Name: ${selectedManagedVariableEntry.entityName}`,
+                ...(owner ? [`Owner: ${owner}`] : []),
                 `Furni id: ${selectedManagedVariableEntry.entityId}`
             ];
         }
@@ -2232,12 +2242,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const managedHolderUserData = useMemo(() => {
         if (variablesType !== 'user' || !selectedManagedVariableEntry || !roomSession) return null;
 
-        return (
-            roomSession.userDataManager.getUserData(selectedManagedVariableEntry.entityId) ??
-            roomSession.userDataManager.getBotData(selectedManagedVariableEntry.entityId) ??
-            roomSession.userDataManager.getRentableBotData(selectedManagedVariableEntry.entityId) ??
-            roomSession.userDataManager.getPetData(selectedManagedVariableEntry.entityId)
-        );
+        return findUserVariableHolderData(roomSession.userDataManager, selectedManagedVariableEntry.entityId);
     }, [variablesType, selectedManagedVariableEntry, roomSession]);
     const managedHolderFurniCategory = useMemo(() => {
         if (variablesType !== 'furni' || !selectedManagedVariableEntry) return RoomObjectCategory.FLOOR;
@@ -2484,7 +2489,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     return;
                 }
 
-                updateUserVariableValue(selectedUser.userId, customDefinition.itemId, parsed);
+                updateUserVariableValue(selectedUserHolderKey, customDefinition.itemId, parsed);
                 setEditingVariable(null);
                 setEditingValue('');
                 return;
@@ -2952,7 +2957,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         const nextValue = Number.isFinite(parsedValue) ? parsedValue : 0;
 
         if (inspectionType === 'user' && selectedUser) {
-            assignUserVariable(selectedUser.userId, selectedInspectionGiveDefinition.itemId, nextValue);
+            assignUserVariable(selectedUserHolderKey, selectedInspectionGiveDefinition.itemId, nextValue);
             setSelectedInspectionVariableKeys((prev) => ({ ...prev, user: selectedInspectionGiveDefinition.name }));
         } else if (inspectionType === 'furni' && selectedFurni) {
             assignFurniVariable(selectedFurni.objectId, selectedInspectionGiveDefinition.itemId, nextValue);
@@ -2967,6 +2972,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         inspectionGiveValue,
         inspectionType,
         selectedUser,
+        selectedUserHolderKey,
         assignUserVariable,
         selectedFurni,
         assignFurniVariable
@@ -2977,7 +2983,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         cancelVariableEdit();
 
         if (inspectionType === 'user' && selectedUser) {
-            removeUserVariable(selectedUser.userId, selectedInspectionCustomDefinition.itemId);
+            removeUserVariable(selectedUserHolderKey, selectedInspectionCustomDefinition.itemId);
             setSelectedInspectionVariableKeys((prev) => ({ ...prev, user: '' }));
         } else if (inspectionType === 'furni' && selectedFurni) {
             removeFurniVariable(selectedFurni.objectId, selectedInspectionCustomDefinition.itemId);
@@ -3190,8 +3196,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                                 setSelectedManagedVariableEntry(null);
                                 setIsVariableManageOpen(true);
                             }}
+                            arrayInspectorCanOpen={!!selectedVariableDefinition?.itemId}
+                            onOpenArrayInspector={() => setIsArrayInspectorOpen(true)}
                             selectedVariableProperties={selectedVariableProperties}
                             selectedVariableTextValues={selectedVariableTextValues}
+                            onOpenWebApiExplorer={() => openVariablesExplorer({ roomId: roomSession?.roomId })}
                         />
                     )}
                     {activeTab === 'settings' && <WiredToolsSettingsTabView onOpenSelfDonation={() => setIsSelfDonationOpen(true)} />}
@@ -3313,170 +3322,84 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     onClose={() => setIsVariableManageOpen(false)}
                 />
             )}
+            {isArrayInspectorOpen && !!selectedVariableDefinition?.itemId && (
+                <WiredArrayInspectorView
+                    definitionItemId={selectedVariableDefinition.itemId}
+                    variableName={selectedVariableDefinition.key}
+                    variableType={wiredArrayVariableTypeOf(variablesType)}
+                    onClose={() => setIsArrayInspectorOpen(false)}
+                />
+            )}
             {isRoomLogsOpen && <WiredRoomLogsView onClose={() => setIsRoomLogsOpen(false)} />}
             {isSelfDonationOpen && <WiredSelfDonationView onClose={() => setIsSelfDonationOpen(false)} />}
             {!!selectedManagedVariableEntry && !!selectedVariableDefinition && (
-                <OctaneCardView
-                    className="min-w-[430px] max-w-[430px] max-h-[620px]"
-                    theme="primary-slim"
-                    uniqueKey="wired-variable-management-entry"
-                    windowPosition={DraggableWindowPosition.TOP_LEFT}
-                    offsetLeft={890}
-                    offsetTop={110}
-                >
-                    <OctaneCardHeaderView headerText={managedHolderPanelTitle} onCloseClick={() => setSelectedManagedVariableEntry(null)} />
-                    <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 relative" overflow="hidden">
-                        <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
-                            <div className="grow text-center">
-                                <Text>{managedHolderWarningText}</Text>
-                            </div>
-                            <Button variant="secondary" onClick={() => requestUserVariables()}>
-                                Refresh
-                            </Button>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <Text bold>Holder info:</Text>
-                            <div className="flex gap-4">
-                                <div className="w-[140px] h-[110px] rounded border border-[#d8d2c3] bg-[#dedede] flex items-center justify-center overflow-hidden">
-                                    {variablesType === 'furni' && roomSession && (
-                                        <LayoutRoomObjectImageView
-                                            category={managedHolderFurniCategory}
-                                            objectId={selectedManagedVariableEntry.entityId}
-                                            roomId={roomSession.roomId}
-                                        />
-                                    )}
-                                    {variablesType === 'user' && managedHolderUserData && (
-                                        <>
-                                            {managedHolderUserData.type === RoomObjectType.PET ? (
-                                                <LayoutPetImageView direction={2} figure={managedHolderUserData.figure} />
-                                            ) : (
-                                                <LayoutAvatarImageView direction={2} figure={managedHolderUserData.figure} />
-                                            )}
-                                        </>
-                                    )}
-                                    {variablesType === 'global' && (
-                                        <img alt="Global placeholder" className="max-w-full max-h-full object-contain p-3" src={wiredGlobalPlaceholderImage} />
-                                    )}
-                                </div>
-                                <div className="grow rounded border border-[#d8d2c3] bg-white p-3 flex flex-col gap-1 text-[12px]">
-                                    {managedHolderInfoLines.map((line, index) => (
-                                        <Text key={`${line}-${index}`}>{line}</Text>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-2 min-h-0 grow">
-                            <Text bold>{variablesType === 'global' ? 'Room variables:' : 'Assigned variables:'}</Text>
-                            <div className="grow rounded border border-[#d1ccbf] bg-white overflow-y-auto">
-                                <table className="w-full text-[12px]">
-                                    <thead className="bg-[#efede5] sticky top-0">
-                                        <tr>
-                                            <th className="text-left px-2 py-1">Variable</th>
-                                            <th className="text-left px-2 py-1">Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {!managedHolderVariableEntries.length && (
-                                            <tr>
-                                                <td className="px-2 py-3 text-center text-[#8b8678]" colSpan={2}>
-                                                    No variables currently assigned
-                                                </td>
-                                            </tr>
-                                        )}
-                                        {managedHolderVariableEntries.map((entry, index) => {
-                                            const isSelected = selectedManagedHolderVariableEntry?.variableItemId === entry.variableItemId;
-                                            const isEditing = editingManagedHolderVariableId === entry.variableItemId;
-
-                                            return (
-                                                <tr
-                                                    key={entry.variableItemId}
-                                                    className={`${isSelected ? 'bg-[#d7dfea]' : index % 2 === 0 ? 'bg-white' : 'bg-[#f8f6f0]'} cursor-pointer hover:bg-[#e8eefc]`}
-                                                    onClick={() => setSelectedManagedHolderVariableId(entry.variableItemId)}
-                                                >
-                                                    <td className="px-2 py-1">
-                                                        <div className="flex flex-col">
-                                                            <span>{entry.name}</span>
-                                                            <span className="text-[10px] text-[#8a8476]">{entry.availability}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-2 py-1">
-                                                        {!entry.hasValue && <span className="text-[#8a8476]">/</span>}
-                                                        {!!entry.hasValue && !isEditing && (
-                                                            <button
-                                                                className={`rounded px-1 py-[1px] ${roomSettings.canModify && !entry.isReadOnly ? 'text-[#1b57b2] underline underline-offset-2' : 'text-[#222]'}`}
-                                                                disabled={!roomSettings.canModify || entry.isReadOnly}
-                                                                type="button"
-                                                                onClick={(event) => {
-                                                                    event.stopPropagation();
-
-                                                                    if (!roomSettings.canModify || entry.isReadOnly) return;
-
-                                                                    setSelectedManagedHolderVariableId(entry.variableItemId);
-                                                                    setEditingManagedHolderVariableId(entry.variableItemId);
-                                                                    setEditingManagedHolderValue(String(entry.value ?? 0));
-                                                                }}
-                                                            >
-                                                                {entry.value ?? 0}
-                                                            </button>
-                                                        )}
-                                                        {!!entry.hasValue && isEditing && (
-                                                            <input
-                                                                autoFocus
-                                                                className="w-[72px] rounded border border-[#b8b2a4] bg-white px-2 py-[2px] text-[12px]"
-                                                                type="number"
-                                                                value={editingManagedHolderValue}
-                                                                onBlur={() => setEditingManagedHolderVariableId(0)}
-                                                                onChange={(event) => setEditingManagedHolderValue(event.target.value)}
-                                                                onClick={(event) => event.stopPropagation()}
-                                                                onKeyDownCapture={onManagedHolderValueInputKeyDown}
-                                                            />
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="relative flex items-center justify-between gap-3 pt-1">
-                            {isManagedGiveOpen && (
-                                <div className="absolute right-0 bottom-full mb-2 w-[210px] rounded border border-[#8d887a] bg-[#efede5] p-3 shadow-[0_2px_8px_rgba(0,0,0,.25)] z-10 flex flex-col gap-2">
-                                    <Text bold>Variable:</Text>
-                                    <select
-                                        className="rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px]"
-                                        value={selectedManagedGiveDefinition?.itemId ?? 0}
-                                        onChange={(event) => setManagedGiveVariableItemId(Number(event.target.value))}
-                                    >
-                                        {!availableManagedHolderDefinitions.length && <option value={0}>No variables available</option>}
-                                        {availableManagedHolderDefinitions.map((definition) => (
-                                            <option key={definition.itemId} value={definition.itemId}>
-                                                {definition.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <Text bold>Value:</Text>
-                                    <input
-                                        className="w-[96px] rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px] disabled:opacity-60"
-                                        disabled={!selectedManagedGiveDefinition?.hasValue}
-                                        type="number"
-                                        value={managedGiveValue}
-                                        onChange={(event) => setManagedGiveValue(event.target.value)}
-                                    />
-                                    <Button disabled={!canGiveManagedHolderVariable} variant="secondary" onClick={() => giveManagedHolderVariable()}>
-                                        Create
-                                    </Button>
-                                </div>
+                <WiredVariableHolderPanelView
+                    title={managedHolderPanelTitle}
+                    warningText={managedHolderWarningText}
+                    onRefresh={() => requestUserVariables()}
+                    onClose={() => setSelectedManagedVariableEntry(null)}
+                    preview={
+                        <>
+                            {variablesType === 'furni' && roomSession && (
+                                <LayoutRoomObjectImageView
+                                    category={managedHolderFurniCategory}
+                                    objectId={selectedManagedVariableEntry.entityId}
+                                    roomId={roomSession.roomId}
+                                />
                             )}
-                            <Button disabled={!canRemoveManagedHolderVariable} variant="secondary" onClick={() => removeManagedHolderVariable()}>
-                                Remove variable
-                            </Button>
-                            <Button disabled={!canGiveManagedHolderVariable} variant="secondary" onClick={() => setIsManagedGiveOpen((value) => !value)}>
-                                Give variable
-                            </Button>
-                        </div>
-                    </OctaneCardContentView>
-                </OctaneCardView>
+                            {variablesType === 'user' && managedHolderUserData && (
+                                <>
+                                    {managedHolderUserData.type === RoomObjectType.PET ? (
+                                        <LayoutPetImageView direction={2} figure={managedHolderUserData.figure} />
+                                    ) : (
+                                        <LayoutAvatarImageView direction={2} figure={managedHolderUserData.figure} />
+                                    )}
+                                </>
+                            )}
+                            {variablesType === 'global' && (
+                                <img alt="Global placeholder" className="max-w-full max-h-full object-contain p-3" src={wiredGlobalPlaceholderImage} />
+                            )}
+                        </>
+                    }
+                    infoLines={managedHolderInfoLines}
+                    variablesTitle={variablesType === 'global' ? 'Room variables:' : 'Assigned variables:'}
+                    entries={managedHolderVariableEntries.map((entry) => ({
+                        id: String(entry.variableItemId),
+                        name: entry.name,
+                        availability: entry.availability,
+                        hasValue: entry.hasValue,
+                        value: entry.value,
+                        isReadOnly: entry.isReadOnly
+                    }))}
+                    selectedId={selectedManagedHolderVariableEntry ? String(selectedManagedHolderVariableEntry.variableItemId) : null}
+                    onSelect={(id) => setSelectedManagedHolderVariableId(Number(id))}
+                    canEdit={roomSettings.canModify}
+                    editingId={editingManagedHolderVariableId ? String(editingManagedHolderVariableId) : null}
+                    editingValue={editingManagedHolderValue}
+                    onBeginEdit={(entry) => {
+                        setSelectedManagedHolderVariableId(Number(entry.id));
+                        setEditingManagedHolderVariableId(Number(entry.id));
+                        setEditingManagedHolderValue(String(entry.value ?? 0));
+                    }}
+                    onEditingValueChange={setEditingManagedHolderValue}
+                    onEditBlur={() => setEditingManagedHolderVariableId(0)}
+                    onEditKeyDown={onManagedHolderValueInputKeyDown}
+                    isGiveOpen={isManagedGiveOpen}
+                    onToggleGive={() => setIsManagedGiveOpen((value) => !value)}
+                    giveOptions={availableManagedHolderDefinitions.map((definition) => ({
+                        id: String(definition.itemId),
+                        name: definition.name,
+                        hasValue: !!definition.hasValue
+                    }))}
+                    giveSelectedId={selectedManagedGiveDefinition ? String(selectedManagedGiveDefinition.itemId) : ''}
+                    onGiveSelect={(id) => setManagedGiveVariableItemId(Number(id))}
+                    giveValue={managedGiveValue}
+                    onGiveValueChange={setManagedGiveValue}
+                    canGive={canGiveManagedHolderVariable}
+                    onGive={() => giveManagedHolderVariable()}
+                    canRemove={canRemoveManagedHolderVariable}
+                    onRemove={() => removeManagedHolderVariable()}
+                />
             )}
             {!!selectedMonitorErrorInfo && (
                 <OctaneCardView

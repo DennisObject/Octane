@@ -123,7 +123,11 @@ export const LayoutBadgeImageView: FC<LayoutBadgeImageViewProps> = (props) => {
             if (event.badgeId !== badgeCode) return;
 
             if (isGroup) {
-                const element = await TextureUtils.generateImage({ target: new OctaneSprite(event.image), resolution: 1 });
+                const sprite = new OctaneSprite(event.image);
+                const element = await TextureUtils.generateImage({ target: sprite, resolution: 1 });
+
+                // Drop the wrapper only; the badge texture stays with the session data manager.
+                sprite.destroy();
 
                 if (element.complete && element.naturalWidth) setImageElement(element);
                 else element.onload = () => setImageElement(element);
@@ -147,7 +151,10 @@ export const LayoutBadgeImageView: FC<LayoutBadgeImageViewProps> = (props) => {
         if (texture && !didSetBadge) {
             if (isGroup) {
                 (async () => {
-                    const element = await TextureUtils.generateImage({ target: new OctaneSprite(texture), resolution: 1 });
+                    const sprite = new OctaneSprite(texture);
+                    const element = await TextureUtils.generateImage({ target: sprite, resolution: 1 });
+
+                    sprite.destroy();
 
                     if (element.complete && element.naturalWidth) setImageElement(element);
                     else element.onload = () => setImageElement(element);

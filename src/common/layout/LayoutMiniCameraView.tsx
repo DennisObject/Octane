@@ -17,12 +17,8 @@ export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
 
     useEffect(() => {
         let frame = 0;
-        let last = 0;
         const tick = (now: number) => {
-            if (now - last >= 1000 / 24) {
-                last = now;
-                blitRoomCanvasToViewfinder(elementRef.current, 110, 110);
-            }
+            blitRoomCanvasToViewfinder(elementRef.current, 110, 110, 1000 / 24, now);
             frame = window.requestAnimationFrame(tick);
         };
 

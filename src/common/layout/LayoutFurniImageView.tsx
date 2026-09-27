@@ -1,4 +1,4 @@
-import { GetRoomEngine, IGetImageListener, ImageResult, TextureUtils, Vector3d } from '@octane/renderer';
+import { GetRoomEngine, IGetImageListener, IImageResult, ImageResult, Vector3d } from '@octane/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProductTypeEnum } from '../../api';
 import { Base, BaseProps } from '../Base';
@@ -31,10 +31,11 @@ export const LayoutFurniImageView: FC<LayoutFurniImageViewProps> = (props) => {
         };
     }, []);
 
-    const updateImage = useCallback(async (texture: any, requestId: number) => {
-        if (!texture) return;
+    const updateImage = useCallback(async (result: IImageResult, requestId: number) => {
+        if (!result?.data) return;
 
-        const image = await TextureUtils.generateImage(texture);
+        // getImage() destroys the render texture once the image exists.
+        const image = await result.getImage();
 
         if (image && isMounted.current && requestIdRef.current === requestId) setImageElement(image);
     }, []);
@@ -67,7 +68,7 @@ export const LayoutFurniImageView: FC<LayoutFurniImageViewProps> = (props) => {
         let imageResult: ImageResult = null;
 
         const listener: IGetImageListener = {
-            imageReady: (result) => updateImage(result?.data, requestId),
+            imageReady: (result) => updateImage(result, requestId),
             imageFailed: () => updateImage(null, requestId)
         };
 
@@ -80,7 +81,7 @@ export const LayoutFurniImageView: FC<LayoutFurniImageViewProps> = (props) => {
                 break;
         }
 
-        if (imageResult?.data) updateImage(imageResult.data, requestId);
+        if (imageResult?.data) updateImage(imageResult, requestId);
     }, [productType, productClassId, direction, extraData, state, updateImage]);
 
     return <Base classNames={['furni-image']} style={getStyle} {...rest} />;

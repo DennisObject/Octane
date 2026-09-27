@@ -114,6 +114,7 @@ const pluginApi: IOctanePluginApi = {
             if (!texture) return;
 
             const imageUrl = await TextureUtils.generateImageUrl(texture);
+            texture.destroy(true);
             if (!imageUrl) return;
 
             // Download the image

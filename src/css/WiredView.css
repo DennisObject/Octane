@@ -875,6 +875,60 @@
         gap: 8px;
     }
 
+    .octane-wired__projectile {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .octane-wired__projectile-section {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .octane-wired__projectile-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .octane-wired__projectile-chevron {
+        flex-shrink: 0;
+        width: 11px;
+        height: 11px;
+        color: #7a7a7a;
+    }
+
+    .octane-wired__projectile-section-body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .octane-wired__projectile-indent {
+        padding-left: 18px;
+    }
+
+    .octane-wired__projectile-grid {
+        display: flex;
+        justify-content: center;
+        padding: 2px 0;
+    }
+
+    .octane-wired__projectile-number {
+        width: 72px;
+        flex-shrink: 0;
+    }
+
     .octane-wired__levelup-mode-block {
         display: flex;
         flex-direction: column;

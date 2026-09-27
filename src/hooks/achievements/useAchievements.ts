@@ -197,6 +197,7 @@ const useAchievementsState = () => {
         selectedAchievement,
         visibleAchievements,
         hasWiredAchievements: enabledWiredAchievements.length > 0,
+        enabledWiredAchievements,
         isLoaded,
         isVisible,
         show,

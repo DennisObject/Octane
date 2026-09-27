@@ -41,6 +41,8 @@ const renderTab = (overrides: Partial<Parameters<typeof WiredVariablesTabView>[0
             canVariableHighlight={false}
             variableManageCanOpen={false}
             onOpenManagePanel={vi.fn()}
+            arrayInspectorCanOpen={false}
+            onOpenArrayInspector={vi.fn()}
             canVariableClear={false}
             onClearVariable={vi.fn()}
             selectedVariableProperties={[]}
@@ -67,5 +69,37 @@ describe('WiredVariablesTabView', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Clear this variable' }));
 
         expect(onClearVariable).toHaveBeenCalledTimes(1);
+    });
+
+    it('can be driven from outside the creator tools store, as the web api explorer does', () => {
+        const onVariablesTypeChange = vi.fn();
+
+        renderTab({
+            variablesType: 'global',
+            onVariablesTypeChange,
+            variableElements: [
+                { key: 'user', label: 'User', icon: '' },
+                { key: 'global', label: 'Global', icon: '' }
+            ],
+            showHighlight: false,
+            showArrayInspector: false
+        });
+
+        expect(screen.queryByRole('button', { name: 'Highlight' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Contents' })).toBeNull();
+
+        fireEvent.click(screen.getByTitle('User'));
+
+        expect(onVariablesTypeChange).toHaveBeenCalledWith('user');
+        expect(uiState.setVariablesType).not.toHaveBeenCalled();
+    });
+
+    it('offers the web api explorer when the creator tools pass an opener', () => {
+        const onOpenWebApiExplorer = vi.fn();
+
+        renderTab({ onOpenWebApiExplorer });
+        fireEvent.click(screen.getByRole('button', { name: 'Web API explorer' }));
+
+        expect(onOpenWebApiExplorer).toHaveBeenCalledTimes(1);
     });
 });

@@ -28,6 +28,7 @@ interface WiredCreatorToolsUiState {
     isMonitorInfoOpen: boolean;
     isInspectionGiveOpen: boolean;
     isVariableManageOpen: boolean;
+    isArrayInspectorOpen: boolean;
     isManagedGiveOpen: boolean;
     isRoomLogsOpen: boolean;
     isSelfDonationOpen: boolean;
@@ -129,6 +130,7 @@ interface WiredCreatorToolsUiState {
     setIsMonitorInfoOpen: (next: boolean) => void;
     setIsInspectionGiveOpen: (next: Updater<boolean>) => void;
     setIsVariableManageOpen: (next: boolean) => void;
+    setIsArrayInspectorOpen: (next: boolean) => void;
     setIsManagedGiveOpen: (next: Updater<boolean>) => void;
     setIsRoomLogsOpen: (next: boolean) => void;
     setIsSelfDonationOpen: (next: boolean) => void;
@@ -176,6 +178,7 @@ export const useWiredCreatorToolsUiStore = createOctaneStore<WiredCreatorToolsUi
     isMonitorInfoOpen: false,
     isInspectionGiveOpen: false,
     isVariableManageOpen: false,
+    isArrayInspectorOpen: false,
     isManagedGiveOpen: false,
     isRoomLogsOpen: false,
     isSelfDonationOpen: false,
@@ -219,6 +222,7 @@ export const useWiredCreatorToolsUiStore = createOctaneStore<WiredCreatorToolsUi
     setIsMonitorInfoOpen: (next) => set({ isMonitorInfoOpen: next }),
     setIsInspectionGiveOpen: (next) => set((state) => ({ isInspectionGiveOpen: apply(state.isInspectionGiveOpen, next) })),
     setIsVariableManageOpen: (next) => set({ isVariableManageOpen: next }),
+    setIsArrayInspectorOpen: (next) => set({ isArrayInspectorOpen: next }),
     setIsRoomLogsOpen: (next) => set({ isRoomLogsOpen: next }),
     setIsSelfDonationOpen: (next) => set({ isSelfDonationOpen: next }),
     setIsManagedGiveOpen: (next) => set((state) => ({ isManagedGiveOpen: apply(state.isManagedGiveOpen, next) })),

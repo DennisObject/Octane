@@ -33,6 +33,20 @@ describe('UI CSS ownership', () =>
         expect(chatsCss).toContain('.octane-bubbles-hidden .newbubblehe');
     });
 
+    it('keeps the wired fx editor off the room overlay class', () =>
+    {
+        // .octane-wired-fx is what the room draws a bar with: white, shadowed, font-weight 700.
+        // The editor window shared it twice by accident and every label, note and option in the
+        // window came out bold, so the editor has its own class and this keeps it that way.
+        const editorView = readSource('src/components/wired/views/extras/WiredExtraVariableFxView.tsx');
+        const fxCss = readSource('src/css/room/WiredVariableFx.css');
+
+        expect(editorView).toContain('octane-wired-fx-editor');
+        expect(editorView).not.toMatch(/octane-wired-fx(?!-editor)(?:__[\w-]+)?["'\s]/);
+        expect(fxCss).toContain('font-weight: 700');
+        expect(fxCss).not.toContain('.octane-wired-fx__override');
+    });
+
     it('keeps window-specific classes from repainting shared card chrome', () =>
     {
         const groupCreatorView = readSource('src/components/groups/views/GroupCreatorView.tsx');

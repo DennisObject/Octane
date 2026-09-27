@@ -1,4 +1,5 @@
 import { WiredConditionlayout } from '../../../../api';
+import { WiredConditionCheckArrayView } from './WiredConditionCheckArrayView';
 import { WiredConditionActorDirView } from './WiredConditionActorDirView';
 import { WiredConditionActorHasHandItemView } from './WiredConditionActorHasHandItem';
 import { WiredConditionActorIsGroupMemberView } from './WiredConditionActorIsGroupMemberView';
@@ -42,6 +43,8 @@ import { WiredConditionVariableValueMatchView } from './WiredConditionVariableVa
 
 export const WiredConditionLayoutView = (code: number) => {
     switch (code) {
+        case WiredConditionlayout.CHECK_ARRAY:
+            return <WiredConditionCheckArrayView />;
         case WiredConditionlayout.ACTOR_HAS_HANDITEM:
             return <WiredConditionActorHasHandItemView />;
         case WiredConditionlayout.NOT_ACTOR_HAS_HANDITEM:

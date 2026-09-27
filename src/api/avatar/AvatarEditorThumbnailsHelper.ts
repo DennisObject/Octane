@@ -12,52 +12,10 @@ import {
     OctaneSprite,
     TextureUtils
 } from '@octane/renderer';
+import { canvasToThumbnailUrl, centerCanvasIntoBox, imageUrlToCanvas, ThumbnailUrlCache, trimCanvasToOpaqueBounds } from './avatarThumbnailUrls';
 import { IAvatarEditorCategoryPartItem } from './IAvatarEditorCategoryPartItem';
 
-const MAX_CACHE_BYTES = 200 * 1024 * 1024;
-
-class LRUImageCache {
-    private _cache: Map<string, string> = new Map();
-    private _currentBytes: number = 0;
-
-    public get(key: string): string | undefined {
-        const value = this._cache.get(key);
-
-        if (value !== undefined) {
-            this._cache.delete(key);
-            this._cache.set(key, value);
-        }
-
-        return value;
-    }
-
-    public set(key: string, value: string): void {
-        if (this._cache.has(key)) {
-            const old = this._cache.get(key);
-
-            this._currentBytes -= (key.length + old.length) * 2;
-            this._cache.delete(key);
-        }
-
-        const entryBytes = (key.length + value.length) * 2;
-
-        while (this._currentBytes + entryBytes > MAX_CACHE_BYTES && this._cache.size > 0) {
-            const firstKey = this._cache.keys().next().value;
-            const firstValue = this._cache.get(firstKey);
-
-            this._currentBytes -= (firstKey.length + firstValue.length) * 2;
-            this._cache.delete(firstKey);
-        }
-
-        this._cache.set(key, value);
-        this._currentBytes += entryBytes;
-    }
-
-    public clear(): void {
-        this._cache.clear();
-        this._currentBytes = 0;
-    }
-}
+const MAX_CACHE_BYTES = 48 * 1024 * 1024;
 
 export type AvatarEditorThumbRect = { x: number; y: number; width: number; height: number };
 
@@ -79,7 +37,7 @@ export const avatarEditorThumbDest = (assetX: number, assetY: number, union: Ava
 });
 
 export class AvatarEditorThumbnailsHelper {
-    private static THUMBNAIL_CACHE: LRUImageCache = new LRUImageCache();
+    private static THUMBNAIL_CACHE: ThumbnailUrlCache = new ThumbnailUrlCache(MAX_CACHE_BYTES);
     private static PENDING_THUMBNAILS: Map<string, Promise<string>> = new Map();
     private static THUMB_DIRECTIONS: number[] = [2, 6, 0, 4, 3, 1];
     private static THUMB_BOX: number = 50;
@@ -118,106 +76,14 @@ export class AvatarEditorThumbnailsHelper {
         AvatarFigurePartType.RIGHT_HAND_ITEM
     ];
 
-    private static async trimTransparentPadding(imageUrl: string): Promise<string> {
-        try {
-            const image = new Image();
+    private static async cacheCanvas(key: string, canvas: HTMLCanvasElement): Promise<string> {
+        const entry = await canvasToThumbnailUrl(canvas);
 
-            await new Promise<void>((resolve, reject) => {
-                image.onload = () => resolve();
-                image.onerror = () => reject(new Error('thumbnail load failed'));
-                image.src = imageUrl;
-            });
+        if (!entry) return null;
 
-            const width = image.naturalWidth;
-            const height = image.naturalHeight;
+        this.THUMBNAIL_CACHE.set(key, entry);
 
-            if (!width || !height) return imageUrl;
-
-            const canvas = document.createElement('canvas');
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const context = canvas.getContext('2d', { willReadFrequently: true });
-
-            if (!context) return imageUrl;
-
-            context.drawImage(image, 0, 0);
-
-            const { data } = context.getImageData(0, 0, width, height);
-            let minX = width;
-            let minY = height;
-            let maxX = -1;
-            let maxY = -1;
-
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (data[(y * width + x) * 4 + 3] > 0) {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-                    }
-                }
-            }
-
-            if (maxX < 0) return imageUrl;
-
-            const trimmedWidth = maxX - minX + 1;
-            const trimmedHeight = maxY - minY + 1;
-
-            if (trimmedWidth === width && trimmedHeight === height) return imageUrl;
-
-            const trimmedCanvas = document.createElement('canvas');
-
-            trimmedCanvas.width = trimmedWidth;
-            trimmedCanvas.height = trimmedHeight;
-
-            const trimmedContext = trimmedCanvas.getContext('2d');
-
-            if (!trimmedContext) return imageUrl;
-
-            trimmedContext.drawImage(canvas, minX, minY, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
-
-            return trimmedCanvas.toDataURL('image/png');
-        } catch {
-            return imageUrl;
-        }
-    }
-
-    private static async centerIntoThumbBox(imageUrl: string): Promise<string> {
-        try {
-            const image = new Image();
-
-            await new Promise<void>((resolve, reject) => {
-                image.onload = () => resolve();
-                image.onerror = () => reject(new Error('thumbnail load failed'));
-                image.src = imageUrl;
-            });
-
-            const width = image.naturalWidth;
-            const height = image.naturalHeight;
-
-            if (!width || !height) return imageUrl;
-
-            if (width === this.THUMB_BOX && height === this.THUMB_BOX) return imageUrl;
-
-            const canvas = document.createElement('canvas');
-
-            canvas.width = this.THUMB_BOX;
-            canvas.height = this.THUMB_BOX;
-
-            const context = canvas.getContext('2d');
-
-            if (!context) return imageUrl;
-
-            context.imageSmoothingEnabled = false;
-            context.drawImage(image, Math.trunc((this.THUMB_BOX - width) / 2), Math.trunc((this.THUMB_BOX - height) / 2));
-
-            return canvas.toDataURL('image/png');
-        } catch {
-            return imageUrl;
-        }
+        return entry.url;
     }
 
     private static getThumbnailKey(setType: string, part: IAvatarEditorCategoryPartItem, partColors?: IPartColor[], isDisabled?: boolean): string {
@@ -337,14 +203,17 @@ export class AvatarEditorThumbnailsHelper {
                 }
 
                 try {
-                    const renderedUrl = await TextureUtils.generateImageUrl({ target: container, resolution: 1 });
-                    const imageUrl = renderedUrl ? await AvatarEditorThumbnailsHelper.centerIntoThumbBox(renderedUrl) : renderedUrl;
+                    const rendered = TextureUtils.generateCanvas({ target: container, resolution: 1 }) as HTMLCanvasElement;
+                    const imageUrl = rendered
+                        ? await AvatarEditorThumbnailsHelper.cacheCanvas(
+                              thumbnailKey,
+                              centerCanvasIntoBox(rendered, AvatarEditorThumbnailsHelper.THUMB_BOX)
+                          )
+                        : null;
 
                     if (completed) return;
 
                     completed = true;
-
-                    if (imageUrl) AvatarEditorThumbnailsHelper.THUMBNAIL_CACHE.set(thumbnailKey, imageUrl);
 
                     resolve(imageUrl);
                 } catch {
@@ -386,6 +255,10 @@ export class AvatarEditorThumbnailsHelper {
 
         if (cached) return cached;
 
+        const pending = this.PENDING_THUMBNAILS.get(thumbnailKey);
+
+        if (pending) return pending;
+
         const promise = new Promise<string>((resolve) => {
             let completed = false;
 
@@ -417,13 +290,14 @@ export class AvatarEditorThumbnailsHelper {
                         return;
                     }
 
-                    const imageUrl = await AvatarEditorThumbnailsHelper.trimTransparentPadding(croppedImageUrl);
+                    const decoded = await imageUrlToCanvas(croppedImageUrl);
+                    const imageUrl = decoded
+                        ? await AvatarEditorThumbnailsHelper.cacheCanvas(thumbnailKey, trimCanvasToOpaqueBounds(decoded))
+                        : null;
 
                     if (completed) return;
 
                     completed = true;
-
-                    if (imageUrl) AvatarEditorThumbnailsHelper.THUMBNAIL_CACHE.set(thumbnailKey, imageUrl);
 
                     resolve(imageUrl);
                 } catch {
@@ -437,6 +311,11 @@ export class AvatarEditorThumbnailsHelper {
             };
 
             resetFigure(figureString);
+        });
+
+        this.PENDING_THUMBNAILS.set(thumbnailKey, promise);
+        void promise.finally(() => {
+            if (this.PENDING_THUMBNAILS.get(thumbnailKey) === promise) this.PENDING_THUMBNAILS.delete(thumbnailKey);
         });
 
         return promise;

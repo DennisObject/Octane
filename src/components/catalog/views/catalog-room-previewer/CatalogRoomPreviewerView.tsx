@@ -21,6 +21,9 @@ export const CatalogRoomPreviewerView: FC<{
         (async () => {
             const image = await TextureUtils.generateImage(renderTexture);
 
+            // getRoomObjectCurrentImage() renders a fresh texture that nobody else owns.
+            renderTexture.destroy(true);
+
             if (!image) return;
 
             const bounds = elementRef.current.getBoundingClientRect();
