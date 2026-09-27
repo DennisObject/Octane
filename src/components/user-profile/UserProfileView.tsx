@@ -13,7 +13,7 @@ import {
     UserRelationshipsComposer
 } from '@octane/renderer';
 import { FC, useState } from 'react';
-import { CreateLinkEvent, GetRoomSession, GetUserProfile, LocalizeText, SendMessageComposer } from '../../api';
+import { CreateLinkEvent, GetRoomSession, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../api';
 import { useMessageEvent, useOctaneEvent } from '../../hooks';
 import { OctaneCard } from '../../layout';
 import { GroupsContainerView } from './GroupsContainerView';
@@ -111,14 +111,22 @@ export const UserProfileView: FC<{}> = () => {
                     <UserContainerView userBadges={userBadges} userProfile={userProfile} userRelationships={userRelationships} onOpenRooms={onOpenRooms} onClose={onClose} />
                 </div>
                 <div className="octane-extended-profile-window__body octane-extended-profile-window__body--groups flex-1 overflow-hidden px-[10px] pb-[10px] pt-[6px]">
-                    <div className="octane-extended-profile-window__panel h-full p-2">
-                        <GroupsContainerView
-                            fullWidth
-                            groups={userProfile.groups}
-                            itsMe={userProfile.id === GetSessionDataManager().userId}
-                            onLeaveGroup={onLeaveGroup}
-                        />
-                    </div>
+                    {/* Official full_profile_hidden: the owner hid the profile, so everybody else
+                        sees this notice in place of the groups section. The owner sees it all. */}
+                    {userProfile.isHidden && userProfile.id !== GetSessionDataManager().userId ? (
+                        <div className="octane-extended-profile__hidden">
+                            {localizeWithFallback('profile.full_profile_hidden', "This user's full profile is hidden")}
+                        </div>
+                    ) : (
+                        <div className="octane-extended-profile-window__panel h-full p-2">
+                            <GroupsContainerView
+                                fullWidth
+                                groups={userProfile.groups}
+                                itsMe={userProfile.id === GetSessionDataManager().userId}
+                                onLeaveGroup={onLeaveGroup}
+                            />
+                        </div>
+                    )}
                 </div>
             </OctaneCard.Content>
         </OctaneCard>
