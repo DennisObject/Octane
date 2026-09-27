@@ -571,3 +571,13 @@
     width: 100%;
   }
 }
+
+/* Official presence: a user hiding their status sees a dimmed icon on their own profile. */
+.octane-extended-profile__presence--hidden {
+  opacity: 0.55;
+}
+
+/* The official levelRegion has no click. */
+.octane-extended-profile__summary-button--level {
+  cursor: default;
+}
