@@ -1065,6 +1065,9 @@ export class ConditionDefinition extends Triggerable {
     }
 }
 
+// Club gifts: the selection composer carries the chosen gift's localization id.
+export class SelectClubGiftComposer extends RecordingComposer {}
+
 // Catalog store, queries and effects hook: the events they subscribe to and
 // the composers they send.
 export class BuildersClubFurniCountMessageEvent extends MessageEvent {}
