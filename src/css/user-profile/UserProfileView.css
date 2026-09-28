@@ -339,6 +339,24 @@
   padding: 0 !important;
 }
 
+/* Official full_profile_hidden: a 498x226 0xcccccc border at (0,5) of the bottom block, with the
+   notice in bold 0x555555 in the middle. */
+.octane-extended-profile__hidden {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 498px;
+  height: 226px;
+  margin-top: 5px;
+  border-radius: 6px;
+  background: #cccccc;
+  color: #555555;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .octane-extended-profile-groups {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
