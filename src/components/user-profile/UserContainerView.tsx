@@ -1,8 +1,8 @@
 import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { ensureBadgeLeaderboardLoaded, FriendlyTime, getBadgesRank, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../api';
+import { ensureBadgeLeaderboardLoaded, FriendlyTime, getBadgesRank, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
-import { level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
+import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
 import { LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../common';
 import { RelationshipsContainerView } from './RelationshipsContainerView';
 
@@ -13,10 +13,13 @@ interface UserContainerViewProps {
     onOpenRooms?: () => void;
     /** Closes the profile window (the official find-friends link closes it). */
     onClose?: () => void;
+    /** Official block_button / blocked_container: the user is on the session block list. */
+    isBlocked?: boolean;
+    onToggleBlock?: () => void;
 }
 
 export const UserContainerView: FC<UserContainerViewProps> = (props) => {
-    const { userProfile = null, userBadges = [], userRelationships = null, onOpenRooms = null, onClose = null } = props;
+    const { userProfile = null, userBadges = [], userRelationships = null, onOpenRooms = null, onClose = null, isBlocked = false, onToggleBlock = null } = props;
 
     const [requestSent, setRequestSent] = useState(userProfile.requestSent);
     const isOwnProfile = userProfile.id === GetSessionDataManager().userId;
@@ -58,7 +61,19 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     }, [userProfile]);
 
     return (
-        <div className="octane-extended-profile">
+        <div className={`octane-extended-profile${isBlocked ? ' is-blocked' : ''}`}>
+            {!isOwnProfile && onToggleBlock && (
+                <button
+                    type="button"
+                    className={`octane-extended-profile__block-button${isBlocked ? ' is-active' : ''}`}
+                    title={isBlocked ? localizeWithFallback('extendedprofile.unblock_player.title', 'Unblock user') : localizeWithFallback('extendedprofile.block_player.title', 'Block user')}
+                    aria-pressed={isBlocked}
+                    onClick={onToggleBlock}
+                >
+                    {/* The official extended_profile_block_icon, 16x16. */}
+                    <img src={profileBlockIcon} alt="" draggable={false} />
+                </button>
+            )}
             <div className="octane-extended-profile__top">
                 <div className="octane-extended-profile__left">
                     <div className="octane-extended-profile__identity">
