@@ -27,7 +27,7 @@ import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
-import { ClearStoredChatHistory, getConnectionFailureAction, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
+import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
 import { SharedHookRegistry } from './state/useSharedHook';
 
 OctaneVersion.UI_VERSION = GetUIVersion();
@@ -294,15 +294,18 @@ export const App: FC<{}> = (props) => {
         const currentPhase = connectionState.phase;
         previousConnectionPhaseRef.current = currentPhase;
 
-        const action = getConnectionFailureAction(previousPhase, currentPhase, isReady);
+        const action = getConnectionFailureAction(previousPhase, currentPhase, isReady, connectionState.disconnectReason);
 
-        if (action === 'login') {
+        if (action === 'kicked') {
+            // ReconnectView shows the reason over the hotel; only a ban forgets the stored login.
+            if (shouldClearLoginAfterDisconnect(connectionState.disconnectReason)) clearStoredCredentials();
+        } else if (action === 'login') {
             console.warn('[App] Connection failed before authentication completed — falling back to login');
             fallbackToLogin();
         } else if (action === 'expired') {
             showSessionExpired();
         }
-    }, [connectionState.phase, fallbackToLogin, isReady, showSessionExpired]);
+    }, [connectionState.phase, connectionState.disconnectReason, clearStoredCredentials, fallbackToLogin, isReady, showSessionExpired]);
 
     useMessageEvent<LoadGameUrlEvent>(LoadGameUrlEvent, (event) => {
         const parser = event.getParser();

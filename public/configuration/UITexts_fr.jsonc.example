@@ -1001,5 +1001,16 @@
     "wiredfurni.web_api.error.max_per_user": "Tu possèdes déjà le nombre maximum d'add-ons Variables Web API.",
     "wiredmenu.variables_explorer.empty.user": "Aucune variable utilisateur permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici.",
     "wiredmenu.variables_explorer.empty.furni": "Aucune variable de mobi permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici.",
-    "wiredmenu.variables_explorer.empty.global": "Aucune variable globale permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici."
+    "wiredmenu.variables_explorer.empty.global": "Aucune variable globale permanente dans cet appart. Règle une variable sur Permanente dans sa box wired pour l'utiliser ici.",
+    "disconnected.back_to_hotel": "Retour à l'hôtel",
+    "disconnected.info.maintenance": "L'hôtel est en maintenance. Reviens dans un petit moment.",
+    "disconnected.info.logged_out": "Tu as été déconnecté.",
+    "disconnected.info.just_banned": "Ton compte a été banni de l'hôtel.",
+    "disconnected.info.still_banned": "Ton compte est toujours banni de l'hôtel.",
+    "disconnected.info.concurrent_login": "Cette session a été fermée car tu t'es connecté ailleurs.",
+    "disconnected.info.hotel_closed": "L'hôtel est fermé pour le moment. Reviens plus tard.",
+    "disconnected.info.incorrect_password": "Connecte-toi à nouveau.",
+    "disconnected.info.idle": "Tu as été absent trop longtemps, l'hôtel a donc fermé ta session.",
+    "disconnected.info.incompatible_client_version": "Recharge la page pour obtenir la dernière version.",
+    "disconnected.info.generic": "Tu as été déconnecté. Réessaie."
 }

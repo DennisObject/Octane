@@ -1001,5 +1001,16 @@
     "wiredfurni.web_api.error.max_per_user": "Je hebt al het maximale aantal Variables Web API-add-ons.",
     "wiredmenu.variables_explorer.empty.user": "Geen permanente gebruikersvariabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken.",
     "wiredmenu.variables_explorer.empty.furni": "Geen permanente meubelvariabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken.",
-    "wiredmenu.variables_explorer.empty.global": "Geen permanente globale variabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken."
+    "wiredmenu.variables_explorer.empty.global": "Geen permanente globale variabelen in deze kamer. Zet een variabele op Permanent in de wired-box om hem hier te gebruiken.",
+    "disconnected.back_to_hotel": "Terug naar het hotel",
+    "disconnected.info.maintenance": "Er wordt aan het hotel gewerkt. Kom over een tijdje terug.",
+    "disconnected.info.logged_out": "Je bent uitgelogd.",
+    "disconnected.info.just_banned": "Je account is verbannen uit het hotel.",
+    "disconnected.info.still_banned": "Je account is nog steeds verbannen uit het hotel.",
+    "disconnected.info.concurrent_login": "Deze sessie is gesloten omdat je ergens anders bent ingelogd.",
+    "disconnected.info.hotel_closed": "Het hotel is nu gesloten. Kom later terug.",
+    "disconnected.info.incorrect_password": "Log opnieuw in.",
+    "disconnected.info.idle": "Je was te lang weg, daarom heeft het hotel je sessie gesloten.",
+    "disconnected.info.incompatible_client_version": "Herlaad de pagina om de nieuwste versie te krijgen.",
+    "disconnected.info.generic": "Je verbinding is verbroken. Probeer het opnieuw."
 }

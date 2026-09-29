@@ -957,5 +957,16 @@
     "wiredfurni.web_api.error.max_per_user": "لديك بالفعل الحد الأقصى من إضافات Variables Web API.",
     "wiredmenu.variables_explorer.empty.user": "لا توجد متغيرات مستخدم دائمة في هذه الغرفة. اجعل المتغير دائمًا في صندوق الوايرد الخاص به لاستخدامه هنا.",
     "wiredmenu.variables_explorer.empty.furni": "لا توجد متغيرات أثاث دائمة في هذه الغرفة. اجعل المتغير دائمًا في صندوق الوايرد الخاص به لاستخدامه هنا.",
-    "wiredmenu.variables_explorer.empty.global": "لا توجد متغيرات عامة دائمة في هذه الغرفة. اجعل المتغير دائمًا في صندوق الوايرد الخاص به لاستخدامه هنا."
+    "wiredmenu.variables_explorer.empty.global": "لا توجد متغيرات عامة دائمة في هذه الغرفة. اجعل المتغير دائمًا في صندوق الوايرد الخاص به لاستخدامه هنا.",
+    "disconnected.back_to_hotel": "العودة إلى الفندق",
+    "disconnected.info.maintenance": "يتم العمل على الفندق. يرجى العودة بعد قليل.",
+    "disconnected.info.logged_out": "لقد تم تسجيل خروجك.",
+    "disconnected.info.just_banned": "تم حظر حسابك من الفندق.",
+    "disconnected.info.still_banned": "لا يزال حسابك محظورًا من الفندق.",
+    "disconnected.info.concurrent_login": "تم إغلاق هذه الجلسة لأنك سجلت الدخول من مكان آخر.",
+    "disconnected.info.hotel_closed": "الفندق مغلق الآن. يرجى العودة لاحقًا.",
+    "disconnected.info.incorrect_password": "يرجى تسجيل الدخول مرة أخرى.",
+    "disconnected.info.idle": "لقد غبت لفترة طويلة، لذلك أغلق الفندق جلستك.",
+    "disconnected.info.incompatible_client_version": "يرجى إعادة تحميل الصفحة للحصول على أحدث إصدار.",
+    "disconnected.info.generic": "تم قطع اتصالك. يرجى المحاولة مرة أخرى."
 }
