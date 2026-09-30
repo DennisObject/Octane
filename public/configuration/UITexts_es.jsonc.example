@@ -1001,5 +1001,16 @@
     "wiredfurni.web_api.error.max_per_user": "Ya tienes el número máximo de complementos Variables Web API.",
     "wiredmenu.variables_explorer.empty.user": "No hay variables de usuario permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí.",
     "wiredmenu.variables_explorer.empty.furni": "No hay variables de furni permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí.",
-    "wiredmenu.variables_explorer.empty.global": "No hay variables globales permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí."
+    "wiredmenu.variables_explorer.empty.global": "No hay variables globales permanentes en esta sala. Marca una variable como Permanente en su caja wired para usarla aquí.",
+    "disconnected.back_to_hotel": "Volver al hotel",
+    "disconnected.info.maintenance": "Se está trabajando en el hotel. Vuelve dentro de un rato.",
+    "disconnected.info.logged_out": "Has cerrado sesión.",
+    "disconnected.info.just_banned": "Tu cuenta ha sido baneada del hotel.",
+    "disconnected.info.still_banned": "Tu cuenta sigue baneada del hotel.",
+    "disconnected.info.concurrent_login": "Esta sesión se cerró porque iniciaste sesión en otro lugar.",
+    "disconnected.info.hotel_closed": "El hotel está cerrado ahora. Vuelve más tarde.",
+    "disconnected.info.incorrect_password": "Vuelve a iniciar sesión.",
+    "disconnected.info.idle": "Estuviste ausente demasiado tiempo, así que el hotel cerró tu sesión.",
+    "disconnected.info.incompatible_client_version": "Recarga la página para obtener la última versión.",
+    "disconnected.info.generic": "Te has desconectado. Inténtalo de nuevo."
 }

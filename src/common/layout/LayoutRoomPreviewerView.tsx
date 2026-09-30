@@ -1,5 +1,6 @@
-import { GetRenderer, GetTicker, RoomPreviewer, TextureUtils } from '@octane/renderer';
+import { GetRenderer, GetTicker, OctaneLogger, OctaneTicker, RoomPreviewer, TextureUtils } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
+import { GetAnimationFrameInterval } from '../../api/octane/room/AddAnimationTickerCallback';
 import { PIXEL_ART_RENDERING } from './PixelArtRendering';
 
 export const LayoutRoomPreviewerView: FC<{
@@ -11,6 +12,10 @@ export const LayoutRoomPreviewerView: FC<{
     const { roomPreviewer = null, height = 0, fitParent = false, onPreviewClick } = props;
     const elementRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    // Consecutive render failures before the preview stops rendering: a transient bad
+    // frame recovers, a wedged previewer stops throwing every animation frame.
+    const renderFailuresRef = useRef(0);
+    const MAX_RENDER_FAILURES = 6;
 
     const onClick = () => {
         if (onPreviewClick) {
@@ -38,6 +43,19 @@ export const LayoutRoomPreviewerView: FC<{
         let texture: ReturnType<typeof TextureUtils.createRenderTexture> = null;
         let roomCanvasInitialized = false;
         let frameImageData: ImageData = null;
+
+        renderFailuresRef.current = 0;
+
+        const noteFailure = (label: string, error: unknown) => {
+            renderFailuresRef.current += 1;
+
+            if (renderFailuresRef.current >= MAX_RENDER_FAILURES) {
+                OctaneLogger.error(
+                    `LayoutRoomPreviewerView ${label} failed ${renderFailuresRef.current} times; disabling further renders for this preview`,
+                    error
+                );
+            }
+        };
 
         const paintToDOM = () => {
             if (!texture) return;
@@ -68,10 +86,28 @@ export const LayoutRoomPreviewerView: FC<{
             context.putImageData(frameImageData, 0, 0);
         };
 
-        const update = () => {
+        // Repositioning follows the room's animation clock; the DOM paint below
+        // still checks every frame so no rendered canvas update is skipped.
+        const repositionInterval = GetAnimationFrameInterval();
+        let repositionElapsed = repositionInterval;
+
+        const update = (ticker: OctaneTicker) => {
+            if (renderFailuresRef.current >= MAX_RENDER_FAILURES) return;
+
             const wasUpdated = !!roomPreviewer.getRenderingCanvas()?.canvasUpdated;
 
-            roomPreviewer.updatePreviewRoomView();
+            repositionElapsed += ticker.deltaMS;
+
+            if (repositionElapsed >= repositionInterval) {
+                repositionElapsed %= repositionInterval;
+
+                try {
+                    roomPreviewer.updatePreviewRoomView();
+                } catch (error) {
+                    noteFailure('update', error);
+                    return;
+                }
+            }
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 

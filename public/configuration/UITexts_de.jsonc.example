@@ -996,5 +996,16 @@
     "wiredfurni.web_api.error.max_per_user": "Du besitzt bereits die maximale Anzahl an Variables-Web-API-Add-ons.",
     "wiredmenu.variables_explorer.empty.user": "Keine dauerhaften Benutzer-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen.",
     "wiredmenu.variables_explorer.empty.furni": "Keine dauerhaften Möbel-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen.",
-    "wiredmenu.variables_explorer.empty.global": "Keine dauerhaften globalen-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen."
+    "wiredmenu.variables_explorer.empty.global": "Keine dauerhaften globalen-Variablen in diesem Raum. Stelle eine Variable in ihrer Wired-Box auf Dauerhaft, um sie hier zu nutzen.",
+    "disconnected.back_to_hotel": "Zurück zum Hotel",
+    "disconnected.info.maintenance": "Am Hotel wird gearbeitet. Bitte komm in Kürze wieder.",
+    "disconnected.info.logged_out": "Du wurdest abgemeldet.",
+    "disconnected.info.just_banned": "Dein Konto wurde aus dem Hotel verbannt.",
+    "disconnected.info.still_banned": "Dein Konto ist weiterhin aus dem Hotel verbannt.",
+    "disconnected.info.concurrent_login": "Diese Sitzung wurde beendet, weil du dich woanders angemeldet hast.",
+    "disconnected.info.hotel_closed": "Das Hotel ist gerade geschlossen. Bitte komm später wieder.",
+    "disconnected.info.incorrect_password": "Bitte melde dich erneut an.",
+    "disconnected.info.idle": "Du warst zu lange weg, daher hat das Hotel deine Sitzung beendet.",
+    "disconnected.info.incompatible_client_version": "Bitte lade die Seite neu, um die neueste Version zu erhalten.",
+    "disconnected.info.generic": "Die Verbindung wurde getrennt. Bitte versuche es erneut."
 }

@@ -1007,5 +1007,16 @@
     "wiredfurni.web_api.error.max_per_user": "You already own the maximum number of Variables Web API add-ons.",
     "wiredmenu.variables_explorer.empty.user": "No permanent user variables in this room. Set a variable to Permanent in its wired box to use it here.",
     "wiredmenu.variables_explorer.empty.furni": "No permanent furni variables in this room. Set a variable to Permanent in its wired box to use it here.",
-    "wiredmenu.variables_explorer.empty.global": "No permanent global variables in this room. Set a variable to Permanent in its wired box to use it here."
+    "wiredmenu.variables_explorer.empty.global": "No permanent global variables in this room. Set a variable to Permanent in its wired box to use it here.",
+    "disconnected.back_to_hotel": "Back to Hotel",
+    "disconnected.info.maintenance": "The hotel is being worked on. Please come back in a little while.",
+    "disconnected.info.logged_out": "You have been logged out.",
+    "disconnected.info.just_banned": "Your account has been banned from the hotel.",
+    "disconnected.info.still_banned": "Your account is still banned from the hotel.",
+    "disconnected.info.concurrent_login": "This session was closed because you logged in somewhere else.",
+    "disconnected.info.hotel_closed": "The hotel is closed right now. Please come back later.",
+    "disconnected.info.incorrect_password": "Please log in again.",
+    "disconnected.info.idle": "You were away for too long, so the hotel closed your session.",
+    "disconnected.info.incompatible_client_version": "Please reload the page to get the latest version.",
+    "disconnected.info.generic": "You have been disconnected. Please try again."
 }
