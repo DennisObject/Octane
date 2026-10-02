@@ -192,6 +192,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 {(groupInformation.type !== GroupType.PRIVATE ||
                     (groupInformation.type === GroupType.PRIVATE && groupInformation.membershipType === GroupMembershipType.MEMBER)) && (
                     <Button
+                        size={null}
                         className="octane-extended-profile-group-info__button"
                         disabled={groupInformation.membershipType === GroupMembershipType.REQUEST_PENDING || isRealOwner}
                         onClick={handleButtonClick}

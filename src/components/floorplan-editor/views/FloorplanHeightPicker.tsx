@@ -6,26 +6,32 @@ import { OFFICIAL_LEVELS } from '../official/officialFloorPlan';
 type Props = {
     selectedH: number;
     onSelect: (h: number) => void;
+    official?: boolean;
 };
 
 /** Official tile_height_colormap: horizontal HSL ramp, thumb is the avatar-editor download icon. */
-export const FloorplanHeightPicker: FC<Props> = ({ selectedH, onSelect }) => {
+export const FloorplanHeightPicker: FC<Props> = ({ selectedH, onSelect, official = false }) => {
     const count = OFFICIAL_LEVELS;
     const maxHeight = OFFICIAL_LEVELS;
     const trackRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
     const gradient = useMemo(() => {
+        if (official) return '';
+
         const stops: string[] = [];
+
         for (let i = 0; i < count; i++) {
             const fill = airHeightHex(i);
             const startPct = (i / count) * 100;
             const endPct = ((i + 1) / count) * 100;
+
             stops.push(`${fill} ${startPct.toFixed(2)}%`);
             stops.push(`${fill} ${endPct.toFixed(2)}%`);
         }
+
         return `linear-gradient(to right, ${stops.join(', ')})`;
-    }, [count]);
+    }, [count, official]);
 
     const heightFromClientX = useCallback(
         (clientX: number): number | null => {
@@ -82,7 +88,13 @@ export const FloorplanHeightPicker: FC<Props> = ({ selectedH, onSelect }) => {
             aria-orientation="horizontal"
             title={`Brush height ${clamped}`}
         >
-            <div ref={trackRef} data-testid="height-track" className="fp-bc-colormap-track" style={{ background: gradient }} onPointerDown={onPointerDown} />
+            <div
+                ref={trackRef}
+                data-testid="height-track"
+                className="fp-bc-colormap-track"
+                style={official ? { backgroundImage: `url(${AIR_FLOOR_ASSETS.heightColormap})` } : { background: gradient }}
+                onPointerDown={onPointerDown}
+            />
             <img
                 data-testid="height-thumb"
                 data-value={clamped}

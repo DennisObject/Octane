@@ -1,5 +1,5 @@
 .octane-groups-window {
-    font-family: Ubuntu, sans-serif;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     color: #111111;
 }
 
@@ -102,58 +102,58 @@
     opacity: 1 !important;
 }
 
-.octane-groups-button--primary {
-    border-width: 5px !important;
-    border-style: solid !important;
-    border-color: transparent !important;
-    border-image-source: var(--habbo-skin-shiny-thick-green) !important;
-    border-image-slice: 5 fill !important;
-    border-image-width: 5px !important;
-    border-image-repeat: stretch !important;
-    background: transparent !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35) !important;
-}
-
-.octane-groups-button--primary:hover {
-    border-image-source: var(--habbo-skin-shiny-thick-green-hover) !important;
-}
-
-.octane-groups-button--primary:active {
-    border-image-source: var(--habbo-skin-shiny-thick-green-pressed) !important;
-}
-
 .octane-group-information-standalone {
-    width: 365px !important;
-    height: 267px !important;
+    width: 363px !important;
+    height: 268px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
     resize: none !important;
 }
 
 .octane-group-information-standalone .octane-card-content-shell,
 .octane-group-information-standalone .octane-groups-content {
-    width: 365px !important;
-    height: 234px !important;
+    width: 100% !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     padding: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    box-sizing: border-box !important;
 }
 
 .octane-group-information-standalone .octane-extended-profile-group-info {
     position: relative;
     display: block !important;
     width: 343px !important;
-    height: 212px !important;
+    height: 214px !important;
     min-height: 0 !important;
-    max-height: 212px !important;
+    max-height: none !important;
     box-sizing: border-box !important;
-    margin: 10px 11px 0 !important;
+    margin: 7px !important;
     padding: 0 !important;
-    border: 1px solid #77776f !important;
-    border-radius: 5px !important;
-    background: #cccccc !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     color: #000000;
     font-size: 12px;
     overflow: hidden !important;
-    clip-path: inset(0 round 5px);
+    clip-path: none !important;
+}
+
+/* AIR 1192/1197: group_cont at (10,43), border style 0, 343 x 214. */
+.octane-group-information-standalone .octane-extended-profile-group-info::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 6px solid transparent;
+    border-image-source: var(--habbo-skin-border-white);
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 .octane-group-information-standalone .octane-extended-profile-group-info__badge-column {
@@ -329,19 +329,6 @@
     height: 29px !important;
     min-height: 29px !important;
     box-sizing: border-box !important;
-    border: 2px solid #111111 !important;
-    border-image: none !important;
-    border-radius: 3px !important;
-    background: linear-gradient(180deg, #ffffff 0%, #f4f4f2 48%, #d5d5d1 100%) !important;
-    color: #111111 !important;
-    text-shadow: none !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        inset 0 -1px 0 #a6a6a0 !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__button:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #fafaf8 48%, #e0e0dc 100%) !important;
 }
 
 .octane-group-information-standalone .octane-extended-profile-group-info__button .text-white,
@@ -569,7 +556,7 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         inset 0 -1px 0 rgba(0, 0, 0, 0.55),
         0 2px 0 rgba(0, 0, 0, 0.35);
-    font-family: Ubuntu, sans-serif;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     image-rendering: var(--octane-pixel-art, pixelated);
     transition: height 0.18s ease;
 }
@@ -701,8 +688,6 @@
     width: 170px;
     height: 27px;
     min-height: 27px;
-    font-size: 12px !important;
-    font-weight: 700 !important;
 }
 
 /* SWF group_room_info.xml coordinates. */
@@ -772,18 +757,19 @@
     min-height: 29px !important;
 }
 
-/* group_room_info.xml: fixed 195x119 surface, using the same dark treatment as
- * the original right-side widgets. The content is positioned by the SWF x/y values. */
+/* group_room_info.xml: guilds/group_bg.png 195x119, contracted Events/event_bg_contracted.png 195x25. */
 .octane-group-room-info {
     position: relative !important;
     overflow: hidden !important;
-    border: 1px solid rgba(0, 0, 0, 0.92) !important;
-    border-radius: 5px !important;
-    background: rgba(117, 116, 111, 0.40) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-        0 2px 0 rgba(0, 0, 0, 0.32) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: url("../../assets/images/groups/swf/group_bg.png") 0 0 / 195px 119px no-repeat !important;
+    box-shadow: none !important;
+}
+
+.octane-group-room-info.is-closed {
+    background-image: url("../../assets/images/groups/swf/event_bg_contracted.png") !important;
+    background-size: 195px 25px !important;
 }
 
 .octane-group-room-info__contracted {
@@ -792,19 +778,14 @@
     height: 25px !important;
     padding: 0 !important;
     border: 0 !important;
-    border-radius: 4px 4px 0 0 !important;
-    background: rgba(28, 34, 37, 0.40) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
 }
 
-.octane-group-room-info__contracted::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 1px;
-    background: #000000;
-    pointer-events: none;
+.octane-group-room-info__toggle::after,
+.octane-group-room-info.is-closed .octane-group-room-info__toggle::after {
+    content: none !important;
+    border: 0 !important;
 }
 
 .octane-group-room-info__base-icon {
@@ -837,7 +818,7 @@
     width: 195px !important;
     height: 94px !important;
     overflow: hidden !important;
-    background: rgba(117, 116, 111, 0.40) !important;
+    background: transparent !important;
 }
 
 .octane-group-room-info__main {
@@ -879,20 +860,10 @@
     height: 29px !important;
     min-height: 29px !important;
     box-sizing: border-box !important;
-    border: 1px solid #050505 !important;
-    border-image: none !important;
-    border-radius: 2px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: linear-gradient(180deg, #ffffff 0%, #f4f4f2 45%, #d7d7d3 100%) !important;
-    color: #111111 !important;
     text-align: center !important;
-    text-shadow: none !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        inset 0 -1px 0 #a7a7a3,
-        0 1px 0 rgba(0, 0, 0, 0.45) !important;
 }
 
 .octane-group-room-info__button .text-white {
@@ -1181,6 +1152,58 @@
     grid-auto-rows: max-content;
     align-content: start;
 }
+
+/* button_thick style 3: neutral shiny skin shared by group controls. */
+.octane-groups-window .octane-groups-button--primary,
+.octane-group-information-standalone .octane-extended-profile-group-info__button,
+.octane-group-room-info .octane-group-room-info__button {
+    border: 5px solid transparent !important;
+    border-image-source: var(--habbo-skin-shiny-thick) !important;
+    border-image-slice: 5 fill !important;
+    border-image-width: 5px !important;
+    border-image-repeat: stretch !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #000000 !important;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    padding: 0 5px !important;
+    font-weight: 700 !important;
+    min-height: 29px !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-groups-window .octane-groups-button--primary:hover,
+.octane-group-information-standalone .octane-extended-profile-group-info__button:hover,
+.octane-group-room-info .octane-group-room-info__button:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover) !important;
+    opacity: 1 !important;
+}
+
+.octane-groups-window .octane-groups-button--primary:active,
+.octane-group-information-standalone .octane-extended-profile-group-info__button:active,
+.octane-group-room-info .octane-group-room-info__button:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed) !important;
+    opacity: 1 !important;
+}
+
+.octane-groups-window .octane-groups-button--primary.pointer-events-none,
+.octane-group-information-standalone .octane-extended-profile-group-info__button.pointer-events-none,
+.octane-group-room-info .octane-group-room-info__button.pointer-events-none {
+    border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
+    opacity: 1 !important;
+}
+
+.octane-groups-window .octane-groups-button--primary:disabled,
+.octane-group-information-standalone .octane-extended-profile-group-info__button:disabled,
+.octane-group-room-info .octane-group-room-info__button:disabled {
+    border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
+    opacity: 1 !important;
+}
+
 .octane-group-manager .form-check-input {
     appearance: auto;
     accent-color: #337d92;
