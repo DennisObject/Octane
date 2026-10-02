@@ -1,7 +1,7 @@
 import { GroupSaveBadgeComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { GroupBadgePart, IGroupData, SendMessageComposer } from '../../../../api';
-import { Column, Flex, Grid, LayoutBadgeImageView } from '../../../../common';
+import { GroupBadgePart, IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
+import { Button, Column, Flex, Grid, LayoutBadgeImageView } from '../../../../common';
 import { useGroup } from '../../../../hooks';
 import { GroupBadgeCreatorView } from '../GroupBadgeCreatorView';
 
@@ -30,7 +30,8 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
     const saveBadge = useCallback(() => {
         if (!groupData || !badgeParts || !badgeParts.length) return false;
 
-        if (groupData.groupBadgeParts === badgeParts) return true;
+        if (groupData.groupBadgeParts.length === badgeParts.length && badgeParts.every((part, index) =>
+            part.key === groupData.groupBadgeParts[index].key && part.color === groupData.groupBadgeParts[index].color && part.position === groupData.groupBadgeParts[index].position)) return true;
 
         if (groupData.groupId <= 0) {
             setGroupData((prevValue) => {
@@ -55,6 +56,7 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
         });
 
         SendMessageComposer(new GroupSaveBadgeComposer(groupData.groupId, badge));
+        setGroupData(prevValue => ({ ...prevValue, groupBadgeParts: badgeParts }));
 
         return true;
     }, [groupData, badgeParts, setGroupData]);
@@ -87,7 +89,7 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
         }
 
         setBadgeParts(groupData.groupBadgeParts);
-    }, [groupData]);
+    }, [groupData.groupId, groupData.groupBadgeParts]);
 
     useEffect(() => {
         setCloseAction({ action: saveBadge });
@@ -101,6 +103,11 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
                 <Flex center className="bg-muted rounded p-1">
                     <LayoutBadgeImageView badgeCode={getModifiedBadgeCode()} isGroup={true} />
                 </Flex>
+                {groupData.groupId > 0 && (
+                    <Button variant="link" onClick={() => setBadgeParts([...groupData.groupBadgeParts])}>
+                        {LocalizeText('group.edit.reset.badge')}
+                    </Button>
+                )}
             </Column>
             <Column overflow="auto" size={10}>
                 <GroupBadgeCreatorView badgeParts={badgeParts} setBadgeParts={setBadgeParts} />

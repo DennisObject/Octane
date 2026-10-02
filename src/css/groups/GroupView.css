@@ -1203,3 +1203,9 @@
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;
 }
+
+.octane-group-manager .form-check-input {
+    appearance: auto;
+    accent-color: #337d92;
+    cursor: pointer;
+}

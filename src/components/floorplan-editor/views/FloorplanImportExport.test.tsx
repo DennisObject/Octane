@@ -25,9 +25,17 @@ describe('FloorplanImportExport', () => {
         expect(ta.value).toBe('01\nx2');
     });
 
-    it('clicking Load dispatches IMPORT_STRING with textarea content', () => {
+    it('the ordinary import dialog has Revert and Save and no Load', () => {
+        render(<FloorplanImportExport state={initialState} dispatch={() => {}} onClose={() => {}} onSaveFromText={() => {}} onRevertText={() => ''} />);
+        expect(document.querySelector('[data-testid="import-load"]')).toBeNull();
+        expect(document.querySelector('[data-testid="import-revert"]')).toBeTruthy();
+        expect(document.querySelector('[data-testid="import-save"]')).toBeTruthy();
+    });
+
+    it('the legacy Load button dispatches IMPORT_STRING with textarea content', () => {
         const dispatch = vi.fn();
-        render(<FloorplanImportExport state={initialState} dispatch={dispatch} onClose={() => {}} onSaveFromText={() => {}} onRevertText={() => ''} />);
+        const onClose = vi.fn();
+        render(<FloorplanImportExport state={initialState} dispatch={dispatch} showLoad onClose={onClose} onSaveFromText={() => {}} onRevertText={() => ''} />);
         const ta = document.querySelector('textarea') as HTMLTextAreaElement;
         expect(ta).toBeTruthy();
         fireEvent.change(ta, { target: { value: 'xq\n00' } });
@@ -35,6 +43,7 @@ describe('FloorplanImportExport', () => {
         expect(button).toBeTruthy();
         fireEvent.click(button);
         expect(dispatch).toHaveBeenCalledWith({ type: 'IMPORT_STRING', raw: 'xq\n00', source: 'local' });
+        expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('clicking Save invokes onSaveFromText with textarea content', () => {

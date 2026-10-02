@@ -4,14 +4,14 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FloorplanWallHeightSlider } from './FloorplanWallHeightSlider';
 
-const TRACK_HEIGHT = 320;
+const TRACK_WIDTH = 320;
 
 const stubTrackGeometry = () => {
     const original = HTMLDivElement.prototype.getBoundingClientRect;
 
     HTMLDivElement.prototype.getBoundingClientRect = function () {
         if (this.getAttribute('data-testid') === 'wall-height-track') {
-            return { top: 0, left: 0, right: 14, bottom: TRACK_HEIGHT, width: 14, height: TRACK_HEIGHT, x: 0, y: 0, toJSON: () => '' };
+            return { top: 0, left: 0, right: TRACK_WIDTH, bottom: 30, width: TRACK_WIDTH, height: 30, x: 0, y: 0, toJSON: () => '' };
         }
 
         return original.call(this);
@@ -32,7 +32,7 @@ describe('FloorplanWallHeightSlider', () => {
         expect(screen.getByRole('slider').getAttribute('aria-valuenow')).toBe('7');
     });
 
-    it('the top of the ladder is the highest wall, the bottom the lowest', () => {
+    it('the left edge is wall 1 and the right edge is wall 16', () => {
         const restore = stubTrackGeometry();
         const onChange = vi.fn();
 
@@ -40,11 +40,11 @@ describe('FloorplanWallHeightSlider', () => {
 
         const track = screen.getByTestId('wall-height-track');
 
-        fireEvent.pointerDown(track, { clientY: 0, button: 0 });
-        expect(onChange).toHaveBeenLastCalledWith(16);
+        fireEvent.pointerDown(track, { clientX: 0, button: 0 });
+        expect(onChange).toHaveBeenLastCalledWith(1);
 
-        fireEvent.pointerDown(track, { clientY: TRACK_HEIGHT, button: 0 });
-        expect(onChange).toHaveBeenLastCalledWith(0);
+        fireEvent.pointerDown(track, { clientX: TRACK_WIDTH, button: 0 });
+        expect(onChange).toHaveBeenLastCalledWith(16);
 
         restore();
     });
@@ -53,15 +53,15 @@ describe('FloorplanWallHeightSlider', () => {
         const restore = stubTrackGeometry();
         const onChange = vi.fn();
 
-        render(<FloorplanWallHeightSlider value={0} onChange={onChange} />);
+        render(<FloorplanWallHeightSlider value={1} onChange={onChange} />);
 
-        fireEvent.pointerDown(screen.getByTestId('wall-height-track'), { clientY: TRACK_HEIGHT, button: 0 });
-        fireEvent.pointerMove(window, { clientY: TRACK_HEIGHT / 2 });
-        expect(onChange).toHaveBeenLastCalledWith(8);
+        fireEvent.pointerDown(screen.getByTestId('wall-height-track'), { clientX: 0, button: 0 });
+        fireEvent.pointerMove(window, { clientX: TRACK_WIDTH / 2 });
+        expect(onChange).toHaveBeenLastCalledWith(9);
 
         fireEvent.pointerUp(window);
         onChange.mockClear();
-        fireEvent.pointerMove(window, { clientY: 0 });
+        fireEvent.pointerMove(window, { clientX: 0 });
         expect(onChange).not.toHaveBeenCalled();
 
         restore();
@@ -73,7 +73,7 @@ describe('FloorplanWallHeightSlider', () => {
 
         render(<FloorplanWallHeightSlider value={16} onChange={onChange} />);
 
-        fireEvent.pointerDown(screen.getByTestId('wall-height-track'), { clientY: 0, button: 0 });
+        fireEvent.pointerDown(screen.getByTestId('wall-height-track'), { clientX: TRACK_WIDTH, button: 0 });
         expect(onChange).not.toHaveBeenCalled();
 
         restore();

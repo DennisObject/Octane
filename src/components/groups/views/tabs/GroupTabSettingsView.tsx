@@ -1,6 +1,6 @@
 import { GroupSavePreferencesComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
+import { IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { Flex, HorizontalRule, Text } from '../../../../common';
 import { useNotification } from '../../../../hooks';
 
@@ -23,7 +23,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
         if (groupForum) {
             // Disabling forum - show confirmation
             showConfirm(
-                LocalizeText('group.forum.disable.confirm'),
+                localizeWithFallback('group.forum.disable.confirm', 'Disable this group\'s forum?'),
                 () => {
                     setGroupForum(false);
                 },
@@ -55,6 +55,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
         }
 
         SendMessageComposer(new GroupSavePreferencesComposer(groupData.groupId, groupState, groupDecorate ? 0 : 1, groupForum));
+        setGroupData(prevValue => ({ ...prevValue, groupState, groupCanMembersDecorate: groupDecorate, groupHasForum: groupForum }));
 
         return true;
     }, [groupData, groupState, groupDecorate, groupForum, setGroupData]);
@@ -63,7 +64,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
         setGroupState(groupData.groupState);
         setGroupDecorate(groupData.groupCanMembersDecorate);
         setGroupForum(groupData.groupHasForum ?? false);
-    }, [groupData]);
+    }, [groupData.groupId, groupData.groupState, groupData.groupCanMembersDecorate, groupData.groupHasForum]);
 
     useEffect(() => {
         setCloseAction({ action: saveSettings });
@@ -107,8 +108,8 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
             <div className="flex items-center gap-1">
                 <input checked={groupForum} className="form-check-input" type="checkbox" onChange={handleForumToggle} />
                 <div className="flex flex-col gap-1">
-                    <Text bold>{LocalizeText('group.forum.enable.caption')}</Text>
-                    <Text>{LocalizeText('group.forum.enable.help')}</Text>
+                    <Text bold>{localizeWithFallback('group.forum.enable.caption', 'Enable / Disable group forum')}</Text>
+                    <Text>{localizeWithFallback('group.forum.enable.help', 'Members can open the group forum while this option is enabled.')}</Text>
                 </div>
             </div>
         </div>

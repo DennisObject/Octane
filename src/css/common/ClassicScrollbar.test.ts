@@ -66,7 +66,7 @@ describe('interface scrollbar theme', () => {
     });
 
     it('keeps hidden-scrollbar exceptions centralized and limited to custom controls', () => {
-        const allowedFiles = new Set(['css/common/ClassicScrollbar.css', 'css/toolbar/ToolBar.css']);
+        const allowedFiles = new Set(['css/common/ClassicScrollbar.css', 'css/toolbar/ToolBar.css', 'css/floorplan-editor/FloorplanEditorView.css']);
         const filesWithHiddenNativeScrollbars = cssFiles(cssRoot)
             .filter((path) => {
                 const relativePath = path.slice(cssRoot.length + 1).replaceAll('\\', '/');

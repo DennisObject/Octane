@@ -1,68 +1,38 @@
 .octane-floorplan-window {
-    --fp-bg: #e4e4e4;
     --fp-text: #2b2b2b;
-    --fp-title-top: #c98a2c;
-    --fp-title-bottom: #bc6900;
-    --fp-box: #dbdbdb;
-    --fp-box-top: #ffffff;
-    --fp-box-bottom: #c2c2c2;
-    --fp-box-active: #aeb8c3;
-    --fp-box-active-top: #8f9aa6;
-    --fp-box-active-bottom: #cad2da;
-    --fp-select: #c0c6cc;
-    --fp-select-top: #e2e6ea;
-    --fp-select-bottom: #a5acb4;
-    --fp-blue: #1f86d3;
-    --fp-blue-dark: #145f9a;
-    --fp-red: #c70d0d;
-    --fp-red-dark: #8a0909;
-    --fp-frame: #262626;
 
-    font-family: Ubuntu, UbuntuCondensed, sans-serif;
-    color: var(--fp-text);
-    background: var(--fp-bg) !important;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    color: #111111;
+    background: transparent !important;
 }
 
-.octane-floorplan-window .octane-card-header-shell {
-    min-height: 46px !important;
-    max-height: 46px !important;
-    padding: 0 52px;
-    background: linear-gradient(var(--fp-title-top) 0 46%, var(--fp-title-bottom) 46% 100%);
-    border-bottom: 2px solid #1a1a1a;
-    box-shadow: none;
-}
-
-.octane-floorplan-window .octane-card-header-shell::before {
-    background-color: rgba(255, 255, 255, 0.12);
-}
-
-.octane-floorplan-window .octane-card-title {
-    font-family: Ubuntu, sans-serif;
-    font-size: 23px;
-    font-weight: 400;
-    line-height: 46px;
-    min-height: 46px;
-    text-shadow: none;
-}
-
-.octane-floorplan-window .octane-card-close-button {
-    right: 8px;
-    width: 34px;
-    height: 34px;
-    border: 2px solid var(--fp-red-dark);
-    border-radius: 4px;
-    box-shadow: 0 0 0 2px #ffffff;
-    background: var(--fp-red);
-}
-
-.octane-floorplan-window .octane-card-close-button::before,
-.octane-floorplan-window .octane-card-close-button::after {
-    width: 18px;
-    height: 4px;
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 {
+    --octane-card-frame-3: url("../../assets/images/habbo-skin/slices/frame-ubuntu-3-bc.png");
+    --octane-card-frame-3-title: #ff8d00;
+    --octane-card-frame-3-line: #6a3a00;
+    width: 662px;
+    height: 600px;
+    min-width: 662px !important;
+    min-height: 600px !important;
+    max-width: 1380px !important;
+    max-height: 900px !important;
+    padding: 33px 0 0 !important;
 }
 
 .octane-floorplan-window .octane-card-content-shell {
+    position: relative;
+    height: 567px;
     padding: 0 !important;
+    overflow: hidden;
+}
+
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 .octane-card-content-shell {
+    position: absolute;
+    top: 33px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
 }
 
 .fp-body {
@@ -620,3 +590,870 @@
 .fp-toggle.is-warm.is-on .fp-toggle-dot {
     background: #e59a2a;
 }
+
+.fp-bc {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #111111;
+    font-size: 12px;
+    background: #e9e9e1;
+}
+
+.fp-bc-banner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 50px;
+    background: #4e4844;
+}
+
+.fp-bc-banner::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 2px;
+    right: 3px;
+    height: 45px;
+    background: #2d2724;
+}
+
+.fp-bc-logo {
+    position: absolute;
+    left: 9px;
+    top: 5px;
+    width: 38px;
+    height: 38px;
+    z-index: 1;
+    image-rendering: pixelated;
+}
+
+.fp-bc-subtitle {
+    position: absolute;
+    left: 74px;
+    top: 9px;
+    z-index: 1;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.fp-bc-area {
+    position: absolute;
+    right: 12px;
+    top: 14px;
+    z-index: 1;
+    color: #d7d0cb;
+    font-size: 11px;
+}
+
+.fp-bc-heightmap {
+    position: absolute;
+    left: 10px;
+    top: 57px;
+    width: calc(100% - 318px);
+    height: calc(100% - 119px);
+    box-sizing: border-box;
+    padding: 4px 8px 0;
+    background: #bdbdb5;
+    box-shadow: inset 0 0 0 1px #8f8f88;
+}
+
+.fp-bc-side {
+    position: absolute;
+    right: 7px;
+    top: 57px;
+    width: 289px;
+    height: calc(100% - 118px);
+    box-sizing: border-box;
+    padding: 3px;
+    background: #bdbdb5;
+    box-shadow: inset 0 0 0 1px #8f8f88;
+}
+
+.fp-bc .fp-control-group {
+    gap: 0;
+}
+
+.fp-bc .fp-group-label {
+    box-sizing: border-box;
+    height: 24px;
+    padding-top: 1px;
+    font-size: 12px;
+    line-height: 17px;
+    color: #111111;
+}
+
+.fp-bc .fp-tools {
+    position: relative;
+    display: block;
+    width: 320px;
+    height: 52px;
+}
+
+.fp-bc .fp-tool-slot {
+    display: block;
+}
+
+.fp-bc .fp-tool-divider {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 42px;
+    margin: 0;
+    image-rendering: pixelated;
+}
+
+.fp-bc .fp-tool-divider[data-before="increase_height"] {
+    left: 122px;
+}
+
+.fp-bc .fp-tool-divider[data-before="set_enter_tile"] {
+    left: 256px;
+}
+
+.fp-bc .fp-tool {
+    position: absolute;
+    top: 0;
+    display: block;
+    width: 51px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    image-rendering: pixelated;
+}
+
+.fp-bc .fp-tool:not(.is-extra) {
+    background: url("../../assets/images/floorplan-editor/air/toolbar_container_button_style3_51x42_default.png") 0 0 / 51px 42px no-repeat;
+}
+
+.fp-bc .fp-tool:not(.is-extra):hover {
+    background: url("../../assets/images/floorplan-editor/air/toolbar_container_button_style3_51x42_hovering.png") 0 0 / 51px 42px no-repeat;
+    border: 0;
+}
+
+.fp-bc .fp-tool[data-tool="add_tile"] { left: 0; }
+.fp-bc .fp-tool[data-tool="remove_tile"] { left: 61px; }
+.fp-bc .fp-tool[data-tool="increase_height"] { left: 134px; }
+.fp-bc .fp-tool[data-tool="decrease_height"] { left: 195px; }
+.fp-bc .fp-tool[data-tool="set_enter_tile"] { left: 268px; }
+
+.fp-bc .fp-tool img {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    image-rendering: pixelated;
+}
+
+.fp-bc .fp-tool[data-tool="add_tile"] img { left: 5px; top: 0; }
+.fp-bc .fp-tool[data-tool="remove_tile"] img { left: 5px; top: 1px; }
+.fp-bc .fp-tool[data-tool="increase_height"] img { left: 6px; top: 1px; }
+.fp-bc .fp-tool[data-tool="decrease_height"] img { left: 6px; top: 4px; }
+.fp-bc .fp-tool[data-tool="set_enter_tile"] img { left: 5px; top: 1px; }
+
+.fp-bc .fp-tool:not(.is-extra).is-active,
+.fp-bc .fp-tool:not(.is-extra).is-active:hover {
+    background: url("../../assets/images/floorplan-editor/air/toolbar_container_button_style3_51x42_pressed.png") 0 0 / 51px 42px no-repeat;
+    outline: none;
+    border: 0;
+}
+
+.fp-bc .fp-tool.is-extra {
+    width: 28px;
+    height: 28px;
+    margin-left: 4px;
+}
+
+.fp-bc-height-row {
+    position: relative;
+    height: 48px;
+}
+
+.fp-bc-height-label {
+    display: block;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.fp-bc-colormap {
+    position: relative;
+    width: 315px;
+    height: 24px;
+}
+
+.fp-bc-colormap-track {
+    position: absolute;
+    left: 1px;
+    top: 4px;
+    width: 315px;
+    height: 19px;
+    cursor: pointer;
+}
+
+.fp-bc-colormap-thumb {
+    position: absolute;
+    top: 0;
+    width: 12px;
+    height: 16px;
+    margin-left: -6px;
+    pointer-events: none;
+    image-rendering: pixelated;
+    transform: scaleY(-1);
+}
+
+.fp-bc-map {
+    position: absolute;
+    left: 0;
+    top: 132px;
+    right: 0;
+    bottom: 12px;
+    background: #000000;
+}
+
+.fp-bc-scroll {
+    width: calc(100% - 13px);
+    height: 100%;
+    overflow: auto;
+    background: #000000;
+    scrollbar-width: none;
+}
+
+.fp-bc-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.fp-bc-map-vbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 2;
+}
+
+.fp-bc-map-hbar {
+    position: absolute;
+    left: 0;
+    bottom: -12px;
+    width: calc(100% - 12px);
+    z-index: 2;
+}
+
+.fp-bc-bitmap {
+    display: block;
+    background: #000000;
+    image-rendering: pixelated;
+    cursor: crosshair;
+}
+
+.fp-bc-zoom {
+    position: absolute;
+    left: 12px;
+    bottom: 22px;
+    z-index: 3;
+    width: 20px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.fp-bc-zoom img {
+    width: 13px;
+    height: 22px;
+    image-rendering: pixelated;
+}
+
+.fp-bc-room-controls {
+    display: flex;
+    height: 98px;
+}
+
+.fp-bc-direction {
+    position: relative;
+    width: 139px;
+    height: 98px;
+}
+
+.fp-bc-direction-label {
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    width: 120px;
+    height: 17px;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+}
+
+.fp-bc-dir-btn {
+    position: absolute;
+    top: 46px;
+    left: 17px;
+    width: 25px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: url("../../assets/images/floorplan-editor/air/dir-style5-default.png") center / 25px 24px no-repeat;
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+
+.fp-bc-dir-btn:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/dir-style5-hover.png");
+}
+
+.fp-bc-dir-btn:active {
+    background-image: url("../../assets/images/floorplan-editor/air/dir-style5-pressed.png");
+}
+
+.fp-bc-dir-btn:disabled {
+    background-image: url("../../assets/images/floorplan-editor/air/dir-style5-disabled.png");
+}
+
+.fp-bc-dir-btn.is-right {
+    left: 82px;
+}
+
+.fp-bc-dir-btn img {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 10px;
+    height: 9px;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.fp-bc-dir-btn.is-right img {
+    left: 9px;
+}
+
+.fp-bc-avatar {
+    position: absolute;
+    left: 41px;
+    top: 12px;
+    width: 45px;
+    height: 72px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.fp-bc-ghost,
+.fp-bc-ghost img {
+    display: block;
+    width: 45px;
+    height: 72px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.fp-bc-vdivider {
+    width: 3px;
+    height: 97px;
+    image-rendering: pixelated;
+}
+
+.fp-bc-thickness {
+    position: relative;
+    width: 128px;
+    height: 99px;
+}
+
+.fp-bc-thickness .fp-bc-direction-label {
+    left: 14px;
+    width: 110px;
+}
+
+.fp-bc-drop {
+    position: absolute;
+    left: 14px;
+    width: 114px;
+    height: 25px;
+    padding: 0 16px 0 4px;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 6px;
+    border-image-source: url("../../assets/images/habbo-skin/slices/dropmenu-3.png");
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    background: #ffffff;
+    color: #111111;
+    font-size: 11px;
+    appearance: none;
+    image-rendering: pixelated;
+}
+
+.fp-bc-thickness [data-testid="wall-thickness"] {
+    top: 30px;
+}
+
+.fp-bc-thickness [data-testid="floor-thickness"] {
+    top: 61px;
+}
+
+.fp-bc-wall-row {
+    position: relative;
+    height: 30px;
+    margin-top: 2px;
+}
+
+.fp-bc-wall-row.is-off .fp-bc-wall-label,
+.fp-bc-wall-row.is-off .fp-bc-wall-number,
+.fp-bc-wall-row.is-off .fp-bc-wall-slider {
+    opacity: 0.6;
+}
+
+.fp-bc-check {
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 18px;
+    height: 17px;
+    padding: 0;
+    border: 0;
+    background: var(--habbo-skin-checkbox) center / 18px 17px no-repeat;
+    cursor: pointer;
+}
+
+.fp-bc-check.is-on {
+    background-image: var(--habbo-skin-checkbox-checked);
+}
+
+.fp-bc-wall-label {
+    position: absolute;
+    left: 18px;
+    top: 6px;
+    width: 90px;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+.fp-bc-wall-number {
+    position: absolute;
+    left: 108px;
+    top: 6px;
+    width: 25px;
+    color: #5f5f5f;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+}
+
+.fp-bc-wall-slider {
+    position: absolute;
+    left: 148px;
+    top: 0;
+    width: 111px;
+    height: 30px;
+}
+
+.fp-bc-wall-slider.is-disabled {
+    pointer-events: none;
+}
+
+.fp-bc-wall-slider-track {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 111px;
+    height: 30px;
+    background: url("../../assets/images/floorplan-editor/air/wall-slider.png") center / 56px 2px no-repeat;
+    cursor: pointer;
+}
+
+.fp-bc-wall-slider-thumb {
+    position: absolute;
+    top: 7px;
+    width: 12px;
+    height: 16px;
+    pointer-events: none;
+    image-rendering: pixelated;
+    transform: scaleY(-1);
+}
+
+.fp-bc-preview-stage {
+    position: absolute;
+    left: 1px;
+    top: 135px;
+    bottom: 14px;
+    width: 273px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.fp-bc-preview-scroll {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    background: #ffffff;
+    scrollbar-width: none;
+}
+
+.fp-bc-preview-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.fp-bc-side > .fp-bc-preview-vbar {
+    position: absolute;
+    left: 274px;
+    top: 135px;
+    bottom: 14px;
+    z-index: 2;
+}
+
+.fp-bc-side > .fp-bc-preview-hbar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 2;
+}
+
+.fp-bc-refresh {
+    display: none;
+}
+
+.fp-bc-preview-bitmap {
+    display: block;
+    margin: auto;
+    image-rendering: pixelated;
+    background: #ffffff;
+}
+
+.fp-bc-footer {
+    position: absolute;
+    left: 10px;
+    right: 9px;
+    bottom: 9px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+}
+
+.fp-bc-btn {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: 120px;
+    height: 35px;
+    padding: 0 8px;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 5px;
+    border-image-source: var(--habbo-skin-shiny-thick);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    background: transparent;
+    color: #111111;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 13px;
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+
+.fp-bc-footer .fp-bc-btn {
+    padding: 5px 10px 6px;
+    color: #111111;
+}
+
+.fp-bc-btn:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.fp-bc-btn:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.fp-bc-footer-right {
+    position: absolute;
+    right: 2px;
+    top: 0;
+    display: flex;
+    gap: 8px;
+}
+
+.fp-bc-btn.is-save,
+.fp-bc-btn.is-save:hover,
+.fp-bc-btn.is-save:active,
+.fp-bc-btn.is-save:disabled {
+    border-width: 0;
+    border-image: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120px 35px;
+    color: #111111;
+}
+
+.fp-bc-btn.is-save {
+    background-image: url("../../assets/images/floorplan-editor/air/save-style5-default.png");
+}
+
+.fp-bc-btn.is-save:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/save-style5-hover.png");
+}
+
+.fp-bc-btn.is-save:active {
+    background-image: url("../../assets/images/floorplan-editor/air/save-style5-pressed.png");
+}
+
+.fp-bc-btn.is-save:disabled,
+.fp-bc-btn.is-save:disabled:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/save-style5-disabled.png");
+    cursor: default;
+}
+
+.fp-bc-import {
+    position: relative;
+    height: 341px;
+}
+
+.fp-bc-import-data {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    width: 347px;
+    height: 266px;
+    margin: 0;
+    padding: 2px;
+    border: 1px solid #bdbdb5;
+    background: #ffffff;
+    color: #111111;
+    font-family: Courier, monospace;
+    font-size: 12px;
+    line-height: 14px;
+    resize: none;
+    white-space: pre;
+}
+
+.fp-bc-import-revert {
+    position: absolute;
+    left: 0;
+    top: 294px;
+    width: 191px;
+}
+
+.fp-bc-import .is-extra {
+    position: absolute;
+    left: 198px;
+    top: 294px;
+    width: 96px;
+}
+
+.fp-bc-import-save {
+    position: absolute;
+    left: 301px;
+    top: 294px;
+    width: 73px;
+}
+
+.octane-floorplan-import.octane-card-frame-3 {
+    width: 379px;
+    height: 374px;
+}
+
+/* The shared card's descendant typography must yield to the AIR text styles. */
+.octane-floorplan-window.octane-card-frame-3 .fp-bc,
+.octane-floorplan-window.octane-card-frame-3 .fp-bc :is(span, button, select),
+.octane-floorplan-import.octane-card-frame-3 .fp-bc-import button {
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+}
+
+.octane-floorplan-window.octane-card-frame-3 .fp-bc-subtitle {
+    color: #ffffff;
+}
+
+.octane-floorplan-window.octane-card-frame-3 .fp-bc-footer .fp-bc-btn,
+.octane-floorplan-import.octane-card-frame-3 .fp-bc-import .fp-bc-btn {
+    color: #111111;
+}
+
+.octane-floorplan-import.octane-card-frame-3 .fp-bc-import-data {
+    font-family: Courier, monospace;
+    color: #111111;
+}
+
+.fp-skin-bar {
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+    image-rendering: pixelated;
+}
+
+.fp-skin-bar-art {
+    position: relative;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-art {
+    width: 17px;
+    height: 100%;
+}
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-art {
+    width: 100%;
+    height: 17px;
+}
+
+.fp-skin-bar-dec,
+.fp-skin-bar-inc,
+.fp-skin-bar-track,
+.fp-skin-bar-cap,
+.fp-skin-bar-mid {
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.fp-skin-bar-dec,
+.fp-skin-bar-inc {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+}
+
+.fp-skin-bar-dec.is-passive,
+.fp-skin-bar-inc.is-passive {
+    pointer-events: none;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-dec,
+.fp-skin-bar.is-vertical .fp-skin-bar-inc {
+    left: 0;
+    width: 17px;
+    height: 16px;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-dec { top: 0; }
+.fp-skin-bar.is-vertical .fp-skin-bar-inc { bottom: 0; }
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec,
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc {
+    top: 0;
+    width: 16px;
+    height: 17px;
+}
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec { left: 0; }
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc { right: 0; }
+
+.fp-skin-bar-track {
+    position: absolute;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-track {
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 17px;
+    background-size: 17px 100%;
+}
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-track {
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 17px;
+    background-size: 100% 17px;
+}
+
+.fp-skin-bar-thumb {
+    position: absolute;
+    overflow: hidden;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb {
+    left: 0;
+    width: 17px;
+}
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb {
+    top: 0;
+    height: 17px;
+}
+
+.fp-skin-bar-cap,
+.fp-skin-bar-mid {
+    position: absolute;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-cap.is-start { left: 0; top: 0; width: 17px; height: 5px; }
+.fp-skin-bar.is-vertical .fp-skin-bar-cap.is-end { left: 0; bottom: 0; width: 17px; height: 5px; }
+.fp-skin-bar.is-vertical .fp-skin-bar-mid {
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 17px;
+    background-repeat: repeat-y;
+    background-size: 17px 16px;
+}
+
+.fp-skin-bar.is-horizontal .fp-skin-bar-cap.is-start { left: 0; top: 0; width: 5px; height: 17px; }
+.fp-skin-bar.is-horizontal .fp-skin-bar-cap.is-end { right: 0; top: 0; width: 5px; height: 17px; }
+.fp-skin-bar.is-horizontal .fp-skin-bar-mid {
+    left: 5px;
+    right: 5px;
+    top: 0;
+    height: 17px;
+    background-repeat: repeat-x;
+    background-size: 16px 17px;
+}
+
+.fp-skin-bar.is-vertical .fp-skin-bar-dec.is-default { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_default_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-dec.is-hover { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_hover_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-dec.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_pressed_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-dec.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_passive_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-inc.is-default { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_default_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-inc.is-hover { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_hover_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-inc.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_pressed_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-inc.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_passive_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec.is-default { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_left_default_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec.is-hover { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_left_hover_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_left_pressed_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-dec.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_left_passive_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc.is-default { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_right_default_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc.is-hover { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_right_hover_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_right_pressed_3_button.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-inc.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_right_passive_3_button.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-track { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_ver_default_3_track.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-track.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_ver_pressed_3_track.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-track.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_ver_passive_3_track.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-track { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_hor_default_3_track.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-track.is-pressed { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_hor_pressed_3_track.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-track.is-passive { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_track_hor_passive_3_track.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-default .is-start,
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-hover .is-start,
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-pressed .is-start { background-repeat: no-repeat; }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-default .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_top.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-hover .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_top.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-pressed .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_top.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-default .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_grd.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-hover .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_grd.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-pressed .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_grd.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-default .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_btm.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-hover .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_btm.png"); }
+.fp-skin-bar.is-vertical .fp-skin-bar-thumb.is-pressed .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_btm.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-default .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_default_3_lft.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-hover .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_hover_3_lft.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-pressed .is-start { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_pressed_3_lft.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-default .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_default_3_grd.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-hover .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_hover_3_grd.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-pressed .fp-skin-bar-mid { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_pressed_3_grd.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-default .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_default_3_rgt.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-hover .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_hover_3_rgt.png"); }
+.fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-pressed .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_pressed_3_rgt.png"); }

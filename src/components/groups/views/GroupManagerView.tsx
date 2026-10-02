@@ -1,6 +1,6 @@
-import { GroupBadgePart, GroupInformationEvent, GroupSettingsEvent } from '@octane/renderer';
+import { GroupInformationEvent, GroupSettingsEvent, HabboGroupDeactivatedMessageEvent } from '@octane/renderer';
 import { FC, useState } from 'react';
-import { IGroupData, LocalizeText } from '../../../api';
+import { GroupBadgePart, IGroupData, LocalizeText } from '../../../api';
 import { Column, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView, Text } from '../../../common';
 import { useMessageEvent } from '../../../hooks';
 import { GroupTabBadgeView } from './tabs/GroupTabBadgeView';
@@ -16,17 +16,15 @@ export const GroupManagerView: FC<{}> = (props) => {
     const [groupData, setGroupData] = useState<IGroupData>(null);
 
     const onClose = () => {
-        setCloseAction((prevValue) => {
-            if (prevValue && prevValue.action) prevValue.action();
+        if (closeAction?.action && !closeAction.action()) return;
 
-            return null;
-        });
-
+        setCloseAction(null);
         setGroupData(null);
     };
 
     const changeTab = (tab: number) => {
-        if (closeAction && closeAction.action) closeAction.action();
+        if (tab === currentTab) return;
+        if (closeAction?.action && !closeAction.action()) return;
 
         setCurrentTab(tab);
     };
@@ -43,6 +41,8 @@ export const GroupManagerView: FC<{}> = (props) => {
             newValue.groupDescription = parser.description;
             newValue.groupState = parser.type;
             newValue.groupCanMembersDecorate = parser.canMembersDecorate;
+            newValue.groupHasForum = parser.hasForum;
+            newValue.groupMembersCount = parser.membersCount;
 
             return newValue;
         });
@@ -57,6 +57,8 @@ export const GroupManagerView: FC<{}> = (props) => {
             groupBadgeParts.push(new GroupBadgePart(part.isBase ? GroupBadgePart.BASE : GroupBadgePart.SYMBOL, part.key, part.color, part.position));
         });
 
+        setCurrentTab(1);
+        setCloseAction(null);
         setGroupData({
             groupId: parser.id,
             groupName: parser.title,
@@ -65,9 +67,18 @@ export const GroupManagerView: FC<{}> = (props) => {
             groupState: parser.state,
             groupCanMembersDecorate: parser.canMembersDecorate,
             groupHasForum: parser.hasForum,
+            groupMembersCount: parser.membersCount,
             groupColors: [parser.colorA, parser.colorB],
             groupBadgeParts
         });
+    });
+
+    useMessageEvent<HabboGroupDeactivatedMessageEvent>(HabboGroupDeactivatedMessageEvent, (event) =>
+    {
+        if (groupData?.groupId !== event.getParser().groupId) return;
+
+        setCloseAction(null);
+        setGroupData(null);
     });
 
     if (!groupData || groupData.groupId <= 0) return null;
@@ -96,7 +107,7 @@ export const GroupManagerView: FC<{}> = (props) => {
                 </div>
                 <Column grow overflow="hidden">
                     {currentTab === 1 && (
-                        <GroupTabIdentityView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} onClose={onClose} />
+                        <GroupTabIdentityView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />
                     )}
                     {currentTab === 2 && (
                         <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} skipDefault={true} />
