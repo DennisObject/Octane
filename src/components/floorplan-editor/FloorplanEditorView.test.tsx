@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +10,7 @@ const octaneHandlers = new Map<unknown, (event: unknown) => void>();
 
 vi.mock('../../hooks', async () => {
     return {
+        useNotification: () => ({ simpleAlert: vi.fn() }),
         useMessageEvent: (eventClass: unknown, handler: (event: unknown) => void) => {
             messageHandlers.set(eventClass, handler);
         },
@@ -37,6 +41,7 @@ import {
     RoomEngineEvent,
     RoomEntryTileMessageEvent,
     RoomOccupiedTilesMessageEvent,
+    BuildersClubSubscriptionStatusMessageEvent,
     RoomVisualizationSettingsEvent,
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
@@ -47,11 +52,19 @@ import { FloorplanEditorView } from './FloorplanEditorView';
 // Find a clickable element by its exact trimmed text content in the portal.
 const findByExactText = (text: string): Element | undefined => {
     const container = document.getElementById('draggable-windows-container') ?? document.body;
-    return Array.from(container.querySelectorAll('div')).find((el: Element) => el.textContent?.trim() === text);
+    return Array.from(container.querySelectorAll('button, div')).find((el: Element) => el.textContent?.trim() === text);
+};
+
+const allowSave = () => {
+    const handler = messageHandlers.get(BuildersClubSubscriptionStatusMessageEvent);
+    expect(handler).toBeTruthy();
+    act(() => handler!({ getParser: () => ({ secondsLeft: 120 }) }));
+    act(() => vi.advanceTimersByTime(10000));
 };
 
 describe('FloorplanEditorView container', () => {
     beforeEach(() => {
+        vi.useFakeTimers();
         messageHandlers.clear();
         octaneHandlers.clear();
         sendMessageComposer.mockClear();
@@ -59,7 +72,7 @@ describe('FloorplanEditorView container', () => {
         (RemoveLinkEventTracker as ReturnType<typeof vi.fn>).mockClear();
     });
 
-    afterEach(() => cleanup());
+    afterEach(() => { cleanup(); vi.useRealTimers(); });
 
     const openEditor = () => {
         render(<FloorplanEditorView />);
@@ -101,6 +114,7 @@ describe('FloorplanEditorView container', () => {
         act(() => rvsHandler!({ getParser: () => ({ thicknessWall: 1, thicknessFloor: 1 }) }));
         // With LocalizeText mocked to identity, the button text is literally the i18n key.
         // Button renders as <div> (not <button>) — use findByExactText.
+        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -118,6 +132,7 @@ describe('FloorplanEditorView container', () => {
         const fhmHandler = messageHandlers.get(FloorHeightMapEvent);
         // parser.wallHeight = 4 → state.wallHeight = 4 + 1 = 5 → Save sends 5 - 1 = 4
         act(() => fhmHandler!({ getParser: () => ({ model: '0', wallHeight: 4 }) }));
+        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -135,6 +150,7 @@ describe('FloorplanEditorView container', () => {
         // server sends 2 for both; convertSettingToNumber(2) = 3; reducer stores thickness=3
         // Save applies convertNumbersForSaving(3) = 1
         act(() => rvsHandler!({ getParser: () => ({ thicknessWall: 2, thicknessFloor: 2 }) }));
+        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -158,6 +174,7 @@ describe('FloorplanEditorView container', () => {
             [false, false]
         ];
         act(() => occHandler!({ getParser: () => ({ blockedTilesMap }) }));
+        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -192,7 +209,7 @@ describe('FloorplanEditorView container', () => {
         const onClose = vi.fn();
         const onSave = vi.fn();
 
-        const { queryByTestId } = render(
+        render(
             <FloorplanEditorView
                 externalSession={{
                     tilemap: '00\r0x',
@@ -204,8 +221,10 @@ describe('FloorplanEditorView container', () => {
             />
         );
 
+        const portal = document.getElementById('draggable-windows-container') ?? document.body;
+
         expect(document.body.textContent).toContain('SnowStorm Floor Plan Editor');
-        expect(queryByTestId('tool-door')).toBeNull();
+        expect(portal.querySelector('[data-testid="tool-door"]')).toBeNull();
         expect(AddLinkEventTracker).not.toHaveBeenCalled();
         expect(sendMessageComposer).not.toHaveBeenCalled();
 
@@ -216,39 +235,114 @@ describe('FloorplanEditorView container', () => {
         expect(onSave).toHaveBeenCalledWith('00\r0x');
         expect(onClose).toHaveBeenCalledTimes(1);
         expect(sendMessageComposer).not.toHaveBeenCalled();
+        expect(portal.querySelector('[data-testid="tool-select-all"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="tool-square-select"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="tool-pan"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="tool-undo"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="tool-redo"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="floorplan-view-switch"]')).toBeTruthy();
+        expect(portal.querySelector('[data-testid="floorplan-live-sync"]')).toBeNull();
+        expect(portal.querySelector('[data-testid="floorplan-auto-pickup"]')).toBeNull();
     });
 
-    it('opens on the flat preview and only mounts the 3D view when asked', () => {
-        window.localStorage.removeItem('octane.floorplan.preview3d');
+    it('opens the official preview and leaves Octane extras on the legacy path', () => {
         openEditor();
         const container = document.getElementById('draggable-windows-container') ?? document.body;
+        const absent = [
+            'floorplan-view-switch',
+            'floorplan-view-2d',
+            'floorplan-view-3d',
+            'floorplan-3d',
+            'tool-select-all',
+            'tool-square-select',
+            'tool-pan',
+            'tool-undo',
+            'tool-redo',
+            'floorplan-live-sync',
+            'floorplan-auto-pickup'
+        ];
 
+        expect(container.querySelector('[data-testid="floorplan-official"]')).toBeTruthy();
+        expect(container.querySelector('.octane-floorplan-window')?.classList.contains('resize')).toBe(true);
+        expect(container.querySelector('.octane-floorplan-window')?.classList.contains('resize-none')).toBe(false);
         expect(container.querySelector('[data-testid="floorplan-preview-2d"]')).toBeTruthy();
-        expect(container.querySelector('[data-testid="floorplan-3d"]')).toBeNull();
-        expect(container.querySelector('[data-testid="floorplan-view-2d"]')?.getAttribute('data-active')).toBe('true');
+        expect(container.querySelector('[data-testid="tool-door"]')).toBeTruthy();
+        expect(container.querySelector('[data-testid="floorplan-save"]')?.classList.contains('is-save')).toBe(true);
 
-        fireEvent.click(container.querySelector('[data-testid="floorplan-view-3d"]')!);
-
-        expect(container.querySelector('[data-testid="floorplan-3d"]')).toBeTruthy();
-        expect(container.querySelector('[data-testid="floorplan-preview-2d"]')).toBeNull();
-        expect(window.localStorage.getItem('octane.floorplan.preview3d')).toBe('true');
-
-        fireEvent.click(container.querySelector('[data-testid="floorplan-view-2d"]')!);
-
-        expect(container.querySelector('[data-testid="floorplan-3d"]')).toBeNull();
-        expect(window.localStorage.getItem('octane.floorplan.preview3d')).toBe('false');
+        for (const id of absent) {
+            expect(container.querySelector(`[data-testid="${id}"]`), id).toBeNull();
+        }
     });
 
-    it('remembers a browser that chose the 3D preview', () => {
-        window.localStorage.setItem('octane.floorplan.preview3d', 'true');
-        try {
-            openEditor();
-            const container = document.getElementById('draggable-windows-container') ?? document.body;
+    it('keeps the wall height and thumb when fixed height is disabled', () => {
+        openEditor();
+        const handler = messageHandlers.get(FloorHeightMapEvent)!;
+        act(() => handler({ getParser: () => ({ model: '00\r00\r', wallHeight: 4 }) }));
+        const fixed = document.querySelector('[data-testid="wall-height-fixed"]')!;
+        fireEvent.click(fixed);
+        expect(document.querySelector('[data-testid="wall-height-badge"]')?.textContent).toBe('5');
+        expect(document.querySelector('[data-testid="wall-height-thumb"]')?.getAttribute('data-value')).toBe('5');
+        act(() => handler({ getParser: () => ({ model: '00\r00\r', wallHeight: -1 }) }));
+        fireEvent.click(fixed);
+        expect(document.querySelector('[data-testid="wall-height-badge"]')?.textContent).toBe('5');
+    });
 
-            expect(container.querySelector('[data-testid="floorplan-3d"]')).toBeTruthy();
-            expect(container.querySelector('[data-testid="floorplan-preview-2d"]')).toBeNull();
-        } finally {
-            window.localStorage.removeItem('octane.floorplan.preview3d');
-        }
+    it('updates main Save on BC ticks but snapshots the import gate on opening', () => {
+        openEditor();
+        const handler = messageHandlers.get(BuildersClubSubscriptionStatusMessageEvent)!;
+        const main = document.querySelector('[data-testid="floorplan-save"]') as HTMLButtonElement;
+        act(() => handler({ getParser: () => ({ secondsLeft: 15 }) }));
+        expect(main.disabled).toBe(true);
+        act(() => vi.advanceTimersByTime(10000));
+        expect(main.disabled).toBe(false);
+        fireEvent.click(document.querySelector('[data-testid="floorplan-import-export"]')!);
+        const imported = document.querySelector('[data-testid="import-save"]') as HTMLButtonElement;
+        expect(imported.disabled).toBe(false);
+        act(() => vi.advanceTimersByTime(10000));
+        expect(main.disabled).toBe(true);
+        expect(imported.disabled).toBe(false);
+        sendMessageComposer.mockClear();
+        fireEvent.change(document.querySelector('textarea')!, { target: { value: '00\n00' } });
+        fireEvent.click(imported);
+        expect(sendMessageComposer.mock.calls[0][0]).toBeInstanceOf(UpdateFloorPropertiesMessageComposer);
+        expect(sendMessageComposer.mock.calls[0][0].tilemap).toBe('00\r00');
+        expect(document.querySelector('.octane-floorplan-import')).toBeTruthy();
+    });
+
+    it('skins the save button cyan and the door arrows from the style-5 assets', () => {
+        const css = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../css/floorplan-editor/FloorplanEditorView.css'), 'utf8');
+        const saveRule = css.slice(css.indexOf('.fp-bc-btn.is-save'));
+
+        expect(saveRule).toContain('save-style5-default.png');
+        expect(saveRule).toContain('save-style5-hover.png');
+        expect(saveRule).toContain('save-style5-pressed.png');
+        expect(saveRule).toContain('save-style5-disabled.png');
+        expect(saveRule).not.toContain('shiny-thick-green');
+        expect(css).toContain('dir-style5-default.png');
+        expect(css).toContain('left: 7px');
+        expect(css).toContain('left: 9px');
+        expect(css).not.toContain('scaleX(-1)');
+        expect(css).toContain('.octane-floorplan-window.octane-card-shell.octane-card-frame-3');
+        expect(css).toContain('--octane-card-frame-3-title: #ff8d00');
+        expect(css).toContain('min-width: 662px');
+        expect(css).toContain('min-height: 600px');
+        expect(css).toContain('max-width: 1380px');
+        expect(css).toContain('max-height: 900px');
+        expect(css).toContain('left: 61px');
+        expect(css).toContain('left: 134px');
+        expect(css).toContain('left: 195px');
+        expect(css).toContain('left: 268px');
+        expect(css).toContain('left: 122px');
+        expect(css).toContain('left: 256px');
+        expect(css).toContain('top: 4px');
+    });
+
+    it('the ordinary import dialog does not offer Load', () => {
+        openEditor();
+        const container = document.getElementById('draggable-windows-container') ?? document.body;
+        fireEvent.click(container.querySelector('[data-testid="floorplan-import-export"]')!);
+        expect(container.querySelector('[data-testid="import-load"]')).toBeNull();
+        expect(container.querySelector('[data-testid="import-revert"]')).toBeTruthy();
+        expect(container.querySelector('[data-testid="import-save"]')).toBeTruthy();
     });
 });

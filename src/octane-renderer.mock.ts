@@ -608,6 +608,7 @@ export class FloorHeightMapEvent extends StubClass {}
 export class RoomVisualizationSettingsEvent extends StubClass {}
 export class RoomEntryTileMessageEvent extends StubClass {}
 export class RoomOccupiedTilesMessageEvent extends StubClass {}
+export class PerkAllowancesMessageEvent extends StubClass {}
 export const RoomEngineEvent = makeEnumProxy('RoomEngineEvent');
 export const RoomSessionEvent = makeEnumProxy('RoomSessionEvent');
 

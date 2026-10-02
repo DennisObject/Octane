@@ -1,82 +1,82 @@
-import { CSSProperties, FC, PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { MAX_WALL_HEIGHT, MIN_WALL_HEIGHT } from '../state/constants';
 
 type Props = {
     value: number;
     onChange: (next: number) => void;
+    disabled?: boolean;
 };
 
-export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange }) => {
-    const count = MAX_WALL_HEIGHT - MIN_WALL_HEIGHT + 1;
+const STEPS = 16;
+
+/** Official wall_height_slider: horizontal, 16 steps shown as 1..16. */
+export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange, disabled = false }) => {
     const trackRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
-    const valueFromClientY = useCallback(
-        (clientY: number): number | null => {
-            const track = trackRef.current;
-
-            if (!track) return null;
-
-            const rect = track.getBoundingClientRect();
-
-            if (rect.height === 0) return null;
-
-            const local = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-
-            return MAX_WALL_HEIGHT - Math.round(local * (count - 1));
-        },
-        [count]
-    );
+    const valueFromClientX = useCallback((clientX: number): number | null => {
+        const track = trackRef.current;
+        if (!track) return null;
+        const rect = track.getBoundingClientRect();
+        if (rect.width === 0) return null;
+        const local = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const index = Math.min(STEPS - 1, Math.floor(local * STEPS));
+        return index + 1;
+    }, []);
 
     const onPointerDown = useCallback(
         (e: ReactPointerEvent<HTMLDivElement>) => {
-            if (e.button !== 0) return;
-
-            const next = valueFromClientY(e.clientY);
-
+            if (disabled || e.button !== 0) return;
+            const next = valueFromClientX(e.clientX);
             if (next !== null && next !== value) onChange(next);
-
             setIsDragging(true);
         },
-        [valueFromClientY, onChange, value]
+        [disabled, valueFromClientX, onChange, value]
     );
 
     useEffect(() => {
         if (!isDragging) return;
-
         const onMove = (e: PointerEvent) => {
-            const next = valueFromClientY(e.clientY);
+            const next = valueFromClientX(e.clientX);
             if (next !== null && next !== value) onChange(next);
         };
         const onUp = () => setIsDragging(false);
-
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
         window.addEventListener('pointercancel', onUp);
-
         return () => {
             window.removeEventListener('pointermove', onMove);
             window.removeEventListener('pointerup', onUp);
             window.removeEventListener('pointercancel', onUp);
         };
-    }, [isDragging, valueFromClientY, onChange, value]);
+    }, [isDragging, valueFromClientX, onChange, value]);
 
     const clamped = Math.max(MIN_WALL_HEIGHT, Math.min(MAX_WALL_HEIGHT, value));
-    const thumbPct = ((MAX_WALL_HEIGHT - clamped + 0.5) / count) * 100;
-    const trackStyle = { '--fp-rung': `${(100 / count).toFixed(4)}%` } as CSSProperties;
+    const shown = clamped <= 0 ? 1 : clamped;
+    const thumbPct = ((shown - 1) / STEPS) * 100;
 
     return (
         <div
-            className={`fp-slider ${isDragging ? 'is-dragging' : ''}`}
+            className={`fp-bc-wall-slider ${disabled ? 'is-disabled' : ''} ${isDragging ? 'is-dragging' : ''}`}
             role="slider"
             aria-label="Wall height"
-            aria-valuemin={MIN_WALL_HEIGHT}
+            aria-valuemin={1}
             aria-valuemax={MAX_WALL_HEIGHT}
-            aria-valuenow={clamped}
-            title={`Wall height ${clamped}`}
+            aria-valuenow={shown}
+            aria-disabled={disabled || undefined}
+            aria-orientation="horizontal"
+            title={`Wall height ${shown}`}
         >
-            <div ref={trackRef} data-testid="wall-height-track" className="fp-slider-track is-ladder" style={trackStyle} onPointerDown={onPointerDown} />
-            <div data-testid="wall-height-thumb" data-value={clamped} className="fp-slider-thumb" style={{ top: `calc(6px + (100% - 12px) * ${(thumbPct / 100).toFixed(4)})` }} />
+            <div ref={trackRef} data-testid="wall-height-track" className="fp-bc-wall-slider-track" onPointerDown={onPointerDown} />
+            <img
+                data-testid="wall-height-thumb"
+                data-value={clamped}
+                className="fp-bc-wall-slider-thumb"
+                src={AIR_FLOOR_ASSETS.sliderThumb}
+                alt=""
+                style={{ left: `${thumbPct.toFixed(4)}%` }}
+            />
         </div>
     );
 };

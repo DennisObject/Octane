@@ -4,22 +4,22 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FloorplanHeightPicker } from './FloorplanHeightPicker';
 
-const TRACK_HEIGHT = 260;
+const TRACK_WIDTH = 300;
 
-const stubTrackGeometry = (top = 0) => {
+const stubTrackGeometry = () => {
     const original = HTMLDivElement.prototype.getBoundingClientRect;
 
     HTMLDivElement.prototype.getBoundingClientRect = function () {
         if (this.getAttribute('data-testid') === 'height-track') {
             return {
-                top,
+                top: 0,
                 left: 0,
-                right: 14,
-                bottom: top + TRACK_HEIGHT,
-                width: 14,
-                height: TRACK_HEIGHT,
+                right: TRACK_WIDTH,
+                bottom: 19,
+                width: TRACK_WIDTH,
+                height: 19,
                 x: 0,
-                y: top,
+                y: 0,
                 toJSON: () => ''
             } as DOMRect;
         }
@@ -47,47 +47,32 @@ describe('FloorplanHeightPicker', () => {
         expect(screen.getByRole('slider').getAttribute('aria-valuenow')).toBe('12');
     });
 
-    it('clicking near the top of the track picks HEIGHT_BRUSH_MAX', () => {
+    it('the left edge picks height 0 and the right edge picks height 30', () => {
+        const restore = stubTrackGeometry();
+        const onSelect = vi.fn();
+
+        render(<FloorplanHeightPicker selectedH={12} onSelect={onSelect} />);
+
+        const track = screen.getByTestId('height-track');
+
+        fireEvent.pointerDown(track, { clientX: 0, button: 0 });
+        expect(onSelect).toHaveBeenLastCalledWith(0);
+
+        fireEvent.pointerDown(track, { clientX: TRACK_WIDTH, button: 0 });
+        expect(onSelect).toHaveBeenLastCalledWith(30);
+
+        restore();
+    });
+
+    it('clicking the middle uses localX / width * 30', () => {
         const restore = stubTrackGeometry();
         const onSelect = vi.fn();
 
         render(<FloorplanHeightPicker selectedH={0} onSelect={onSelect} />);
 
-        const track = screen.getByTestId('height-track');
+        fireEvent.pointerDown(screen.getByTestId('height-track'), { clientX: TRACK_WIDTH / 2, button: 0 });
 
-        fireEvent.pointerDown(track, { clientY: 0, button: 0 });
-
-        expect(onSelect).toHaveBeenCalledWith(26);
-
-        restore();
-    });
-
-    it('clicking near the bottom of the track picks HEIGHT_BRUSH_MIN', () => {
-        const restore = stubTrackGeometry();
-        const onSelect = vi.fn();
-
-        render(<FloorplanHeightPicker selectedH={26} onSelect={onSelect} />);
-
-        const track = screen.getByTestId('height-track');
-
-        fireEvent.pointerDown(track, { clientY: TRACK_HEIGHT, button: 0 });
-
-        expect(onSelect).toHaveBeenCalledWith(0);
-
-        restore();
-    });
-
-    it('clicking at the middle picks roughly the middle height', () => {
-        const restore = stubTrackGeometry();
-        const onSelect = vi.fn();
-
-        render(<FloorplanHeightPicker selectedH={0} onSelect={onSelect} />);
-
-        const track = screen.getByTestId('height-track');
-
-        fireEvent.pointerDown(track, { clientY: TRACK_HEIGHT / 2, button: 0 });
-
-        expect(onSelect).toHaveBeenCalledWith(13);
+        expect(onSelect).toHaveBeenCalledWith(15);
 
         restore();
     });
@@ -96,11 +81,9 @@ describe('FloorplanHeightPicker', () => {
         const restore = stubTrackGeometry();
         const onSelect = vi.fn();
 
-        render(<FloorplanHeightPicker selectedH={26} onSelect={onSelect} />);
+        render(<FloorplanHeightPicker selectedH={30} onSelect={onSelect} />);
 
-        const track = screen.getByTestId('height-track');
-
-        fireEvent.pointerDown(track, { clientY: 0, button: 0 });
+        fireEvent.pointerDown(screen.getByTestId('height-track'), { clientX: TRACK_WIDTH, button: 0 });
 
         expect(onSelect).not.toHaveBeenCalled();
 
