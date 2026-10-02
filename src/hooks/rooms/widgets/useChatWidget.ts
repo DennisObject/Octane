@@ -2,7 +2,6 @@ import {
     GetGuestRoomResultEvent,
     GetRoomEngine,
     GetSessionDataManager,
-    PetFigureData,
     RoomChatSettings,
     RoomChatSettingsEvent,
     RoomDragEvent,
@@ -22,8 +21,8 @@ import {
     GetConfigurationValue,
     GetRoomObjectScreenLocation,
     IRoomChatSettings,
-    loadEmojiShortcodes,
     LocalizeText,
+    loadEmojiShortcodes,
     PlaySound,
     RoomChatFormatter
 } from '../../../api';
@@ -34,6 +33,7 @@ import { useMessageEvent, useOctaneEvent, useUiEvent } from '../../events';
 import { useUserDataSnapshot } from '../../session/useSessionSnapshots';
 import { useTranslation } from '../../translation';
 import { useRoom } from '../useRoom';
+import { createChatLineQueue, reserveChatLine, resetChatLineQueue, settleChatLine, takeReadyChatLines } from './chatLineQueue';
 
 const CHAT_MESSAGES_MAX = 250;
 
@@ -50,6 +50,9 @@ const useChatWidgetState = () => {
     const { addChatEntry, updateChatEntry } = useChatHistory();
     const { settings, translateIncoming, consumeOutgoingTranslation } = useTranslation();
     const isDisposed = useRef(false);
+    const roomTokenRef = useRef(0);
+    const lineQueueRef = useRef(createChatLineQueue<ChatBubbleMessage>());
+    const lineFlushFrameRef = useRef(0);
     // Reactive: re-renders if the session-data snapshot flips (e.g.
     // reconnect under a different user id). Safe to call here —
     // useChatWidget is not singleton-backed (see export below),
@@ -107,6 +110,42 @@ const useChatWidgetState = () => {
         [applyTranslationToBubble, buildTranslatedEntryPatch, updateChatEntry]
     );
 
+    const cancelLineFlush = () => {
+        if (!lineFlushFrameRef.current) return;
+
+        window.cancelAnimationFrame(lineFlushFrameRef.current);
+        lineFlushFrameRef.current = 0;
+    };
+
+    const flushQueuedLines = () => {
+        lineFlushFrameRef.current = 0;
+
+        if (isDisposed.current) return;
+
+        const batch = takeReadyChatLines(lineQueueRef.current);
+
+        if (!batch.length) return;
+
+        setChatMessages((prevValue) => {
+            const next = prevValue.concat(batch);
+
+            if (next.length > CHAT_MESSAGES_MAX) next.splice(0, next.length - CHAT_MESSAGES_MAX);
+
+            return next;
+        });
+    };
+
+    const scheduleLineFlush = () => {
+        if (lineFlushFrameRef.current || isDisposed.current) return;
+
+        lineFlushFrameRef.current = window.requestAnimationFrame(flushQueuedLines);
+    };
+
+    const abandonLine = (seq: number) => {
+        settleChatLine(lineQueueRef.current, seq, null);
+        scheduleLineFlush();
+    };
+
     const getScrollSpeed = useMemo(() => {
         if (!chatSettings) return 6000;
 
@@ -120,18 +159,26 @@ const useChatWidgetState = () => {
         }
     }, [chatSettings]);
 
-    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, async (event) => {
+    const processChatEvent = (event: RoomSessionChatEvent, roomToken: number, seq: number) => {
+        if (!roomSession || isDisposed.current) {
+            abandonLine(seq);
+
+            return;
+        }
+
         const roomObject = GetRoomEngine().getRoomObject(roomSession.roomId, event.objectId, RoomObjectCategory.UNIT);
         const bubbleLocation = roomObject ? GetRoomObjectScreenLocation(roomSession.roomId, roomObject?.id, RoomObjectCategory.UNIT) : { x: 0, y: 0 };
         const userData = roomObject ? roomSession.userDataManager.getUserDataByIndex(event.objectId) : new RoomUserData(-1);
 
+        if (!userData) return;
+
         let username = '';
         let avatarColor = 0;
         let imageUrl: string = null;
+        let imagePromise: Promise<string> = null;
         let chatType = event.chatType;
         let styleId = event.style;
         let userType = 0;
-        let petType = -1;
         let text = event.message;
 
         if (userData) {
@@ -141,11 +188,10 @@ const useChatWidgetState = () => {
 
             switch (userType) {
                 case RoomObjectType.PET:
-                    imageUrl = await ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE));
-                    petType = new PetFigureData(figure).typeId;
+                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
                     break;
                 case RoomObjectType.USER:
-                    imageUrl = await ChatBubbleUtilities.getUserImage(figure);
+                    imagePromise = ChatBubbleUtilities.getUserImage(figure).catch(() => null);
                     break;
                 case RoomObjectType.RENTABLE_BOT:
                 case RoomObjectType.BOT:
@@ -212,6 +258,7 @@ const useChatWidgetState = () => {
             chatType === RoomSessionChatEvent.CHAT_TYPE_SPEAK ||
             chatType === RoomSessionChatEvent.CHAT_TYPE_WHISPER ||
             chatType === RoomSessionChatEvent.CHAT_TYPE_SHOUT;
+
         const outgoingTranslation = isTranslatableChatType && userData.webID === ownUserId ? consumeOutgoingTranslation(text) : null;
         const originalText = outgoingTranslation?.originalText || text;
         const formattedText = RoomChatFormatter(originalText);
@@ -253,13 +300,14 @@ const useChatWidgetState = () => {
         chatMessage.nickIcon = event.nickIcon || '';
         chatMessage.displayOrder = event.displayOrder || 'icon-prefix-name';
 
-        setChatMessages((prevValue) => {
-            const newValue = [...prevValue, chatMessage];
+        if (isDisposed.current || roomToken !== roomTokenRef.current) {
+            abandonLine(seq);
 
-            if (newValue.length > CHAT_MESSAGES_MAX) newValue.shift();
+            return;
+        }
 
-            return newValue;
-        });
+        settleChatLine(lineQueueRef.current, seq, chatMessage);
+        scheduleLineFlush();
 
         // Pet, Bot and Rentable Bot chat is fire-and-forget ("UDP-style"):
         // the live bubble already rendered above, but we deliberately skip
@@ -295,10 +343,34 @@ const useChatWidgetState = () => {
                   })
                 : -1;
 
+        if (imagePromise) {
+            void imagePromise.then((resolvedImageUrl) => {
+                if (!resolvedImageUrl || isDisposed.current || roomToken !== roomTokenRef.current) return;
+
+                // This same object may still be in the RAF queue or already in live state.
+                chatMessage.imageUrl = resolvedImageUrl;
+                setChatMessages((prevValue) => {
+                    if (isDisposed.current || roomToken !== roomTokenRef.current || !prevValue.includes(chatMessage)) return prevValue;
+
+                    return [...prevValue];
+                });
+
+                if (chatEntryId >= 0) updateChatEntry(chatEntryId, { imageUrl: resolvedImageUrl });
+            }).catch(() => {});
+        }
+
         if (!settings.enabled || outgoingTranslation || !isTranslatableChatType || !text.trim().length) return;
 
         void translateIncoming(text).then((translation) => {
-            if (!translation || isDisposed.current) return;
+            if (!translation || isDisposed.current || roomToken !== roomTokenRef.current) return;
+
+            applyTranslationToBubble(
+                chatMessage,
+                translation.originalText,
+                translation.translatedText,
+                translation.detectedLanguage,
+                translation.targetLanguage
+            );
 
             applyAsyncTranslation(
                 chatMessage.id,
@@ -309,6 +381,20 @@ const useChatWidgetState = () => {
                 translation.targetLanguage
             );
         });
+    };
+
+    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, (event) => {
+        const roomToken = roomTokenRef.current;
+        const seq = reserveChatLine(lineQueueRef.current);
+
+        try {
+            processChatEvent(event, roomToken, seq);
+        } catch (error) {
+            console.error('[RoomChat] Failed to process chat event', error);
+        } finally {
+            // Settlement is idempotent: preserve queued text, or close a failed/skipped slot.
+            abandonLine(seq);
+        }
     });
 
     useUiEvent<SoundboardRoomMessageEvent>(SoundboardRoomMessageEvent.ROOM_MESSAGE, (event) => {
@@ -332,13 +418,10 @@ const useChatWidgetState = () => {
         );
         bubble.textSize = getStoredChatTextSize();
 
-        setChatMessages((previous) => {
-            const next = [...previous, bubble];
+        const seq = reserveChatLine(lineQueueRef.current);
 
-            if (next.length > CHAT_MESSAGES_MAX) next.shift();
-
-            return next;
-        });
+        settleChatLine(lineQueueRef.current, seq, bubble);
+        scheduleLineFlush();
 
         addChatEntry({
             id: -1,
@@ -381,12 +464,22 @@ const useChatWidgetState = () => {
     });
 
     useEffect(() => {
+        roomTokenRef.current += 1;
+        resetChatLineQueue(lineQueueRef.current);
+        cancelLineFlush();
+        setChatMessages([]);
+    }, [roomSession?.roomId]);
+
+    useEffect(() => {
         isDisposed.current = false;
 
         if (GetConfigurationValue<boolean>('chat.emoji.enabled', true)) loadEmojiShortcodes();
 
         return () => {
             isDisposed.current = true;
+            roomTokenRef.current += 1;
+            resetChatLineQueue(lineQueueRef.current);
+            cancelLineFlush();
         };
     }, []);
 

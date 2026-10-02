@@ -7,34 +7,41 @@ import { CHAT_TEXT_SIZE_EVENT } from '../chat-input/chatTextSize';
 import { ChatWidgetMessageView } from './ChatWidgetMessageView';
 import { ChatWidgetWindowView } from './ChatWidgetWindowView';
 import { measureBubbleVisualOffsets } from './chatBubbleMetrics';
+import { separateOverlappingChats } from './chatCollision';
 import { getChatViewerHeight } from './freeFlowChatLayout';
 
 const CHAT_MOVE_UP_PIXELS = 19;
-const CHAT_COLLISION_ITERATIONS = 20;
-const CHAT_COLLISION_MIN_WIDTH = 240;
 const CHAT_REMOVE_TOP_MARGIN = -10;
-const STACK_OVERLAP = 0;
 
 export const ChatWidgetView: FC<{}> = (props) => {
     const { chatMessages = [], setChatMessages = null, chatSettings = null, getScrollSpeed = 6000 } = useChatWidget();
     const [chatWindowEnabled] = useChatWindow();
     const elementRef = useRef<HTMLDivElement>(null);
+    const chatMessagesRef = useRef(chatMessages);
+    const frameRef = useRef(0);
+    const measureAllRef = useRef(false);
+    const layoutRef = useRef<(measureAll: boolean) => void>(() => undefined);
+    const shiftRef = useRef<(amount: number) => void>(() => undefined);
+
+    chatMessagesRef.current = chatMessages;
 
     const removeHiddenChats = useCallback(() => {
         setChatMessages((prevValue) => {
-            if (prevValue) {
-                const newMessages = prevValue.filter((chat) => chat.top + chat.height + chat.visualOffsetBottom >= CHAT_REMOVE_TOP_MARGIN);
+            if (!prevValue) return prevValue;
 
-                if (newMessages.length !== prevValue.length) return newMessages;
-            }
+            const newMessages = prevValue.filter((chat) => chat.top + chat.height + chat.visualOffsetBottom >= CHAT_REMOVE_TOP_MARGIN);
 
-            return prevValue;
+            return newMessages.length === prevValue.length ? prevValue : newMessages;
         });
     }, [setChatMessages]);
 
-    const refreshChatMeasurements = useCallback(() => {
-        chatMessages.forEach((chat) => {
-            if (!chat.elementRef) return;
+    const removeHiddenRef = useRef(removeHiddenChats);
+
+    removeHiddenRef.current = removeHiddenChats;
+
+    const measureChats = (chats: ChatBubbleMessage[]) => {
+        for (const chat of chats) {
+            if (!chat.elementRef) continue;
 
             const visualOffsets = measureBubbleVisualOffsets(chat.elementRef);
 
@@ -42,142 +49,107 @@ export const ChatWidgetView: FC<{}> = (props) => {
             chat.height = chat.elementRef.offsetHeight;
             chat.visualOffsetTop = visualOffsets.top;
             chat.visualOffsetBottom = visualOffsets.bottom;
-        });
-    }, [chatMessages]);
+        }
+    };
 
-    const getChatCollisionRect = useCallback((chat: ChatBubbleMessage) => {
-        const width = Math.max(chat.width, CHAT_COLLISION_MIN_WIDTH);
-        const horizontalPadding = Math.max(0, (width - chat.width) / 2);
+    const flushLayout = () => {
+        frameRef.current = 0;
 
-        return {
-            left: chat.left - horizontalPadding,
-            right: chat.left + chat.width + horizontalPadding,
-            top: chat.top,
-            bottom: chat.top + chat.height
-        };
+        if (measureAllRef.current) {
+            measureAllRef.current = false;
+            measureChats(chatMessagesRef.current);
+        }
+
+        const visible: ChatBubbleMessage[] = [];
+
+        for (const chat of chatMessagesRef.current) {
+            if (chat.elementRef && chat.width > 0 && chat.height > 0) visible.push(chat);
+        }
+
+        separateOverlappingChats(visible);
+        removeHiddenRef.current();
+    };
+
+    const requestLayout = (measureAll: boolean) => {
+        if (measureAll) measureAllRef.current = true;
+
+        if (frameRef.current) return;
+
+        frameRef.current = window.requestAnimationFrame(flushLayout);
+    };
+
+    layoutRef.current = requestLayout;
+
+    const shiftChats = (amount: number) => {
+        for (const chat of chatMessagesRef.current) chat.top -= amount;
+
+        removeHiddenRef.current();
+        requestLayout(false);
+    };
+
+    shiftRef.current = shiftChats;
+
+    const makeRoom = useCallback((_chat: ChatBubbleMessage) => {
+        layoutRef.current(false);
     }, []);
 
-    const resolveOverlappingChats = useCallback(() => {
-        const visibleChats = chatMessages.filter((chat) => chat.elementRef && chat.width > 0 && chat.height > 0);
-
-        for (let iteration = 0; iteration < CHAT_COLLISION_ITERATIONS; iteration++) {
-            let moved = false;
-
-            for (let firstIndex = 0; firstIndex < visibleChats.length; firstIndex++) {
-                const firstChat = visibleChats[firstIndex];
-
-                for (let secondIndex = firstIndex + 1; secondIndex < visibleChats.length; secondIndex++) {
-                    const secondChat = visibleChats[secondIndex];
-                    const firstRect = getChatCollisionRect(firstChat);
-                    const secondRect = getChatCollisionRect(secondChat);
-                    const overlapsHorizontally = firstRect.left < secondRect.right && firstRect.right > secondRect.left;
-                    const overlapsVertically = firstRect.top < secondRect.bottom && firstRect.bottom > secondRect.top;
-
-                    if (!overlapsHorizontally || !overlapsVertically) continue;
-
-                    const topChat = firstChat.id < secondChat.id ? firstChat : secondChat;
-                    const bottomRect = topChat === firstChat ? secondRect : firstRect;
-                    const topRect = topChat === firstChat ? firstRect : secondRect;
-
-                    const amount = topRect.bottom - bottomRect.top - STACK_OVERLAP;
-
-                    if (amount <= 0) continue;
-
-                    topChat.top -= amount;
-                    moved = true;
-                }
-            }
-
-            if (!moved) break;
-        }
-    }, [chatMessages, getChatCollisionRect]);
-
-    const makeRoom = useCallback(
-        (_chat: ChatBubbleMessage) => {
-            refreshChatMeasurements();
-            resolveOverlappingChats();
-            removeHiddenChats();
-        },
-        [refreshChatMeasurements, removeHiddenChats, resolveOverlappingChats]
-    );
-
     useEffect(() => {
-        const resize = (event: UIEvent = null) => {
-            if (!elementRef || !elementRef.current) return;
+        const resize = () => {
+            const element = elementRef.current;
 
-            const currentHeight = elementRef.current.offsetHeight;
+            if (!element) return;
+
+            const currentHeight = element.offsetHeight;
             const configuredHeightPercentage = GetConfigurationValue<number>('chat.viewer.height.percentage', 0.25);
             const newHeight = getChatViewerHeight(document.body.offsetHeight, configuredHeightPercentage);
 
-            elementRef.current.style.height = `${newHeight}px`;
+            element.style.height = `${newHeight}px`;
 
-            setChatMessages((prevValue) => {
-                if (prevValue) {
-                    prevValue.forEach((chat) => (chat.top -= currentHeight - newHeight));
-                }
+            const delta = currentHeight - newHeight;
 
-                return prevValue;
-            });
+            if (delta) {
+                for (const chat of chatMessagesRef.current) chat.top -= delta;
+            }
 
-            window.requestAnimationFrame(() => {
-                refreshChatMeasurements();
-                resolveOverlappingChats();
-                removeHiddenChats();
-            });
+            layoutRef.current(true);
         };
 
         window.addEventListener('resize', resize);
-
         resize();
 
-        return () => {
-            window.removeEventListener('resize', resize);
-        };
-    }, [refreshChatMeasurements, removeHiddenChats, resolveOverlappingChats, setChatMessages]);
+        return () => window.removeEventListener('resize', resize);
+    }, []);
 
     useEffect(() => {
-        const moveAllChatsUp = (amount: number) => {
-            setChatMessages((prevValue) => {
-                prevValue.forEach((chat) => {
-                    chat.top -= amount;
-                });
-
-                return prevValue;
-            });
-
-            refreshChatMeasurements();
-            resolveOverlappingChats();
-            removeHiddenChats();
-        };
-
         const worker = new WorkerBuilder(IntervalWebWorker);
 
-        worker.onmessage = () => moveAllChatsUp(CHAT_MOVE_UP_PIXELS);
-
+        worker.onmessage = () => shiftRef.current(CHAT_MOVE_UP_PIXELS);
         worker.postMessage({ action: 'START', content: getScrollSpeed });
 
         return () => {
             worker.postMessage({ action: 'STOP' });
-
             worker.terminate();
         };
-    }, [getScrollSpeed, refreshChatMeasurements, removeHiddenChats, resolveOverlappingChats, setChatMessages]);
+    }, [getScrollSpeed]);
 
     useEffect(() => {
         const onTextSizeChange = () => {
             window.requestAnimationFrame(() => {
-                window.requestAnimationFrame(() => {
-                    refreshChatMeasurements();
-                    resolveOverlappingChats();
-                    removeHiddenChats();
-                });
+                window.requestAnimationFrame(() => layoutRef.current(true));
             });
         };
 
         window.addEventListener(CHAT_TEXT_SIZE_EVENT, onTextSizeChange);
 
         return () => window.removeEventListener(CHAT_TEXT_SIZE_EVENT, onTextSizeChange);
-    }, [refreshChatMeasurements, removeHiddenChats, resolveOverlappingChats]);
+    }, []);
+
+    useEffect(
+        () => () => {
+            if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+        },
+        []
+    );
 
     return (
         <div
