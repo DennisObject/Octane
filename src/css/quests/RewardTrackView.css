@@ -1,0 +1,2014 @@
+.draggable-window:has(> .octane-reward-track) {
+    width: 1103px;
+    min-width: 1103px;
+    max-width: 1103px;
+    height: 722px;
+}
+
+.octane-card-shell.octane-reward-track {
+    box-sizing: border-box;
+    width: 1103px !important;
+    min-width: 1103px !important;
+    max-width: 1103px !important;
+    height: 722px !important;
+    min-height: 722px !important;
+    max-height: 722px !important;
+    color: #000;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+}
+
+.octane-card-shell.octane-reward-track[data-theme="blue"] {
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-blue.png");
+    --octane-card-frame-3-title: #3576b9;
+}
+
+.octane-card-shell.octane-reward-track[data-theme="orange"] {
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-orange.png");
+    --octane-card-frame-3-title: #c97918;
+}
+
+.octane-card-shell.octane-reward-track[data-theme="forest_green"] {
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-forest-green.png");
+    --octane-card-frame-3-title: #3f8a45;
+}
+
+.octane-card-shell.octane-reward-track[data-theme="red"] {
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-red.png");
+    --octane-card-frame-3-title: #b84b4b;
+}
+
+.octane-card-shell.octane-reward-track[data-theme="cyan"] {
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-cyan.png");
+    --octane-card-frame-3-title: #1f9eb3;
+}
+
+.octane-reward-track,
+.octane-reward-track * {
+    box-sizing: border-box;
+}
+
+.octane-reward-track .octane-reward-track-content.octane-card-content-shell {
+    position: relative;
+    display: block;
+    width: 1097px;
+    height: 683px;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent;
+}
+
+.octane-reward-track-admin-host {
+    height: 100%;
+    overflow: auto;
+}
+
+.octane-reward-track-loading {
+    padding: 24px;
+    text-align: center;
+}
+
+.octane-reward-track-stage {
+    position: relative;
+    width: 1079px;
+    height: 667px;
+}
+
+.octane-reward-track-header {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1079px;
+    height: 243px;
+    overflow: visible;
+}
+
+.octane-reward-track-profile {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    width: 264px;
+    height: 243px;
+    overflow: visible;
+    background: transparent;
+}
+
+.octane-reward-track-profile::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 232px;
+    background: var(--rt-light);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rt-medium) 70%, #8aa4c4);
+    pointer-events: none;
+}
+
+.octane-reward-track-join {
+    position: absolute;
+    left: 207px;
+    top: -57px;
+    z-index: 0;
+    width: 70px;
+    height: 300px;
+    border-radius: 50%;
+    background: var(--rt-light);
+    pointer-events: none;
+}
+
+.octane-reward-track-avatar {
+    position: absolute;
+    left: -3px;
+    top: -15px;
+    width: 90px;
+    height: 130px;
+    overflow: hidden;
+}
+
+.octane-reward-track-title,
+.octane-reward-track-desc,
+.octane-reward-track-instructions {
+    position: absolute;
+    left: 87px;
+    overflow: hidden;
+}
+
+.octane-reward-track-title {
+    top: 25px;
+    width: auto;
+    height: 24px;
+    overflow: visible;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    white-space: nowrap;
+}
+
+.octane-reward-track-desc {
+    top: 53px;
+    width: 160px;
+    height: 16px;
+    font-size: 11px;
+    line-height: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-reward-track-instructions {
+    top: 70px;
+    width: 157px;
+    height: 28px;
+    font-size: 11px;
+    line-height: 14px;
+}
+
+.octane-reward-track-points {
+    position: absolute;
+    left: 43px;
+    top: 122px;
+    width: 179px;
+    height: 62px;
+    background: var(--rt-medium);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rt-dark) 25%, #fff);
+}
+
+.octane-reward-track-points-value {
+    position: absolute;
+    left: 53px;
+    top: 11px;
+    display: flex;
+    align-items: center;
+    height: 20px;
+    gap: 4px;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 22px;
+}
+
+.octane-reward-track-points-label {
+    position: absolute;
+    left: 10px;
+    top: 36px;
+    width: 160px;
+    height: 18px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+.octane-reward-track-collected {
+    position: absolute;
+    left: 9px;
+    top: 204px;
+    display: flex;
+    align-items: center;
+    width: 247px;
+    height: 30px;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+.octane-reward-track-collected img {
+    margin-top: 1px;
+}
+
+.octane-reward-track-rewards {
+    position: absolute;
+    left: 232px;
+    top: 0;
+    z-index: 2;
+    width: 847px;
+    height: 243px;
+    overflow: hidden;
+    background: var(--rt-light);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rt-medium) 75%, #fff);
+}
+
+.octane-reward-track-bg {
+    position: absolute;
+    left: 2px;
+    top: -2px;
+    z-index: 0;
+    width: 843px;
+    height: 243px;
+    background: var(--rt-dark);
+    pointer-events: none;
+    -webkit-mask-image: var(--rt-prizes-bg);
+    mask-image: var(--rt-prizes-bg);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 843px 243px;
+    mask-size: 843px 243px;
+}
+
+.octane-reward-track-stars {
+    position: absolute;
+    left: 1px;
+    top: 0;
+    z-index: 1;
+    width: 843px;
+    height: 226px;
+    pointer-events: none;
+}
+
+.octane-reward-track-points-band {
+    position: absolute;
+    left: 8px;
+    top: 208px;
+    z-index: 1;
+    width: 844px;
+    height: 44px;
+    background: var(--rt-medium);
+    pointer-events: none;
+}
+
+.octane-reward-track-main-bar {
+    position: absolute;
+    left: 194px;
+    top: 94px;
+    z-index: 2;
+    width: 602px;
+    height: 13px;
+    overflow: hidden;
+    background: #888;
+}
+
+.octane-reward-track-main-bar-fill {
+    height: 13px;
+    background: #71af24;
+}
+
+.octane-reward-track-indicator {
+    position: absolute;
+    top: 82px;
+    z-index: 3;
+    width: 80px;
+    height: 157px;
+    pointer-events: none;
+}
+
+.octane-reward-track-indicator img {
+    position: absolute;
+    left: 30px;
+    top: 7px;
+}
+
+.octane-reward-track-indicator span {
+    position: absolute;
+    left: 0;
+    top: 136px;
+    width: 80px;
+    height: 17px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+}
+
+.octane-reward-track-prize-layer {
+    position: absolute;
+    left: 196px;
+    top: 2px;
+    z-index: 4;
+    width: 598px;
+    height: 239px;
+}
+
+.octane-reward-track-prize {
+    position: absolute;
+    width: 80px;
+    height: 105px;
+}
+
+.octane-reward-track-prize[data-tier="free"] {
+    top: 4px;
+}
+
+.octane-reward-track-prize[data-tier="premium"] {
+    top: 89px;
+    height: 104px;
+}
+
+.octane-reward-track-prize-hit {
+    position: absolute;
+    left: 12px;
+    width: 56px;
+    height: 60px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.octane-reward-track-prize[data-tier="free"] .octane-reward-track-prize-hit {
+    top: 10px;
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-hit {
+    top: 34px;
+}
+
+.octane-reward-track-prize-hit:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.octane-reward-track-prize-plate {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 56px;
+    height: 56px;
+    background: #f9efe0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-plate {
+    background: #f1def7;
+}
+
+.octane-reward-track-prize-product {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+}
+
+.octane-reward-track-prize-product[data-shifted="true"] {
+    top: 5px;
+}
+
+.octane-reward-track-prize-product img,
+.octane-reward-track-prize-furni,
+.octane-reward-track-prize-currency {
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.octane-reward-track-prize-amount {
+    position: absolute;
+    left: 18px;
+    top: 37px;
+    width: 20px;
+    height: 14px;
+    background: #f9efe0;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-amount {
+    background: #f1def7;
+}
+
+.octane-reward-track-prize-generic {
+    font-size: 9px;
+    line-height: 10px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.octane-reward-track-prize-stem {
+    position: absolute;
+    left: 39px;
+    width: 2px;
+    height: 19px;
+    background: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
+
+.octane-reward-track-prize[data-tier="free"] .octane-reward-track-prize-stem {
+    top: 66px;
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-stem {
+    top: 19px;
+}
+
+.octane-reward-track-prize-lock,
+.octane-reward-track-prize-check {
+    position: absolute;
+    pointer-events: none;
+}
+
+.octane-reward-track-prize[data-tier="free"] .octane-reward-track-prize-lock {
+    left: 53px;
+    top: 54px;
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-lock {
+    left: 53px;
+    top: 78px;
+}
+
+.octane-reward-track-prize[data-tier="free"] .octane-reward-track-prize-check {
+    left: 54px;
+    top: 4px;
+}
+
+.octane-reward-track-prize[data-tier="premium"] .octane-reward-track-prize-check {
+    left: 54px;
+    top: 28px;
+}
+
+.octane-reward-track-band {
+    position: absolute;
+    left: 96px;
+    z-index: 5;
+    width: 700px;
+    height: 80px;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 2px var(--band, #f9efe0);
+}
+
+.octane-reward-track-band[data-tier="free"] {
+    top: 6px;
+    --band: #f9efe0;
+}
+
+.octane-reward-track-band[data-tier="premium"] {
+    top: 115px;
+    --band: #f1def7;
+}
+
+.octane-reward-track-band::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 80px;
+    background: var(--band);
+    box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.45);
+}
+
+.octane-reward-track-band img,
+.octane-reward-track-band span,
+.octane-reward-track-band small {
+    position: absolute;
+    z-index: 1;
+}
+
+.octane-reward-track-band[data-tier="free"] img {
+    left: 26px;
+    top: 9px;
+}
+
+.octane-reward-track-band[data-tier="premium"] img {
+    left: 24px;
+    top: 4px;
+}
+
+.octane-reward-track-band span {
+    left: 6px;
+    width: 90px;
+    height: 17px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+}
+
+.octane-reward-track-band[data-tier="free"] span {
+    top: 57px;
+}
+
+.octane-reward-track-band[data-tier="premium"] span {
+    top: 47px;
+}
+
+.octane-reward-track-band small {
+    left: 6px;
+    top: 61px;
+    width: 90px;
+    height: 16px;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+}
+
+.octane-reward-track-page {
+    position: absolute;
+    top: 84px;
+    z-index: 6;
+    width: 33px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.octane-reward-track-page[data-side="prev"] {
+    left: 54px;
+}
+
+.octane-reward-track-page[data-side="next"] {
+    left: 805px;
+}
+
+.octane-reward-track-page:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.octane-reward-track-unclaimed {
+    position: absolute;
+    top: 77px;
+    z-index: 7;
+    width: 17px;
+    height: 18px;
+    background: #ee2924;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.octane-reward-track-unclaimed[data-side="prev"] {
+    left: 74px;
+}
+
+.octane-reward-track-unclaimed[data-side="next"] {
+    left: 827px;
+}
+
+.octane-reward-track-body {
+    position: absolute;
+    left: 0;
+    top: 249px;
+    width: 1079px;
+    height: 418px;
+}
+
+.octane-reward-track-tasks,
+.octane-reward-track-task-info {
+    position: absolute;
+    top: 0;
+    height: 418px;
+    background: #f0f0f0;
+    box-shadow: inset 0 0 0 2px #e4e4e4;
+}
+
+.octane-reward-track-tasks {
+    left: 0;
+    width: 444px;
+    overflow: hidden;
+}
+
+.octane-reward-track-task-info {
+    left: 451px;
+    width: 628px;
+    overflow: visible;
+}
+
+.octane-reward-track-tasks-icon {
+    position: absolute;
+    left: 19px;
+    top: 17px;
+}
+
+.octane-reward-track-tasks-title {
+    position: absolute;
+    left: 46px;
+    top: 11px;
+    height: 19px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+}
+
+.octane-reward-track-tasks-progress {
+    position: absolute;
+    left: 46px;
+    top: 31px;
+    color: #3c3c3c;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+.octane-reward-track-filters {
+    position: absolute;
+    left: 14px;
+    top: 58px;
+    width: 278px;
+    height: 30px;
+}
+
+.octane-reward-track-filter {
+    position: absolute;
+    top: 0;
+    width: 88px;
+    height: 29px;
+    padding: 0 4px;
+    border: 0;
+    background: #dddcdc;
+    color: #444;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 29px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-reward-track-filter:nth-child(1) {
+    left: 0;
+}
+
+.octane-reward-track-filter:nth-child(2) {
+    left: 95px;
+}
+
+.octane-reward-track-filter:nth-child(3) {
+    left: 190px;
+}
+
+.octane-reward-track-filter[data-active="true"] {
+    background: var(--rt-dark);
+    color: #fff;
+}
+
+.octane-reward-track-filter:hover:not([data-active="true"]) {
+    background: var(--rt-light);
+    box-shadow: inset 0 0 0 1px var(--rt-dark);
+    color: var(--rt-dark);
+}
+
+.octane-reward-track-task-list {
+    position: absolute;
+    left: 14px;
+    top: 94px;
+    width: 422px;
+    height: 259px;
+    overflow: auto;
+}
+
+.octane-reward-track-task {
+    position: relative;
+    display: block;
+    width: 406px;
+    height: 61px;
+    margin: 0 0 5px;
+    padding: 0;
+    border: 2px solid #f0f0f0;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.octane-reward-track-task:hover:not([data-selected="true"]) {
+    border-color: var(--rt-light);
+}
+
+.octane-reward-track-task[data-selected="true"] {
+    border-color: var(--rt-active);
+}
+
+.octane-reward-track-task-glyph {
+    position: absolute;
+    left: 9px;
+    top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 50px;
+    overflow: hidden;
+}
+
+.octane-reward-track-task-name,
+.octane-reward-track-task-desc {
+    position: absolute;
+    left: 67px;
+    width: 202px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-reward-track-task-name {
+    top: 7px;
+    height: 17px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+}
+
+.octane-reward-track-task-desc {
+    top: 23px;
+    height: 16px;
+    font-size: 11px;
+    line-height: 16px;
+}
+
+.octane-reward-track-task .octane-reward-track-mini-bar {
+    position: absolute;
+    left: 68px;
+    top: 44px;
+    width: 200px;
+}
+
+.octane-reward-track-task-count {
+    position: absolute;
+    left: 280px;
+    top: 38px;
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
+}
+
+.octane-reward-track-task-reward {
+    position: absolute;
+    left: 331px;
+    top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 31px;
+    gap: 5px;
+    border: 2px solid #f0f0f0;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.octane-reward-track-mini-bar {
+    display: block;
+    height: 7px;
+    overflow: hidden;
+    background: #ccc;
+}
+
+.octane-reward-track-mini-bar > span {
+    display: block;
+    height: 7px;
+    background: #eba60c;
+}
+
+.octane-reward-track-mini-bar > span[data-complete="true"] {
+    background: #71af24;
+}
+
+.octane-reward-track-tip {
+    position: absolute;
+    left: 9px;
+    top: 361px;
+    width: 426px;
+    height: 48px;
+    background: #f5e1b9;
+    box-shadow: inset 0 0 0 2px #e7d0a4;
+}
+
+.octane-reward-track-tip[data-upgrade="true"] {
+    background: #f1def7;
+    box-shadow: inset 0 0 0 2px #e3c8ee;
+}
+
+.octane-reward-track-tip-gift {
+    position: absolute;
+    left: 8px;
+    top: 7px;
+}
+
+.octane-reward-track-tip p {
+    position: absolute;
+    left: 57px;
+    top: 9px;
+    width: 265px;
+    height: 30px;
+    margin: 0;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+.octane-reward-track-tip[data-upgrade="true"] p {
+    width: 227px;
+}
+
+.octane-reward-track-tip-frank {
+    position: absolute;
+    left: 329px;
+    top: 7px;
+}
+
+.octane-reward-track-tip .octane-reward-track-btn {
+    position: absolute;
+    left: 323px;
+    top: 9px;
+    width: 91px;
+    height: 30px;
+}
+
+.octane-reward-track-detail-glyph {
+    position: absolute;
+    left: 23px;
+    top: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 104px;
+    height: 100px;
+    overflow: hidden;
+}
+
+.octane-reward-track-detail-glyph .is-scaled {
+    image-rendering: pixelated;
+}
+
+.octane-reward-track-detail-name {
+    position: absolute;
+    left: 137px;
+    top: 35px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 22px;
+    white-space: nowrap;
+}
+
+.octane-reward-track-detail-desc {
+    position: absolute;
+    left: 137px;
+    top: 59px;
+    width: 469px;
+    height: 63px;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.octane-reward-track-levels-rule {
+    position: absolute;
+    left: 22px;
+    top: 147px;
+    width: 582px;
+    height: 2px;
+    background: #d6d5d3;
+}
+
+.octane-reward-track-levels-title {
+    position: absolute;
+    left: 37px;
+    top: 134px;
+    min-width: 53px;
+    height: 18px;
+    padding: 0 3px;
+    background: #f0f0f0;
+    color: #124b8b;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.octane-reward-track-levels {
+    position: absolute;
+    left: 22px;
+    top: 162px;
+    width: 598px;
+    height: 150px;
+    overflow: auto;
+}
+
+.octane-reward-track-level {
+    position: relative;
+    width: 582px;
+    height: 44px;
+    margin-bottom: 9px;
+    border: 2px solid #e3e3e3;
+    background: #fff;
+}
+
+.octane-reward-track-level[data-active="true"] {
+    border-color: var(--rt-active);
+}
+
+.octane-reward-track-level-name {
+    position: absolute;
+    left: 18px;
+    top: 14px;
+    width: 85px;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-reward-track-level .octane-reward-track-mini-bar {
+    position: absolute;
+    left: 94px;
+    top: 19px;
+    width: 260px;
+}
+
+.octane-reward-track-level-count {
+    position: absolute;
+    left: 377px;
+    top: 14px;
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
+}
+
+.octane-reward-track-level-check {
+    position: absolute;
+    left: 470px;
+    top: 15px;
+}
+
+.octane-reward-track-level-reward {
+    position: absolute;
+    left: 520px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.octane-reward-track-hint {
+    position: absolute;
+    left: 16px;
+    top: 331px;
+    width: 596px;
+    height: 74px;
+    overflow: visible;
+    background: #e9e9e9;
+    box-shadow: inset 0 0 0 2px #dedede;
+}
+
+.octane-reward-track-hint-frank {
+    position: absolute;
+    left: 15px;
+    top: 7px;
+    width: 52px;
+    height: 88px;
+}
+
+.octane-reward-track-hint-label {
+    position: absolute;
+    left: 76px;
+    top: 10px;
+    color: #124b8b;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.octane-reward-track-hint-text {
+    position: absolute;
+    left: 76px;
+    top: 29px;
+    width: 333px;
+    height: 42px;
+    overflow: hidden;
+    color: #1f6a96;
+    font-size: 11px;
+    line-height: 14px;
+}
+
+.octane-reward-track-hint .octane-reward-track-btn {
+    position: absolute;
+    left: 471px;
+    top: 16px;
+    width: 109px;
+    height: 30px;
+}
+
+.octane-reward-track-btn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 5px solid transparent;
+    border-image-source: var(--habbo-skin-shiny);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    background: transparent;
+    color: #111;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-reward-track-btn:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-reward-track-btn:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-reward-track-btn:disabled {
+    border-image-source: var(--habbo-skin-shiny-disabled);
+    color: #777;
+    cursor: default;
+}
+
+.octane-reward-track-btn-premium {
+    border-image-source: var(--habbo-skin-shiny-thick);
+    border-image-slice: 5;
+    background: #b265ce;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.octane-reward-track-btn-premium:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.octane-reward-track-btn-premium:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.octane-reward-track-btn-premium:disabled {
+    border-image-source: var(--habbo-skin-shiny-thick-disabled);
+    color: #f3e8f8;
+}
+
+.draggable-window:has(> .octane-reward-track-premium) {
+    width: 390px;
+    min-width: 390px;
+    max-width: 390px;
+    height: 352px;
+}
+
+.octane-card-shell.octane-reward-track-premium {
+    box-sizing: border-box;
+    width: 390px !important;
+    min-width: 390px !important;
+    max-width: 390px !important;
+    height: 352px !important;
+    min-height: 352px !important;
+    max-height: 352px !important;
+    color: #000;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    --octane-card-frame-3: url("../../assets/images/reward-track/air/frame-premium.png");
+    --octane-card-frame-3-title: #7b3fa1;
+}
+
+.octane-reward-track-premium.is-pending .octane-card-close-button {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.octane-reward-track-premium .octane-reward-track-premium-content.octane-card-content-shell {
+    position: relative;
+    display: block;
+    width: 384px;
+    height: 313px;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent;
+}
+
+.octane-reward-track-premium-body {
+    position: absolute;
+    left: 12px;
+    top: 20px;
+    width: 366px;
+    height: 268px;
+}
+
+.octane-reward-track-premium-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 132px;
+    height: 208px;
+    background: #f5def8;
+    box-shadow: inset 0 0 0 2px #e7c6ef;
+}
+
+.octane-reward-track-premium-frame {
+    position: absolute;
+    left: 13px;
+    top: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 106px;
+    height: 92px;
+    background: #fff4ff;
+    box-shadow: inset 0 0 0 2px #f3e2f8;
+}
+
+.octane-reward-track-premium-frame img {
+    width: 58px;
+    height: 45px;
+}
+
+.octane-reward-track-premium-panel-name,
+.octane-reward-track-premium-panel-info {
+    position: absolute;
+    left: 8px;
+    width: 116px;
+    text-align: center;
+}
+
+.octane-reward-track-premium-panel-name {
+    top: 138px;
+    height: 19px;
+    color: #5d2c82;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+}
+
+.octane-reward-track-premium-panel-info {
+    top: 157px;
+    height: 16px;
+    color: #4d3559;
+    font-size: 11px;
+    line-height: 16px;
+}
+
+.octane-reward-track-premium-benefits {
+    position: absolute;
+    left: 146px;
+    top: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 220px;
+}
+
+.octane-reward-track-premium-gap {
+    height: 10px;
+    flex: 0 0 10px;
+}
+
+.octane-reward-track-premium-desc {
+    margin: 0;
+    width: 220px;
+    color: #2d1f35;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+}
+
+.octane-reward-track-premium-benefit {
+    display: flex;
+    align-items: center;
+    width: 220px;
+    height: 24px;
+    padding: 0 6px 0 7px;
+    background: #f3dcf7;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 16px;
+}
+
+.octane-reward-track-premium-benefit img {
+    flex: 0 0 17px;
+}
+
+.octane-reward-track-premium-cost {
+    position: absolute;
+    left: 0;
+    top: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 366px;
+    height: 38px;
+    padding: 0 12px 0 10px;
+    background: #f7e7ff;
+    color: #57356b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.octane-reward-track-premium-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    min-height: 22px;
+    font-weight: 700;
+}
+
+.octane-reward-track-premium-buttons {
+    position: absolute;
+    left: 12px;
+    top: 289px;
+    display: flex;
+    justify-content: space-between;
+    width: 366px;
+    height: 27px;
+}
+
+.octane-reward-track-premium-buttons .octane-reward-track-btn {
+    width: 110px;
+    height: 27px;
+}
+
+/* ---- ME menu icons ---- */
+
+.icon-me-quests,
+.icon-me-dailytasks,
+.icon-me-rewardtrack {
+    width: 32px;
+    height: 30px;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.icon-me-quests {
+    background-image: url("@/assets/images/toolbar/icons/me-menu/quests.png");
+}
+
+.icon-me-dailytasks {
+    background-image: url("@/assets/images/toolbar/icons/me-menu/daily-tasks.png");
+}
+
+.icon-me-rewardtrack {
+    width: 33px;
+    height: 32px;
+    background-image: url("@/assets/images/toolbar/icons/me-menu/reward-track.png");
+}
+
+/* Reward track staff editor (the gear in the window, acc_rewardtrack). */
+.octane-reward-track-admin-toggle {
+    position: absolute;
+    top: 150px;
+    left: 262px;
+    z-index: 8;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #5b5b5b;
+    border-radius: 4px;
+    background: #f5f5f5;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-toggle:hover {
+    background: #ffffff;
+}
+
+.octane-reward-track-content {
+    position: relative;
+}
+
+.octane-reward-track-admin {
+    --rta-bg: #ecece4;
+    --rta-panel: #f7f7f2;
+    --rta-panel-top: #fffdf5;
+    --rta-panel-alt: #e9e9df;
+    --rta-border: #9d9d96;
+    --rta-border-dark: #5f5f59;
+    --rta-text: #20201d;
+    --rta-muted: #60605a;
+    --rta-blue: #418db0;
+    --rta-blue-dark: #0e3f52;
+    --rta-blue-light: #dcecf5;
+    --rta-green: #1a7f2c;
+    --rta-danger: #b83b32;
+    --rta-premium: #6b3fa0;
+    --rta-premium-light: #ece1f6;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 6px;
+    background: var(--rta-bg);
+    color: var(--rta-text);
+    font-size: 12px;
+}
+
+.octane-reward-track-admin-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+}
+
+.octane-reward-track-admin-toolbar > :last-child {
+    margin-left: auto;
+}
+
+.octane-reward-track-admin-heading {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--rta-blue-dark);
+}
+
+.octane-reward-track-admin-status {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.octane-reward-track-admin-status.is-ok {
+    background: #d8f3d0;
+    color: var(--rta-green);
+}
+
+.octane-reward-track-admin-status.is-error {
+    background: #f7d2d2;
+    color: var(--rta-danger);
+}
+
+.octane-reward-track-admin-status.is-pending {
+    background: var(--rta-panel-alt);
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin-body {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.octane-reward-track-admin-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+/* Panels: the bordered cream cards of the catalog editor. */
+.octane-reward-track-admin-panel {
+    border: 2px solid var(--rta-border);
+    border-radius: 4px;
+    background: linear-gradient(180deg, var(--rta-panel-top) 0%, var(--rta-panel) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 1px 0 rgba(0, 0, 0, 0.08);
+    padding: 8px 10px 10px;
+}
+
+.octane-reward-track-admin-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rta-border);
+}
+
+.octane-reward-track-admin-panel-head.is-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+.octane-reward-track-admin-panel.is-collapsed .octane-reward-track-admin-panel-head {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.octane-reward-track-admin-chevron {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--rta-blue-dark);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-panel-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--rta-muted);
+    font-size: 11px;
+}
+
+.octane-reward-track-admin-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rta-blue-dark);
+}
+
+.octane-reward-track-admin-panel.is-track .octane-reward-track-admin-panel-title {
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.octane-reward-track-admin-panel-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.octane-reward-track-admin-subtitle {
+    margin: 4px 0 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rta-blue-dark);
+}
+
+.octane-reward-track-admin-muted {
+    color: var(--rta-muted);
+}
+
+/* Track list. */
+.octane-reward-track-admin-track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.octane-reward-track-admin-track {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border: 1px solid var(--rta-border);
+    border-radius: 4px;
+    background: #ffffff;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-track:hover {
+    border-color: var(--rta-blue);
+}
+
+.octane-reward-track-admin-track.is-active {
+    border-color: var(--rta-blue-dark);
+    background: var(--rta-blue-light);
+    box-shadow: inset 3px 0 0 var(--rta-blue);
+}
+
+.octane-reward-track-admin-track.is-disabled .octane-reward-track-admin-track-id {
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin-track-swatch {
+    width: 10px;
+    height: 28px;
+    border-radius: 2px;
+    background: #3577b9;
+}
+
+.octane-reward-track-admin-track-swatch[data-theme="green"] {
+    background: #2f9a4a;
+}
+
+.octane-reward-track-admin-track-swatch[data-theme="red"] {
+    background: #c0392b;
+}
+
+.octane-reward-track-admin-track-swatch[data-theme="orange"] {
+    background: #e67e22;
+}
+
+.octane-reward-track-admin-track-swatch[data-theme="purple"] {
+    background: #7d3c98;
+}
+
+.octane-reward-track-admin-track-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    font-size: 11px;
+}
+
+.octane-reward-track-admin-track-id {
+    font-size: 12px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tags and chips. */
+.octane-reward-track-admin-tag {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--rta-panel-alt);
+    color: var(--rta-muted);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.octane-reward-track-admin-tag.is-on {
+    background: #d8f3d0;
+    color: var(--rta-green);
+}
+
+.octane-reward-track-admin-tag.is-off {
+    background: #f7d2d2;
+    color: var(--rta-danger);
+}
+
+.octane-reward-track-admin-tag.is-premium {
+    background: var(--rta-premium-light);
+    color: var(--rta-premium);
+}
+
+.octane-reward-track-admin-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    font-size: 11px;
+}
+
+.octane-reward-track-admin-facts .octane-reward-track-admin-tag {
+    margin-left: 0;
+}
+
+.octane-reward-track-admin-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.octane-reward-track-admin-chip {
+    padding: 1px 6px;
+    border: 1px solid var(--rta-border);
+    border-radius: 3px;
+    background: #ffffff;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.octane-reward-track-admin-chip.is-premium {
+    border-color: var(--rta-premium);
+    background: var(--rta-premium-light);
+    color: var(--rta-premium);
+}
+
+/* Tables. */
+.octane-reward-track-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.octane-reward-track-admin-table th {
+    padding: 2px 6px 4px;
+    text-align: left;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin-table td {
+    padding: 3px 6px;
+    border-top: 1px solid var(--rta-border);
+    vertical-align: middle;
+}
+
+.octane-reward-track-admin-table tbody tr:nth-child(even) td {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.octane-reward-track-admin-table.is-levels td {
+    border-top-color: transparent;
+    padding: 2px 6px;
+}
+
+.octane-reward-track-admin-table.is-levels input:not([type="checkbox"]) {
+    width: 90px;
+}
+
+.octane-reward-track-admin-row-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.octane-reward-track-admin-row-actions .octane-reward-track-admin-btn + .octane-reward-track-admin-btn {
+    margin-left: 4px;
+}
+
+/* Forms. */
+.octane-reward-track-admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.octane-reward-track-admin-form.is-nested {
+    margin-top: 8px;
+    padding: 8px 10px 10px;
+    border: 1px solid var(--rta-border);
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.octane-reward-track-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px 8px;
+}
+
+.octane-reward-track-admin-grid.is-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.octane-reward-track-admin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.octane-reward-track-admin-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin input:not([type="checkbox"]),
+.octane-reward-track-admin select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 24px;
+    padding: 2px 6px;
+    border: 2px solid var(--rta-border-dark);
+    border-radius: 4px;
+    background: #fffdf4;
+    color: var(--rta-text);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.octane-reward-track-admin input:not([type="checkbox"]):focus,
+.octane-reward-track-admin select:focus {
+    outline: none;
+    border-color: var(--rta-blue);
+    box-shadow: 0 0 0 2px rgba(99, 197, 233, 0.35);
+}
+
+.octane-reward-track-admin input:disabled {
+    background: var(--rta-panel-alt);
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin input::placeholder {
+    color: #9a9990;
+}
+
+.octane-reward-track-admin input[type="checkbox"] {
+    appearance: auto;
+    -webkit-appearance: checkbox;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: var(--rta-blue);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.octane-reward-track-admin-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+}
+
+.octane-reward-track-admin-toggle-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.octane-reward-track-admin-spacer {
+    flex: 1 1 auto;
+}
+
+/* Buttons keep the hotel skin but take the editor's compact size. */
+.octane-reward-track-admin-btn {
+    min-height: 22px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+}
+
+/* The editor's forms open in a window of their own over the Reward Track window. */
+.octane-reward-track-admin-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.octane-reward-track-admin-modal {
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border: 2px solid #1c3f52;
+    border-radius: 6px;
+    background: #ecece4;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
+.octane-reward-track-admin-modal-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 31px;
+    padding: 0 30px;
+    background: linear-gradient(180deg, #58a8c5 0%, #418db0 45%, #0e3f52 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.octane-reward-track-admin-modal-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-reward-track-admin-modal-body {
+    min-height: 0;
+    overflow: auto;
+    padding: 10px;
+}
+
+.octane-reward-track-admin-modal-body.octane-reward-track-admin {
+    min-height: 0;
+    border-radius: 0;
+}
+
+.octane-reward-track-admin-grid.is-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Inline validation, notes, reorder arrows. */
+.octane-reward-track-admin-field.has-error input:not([type="checkbox"]),
+.octane-reward-track-admin-field.has-error select,
+.octane-reward-track-admin input[aria-invalid="true"] {
+    border-color: var(--rta-danger) !important;
+}
+
+.octane-reward-track-admin-field-error {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--rta-danger);
+}
+
+.octane-reward-track-admin-form-problems {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rta-danger);
+}
+
+.octane-reward-track-admin-note {
+    padding: 4px 8px;
+    border: 1px solid var(--rta-border);
+    border-radius: 4px;
+    background: var(--rta-blue-light);
+    color: var(--rta-blue-dark);
+    font-size: 11px;
+}
+
+.octane-reward-track-admin-order-head,
+.octane-reward-track-admin-order {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.octane-reward-track-admin-arrow {
+    width: 18px;
+    height: 16px;
+    padding: 0;
+    border: 1px solid var(--rta-border);
+    border-radius: 3px;
+    background: #ffffff;
+    color: var(--rta-blue-dark);
+    font-size: 8px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-arrow + .octane-reward-track-admin-arrow {
+    margin-left: 2px;
+}
+
+.octane-reward-track-admin-arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* Track filters, the texts form, the furni picker. */
+.octane-reward-track-admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 6px;
+}
+
+.octane-reward-track-admin-filter {
+    padding: 2px 7px;
+    border: 1px solid var(--rta-border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--rta-muted);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-filter.is-active {
+    border-color: var(--rta-blue-dark);
+    background: var(--rta-blue-light);
+    color: var(--rta-blue-dark);
+}
+
+.octane-reward-track-admin-tag.is-scheduled {
+    background: #fff1cc;
+    color: #8a5a00;
+}
+
+.octane-reward-track-admin-tag.is-expired {
+    background: var(--rta-panel-alt);
+    color: var(--rta-muted);
+}
+
+.octane-reward-track-admin-text-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 360px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.octane-reward-track-admin-text-row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+}
+
+.octane-reward-track-admin-furni-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.octane-reward-track-admin-furni-results {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    max-height: 180px;
+    overflow: auto;
+    padding: 4px;
+    border: 1px solid var(--rta-border);
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.octane-reward-track-admin-furni-match {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 2px 4px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    font: inherit;
+    font-size: 11px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.octane-reward-track-admin-furni-match span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-reward-track-admin-furni-match:hover {
+    border-color: var(--rta-blue);
+}
+
+.octane-reward-track-admin-furni-match.is-picked {
+    border-color: var(--rta-blue-dark);
+    background: var(--rta-blue-light);
+}
+
+.octane-reward-track-admin-furni-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    image-rendering: pixelated;
+}

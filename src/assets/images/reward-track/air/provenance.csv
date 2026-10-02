@@ -1,0 +1,54 @@
+destination,swf symbol,source png path,pixel size
+icons-back.png,icons_back,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2280_back_png$91e4375a8a280a29d3d282ceff127f95729940351.png,33x34
+icons-forward.png,icons_forward,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2619_forward_png$26e79cef1ccdcb1184f3d1a55cc8a727429386755.png,33x34
+checkmark.png,reward_track_checkmark,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2759_class_377.png,17x15
+available-icon.png,available_icon,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2486_class_184.png,20x20
+frank-and-piccolo.png,frank_and_piccolo,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1974_class_597.png,88x39
+frank-tips.png,frank_tips,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2669_class_599.png,52x88
+free-track.png,free_track,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2413_class_600.png,49x48
+locked-reward.png,locked_reward,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2370_locked_reward_png$bfbed8806b4a5181317a497d389928d0493112993.png,18x22
+not-available-icon.png,not_available_icon,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2228_class_1285.png,20x20
+point-large.png,point_large,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1873_class_1336.png,27x18
+point-small.png,point_small,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2734_point_small_png$9ea7b1ef3b1ea5681a954d514f95fd9d24674125.png,19x14
+premium-track.png,premium_track,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2692_class_1345.png,58x45
+prizes-background.png,prizes_background,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2495_class_1347.png,843x243
+prizes-background-stars.png,prizes_background_stars,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2404_class_1348.png,843x226
+reward-gift.png,reward_gift,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2736_reward_gift_png$50b5471db0f40011fea5b9f13fa17eb01155398373.png,41x36
+reward-gift-premium.png,reward_gift_premium,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2591_class_1405.png,41x36
+task-list.png,task_list,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2224_task_list_png$b15f716b69aec7986543e79514012cd41053871181.png,19x25
+task-buy-from-catalogue.png,reward_track_tasks_buy_from_catalogue,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2173_class_264.png,44x52
+task-change-figure.png,reward_track_tasks_change_figure,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2942_change_figure_png$5e9017174fdc08dcd8d004e07c871e8b1890524962.png,53x51
+task-change-motto.png,reward_track_tasks_change_motto,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2137_class_284.png,53x47
+task-chat-with-someone.png,reward_track_tasks_chat_with_someone,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2637_chat_with_someone_png$f974eddc2d056ed11b43dd61a0a173051383350231.png,48x48
+task-create-room.png,reward_track_tasks_create_room,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1937_class_429.png,53x40
+task-dance.png,reward_track_tasks_dance,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2998_dance_png$d1e371dd0f76effb0f3a7c342a39256e2054376834.png,49x46
+task-enter-other-users-room.png,reward_track_tasks_enter_other_users_room,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2897_class_539.png,37x25
+task-find-hand-item.png,reward_track_tasks_find_hand_item,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2107_class_587.png,46x50
+task-follow-friend.png,reward_track_tasks_follow_friend,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2911_follow_friend_png$088be9ff981a459c8401191e4d4fcda11805053131.png,44x45
+task-friend-furni-locked.png,reward_track_tasks_friend_furni_locked,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2141_friend_furni_locked_png$8ba654a430fcbc3227c4115de49f084e1210194379.png,48x48
+task-give-respect.png,reward_track_tasks_give_respect,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2516_class_744.png,34x37
+task-move-item.png,reward_track_tasks_move_item,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2318_class_1245.png,43x45
+task-pet-eat.png,reward_track_tasks_pet_eat,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2286_pet_eat_png$1f6c57b15681df8c2847517db516b6f81553489823.png,42x49
+task-pet-level.png,reward_track_tasks_pet_level,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2428_class_1321.png,46x45
+task-pet-respect.png,reward_track_tasks_pet_respect,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2307_pet_respect_png$f81eb5ca90fc875fc4c4c7431c12e2ad1631429133.png,46x45
+task-place-builders-club-furni.png,reward_track_tasks_place_builders_club_furni,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2605_place_builders_club_furni_png$7dfeda74ecc2b6d8e0e915fa93b6e899138605875.png,24x50
+task-place-item.png,reward_track_tasks_place_item,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1969_place_item_png$e43b60ec90954ab6c328fbbf652a0019827472362.png,24x50
+task-publish-picture.png,reward_track_tasks_publish_picture,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1978_class_1364.png,52x50
+task-replenish-respect.png,reward_track_tasks_replenish_respect,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2819_class_1398.png,42x45
+task-request-friend.png,reward_track_tasks_request_friend,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2184_class_1401.png,49x48
+task-rotate-item.png,reward_track_tasks_rotate_item,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2756_class_1439.png,43x46
+task-send-messenger-invite.png,reward_track_tasks_send_messenger_invite,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2595_class_1496.png,52x33
+task-send-messenger-message.png,reward_track_tasks_send_messenger_message,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2628_class_1497.png,39x50
+task-set-relationship-status.png,reward_track_tasks_set_relationship_status,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2888_set_relationship_status_png$d75f304319dae8c7ec03bb620f8435aa1247855963.png,40x50
+task-switch-item-state.png,reward_track_tasks_switch_item_state,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2013_switch_item_state_png$8794f4d6c8e289103cc5695070868cec1163433383.png,43x45
+task-swim.png,reward_track_tasks_swim,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2327_swim_png$ae83fad27542d1d2e3b88a0647657946779312431.png,52x42
+task-teleport.png,reward_track_tasks_teleport,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/1909_class_1606.png,52x51
+task-use-habbicon.png,reward_track_tasks_use_habbicon,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2629_use_habbicon_png$a9e261156ea9666bc915bb7e8f87c99d274191817.png,26x50
+task-wave.png,reward_track_tasks_wave,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2144_class_1732.png,51x49
+task-wear-badge.png,reward_track_tasks_wear_badge,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2954_wear_badge_png$d3a6343de6e9741184f54c56d6920bc7399526002.png,40x49
+frame-blue.png,habbo_skin_ubuntu_png top multiply #3576B9,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55
+frame-orange.png,habbo_skin_ubuntu_png top multiply #C97918,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55
+frame-forest-green.png,habbo_skin_ubuntu_png top multiply #3F8A45,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55
+frame-red.png,habbo_skin_ubuntu_png top multiply #B84B4B,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55
+frame-cyan.png,habbo_skin_ubuntu_png top multiply #1F9EB3,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55
+frame-premium.png,habbo_skin_ubuntu_png top multiply #7B3FA1,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png,26x55

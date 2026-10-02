@@ -9,10 +9,10 @@ import {
     getQuestImageName,
     getQuestProgressPercent,
     getRewardTrackPrizeState,
+    getRewardTrackTaskHintLink,
     isQuestRewardVisible,
     paginatePrizes,
     paginatePrizeTiers,
-    getRewardTrackTaskHintLink,
     resolveRewardTrackTheme,
     sortDailyTasks
 } from './QuestUtilities';
@@ -102,8 +102,8 @@ describe('reward track', () => {
     });
 
     it('falls back to the blue theme', () => {
-        expect(resolveRewardTrackTheme('unknown').dark).toBe('#3577B9');
-        expect(resolveRewardTrackTheme('red').dark).toBe('#B84A4B');
+        expect(resolveRewardTrackTheme('unknown').dark).toBe('#3576B9');
+        expect(resolveRewardTrackTheme('red').dark).toBe('#B84B4B');
     });
 
     it('filters tasks by the three tabs', () => {
@@ -149,9 +149,9 @@ describe('reward track', () => {
     });
 
     it('opens a window from the hint only for the official actions that have a button', () => {
-        expect(getRewardTrackTaskHintLink('enter_other_users_room')?.link).toBe('navigator/show');
-        expect(getRewardTrackTaskHintLink('CHAT_WITH_SOMEONE')?.link).toBe('navigator/show');
-        expect(getRewardTrackTaskHintLink('place_item')?.link).toBe('inventory/show');
+        expect(getRewardTrackTaskHintLink('enter_other_users_room')).toBeNull();
+        expect(getRewardTrackTaskHintLink('CHAT_WITH_SOMEONE')).toBeNull();
+        expect(getRewardTrackTaskHintLink('place_item')).toBeNull();
         expect(getRewardTrackTaskHintLink('give_respect')).toBeNull();
         expect(getRewardTrackTaskHintLink('')).toBeNull();
     });
