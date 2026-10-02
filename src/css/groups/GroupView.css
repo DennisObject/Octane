@@ -1181,3 +1181,8 @@
     grid-auto-rows: max-content;
     align-content: start;
 }
+.octane-group-manager .form-check-input {
+    appearance: auto;
+    accent-color: #337d92;
+    cursor: pointer;
+}

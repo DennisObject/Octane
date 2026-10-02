@@ -218,7 +218,8 @@
     "groupforum.thread.delete": "Elimina argomento + messaggi",
     "groupforum.message.hide": "Nascondi messaggio",
     "group.forum.enable.caption": "Abilita/disabilita forum di gruppo",
-    "group.forum.enable.help": "Se disabiliti il forum di gruppo, verranno eliminati anche tutti i messaggi!",
+    "group.forum.enable.help": "I membri possono aprire il forum del gruppo mentre questa opzione è abilitata.",
+    "group.forum.disable.confirm": "Disabilitare il forum di questo gruppo?",
     "groupforum.view.no_threads": "Al momento non ci sono argomenti attivi",
 
     // ------------------------------------------------------------------------

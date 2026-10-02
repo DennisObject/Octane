@@ -5,6 +5,8 @@ import {
     GroupAdminTakeComposer,
     GroupConfirmMemberRemoveEvent,
     GroupConfirmRemoveMemberComposer,
+    GroupInformationComposer,
+    GroupInformationEvent,
     GroupMemberParser,
     GroupMembersComposer,
     GroupMembersEvent,
@@ -15,6 +17,7 @@ import {
     GroupMemberUpdateEvent,
     GroupRank,
     GroupRemoveMemberComposer,
+    HabboGroupDeactivatedMessageEvent,
     ILinkEventTracker,
     RemoveLinkEventTracker
 } from '@octane/renderer';
@@ -43,14 +46,15 @@ export const GroupMembersView: FC<{}> = (props) => {
     const [pageId, setPageId] = useState<number>(-1);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [removingMemberName, setRemovingMemberName] = useState<string>(null);
+    const [isOwner, setIsOwner] = useState(false);
+    const pendingRemoval = useRef<{ groupId: number; userId: number; name: string }>(null);
     const { showConfirm = null } = useNotification();
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
     const getRankDescription = (member: GroupMemberParser) => {
         if (member.rank === GroupRank.OWNER) return 'group.members.owner';
 
-        if (membersData.admin) {
+        if (isOwner) {
             if (member.rank === GroupRank.ADMIN) return 'group.members.removerights';
 
             if (member.rank === GroupRank.MEMBER) return 'group.members.giverights';
@@ -66,7 +70,7 @@ export const GroupMembersView: FC<{}> = (props) => {
     }, [groupId, levelId, pageId, searchQuery]);
 
     const toggleAdmin = (member: GroupMemberParser) => {
-        if (!membersData.admin || member.rank === GroupRank.OWNER) return;
+        if (!isOwner || member.rank === GroupRank.OWNER) return;
 
         const key = `admin_${member.id}`;
         if (pendingActionsRef.current.has(key)) return;
@@ -102,7 +106,7 @@ export const GroupMembersView: FC<{}> = (props) => {
             return;
         }
 
-        setRemovingMemberName(member.name);
+        pendingRemoval.current = { groupId: membersData.groupId, userId: member.id, name: member.name };
         SendMessageComposer(new GroupConfirmRemoveMemberComposer(membersData.groupId, member.id));
     };
 
@@ -116,6 +120,12 @@ export const GroupMembersView: FC<{}> = (props) => {
         setMembersData(parser);
         setLevelId(parser.level);
         setTotalPages(Math.ceil(parser.totalMembersCount / parser.pageSize));
+    });
+
+    useMessageEvent<GroupInformationEvent>(GroupInformationEvent, (event) =>
+    {
+        const parser = event.getParser();
+        if (parser.id === groupId) setIsOwner(parser.isOwner);
     });
 
     useMessageEvent<GroupMemberUpdateEvent>(GroupMemberUpdateEvent, (event) => {
@@ -132,20 +142,28 @@ export const GroupMembersView: FC<{}> = (props) => {
 
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
         const parser = event.getParser();
+        const removal = pendingRemoval.current;
+
+        if (!removal || removal.groupId !== groupId || removal.userId !== parser.userId) return;
+
+        pendingRemoval.current = null;
 
         showConfirm(
             LocalizeText(
                 parser.furnitureCount > 0 ? 'group.kickconfirm.desc' : 'group.kickconfirm_nofurni.desc',
                 ['user', 'amount'],
-                [removingMemberName, parser.furnitureCount.toString()]
+                [removal.name, parser.furnitureCount.toString()]
             ),
             () => {
-                SendMessageComposer(new GroupRemoveMemberComposer(membersData.groupId, parser.userId));
+                SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));
             },
             null
         );
+    });
 
-        setRemovingMemberName(null);
+    useMessageEvent<HabboGroupDeactivatedMessageEvent>(HabboGroupDeactivatedMessageEvent, (event) =>
+    {
+        if (event.getParser().groupId === groupId) setGroupId(-1);
     });
 
     useEffect(() => {
@@ -186,7 +204,9 @@ export const GroupMembersView: FC<{}> = (props) => {
         setMembersData(null);
         setTotalPages(0);
         setSearchQuery('');
-        setRemovingMemberName(null);
+        pendingRemoval.current = null;
+        setIsOwner(false);
+        SendMessageComposer(new GroupInformationComposer(groupId, false));
     }, [groupId]);
 
     if (groupId === -1 || !membersData) return null;
@@ -213,7 +233,7 @@ export const GroupMembersView: FC<{}> = (props) => {
                         <select className="octane-groups-select form-select form-select-sm w-full" value={levelId} onChange={(event) => setLevelId(parseInt(event.target.value))}>
                             <option value="0">{LocalizeText('group.members.search.all')}</option>
                             <option value="1">{LocalizeText('group.members.search.admins')}</option>
-                            <option value="2">{LocalizeText('group.members.search.pending')}</option>
+                            {membersData.admin && <option value="2">{LocalizeText('group.members.search.pending')}</option>}
                         </select>
                     </Column>
                 </div>
@@ -247,8 +267,8 @@ export const GroupMembersView: FC<{}> = (props) => {
                                         <div className="flex items-center justify-center">
                                             <div
                                                 className={classNames(
-                                                    `octane-icon icon-group-small-${member.rank === GroupRank.OWNER ? 'owner' : member.rank === GroupRank.ADMIN ? 'admin' : membersData.admin && member.rank === GroupRank.MEMBER ? 'not-admin' : ''}`,
-                                                    membersData.admin && 'cursor-pointer'
+                                                    `octane-icon icon-group-small-${member.rank === GroupRank.OWNER ? 'owner' : member.rank === GroupRank.ADMIN ? 'admin' : isOwner && member.rank === GroupRank.MEMBER ? 'not-admin' : ''}`,
+                                                    isOwner && 'cursor-pointer'
                                                 )}
                                                 title={LocalizeText(getRankDescription(member))}
                                                 onClick={(event) => toggleAdmin(member)}
