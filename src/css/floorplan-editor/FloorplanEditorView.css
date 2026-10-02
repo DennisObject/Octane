@@ -1288,32 +1288,34 @@
     gap: 8px;
 }
 
-.fp-bc-btn.is-save,
-.fp-bc-btn.is-save:hover,
-.fp-bc-btn.is-save:active,
-.fp-bc-btn.is-save:disabled {
+.octane-floorplan-window .fp-bc-btn.is-save,
+.octane-floorplan-window .fp-bc-btn.is-save:hover,
+.octane-floorplan-window .fp-bc-btn.is-save:active,
+.octane-floorplan-window .fp-bc-btn.is-save:disabled {
     border-width: 0;
-    border-image: none;
+    border-image-source: initial;
+    border-image-width: 0;
+    border-image-slice: 0;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 120px 35px;
     color: #111111;
 }
 
-.fp-bc-btn.is-save {
+.octane-floorplan-window .fp-bc-btn.is-save {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-default.png");
 }
 
-.fp-bc-btn.is-save:hover {
+.octane-floorplan-window .fp-bc-btn.is-save:hover {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-hover.png");
 }
 
-.fp-bc-btn.is-save:active {
+.octane-floorplan-window .fp-bc-btn.is-save:active {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-pressed.png");
 }
 
-.fp-bc-btn.is-save:disabled,
-.fp-bc-btn.is-save:disabled:hover {
+.octane-floorplan-window .fp-bc-btn.is-save:disabled,
+.octane-floorplan-window .fp-bc-btn.is-save:disabled:hover {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-disabled.png");
     cursor: default;
 }
