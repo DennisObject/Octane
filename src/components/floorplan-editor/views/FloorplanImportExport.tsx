@@ -31,7 +31,7 @@ export const FloorplanImportExport: FC<Props> = ({ state, dispatch, onClose, onS
     };
 
     return (
-        <OctaneCardView uniqueKey="floorplan-import-export" frameStyle={3} theme="primary" className="w-[379px] h-[374px]" classNames={['octane-floorplan-import']} isResizable={false}>
+        <OctaneCardView uniqueKey="floorplan-import-export" frameStyle={3} theme="primary" className="w-[379px] h-[374px]" classNames={['octane-floorplan-import', ...(!showLoad ? ['is-official'] : [])]} isResizable={false}>
             <OctaneCardHeaderView headerText={LocalizeText('floor.plan.editor.import.export')} onCloseClick={onClose} />
             <OctaneCardContentView overflow="hidden" className="fp-bc-import">
                 <textarea className="fp-bc-import-data" name="data" value={raw} spellCheck={false} onChange={(event) => setRaw(event.target.value)} />
