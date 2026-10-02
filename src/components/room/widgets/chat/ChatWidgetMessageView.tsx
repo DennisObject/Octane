@@ -85,7 +85,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
 
         setIsReady(true);
 
-        if (isVisible && (previousWidth !== width || previousHeight !== height) && makeRoom) makeRoom(chat);
+        if (isVisible && (previousWidth !== width || previousHeight !== height)) makeRoomRef.current?.(chat);
     }, [
         chat,
         chat.formattedText,
@@ -94,7 +94,6 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         chat.translatedFormattedText,
         chatTextSize,
         isVisible,
-        makeRoom,
         showPointer
     ]);
 
@@ -153,9 +152,9 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     useEffect(() => {
         if (!isReady || !chat || isVisible) return;
 
-        if (makeRoom) makeRoom(chat);
+        makeRoomRef.current?.(chat);
         setIsVisible(true);
-    }, [chat, isReady, isVisible, makeRoom]);
+    }, [chat, isReady, isVisible]);
 
     const messageClassName = `message [overflow-wrap:anywhere] break-words${chat.type === 1 ? ' italic text-[#595959]' : ''}${chat.type === 2 ? ' font-bold' : ''}`;
 
