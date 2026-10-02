@@ -1648,3 +1648,23 @@
 .fp-bc-drop-item[aria-selected="true"] { background: #dddddd; }
 .fp-bc-drop-item.is-highlighted { background: #ebebeb; }
 .fp-bc-drop-item[aria-selected="true"].is-highlighted { background: #dddddd; }
+
+/* The import frame overrides the style-3 default content margins in its XML. */
+.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 {
+    padding: 30px 1px 1px !important;
+}
+
+.octane-floorplan-import.is-official .octane-card-content-shell {
+    position: absolute;
+    top: 30px;
+    right: 1px;
+    bottom: 1px;
+    left: 1px;
+    height: auto;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-revert {
+    left: -3px;
+}
