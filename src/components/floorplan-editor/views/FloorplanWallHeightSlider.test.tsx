@@ -25,6 +25,16 @@ const stubTrackGeometry = () => {
 describe('FloorplanWallHeightSlider', () => {
     afterEach(() => cleanup());
 
+    it('places the thumb by percent unless official pixel steps are requested', () => {
+        const { rerender } = render(<FloorplanWallHeightSlider value={16} onChange={() => undefined} />);
+
+        expect(screen.getByTestId('wall-height-thumb').style.left).toBe('93.75%');
+
+        rerender(<FloorplanWallHeightSlider value={16} onChange={() => undefined} official />);
+
+        expect(screen.getByTestId('wall-height-thumb').style.left).toBe('104.0625px');
+    });
+
     it('shows the current value on the thumb', () => {
         render(<FloorplanWallHeightSlider value={7} onChange={() => undefined} />);
 

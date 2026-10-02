@@ -19,6 +19,10 @@
     padding: 33px 0 0 !important;
 }
 
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3::after {
+    display: none;
+}
+
 .octane-floorplan-window .octane-card-content-shell {
     position: relative;
     height: 567px;
@@ -656,8 +660,8 @@
     height: calc(100% - 119px);
     box-sizing: border-box;
     padding: 4px 8px 0;
-    background: #bdbdb5;
-    box-shadow: inset 0 0 0 1px #8f8f88;
+    background: transparent;
+    box-shadow: none;
 }
 
 .fp-bc-side {
@@ -668,8 +672,18 @@
     height: calc(100% - 118px);
     box-sizing: border-box;
     padding: 3px;
-    background: #bdbdb5;
-    box-shadow: inset 0 0 0 1px #8f8f88;
+    background: transparent;
+    box-shadow: none;
+}
+
+.fp-bc-heightmap::before,
+.fp-bc-side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-image: url("../../assets/images/floorplan-editor/air/panel-border.png") 3 fill / 3px stretch;
+    pointer-events: none;
 }
 
 .fp-bc .fp-control-group {
@@ -779,10 +793,23 @@
     line-height: 16px;
 }
 
+.fp-bc .fp-bc-height-label {
+    position: absolute;
+    left: 0;
+    top: 4px;
+}
+
 .fp-bc-colormap {
     position: relative;
     width: 315px;
     height: 24px;
+}
+
+.fp-bc .fp-bc-colormap {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 48px;
 }
 
 .fp-bc-colormap-track {
@@ -794,6 +821,10 @@
     cursor: pointer;
 }
 
+.fp-bc .fp-bc-colormap-track {
+    top: 23px;
+}
+
 .fp-bc-colormap-thumb {
     position: absolute;
     top: 0;
@@ -803,6 +834,11 @@
     pointer-events: none;
     image-rendering: pixelated;
     transform: scaleY(-1);
+}
+
+.fp-bc .fp-bc-colormap-thumb {
+    top: 29px;
+    margin-left: 0;
 }
 
 .fp-bc-map {
@@ -875,10 +911,21 @@
     height: 98px;
 }
 
+.fp-bc .fp-bc-room-controls {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 271px;
+}
+
 .fp-bc-direction {
     position: relative;
     width: 139px;
     height: 98px;
+}
+
+.fp-bc .fp-bc-direction {
+    flex: 0 0 139px;
 }
 
 .fp-bc-direction-label {
@@ -948,6 +995,10 @@
     overflow: hidden;
 }
 
+.fp-bc .fp-bc-avatar {
+    cursor: auto;
+}
+
 .fp-bc-ghost,
 .fp-bc-ghost img {
     display: block;
@@ -957,16 +1008,31 @@
     image-rendering: pixelated;
 }
 
+.fp-bc .fp-bc-ghost,
+.fp-bc .fp-bc-ghost img {
+    width: auto;
+    height: auto;
+    object-fit: fill;
+}
+
 .fp-bc-vdivider {
     width: 3px;
     height: 97px;
     image-rendering: pixelated;
 }
 
+.fp-bc .fp-bc-vdivider {
+    flex: 0 0 3px;
+}
+
 .fp-bc-thickness {
     position: relative;
     width: 128px;
     height: 99px;
+}
+
+.fp-bc .fp-bc-thickness {
+    flex: 0 0 128px;
 }
 
 .fp-bc-thickness .fp-bc-direction-label {
@@ -1008,10 +1074,22 @@
     margin-top: 2px;
 }
 
+.fp-bc .fp-bc-wall-row {
+    position: absolute;
+    left: 7px;
+    top: 97px;
+    width: 269px;
+    margin-top: 0;
+}
+
 .fp-bc-wall-row.is-off .fp-bc-wall-label,
 .fp-bc-wall-row.is-off .fp-bc-wall-number,
 .fp-bc-wall-row.is-off .fp-bc-wall-slider {
     opacity: 0.6;
+}
+
+.fp-bc .fp-bc-wall-slider {
+    width: 118px;
 }
 
 .fp-bc-check {
@@ -1026,8 +1104,16 @@
     cursor: pointer;
 }
 
+.fp-bc .fp-bc-check {
+    background: url("../../assets/images/floorplan-editor/air/checkbox-default.png") 0 0 / 15px 15px no-repeat;
+}
+
 .fp-bc-check.is-on {
     background-image: var(--habbo-skin-checkbox-checked);
+}
+
+.fp-bc .fp-bc-check.is-on {
+    background-image: url("../../assets/images/floorplan-editor/air/checkbox-selected.png");
 }
 
 .fp-bc-wall-label {
@@ -1037,6 +1123,10 @@
     width: 90px;
     font-size: 12px;
     line-height: 17px;
+}
+
+.fp-bc .fp-bc-wall-label {
+    width: 105px;
 }
 
 .fp-bc-wall-number {
@@ -1049,6 +1139,10 @@
     font-weight: 700;
     line-height: 17px;
     text-align: center;
+}
+
+.fp-bc .fp-bc-wall-number {
+    left: 123px;
 }
 
 .fp-bc-wall-slider {
@@ -1071,6 +1165,11 @@
     height: 30px;
     background: url("../../assets/images/floorplan-editor/air/wall-slider.png") center / 56px 2px no-repeat;
     cursor: pointer;
+}
+
+.fp-bc .fp-bc-wall-slider-track {
+    left: 2px;
+    background-size: 111px 2px;
 }
 
 .fp-bc-wall-slider-thumb {
@@ -1189,32 +1288,34 @@
     gap: 8px;
 }
 
-.fp-bc-btn.is-save,
-.fp-bc-btn.is-save:hover,
-.fp-bc-btn.is-save:active,
-.fp-bc-btn.is-save:disabled {
+.octane-floorplan-window .fp-bc-btn.is-save,
+.octane-floorplan-window .fp-bc-btn.is-save:hover,
+.octane-floorplan-window .fp-bc-btn.is-save:active,
+.octane-floorplan-window .fp-bc-btn.is-save:disabled {
     border-width: 0;
-    border-image: none;
+    border-image-source: initial;
+    border-image-width: 0;
+    border-image-slice: 0;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 120px 35px;
     color: #111111;
 }
 
-.fp-bc-btn.is-save {
+.octane-floorplan-window .fp-bc-btn.is-save {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-default.png");
 }
 
-.fp-bc-btn.is-save:hover {
+.octane-floorplan-window .fp-bc-btn.is-save:hover {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-hover.png");
 }
 
-.fp-bc-btn.is-save:active {
+.octane-floorplan-window .fp-bc-btn.is-save:active {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-pressed.png");
 }
 
-.fp-bc-btn.is-save:disabled,
-.fp-bc-btn.is-save:disabled:hover {
+.octane-floorplan-window .fp-bc-btn.is-save:disabled,
+.octane-floorplan-window .fp-bc-btn.is-save:disabled:hover {
     background-image: url("../../assets/images/floorplan-editor/air/save-style5-disabled.png");
     cursor: default;
 }
@@ -1457,3 +1558,93 @@
 .fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-default .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_default_3_rgt.png"); }
 .fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-hover .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_hover_3_rgt.png"); }
 .fp-skin-bar.is-horizontal .fp-skin-bar-thumb.is-pressed .is-end { background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_horizontal_pressed_3_rgt.png"); }
+
+/* AIR dropmenu style 3 keeps the frame caps and the 22x20 arrow separate. */
+.fp-bc-thickness-menu {
+    position: absolute;
+    left: 14px;
+    width: 114px;
+    height: 25px;
+}
+
+.fp-bc-thickness-menu[data-menu="wall-thickness"] { top: 30px; }
+.fp-bc-thickness-menu[data-menu="floor-thickness"] { top: 61px; }
+.fp-bc-thickness-menu.is-open { z-index: 5; }
+
+.fp-bc-thickness-menu .fp-bc-drop {
+    inset: 0;
+    width: 114px;
+    height: 25px;
+    padding: 0;
+    border-image-source: url("../../assets/images/floorplan-editor/air/dropmenu-frame.png");
+    background: transparent;
+    color: #000000;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.fp-bc-thickness-menu .fp-bc-drop span {
+    position: absolute;
+    left: 0;
+    top: -2px;
+    width: 102px;
+    height: 17px;
+    padding: 0 2px;
+    box-sizing: border-box;
+    z-index: 1;
+    line-height: 17px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.fp-bc-thickness-menu .fp-bc-drop::after {
+    content: "";
+    position: absolute;
+    left: 84px;
+    top: -4px;
+    width: 22px;
+    height: 20px;
+    background: url("../../assets/images/floorplan-editor/air/dropmenu-arrow.png") 0 0 / 22px 20px no-repeat;
+    pointer-events: none;
+}
+
+.fp-bc-thickness-menu .fp-bc-drop:hover::after {
+    background-image: url("../../assets/images/floorplan-editor/air/dropmenu-arrow-hover.png");
+}
+
+.fp-bc-drop-list {
+    position: absolute;
+    left: 0;
+    top: 0;
+    min-width: 114px;
+    padding: 2px 2px 5px;
+    border: 0 solid transparent;
+    border-image: url("../../assets/images/floorplan-editor/air/dropmenu-frame.png") 6 fill / 6px stretch;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.fp-bc-drop-item {
+    display: block;
+    width: 100%;
+    min-width: max-content;
+    height: 23px;
+    margin: 0;
+    padding: 2px 6px 4px;
+    box-sizing: border-box;
+    border: 0;
+    background: #ffffff;
+    color: #000000;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 17px;
+    white-space: nowrap;
+    text-align: left;
+    cursor: pointer;
+}
+
+.fp-bc-drop-item[aria-selected="true"] { background: #dddddd; }
+.fp-bc-drop-item.is-highlighted { background: #ebebeb; }
+.fp-bc-drop-item[aria-selected="true"].is-highlighted { background: #dddddd; }

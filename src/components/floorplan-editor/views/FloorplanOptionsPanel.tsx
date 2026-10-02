@@ -2,15 +2,17 @@ import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/
 import { Dispatch, FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../api';
 import { AIR_FLOOR_ASSETS } from '../air/airAssets';
+import { FloorplanThicknessMenu } from './FloorplanThicknessMenu';
+import { THICKNESS_NAMES } from '../state/constants';
 import { EntryDir, FloorplanAction, FloorplanState, ThicknessLevel } from '../state/types';
 
 type Props = {
     state: FloorplanState;
     dispatch: Dispatch<FloorplanAction>;
+    official?: boolean;
 };
 
 const THICKNESS_LEVELS: ThicknessLevel[] = [0, 1, 2, 3];
-const THICKNESS_NAMES = ['thinnest', 'thin', 'normal', 'thick'] as const;
 
 const OFFICIAL_GHOST_FIGURE = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
 
@@ -65,10 +67,11 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
     );
 };
 
-export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch }) => {
+export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch, official = false }) => {
     const setDir = (next: EntryDir) => dispatch({ type: 'SET_DOOR_DIR', dir: next, source: 'local' });
     const setWall = (t: ThicknessLevel) => dispatch({ type: 'SET_THICKNESS', wall: t, source: 'local' });
     const setFloor = (t: ThicknessLevel) => dispatch({ type: 'SET_THICKNESS', floor: t, source: 'local' });
+    const Menu = official ? FloorplanThicknessMenu : ThicknessMenu;
 
     return (
         <div className="fp-bc-room-controls" data-testid="floorplan-room-controls">
@@ -92,8 +95,8 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch }) => {
             <img className="fp-bc-vdivider" src={AIR_FLOOR_ASSETS.receptionDivider} alt="" />
             <div className="fp-bc-thickness" data-testid="floorplan-appearance">
                 <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.room.options')}</div>
-                <ThicknessMenu value={state.thickness.wall} onChange={setWall} testId="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
-                <ThicknessMenu value={state.thickness.floor} onChange={setFloor} testId="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
+                <Menu value={state.thickness.wall} onChange={setWall} testId="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
+                <Menu value={state.thickness.floor} onChange={setFloor} testId="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
             </div>
         </div>
     );

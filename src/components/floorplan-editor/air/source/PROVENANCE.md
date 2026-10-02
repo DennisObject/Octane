@@ -71,3 +71,17 @@ Files: `icon_style2_arrow_left.png` and `icon_style3_arrow_right.png` are the bl
 ## Scrollbars and toolbar selection
 
 Copied from `floor-editor-reference/assets/chrome/skin/` (`BARS-AND-SELECTION.md`). Style 3 art is 17px on the cross axis and is drawn at the widget origin. Height-map slots are 13px, so the extra 4px is clipped. The preview vertical slot is 20px and the 17px art stays left-aligned. Toolbar buttons are `container_button` style 3 at 51×42. Bit 16 is the skin state `pressed`. Files: `air/scroll/scrollbar3_*` and `air/toolbar_container_button_style3_51x42_{default,hovering,pressed}.png`.
+
+## Frame and control corrections (2026-10-02)
+
+Build remains `WIN63-202609091217-117204808`, resolved through Habbo Intelligence. The existing frame-ubuntu-3-bc.png already matches the original colorized frame; the extra CSS fill was removed rather than recoloring it. Atlas `decompiled/images/2925_habbo_skin_ubuntu_png$3e7b6c31bebfcaeb507157a302e0b5be1308799348.png`, skin `2731_habbo_skin_frame_3_xml$d1e23f95e0a5a8d49e2c96e218b39397322985329.bin`. Top 33 rows multiply by FF8D00; body and bottom stay untinted. The ordinary editor overrides default frame margins with 0/33/0/0 in its XML.
+
+`dropmenu-frame.png` assembles left/center atlas (10,70) and separate right cap (140,70), 6/4/6 columns, 6/11/6 rows. `dropmenu-arrow.png` and `dropmenu-arrow-hover.png` are the 22x20 rectangles at (20,72) and (60,72). Skin `2136_habbo_skin_dropmenu_3_xml$89b64be081a9a84b6b80b746236626701322682160.bin`, window layout `1903_dropmenu_3_xml$1ab4a96b40d2038cce5d2f186668186f1537248225.bin`. Arrow moves to (90,2) on 114x25 controls; it is not stretched into a border.
+
+`checkbox-default.png` and `checkbox-selected.png` are fixed 15x15 style-0 crops at (410,0)/(410,16) of `2378_class_840.png` (habbo_blue_skin), which style 3 falls back to. `panel-border.png` is the style-3 border-slot crop at (20,30), 7x7, from that sheet, multiplied by BDBDB5 with alpha unchanged and 3/1/3 slices.
+
+`height-colormap.png` reproduces `BCFloorPlanEditor.createTileHeightColorMap`: 315x19, one column per x, palette index int(x/315*30). Colors use the unoccupied uint(255*channel) values from the extraction height-colors.csv, not a browser gradient. Slider geometry is from the copied editor layout; the 56x2 wall-divider asset stretches horizontally to 111x2, and the 17x21 thumb stretches to its 12x16 XML slot.
+
+Ghost avatar bitmap stays at its natural sh size: AvatarImageWidget.refresh assigns the widget dimensions from its bitmap without a CSS scale.
+
+The dropmenu labels grow through TextLabelController.refresh and ButtonController expand-to-child; the item layout 12px is not the final row. Embedded Ubuntu Regular metrics (em 1000, ascent 932, descent 190), leading 0, text-field gutter 4 and floor-to-pixel give a 17px caption plus 2/4 margins: 23px rows and a 99px four-item popup. Closed runtime caption width is 102 after closeExpandedMenuView; the separate arrow remains at x=90.

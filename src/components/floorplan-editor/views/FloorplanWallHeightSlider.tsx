@@ -6,12 +6,13 @@ type Props = {
     value: number;
     onChange: (next: number) => void;
     disabled?: boolean;
+    official?: boolean;
 };
 
 const STEPS = 16;
 
 /** Official wall_height_slider: horizontal, 16 steps shown as 1..16. */
-export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange, disabled = false }) => {
+export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange, disabled = false, official = false }) => {
     const trackRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -54,7 +55,9 @@ export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange, disabled
 
     const clamped = Math.max(MIN_WALL_HEIGHT, Math.min(MAX_WALL_HEIGHT, value));
     const shown = clamped <= 0 ? 1 : clamped;
-    const thumbPct = ((shown - 1) / STEPS) * 100;
+    const thumbLeft = official
+        ? `${(shown - 1) * (111 / STEPS)}px`
+        : `${(((shown - 1) / STEPS) * 100).toFixed(4)}%`;
 
     return (
         <div
@@ -75,7 +78,7 @@ export const FloorplanWallHeightSlider: FC<Props> = ({ value, onChange, disabled
                 className="fp-bc-wall-slider-thumb"
                 src={AIR_FLOOR_ASSETS.sliderThumb}
                 alt=""
-                style={{ left: `${thumbPct.toFixed(4)}%` }}
+                style={{ left: thumbLeft }}
             />
         </div>
     );

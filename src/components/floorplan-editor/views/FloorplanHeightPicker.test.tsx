@@ -90,6 +90,18 @@ describe('FloorplanHeightPicker', () => {
         restore();
     });
 
+    it('keeps the css gradient unless the official palette is requested', () => {
+        const { rerender } = render(<FloorplanHeightPicker selectedH={0} onSelect={() => undefined} />);
+        const legacyTrack = screen.getByTestId('height-track');
+
+        expect(legacyTrack.style.background).toContain('linear-gradient');
+        expect(legacyTrack.style.backgroundImage).not.toContain('height-colormap');
+
+        rerender(<FloorplanHeightPicker selectedH={0} onSelect={() => undefined} official />);
+
+        expect(screen.getByTestId('height-track').style.backgroundImage).toContain('height-colormap');
+    });
+
     it('thumb fill matches the tile colour at the picked height', () => {
         const { rerender } = render(<FloorplanHeightPicker selectedH={0} onSelect={() => undefined} />);
 
