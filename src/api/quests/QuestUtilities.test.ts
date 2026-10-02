@@ -11,6 +11,7 @@ import {
     getRewardTrackPrizeState,
     getRewardTrackTaskHintLink,
     isQuestRewardVisible,
+    layoutRewardTrackPrizes,
     paginatePrizes,
     paginatePrizeTiers,
     resolveRewardTrackTheme,
@@ -148,12 +149,33 @@ describe('reward track', () => {
         expect(paginatePrizeTiers([], 4)).toEqual({ free: [[]], milestones: [[]], premium: [[]] });
     });
 
-    it('opens a window from the hint only for the official actions that have a button', () => {
+    it('opens a window from the hint only for the official tasks that have a button', () => {
+        expect(getRewardTrackTaskHintLink('buy_catalog_furni')?.link).toBe('catalog/open');
+        expect(getRewardTrackTaskHintLink('change_outfit')?.link).toBe('avatareditor/open');
+        expect(getRewardTrackTaskHintLink('chat_with_users')?.link).toBe('navigator/tab/popular');
+        expect(getRewardTrackTaskHintLink('create_room')?.link).toBe('navigator/tab/me');
+        expect(getRewardTrackTaskHintLink('make_friends')?.link).toBe('friendbar/findfriends');
+        expect(getRewardTrackTaskHintLink('place_furniture')?.link).toBe('inventory/open/furni');
+        expect(getRewardTrackTaskHintLink('publish_picture')?.link).toBe('camera/open');
+        expect(getRewardTrackTaskHintLink('visit_rooms')?.link).toBe('navigator/tab/popular');
+        expect(getRewardTrackTaskHintLink('wear_badge')?.link).toBe('inventory/open/badges');
         expect(getRewardTrackTaskHintLink('enter_other_users_room')).toBeNull();
         expect(getRewardTrackTaskHintLink('CHAT_WITH_SOMEONE')).toBeNull();
         expect(getRewardTrackTaskHintLink('place_item')).toBeNull();
         expect(getRewardTrackTaskHintLink('give_respect')).toBeNull();
         expect(getRewardTrackTaskHintLink('')).toBeNull();
+    });
+
+    it('keeps both introduction prizes on the first page', () => {
+        const layout = layoutRewardTrackPrizes([
+            { premium: false, requiredPoints: 50 },
+            { premium: true, requiredPoints: 200 }
+        ]);
+
+        expect(layout.pageCount).toBe(1);
+        expect(layout.pageForPoints(50)).toBe(0);
+        expect(layout.pageForPoints(200)).toBe(0);
+        expect(layout.pageForPoints(0)).toBe(0);
     });
 
     it('turns the boost multiplier into a percentage', () => {
