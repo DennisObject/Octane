@@ -88,6 +88,7 @@ import './css/WiredView.css';
 import './css/camera/CameraWidget.css';
 import './css/catalog/CatalogGiftView.css';
 import './css/navigator/NavigatorView.css';
+import './css/quests/RewardTrackView.css';
 import './css/common/ClassicScrollbar.css';
 
 document.documentElement.classList.add('has-classic-scrollbar');

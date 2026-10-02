@@ -154,13 +154,13 @@ export const getRewardTrackPrizeState = (prize: RewardTrackPrizeData, track: Rew
 export const getRewardTrackPrizeTooltip = (state: RewardTrackPrizeState): string => {
     switch (state) {
         case 'claimed':
-            return localizeWithFallback('reward_track.rewards.reward_tooltip.claimed', 'Already claimed');
+            return localizeWithFallback('reward_track.rewards.reward_tooltip.claimed', 'You already claimed this reward');
         case 'premium_locked':
-            return localizeWithFallback('reward_track.rewards.reward_tooltip.premium', 'Premium reward - upgrade to claim it');
+            return localizeWithFallback('reward_track.rewards.reward_tooltip.premium', 'Upgrade to premium to claim this reward');
         case 'not_enough_points':
-            return localizeWithFallback('reward_track.rewards.reward_tooltip.not_enough_points', 'Collect more points to claim this reward');
+            return localizeWithFallback('reward_track.rewards.reward_tooltip.not_enough_points', 'You do not have enough points to claim this reward');
         default:
-            return localizeWithFallback('reward_track.rewards.reward_tooltip.claim', 'Click to claim');
+            return localizeWithFallback('reward_track.rewards.reward_tooltip.claim', 'Click to claim this reward');
     }
 };
 
@@ -171,33 +171,35 @@ export interface RewardTrackTheme {
     active: string;
 }
 
-/** RewardTrackTheme.resolve(): five recolour themes, blue is the fallback. */
+/** RewardTrackTheme.resolve(): the five uint themes, blue is the fallback. */
 export const REWARD_TRACK_THEMES: Record<string, RewardTrackTheme> = {
-    blue: { dark: '#3577B9', medium: '#CFE2F9', light: '#DDEBF9', active: '#BDD6EF' },
-    orange: { dark: '#C97C98', medium: '#FFE1B2', light: '#FFF1D6', active: '#FFD1D1' },
-    forest_green: { dark: '#3F8B45', medium: '#CDE0CB', light: '#E1F0DF', active: '#B8E0B6' },
-    red: { dark: '#B84A4B', medium: '#F1D9CC', light: '#F8E8DD', active: '#E7B0B8' },
-    cyan: { dark: '#1F9BF3', medium: '#C7F1B5', light: '#DCF3BB', active: '#B5E9B1' }
+    blue: { dark: '#3576B9', medium: '#CFE2F9', light: '#DDEBF9', active: '#BDD6EF' },
+    orange: { dark: '#C97918', medium: '#FFDFB2', light: '#FFEFD6', active: '#FFCF91' },
+    forest_green: { dark: '#3F8A45', medium: '#CDEACB', light: '#E1F3DF', active: '#B8DFB6' },
+    red: { dark: '#B84B4B', medium: '#F1CCCC', light: '#F8DDDD', active: '#E7B8B8' },
+    cyan: { dark: '#1F9EB3', medium: '#C7EFF5', light: '#DCF7FB', active: '#B5E9F1' }
 };
 
 export const resolveRewardTrackTheme = (theme: string): RewardTrackTheme => REWARD_TRACK_THEMES[theme] ?? REWARD_TRACK_THEMES.blue;
 
 /**
- * The window the hint button opens for a task, keyed on the official action
- * name the server sends. Only the actions whose official hint button exists
- * (`task.<id>.hint.button_text`) map to a window; the others show no button.
+ * Hint buttons exist only when `reward_track.{track}.task.{id}.hint.internal_link`
+ * is set. The introduction track's nine links are keyed on the task id.
  */
-export const getRewardTrackTaskHintLink = (actionType: string): { fallbackText: string; link: string } | null => {
-    switch ((actionType || '').toLowerCase()) {
-        case 'enter_other_users_room':
-        case 'chat_with_someone':
-            return { fallbackText: 'Open the Navigator', link: 'navigator/show' };
-        case 'place_item':
-            return { fallbackText: 'Open the inventory', link: 'inventory/show' };
-        default:
-            return null;
-    }
+const REWARD_TRACK_TASK_HINTS: Record<string, { fallbackText: string; link: string }> = {
+    buy_catalog_furni: { fallbackText: 'Open Catalog', link: 'catalog/open' },
+    change_outfit: { fallbackText: 'Open Clothes Editor', link: 'avatareditor/open' },
+    chat_with_users: { fallbackText: 'Find Rooms', link: 'navigator/tab/popular' },
+    create_room: { fallbackText: 'Open Navigator', link: 'navigator/tab/me' },
+    make_friends: { fallbackText: 'Find Friends', link: 'friendbar/findfriends' },
+    place_furniture: { fallbackText: 'Open Inventory', link: 'inventory/open/furni' },
+    publish_picture: { fallbackText: 'Open Camera', link: 'camera/open' },
+    visit_rooms: { fallbackText: 'Open Navigator', link: 'navigator/tab/popular' },
+    wear_badge: { fallbackText: 'Open Inventory', link: 'inventory/open/badges' }
 };
+
+export const getRewardTrackTaskHintLink = (taskId: string): { fallbackText: string; link: string } | null =>
+    REWARD_TRACK_TASK_HINTS[(taskId || '').toLowerCase()] ?? null;
 
 export const getRewardTrackText = (trackId: string, suffix: string, fallback: string): string =>
     localizeWithFallback(`reward_track.${trackId}.${suffix}`, fallback);
@@ -250,13 +252,116 @@ export const paginatePrizeTiers = <T extends { premium: boolean; requiredPoints:
         const span = new Set(page);
 
         pageMilestones.push(page);
-        const ofPage = (tier: boolean) => prizes.filter((prize) => prize.premium === tier && span.has(prize.requiredPoints)).sort((a, b) => a.requiredPoints - b.requiredPoints);
+        const ofPage = (tier: boolean) =>
+            prizes.filter((prize) => prize.premium === tier && span.has(prize.requiredPoints)).sort((a, b) => a.requiredPoints - b.requiredPoints);
 
         free.push(ofPage(false));
         premium.push(ofPage(true));
     }
 
     return free.length ? { free, milestones: pageMilestones, premium } : { free: [[]], milestones: [[]], premium: [[]] };
+};
+
+const PAGE_BOUNDARY_EPSILON = 0.0001;
+
+const minimumGapForTier = (prizes: { premium: boolean; requiredPoints: number }[], premium: boolean): number => {
+    let previous = -1;
+    let gap = 0;
+
+    for (const prize of prizes) {
+        if (prize.premium !== premium) continue;
+
+        if (previous !== -1) {
+            const delta = prize.requiredPoints - previous;
+
+            if (delta > 0 && (gap === 0 || delta < gap)) gap = delta;
+        }
+
+        previous = prize.requiredPoints;
+    }
+
+    return gap;
+};
+
+export interface RewardTrackPrizeLayout {
+    pageCount: number;
+    xForPoints: (points: number, page: number) => number;
+    pageForPoints: (points: number) => number;
+}
+
+/**
+ * RewardTrackPrizeLayout.rebuild. Pages follow the point gap, prize width 80
+ * and spacing 15 across the 598px prize content. The page span is fixed from
+ * the first distance, then the distance grows until that span still fits.
+ */
+export const layoutRewardTrackPrizes = (
+    prizes: { premium: boolean; requiredPoints: number }[],
+    visibleWidth = 598,
+    prizeWidth = 80,
+    spacing = 15
+): RewardTrackPrizeLayout => {
+    const edge = prizeWidth / 2 + spacing;
+    let minRequired = -1;
+    let maxRequired = 0;
+
+    for (const prize of prizes) {
+        if (minRequired === -1 || prize.requiredPoints < minRequired) minRequired = prize.requiredPoints;
+
+        if (prize.requiredPoints > maxRequired) maxRequired = prize.requiredPoints;
+    }
+
+    minRequired = Math.max(0, minRequired);
+
+    const freeGap = minimumGapForTier(prizes, false);
+    const premiumGap = minimumGapForTier(prizes, true);
+    let gap = freeGap;
+
+    if (freeGap <= 0) gap = premiumGap;
+    else if (premiumGap > 0) gap = Math.min(freeGap, premiumGap);
+
+    if (gap <= 0) gap = Math.max(1, maxRequired);
+
+    let distance = (prizeWidth + spacing) / gap;
+
+    if (distance <= 0) distance = 1;
+
+    const zeroOffsetFor = (value: number) => Math.max(0, edge - minRequired * value);
+    const usableWidthFor = (value: number) => Math.max(1, visibleWidth - edge - zeroOffsetFor(value));
+    const pagePointSpan = Math.max(1, Math.max(1, Math.floor(usableWidthFor(distance) / distance / gap)) * gap);
+    const fits = (value: number) => pagePointSpan * value <= usableWidthFor(value) + PAGE_BOUNDARY_EPSILON;
+    let low = distance;
+    let high = distance;
+
+    for (let step = 0; step < 32; step++) {
+        high *= 2;
+
+        if (!fits(high)) break;
+
+        low = high;
+    }
+
+    for (let step = 0; step < 24; step++) {
+        const mid = (low + high) / 2;
+
+        if (fits(mid)) low = mid;
+        else high = mid;
+    }
+
+    distance = low;
+
+    const zeroOffset = zeroOffsetFor(distance);
+    const pageForSpan = (points: number) => (points <= 0 ? 0 : Math.max(0, Math.ceil((points - PAGE_BOUNDARY_EPSILON) / pagePointSpan) - 1));
+    let maxPage = 0;
+
+    for (const prize of prizes) maxPage = Math.max(maxPage, pageForSpan(prize.requiredPoints));
+
+    const pageCount = Math.max(1, maxPage + 1);
+
+    return {
+        pageCount,
+        xForPoints: (points, page) => zeroOffset + (points - Math.max(0, page * pagePointSpan)) * distance,
+        pageForPoints: (points) => Math.max(0, Math.min(pageCount - 1, pageForSpan(points)))
+    };
 };
 
 export const getPremiumBoostPercent = (taskPointsBoost: number): number => Math.round((taskPointsBoost - 1) * 100);
