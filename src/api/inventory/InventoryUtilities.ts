@@ -36,7 +36,7 @@ export const cancelRoomObjectPlacement = () => {
 export const attemptPetPlacement = (petItem: IPetItem, flag: boolean = false) => {
     const petData = petItem.petData;
 
-    if (!petData) return false;
+    if (!petData || !Number.isSafeInteger(petData.id) || petData.id <= 0) return false;
 
     const session = GetRoomSessionManager().getSession(1);
 
