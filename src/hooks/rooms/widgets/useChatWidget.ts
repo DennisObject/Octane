@@ -2,7 +2,6 @@ import {
     GetGuestRoomResultEvent,
     GetRoomEngine,
     GetSessionDataManager,
-    PetFigureData,
     RoomChatSettings,
     RoomChatSettingsEvent,
     RoomDragEvent,
@@ -160,10 +159,7 @@ const useChatWidgetState = () => {
         }
     }, [chatSettings]);
 
-    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, async (event) => {
-        const roomToken = roomTokenRef.current;
-        const seq = reserveChatLine(lineQueueRef.current);
-
+    const processChatEvent = (event: RoomSessionChatEvent, roomToken: number, seq: number) => {
         if (!roomSession || isDisposed.current) {
             abandonLine(seq);
 
@@ -174,6 +170,8 @@ const useChatWidgetState = () => {
         const bubbleLocation = roomObject ? GetRoomObjectScreenLocation(roomSession.roomId, roomObject?.id, RoomObjectCategory.UNIT) : { x: 0, y: 0 };
         const userData = roomObject ? roomSession.userDataManager.getUserDataByIndex(event.objectId) : new RoomUserData(-1);
 
+        if (!userData) return;
+
         let username = '';
         let avatarColor = 0;
         let imageUrl: string = null;
@@ -181,7 +179,6 @@ const useChatWidgetState = () => {
         let chatType = event.chatType;
         let styleId = event.style;
         let userType = 0;
-        let petType = -1;
         let text = event.message;
 
         if (userData) {
@@ -191,11 +188,10 @@ const useChatWidgetState = () => {
 
             switch (userType) {
                 case RoomObjectType.PET:
-                    petType = new PetFigureData(figure).typeId;
-                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE));
+                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
                     break;
                 case RoomObjectType.USER:
-                    imagePromise = ChatBubbleUtilities.getUserImage(figure);
+                    imagePromise = ChatBubbleUtilities.getUserImage(figure).catch(() => null);
                     break;
                 case RoomObjectType.RENTABLE_BOT:
                 case RoomObjectType.BOT:
@@ -263,12 +259,6 @@ const useChatWidgetState = () => {
             chatType === RoomSessionChatEvent.CHAT_TYPE_WHISPER ||
             chatType === RoomSessionChatEvent.CHAT_TYPE_SHOUT;
 
-        if (!userData) {
-            abandonLine(seq);
-
-            return;
-        }
-
         const outgoingTranslation = isTranslatableChatType && userData.webID === ownUserId ? consumeOutgoingTranslation(text) : null;
         const originalText = outgoingTranslation?.originalText || text;
         const formattedText = RoomChatFormatter(originalText);
@@ -310,21 +300,12 @@ const useChatWidgetState = () => {
         chatMessage.nickIcon = event.nickIcon || '';
         chatMessage.displayOrder = event.displayOrder || 'icon-prefix-name';
 
-        if (imagePromise) {
-            try {
-                imageUrl = await imagePromise;
-            } catch {
-                imageUrl = null;
-            }
-        }
-
         if (isDisposed.current || roomToken !== roomTokenRef.current) {
             abandonLine(seq);
 
             return;
         }
 
-        chatMessage.imageUrl = imageUrl;
         settleChatLine(lineQueueRef.current, seq, chatMessage);
         scheduleLineFlush();
 
@@ -362,6 +343,22 @@ const useChatWidgetState = () => {
                   })
                 : -1;
 
+        if (imagePromise) {
+            void imagePromise.then((resolvedImageUrl) => {
+                if (!resolvedImageUrl || isDisposed.current || roomToken !== roomTokenRef.current) return;
+
+                // This same object may still be in the RAF queue or already in live state.
+                chatMessage.imageUrl = resolvedImageUrl;
+                setChatMessages((prevValue) => {
+                    if (isDisposed.current || roomToken !== roomTokenRef.current || !prevValue.includes(chatMessage)) return prevValue;
+
+                    return [...prevValue];
+                });
+
+                if (chatEntryId >= 0) updateChatEntry(chatEntryId, { imageUrl: resolvedImageUrl });
+            }).catch(() => {});
+        }
+
         if (!settings.enabled || outgoingTranslation || !isTranslatableChatType || !text.trim().length) return;
 
         void translateIncoming(text).then((translation) => {
@@ -384,6 +381,20 @@ const useChatWidgetState = () => {
                 translation.targetLanguage
             );
         });
+    };
+
+    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, (event) => {
+        const roomToken = roomTokenRef.current;
+        const seq = reserveChatLine(lineQueueRef.current);
+
+        try {
+            processChatEvent(event, roomToken, seq);
+        } catch (error) {
+            console.error('[RoomChat] Failed to process chat event', error);
+        } finally {
+            // Settlement is idempotent: preserve queued text, or close a failed/skipped slot.
+            abandonLine(seq);
+        }
     });
 
     useUiEvent<SoundboardRoomMessageEvent>(SoundboardRoomMessageEvent.ROOM_MESSAGE, (event) => {
