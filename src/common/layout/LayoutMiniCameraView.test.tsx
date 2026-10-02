@@ -21,19 +21,20 @@ vi.mock('../../api', () => ({
     PlaySound: vi.fn(),
     SoundNames: { CAMERA_SHUTTER: 'camera-shutter' },
     blitRoomCanvasToViewfinder: vi.fn(),
+    getTrustedCameraViewport: (frame: unknown) => frame,
     getViewfinderRoomFrame: vi.fn(() => ({ x: 3, y: 30, width: 110, height: 110 }))
 }));
 
 describe('AIR room thumbnail viewfinder', () => {
     it('submits at most one screenshot while the server request is pending', () => {
-        const textureReceiver = vi.fn(() => new Promise<void>(() => undefined));
-        render(<LayoutMiniCameraView roomId={42} textureReceiver={textureReceiver} onClose={vi.fn()} />);
+        const viewportReceiver = vi.fn(() => new Promise<void>(() => undefined));
+        render(<LayoutMiniCameraView roomId={42} viewportReceiver={viewportReceiver} onClose={vi.fn()} />);
 
-        const saveButton = screen.getByRole('button', { name: 'navigator.thumbeditor.save' });
+        const saveButton = screen.getByRole('button', { name: 'navigator.thumbnail.camera.title.capture' });
         fireEvent.click(saveButton);
         fireEvent.click(saveButton);
 
-        expect(textureReceiver).toHaveBeenCalledTimes(1);
+        expect(viewportReceiver).toHaveBeenCalledTimes(1);
         expect(saveButton).toBeDisabled();
     });
 });

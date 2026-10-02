@@ -1,11 +1,11 @@
-import { GetGuestRoomMessageComposer, GetRoomEngine, OctaneRenderTexture, ThumbnailStatusMessageEvent } from '@octane/renderer';
+import { GetGuestRoomMessageComposer, ThumbnailStatusMessageEvent } from '@octane/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { LocalizeText, RefreshRoomThumbnail, SendMessageComposer } from '../../../../api';
+import { CameraViewport, LocalizeText, RefreshRoomThumbnail, SendMessageComposer, sendTrustedCameraRequest } from '../../../../api';
 import { LayoutMiniCameraView } from '../../../../common';
 import { RoomWidgetThumbnailEvent } from '../../../../events';
 import { useMessageEvent, useNotification, useRoom, useUiEvent } from '../../../../hooks';
 
-const THUMBNAIL_UPLOAD_TIMEOUT_MS = 10_000;
+const THUMBNAIL_UPLOAD_TIMEOUT_MS = 30_000;
 
 export const RoomThumbnailWidgetView: FC<{}> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -22,6 +22,12 @@ export const RoomThumbnailWidgetView: FC<{}> = (props) => {
     }, []);
 
     useEffect(() => clearUploadTimeout, [clearUploadTimeout]);
+
+    useEffect(() => {
+        clearUploadTimeout();
+        setIsSaving(false);
+        setIsVisible(false);
+    }, [roomSession?.roomId, clearUploadTimeout]);
 
     useUiEvent([RoomWidgetThumbnailEvent.SHOW_THUMBNAIL, RoomWidgetThumbnailEvent.HIDE_THUMBNAIL, RoomWidgetThumbnailEvent.TOGGLE_THUMBNAIL], (event) => {
         switch (event.type) {
@@ -41,7 +47,7 @@ export const RoomThumbnailWidgetView: FC<{}> = (props) => {
         }
     });
 
-    const receiveTexture = async (texture: OctaneRenderTexture) => {
+    const receiveViewport = async (viewport: CameraViewport) => {
         if (isSaving) return;
 
         setIsSaving(true);
@@ -53,14 +59,11 @@ export const RoomThumbnailWidgetView: FC<{}> = (props) => {
         }, THUMBNAIL_UPLOAD_TIMEOUT_MS);
 
         try {
-            await GetRoomEngine().saveTextureAsScreenshot(texture, true);
+            sendTrustedCameraRequest({ v: 1, action: 'capture', requestId: crypto.randomUUID(), viewport }, true);
         } catch {
             clearUploadTimeout();
             setIsSaving(false);
             simpleAlert(LocalizeText('camera.error.creation'));
-        } finally {
-            // createTextureFromRoom hands us a fresh render texture; it is ours to release.
-            texture?.destroy?.(true);
         }
     };
 
@@ -89,13 +92,14 @@ export const RoomThumbnailWidgetView: FC<{}> = (props) => {
         simpleAlert(LocalizeText('navigator.thumbnail.camera.success'));
     });
 
-    if (!isVisible) return null;
+    if (!isVisible || !roomSession) return null;
 
     return (
         <LayoutMiniCameraView
             roomId={roomSession.roomId}
-            textureReceiver={receiveTexture}
+            viewportReceiver={receiveViewport}
             isSaving={isSaving}
+            onCaptureError={() => simpleAlert(LocalizeText('camera.error.creation'))}
             onClose={() => !isSaving && setIsVisible(false)}
         />
     );

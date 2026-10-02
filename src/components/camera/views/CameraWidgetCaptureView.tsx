@@ -1,6 +1,16 @@
-import { GetRenderer, GetRoomEngine, OctaneTexture, TextureUtils } from '@octane/renderer';
+import { GetRenderer, OctaneTexture } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
-import { blitRoomCanvasToViewfinder, CameraPicture, GetRoomSession, getViewfinderRoomFrame, LocalizeText, PlaySound, SoundNames } from '../../../api';
+import {
+    blitRoomCanvasToViewfinder,
+    CameraPicture,
+    captureTrustedCamera,
+    deleteTrustedCamera,
+    getTrustedCameraViewport,
+    getViewfinderRoomFrame,
+    LocalizeText,
+    PlaySound,
+    SoundNames
+} from '../../../api';
 import { Button, Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
 import { getNextEmptyCameraSlot, willFillLastCameraSlot } from '../CameraAirUtilities';
@@ -154,47 +164,71 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         const frame = getViewfinderRoomFrame(elementRef.current, 320, 320);
 
-        if (!frame) return;
+        if (!frame) {
+            simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
+            return;
+        }
 
         isTakingPictureRef.current = true;
 
         const targetSlot = activePictureSlotIndex >= 0 && activePictureSlotIndex < CAMERA_ROLL_LIMIT ? activePictureSlotIndex : 0;
         let texture: OctaneTexture = null;
+        let capturedDraftId: string = null;
 
         try {
-            texture = GetRoomEngine().createTextureFromRoom(GetRoomSession().roomId, 1, frame);
-
-            if (!texture) return;
-
             PlaySound(SoundNames.CAMERA_SHUTTER);
             flashRef.current?.classList.remove('octane-camera-capture__flash--active');
             // Restart the CSS flash even when two photographs are taken quickly.
             void flashRef.current?.offsetWidth;
             flashRef.current?.classList.add('octane-camera-capture__flash--active');
 
-            const imageUrl = await TextureUtils.generateImageUrl(texture);
+            // Only this server-issued capture can enter the roll or checkout.
+            const previousDraft = cameraRoll[targetSlot]?.draftId;
+            if (previousDraft) {
+                deleteTrustedCamera(previousDraft);
+                setCameraRoll((previous) => previous.map((picture, index) => (index === targetSlot ? null : picture)));
+            }
+            const capture = await captureTrustedCamera(getTrustedCameraViewport(frame));
+            capturedDraftId = capture.draftId;
 
-            if (!imageUrl || !isMountedRef.current) {
-                texture?.destroy?.(true);
-                texture = null;
-
-                if (isMountedRef.current) {
-                    simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
-                }
-
+            if (!isMountedRef.current) {
+                deleteTrustedCamera(capture.draftId);
                 return;
             }
+
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+            await new Promise<void>((resolve, reject) => {
+                const timeout = window.setTimeout(() => reject(new Error('Camera image timed out')), 30_000);
+                image.onload = () => {
+                    window.clearTimeout(timeout);
+                    resolve();
+                };
+                image.onerror = () => {
+                    window.clearTimeout(timeout);
+                    reject(new Error('Camera image could not be loaded'));
+                };
+                image.src = capture.url;
+            });
+            if (!isMountedRef.current) {
+                deleteTrustedCamera(capture.draftId);
+                return;
+            }
+            texture = OctaneTexture.from(image);
+            const imageUrl = capture.url;
 
             cameraRoll[targetSlot]?.texture?.destroy?.(true);
 
             const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => cameraRoll[index] ?? null);
 
-            nextRoll[targetSlot] = new CameraPicture(texture, imageUrl);
+            nextRoll[targetSlot] = new CameraPicture(texture, imageUrl, capture.draftId);
             pendingCapturedSlotRef.current = targetSlot;
             pendingShouldShowFullAlertRef.current = !hasShownFullRollAlert && willFillLastCameraSlot(cameraRoll, targetSlot);
             texture = null;
             setCameraRoll(nextRoll);
+            capturedDraftId = null;
         } catch {
+            if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
             texture?.destroy?.(true);
 
             if (isMountedRef.current) {

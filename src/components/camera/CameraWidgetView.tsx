@@ -9,8 +9,8 @@ import {
     RoomSessionEvent
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { GetConfigurationValue, LocalizeText } from '../../api';
-import { useAchievements, useCamera, useOctaneEvent, useNotification, useRoom } from '../../hooks';
+import { CameraEffectSelection, deleteTrustedCamera, GetConfigurationValue, LocalizeText } from '../../api';
+import { useAchievements, useCamera, useNotification, useOctaneEvent, useRoom } from '../../hooks';
 import { getCameraAchievementLevel } from './CameraAirUtilities';
 import { CameraWidgetCaptureView } from './views/CameraWidgetCaptureView';
 import { CameraWidgetCheckoutView } from './views/CameraWidgetCheckoutView';
@@ -37,7 +37,8 @@ const isDefaultRoomZoom = (roomId: number): boolean => Math.abs(getLogicalRoomZo
 
 export const CameraWidgetView: FC<{}> = (props) => {
     const [mode, setMode] = useState<number>(MODE_NONE);
-    const [base64Url, setSavedPictureUrl] = useState<string>(null);
+    const [checkoutEffects, setCheckoutEffects] = useState<CameraEffectSelection[]>([]);
+    const [checkoutZoom, setCheckoutZoom] = useState(false);
     const {
         availableEffects = [],
         selectedPictureIndex = -1,
@@ -84,6 +85,7 @@ export const CameraWidgetView: FC<{}> = (props) => {
             case 'delete':
                 if (selectedPictureIndex < 0) return;
 
+                deleteTrustedCamera(cameraRoll[selectedPictureIndex]?.draftId);
                 cameraRoll[selectedPictureIndex]?.texture?.destroy?.(true);
                 setCameraRoll((previous) => previous.map((picture, index) => (index === selectedPictureIndex ? null : picture)));
                 setActivePictureSlotIndex(selectedPictureIndex);
@@ -97,7 +99,7 @@ export const CameraWidgetView: FC<{}> = (props) => {
         }
     };
 
-    const checkoutPictureUrl = (pictureUrl: string) => {
+    const checkoutPictureUrl = (pictureUrl: string, effects: CameraEffectSelection[] = [], zoom = false) => {
         if (GetSessionDataManager().isSafetyLocked) {
             simpleAlert(LocalizeText('notifications.text.safety_locked'), null, null, null, LocalizeText('generic.alert.title'));
 
@@ -112,7 +114,8 @@ export const CameraWidgetView: FC<{}> = (props) => {
             return;
         }
 
-        setSavedPictureUrl(pictureUrl);
+        setCheckoutEffects(effects);
+        setCheckoutZoom(zoom);
         setMode(MODE_CHECKOUT);
     };
 
@@ -178,7 +181,9 @@ export const CameraWidgetView: FC<{}> = (props) => {
             )}
             {mode === MODE_CHECKOUT && (
                 <CameraWidgetCheckoutView
-                    base64Url={base64Url}
+                    picture={cameraRoll[selectedPictureIndex]}
+                    effects={checkoutEffects}
+                    zoom={checkoutZoom}
                     price={price}
                     onCancelClick={() => processAction('editor_cancel')}
                     onCloseClick={() => processAction('editor_cancel')}

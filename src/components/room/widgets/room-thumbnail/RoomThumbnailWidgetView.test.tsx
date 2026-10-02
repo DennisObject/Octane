@@ -6,7 +6,7 @@ import { RoomThumbnailWidgetView } from './RoomThumbnailWidgetView';
 const mocks = vi.hoisted(() => ({
     messageHandler: null as null | ((event: any) => void),
     refreshRoomThumbnail: vi.fn(),
-    saveTextureAsScreenshot: vi.fn(() => Promise.resolve()),
+    sendTrustedCameraRequest: vi.fn(() => Promise.resolve()),
     sendMessageComposer: vi.fn(),
     simpleAlert: vi.fn(),
     uiHandler: null as null | ((event: { type: string }) => void)
@@ -17,20 +17,25 @@ vi.mock('@octane/renderer', async () => {
 
     return {
         ...actual,
-        GetRoomEngine: () => ({ saveTextureAsScreenshot: mocks.saveTextureAsScreenshot })
+        GetRoomEngine: () => ({})
     };
 });
 
 vi.mock('../../../../api', () => ({
     LocalizeText: (key: string) => key,
     RefreshRoomThumbnail: mocks.refreshRoomThumbnail,
-    SendMessageComposer: mocks.sendMessageComposer
+    SendMessageComposer: mocks.sendMessageComposer,
+    sendTrustedCameraRequest: mocks.sendTrustedCameraRequest
 }));
 
 vi.mock('../../../../common', () => ({
-    LayoutMiniCameraView: ({ isSaving, onClose, textureReceiver }: any) => (
+    LayoutMiniCameraView: ({ isSaving, onClose, viewportReceiver }: any) => (
         <div role="dialog" aria-label="room-thumbnail-camera">
-            <button type="button" disabled={isSaving} onClick={() => textureReceiver({ id: 'texture' })}>
+            <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => viewportReceiver({ width: 1280, height: 900, x: 3, y: 30, cropWidth: 110, cropHeight: 110 })}
+            >
                 navigator.thumbeditor.save
             </button>
             <button type="button" disabled={isSaving} onClick={onClose}>
@@ -56,7 +61,7 @@ afterEach(() => {
     cleanup();
     mocks.messageHandler = null;
     mocks.refreshRoomThumbnail.mockClear();
-    mocks.saveTextureAsScreenshot.mockClear();
+    mocks.sendTrustedCameraRequest.mockClear();
     mocks.sendMessageComposer.mockClear();
     mocks.simpleAlert.mockClear();
     mocks.uiHandler = null;
@@ -68,7 +73,7 @@ const openCamera = () => {
 };
 
 describe('AIR room thumbnail server handshake', () => {
-    it('keeps the camera open and locked until the server acknowledges the upload', async () => {
+    it('keeps the camera open and locked until the server acknowledges the capture', async () => {
         openCamera();
 
         fireEvent.click(screen.getByRole('button', { name: 'navigator.thumbeditor.save' }));
@@ -80,7 +85,7 @@ describe('AIR room thumbnail server handshake', () => {
     it('closes and refreshes the saved room thumbnail after server success', async () => {
         openCamera();
         fireEvent.click(screen.getByRole('button', { name: 'navigator.thumbeditor.save' }));
-        await waitFor(() => expect(mocks.saveTextureAsScreenshot).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(mocks.sendTrustedCameraRequest).toHaveBeenCalledTimes(1));
 
         act(() => mocks.messageHandler?.({ getParser: () => ({ isRenderLimitHit: false, ok: true }) }));
 
@@ -92,7 +97,7 @@ describe('AIR room thumbnail server handshake', () => {
     it('keeps the camera usable when the server rejects the thumbnail', async () => {
         openCamera();
         fireEvent.click(screen.getByRole('button', { name: 'navigator.thumbeditor.save' }));
-        await waitFor(() => expect(mocks.saveTextureAsScreenshot).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(mocks.sendTrustedCameraRequest).toHaveBeenCalledTimes(1));
 
         act(() => mocks.messageHandler?.({ getParser: () => ({ isRenderLimitHit: true, ok: false }) }));
 
@@ -107,7 +112,7 @@ describe('AIR room thumbnail server handshake', () => {
         fireEvent.click(screen.getByRole('button', { name: 'navigator.thumbeditor.save' }));
         await act(async () => Promise.resolve());
 
-        act(() => vi.advanceTimersByTime(10_000));
+        act(() => vi.advanceTimersByTime(30_000));
 
         expect(screen.getByRole('button', { name: 'navigator.thumbeditor.save' })).toBeEnabled();
         expect(mocks.simpleAlert).toHaveBeenCalledWith('camera.error.creation');

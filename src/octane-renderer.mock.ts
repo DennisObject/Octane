@@ -1091,3 +1091,6 @@ export class PurchaseFromCatalogComposer extends StubClass {}
 export class RoomEngineObjectPlacedEvent extends StubClass {
     static PLACED = 'REOPE_PLACED';
 }
+
+export class RenderRoomMessageComposer extends RecordingComposer {}
+export class RenderRoomThumbnailMessageComposer extends RecordingComposer {}

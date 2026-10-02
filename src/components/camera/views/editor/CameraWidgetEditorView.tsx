@@ -7,7 +7,7 @@ import {
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaDownload, FaSearchMinus, FaSearchPlus, FaTrash } from 'react-icons/fa';
-import { CameraEditorTabs, CameraPicture, CameraPictureThumbnail, LocalizeText } from '../../../../api';
+import { CameraEditorTabs, CameraEffectSelection, CameraPicture, CameraPictureThumbnail, LocalizeText } from '../../../../api';
 import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Slider } from '../../../../common';
 import { CameraWidgetEffectListView } from './effect-list';
 
@@ -17,7 +17,7 @@ export interface CameraWidgetEditorViewProps {
     myLevel: number;
     onClose: () => void;
     onCancel: () => void;
-    onCheckout: (pictureUrl: string) => void;
+    onCheckout: (pictureUrl: string, effects: CameraEffectSelection[], zoom: boolean) => void;
 }
 
 const TABS: string[] = [CameraEditorTabs.COLORMATRIX, CameraEditorTabs.COMPOSITE];
@@ -86,7 +86,12 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                     onCancel();
                     return;
                 case 'checkout':
-                    if (!isRendering && currentPictureUrl) onCheckout(currentPictureUrl);
+                    if (!isRendering && currentPictureUrl)
+                        onCheckout(
+                            currentPictureUrl,
+                            selectedEffects.map((effect) => ({ name: effect.effect.name, strength: effect.strength })),
+                            isZoomed
+                        );
                     return;
                 case 'change_tab':
                     setCurrentTab(String(effectName));
@@ -101,10 +106,18 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
 
                     if (getSelectedEffectIndex(effectName) >= 0) return;
 
+                    const remainingEffects = effect.type === 'frame'
+                        ? selectedEffects.filter((selectedEffect) => selectedEffect.effect.type !== 'frame')
+                        : selectedEffects;
+
+                    if (remainingEffects.length >= 8) return;
+
                     setIsRendering(true);
                     setSelectedEffects((previous) => {
                         const effectsWithoutAnotherFrame =
                             effect.type === 'frame' ? previous.filter((selectedEffect) => selectedEffect.effect.type !== 'frame') : previous;
+
+                        if (effectsWithoutAnotherFrame.length >= 8) return previous;
 
                         return [
                             ...effectsWithoutAnotherFrame,
@@ -158,7 +171,8 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
             onCheckout,
             onClose,
             selectedEffectName,
-            selectedEffects.length
+            selectedEffects,
+            isZoomed
         ]
     );
 

@@ -1,4 +1,5 @@
-import { GetRenderer, GetRoomEngine, OctaneRectangle, TextureUtils } from '@octane/renderer';
+import { GetRenderer, OctaneRectangle, TextureUtils } from '@octane/renderer';
+import { GetCameraRoomCanvas } from './GetCameraRoomCanvas';
 
 /**
  * AIR CameraViewFinder.update() snapshots the room display object
@@ -62,7 +63,7 @@ export const getViewfinderRoomFrame = (target: HTMLCanvasElement | null, width?:
 
     try
     {
-        const master = GetRoomEngine()?.getActiveRoomInstanceRenderingCanvas?.()?.master;
+        const master = GetCameraRoomCanvas()?.master;
         const renderer = GetRenderer();
         const source = renderer?.canvas as HTMLCanvasElement | undefined;
 
@@ -106,7 +107,7 @@ export const blitRoomCanvasToViewfinder = (target: HTMLCanvasElement | null, wid
 
     try
     {
-        const roomCanvas = GetRoomEngine()?.getActiveRoomInstanceRenderingCanvas?.();
+        const roomCanvas = GetCameraRoomCanvas();
         const master = roomCanvas?.master;
 
         if(!master) return false;
