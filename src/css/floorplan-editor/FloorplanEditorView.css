@@ -1170,7 +1170,7 @@
 
 .fp-bc-footer .fp-bc-btn {
     padding: 5px 10px 6px;
-    color: #ffffff;
+    color: #111111;
 }
 
 .fp-bc-btn:hover {
@@ -1198,7 +1198,7 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: 120px 35px;
-    color: #ffffff;
+    color: #111111;
 }
 
 .fp-bc-btn.is-save {
@@ -1275,9 +1275,13 @@
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
 }
 
-.octane-floorplan-window.octane-card-frame-3 .fp-bc-subtitle,
-.octane-floorplan-window.octane-card-frame-3 .fp-bc-footer .fp-bc-btn {
+.octane-floorplan-window.octane-card-frame-3 .fp-bc-subtitle {
     color: #ffffff;
+}
+
+.octane-floorplan-window.octane-card-frame-3 .fp-bc-footer .fp-bc-btn,
+.octane-floorplan-import.octane-card-frame-3 .fp-bc-import .fp-bc-btn {
+    color: #111111;
 }
 
 .octane-floorplan-import.octane-card-frame-3 .fp-bc-import-data {
