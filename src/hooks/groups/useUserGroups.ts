@@ -1,4 +1,4 @@
-import { CatalogGroupsComposer, GuildMembershipsMessageEvent, HabboGroupEntryData } from '@octane/renderer';
+import { CatalogGroupsComposer, GroupPurchasedEvent, GuildMembershipsMessageEvent, HabboGroupEntryData } from '@octane/renderer';
 import { useCallback, useEffect, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { SendMessageComposer } from '../../api';
@@ -12,6 +12,11 @@ const useUserGroupsStore = () => {
     }, []);
 
     useMessageEvent<GuildMembershipsMessageEvent>(GuildMembershipsMessageEvent, onGuildMemberships);
+
+    useMessageEvent<GroupPurchasedEvent>(GroupPurchasedEvent, () =>
+    {
+        SendMessageComposer(new CatalogGroupsComposer());
+    });
 
     useEffect(() => {
         SendMessageComposer(new CatalogGroupsComposer());
