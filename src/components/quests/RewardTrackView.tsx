@@ -27,6 +27,8 @@ import {
 } from '../../api';
 import availableIcon from '../../assets/images/reward-track/air/available-icon.png';
 import checkIcon from '../../assets/images/reward-track/air/checkmark.png';
+import creditBigIcon from '../../assets/images/reward-track/air/credit-big.png';
+import diamondBigIcon from '../../assets/images/reward-track/air/diamond-big.png';
 import frankAndPiccolo from '../../assets/images/reward-track/air/frank-and-piccolo.png';
 import frankTips from '../../assets/images/reward-track/air/frank-tips.png';
 import freeTrackIcon from '../../assets/images/reward-track/air/free-track.png';
@@ -50,6 +52,8 @@ import { RewardTrackAdminView } from './RewardTrackAdminView';
 const CURRENCY_TYPES: Record<string, number> = { credits: -1, duckets: 0, diamonds: 5 };
 const FILTERS: RewardTrackTaskFilter[] = ['all', 'in_progress', 'completed'];
 const MAIN_BAR_WIDTH = 602;
+const TASK_BAR_WIDTH = 200;
+const LEVEL_BAR_WIDTH = 260;
 const taskIconModules = import.meta.glob('../../assets/images/reward-track/air/task-*.png', { eager: true, import: 'default' }) as Record<string, string>;
 
 /** Native pixel size of reward_track_tasks_<action>. The row shows this size; the detail doubles it. */
@@ -131,7 +135,23 @@ const RewardIcon: FC<{ rewardTypeId: string; extraParams: string; productItemTyp
     return <div className="octane-reward-track-prize-generic">{rewardTypeId}</div>;
 };
 
-const TaskGlyph: FC<{ actionType: string; zoom?: number }> = ({ actionType, zoom = 1 }) => {
+/** RewardTrackTaskProgressBarView: the fill is round(width * ratio) wide and turns green once complete. */
+const TaskProgressBar: FC<{ ratio: number; width: number }> = ({ ratio, width }) => {
+    const fill = Math.round(width * Math.max(0, Math.min(1, ratio)));
+
+    return (
+        <span className="octane-reward-track-mini-bar">
+            {fill > 0 && (
+                <span className="octane-reward-track-mini-bar-fill" data-complete={ratio >= 1} style={{ width: fill }}>
+                    <span className="octane-reward-track-mini-bar-gloss" />
+                </span>
+            )}
+        </span>
+    );
+};
+
+/** task_image / task_info_img use pivot_point center: int((box - size) / 2) inside the 52x50 or 104x100 slot. */
+const TaskGlyph: FC<{ actionType: string; boxWidth: number; boxHeight: number; zoom?: number }> = ({ actionType, boxWidth, boxHeight, zoom = 1 }) => {
     const icon = taskIcon(actionType);
 
     if (!icon) return null;
@@ -139,7 +159,17 @@ const TaskGlyph: FC<{ actionType: string; zoom?: number }> = ({ actionType, zoom
     const width = icon.w * zoom;
     const height = icon.h * zoom;
 
-    return <img src={icon.src} alt="" width={width} height={height} draggable={false} className={zoom > 1 ? 'is-scaled' : undefined} />;
+    return (
+        <img
+            src={icon.src}
+            alt=""
+            width={width}
+            height={height}
+            draggable={false}
+            className={zoom > 1 ? 'is-scaled' : undefined}
+            style={{ left: Math.trunc((boxWidth - width) / 2), top: Math.trunc((boxHeight - height) / 2) }}
+        />
+    );
 };
 
 const RewardTrackPrizeView: FC<{
@@ -169,15 +199,21 @@ const RewardTrackPrizeView: FC<{
             className="octane-reward-track-prize"
             data-tier={prize.premium ? 'premium' : 'free'}
             data-state={state}
+            data-dimmed={dimmed}
             style={{ left, opacity: dimmed ? 0.75 : 1 }}
             title={getRewardTrackPrizeTooltip(state)}
         >
-            <button type="button" className="octane-reward-track-prize-hit" disabled={dimmed || prize.claimed} onClick={onClick}>
+            <button type="button" className="octane-reward-track-prize-hit" disabled={dimmed} onClick={onClick}>
+                <span className="octane-reward-track-prize-shadow" />
                 <span className="octane-reward-track-prize-plate">
                     <span className="octane-reward-track-prize-product" data-shifted={prize.rewardAmount > 1}>
                         <RewardIcon rewardTypeId={prize.rewardTypeId} extraParams={prize.extraParams} productItemTypeId={prize.productItemTypeId} />
                     </span>
-                    {prize.rewardAmount > 1 && <span className="octane-reward-track-prize-amount">{prize.rewardAmount}</span>}
+                    {prize.rewardAmount > 1 && (
+                        <span className="octane-reward-track-prize-amount">
+                            <span>{prize.rewardAmount}</span>
+                        </span>
+                    )}
                 </span>
             </button>
             <span className="octane-reward-track-prize-stem" />
@@ -261,14 +297,16 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
                         {track.costCredits > 0 && (
                             <>
                                 <span>{track.costCredits}</span>
-                                <LayoutCurrencyIcon type={-1} />
+                                <img src={creditBigIcon} alt="" width={22} height={22} draggable={false} />
                             </>
                         )}
                         {track.costCredits > 0 && track.costDiamonds > 0 && <span>+</span>}
                         {track.costDiamonds > 0 && (
                             <>
                                 <span>{track.costDiamonds}</span>
-                                <LayoutCurrencyIcon type={5} />
+                                <span className="octane-reward-track-premium-diamond">
+                                    <img src={diamondBigIcon} alt="" width={19} height={19} draggable={false} />
+                                </span>
                             </>
                         )}
                     </span>
@@ -466,42 +504,44 @@ export const RewardTrackView: FC<{}> = () => {
                     )}
                     {!editMode && track && (
                         <div className="octane-reward-track-stage">
+                            {/* reward_track_item / button dynamic styles: hover is RGB x1.1 + 15 */}
+                            <svg className="octane-reward-track-filters-svg" aria-hidden="true" focusable="false">
+                                <filter id="octane-reward-track-hover" colorInterpolationFilters="sRGB">
+                                    <feComponentTransfer>
+                                        <feFuncR type="linear" slope="1.1" intercept="0.0588" />
+                                        <feFuncG type="linear" slope="1.1" intercept="0.0588" />
+                                        <feFuncB type="linear" slope="1.1" intercept="0.0588" />
+                                    </feComponentTransfer>
+                                </filter>
+                            </svg>
                             <div className="octane-reward-track-header">
-                                <div className="octane-reward-track-profile">
-                                    <div className="octane-reward-track-avatar">
-                                        <LayoutAvatarImageView figure={GetSessionDataManager().figure} direction={2} />
-                                    </div>
-                                    <div className="octane-reward-track-title">{getRewardTrackText(track.id, 'name', trackFallback(track.id, 'name'))}</div>
-                                    <div className="octane-reward-track-desc">{getRewardTrackText(track.id, 'desc', trackFallback(track.id, 'desc'))}</div>
-                                    <div className="octane-reward-track-instructions">
-                                        {getRewardTrackText(track.id, 'info', trackFallback(track.id, 'info'))}
-                                    </div>
-                                    <div className="octane-reward-track-points">
-                                        <div className="octane-reward-track-points-value">
-                                            <img src={pointLarge} alt="" width={27} height={18} draggable={false} />
-                                            <span>{track.points}</span>
-                                        </div>
-                                        <div className="octane-reward-track-points-label">
-                                            {rewardText('reward_track.profile.points_collected', 'Points collected')}
-                                        </div>
-                                    </div>
-                                    <div className="octane-reward-track-collected">
-                                        <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
-                                        <span>
-                                            {rewardText('reward_track.profile.rewards_collected', '%progress% / %total% rewards collected', {
-                                                progress: track.claimedPrizeCount,
-                                                total: track.totalPrizeCount
-                                            })}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="octane-reward-track-join" />
                                 <div className="octane-reward-track-rewards">
                                     <div className="octane-reward-track-bg" />
+                                    <div className="octane-reward-track-sky" />
                                     <img className="octane-reward-track-stars" src={prizesStars} alt="" width={843} height={226} draggable={false} />
-                                    <div className="octane-reward-track-points-band" />
                                     <div className="octane-reward-track-main-bar">
-                                        <div className="octane-reward-track-main-bar-fill" style={{ width: progressShape }} />
+                                        <div className="octane-reward-track-main-bar-progress" style={{ width: progressFill }}>
+                                            <div className="octane-reward-track-main-bar-fill" style={{ width: progressShape }} />
+                                            <div className="octane-reward-track-main-bar-gloss" />
+                                        </div>
+                                    </div>
+                                    <div className="octane-reward-track-points-band-clip">
+                                        <div className="octane-reward-track-points-band" />
+                                    </div>
+                                    <div className="octane-reward-track-band" data-tier="free">
+                                        <span className="octane-reward-track-band-bg" />
+                                        <span className="octane-reward-track-band-info" />
+                                        <span className="octane-reward-track-band-split" />
+                                        <img src={freeTrackIcon} alt="" width={49} height={48} draggable={false} />
+                                        <span className="octane-reward-track-band-title">{rewardText('reward_track.rewards.free', 'Free Track')}</span>
+                                    </div>
+                                    <div className="octane-reward-track-band" data-tier="premium">
+                                        <span className="octane-reward-track-band-bg" />
+                                        <span className="octane-reward-track-band-info" />
+                                        <span className="octane-reward-track-band-split" />
+                                        <img src={premiumTrackIcon} alt="" width={58} height={45} draggable={false} />
+                                        <span className="octane-reward-track-band-title">{rewardText('reward_track.rewards.premium', 'Premium')}</span>
+                                        <small>{rewardText('reward_track.rewards.premium.info', 'Extra rewards')}</small>
                                     </div>
                                     {pagePrizes.points[safePage].map((points) => (
                                         <div key={points} className="octane-reward-track-indicator" style={{ left: 196 + prizeLeft(points) }}>
@@ -512,6 +552,9 @@ export const RewardTrackView: FC<{}> = () => {
                                                 height={20}
                                                 draggable={false}
                                             />
+                                            <i className="octane-reward-track-indicator-dot" />
+                                            <i className="octane-reward-track-indicator-stem" />
+                                            <i className="octane-reward-track-indicator-connector" />
                                             <span>{points}</span>
                                         </div>
                                     ))}
@@ -536,15 +579,6 @@ export const RewardTrackView: FC<{}> = () => {
                                                 onPremium={onPremium}
                                             />
                                         ))}
-                                    </div>
-                                    <div className="octane-reward-track-band" data-tier="free">
-                                        <img src={freeTrackIcon} alt="" width={49} height={48} draggable={false} />
-                                        <span>{rewardText('reward_track.rewards.free', 'Free Track')}</span>
-                                    </div>
-                                    <div className="octane-reward-track-band" data-tier="premium">
-                                        <img src={premiumTrackIcon} alt="" width={58} height={45} draggable={false} />
-                                        <span>{rewardText('reward_track.rewards.premium', 'Premium')}</span>
-                                        <small>{rewardText('reward_track.rewards.premium.info', 'Extra rewards')}</small>
                                     </div>
                                     <button
                                         type="button"
@@ -577,6 +611,44 @@ export const RewardTrackView: FC<{}> = () => {
                                         </span>
                                     )}
                                 </div>
+                                <div className="octane-reward-track-cutout">
+                                    <div className="octane-reward-track-profile">
+                                        <div className="octane-reward-track-avatar">
+                                            <LayoutAvatarImageView figure={GetSessionDataManager().figure} direction={2} />
+                                        </div>
+                                        <div className="octane-reward-track-info">
+                                            <div className="octane-reward-track-title">
+                                                {getRewardTrackText(track.id, 'name', trackFallback(track.id, 'name'))}
+                                            </div>
+                                            <div className="octane-reward-track-desc">
+                                                {getRewardTrackText(track.id, 'desc', trackFallback(track.id, 'desc'))}
+                                            </div>
+                                            <div className="octane-reward-track-instructions">
+                                                {getRewardTrackText(track.id, 'info', trackFallback(track.id, 'info'))}
+                                            </div>
+                                        </div>
+                                        <div className="octane-reward-track-points">
+                                            <div className="octane-reward-track-points-value">
+                                                <img src={pointLarge} alt="" width={27} height={18} draggable={false} />
+                                                <span>{track.points}</span>
+                                            </div>
+                                            <div className="octane-reward-track-points-label">
+                                                {rewardText('reward_track.profile.points_collected', 'Points collected')}
+                                            </div>
+                                        </div>
+                                        <div className="octane-reward-track-splitter" />
+                                        <div className="octane-reward-track-collected">
+                                            <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
+                                            <span>
+                                                {rewardText('reward_track.profile.rewards_collected', '%progress% / %total% rewards collected', {
+                                                    progress: track.claimedPrizeCount,
+                                                    total: track.totalPrizeCount
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="octane-reward-track-bulge" />
                                 {isEditor && (
                                     <button
                                         type="button"
@@ -626,7 +698,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                     onClick={() => setSelectedTaskId(task.id)}
                                                 >
                                                     <span className="octane-reward-track-task-glyph">
-                                                        <TaskGlyph actionType={task.actionType} />
+                                                        <TaskGlyph actionType={task.actionType} boxWidth={52} boxHeight={50} />
                                                     </span>
                                                     <span className="octane-reward-track-task-name">
                                                         {getRewardTrackTaskText(track.id, task.id, 'name', task.id)}
@@ -634,9 +706,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                     <span className="octane-reward-track-task-desc">
                                                         {getRewardTrackTaskText(track.id, task.id, 'desc', '')}
                                                     </span>
-                                                    <span className="octane-reward-track-mini-bar">
-                                                        <span data-complete={ratio >= 1} style={{ width: `${Math.round(ratio * 100)}%` }} />
-                                                    </span>
+                                                    <TaskProgressBar ratio={ratio} width={TASK_BAR_WIDTH} />
                                                     <span className="octane-reward-track-task-count">
                                                         {task.progressCount} / {level ? level.requiredCount : 0}
                                                     </span>
@@ -682,7 +752,7 @@ export const RewardTrackView: FC<{}> = () => {
                                 {filteredTasks.length > 0 && selectedTask && (
                                     <div className="octane-reward-track-task-info">
                                         <div className="octane-reward-track-detail-glyph">
-                                            <TaskGlyph actionType={selectedTask.actionType} zoom={2} />
+                                            <TaskGlyph actionType={selectedTask.actionType} boxWidth={104} boxHeight={100} zoom={2} />
                                         </div>
                                         <div className="octane-reward-track-detail-name">
                                             {getRewardTrackTaskText(track.id, selectedTask.id, 'name', selectedTask.id)}
@@ -703,25 +773,25 @@ export const RewardTrackView: FC<{}> = () => {
                                                         <span className="octane-reward-track-level-name">
                                                             {rewardText('reward_track.levels.level', 'Level %level%', { level: index + 1 })}
                                                         </span>
-                                                        <span className="octane-reward-track-mini-bar">
-                                                            <span data-complete={ratio >= 1} style={{ width: `${Math.round(ratio * 100)}%` }} />
-                                                        </span>
+                                                        <TaskProgressBar ratio={ratio} width={LEVEL_BAR_WIDTH} />
                                                         <span className="octane-reward-track-level-count">
                                                             {selectedTask.progressCount} / {level.requiredCount}
                                                         </span>
-                                                        {ratio >= 1 && (
-                                                            <img
-                                                                className="octane-reward-track-level-check"
-                                                                src={checkIcon}
-                                                                alt=""
-                                                                width={17}
-                                                                height={15}
-                                                                draggable={false}
-                                                            />
-                                                        )}
-                                                        <span className="octane-reward-track-level-reward">
-                                                            <span>{level.pointsReward}</span>
-                                                            <img src={pointSmall} alt="" width={19} height={14} draggable={false} />
+                                                        <span className="octane-reward-track-level-end">
+                                                            {ratio >= 1 && (
+                                                                <img
+                                                                    className="octane-reward-track-level-check"
+                                                                    src={checkIcon}
+                                                                    alt=""
+                                                                    width={17}
+                                                                    height={15}
+                                                                    draggable={false}
+                                                                />
+                                                            )}
+                                                            <span className="octane-reward-track-level-reward">
+                                                                <span>{level.pointsReward}</span>
+                                                                <img src={pointSmall} alt="" width={19} height={14} draggable={false} />
+                                                            </span>
                                                         </span>
                                                     </div>
                                                 );
