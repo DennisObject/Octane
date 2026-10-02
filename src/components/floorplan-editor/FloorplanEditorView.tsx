@@ -345,7 +345,7 @@ const OfficialFloorplanEditor: FC = () => {
                                 />
                                 <div className="fp-bc-height-row">
                                     <span className="fp-bc-height-label">{LocalizeText('floor.plan.editor.tile.height')}</span>
-                                    <FloorplanHeightPicker selectedH={drawingHeight} onSelect={setDrawingHeight} />
+                                    <FloorplanHeightPicker selectedH={drawingHeight} onSelect={setDrawingHeight} official />
                                 </div>
                                 <div className="fp-bc-map">
                                     <FloorplanOfficialCanvas
@@ -362,7 +362,7 @@ const OfficialFloorplanEditor: FC = () => {
                                 </div>
                             </section>
                             <section className="fp-bc-side" data-testid="floorplan-preview-panel">
-                                <FloorplanOptionsPanel state={toolbarState} dispatch={dispatch} />
+                                <FloorplanOptionsPanel state={toolbarState} dispatch={dispatch} official />
                                 <div className={`fp-bc-wall-row ${wallsFixed ? '' : 'is-off'}`}>
                                     <button
                                         type="button"
@@ -382,7 +382,7 @@ const OfficialFloorplanEditor: FC = () => {
                                     />
                                     <span className="fp-bc-wall-label">{LocalizeText('floor.editor.wall.height')}</span>
                                     <span className="fp-bc-wall-number" data-testid="wall-height-badge">{displayedWall}</span>
-                                    <FloorplanWallHeightSlider value={displayedWall} disabled={!wallsFixed} onChange={(value) => dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' })} />
+                                    <FloorplanWallHeightSlider value={displayedWall} disabled={!wallsFixed} official onChange={(value) => dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' })} />
                                 </div>
                                 <div className="fp-bc-preview-stage" ref={previewStageRef}>
                                     <FloorplanOfficialPreview plan={previewPlan} onDrawn={centerPreviewOnce} />

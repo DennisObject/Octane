@@ -2,6 +2,7 @@ import addTile from '@/assets/images/floorplan-editor/air/add-tile.png';
 import arrowLeft from '@/assets/images/floorplan-editor/air/arrow-left.png';
 import arrowRight from '@/assets/images/floorplan-editor/air/arrow-right.png';
 import enterTile from '@/assets/images/floorplan-editor/air/enter-tile.png';
+import heightColormap from '@/assets/images/floorplan-editor/air/height-colormap.png';
 import logo from '@/assets/images/floorplan-editor/air/logo.png';
 import magnifier from '@/assets/images/floorplan-editor/air/magnifier.png';
 import preview0 from '@/assets/images/floorplan-editor/air/preview-0.png';
@@ -35,6 +36,7 @@ import wallSlider from '@/assets/images/floorplan-editor/air/wall-slider.png';
 
 export const AIR_FLOOR_ASSETS = {
     logo,
+    heightColormap,
     addTile,
     removeTile,
     raiseTile,
