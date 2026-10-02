@@ -1,18 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import {
-    CHAT_COLLISION_COMPARISONS_PER_FRAME,
-    CHAT_COLLISION_ITERATIONS,
-    CHAT_COLLISION_MIN_WIDTH,
-    type ChatCollisionBubble,
-    type CollisionCursor,
-    createCollisionCursor,
-    separateOverlappingChats
-} from './chatCollision';
+import { CHAT_COLLISION_MIN_WIDTH, type ChatCollisionBubble, separateOverlappingChats } from './chatCollision';
 
-const separateOriginal = (input: readonly ChatCollisionBubble[]): ChatCollisionBubble[] => {
+const separateOriginal = (input: readonly ChatCollisionBubble[], maxIterations: number): ChatCollisionBubble[] => {
     const chats = input.map((chat) => ({ ...chat }));
 
-    for (let iteration = 0; iteration < CHAT_COLLISION_ITERATIONS; iteration++) {
+    for (let iteration = 0; iteration < maxIterations; iteration++) {
         let moved = false;
 
         for (let firstIndex = 0; firstIndex < chats.length; firstIndex++) {
@@ -46,7 +38,7 @@ const separateOriginal = (input: readonly ChatCollisionBubble[]): ChatCollisionB
                 const older = first.id < second.id ? first : second;
                 const olderRect = older === first ? firstRect : secondRect;
                 const newerRect = older === first ? secondRect : firstRect;
-                const amount = olderRect.bottom - newerRect.top - 0;
+                const amount = olderRect.bottom - newerRect.top;
 
                 if (amount <= 0) continue;
 
@@ -61,11 +53,10 @@ const separateOriginal = (input: readonly ChatCollisionBubble[]): ChatCollisionB
     return chats;
 };
 
-const separateSliced = (input: readonly ChatCollisionBubble[], budget: number): ChatCollisionBubble[] => {
+const bottomsUp = (input: readonly ChatCollisionBubble[]): ChatCollisionBubble[] => {
     const chats = input.map((chat) => ({ ...chat }));
-    const cursor = createCollisionCursor();
 
-    while (!cursor.finished) separateOverlappingChats(chats, cursor, budget);
+    separateOverlappingChats(chats);
 
     return chats;
 };
@@ -98,45 +89,106 @@ const stackedScene = (count: number): ChatCollisionBubble[] =>
         height: 28
     }));
 
+const colliderEdges = (chat: ChatCollisionBubble) => {
+    const width = Math.max(chat.width, CHAT_COLLISION_MIN_WIDTH);
+    const pad = (width - chat.width) / 2;
+
+    return { left: chat.left - pad, right: chat.left + chat.width + pad };
+};
+
+const sharesCollider = (chat: ChatCollisionBubble, other: ChatCollisionBubble) => {
+    const first = colliderEdges(chat);
+    const second = colliderEdges(other);
+
+    return first.left < second.right && first.right > second.left;
+};
+
+const remainingOverlaps = (chats: readonly ChatCollisionBubble[]) => {
+    let count = 0;
+
+    for (let firstIndex = 0; firstIndex < chats.length; firstIndex++) {
+        for (let secondIndex = firstIndex + 1; secondIndex < chats.length; secondIndex++) {
+            const first = chats[firstIndex];
+            const second = chats[secondIndex];
+
+            if (!sharesCollider(first, second)) continue;
+
+            if (first.top < second.top + second.height && first.top + first.height > second.top) count += 1;
+        }
+    }
+
+    return count;
+};
+
 describe('separateOverlappingChats', () => {
-    it('matches the previous 20-pass placement for stacked, spread, and random rooms', () => {
-        const scenes = [stackedScene(40), stackedScene(250), randomScene(2, 1), randomScene(1, 2)];
+    it('finishes a column with the same gaps as the old solver and leaves other scenes unoverlapped', () => {
+        expect(tops(bottomsUp(stackedScene(40)))).toEqual(tops(separateOriginal(stackedScene(40), 500)));
 
-        for (let seed = 1; seed <= 12; seed++) scenes.push(randomScene(80, seed));
-        scenes.push(randomScene(250, 99));
+        const column = bottomsUp(stackedScene(250));
 
-        for (const scene of scenes) {
-            expect(tops(separateSliced(scene, CHAT_COLLISION_COMPARISONS_PER_FRAME))).toEqual(tops(separateOriginal(scene)));
-            expect(tops(separateSliced(scene, 1))).toEqual(tops(separateOriginal(scene)));
-            expect(tops(separateSliced(scene, 997))).toEqual(tops(separateOriginal(scene)));
+        expect(column[0].top).toBe(480 - 28 * 249);
+        expect(column[249].top).toBe(480);
+        expect(column[0].top + column[0].height).toBe(column[1].top);
+        expect(remainingOverlaps(column)).toBe(0);
+
+        for (let seed = 1; seed <= 8; seed++) {
+            const scene = randomScene(40, seed);
+            const placed = bottomsUp(scene);
+
+            expect(remainingOverlaps(placed)).toBe(0);
+
+            placed.forEach((chat, index) => {
+                expect(chat.top).toBeLessThanOrEqual(scene[index].top);
+
+                if (chat.top === scene[index].top) return;
+
+                const flushWithNewer = placed.some((other) => other.id > chat.id && sharesCollider(chat, other) && chat.top + chat.height === other.top);
+
+                expect(flushWithNewer).toBe(true);
+            });
         }
     });
 
-    it('stops without moving bubbles that only share an edge', () => {
-        const scene = [
-            { id: 1, left: 0, top: 0, width: 240, height: 30 },
-            { id: 2, left: 0, top: 30, width: 240, height: 30 }
-        ];
-        const cursor = createCollisionCursor();
-
-        separateOverlappingChats(
-            scene.map((chat) => ({ ...chat })),
-            cursor,
-            100
-        );
-
-        expect(cursor.finished).toBe(true);
-        expect(tops(separateSliced(scene, 10))).toEqual([0, 30]);
-    });
-
-    it('places the older bubble on top of the newer one it overlaps', () => {
-        const scene = [
+    it('leaves a zero gap and keeps the 240 collider', () => {
+        const overlapped = bottomsUp([
             { id: 1, left: 0, top: 100, width: 240, height: 26 },
             { id: 2, left: 0, top: 100, width: 240, height: 26 }
-        ];
+        ]);
 
-        expect(tops(separateSliced(scene, 50))).toEqual(tops(separateOriginal(scene)));
-        expect(tops(separateSliced(scene, 50))[0]).toBeLessThan(100);
+        expect(overlapped[0].top + overlapped[0].height).toBe(overlapped[1].top);
+
+        const narrow = [
+            { id: 1, left: 0, top: 100, width: 100, height: 26 },
+            { id: 2, left: 239, top: 100, width: 100, height: 26 }
+        ];
+        const separated = bottomsUp(narrow);
+        const clear = bottomsUp([
+            { id: 1, left: 0, top: 100, width: 100, height: 26 },
+            { id: 2, left: 240, top: 100, width: 100, height: 26 }
+        ]);
+
+        expect(separated[0].top).toBeLessThan(100);
+        expect(clear.map((chat) => chat.top)).toEqual([100, 100]);
+        expect(colliderEdges(narrow[0]).right).toBeGreaterThan(colliderEdges(narrow[1]).left);
+        expect(colliderEdges(clear[0]).right).toBeLessThanOrEqual(colliderEdges({ ...clear[1], left: 240 }).left);
+    });
+
+    it('stacks three chained bubbles newest at the bottom', () => {
+        const result = bottomsUp([
+            { id: 1, left: 10, top: 200, width: 200, height: 30 },
+            { id: 2, left: 10, top: 200, width: 200, height: 30 },
+            { id: 3, left: 10, top: 200, width: 200, height: 40 }
+        ]);
+
+        expect(result.map((chat) => chat.top)).toEqual([140, 170, 200]);
+        expect(tops(result)).toEqual(
+            tops(
+                separateOriginal(
+                    result.map((chat) => ({ ...chat, top: 200 })),
+                    20
+                )
+            )
+        );
     });
 });
 
@@ -160,18 +212,18 @@ const elapsed = (scene: ChatCollisionBubble[], run: (chats: ChatCollisionBubble[
 };
 
 describe('chat collision budget', () => {
-    it('reports a per-frame slice against a full 20-pass solve', () => {
+    it('reports the old 20-pass solver against one bottom-up pass', () => {
         const scene = stackedScene(250);
-        const full = elapsed(scene, (chats) => {
-            const cursor: CollisionCursor = createCollisionCursor();
+        const before = elapsed(scene, (chats) => {
+            const solved = separateOriginal(chats, 20);
 
-            separateOverlappingChats(chats, cursor, Number.POSITIVE_INFINITY);
+            chats.forEach((chat, index) => {
+                chat.top = solved[index].top;
+            });
         });
-        const slice = elapsed(scene, (chats) => {
-            separateOverlappingChats(chats, createCollisionCursor(), CHAT_COLLISION_COMPARISONS_PER_FRAME);
-        });
+        const after = elapsed(scene, (chats) => separateOverlappingChats(chats));
 
-        console.info(`collision benchmark stacked n=250 full=${full.toFixed(3)}ms slice=${slice.toFixed(3)}ms`);
-        expect(slice).toBeLessThan(full);
+        console.info(`collision benchmark stacked n=250 before=${before.toFixed(3)}ms after=${after.toFixed(3)}ms`);
+        expect(after).toBeLessThan(before);
     });
 });

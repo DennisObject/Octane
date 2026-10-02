@@ -7,7 +7,7 @@ import { CHAT_TEXT_SIZE_EVENT } from '../chat-input/chatTextSize';
 import { ChatWidgetMessageView } from './ChatWidgetMessageView';
 import { ChatWidgetWindowView } from './ChatWidgetWindowView';
 import { measureBubbleVisualOffsets } from './chatBubbleMetrics';
-import { CHAT_COLLISION_COMPARISONS_PER_FRAME, type CollisionCursor, createCollisionCursor, separateOverlappingChats } from './chatCollision';
+import { separateOverlappingChats } from './chatCollision';
 import { getChatViewerHeight } from './freeFlowChatLayout';
 
 const CHAT_MOVE_UP_PIXELS = 19;
@@ -18,9 +18,7 @@ export const ChatWidgetView: FC<{}> = (props) => {
     const [chatWindowEnabled] = useChatWindow();
     const elementRef = useRef<HTMLDivElement>(null);
     const chatMessagesRef = useRef(chatMessages);
-    const cursorRef = useRef<CollisionCursor>(createCollisionCursor());
     const frameRef = useRef(0);
-    const epochRef = useRef(0);
     const measureAllRef = useRef(false);
     const layoutRef = useRef<(measureAll: boolean) => void>(() => undefined);
     const shiftRef = useRef<(amount: number) => void>(() => undefined);
@@ -57,8 +55,6 @@ export const ChatWidgetView: FC<{}> = (props) => {
     const flushLayout = () => {
         frameRef.current = 0;
 
-        const epoch = epochRef.current;
-
         if (measureAllRef.current) {
             measureAllRef.current = false;
             measureChats(chatMessagesRef.current);
@@ -70,18 +66,11 @@ export const ChatWidgetView: FC<{}> = (props) => {
             if (chat.elementRef && chat.width > 0 && chat.height > 0) visible.push(chat);
         }
 
-        separateOverlappingChats(visible, cursorRef.current, CHAT_COLLISION_COMPARISONS_PER_FRAME);
+        separateOverlappingChats(visible);
         removeHiddenRef.current();
-
-        if (!cursorRef.current.finished && epoch === epochRef.current && !frameRef.current) {
-            frameRef.current = window.requestAnimationFrame(flushLayout);
-        }
     };
 
     const requestLayout = (measureAll: boolean) => {
-        epochRef.current++;
-        cursorRef.current = createCollisionCursor();
-
         if (measureAll) measureAllRef.current = true;
 
         if (frameRef.current) return;
