@@ -9,9 +9,9 @@ export class GroupBadgePart {
 
     constructor(type: string, key?: number, color?: number, position?: number) {
         this.type = type;
-        this.key = key ? key : 0;
-        this.color = color ? color : 0;
-        this.position = position ? position : 4;
+        this.key = key ?? 0;
+        this.color = color ?? 0;
+        this.position = position ?? 4;
     }
 
     public get code(): string {

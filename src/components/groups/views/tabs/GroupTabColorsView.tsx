@@ -1,8 +1,8 @@
 import { GroupSaveColorsComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { AutoGrid, Column, Grid, Text } from '../../../../common';
-import { useGroup } from '../../../../hooks';
+import { AutoGrid, Button, Column, Grid, Text } from '../../../../common';
+import { useGroup, useNotification } from '../../../../hooks';
 import { classNames } from '../../../../layout';
 
 interface GroupTabColorsViewProps {
@@ -15,6 +15,7 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     const { groupData = null, setGroupData = null, setCloseAction = null } = props;
     const [colors, setColors] = useState<number[]>(null);
     const { groupCustomize = null } = useGroup();
+    const { simpleAlert } = useNotification();
 
     const getGroupColor = (colorIndex: number) => {
         if (!groupCustomize || !colors) return '000000';
@@ -36,9 +37,14 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     };
 
     const saveColors = useCallback(() => {
-        if (!groupData || !colors || !colors.length) return false;
+        if (!groupData) return false;
+        if (!colors || !groupCustomize?.groupColorsA?.some(color => color.id === colors[0]) || !groupCustomize?.groupColorsB?.some(color => color.id === colors[1]))
+        {
+            simpleAlert(LocalizeText('group.edit.error.no.color.selected'), null, null, null, LocalizeText('group.edit.error.title'));
+            return false;
+        }
 
-        if (groupData.groupColors === colors) return true;
+        if (groupData.groupColors[0] === colors[0] && groupData.groupColors[1] === colors[1]) return true;
 
         if (groupData.groupId <= 0) {
             setGroupData((prevValue) => {
@@ -53,9 +59,10 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
         }
 
         SendMessageComposer(new GroupSaveColorsComposer(groupData.groupId, colors[0], colors[1]));
+        setGroupData(prevValue => ({ ...prevValue, groupColors: [...colors] }));
 
         return true;
-    }, [groupData, colors, setGroupData]);
+    }, [groupData, colors, setGroupData, groupCustomize, simpleAlert]);
 
     useEffect(() => {
         if (!groupCustomize?.groupColorsA?.length || !groupCustomize?.groupColorsB?.length || (groupData.groupColors && groupData.groupColors.length)) return;
@@ -75,7 +82,7 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
         }
 
         setColors(groupData.groupColors);
-    }, [groupData]);
+    }, [groupData.groupId, groupData.groupColors]);
 
     useEffect(() => {
         setCloseAction({ action: saveColors });
@@ -94,6 +101,11 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
                         <div className="w-[30px] h-[40px]" style={{ backgroundColor: '#' + getGroupColor(0) }} />
                         <div className="w-[30px] h-[40px]" style={{ backgroundColor: '#' + getGroupColor(1) }} />
                     </div>
+                )}
+                {groupData.groupId > 0 && (
+                    <Button variant="link" onClick={() => setColors([...groupData.groupColors])}>
+                        {LocalizeText('group.edit.reset.color')}
+                    </Button>
                 )}
             </Column>
             <Column gap={1} overflow="hidden" size={5}>

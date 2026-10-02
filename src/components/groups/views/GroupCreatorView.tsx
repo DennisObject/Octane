@@ -157,7 +157,6 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
                                 isCreator={true}
                                 setCloseAction={setCloseAction}
                                 setGroupData={setGroupData}
-                                onClose={null}
                             />
                         )}
                         {currentTab === 2 && <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}

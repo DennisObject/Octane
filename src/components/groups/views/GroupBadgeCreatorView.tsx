@@ -19,6 +19,8 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
     const setPartProperty = (partIndex: number, property: string, value: number) => {
         const newBadgeParts = [...badgeParts];
 
+        const part = newBadgeParts[partIndex];
+        newBadgeParts[partIndex] = new GroupBadgePart(part.type, part.key, part.color, part.position);
         newBadgeParts[partIndex][property] = value;
 
         setBadgeParts(newBadgeParts);
@@ -71,9 +73,9 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
                                         return (
                                             <div
                                                 key={colorIndex}
-                                                className={`relative [box-shadow:inset_2px_2px_#0003] rounded-[.25rem] w-[16px] h-[16px] bg-[#fff] border-2 border-[solid] border-[#fff] [box-shadow:inset_3px_3px_#0000001a]cursor-pointer ${badgeParts[index].color === colorIndex + 1 ? 'bg-primary [box-shadow:none]' : ''}`}
+                                                className={`relative [box-shadow:inset_2px_2px_#0003] rounded-[.25rem] w-[16px] h-[16px] bg-[#fff] border-2 border-[solid] border-[#fff] [box-shadow:inset_3px_3px_#0000001a]cursor-pointer ${badgeParts[index].color === item.id ? 'bg-primary [box-shadow:none]' : ''}`}
                                                 style={{ backgroundColor: '#' + item.color }}
-                                                onClick={(event) => setPartProperty(index, 'color', colorIndex + 1)}
+                                                onClick={(event) => setPartProperty(index, 'color', item.id)}
                                             />
                                         );
                                     })}
