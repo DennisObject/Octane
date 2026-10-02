@@ -201,6 +201,41 @@
     box-shadow: none !important;
 }
 
+/* furni_view / pet_view: button style 1, habbo_skin_button_default_black, 3px slice.
+   Doubled class keeps the bitmap skin ahead of variant utility rules. */
+.habbo-btn-black.habbo-btn-black {
+    border: 3px solid transparent !important;
+    border-radius: 0 !important;
+    border-image-source: var(--habbo-skin-button-black) !important;
+    border-image-slice: 3 fill !important;
+    border-image-width: 3px !important;
+    border-image-repeat: stretch !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.habbo-btn-black.habbo-btn-black:hover {
+    border-image-source: var(--habbo-skin-button-black-hover) !important;
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.habbo-btn-black.habbo-btn-black:active {
+    border-image-source: var(--habbo-skin-button-black-pressed) !important;
+    background: transparent !important;
+}
+
+.habbo-btn-black.habbo-btn-black.pointer-events-none,
+.habbo-btn-black.habbo-btn-black:disabled {
+    border-image-source: var(--habbo-skin-button-black-disabled) !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+}
+
 /* Selected state.
    Button adds the class `active` when a toggle is on - an open mod tool, the
    selected catalog page, the current floorplan brush - but the skin only drew the

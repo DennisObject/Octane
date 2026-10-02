@@ -10,7 +10,7 @@
     resize: none !important;
     padding: 0;
     --octane-card-surface: #e9e9e1;
-    border: 1px solid transparent !important;
+    border: 0 !important;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
@@ -34,10 +34,12 @@
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    margin-top: 32px;
-    margin-left: -1px;
+    /* Achievements XML overrides frame margins to 0/33/0/3.
+       AchievementController adds 45px to the stacked children. */
+    margin-top: 33px;
+    margin-left: 0;
     background: transparent;
-    padding: 0 0 11px !important;
+    padding: 0 0 12px !important;
     flex: 0 0 auto;
     gap: 4px;
     overflow: visible;
@@ -463,7 +465,6 @@
     border-image-slice: 6 fill;
     border-image-width: 6px;
     border-image-repeat: stretch;
-    filter: brightness(0.8);
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 

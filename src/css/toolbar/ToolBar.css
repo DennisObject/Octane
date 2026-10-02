@@ -258,6 +258,21 @@
         inset 1px 1px rgba(255, 255, 255, 0.08);
 }
 
+/* me_menu_view.xml border style 6: habbo_skin_border_6, ubuntu atlas 8/4/8, window color #79756e. */
+.octane-toolbar-me-popup {
+    box-sizing: border-box;
+    border: 8px solid transparent;
+    border-radius: 0;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-6-79756e.png");
+    border-image-slice: 8 fill;
+    border-image-width: 8px;
+    border-image-repeat: stretch;
+    background: transparent;
+    box-shadow: none;
+    padding: 4px 6px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
 .tbme-icon {
     opacity: 0.72;
     cursor: pointer;

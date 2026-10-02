@@ -296,11 +296,11 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                     </div>
                 </Column>
             </Column>
-            <Flex gap={1} justifyContent="end">
+            <Flex className="octane-infostand-actions" justifyContent="end">
                 {buttons.map(
                     (button) =>
                         button.condition && (
-                            <Button key={button.action} variant="dark" onClick={() => processButtonAction(button.action)}>
+                            <Button key={button.action} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
                                 {button.label}
                             </Button>
                         )
