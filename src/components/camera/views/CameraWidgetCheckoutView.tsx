@@ -1,11 +1,9 @@
 import {
     CameraPublishStatusMessageEvent,
     CameraPurchaseOKMessageEvent,
-    CameraStorageUrlMessageEvent,
     CompetitionStatusMessageEvent,
     CreateLinkEvent,
     GetEventDispatcher,
-    GetRoomEngine,
     GetSessionDataManager,
     OctaneToolbarAnimateIconEvent,
     PhotoCompetitionMessageComposer,
@@ -14,13 +12,14 @@ import {
     ToolbarIconEnum
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GetConfigurationValue, LocalizeText, OpenUrl, SendMessageComposer } from '../../../api';
+import { CameraEffectSelection, CameraPicture, GetConfigurationValue, LocalizeText, OpenUrl, renderTrustedCamera, SendMessageComposer } from '../../../api';
 import { Button, LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../common';
 import { useMessageEvent, useNotification, usePurse } from '../../../hooks';
-import { joinCameraPhotoUrl } from '../CameraAirUtilities';
 
 export interface CameraWidgetCheckoutViewProps {
-    base64Url: string;
+    picture: CameraPicture;
+    effects: CameraEffectSelection[];
+    zoom: boolean;
     onCloseClick: () => void;
     onCancelClick: () => void;
     price: { credits: number; duckets: number; publishDucketPrice: number };
@@ -30,8 +29,9 @@ const CAMERA_POINT_CURRENCY_TYPE = 0;
 const CAMERA_POINT_ICON_TYPE = 5;
 
 export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (props) => {
-    const { base64Url = null, onCloseClick = null, onCancelClick = null, price = null } = props;
+    const { picture = null, effects = [], zoom = false, onCloseClick = null, onCancelClick = null, price = null } = props;
     const [pictureUrl, setPictureUrl] = useState<string>(null);
+    const [checkoutId, setCheckoutId] = useState<string>(null);
     const [publishId, setPublishId] = useState<string>(null);
     const [picturesBought, setPicturesBought] = useState(0);
     const [wasPicturePublished, setWasPicturePublished] = useState(false);
@@ -65,6 +65,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
 
     const reportRenderingFailure = useCallback(() => {
         setPictureUrl(null);
+        setCheckoutId(null);
         setIsImageLoaded(false);
         setHasRenderingFailed(true);
         setStatusLocalization('');
@@ -173,22 +174,6 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
         setIsWaiting(false);
     });
 
-    useMessageEvent<CameraStorageUrlMessageEvent>(CameraStorageUrlMessageEvent, (event) => {
-        const parser = event.getParser();
-        const imageBaseUrl = GetConfigurationValue<string>('stories.image_url_base', '') || GetConfigurationValue<string>('camera.url', '');
-        const nextPictureUrl = joinCameraPhotoUrl(imageBaseUrl, parser.url);
-
-        setIsImageLoaded(false);
-        setHasRenderingFailed(false);
-
-        if (!nextPictureUrl) {
-            reportRenderingFailure();
-            return;
-        }
-
-        setPictureUrl(nextPictureUrl);
-    });
-
     const processAction = (type: string) => {
         switch (type) {
             case 'close':
@@ -212,7 +197,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
 
                 if (spendingDisclaimerEnabled) setDisclaimerAccepted(false);
 
-                SendMessageComposer(new PurchasePhotoMessageComposer(''));
+                SendMessageComposer(new PurchasePhotoMessageComposer(checkoutId));
                 return;
             case 'publish':
                 if (isWaiting || !isImageLoaded || publishCooldown > 0) return;
@@ -224,14 +209,14 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
 
                 setIsWaiting(true);
                 setStatusLocalization('camera.purchase.pleasewait');
-                SendMessageComposer(new PublishPhotoMessageComposer());
+                SendMessageComposer(new PublishPhotoMessageComposer(checkoutId));
                 return;
             case 'competition':
                 if (isWaiting || !isImageLoaded || ['submitted', 'limit', 'error'].includes(competitionState)) return;
 
                 setIsWaiting(true);
                 setStatusLocalization('camera.purchase.pleasewait');
-                SendMessageComposer(new PhotoCompetitionMessageComposer());
+                SendMessageComposer(new PhotoCompetitionMessageComposer(checkoutId));
                 return;
             case 'cancel':
                 onCancelClick();
@@ -240,10 +225,40 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
     };
 
     useEffect(() => {
-        if (!base64Url) return;
+        let active = true;
+        setPictureUrl(null);
+        setCheckoutId(null);
+        setIsImageLoaded(false);
+        setHasRenderingFailed(false);
+        if (!picture?.draftId) {
+            reportRenderingFailure();
+            return;
+        }
 
-        GetRoomEngine().saveBase64AsScreenshot(base64Url);
-    }, [base64Url]);
+        renderTrustedCamera(picture.draftId, effects, zoom)
+            .then((capture) => {
+                if (active) {
+                    setPictureUrl(capture.url);
+                    setCheckoutId(capture.url.slice('/camera/'.length, -'.png'.length));
+                }
+            })
+            .catch(() => {
+                if (active) reportRenderingFailure();
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [picture, effects, zoom, reportRenderingFailure]);
+
+    useEffect(() => {
+        if (!isWaiting) return;
+        const timeout = window.setTimeout(() => {
+            setIsWaiting(false);
+            setStatusLocalization('generic.failed');
+        }, 30_000);
+        return () => window.clearTimeout(timeout);
+    }, [isWaiting]);
 
     useEffect(() => {
         if (publishCooldown <= 0) return;

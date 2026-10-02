@@ -1,17 +1,17 @@
-import { GetRoomEngine, OctaneTexture } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import { blitRoomCanvasToViewfinder, getViewfinderRoomFrame, LocalizeText, PlaySound, SoundNames } from '../../api';
-import { DraggableWindow } from '../draggable-window';
+import { blitRoomCanvasToViewfinder, CameraViewport, getTrustedCameraViewport, getViewfinderRoomFrame, LocalizeText, PlaySound, SoundNames } from '../../api';
+import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../card';
 
 interface LayoutMiniCameraViewProps {
     roomId: number;
-    textureReceiver: (texture: OctaneTexture) => Promise<void>;
+    viewportReceiver: (viewport: CameraViewport) => Promise<void>;
     onClose: () => void;
     isSaving?: boolean;
+    onCaptureError?: () => void;
 }
 
 export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
-    const { roomId = -1, textureReceiver = null, onClose = null, isSaving = false } = props;
+    const { roomId = -1, viewportReceiver = null, onClose = null, isSaving = false, onCaptureError = null } = props;
     const elementRef = useRef<HTMLCanvasElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
 
@@ -32,13 +32,18 @@ export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
 
         const frame = getViewfinderRoomFrame(elementRef.current, 110, 110);
 
-        if (!frame) return;
+        if (!frame) {
+            onCaptureError?.();
+            return;
+        }
 
         setIsCapturing(true);
         PlaySound(SoundNames.CAMERA_SHUTTER);
 
         try {
-            await textureReceiver(GetRoomEngine().createTextureFromRoom(roomId, 1, frame));
+            await viewportReceiver(getTrustedCameraViewport(frame));
+        } catch {
+            onCaptureError?.();
         } finally {
             setIsCapturing(false);
         }
@@ -47,44 +52,27 @@ export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
     const isBusy = isCapturing || isSaving;
 
     return (
-        <DraggableWindow handleSelector=".octane-room-thumbnail-camera">
-            <div
-                className="octane-room-thumbnail-camera w-[132px] h-[192px] bg-[url('@/assets/images/room-widgets/thumbnail-widget/thumbnail-camera-spritesheet.png')] px-2"
-                role="dialog"
-                aria-label={LocalizeText('navigator.thumbnail.camera.title')}
-                aria-busy={isBusy}
-            >
-                <div
-                    style={{
-                        position: 'relative',
-                        paddingBottom: '192px' // Matches the space needed to position buttons as per the design
-                    }}
-                >
-                    <canvas
-                        ref={elementRef}
-                        className="octane-camera-viewfinder absolute mt-[30px] ml-[3px] w-[110px] h-[110px] pointer-events-none"
-                        width={110}
-                        height={110}
-                    />
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '10px',
-                            left: '10px',
-                            right: '10px',
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                        }}
-                    >
-                        <button type="button" className="btn btn-sm btn-danger" style={{ width: '52px' }} disabled={isBusy} onClick={onClose}>
-                            {LocalizeText('cancel')}
-                        </button>
-                        <button type="button" className="btn btn-sm btn-success" style={{ width: '52px' }} disabled={isBusy} onClick={takePicture}>
-                            {LocalizeText('navigator.thumbeditor.save')}
-                        </button>
-                    </div>
+        <OctaneCardView
+            className="octane-room-thumbnail-camera"
+            role="dialog"
+            aria-label={LocalizeText('navigator.thumbnail.camera.title')}
+            frameStyle={3}
+            isResizable={false}
+        >
+            <OctaneCardHeaderView headerText={LocalizeText('navigator.thumbnail.camera.title')} onCloseClick={() => !isBusy && onClose()} />
+            <OctaneCardContentView className="octane-room-thumbnail-camera__content" aria-busy={isBusy}>
+                <div className="octane-room-thumbnail-camera__viewfinder">
+                    <canvas ref={elementRef} className="octane-camera-viewfinder" width={110} height={110} />
                 </div>
-            </div>
-        </DraggableWindow>
+                <div className="octane-room-thumbnail-camera__buttons">
+                    <button type="button" disabled={isBusy} onClick={onClose}>
+                        {LocalizeText('navigator.thumbnail.camera.title.cancel')}
+                    </button>
+                    <button type="button" disabled={isBusy} onClick={takePicture}>
+                        {LocalizeText('navigator.thumbnail.camera.title.capture')}
+                    </button>
+                </div>
+            </OctaneCardContentView>
+        </OctaneCardView>
     );
 };

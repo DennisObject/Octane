@@ -1,13 +1,15 @@
 import {
+    CameraStorageUrlMessageEvent,
     GetRoomCameraWidgetManager,
     InitCameraMessageEvent,
     IRoomCameraWidgetEffect,
     RequestCameraConfigurationComposer,
-    RoomCameraWidgetManagerEvent
+    RoomCameraWidgetManagerEvent,
+    RoomSessionEvent
 } from '@octane/renderer';
 import { useEffect, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
-import { CameraPicture, SendMessageComposer } from '../../api';
+import { CameraPicture, cancelTrustedCameraRequests, completeTrustedCameraRequest, SendMessageComposer } from '../../api';
 import { useMessageEvent, useOctaneEvent } from '../events';
 
 const useCameraState = () => {
@@ -24,6 +26,20 @@ const useCameraState = () => {
         setAvailableEffects(Array.from(GetRoomCameraWidgetManager().effects.values()));
     });
 
+    useMessageEvent<CameraStorageUrlMessageEvent>(CameraStorageUrlMessageEvent, (event) => {
+        completeTrustedCameraRequest(event.getParser().url);
+    });
+
+    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
+        cancelTrustedCameraRequests();
+        setCameraRoll((previous) => {
+            previous.forEach((picture) => picture?.texture?.destroy?.(true));
+            return Array(5).fill(null);
+        });
+        setSelectedPictureIndex(-1);
+        setActivePictureSlotIndex(0);
+    });
+
     useMessageEvent<InitCameraMessageEvent>(InitCameraMessageEvent, (event) => {
         const parser = event.getParser();
 
@@ -31,11 +47,13 @@ const useCameraState = () => {
     });
 
     useEffect(() => {
-        if (GetRoomCameraWidgetManager().isLoaded) return;
+        const manager = GetRoomCameraWidgetManager();
 
-        GetRoomCameraWidgetManager().init();
+        if (!manager.isLoaded) manager.init();
+        else setAvailableEffects(Array.from(manager.effects.values()));
 
         SendMessageComposer(new RequestCameraConfigurationComposer());
+        return cancelTrustedCameraRequests;
     }, []);
 
     return {

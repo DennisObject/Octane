@@ -1,6 +1,6 @@
 import { GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectCategory, RoomObjectVariable } from '@octane/renderer';
 import { useState } from 'react';
-import { IPhotoData } from '../../../../api';
+import { getCameraMediaUrl, IPhotoData } from '../../../../api';
 import { useOctaneEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 import { useRoom } from '../../useRoom';
@@ -31,22 +31,36 @@ const useFurnitureExternalImageWidgetState = () => {
             if (object.type !== 'external_image_wallitem_poster_small') return null;
 
             const data = object.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA);
-            const jsonData: IPhotoData = JSON.parse(data);
-
-            datas.push(jsonData);
+            try {
+                const jsonData: IPhotoData = JSON.parse(data);
+                if (getCameraMediaUrl(jsonData?.w)) datas.push(jsonData);
+            } catch {
+                // Legacy or malformed item data cannot supply camera media.
+            }
         });
 
         setObjectId(event.objectId);
         setCategory(event.category);
         setCurrentPhotos(datas);
 
-        const roomObjectPhotoData = JSON.parse(roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA)) as IPhotoData;
+        let roomObjectPhotoData: IPhotoData;
+        try {
+            roomObjectPhotoData = JSON.parse(roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA)) as IPhotoData;
+        } catch {
+            onClose();
+            return;
+        }
 
-        setCurrentPhotoIndex((prevValue) => {
+        if (!getCameraMediaUrl(roomObjectPhotoData?.w)) {
+            onClose();
+            return;
+        }
+
+        setCurrentPhotoIndex(() => {
             let index = 0;
 
             if (roomObjectPhotoData) {
-                index = datas.findIndex((data) => data.u === roomObjectPhotoData.u);
+                index = datas.findIndex((data) => data.w === roomObjectPhotoData.w);
             }
 
             if (index < 0) index = 0;

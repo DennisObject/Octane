@@ -1,7 +1,7 @@
 import { GetRoomEngine, RoomObjectCategory, RoomObjectVariable } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
-import { GetUserProfile, IPhotoData, LocalizeText } from '../../../api';
+import { GetUserProfile, getCameraMediaUrl, IPhotoData, LocalizeText } from '../../../api';
 import { Flex, Grid, Text } from '../../../common';
 
 export interface CameraWidgetShowPhotoViewProps {
@@ -15,6 +15,7 @@ export const CameraWidgetShowPhotoView: FC<CameraWidgetShowPhotoViewProps> = (pr
     const [imageIndex, setImageIndex] = useState(0);
 
     const currentImage = currentPhotos && currentPhotos.length ? currentPhotos[imageIndex] : null;
+    const imageUrl = getCameraMediaUrl(currentImage?.w);
 
     const next = () => {
         setImageIndex((prevValue) => {
@@ -48,13 +49,8 @@ export const CameraWidgetShowPhotoView: FC<CameraWidgetShowPhotoViewProps> = (pr
 
     return (
         <Grid style={{ display: 'flex', flexDirection: 'column' }}>
-            <Flex
-                center
-                className="picture-preview border border-black"
-                style={currentImage.w ? { backgroundImage: 'url(' + currentImage.w + ')' } : {}}
-                onClick={onClick}
-            >
-                {!currentImage.w && <Text bold>{LocalizeText('camera.loading')}</Text>}
+            <Flex center className="picture-preview border border-black" style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : {}} onClick={onClick}>
+                {!imageUrl && <Text bold>{LocalizeText('camera.loading')}</Text>}
             </Flex>
             {currentImage.m && currentImage.m.length && <Text center>{currentImage.m}</Text>}
             <div className="flex items-center center justify-between">

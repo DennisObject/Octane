@@ -841,7 +841,7 @@
 }
 
 .octane-camera-checkout__section--purchase:has(.octane-camera-checkout__inventory-link) {
-    height: 78px;
+    height: 94px;
 }
 
 .octane-camera-checkout__section--competition {
@@ -939,14 +939,10 @@
     min-height: 25px;
     align-items: center;
     gap: 4px;
+    flex-wrap: wrap;
     color: #151515;
     font-size: 14px;
     line-height: 19px;
-}
-
-.octane-camera-checkout__inventory-link button {
-    font-size: 11px;
-    line-height: 17px;
 }
 
 .octane-camera-checkout__inventory-link button,
@@ -963,6 +959,14 @@
     font: inherit;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.octane-camera-checkout__inventory-link button {
+    position: static;
+    flex-basis: 100%;
+    text-align: left;
+    font-size: 11px;
+    line-height: 17px;
 }
 
 .octane-camera-checkout__section-copy a {
@@ -1056,4 +1060,81 @@
     max-height: 27px;
     padding: 0 8px !important;
     font-size: 11px !important;
+}
+
+/* WIN63 iro_room_thumbnail_camera: Frame 3, 148x217, 110x110 bitmap. */
+.octane-room-thumbnail-camera {
+    box-sizing: border-box;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
+    height: 217px;
+    min-height: 217px;
+    max-height: 217px;
+}
+
+.octane-room-thumbnail-camera__content {
+    position: relative;
+    width: 144px;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.octane-room-thumbnail-camera__viewfinder {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    box-sizing: border-box;
+    width: 112px;
+    height: 112px;
+    border: 1px solid #000000;
+    background: #000000;
+}
+
+.octane-room-thumbnail-camera__viewfinder canvas {
+    display: block;
+    width: 110px;
+    height: 110px;
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-thumbnail-camera__buttons {
+    position: absolute;
+    top: 138px;
+    left: 4px;
+    display: flex;
+    width: 135px;
+    height: 30px;
+    gap: 5px;
+}
+
+.octane-room-thumbnail-camera__buttons button {
+    box-sizing: border-box;
+    width: 65px;
+    height: 30px;
+    padding: 0;
+    border: 4px solid transparent;
+    border-image: url('../../assets/images/habbo-skin/slices/button-thick-default.png') 4 fill / 4px stretch;
+    background: transparent;
+    color: #111111;
+    font-family: Ubuntu, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-thumbnail-camera__buttons button:hover {
+    border-image-source: url('../../assets/images/habbo-skin/slices/button-thick-hover.png');
+}
+
+.octane-room-thumbnail-camera__buttons button:active {
+    border-image-source: url('../../assets/images/habbo-skin/slices/button-thick-pressed.png');
+}
+
+.octane-room-thumbnail-camera__buttons button:disabled {
+    border-image-source: url('../../assets/images/habbo-skin/slices/button-thick-disabled.png');
+    color: #777777;
+    cursor: default;
 }
