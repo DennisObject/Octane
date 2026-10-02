@@ -1,11 +1,12 @@
 import {
     AddLinkEventTracker,
-    convertNumbersForSaving,
-    convertSettingToNumber,
+    BuildersClubSubscriptionStatusMessageEvent,
     FloorHeightMapEvent,
     GetOccupiedTilesMessageComposer,
     GetRoomEntryTileMessageComposer,
+    GetSessionDataManager,
     ILinkEventTracker,
+    PerkAllowancesMessageEvent,
     RemoveLinkEventTracker,
     RoomEngineEvent,
     RoomEntryTileMessageEvent,
@@ -14,22 +15,30 @@ import {
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { GetLocalStorage, LocalizeText, SendMessageComposer, SetLocalStorage } from '../../api';
-import { Base, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
-import { useMessageEvent, useOctaneEvent } from '../../hooks';
-import { useFloorplanLiveSync } from '../../hooks/rooms/widgets/useFloorplanLiveSync';
-import { useFloorplanReducer } from './hooks/useFloorplanReducer';
-import { MAX_WALL_HEIGHT, MIN_WALL_HEIGHT } from './state/constants';
-import { serializeTilemap } from './state/encoding';
-import { localizeOr } from './state/localize';
-import { areaCount } from './state/selectors';
-import { EntryDir, ThicknessLevel } from './state/types';
-import { Floorplan3DView } from './views/Floorplan3DView';
-import { FloorplanCanvasSVG } from './views/FloorplanCanvasSVG';
+import { LocalizeText, SendMessageComposer } from '../../api';
+import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
+import { AIR_FLOOR_ASSETS } from './air/airAssets';
+import { FloorplanEditorLegacyView } from './FloorplanEditorLegacyView';
+import {
+    OfficialDrawMode,
+    OfficialFloorPlan,
+    emptyOfficialFloorPlan,
+    loadOfficialMap,
+    officialPlanData,
+    setOccupiedMap,
+    thicknessSelection,
+    thicknessWire,
+    wrapDirection
+} from './official/officialFloorPlan';
+import { parseTilemap } from './state/encoding';
+import { initialState } from './state/reducer';
+import { FloorActionMode, FloorplanAction, FloorplanState, ThicknessLevel } from './state/types';
 import { FloorplanHeightPicker } from './views/FloorplanHeightPicker';
 import { FloorplanImportExport } from './views/FloorplanImportExport';
+import { FloorplanOfficialCanvas } from './views/FloorplanOfficialCanvas';
+import { FloorplanOfficialPreview } from './views/FloorplanOfficialPreview';
 import { FloorplanOptionsPanel } from './views/FloorplanOptionsPanel';
-import { FloorplanPreviewSVG } from './views/FloorplanPreviewSVG';
 import { FloorplanToolbar } from './views/FloorplanToolbar';
 import { FloorplanWallHeightSlider } from './views/FloorplanWallHeightSlider';
 
@@ -45,356 +54,353 @@ type Props = {
     externalSession?: FloorplanEditorExternalSession;
 };
 
-export const PREVIEW_3D_STORAGE_KEY = 'octane.floorplan.preview3d';
+const ACTION_FOR_MODE: Record<OfficialDrawMode, FloorActionMode> = {
+    add_tile: 'SET',
+    remove_tile: 'UNSET',
+    increase_height: 'UP',
+    decrease_height: 'DOWN',
+    set_enter_tile: 'DOOR'
+};
 
-const readPreview3dPreference = (): boolean => {
+const MODE_FOR_ACTION: Record<FloorActionMode, OfficialDrawMode> = {
+    SET: 'add_tile',
+    UNSET: 'remove_tile',
+    UP: 'increase_height',
+    DOWN: 'decrease_height',
+    DOOR: 'set_enter_tile'
+};
+
+const staffCanSave = (): boolean => {
     try {
-        return GetLocalStorage<boolean>(PREVIEW_3D_STORAGE_KEY) === true;
+        const session = GetSessionDataManager();
+
+        return typeof session?.hasSecurity === 'function' && session.hasSecurity(4) === true;
     } catch {
         return false;
     }
 };
 
-const clampThickness = (v: number): ThicknessLevel => {
-    if (v <= 0) return 0;
-    if (v >= 3) return 3;
-    return (v | 0) as ThicknessLevel;
-};
+const asThickness = (value: number): ThicknessLevel => (value <= 0 ? 0 : value >= 3 ? 3 : (value as ThicknessLevel));
 
 export const FloorplanEditorView: FC<Props> = ({ externalSession }) => {
+    if (externalSession) return <FloorplanEditorLegacyView externalSession={externalSession} />;
+
+    return <OfficialFloorplanEditor />;
+};
+
+const OfficialFloorplanEditor: FC = () => {
     const [roomVisible, setRoomVisible] = useState(false);
     const [importExportVisible, setImportExportVisible] = useState(false);
-    const [liveSync, setLiveSync] = useState(true);
-    const [panMode, setPanMode] = useState(false);
-    const [autoPickup, setAutoPickup] = useState(false);
-    const [preview3d, setPreview3d] = useState(readPreview3dPreference);
-    const { state, dispatch, loadFromServer, undo, redo, canUndo, canRedo } = useFloorplanReducer();
-    const isExternal = !!externalSession;
-    const isVisible = isExternal || roomVisible;
-    const originalRef = useRef<{
-        tilemap: string;
-        entryPoint: [number, number];
-        entryPointDir: number;
-        thicknessWall: ThicknessLevel;
-        thicknessFloor: ThicknessLevel;
-        wallHeight: number;
-    } | null>(null);
+    const [zoom, setZoom] = useState<1 | 2>(1);
+    const [plan, setPlan] = useState<OfficialFloorPlan>(emptyOfficialFloorPlan);
+    const [previewPlan, setPreviewPlan] = useState<OfficialFloorPlan>(emptyOfficialFloorPlan);
+    const [drawMode, setDrawMode] = useState<OfficialDrawMode>('add_tile');
+    const [drawingHeight, setDrawingHeight] = useState(0);
+    const [fixedWallsHeight, setFixedWallsHeight] = useState(0);
+    const fixedWallsWireRef = useRef(0);
+    const [wallsFixed, setWallsFixed] = useState(false);
+    const [wallDrop, setWallDrop] = useState<ThicknessLevel>(0);
+    const [floorDrop, setFloorDrop] = useState<ThicknessLevel>(0);
+    const [committedWall, setCommittedWall] = useState<ThicknessLevel>(0);
+    const [committedFloor, setCommittedFloor] = useState<ThicknessLevel>(0);
+    const [canSave, setCanSave] = useState(false);
+    const [importCanSave, setImportCanSave] = useState(false);
+    const bcSecondsRef = useRef(0);
+    const windowCreatedRef = useRef(false);
+    const roomVisibleRef = useRef(false);
+    const { simpleAlert } = useNotification();
+    const [largeFloorPlans, setLargeFloorPlans] = useState(false);
+    const lastReceivedRef = useRef('');
+    const planRef = useRef(plan);
+    const bcTimerRef = useRef<number | null>(null);
+    const previewStageRef = useRef<HTMLDivElement>(null);
+    const previewTimerRef = useRef<number | null>(null);
+    const previewCenteredRef = useRef(false);
 
-    const area = useMemo(() => areaCount(state.tiles), [state.tiles]);
+    planRef.current = plan;
+    roomVisibleRef.current = roomVisible;
 
-    const { setBaseline, mergeBaseline, revert: revertLivePreview } = useFloorplanLiveSync({ enabled: !isExternal && liveSync && isVisible, state });
+    const liveState = useMemo<FloorplanState>(() => ({
+        ...initialState,
+        tiles: parseTilemap(officialPlanData(plan)),
+        door: { x: plan.entryX, y: plan.entryY, dir: (plan.entryDir & 7) as FloorplanState['door']['dir'] },
+        thickness: { wall: wallDrop, floor: floorDrop },
+        wallHeight: wallsFixed ? fixedWallsHeight + 1 : 0
+    }), [plan, wallDrop, floorDrop, wallsFixed, fixedWallsHeight]);
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => {
-        if (!isExternal) setRoomVisible(false);
-    });
+    const toolbarState = useMemo<FloorplanState>(() => ({
+        ...liveState,
+        brush: { h: drawingHeight, action: ACTION_FOR_MODE[drawMode] }
+    }), [liveState, drawingHeight, drawMode]);
+
+    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => setRoomVisible(false));
 
     useEffect(() => {
-        if (!externalSession) return;
+        if (!roomVisible) return;
 
-        const rows = externalSession.tilemap.split(/\r\n|\r|\n/).filter((row) => row.length > 0);
-        let entryPoint: [number, number] = [0, 0];
-        outer: for (let y = 0; y < rows.length; y++) {
-            for (let x = 0; x < rows[y].length; x++) {
-                if (rows[y].charAt(x).toLowerCase() === 'x') continue;
-                entryPoint = [x, y];
-                break outer;
-            }
+        if (!windowCreatedRef.current) {
+            setCanSave(bcSecondsRef.current > 0 || staffCanSave());
+            windowCreatedRef.current = true;
         }
-
-        const settings = {
-            tilemap: externalSession.tilemap,
-            entryPoint,
-            entryPointDir: 2,
-            thicknessWall: 1 as ThicknessLevel,
-            thicknessFloor: 1 as ThicknessLevel,
-            wallHeight: MIN_WALL_HEIGHT
-        };
-        originalRef.current = settings;
-        loadFromServer(settings);
-        if (externalSession.occupiedTiles) dispatch({ type: 'SET_OCCUPIED_TILES', map: externalSession.occupiedTiles });
-    }, [dispatch, externalSession?.occupiedTiles, externalSession?.tilemap, loadFromServer]);
-
-    useEffect(() => {
-        if (!isVisible || isExternal) return;
+        setWallDrop(committedWall);
+        setFloorDrop(committedFloor);
+        setWallsFixed(fixedWallsWireRef.current !== -1);
+        if (!previewTimerRef.current) setPreviewPlan(planRef.current);
         SendMessageComposer(new GetRoomEntryTileMessageComposer());
         SendMessageComposer(new GetOccupiedTilesMessageComposer());
-    }, [isExternal, isVisible]);
+    }, [roomVisible]);
+
+    useEffect(() => {
+        if (!roomVisible || previewTimerRef.current !== null) return;
+
+        // AIR's preview receiver keeps its cadence after the editor has first been created.
+        previewTimerRef.current = window.setInterval(() => setPreviewPlan(planRef.current), 2000);
+    }, [roomVisible]);
+
+    useEffect(() => {
+        if (!roomVisible) previewCenteredRef.current = false;
+    }, [roomVisible]);
+
+    const centerPreviewOnce = () => {
+        if (previewCenteredRef.current) return;
+
+        const stage = previewStageRef.current;
+
+        if (!stage || stage.clientWidth <= 0 || stage.clientHeight <= 0) return;
+
+        stage.scrollLeft = Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2);
+        stage.scrollTop = Math.max(0, (stage.scrollHeight - stage.clientHeight) / 2);
+        previewCenteredRef.current = true;
+    };
+
+    useEffect(() => () => {
+        if (bcTimerRef.current !== null) window.clearInterval(bcTimerRef.current);
+        if (previewTimerRef.current !== null) window.clearInterval(previewTimerRef.current);
+    }, []);
+
+    useMessageEvent<BuildersClubSubscriptionStatusMessageEvent>(BuildersClubSubscriptionStatusMessageEvent, (event) => {
+        const seconds = event.getParser()?.secondsLeft ?? 0;
+
+        bcSecondsRef.current = seconds;
+
+        if (bcTimerRef.current === null) {
+            bcTimerRef.current = window.setInterval(() => {
+                bcSecondsRef.current -= 10;
+                if (roomVisibleRef.current) setCanSave(bcSecondsRef.current > 0 || staffCanSave());
+            }, 10000);
+        }
+    });
+
+    useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, (event) => {
+        const parser = event.getParser() as { isAllowed?: (code: string) => boolean; isPerkAllowed?: (code: string) => boolean } | undefined;
+
+        setLargeFloorPlans(Boolean(parser?.isAllowed?.('BUILDER_AT_WORK') || parser?.isPerkAllowed?.('BUILDER_AT_WORK')));
+    });
 
     useMessageEvent<RoomOccupiedTilesMessageEvent>(RoomOccupiedTilesMessageEvent, (event) => {
-        if (isExternal) return;
-        dispatch({ type: 'SET_OCCUPIED_TILES', map: event.getParser().blockedTilesMap });
+        const occupied = event.getParser().blockedTilesMap ?? [];
+
+        setPlan((current) => setOccupiedMap(current, occupied));
     });
 
     useMessageEvent<RoomEntryTileMessageEvent>(RoomEntryTileMessageEvent, (event) => {
-        if (isExternal) return;
         const parser = event.getParser();
-        originalRef.current = {
-            tilemap: originalRef.current?.tilemap ?? '',
-            entryPoint: [parser.x, parser.y],
-            entryPointDir: parser.direction,
-            thicknessWall: originalRef.current?.thicknessWall ?? 1,
-            thicknessFloor: originalRef.current?.thicknessFloor ?? 1,
-            wallHeight: originalRef.current?.wallHeight ?? -1
-        };
-        dispatch({ type: 'SET_DOOR', x: parser.x, y: parser.y, source: 'remote' });
-        dispatch({ type: 'SET_DOOR_DIR', dir: ((parser.direction | 0) & 7) as EntryDir, source: 'remote' });
-        mergeBaseline({ doorX: parser.x, doorY: parser.y, doorDir: (parser.direction | 0) & 7 });
+
+        setPlan((current) => ({
+            ...current,
+            entryX: parser.x,
+            entryY: parser.y,
+            entryDir: wrapDirection(parser.direction | 0)
+        }));
     });
 
     useMessageEvent<FloorHeightMapEvent>(FloorHeightMapEvent, (event) => {
-        if (isExternal) return;
         const parser = event.getParser();
-        originalRef.current = {
-            tilemap: parser.model,
-            entryPoint: originalRef.current?.entryPoint ?? [0, 0],
-            entryPointDir: originalRef.current?.entryPointDir ?? 2,
-            thicknessWall: originalRef.current?.thicknessWall ?? 1,
-            thicknessFloor: originalRef.current?.thicknessFloor ?? 1,
-            wallHeight: parser.wallHeight + 1
-        };
-        loadFromServer({
-            tilemap: parser.model,
-            entryPoint: originalRef.current.entryPoint,
-            entryPointDir: originalRef.current.entryPointDir,
-            thicknessWall: originalRef.current.thicknessWall,
-            thicknessFloor: originalRef.current.thicknessFloor,
-            wallHeight: parser.wallHeight + 1
-        });
-        setBaseline({
-            tilemap: parser.model,
-            doorX: originalRef.current.entryPoint[0],
-            doorY: originalRef.current.entryPoint[1],
-            doorDir: originalRef.current.entryPointDir,
-            thicknessWall: originalRef.current.thicknessWall,
-            thicknessFloor: originalRef.current.thicknessFloor,
-            wallHeight: parser.wallHeight + 1
-        });
+        const loaded = loadOfficialMap(parser.model ?? '');
+
+        lastReceivedRef.current = parser.model ?? '';
+        setPlan((current) => ({ ...loaded, reserved: current.reserved, entryX: current.entryX, entryY: current.entryY, entryDir: current.entryDir }));
+        setPreviewPlan({ ...loaded, entryX: planRef.current.entryX, entryY: planRef.current.entryY, entryDir: planRef.current.entryDir });
+        fixedWallsWireRef.current = parser.wallHeight;
+        if (parser.wallHeight !== -1) setFixedWallsHeight(parser.wallHeight);
+        setWallsFixed(parser.wallHeight !== -1);
     });
 
     useMessageEvent<RoomVisualizationSettingsEvent>(RoomVisualizationSettingsEvent, (event) => {
-        if (isExternal) return;
         const parser = event.getParser();
-        const wall = clampThickness(convertSettingToNumber(parser.thicknessWall));
-        const floor = clampThickness(convertSettingToNumber(parser.thicknessFloor));
-        originalRef.current = {
-            tilemap: originalRef.current?.tilemap ?? '',
-            entryPoint: originalRef.current?.entryPoint ?? [0, 0],
-            entryPointDir: originalRef.current?.entryPointDir ?? 2,
-            thicknessWall: wall,
-            thicknessFloor: floor,
-            wallHeight: originalRef.current?.wallHeight ?? -1
-        };
-        dispatch({ type: 'SET_THICKNESS', wall, floor, source: 'remote' });
-        mergeBaseline({ thicknessWall: wall, thicknessFloor: floor });
+        const wall = asThickness(thicknessSelection(parser.thicknessWall));
+        const floor = asThickness(thicknessSelection(parser.thicknessFloor));
+
+        setWallDrop(wall);
+        setFloorDrop(floor);
+        setCommittedWall(wall);
+        setCommittedFloor(floor);
     });
 
     useEffect(() => {
-        if (!isVisible) return;
-        const handler = (e: KeyboardEvent) => {
-            if (!(e.ctrlKey || e.metaKey)) return;
-            const target = e.target as HTMLElement | null;
-            const tag = target?.tagName;
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return;
-            const key = e.key.toLowerCase();
-            if (key === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                undo();
-            } else if ((key === 'z' && e.shiftKey) || key === 'y') {
-                e.preventDefault();
-                redo();
-            }
-        };
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
-    }, [isVisible, undo, redo]);
-
-    useEffect(() => {
-        if (isExternal) return;
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
                 const parts = url.split('/');
+
                 if (parts.length < 2) return;
-                switch (parts[1]) {
-                    case 'show':
-                        setRoomVisible(true);
-                        return;
-                    case 'hide':
-                        setRoomVisible(false);
-                        return;
-                    case 'toggle':
-                        setRoomVisible((v) => !v);
-                        return;
-                }
+
+                if (parts[1] === 'show') setRoomVisible(true);
+                else if (parts[1] === 'hide') setRoomVisible(false);
+                else if (parts[1] === 'toggle') setRoomVisible((value) => !value);
             },
             eventUrlPrefix: 'floor-editor/'
         };
-        AddLinkEventTracker(linkTracker);
-        return () => RemoveLinkEventTracker(linkTracker);
-    }, [isExternal]);
 
-    const onWallHeightChange = (value: number) => {
-        if (isNaN(value) || value <= 0) value = MIN_WALL_HEIGHT;
-        if (value > MAX_WALL_HEIGHT) value = MAX_WALL_HEIGHT;
-        dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' });
+        AddLinkEventTracker(linkTracker);
+
+        return () => RemoveLinkEventTracker(linkTracker);
+    }, []);
+
+    const acceptPlan = (next: OfficialFloorPlan, limited: boolean) => {
+        setPlan(next);
+
+        if (limited) simpleAlert(LocalizeText('floor.plan.editor.size.limit.exceeded'), null, null, null, LocalizeText('floor.plan.editor.alert'));
     };
 
-    const saveFloorChanges = () => {
-        if (externalSession) {
-            externalSession.onSave(serializeTilemap(state.tiles));
-            externalSession.onClose();
+    const dispatch = (action: FloorplanAction) => {
+        if (action.type === 'BRUSH_SET') {
+            if (action.action) setDrawMode(MODE_FOR_ACTION[action.action]);
+            if (action.h !== undefined) setDrawingHeight(Math.max(0, Math.min(30, action.h | 0)));
             return;
         }
 
-        SendMessageComposer(
-            new UpdateFloorPropertiesMessageComposer(
-                serializeTilemap(state.tiles),
-                state.door.x,
-                state.door.y,
-                state.door.dir,
-                convertNumbersForSaving(state.thickness.wall),
-                convertNumbersForSaving(state.thickness.floor),
-                state.wallHeight - 1,
-                autoPickup
-            )
-        );
-    };
+        if (action.type === 'SET_DOOR_DIR') {
+            setPlan((current) => ({ ...current, entryDir: wrapDirection(action.dir) }));
+            return;
+        }
 
-    const choosePreview = (use3d: boolean) => {
-        setPreview3d(use3d);
-        try {
-            SetLocalStorage(PREVIEW_3D_STORAGE_KEY, use3d);
-        } catch {
+        if (action.type === 'SET_THICKNESS') {
+            if (action.wall !== undefined) setWallDrop(action.wall);
+            if (action.floor !== undefined) setFloorDrop(action.floor);
+            return;
+        }
+
+        if (action.type === 'SET_WALL_HEIGHT') {
+            if (action.value <= 0) {
+                setWallsFixed(false);
+                return;
+            }
+
+            setWallsFixed(true);
+            fixedWallsWireRef.current = Math.max(0, Math.min(15, action.value - 1));
+            setFixedWallsHeight(fixedWallsWireRef.current);
+            return;
+        }
+
+        if (action.type === 'IMPORT_STRING') {
+            const loaded = loadOfficialMap(action.raw.replace(/\n/g, '\r'));
+
+            setPlan((current) => ({ ...loaded, reserved: current.reserved, entryX: current.entryX, entryY: current.entryY, entryDir: current.entryDir }));
         }
     };
 
-    const revertChanges = () => {
-        const o = originalRef.current;
-        if (!o) return;
-        loadFromServer(o);
-        if (!isExternal && liveSync) revertLivePreview();
+    const saveFloorChanges = () => {
+        if (!canSave) return;
+
+        setCommittedWall(wallDrop);
+        setCommittedFloor(floorDrop);
+        SendMessageComposer(new UpdateFloorPropertiesMessageComposer(
+            officialPlanData(plan),
+            plan.entryX,
+            plan.entryY,
+            plan.entryDir,
+            thicknessWire(wallDrop),
+            thicknessWire(floorDrop),
+            wallsFixed ? fixedWallsHeight : -1
+        ));
     };
 
-    const closeEditor = () => {
-        setImportExportVisible(false);
-        if (externalSession) externalSession.onClose();
-        else setRoomVisible(false);
+    const reloadFromLast = () => {
+        const loaded = loadOfficialMap(lastReceivedRef.current);
+
+        setPlan((current) => ({ ...loaded, reserved: current.reserved, entryX: current.entryX, entryY: current.entryY, entryDir: current.entryDir }));
+        setPreviewPlan((current) => ({ ...loaded, reserved: current.reserved, entryX: current.entryX, entryY: current.entryY, entryDir: current.entryDir }));
+        SendMessageComposer(new GetOccupiedTilesMessageComposer());
+        SendMessageComposer(new GetRoomEntryTileMessageComposer());
     };
+
+    const displayedWall = fixedWallsHeight + 1;
 
     return (
         <>
-            {isVisible && (
-                <OctaneCardView uniqueKey="floorpan-editor" className="w-[1010px] h-[620px]" classNames={['octane-floorplan-window']} theme="primary-slim" isResizable={false}>
-                    <OctaneCardHeaderView headerText={externalSession?.title ?? LocalizeText('floor.plan.editor.title')} onCloseClick={closeEditor} />
-                    <OctaneCardContentView overflow="hidden" className="flex flex-col">
-                        <div className="fp-body">
-                            <div className="fp-controls">
+            {roomVisible && (
+                <OctaneCardView uniqueKey="floorpan-editor" frameStyle={3} className="w-[662px] h-[600px]" classNames={['octane-floorplan-window']} theme="primary" isResizable>
+                    <OctaneCardHeaderView headerText={LocalizeText('floor.plan.editor.title')} onCloseClick={() => setRoomVisible(false)} />
+                    <OctaneCardContentView overflow="hidden">
+                        <div className="fp-bc" data-testid="floorplan-official">
+                            <div className="fp-bc-banner">
+                                <img className="fp-bc-logo" src={AIR_FLOOR_ASSETS.logo} alt="" />
+                                <span className="fp-bc-subtitle">{LocalizeText('floor.plan.editor.subtitle')}</span>
+                            </div>
+                            <section className="fp-bc-heightmap" data-testid="floorplan-plan-panel">
                                 <FloorplanToolbar
-                                    state={state}
+                                    state={toolbarState}
                                     dispatch={dispatch}
-                                    canUndo={canUndo}
-                                    canRedo={canRedo}
-                                    onUndo={undo}
-                                    onRedo={redo}
-                                    panMode={panMode}
-                                    setPanMode={setPanMode}
-                                    includeDoor={!isExternal}
+                                    extras={false}
                                 />
-                                {!isExternal && <FloorplanOptionsPanel state={state} dispatch={dispatch} />}
-                            </div>
-                            <div className="fp-panels">
-                                <div className="fp-panel" data-testid="floorplan-plan-panel">
-                                    <div className="fp-panel-head">
-                                        <div className="fp-badge is-brush" data-testid="brush-height-badge" title="Brush height">
-                                            {state.brush.h}
-                                        </div>
-                                        <span className="fp-panel-title">{localizeOr('floor.plan.editor.tile.height', 'Set height')}</span>
-                                        <span className="fp-panel-info" data-testid="floorplan-area">
-                                            {localizeOr('floor.plan.editor.area', `Area: ${area.total} (${area.walkable} tiles)`, ['total', 'walkable'], [String(area.total), String(area.walkable)])}
-                                        </span>
-                                    </div>
-                                    <div className="fp-panel-body">
-                                        <FloorplanHeightPicker selectedH={state.brush.h} onSelect={(h) => dispatch({ type: 'BRUSH_SET', h })} />
-                                        <FloorplanCanvasSVG state={state} dispatch={dispatch} panMode={panMode} />
-                                    </div>
+                                <div className="fp-bc-height-row">
+                                    <span className="fp-bc-height-label">{LocalizeText('floor.plan.editor.tile.height')}</span>
+                                    <FloorplanHeightPicker selectedH={drawingHeight} onSelect={setDrawingHeight} />
                                 </div>
-                                <div className="fp-panel" data-testid="floorplan-preview-panel">
-                                    <div className="fp-panel-head">
-                                        <div className="fp-badge" data-testid="wall-height-badge" title="Wall height">
-                                            {state.wallHeight}
-                                        </div>
-                                        <span className="fp-panel-title">{LocalizeText('floor.editor.wall.height')}</span>
-                                        <div className="fp-view-switch" data-testid="floorplan-view-switch" role="group" aria-label={localizeOr('floor.plan.editor.preview.mode', 'Preview')}>
-                                            <button
-                                                type="button"
-                                                data-testid="floorplan-view-2d"
-                                                data-active={preview3d ? 'false' : 'true'}
-                                                className={`fp-pill ${preview3d ? '' : 'is-on'}`}
-                                                title={localizeOr('floor.plan.editor.preview.2d.title', 'Flat preview (light, works on every device)')}
-                                                onClick={() => choosePreview(false)}
-                                            >
-                                                2D
-                                            </button>
-                                            <button
-                                                type="button"
-                                                data-testid="floorplan-view-3d"
-                                                data-active={preview3d ? 'true' : 'false'}
-                                                className={`fp-pill ${preview3d ? 'is-on' : ''}`}
-                                                title={localizeOr('floor.plan.editor.preview.3d.title', '3D preview (WebGL, editable, heavier)')}
-                                                onClick={() => choosePreview(true)}
-                                            >
-                                                3D
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="fp-panel-body">
-                                        <FloorplanWallHeightSlider value={state.wallHeight} onChange={onWallHeightChange} />
-                                        {preview3d ? (
-                                            <Floorplan3DView state={state} dispatch={dispatch} panMode={panMode} />
-                                        ) : (
-                                            <div className="fp-stage" data-testid="floorplan-preview-2d">
-                                                <FloorplanPreviewSVG state={state} />
-                                            </div>
-                                        )}
-                                    </div>
+                                <div className="fp-bc-map">
+                                    <FloorplanOfficialCanvas
+                                        plan={plan}
+                                        zoom={zoom}
+                                        mode={drawMode}
+                                        drawingHeight={drawingHeight}
+                                        largeFloorPlans={largeFloorPlans}
+                                        onPlan={acceptPlan}
+                                    />
+                                    <button type="button" className="fp-bc-zoom" data-testid="floorplan-zoom" data-zoom={zoom} onClick={() => setZoom((value) => (value === 1 ? 2 : 1))}>
+                                        <img src={AIR_FLOOR_ASSETS.magnifier} alt="" />
+                                    </button>
                                 </div>
-                            </div>
-                            <div className="fp-footer">
-                                <Base pointer className="fp-btn is-red" data-testid="floorplan-revert" onClick={revertChanges}>
-                                    {LocalizeText('floor.plan.editor.reload')}
-                                </Base>
-                                {!isExternal && (
-                                    <div className="fp-footer-middle">
-                                        <Base
-                                            pointer
-                                            data-testid="floorplan-live-sync"
-                                            data-active={liveSync ? 'true' : 'false'}
-                                            className={`fp-toggle ${liveSync ? 'is-on' : ''}`}
-                                            onClick={() => setLiveSync((v) => !v)}
-                                            title="Local in-room preview while drawing (does not save to server)"
-                                        >
-                                            <span className="fp-toggle-dot" />
-                                            {liveSync ? 'Live preview ON' : 'Live preview OFF'}
-                                        </Base>
-                                        <Base
-                                            pointer
-                                            data-testid="floorplan-auto-pickup"
-                                            data-active={autoPickup ? 'true' : 'false'}
-                                            className={`fp-toggle is-warm ${autoPickup ? 'is-on' : ''}`}
-                                            onClick={() => setAutoPickup((v) => !v)}
-                                            title="On save: pick up furniture blocking the new floor plan and return it to its owner's inventory"
-                                        >
-                                            <span className="fp-toggle-dot" />
-                                            {autoPickup ? 'Pick up blocking furni ON' : 'Pick up blocking furni OFF'}
-                                        </Base>
-                                    </div>
-                                )}
-                                <div className={`fp-footer-right ${isExternal ? 'ml-auto' : ''}`}>
-                                    <Base pointer className="fp-btn is-grey" data-testid="floorplan-import-export" onClick={() => setImportExportVisible(true)}>
-                                        {LocalizeText('floor.plan.editor.import.export')}
-                                    </Base>
-                                    <Base pointer className="fp-btn is-blue" data-testid="floorplan-save" onClick={saveFloorChanges}>
-                                        {LocalizeText('floor.plan.editor.save')}
-                                    </Base>
+                            </section>
+                            <section className="fp-bc-side" data-testid="floorplan-preview-panel">
+                                <FloorplanOptionsPanel state={toolbarState} dispatch={dispatch} />
+                                <div className={`fp-bc-wall-row ${wallsFixed ? '' : 'is-off'}`}>
+                                    <button
+                                        type="button"
+                                        className={`fp-bc-check ${wallsFixed ? 'is-on' : ''}`}
+                                        data-testid="wall-height-fixed"
+                                        aria-pressed={wallsFixed}
+                                        onClick={() => {
+                                            if (wallsFixed) {
+                                                setWallsFixed(false);
+                                                return;
+                                            }
+
+                                            if (fixedWallsWireRef.current === -1) fixedWallsWireRef.current = fixedWallsHeight;
+                                            setWallsFixed(true);
+
+                                        }}
+                                    />
+                                    <span className="fp-bc-wall-label">{LocalizeText('floor.editor.wall.height')}</span>
+                                    <span className="fp-bc-wall-number" data-testid="wall-height-badge">{displayedWall}</span>
+                                    <FloorplanWallHeightSlider value={displayedWall} disabled={!wallsFixed} onChange={(value) => dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' })} />
+                                </div>
+                                <div className="fp-bc-preview-stage" ref={previewStageRef}>
+                                    <FloorplanOfficialPreview plan={previewPlan} onDrawn={centerPreviewOnce} />
+                                    <button type="button" className="fp-bc-refresh" data-testid="floorplan-refresh" onClick={() => setPreviewPlan(planRef.current)}>
+                                        <img src={AIR_FLOOR_ASSETS.refresh} alt="" />
+                                    </button>
+                                </div>
+                            </section>
+                            <div className="fp-bc-footer">
+                                <button type="button" className="fp-bc-btn" data-testid="floorplan-revert" onClick={reloadFromLast}>{LocalizeText('floor.plan.editor.reload')}</button>
+                                <div className="fp-bc-footer-right">
+                                    <button type="button" className="fp-bc-btn" data-testid="floorplan-import-export" onClick={() => {
+                                        if (importExportVisible) { setImportExportVisible(false); return; }
+                                        setImportCanSave(bcSecondsRef.current > 0 || staffCanSave());
+                                        setImportExportVisible(true);
+                                    }}>{LocalizeText('floor.plan.editor.import.export')}</button>
+                                    <button type="button" className="fp-bc-btn" data-testid="floorplan-cancel" onClick={() => setRoomVisible(false)}>{LocalizeText('floor.plan.editor.cancel')}</button>
+                                    <button type="button" className="fp-bc-btn is-save" data-testid="floorplan-save" disabled={!canSave} onClick={saveFloorChanges}>{LocalizeText('floor.plan.editor.save')}</button>
                                 </div>
                             </div>
                         </div>
@@ -403,30 +409,25 @@ export const FloorplanEditorView: FC<Props> = ({ externalSession }) => {
             )}
             {importExportVisible && (
                 <FloorplanImportExport
-                    state={state}
+                    state={toolbarState}
                     dispatch={dispatch}
+                    initialText={officialPlanData(plan)}
+                    saveDisabled={!importCanSave}
                     onClose={() => setImportExportVisible(false)}
                     onSaveFromText={(raw) => {
-                        if (externalSession) {
-                            externalSession.onSave(raw);
-                            setImportExportVisible(false);
-                            externalSession.onClose();
-                            return;
-                        }
-                        SendMessageComposer(
-                            new UpdateFloorPropertiesMessageComposer(
-                                raw,
-                                state.door.x,
-                                state.door.y,
-                                state.door.dir,
-                                convertNumbersForSaving(state.thickness.wall),
-                                convertNumbersForSaving(state.thickness.floor),
-                                state.wallHeight - 1,
-                                autoPickup
-                            )
-                        );
+                        if (!importCanSave) return;
+
+                        SendMessageComposer(new UpdateFloorPropertiesMessageComposer(
+                            raw.replace(/\r\n|\n/g, '\r'),
+                            plan.entryX,
+                            plan.entryY,
+                            plan.entryDir,
+                            thicknessWire(committedWall),
+                            thicknessWire(committedFloor),
+                            -1
+                        ));
                     }}
-                    onRevertText={() => originalRef.current?.tilemap ?? serializeTilemap(state.tiles)}
+                    onRevertText={() => lastReceivedRef.current}
                 />
             )}
         </>

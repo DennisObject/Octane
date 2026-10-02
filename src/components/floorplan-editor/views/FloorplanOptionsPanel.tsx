@@ -1,8 +1,7 @@
-import { Dispatch, FC } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { Dispatch, FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../api';
-import { localizeOr } from '../state/localize';
-import { Base } from '../../../common';
+import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { EntryDir, FloorplanAction, FloorplanState, ThicknessLevel } from '../state/types';
 
 type Props = {
@@ -13,7 +12,58 @@ type Props = {
 const THICKNESS_LEVELS: ThicknessLevel[] = [0, 1, 2, 3];
 const THICKNESS_NAMES = ['thinnest', 'thin', 'normal', 'thick'] as const;
 
+const OFFICIAL_GHOST_FIGURE = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
+
 const rotateDir = (dir: EntryDir, step: 1 | -1): EntryDir => ((dir + step + 8) & 7) as EntryDir;
+
+const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
+    const [url, setUrl] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+        const listener = {
+            disposed: false,
+            dispose: null as (() => void) | null,
+            resetFigure: (figure: string) => {
+                if (cancelled || listener.disposed) return;
+
+                const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.SMALL, 'M', listener);
+
+                if (!avatar) return;
+
+                try {
+                    avatar.setDirection(AvatarSetType.FULL, direction);
+
+                    const image = avatar.processAsImageUrl(AvatarSetType.FULL);
+                    const placeholder = typeof avatar.isPlaceholder === 'function' && avatar.isPlaceholder();
+
+                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) setUrl(image);
+                } catch {
+                    if (!cancelled) setUrl('');
+                } finally {
+                    avatar.dispose();
+                }
+            }
+        };
+
+        try {
+            listener.resetFigure(OFFICIAL_GHOST_FIGURE);
+        } catch {
+            if (!cancelled) setUrl('');
+        }
+
+        return () => {
+            cancelled = true;
+            listener.disposed = true;
+        };
+    }, [direction]);
+
+    return (
+        <span className="fp-bc-ghost" data-testid="floorplan-ghost" data-figure={OFFICIAL_GHOST_FIGURE} data-scale="sh" data-direction={direction}>
+            {url ? <img src={url} alt="" /> : null}
+        </span>
+    );
+};
 
 export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch }) => {
     const setDir = (next: EntryDir) => dispatch({ type: 'SET_DOOR_DIR', dir: next, source: 'local' });
@@ -21,68 +71,54 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch }) => {
     const setFloor = (t: ThicknessLevel) => dispatch({ type: 'SET_THICKNESS', floor: t, source: 'local' });
 
     return (
-        <>
-            <div className="fp-control-group is-centered" data-testid="floorplan-orientation">
-                <div className="fp-group-label">{LocalizeText('floor.plan.editor.enter.direction')}</div>
-                <div className="fp-orientation">
-                    <Base data-testid="entry-dir-prev" pointer title="Rotate left" className="fp-orientation-step" onClick={() => setDir(rotateDir(state.door.dir, -1))}>
-                        <FaChevronLeft size={11} />
-                    </Base>
-                    <Base
-                        data-testid="entry-dir"
-                        pointer
-                        title={`Direction ${state.door.dir}/7 (click to rotate)`}
-                        className={`octane-icon icon-door-direction-${state.door.dir}`}
-                        onClick={() => setDir(rotateDir(state.door.dir, 1))}
-                    />
-                    <Base data-testid="entry-dir-next" pointer title="Rotate right" className="fp-orientation-step" onClick={() => setDir(rotateDir(state.door.dir, 1))}>
-                        <FaChevronRight size={11} />
-                    </Base>
-                </div>
-            </div>
-
-            <div className="fp-control-group is-centered is-right" data-testid="floorplan-appearance">
-                <div className="fp-group-label">{localizeOr('floor.plan.editor.appearance', 'Appearance')}</div>
-                <ThicknessStepper value={state.thickness.wall} onChange={setWall} testIdPrefix="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
-                <ThicknessStepper value={state.thickness.floor} onChange={setFloor} testIdPrefix="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
-            </div>
-        </>
-    );
-};
-
-type StepperProps = {
-    value: ThicknessLevel;
-    onChange: (next: ThicknessLevel) => void;
-    testIdPrefix: string;
-    labelKeyPrefix: string;
-};
-
-/** Up steps to the next thicker level, down to the thinner one; the label cycles on click. */
-const ThicknessStepper: FC<StepperProps> = ({ value, onChange, testIdPrefix, labelKeyPrefix }) => {
-    const index = THICKNESS_LEVELS.indexOf(value);
-    const thinner = index > 0 ? THICKNESS_LEVELS[index - 1] : null;
-    const thicker = index < THICKNESS_LEVELS.length - 1 ? THICKNESS_LEVELS[index + 1] : null;
-    const label = LocalizeText(`${labelKeyPrefix}.${THICKNESS_NAMES[value]}`);
-
-    return (
-        <div className="fp-select" data-testid={testIdPrefix} data-value={value} title={label}>
-            <span data-testid={`${testIdPrefix}-label`} onClick={() => onChange(thicker ?? THICKNESS_LEVELS[0])}>
-                {label}
-            </span>
-            <div className="fp-select-arrows">
+        <div className="fp-bc-room-controls" data-testid="floorplan-room-controls">
+            <div className="fp-bc-direction" data-testid="floorplan-orientation">
+                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.enter.direction')}</div>
+                <button type="button" className="fp-bc-dir-btn" data-testid="entry-dir-prev" title="Rotate door" onClick={() => setDir(rotateDir(state.door.dir, 1))}>
+                    <img src={AIR_FLOOR_ASSETS.arrowLeft} alt="" />
+                </button>
                 <span
-                    data-testid={`${testIdPrefix}-up`}
-                    className={`fp-select-arrow is-up ${thicker === null ? 'is-disabled' : ''}`}
-                    title="Thicker"
-                    onClick={() => thicker !== null && onChange(thicker)}
-                />
-                <span
-                    data-testid={`${testIdPrefix}-down`}
-                    className={`fp-select-arrow is-down ${thinner === null ? 'is-disabled' : ''}`}
-                    title="Thinner"
-                    onClick={() => thinner !== null && onChange(thinner)}
-                />
+                    className="fp-bc-avatar"
+                    data-testid="entry-dir"
+                    data-dir={state.door.dir}
+                    title={`Direction ${state.door.dir}/7`}
+                >
+                    <GhostAvatar direction={state.door.dir} />
+                </span>
+                <button type="button" className="fp-bc-dir-btn is-right" data-testid="entry-dir-next" title="Rotate door" onClick={() => setDir(rotateDir(state.door.dir, -1))}>
+                    <img src={AIR_FLOOR_ASSETS.arrowRight} alt="" />
+                </button>
+            </div>
+            <img className="fp-bc-vdivider" src={AIR_FLOOR_ASSETS.receptionDivider} alt="" />
+            <div className="fp-bc-thickness" data-testid="floorplan-appearance">
+                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.room.options')}</div>
+                <ThicknessMenu value={state.thickness.wall} onChange={setWall} testId="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
+                <ThicknessMenu value={state.thickness.floor} onChange={setFloor} testId="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
             </div>
         </div>
     );
 };
+
+type MenuProps = {
+    value: ThicknessLevel;
+    onChange: (next: ThicknessLevel) => void;
+    testId: string;
+    labelKeyPrefix: string;
+};
+
+const ThicknessMenu: FC<MenuProps> = ({ value, onChange, testId, labelKeyPrefix }) => (
+    <select
+        className="fp-bc-drop"
+        data-testid={testId}
+        data-value={value}
+        aria-label={testId}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value) as ThicknessLevel)}
+    >
+        {THICKNESS_LEVELS.map((level) => (
+            <option key={level} value={level}>
+                {LocalizeText(`${labelKeyPrefix}.${THICKNESS_NAMES[level]}`)}
+            </option>
+        ))}
+    </select>
+);

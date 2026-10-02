@@ -2,6 +2,7 @@ import { Dispatch, FC } from 'react';
 import { FaRedo, FaUndo } from 'react-icons/fa';
 import { LocalizeText } from '../../../api';
 import { Base } from '../../../common';
+import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { FloorActionMode, FloorplanAction, FloorplanState } from '../state/types';
 
 type Props = {
@@ -14,17 +15,18 @@ type Props = {
     panMode?: boolean;
     setPanMode?: (next: boolean) => void;
     includeDoor?: boolean;
+    extras?: boolean;
 };
 
-const BRUSH_BUTTONS: { id: string; mode: FloorActionMode; iconClass: string; gap?: boolean }[] = [
-    { id: 'tool-set', mode: 'SET', iconClass: 'icon-set-tile' },
-    { id: 'tool-unset', mode: 'UNSET', iconClass: 'icon-unset-tile' },
-    { id: 'tool-up', mode: 'UP', iconClass: 'icon-increase-height', gap: true },
-    { id: 'tool-down', mode: 'DOWN', iconClass: 'icon-decrease-height' },
-    { id: 'tool-door', mode: 'DOOR', iconClass: 'icon-set-door', gap: true }
+const BRUSH_BUTTONS: { id: string; mode: FloorActionMode; icon: string; name: string }[] = [
+    { id: 'tool-set', mode: 'SET', icon: AIR_FLOOR_ASSETS.addTile, name: 'add_tile' },
+    { id: 'tool-unset', mode: 'UNSET', icon: AIR_FLOOR_ASSETS.removeTile, name: 'remove_tile' },
+    { id: 'tool-up', mode: 'UP', icon: AIR_FLOOR_ASSETS.raiseTile, name: 'increase_height' },
+    { id: 'tool-down', mode: 'DOWN', icon: AIR_FLOOR_ASSETS.sinkTile, name: 'decrease_height' },
+    { id: 'tool-door', mode: 'DOOR', icon: AIR_FLOOR_ASSETS.enterTile, name: 'set_enter_tile' }
 ];
 
-export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo, onUndo, onRedo, panMode, setPanMode, includeDoor = true }) => {
+export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo, onUndo, onRedo, panMode, setPanMode, includeDoor = true, extras = true }) => {
     const exitPan = () => {
         if (panMode && setPanMode) setPanMode(false);
     };
@@ -37,27 +39,32 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
             <div className="fp-tools">
                 {buttons.map((b, index) => {
                     const active = state.brush.action === b.mode && !panMode;
+                    const gapBefore = b.mode === 'UP' || b.mode === 'DOOR';
 
                     return (
-                        <Base
-                            key={b.id}
-                            pointer
-                            data-testid={b.id}
-                            data-active={active ? 'true' : 'false'}
-                            className={`fp-tool ${active ? 'is-active' : ''} ${b.gap && index > 0 ? 'is-gap' : ''}`}
-                            onClick={() => {
-                                exitPan();
-                                dispatch({ type: 'BRUSH_SET', action: b.mode });
-                            }}
-                        >
-                            <span className={`octane-icon ${b.iconClass}`} />
-                        </Base>
+                        <span key={b.id} className="fp-tool-slot">
+                            {gapBefore && index > 0 && <img className="fp-tool-divider" data-before={b.name} src={AIR_FLOOR_ASSETS.receptionDivider} alt="" />}
+                            <Base
+                                pointer
+                                data-testid={b.id}
+                                data-tool={b.name}
+                                data-active={active ? 'true' : 'false'}
+                                className={`fp-tool ${active ? 'is-active' : ''}`}
+                                onClick={() => {
+                                    exitPan();
+                                    dispatch({ type: 'BRUSH_SET', action: b.mode });
+                                }}
+                            >
+                                <img src={b.icon} alt="" draggable={false} />
+                            </Base>
+                        </span>
                     );
                 })}
+                {extras && <>
                 <Base
                     pointer
                     data-testid="tool-select-all"
-                    className="fp-tool is-gap"
+                    className="fp-tool is-extra"
                     title={state.brush.action === 'UNSET' ? 'Erase all tiles' : 'Apply brush to all tiles'}
                     onClick={() => {
                         exitPan();
@@ -71,12 +78,8 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                     pointer
                     data-testid="tool-square-select"
                     data-active={state.squareSelect && !panMode ? 'true' : 'false'}
-                    title={
-                        state.squareSelect && !panMode
-                            ? 'Rectangular selection mode active — drag on the canvas to apply the brush'
-                            : 'Rectangular selection — apply the brush to all tiles in an area'
-                    }
-                    className={`fp-tool ${state.squareSelect && !panMode ? 'is-active' : ''}`}
+                    title="Rectangular selection"
+                    className={`fp-tool is-extra ${state.squareSelect && !panMode ? 'is-active' : ''}`}
                     onClick={() => {
                         exitPan();
                         dispatch({ type: 'SQUARE_SELECT_TOGGLE' });
@@ -90,7 +93,7 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                         data-testid="tool-pan"
                         data-active={panMode ? 'true' : 'false'}
                         title={panMode ? 'Hand mode active — drag to pan the view' : 'Hand mode — drag to pan the view'}
-                        className={`fp-tool is-gap ${panMode ? 'is-active' : ''}`}
+                        className={`fp-tool is-extra ${panMode ? 'is-active' : ''}`}
                         onClick={() => setPanMode(!panMode)}
                     >
                         <span className="octane-icon icon-hand-mode" />
@@ -102,22 +105,23 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                             pointer={Boolean(canUndo)}
                             data-testid="tool-undo"
                             title="Undo (Ctrl+Z)"
-                            className={`fp-tool is-compact is-gap ${canUndo ? '' : 'is-disabled'}`}
+                            className={`fp-tool is-extra is-compact ${canUndo ? '' : 'is-disabled'}`}
                             onClick={canUndo && onUndo ? onUndo : undefined}
                         >
-                            <FaUndo size={16} />
+                            <FaUndo size={12} />
                         </Base>
                         <Base
                             pointer={Boolean(canRedo)}
                             data-testid="tool-redo"
                             title="Redo (Ctrl+Shift+Z)"
-                            className={`fp-tool is-compact ${canRedo ? '' : 'is-disabled'}`}
+                            className={`fp-tool is-extra is-compact ${canRedo ? '' : 'is-disabled'}`}
                             onClick={canRedo && onRedo ? onRedo : undefined}
                         >
-                            <FaRedo size={16} />
+                            <FaRedo size={12} />
                         </Base>
                     </>
                 )}
+                </>}
             </div>
         </div>
     );
