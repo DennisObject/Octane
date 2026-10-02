@@ -20,7 +20,7 @@ import {
     UpdateFurniturePositionComposer
 } from '@octane/renderer';
 import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaCrosshairs, FaEraser, FaTimes } from 'react-icons/fa';
+import { FaCrosshairs, FaEraser } from 'react-icons/fa';
 import { GrFormNextLink, GrRotateLeft, GrRotateRight } from 'react-icons/gr';
 import {
     AvatarInfoFurni,
@@ -677,15 +677,15 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const showBuildtools = godMode && !avatarInfo.isWallItem && canMove;
 
     return (
-        <Column alignItems="end" gap={1}>
-            <Column className="relative min-w-[190px] max-w-[190px] z-30 pointer-events-auto bg-[rgba(28,28,32,.95)] [box-shadow:inset_0_5px_#22222799,inset_0_-4px_#12121599] rounded">
+        <Column alignItems="end" className="octane-furni-infostand-stack">
+            <Column className="octane-furni-infostand relative z-30 min-w-[190px] max-w-[190px] pointer-events-auto">
+                <button type="button" className="octane-furni-infostand__close" aria-label={localizeWithFallback('generic.close', 'Close')} onClick={onClose} />
                 <Column className="h-full p-[8px] overflow-auto" gap={1} overflow="visible">
                     <div className="flex flex-col gap-1">
                         <Flex alignItems="center" gap={1} justifyContent="between">
-                            <Text small wrap variant="white">
+                            <Text small wrap variant="white" className="max-w-[159px]">
                                 {avatarInfo.name}
                             </Text>
-                            <FaTimes className="cursor-pointer fa-icon" onClick={onClose} />
                         </Flex>
                         <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
                     </div>
@@ -1104,36 +1104,36 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                     </div>
                 </Column>
             </Column>
-            <Flex gap={1} justifyContent="end">
+            <Flex className="octane-furni-infostand__actions" justifyContent="end">
                 {showInspectButton && (
-                    <Button variant="dark" onClick={() => openInspectionForFurni(avatarInfo.id, avatarInfo.category)}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => openInspectionForFurni(avatarInfo.id, avatarInfo.category)}>
                         Inspect
                     </Button>
                 )}
                 {canMove && (
-                    <Button variant="dark" onClick={(event) => processButtonAction('move')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={(event) => processButtonAction('move')}>
                         {LocalizeText('infostand.button.move')}
                     </Button>
                 )}
                 {canRotate && (
-                    <Button variant="dark" onClick={(event) => processButtonAction('rotate')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={(event) => processButtonAction('rotate')}>
                         {LocalizeText('infostand.button.rotate')}
                     </Button>
                 )}
                 {pickupMode !== PICKUP_MODE_NONE && (
-                    <Button variant="dark" onClick={(event) => processButtonAction('pickup')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={(event) => processButtonAction('pickup')}>
                         {isPlant && plantDead
                             ? LocalizeText('generic.delete')
                             : LocalizeText(pickupMode === PICKUP_MODE_EJECT ? 'infostand.button.eject' : 'infostand.button.pickup')}
                     </Button>
                 )}
                 {canUse && (
-                    <Button variant="dark" onClick={(event) => processButtonAction('use')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={(event) => processButtonAction('use')}>
                         {LocalizeText('infostand.button.use')}
                     </Button>
                 )}
                 {canRemoveBackground && (
-                    <Button variant="dark" onClick={(event) => processButtonAction('remove_background')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={(event) => processButtonAction('remove_background')}>
                         <Flex alignItems="center" gap={1}>
                             <FaEraser className="fa-icon" />
                             {removeLandscapeLabel()}
@@ -1141,17 +1141,17 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                     </Button>
                 )}
                 {hasBrandingOffsets && (
-                    <Button variant="dark" onClick={() => setShowPositionEditor(true)}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => setShowPositionEditor(true)}>
                         {LocalizeText('image.position.editor.button')}
                     </Button>
                 )}
                 {furniKeys.length > 0 && furniValues.length > 0 && furniKeys.length === furniValues.length && (
-                    <Button variant="dark" onClick={() => processButtonAction('save_branding_configuration')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction('save_branding_configuration')}>
                         {LocalizeText('save')}
                     </Button>
                 )}
                 {customKeys.length > 0 && customValues.length > 0 && customKeys.length === customValues.length && (
-                    <Button variant="dark" onClick={() => processButtonAction('save_custom_variables')}>
+                    <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction('save_custom_variables')}>
                         {LocalizeText('save')}
                     </Button>
                 )}

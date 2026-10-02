@@ -17,7 +17,7 @@ export const GroupInformationStandaloneView: FC<{}> = (props) => {
     if (!groupInformation) return null;
 
     return (
-        <OctaneCardView className="octane-groups-window octane-group-information-standalone" theme="primary-slim" isResizable={false}>
+        <OctaneCardView frameStyle={3} className="octane-groups-window octane-group-information-standalone" theme="primary-slim" isResizable={false}>
             <OctaneCardHeaderView headerText={LocalizeText('group.window.title')} onCloseClick={(event) => setGroupInformation(null)} />
             <OctaneCardContentView className="octane-groups-content">
                 <GroupInformationView groupInformation={groupInformation} onClose={() => setGroupInformation(null)} />

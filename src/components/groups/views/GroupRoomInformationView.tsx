@@ -184,6 +184,7 @@ export const GroupRoomInformationView: FC<{}> = (props) => {
                 {(groupInformation.type !== GroupType.PRIVATE || isRealOwner) && (
                     <div className="octane-group-room-info__button-wrap">
                         <Button
+                            size={null}
                             fullWidth
                             disabled={groupInformation.membershipType === GroupMembershipType.REQUEST_PENDING}
                             className="octane-groups-button octane-group-room-info__button"

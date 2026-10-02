@@ -73,7 +73,7 @@ export const GroupManagerView: FC<{}> = (props) => {
     if (!groupData || groupData.groupId <= 0) return null;
 
     return (
-        <OctaneCardView className="octane-groups-window octane-group-manager w-[560px]">
+        <OctaneCardView frameStyle={3} className="octane-groups-window octane-group-manager w-[560px]">
             <OctaneCardHeaderView headerText={LocalizeText('group.window.title')} onCloseClick={onClose} />
             <OctaneCardTabsView>
                 {TABS.map((tab) => {

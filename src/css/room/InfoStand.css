@@ -438,3 +438,63 @@
     background: rgba(0, 0, 0, 0.45);
   }
 }
+
+/* furni_view: border style 2, #3d3d3d, 6px caps. Close style 1 uses
+   one fixed 15px bitmap at (0,0) inside its 18x16 control for every state. */
+.octane-furni-infostand {
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    width: 190px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-infostand::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border: 6px solid transparent;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-colorless-3d3d3d.png");
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+}
+
+.octane-furni-infostand__close {
+    position: absolute;
+    top: 6px;
+    right: 4px;
+    z-index: 2;
+    width: 18px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent url("../../assets/images/habbo-skin/slices/close-black.png") 0 0 / 15px 15px no-repeat;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-infostand-stack,
+.octane-furni-infostand__actions {
+    gap: 10px;
+}
+
+.octane-infostand-actions .habbo-btn-black,
+.octane-furni-infostand__actions .habbo-btn-black {
+    font-family: Volter, monospace !important;
+    font-size: 9px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    min-height: 25px !important;
+    padding: 4px 8px !important;
+}
+
+.octane-infostand-actions {
+    gap: 10px;
+}

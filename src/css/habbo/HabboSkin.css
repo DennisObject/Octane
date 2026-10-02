@@ -7,6 +7,10 @@
     --habbo-skin-button-hover: url("../../assets/images/habbo-skin/slices/button-hover.png");
     --habbo-skin-button-pressed: url("../../assets/images/habbo-skin/slices/button-pressed.png");
     --habbo-skin-button-disabled: url("../../assets/images/habbo-skin/slices/button-disabled.png");
+    --habbo-skin-button-black: url("../../assets/images/habbo-skin/slices/button-black-default.png");
+    --habbo-skin-button-black-hover: url("../../assets/images/habbo-skin/slices/button-black-hover.png");
+    --habbo-skin-button-black-pressed: url("../../assets/images/habbo-skin/slices/button-black-pressed.png");
+    --habbo-skin-button-black-disabled: url("../../assets/images/habbo-skin/slices/button-black-disabled.png");
     --habbo-skin-shiny: url("../../assets/images/habbo-skin/slices/button-shiny-default.png");
     --habbo-skin-shiny-hover: url("../../assets/images/habbo-skin/slices/button-shiny-hover.png");
     --habbo-skin-shiny-pressed: url("../../assets/images/habbo-skin/slices/button-shiny-pressed.png");

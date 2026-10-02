@@ -120,7 +120,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     if (!groupData) return null;
 
     return (
-        <OctaneCardView className="octane-groups-window octane-group-creator h-[355px] w-[390px]" theme="primary-slim">
+        <OctaneCardView frameStyle={3} className="octane-groups-window octane-group-creator h-[355px] w-[390px]" theme="primary-slim">
             <OctaneCardHeaderView headerText={LocalizeText('group.create.title')} onCloseClick={onCloseClose} />
             <OctaneCardContentView className="octane-groups-content">
                 <div className="flex items-center justify-center creator-tabs">
@@ -169,6 +169,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
                             {LocalizeText(currentTab === 1 ? 'generic.cancel' : 'group.create.previousstep')}
                         </Button>
                         <Button
+                            size={null}
                             className="octane-groups-button octane-groups-button--primary"
                             disabled={currentTab === 4 && !HasHabboClub()}
                             variant={currentTab === 4 ? (HasHabboClub() ? 'success' : 'danger') : 'primary'}
