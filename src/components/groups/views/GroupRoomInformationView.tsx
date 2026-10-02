@@ -5,12 +5,13 @@ import {
     GroupInformationComposer,
     GroupInformationEvent,
     GroupInformationParser,
+    GroupPurchasedEvent,
     GroupRemoveMemberComposer,
     HabboGroupDeactivatedMessageEvent,
     RoomEntryInfoMessageEvent
 } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import { GetGroupInformation, GetGroupManager, GroupMembershipType, GroupType, LocalizeText, SendMessageComposer, TryJoinGroup } from '../../../api';
+import { GetGroupInformation, GetGroupManager, GetRoomSession, GroupMembershipType, GroupType, LocalizeText, SendMessageComposer, TryJoinGroup } from '../../../api';
 import groupBaseIcon from '../../../assets/images/groups/swf/group_base_icon.png';
 import { Button, Flex, LayoutBadgeImageView, Text } from '../../../common';
 import { useMessageEvent, useNotification } from '../../../hooks';
@@ -87,6 +88,17 @@ export const GroupRoomInformationView: FC<{}> = (props) => {
         } else {
             resetGroupState();
         }
+    });
+
+    useMessageEvent<GroupPurchasedEvent>(GroupPurchasedEvent, (event) =>
+    {
+        const parser = event.getParser();
+
+        if (GetRoomSession()?.roomId !== parser.roomId) return;
+
+        setRequestedGroupId(parser.guildId);
+        setIsOpen(true);
+        requestGroupInformation(parser.guildId);
     });
 
     useMessageEvent<HabboGroupDeactivatedMessageEvent>(HabboGroupDeactivatedMessageEvent, (event) => {
