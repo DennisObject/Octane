@@ -1,5 +1,5 @@
 /**
- * Client for the Variables Web API (`/api/public/rooms/{roomId}/...`, see docs/wired/web-api.md).
+ * Client for the Variables Web API (`/api/public/rooms/{roomId}/...`).
  * Keys only ever travel in the `Authorization` header. After a 429 the client refuses further calls
  * until `Retry-After` has passed instead of retrying.
  */

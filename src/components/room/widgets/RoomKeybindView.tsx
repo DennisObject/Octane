@@ -15,7 +15,7 @@ import { SendMessageComposer } from '../../../api';
  *
  * NOTE (UX, needs in-room verification): for printable keys this fires AND the key may also type into
  * chat once it focuses. Best paired with non-printable keys; if you want a printable key, consider
- * gating on a modifier (Ctrl/Alt) here after testing. See docs/plans/press-keybind-implementation-plan.md.
+ * gating on a modifier (Ctrl/Alt) here after testing.
  */
 export const RoomKeybindView: FC<{}> = () =>
 {
