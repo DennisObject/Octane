@@ -2,11 +2,12 @@ import { useCallback } from 'react';
 import {
     GetRoomSession,
     HK_MAX_ALERT_LENGTH,
+    HK_MAX_CLUB_DAYS,
+    HK_MAX_ITEM_QUANTITY,
+    HK_MAX_TRADE_LOCK_HOURS,
     HousekeepingApi,
     HousekeepingErrorKey,
     IHousekeepingActionResult,
-    IHousekeepingRoom,
-    IHousekeepingUser,
     LocalizeText,
     NotificationBubbleType,
     validateAmount,
@@ -38,7 +39,7 @@ const isOk = (result: IHousekeepingActionResult | null) => !!result && result.ok
  * permissions and limits on every one of these.
  */
 export const useHousekeepingActions = () => {
-    const { selectedUser, selectedRoom, setSelectedUser, setSelectedRoom, beginAction, endAction, reportStatus, revealPassword } = useHousekeepingStore();
+    const { selectedUser, patchSelectedUser, patchSelectedRoom, clearSelectedRoom, beginAction, endAction, reportStatus, revealPassword } = useHousekeepingStore();
     const { showSingleBubble } = useNotification();
 
     const firstError = useCallback(
@@ -80,20 +81,6 @@ export const useHousekeepingActions = () => {
             }
         },
         [beginAction, endAction, showSingleBubble]
-    );
-
-    const patchSelectedUser = useCallback(
-        (userId: number, patch: Partial<IHousekeepingUser>) => {
-            if (selectedUser && selectedUser.id === userId) setSelectedUser({ ...selectedUser, ...patch });
-        },
-        [selectedUser, setSelectedUser]
-    );
-
-    const patchSelectedRoom = useCallback(
-        (roomId: number, patch: Partial<IHousekeepingRoom>) => {
-            if (selectedRoom && selectedRoom.id === roomId) setSelectedRoom({ ...selectedRoom, ...patch });
-        },
-        [selectedRoom, setSelectedRoom]
     );
 
     // -- user ------------------------------------------------------------------------
@@ -160,7 +147,7 @@ export const useHousekeepingActions = () => {
 
     const tradeLockUser = useCallback(
         async (userId: number, hours: number, reason: string) => {
-            if (firstError(validatePositiveId(userId, 'user'), validateText(reason), validateHours(hours))) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason), validateHours(hours, HK_MAX_TRADE_LOCK_HOURS))) return null;
 
             const result = await run(() => HousekeepingApi.tradeLockUser(userId, hours, reason.trim()));
 
@@ -275,17 +262,17 @@ export const useHousekeepingActions = () => {
 
             const result = await run(() => HousekeepingApi.deleteRoom(roomId));
 
-            if (isOk(result) && selectedRoom?.id === roomId) setSelectedRoom(null);
+            if (isOk(result)) clearSelectedRoom(roomId);
 
             return result;
         },
-        [firstError, run, selectedRoom, setSelectedRoom]
+        [firstError, run, clearSelectedRoom]
     );
 
     // -- economy & hotel -------------------------------------------------------------
     const giveCurrency = useCallback(
-        (userId: number, amount: number, send: (userId: number, amount: number) => Promise<IHousekeepingActionResult>) => {
-            if (firstError(validatePositiveId(userId, 'user'), validateAmount(amount))) return null;
+        (userId: number, amount: number, send: (userId: number, amount: number) => Promise<IHousekeepingActionResult>, max?: number) => {
+            if (firstError(validatePositiveId(userId, 'user'), validateAmount(amount, max))) return null;
 
             return run(() => send(userId, amount));
         },
@@ -295,11 +282,11 @@ export const useHousekeepingActions = () => {
     const giveCredits = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveCredits), [giveCurrency]);
     const giveDuckets = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveDuckets), [giveCurrency]);
     const giveDiamonds = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveDiamonds), [giveCurrency]);
-    const setHcSubscription = useCallback((userId: number, days: number) => giveCurrency(userId, days, HousekeepingApi.setHcSubscription), [giveCurrency]);
+    const setHcSubscription = useCallback((userId: number, days: number) => giveCurrency(userId, days, HousekeepingApi.setHcSubscription, HK_MAX_CLUB_DAYS), [giveCurrency]);
 
     const grantItem = useCallback(
         (userId: number, itemId: number, quantity: number) => {
-            if (firstError(validatePositiveId(userId, 'user'), validatePositiveId(itemId, 'item'), validateAmount(quantity))) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validatePositiveId(itemId, 'item'), validateAmount(quantity, HK_MAX_ITEM_QUANTITY))) return null;
 
             return run(() => HousekeepingApi.grantItem(userId, itemId, quantity));
         },

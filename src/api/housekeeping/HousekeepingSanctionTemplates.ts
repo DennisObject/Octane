@@ -27,7 +27,7 @@ export const HK_SANCTION_TEMPLATES: HousekeepingSanctionTemplate[] = [
     { id: 'ban_30d', type: HousekeepingSanctionType.BAN, durationValue: 720 },
     { id: 'ban_perm', type: HousekeepingSanctionType.BAN, durationValue: PERMANENT_HOURS },
     { id: 'tlock_7d', type: HousekeepingSanctionType.TRADE_LOCK, durationValue: 168 },
-    { id: 'tlock_perm', type: HousekeepingSanctionType.TRADE_LOCK, durationValue: PERMANENT_HOURS }
+    { id: 'tlock_1y', type: HousekeepingSanctionType.TRADE_LOCK, durationValue: 24 * 365 }
 ];
 
 export const findTemplateById = (id: string): HousekeepingSanctionTemplate | null => HK_SANCTION_TEMPLATES.find((t) => t.id === id) ?? null;

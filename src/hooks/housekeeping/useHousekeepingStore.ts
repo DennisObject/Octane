@@ -56,6 +56,8 @@ const useHousekeepingStoreInner = () => {
     // gone when the panel closes or another user is selected.
     const [passwordReveal, setPasswordReveal] = useState<HousekeepingPasswordReveal | null>(null);
     const actionPendingRef = useRef(false);
+    const isVisibleRef = useRef(false);
+    const selectedUserIdRef = useRef(0);
     const userTokenRef = useRef(0);
     const roomTokenRef = useRef(0);
 
@@ -69,9 +71,21 @@ const useHousekeepingStoreInner = () => {
     }, []);
 
     const setSelectedUser = useCallback((user: IHousekeepingUser | null) => {
+        selectedUserIdRef.current = user?.id ?? 0;
         setSelectedUserState(user);
         setPasswordReveal((reveal) => (reveal && reveal.userId === user?.id ? reveal : null));
     }, []);
+
+    // Action acks patch whatever is selected *now*, never the target captured at click time.
+    const patchSelectedUser = useCallback((userId: number, patch: Partial<IHousekeepingUser>) => {
+        setSelectedUserState((current) => (current?.id === userId ? { ...current, ...patch } : current));
+    }, []);
+
+    const patchSelectedRoom = useCallback((roomId: number, patch: Partial<IHousekeepingRoom>) => {
+        setSelectedRoom((current) => (current?.id === roomId ? { ...current, ...patch } : current));
+    }, []);
+
+    const clearSelectedRoom = useCallback((roomId: number) => setSelectedRoom((current) => (current?.id === roomId ? null : current)), []);
 
     const rememberLookup = useCallback((entry: RecentLookupEntry) => {
         setRecentLookups((prev) => {
@@ -185,15 +199,20 @@ const useHousekeepingStoreInner = () => {
         setLastSuccess(successKey);
     }, []);
 
+    // A reply that lands after the panel closed or another user was picked is dropped.
     const revealPassword = useCallback((userId: number, username: string, password: string) => {
-        if (password) setPasswordReveal({ userId, username, password });
+        if (password && isVisibleRef.current && selectedUserIdRef.current === userId) setPasswordReveal({ userId, username, password });
     }, []);
 
     const clearPasswordReveal = useCallback(() => setPasswordReveal(null), []);
 
-    const openPanel = useCallback(() => setIsVisible(true), []);
+    const openPanel = useCallback(() => {
+        isVisibleRef.current = true;
+        setIsVisible(true);
+    }, []);
 
     const closePanel = useCallback(() => {
+        isVisibleRef.current = false;
         setIsVisible(false);
         setPasswordReveal(null);
         clearStatus();
@@ -218,6 +237,9 @@ const useHousekeepingStoreInner = () => {
         setSelectedUser,
         selectedRoom,
         setSelectedRoom,
+        patchSelectedUser,
+        patchSelectedRoom,
+        clearSelectedRoom,
         isUserLoading,
         isRoomLoading,
         lookupUserByName,

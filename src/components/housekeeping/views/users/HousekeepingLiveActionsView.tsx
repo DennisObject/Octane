@@ -1,14 +1,15 @@
 import { FC } from 'react';
 import { LocalizeText } from '../../../../api';
 import { Button, StaffSection } from '../../../../common';
-import { useHousekeeping, useHousekeepingConfirm } from '../../../../hooks';
+import { useHousekeeping, useHousekeepingConfirm, useRoomUserListSnapshot } from '../../../../hooks';
 
-/** Room-level sanctions for a user who is online, sent through the current room session. */
+/** Room-level sanctions, offered only while the user is in the staff member's current room. */
 export const HousekeepingLiveActionsView: FC = () => {
     const { selectedUser, isActionPending, kickFromCurrentRoom, muteInCurrentRoom, banFromCurrentRoom } = useHousekeeping();
     const confirm = useHousekeepingConfirm();
+    const roomUsers = useRoomUserListSnapshot();
 
-    if (!selectedUser?.online) return null;
+    if (!selectedUser || !roomUsers.some((user) => user.webID === selectedUser.id)) return null;
 
     const id = selectedUser.id;
     const confirmRoomBan = (severity: 'hour' | 'day') =>

@@ -15,10 +15,14 @@ export const HousekeepingErrorKey = {
 
 export type HousekeepingErrorKey = (typeof HousekeepingErrorKey)[keyof typeof HousekeepingErrorKey];
 
+// Mirrors the emulator's HousekeepingLimits so a doomed request isn't sent.
 export const HK_MAX_GIVE_AMOUNT = 1_000_000_000;
+export const HK_MAX_ITEM_QUANTITY = 100;
+export const HK_MAX_CLUB_DAYS = 3650;
 export const HK_MAX_BAN_HOURS = 24 * 365 * 100;
-export const HK_MAX_MUTE_MINUTES = 60 * 24 * 365;
-export const HK_MAX_REASON_LENGTH = 255;
+export const HK_MAX_TRADE_LOCK_HOURS = 24 * 365;
+export const HK_MAX_MUTE_MINUTES = 60 * 24 * 30;
+export const HK_MAX_REASON_LENGTH = 500;
 export const HK_MAX_ALERT_LENGTH = 1000;
 export const HK_MIN_RANK = 1;
 export const HK_MAX_RANK = 12;
@@ -34,9 +38,9 @@ const ID_ERRORS = {
 export const validatePositiveId = (raw: number, kind: keyof typeof ID_ERRORS): HousekeepingErrorKey =>
     isPositiveInteger(raw) ? HousekeepingErrorKey.NONE : ID_ERRORS[kind];
 
-export const validateAmount = (raw: number): HousekeepingErrorKey => {
+export const validateAmount = (raw: number, max: number = HK_MAX_GIVE_AMOUNT): HousekeepingErrorKey => {
     if (!isPositiveInteger(raw)) return HousekeepingErrorKey.INVALID_AMOUNT;
-    if (raw > HK_MAX_GIVE_AMOUNT) return HousekeepingErrorKey.AMOUNT_TOO_LARGE;
+    if (raw > max) return HousekeepingErrorKey.AMOUNT_TOO_LARGE;
 
     return HousekeepingErrorKey.NONE;
 };
@@ -50,8 +54,8 @@ export const validateText = (raw: string, maxLength: number = HK_MAX_REASON_LENG
     return HousekeepingErrorKey.NONE;
 };
 
-export const validateHours = (raw: number): HousekeepingErrorKey =>
-    isPositiveInteger(raw) && raw <= HK_MAX_BAN_HOURS ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_HOURS;
+export const validateHours = (raw: number, max: number = HK_MAX_BAN_HOURS): HousekeepingErrorKey =>
+    isPositiveInteger(raw) && raw <= max ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_HOURS;
 
 export const validateMinutes = (raw: number): HousekeepingErrorKey =>
     isPositiveInteger(raw) && raw <= HK_MAX_MUTE_MINUTES ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_MINUTES;

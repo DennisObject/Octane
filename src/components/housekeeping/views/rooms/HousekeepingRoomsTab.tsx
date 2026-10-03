@@ -87,7 +87,7 @@ export const HousekeepingRoomsTab: FC = () => {
                     <Button disabled={disabled || !selectedRoom?.isLocked} variant="secondary" onClick={() => setRoomOpen(selectedRoom.id, true)}>
                         {LocalizeText('housekeeping.room.open')}
                     </Button>
-                    <Button disabled={disabled || selectedRoom?.isLocked} variant="secondary" onClick={() => setRoomOpen(selectedRoom.id, false)}>
+                    <Button disabled={disabled || selectedRoom?.isLocked} variant="secondary" onClick={() => ask('housekeeping.room.close.confirm', () => setRoomOpen(selectedRoom.id, false))}>
                         {LocalizeText('housekeeping.room.close')}
                     </Button>
                     <Button disabled={disabled} variant="secondary" onClick={() => setRoomMuted(selectedRoom.id, !selectedRoom.isMuted)}>

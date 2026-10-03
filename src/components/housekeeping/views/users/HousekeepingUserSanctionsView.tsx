@@ -84,7 +84,7 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                         {LocalizeText('housekeeping.action.mute_min', ['m'], [String(muteMinutes)])}
                     </Button>
                     <HousekeepingNumberInput label={LocalizeText('housekeeping.unit.hours')} value={tradeLockHours} onChange={(value) => update({ tradeLockHours: value })} />
-                    <Button disabled={disabled} variant="secondary" onClick={() => tradeLockUser(selectedUser.id, tradeLockHours, reasonText)}>
+                    <Button disabled={disabled} variant="secondary" onClick={() => ask('housekeeping.confirm.trade_lock', () => tradeLockUser(selectedUser.id, tradeLockHours, reasonText), [['h'], [String(tradeLockHours)]])}>
                         {LocalizeText('housekeeping.action.trade_lock_h', ['h'], [String(tradeLockHours)])}
                     </Button>
                 </div>
