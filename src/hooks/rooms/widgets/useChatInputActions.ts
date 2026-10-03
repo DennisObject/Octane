@@ -18,6 +18,7 @@ import { useCallback } from 'react';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { useNotification } from '../../notification';
 import { useTranslation } from '../../translation';
+import { useWiredToolsActions } from '../../wired-tools';
 import { useRoom } from '../useRoom';
 
 /**
@@ -39,6 +40,7 @@ export const useChatInputActions = () => {
     const { showOctaneAlert = null, showConfirm = null } = useNotification();
     const { settings, translateOutgoing, enqueueOutgoingTranslation } = useTranslation();
     const { roomSession = null } = useRoom();
+    const { openMonitor } = useWiredToolsActions();
 
     const sendChat = useCallback(
         (text: string, chatType: number, recipientName: string = '', styleId: number = 0) => {
@@ -204,6 +206,9 @@ export const useChatInputActions = () => {
                         if ((roomSession?.controllerLevel ?? 0) >= RoomControllerLevel.ROOM_OWNER) CreateLinkEvent('floor-editor/show');
 
                         return null;
+                    case ':wired':
+                        openMonitor();
+                        return null;
                     case ':togglefps': {
                         if (GetTicker().maxFPS > 0) GetTicker().maxFPS = 0;
                         else GetTicker().maxFPS = GetConfigurationValue('system.animation.fps');
@@ -271,7 +276,7 @@ export const useChatInputActions = () => {
 
             return null;
         },
-        [roomSession, settings, translateOutgoing, enqueueOutgoingTranslation, showConfirm, showOctaneAlert]
+        [roomSession, settings, translateOutgoing, enqueueOutgoingTranslation, showConfirm, showOctaneAlert, openMonitor]
     );
 
     return { sendChat };
