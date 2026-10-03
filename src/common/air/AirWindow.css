@@ -1,0 +1,198 @@
+/* WIN63 Illumina skins; the existing AIR messenger owns the source bitmaps. */
+@font-face {
+    font-family: AirUbuntu;
+    src: url('../../assets/webfonts/Ubuntu.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: AirUbuntu;
+    src: url('../../assets/webfonts/Ubuntu-b.ttf') format('truetype');
+    font-weight: 700;
+}
+
+.air-frame {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: #000;
+    font: 400 12px/14px AirUbuntu, sans-serif;
+    font-synthesis: none;
+    text-shadow: none;
+    pointer-events: auto;
+    filter: drop-shadow(0 0 10px rgb(0 0 0 / 35%));
+}
+
+.air-frame *, .air-frame *::before, .air-frame *::after {
+    box-sizing: border-box;
+}
+
+.air-frame__chrome {
+    position: absolute;
+    inset: 0;
+    border-image: url('../../assets/images/friends/swf/illumina_light_border_frame.png') 4 4 7 4 fill / 4px 4px 7px 4px stretch;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.air-frame__titlebar {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 30px;
+    cursor: move;
+    user-select: none;
+}
+
+.air-frame__title {
+    position: absolute;
+    left: 8px;
+    top: 11px;
+    height: 20px;
+    max-width: calc(100% - 40px);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font: 700 10px/14px AirUbuntu, sans-serif;
+    text-shadow: 0 1px rgb(255 255 255 / 70%);
+    white-space: nowrap;
+}
+
+.air-frame__close {
+    position: absolute;
+    right: 8px;
+    top: 9px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: url('../../assets/images/friends/swf/illumina_light_button_frame_close.png') 0 0 no-repeat;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+
+.air-frame__close:hover { background-position: -52px 0; }
+.air-frame__close:active { background-position: -26px 0; }
+
+.air-frame__content {
+    position: absolute;
+    top: 30px;
+    right: 1px;
+    bottom: 1px;
+    left: 1px;
+    overflow: hidden;
+}
+
+.air-button {
+    position: relative;
+    margin: 0;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #000;
+    font: 700 10px/14px AirUbuntu, sans-serif;
+    text-shadow: 0 1px rgb(255 255 255 / 70%);
+    cursor: pointer;
+    isolation: isolate;
+}
+
+.air-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-image: url('../../assets/images/friends/swf/illumina_light_button_plain_default.png') 8 4 8 6 fill / 8px 4px 8px 6px stretch;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.air-button:hover::before { border-image-source: url('../../assets/images/friends/swf/illumina_light_button_plain_hover.png'); }
+.air-button:active::before { border-image-source: url('../../assets/images/friends/swf/illumina_light_button_plain_pressed.png'); }
+
+/* Plain-button curves and lower etching are separate AIR paint entities. */
+.air-button__curves {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: url('../../assets/images/habbo-skin/illumina/button-curve-left.png'), url('../../assets/images/habbo-skin/illumina/button-curve-right.png');
+    background-position: 1px center, right 1px center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.air-button:hover .air-button__curves {
+    background-image: url('../../assets/images/habbo-skin/illumina/button-curve-left-hover.png'), url('../../assets/images/habbo-skin/illumina/button-curve-right-hover.png');
+}
+
+.air-button:active .air-button__curves { background-image: none; }
+
+.air-button::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 5px;
+    z-index: -1;
+    border-image: url('../../assets/images/habbo-skin/illumina/button-etching.png') 0 4 0 6 fill / 0 4px 0 6px stretch;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.air-input-surface {
+    position: relative;
+    isolation: isolate;
+}
+
+.air-input-surface::before, .air-input-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.air-input-surface::before {
+    border-image: url('../../assets/images/friends/swf/illumina_light_input_fill.png') 8 5 4 5 fill / 8px 5px 4px 5px stretch;
+}
+
+.air-input-surface::after {
+    border-image: url('../../assets/images/habbo-skin/illumina/input-border.png') 4 4 5 4 / 4px 4px 5px 4px stretch;
+}
+
+.air-checkbox {
+    appearance: none;
+    width: 17px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../../assets/images/habbo-skin/slices/checkbox-default.png') 0 0 no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+
+.air-checkbox:checked { background-image: url('../../assets/images/habbo-skin/slices/checkbox-checked.png'); }
+
+.air-slider {
+    height: 30px;
+    touch-action: none;
+}
+
+.air-slider__thumb {
+    position: absolute;
+    top: 0;
+    width: 20px;
+    height: 30px;
+    padding: 0;
+    touch-action: none;
+}
+
+.air-frame button:focus-visible, .air-frame input:focus-visible {
+    outline: 1px solid #777;
+    outline-offset: 1px;
+}

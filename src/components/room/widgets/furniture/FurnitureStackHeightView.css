@@ -1,0 +1,122 @@
+/* 993_custom_stack_height_xml, relative to the Illumina content area (1,30). */
+.furniture-stack-height {
+    width: 320px;
+    height: 185px;
+}
+
+.furniture-stack-height--walk { height: 210px; }
+
+.furniture-stack-height .furniture-stack-height__text {
+    position: absolute;
+    left: 10px;
+    top: 5px;
+    width: 294px;
+    height: 59px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overflow-wrap: break-word;
+}
+
+.furniture-stack-height .furniture-stack-height__slider {
+    position: absolute;
+    left: 35px;
+    top: 68px;
+    width: 206px;
+    height: 30px;
+}
+
+.furniture-stack-height .furniture-stack-height__input-border {
+    position: absolute;
+    left: 250px;
+    top: 68px;
+    width: 58px;
+    height: 30px;
+}
+
+.furniture-stack-height .furniture-stack-height__input-border input {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 45px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #000;
+    font: inherit;
+}
+
+.furniture-stack-height .furniture-stack-height__above {
+    position: absolute;
+    left: 12px;
+    top: 110px;
+    width: 134px;
+    height: 29px;
+}
+
+.furniture-stack-height .furniture-stack-height__floor {
+    position: absolute;
+    left: 182px;
+    top: 110px;
+    width: 126px;
+    height: 29px;
+}
+
+.furniture-stack-height .furniture-stack-height__walk {
+    position: absolute;
+    left: 0;
+    top: 149px;
+    width: 318px;
+    height: 24px;
+    margin: 0;
+}
+
+.furniture-stack-height .furniture-stack-height__walk input {
+    position: absolute;
+    left: 13px;
+    top: 3px;
+}
+
+.furniture-stack-height .furniture-stack-height__walk span {
+    position: absolute;
+    left: 31px;
+    top: 2px;
+    width: 282px;
+    height: 19px;
+    overflow: hidden;
+    overflow-wrap: break-word;
+}
+
+.furniture-stack-height .furniture-stack-height__step {
+    position: absolute;
+    left: 9px;
+    width: 19px;
+    height: 20px;
+    padding: 0;
+}
+
+.furniture-stack-height .furniture-stack-height__step--up { top: 62px; }
+.furniture-stack-height .furniture-stack-height__step--down { top: 84px; }
+
+.furniture-stack-height .furniture-stack-height__step i {
+    position: absolute;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.furniture-stack-height .furniture-stack-height__step--up i {
+    top: 4px;
+    background-image: url('../../../../assets/images/habbo-skin/illumina/arrow-up.png');
+}
+
+.furniture-stack-height .furniture-stack-height__step--down i {
+    top: 5px;
+    background-image: url('../../../../assets/images/habbo-skin/illumina/arrow-down.png');
+}
