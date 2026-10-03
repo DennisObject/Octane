@@ -21,7 +21,7 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { ClearRememberLogin, exchangeSsoTicketForAccessToken, GetRememberLogin, GetUIVersion, persistAccessTokenFromPayload, SetRememberLogin, StoreRememberLoginFromPayload } from './api';
+import { ClearRememberLogin, exchangeSsoTicketForAccessToken, GetRememberLogin, GetUIVersion, loginWithRememberToken, persistAccessToken, refreshRememberToken, SetRememberLogin, StoreRememberGrant } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -199,56 +199,18 @@ export const App: FC<{}> = (props) => {
     const tryRememberLogin = useCallback(async (): Promise<string> => {
         const remembered = GetRememberLogin();
 
-        console.warn('[App] tryRememberLogin start', {
-            hasRemembered: !!remembered,
-            hasToken: !!remembered?.token?.length,
-            hasStoredSso: !!remembered?.ssoTicket?.length
-        });
+        if (!remembered) return '';
 
-        if (!remembered?.token?.length) {
-            if (remembered) ClearRememberLogin();
-            console.warn('[App] tryRememberLogin → no token, returning empty');
-            return '';
+        const result = await loginWithRememberToken(remembered.token, remembered.username);
+
+        if (result.ok) {
+            persistAccessToken(result.data);
+            StoreRememberGrant(result.data, result.data.username);
+            return result.data.ssoTicket;
         }
 
-        try {
-            const rawEndpoint = GetConfiguration().getValue<string>('login.remember.endpoint', '${api.url}/api/auth/remember');
-            const endpoint = GetConfiguration().interpolate(rawEndpoint);
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'OctaneRememberLogin'
-                },
-                body: JSON.stringify({ rememberToken: remembered.token })
-            });
-
-            let payload: Record<string, unknown> = {};
-            try {
-                payload = await response.json();
-            } catch {}
-
-            const ssoTicket = typeof payload.ssoTicket === 'string' ? payload.ssoTicket : typeof payload.sso === 'string' ? payload.sso : '';
-
-            console.warn('[App] tryRememberLogin → remember endpoint replied', {
-                status: response.status,
-                ok: response.ok,
-                gotSsoTicket: !!ssoTicket
-            });
-
-            if (response.ok && ssoTicket) {
-                persistAccessTokenFromPayload(payload);
-                StoreRememberLoginFromPayload(payload, typeof payload.username === 'string' ? payload.username : remembered.username, ssoTicket);
-                return ssoTicket;
-            }
-        } catch (error) {
-            console.warn('[App] tryRememberLogin → fetch threw', error);
-        }
-
-        ClearRememberLogin();
-        console.warn('[App] tryRememberLogin → cleared remember, returning empty');
+        // A maintenance or rate-limit answer is temporary, so the token is kept for the next visit.
+        if (result.failure.kind !== 'maintenance' && result.failure.kind !== 'rate-limited' && result.failure.kind !== 'unreachable') ClearRememberLogin();
 
         return '';
     }, []);
@@ -256,37 +218,17 @@ export const App: FC<{}> = (props) => {
     const rotateRememberLogin = useCallback(async (): Promise<void> => {
         const remembered = GetRememberLogin();
 
-        if (!remembered?.token?.length) return;
+        if (!remembered) return;
 
-        try {
-            const rawEndpoint = GetConfiguration().getValue<string>('login.refresh.endpoint', '${api.url}/api/auth/refresh');
-            const endpoint = GetConfiguration().interpolate(rawEndpoint);
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'OctaneRememberRotate'
-                },
-                body: JSON.stringify({ rememberToken: remembered.token })
-            });
+        const result = await refreshRememberToken(remembered.token);
 
-            let payload: Record<string, unknown> = {};
-            try {
-                payload = await response.json();
-            } catch {}
-
-            if (response.ok) {
-                persistAccessTokenFromPayload(payload);
-                StoreRememberLoginFromPayload(payload, remembered.username, remembered.ssoTicket);
-                return;
-            }
-
-            if (response.status === 400 || response.status === 401 || response.status === 403) ClearRememberLogin();
-        } catch (error) {
-            OctaneLogger.error('[LoginScreen] Remember rotation failed', error);
+        if (result.ok) {
+            persistAccessToken(result.data);
+            StoreRememberGrant(result.data, remembered.username);
+            return;
         }
+
+        if (result.failure.kind === 'invalid-credentials' || result.failure.kind === 'rejected' || result.failure.kind === 'banned') ClearRememberLogin();
     }, []);
 
     useEffect(() => {
@@ -432,8 +374,7 @@ export const App: FC<{}> = (props) => {
             console.warn('[App] prepare() start', {
                 hasOctaneConfig: !!window.OctaneConfig,
                 ssoTicketInConfig: !!window.OctaneConfig?.['sso.ticket'],
-                hasRememberLocal: !!GetRememberLogin(),
-                hasUrlSso: !!new URLSearchParams(window.location.search).get('sso')
+                hasRememberLocal: !!GetRememberLogin()
             });
 
             const bootLabel = taskLabel('loader', 'Booting...');
@@ -447,17 +388,19 @@ export const App: FC<{}> = (props) => {
                 let ssoTicket = window.OctaneConfig['sso.ticket'];
                 if (ssoTicket) GetConfiguration().setValue('sso.ticket', ssoTicket);
 
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const tokenParam = urlParams.get('token');
-                    const tokenExpParam = urlParams.get('token_exp');
-                    if (tokenParam && !GetRememberLogin()) {
-                        const parsedExpiry = Number(tokenExpParam || 0);
-                        const expiresAt = Number.isFinite(parsedExpiry) && parsedExpiry > 0 ? parsedExpiry : Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-                        SetRememberLogin({ token: tokenParam, expiresAt });
-                    }
-                } catch (e) {
-                    console.warn('[App] failed to persist remember token from URL', e);
+                // A website hand-off may pass a remember token in the URL; keep it and drop it from the address bar.
+                const url = new URL(window.location.href);
+                const tokenParam = url.searchParams.get('token');
+
+                if (tokenParam && !GetRememberLogin()) {
+                    const parsedExpiry = Number(url.searchParams.get('token_exp') || 0);
+                    const expiresAt = Number.isFinite(parsedExpiry) && parsedExpiry > 0 ? parsedExpiry : Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                    SetRememberLogin({ token: tokenParam, expiresAt });
+                }
+
+                if (url.searchParams.has('token') || url.searchParams.has('token_exp') || url.searchParams.has('sso')) {
+                    for (const key of ['token', 'token_exp', 'sso']) url.searchParams.delete(key);
+                    window.history.replaceState(window.history.state, '', url.toString());
                 }
 
                 bumpProgress(10, taskLabel('loading.task.session', 'Verifying session...'));
@@ -545,7 +488,7 @@ export const App: FC<{}> = (props) => {
                 if (rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
 
                 const rotateMinutes = Math.max(1, Number(GetConfiguration().getValue<unknown>('login.remember.rotate.interval.minutes', 15)) || 15);
-                if (GetRememberLogin()?.token?.length)
+                if (GetRememberLogin())
                     rememberRotateIntervalRef.current = window.setInterval(() => rotateRememberLogin(), rotateMinutes * 60 * 1000);
 
                 if (!tickersStartedRef.current) {

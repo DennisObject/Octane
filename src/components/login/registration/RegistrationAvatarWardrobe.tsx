@@ -1,6 +1,6 @@
 import { AvatarDirectionAngle, GetAvatarRenderManager, IPartColor } from '@octane/renderer';
 import { FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
-import { AvatarEditorThumbnailsHelper } from '../../../api';
+import { AvatarEditorThumbnailsHelper, FigureSelection, Gender, loginText } from '../../../api';
 import faceTabIcon from '../../../assets/images/wardrobe/hd.png';
 import headTabIcon from '../../../assets/images/wardrobe/head.png';
 import legsTabIcon from '../../../assets/images/wardrobe/legs.png';
@@ -8,12 +8,7 @@ import torsoTabIcon from '../../../assets/images/wardrobe/torso.png';
 import { LayoutAvatarImageView } from '../../../common';
 import { InfiniteGrid } from '../../../layout';
 import { AvatarEditorIcon } from '../../avatar-editor/AvatarEditorIcon';
-import { t } from '../utils/i18n';
-
-type GenderKey = 'M' | 'F';
-type FigureSelection = Record<string, { partId: number; colors: number[] }>;
-type PartOptions = Record<string, Record<GenderKey, number[]>>;
-type PaletteOptions = Record<string, { id: number; hex: string }[]>;
+import { PaletteOptions, PartOptions } from '../../../hooks/login';
 
 interface WardrobeGroup {
     key: string;
@@ -119,7 +114,7 @@ const WardrobePartItem: FC<WardrobePartItemProps> = ({ setType, partId, colorIds
             className={`registration-wardrobe-part wardrobe-part-${setType} avatar-parts${selected ? ' part-selected' : ''}${partId >= 0 && !assetUrl ? ' wardrobe-part-loading' : ''}`}
             role="button"
             tabIndex={0}
-            aria-label={partId < 0 ? t('nitro.login.register.wardrobe.none', 'None') : `${label} ${partId}`}
+            aria-label={partId < 0 ? loginText('nitro.login.register.wardrobe.none', 'None') : `${label} ${partId}`}
             aria-pressed={selected}
             onClick={onSelect}
             onKeyDown={handleKeyDown}
@@ -130,7 +125,7 @@ const WardrobePartItem: FC<WardrobePartItemProps> = ({ setType, partId, colorIds
 };
 
 interface RegistrationAvatarWardrobeProps {
-    gender: GenderKey;
+    gender: Gender;
     figure: string;
     selection: FigureSelection;
     partOptions: PartOptions;
@@ -153,7 +148,7 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
     const [activeSetType, setActiveSetType] = useState(WARDROBE_GROUPS[0].setTypes[0]);
     const activeGroup = WARDROBE_GROUPS.find((group) => group.key === activeGroupKey) ?? WARDROBE_GROUPS[0];
     const setTypeLabel = SET_TYPE_LABELS[activeSetType] ?? { key: activeSetType, fallback: activeSetType.toUpperCase() };
-    const translatedSetTypeLabel = t(setTypeLabel.key, setTypeLabel.fallback);
+    const translatedSetTypeLabel = loginText(setTypeLabel.key, setTypeLabel.fallback);
     const selectedPart = selection[activeSetType]?.partId ?? -1;
     const selectedColor = selection[activeSetType]?.colors?.[0] ?? -1;
     const availableParts = partOptions[activeSetType]?.[gender] ?? [];
@@ -177,10 +172,10 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
 
     return (
         <div className="registration-avatar-wardrobe">
-            <div className="registration-wardrobe-tabs" role="tablist" aria-label={t('nitro.login.register.wardrobe.categories', 'Clothing categories')}>
+            <div className="registration-wardrobe-tabs" role="tablist" aria-label={loginText('nitro.login.register.wardrobe.categories', 'Clothing categories')}>
                 {WARDROBE_GROUPS.map((group) => {
                     const active = group.key === activeGroup.key;
-                    const label = t(group.labelKey, group.fallback);
+                    const label = loginText(group.labelKey, group.fallback);
                     return (
                         <button
                             key={group.key}
@@ -200,23 +195,23 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
 
             <div className="registration-wardrobe-main">
                 <div className="avatar-preview-panel registration-wardrobe-preview">
-                    <div className="avatar-preview" aria-label={t('nitro.login.register.avatar.preview', 'Your Habbo preview')}>
+                    <div className="avatar-preview" aria-label={loginText('nitro.login.register.avatar.preview', 'Your Habbo preview')}>
                         <LayoutAvatarImageView direction={direction} figure={figure} gender={gender} scale={1.7} />
                         <div className="registration-avatar-shadow" />
                     </div>
                     <div className="registration-wardrobe-rotation">
                         <button
                             type="button"
-                            aria-label={t('nitro.login.register.wardrobe.rotate_left', 'Rotate left')}
-                            title={t('nitro.login.register.wardrobe.rotate_left', 'Rotate left')}
+                            aria-label={loginText('nitro.login.register.wardrobe.rotate_left', 'Rotate left')}
+                            title={loginText('nitro.login.register.wardrobe.rotate_left', 'Rotate left')}
                             onClick={() => rotateAvatar(1)}
                         >
                             <AvatarEditorIcon icon="arrow-left" />
                         </button>
                         <button
                             type="button"
-                            aria-label={t('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
-                            title={t('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
+                            aria-label={loginText('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
+                            title={loginText('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
                             onClick={() => rotateAvatar(-1)}
                         >
                             <AvatarEditorIcon icon="arrow-right" />
@@ -225,11 +220,11 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
                 </div>
 
                 <div className="registration-wardrobe-editor">
-                    <div className="registration-wardrobe-set-tabs" role="tablist" aria-label={t(activeGroup.labelKey, activeGroup.fallback)}>
+                    <div className="registration-wardrobe-set-tabs" role="tablist" aria-label={loginText(activeGroup.labelKey, activeGroup.fallback)}>
                         {activeGroup.setTypes.length > 1 &&
                             activeGroup.setTypes.map((setType) => {
                                 const labelInfo = SET_TYPE_LABELS[setType];
-                                const label = t(labelInfo.key, labelInfo.fallback);
+                                const label = loginText(labelInfo.key, labelInfo.fallback);
                                 const active = activeSetType === setType;
                                 return (
                                     <button
@@ -270,11 +265,11 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
                                 )}
                             />
                         ) : (
-                            <div className="registration-wardrobe-loading">{t('nitro.login.register.wardrobe.loading', 'Loading wardrobe…')}</div>
+                            <div className="registration-wardrobe-loading">{loginText('nitro.login.register.wardrobe.loading', 'Loading wardrobe…')}</div>
                         )}
                     </div>
 
-                    <div className="registration-wardrobe-section-title">{t('nitro.login.register.wardrobe.colors', 'Colors')}</div>
+                    <div className="registration-wardrobe-section-title">{loginText('nitro.login.register.wardrobe.colors', 'Colors')}</div>
                     <div className="registration-wardrobe-palette">
                         {availableColors.map((color) => (
                             <button
@@ -282,7 +277,7 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
                                 type="button"
                                 className={color.id === selectedColor ? 'active' : ''}
                                 style={{ backgroundColor: color.hex }}
-                                aria-label={`${t('nitro.login.register.wardrobe.color', 'Color')} ${color.id}`}
+                                aria-label={`${loginText('nitro.login.register.wardrobe.color', 'Color')} ${color.id}`}
                                 aria-pressed={color.id === selectedColor}
                                 disabled={selectedPart < 0}
                                 onClick={() => onSelectColor(activeSetType, color.id)}

@@ -1,668 +1,668 @@
+/*
+ * Login and registration in the official AIR onboarding look (login.LoginFlow
+ * and onBoardingHcUi): Ubuntu text, 40px white titles, light-blue captions,
+ * "hitch" input fields, coloured 9-slice buttons and dark balloons, laid over
+ * the hotel view backdrop.
+ */
 @font-face {
-    font-family: Volter;
+    font-family: LoginFlowUbuntu;
     font-weight: normal;
-    font-style: normal;
-    src: url("@/assets/webfonts/Volter.ttf") format("truetype");
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: Volter;
+    font-family: LoginFlowUbuntu;
     font-weight: bold;
-    font-style: normal;
-    src: url("@/assets/webfonts/Volter-b.ttf") format("truetype");
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
 }
 
-.octane-login-view,
-.octane-login-view * {
-    font-family: Volter, "Volter (Goldfish)", monospace;
-    -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: grayscale;
-    font-smooth: never;
-}
-
-.octane-login-view {
+.login-flow {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #6eadc8;
     z-index: 100;
-}
-
-.octane-login-view .login-layer {
-    position: absolute;
-    background-repeat: no-repeat;
-    pointer-events: none;
-    transform: translateZ(0);
-}
-
-.octane-login-view .login-layer-img {
-    display: block;
-    user-select: none;
-    -webkit-user-drag: none;
-    object-fit: none;
-}
-
-.octane-login-view .login-image-preloader {
-    position: absolute;
-    width: 1px;
-    height: 1px;
     overflow: hidden;
-    opacity: 0;
+    color: #ffffff;
+    font-family: LoginFlowUbuntu, Ubuntu, Arial, sans-serif;
+}
+
+.login-flow-logo {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    z-index: 5;
+    image-rendering: var(--octane-pixel-art, pixelated);
+    user-select: none;
+}
+
+/*
+ * LoginFlow._mainSprite: centred, 50px logo area plus the 50px screen offset.
+ * The official screens sit on LoginFlow's Background (a #0c5a7f to #0c3a65
+ * gradient with faint scanlines); here that background backs the column so
+ * the light-blue captions stay readable over the bright hotel view.
+ */
+.login-flow-main {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    z-index: 5;
+    box-sizing: border-box;
+    width: 680px;
+    max-height: calc(100% - 110px);
+    padding: 16px 20px 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 6px;
+    background:
+        repeating-linear-gradient(180deg, rgba(134, 134, 134, 0.07) 0 1px, transparent 1px 3px),
+        linear-gradient(180deg, rgba(12, 90, 127, 0.9) 50%, rgba(12, 58, 101, 0.9) 100%);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    transform: translateX(-50%);
+}
+
+.login-flow.is-entering .login-flow-main {
     pointer-events: none;
 }
 
-.octane-login-view .login-image-preloader img {
-    width: 1px;
-    height: 1px;
+@media (max-width: 690px) {
+    .login-flow-main {
+        left: 5px;
+        width: calc(100% - 10px);
+        transform: none;
+    }
 }
 
-.octane-login-view .login-background {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
+.login-flow-screen {
+    position: relative;
 }
 
-.octane-login-view .login-sun {
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 600px;
-    object-fit: contain;
-    object-position: center top;
+.login-flow-title {
+    height: 50px;
+    margin: 0;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 40px;
+    font-weight: normal;
+    line-height: 50px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.octane-login-view .login-drape {
-    top: 0;
-    left: 0;
-    width: 190px;
-    height: 220px;
-    z-index: 3;
-    object-fit: contain;
-    object-position: left top;
-}
-
-.octane-login-view .login-left {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: none;
-    object-position: left bottom;
-}
-
-.octane-login-view .login-right-repeat {
-    top: 0;
-    right: 0;
-    width: 400px;
-    height: 100%;
-    background-repeat: repeat-y;
-    background-position: right top;
-}
-
-.octane-login-view .login-right {
-    bottom: 0;
-    right: 0;
-    width: auto;
-    height: auto;
-    max-width: none;
-    object-fit: initial;
-    object-position: initial;
-}
-
-.octane-login-view .login-stack {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* The first field caption sits at y=100 and the button row at y=300. */
+.login-flow-form {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: 300px;
-    max-width: calc(100vw - 32px);
-    max-height: calc(100vh - 32px);
-    padding: 4px;
-    z-index: 50;
-    pointer-events: auto;
+    min-height: 290px;
+    padding-top: 43px;
 }
 
-@media (max-width: 900px), (max-height: 640px) {
-    .octane-login-view .login-stack {
-        overflow-y: auto;
-    }
+.login-flow-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
 }
 
-.octane-login-view .login-auth-card,
-.octane-login-view .login-register-card,
-.octane-login-view .login-language-picker,
-.octane-login-view .login-widget-slot {
-    transform: translate(var(--login-drag-x, 0px), var(--login-drag-y, 0px));
+.login-flow-field-caption {
+    color: #7ecaee;
+    font-size: 24px;
+    line-height: 30px;
 }
 
-.octane-login-view .login-drag-handle {
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-}
-
-.octane-login-view .is-dragging > .login-drag-handle,
-.octane-login-view .is-dragging .login-drag-handle {
-    cursor: grabbing;
-}
-
-.octane-login-view .is-dragging {
-    transition: none;
-}
-
-@media (max-width: 900px) {
-    .octane-login-view .login-drag-handle {
-        cursor: default;
-        touch-action: auto;
-    }
-}
-
-.octane-login-view .login-widgets {
-    position: absolute;
-    top: 18px;
-    left: 240px;
-    right: 360px;
-    z-index: 25;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-    gap: 34px 58px;
-    pointer-events: auto;
-}
-
-.octane-login-view .login-widget-slot {
-    min-height: 110px;
-    display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
-    align-items: center;
-    gap: 22px;
-    color: #ffffff;
-    font-family: Ubuntu, 'Helvetica Neue', Arial, sans-serif;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.45);
-}
-
-.octane-login-view .login-widget-image {
-    max-width: 150px;
-    max-height: 150px;
-    width: auto;
-    height: auto;
-    justify-self: center;
-    image-rendering: auto;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.octane-login-view .login-widget-content {
-    min-width: 0;
-}
-
-.octane-login-view .login-widget-title {
+.login-flow-input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 31px;
+    padding: 0 6px;
+    border-style: solid;
+    border-width: 5px 10px;
+    border-image: url("@/assets/images/login/input_field_hitch.png") 5 10 fill / 5px 10px stretch;
+    background: transparent;
+    color: #666666;
+    font-family: inherit;
     font-size: 18px;
-    line-height: 20px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-    margin-bottom: 5px;
-}
-
-.octane-login-view .login-widget-description {
-    max-width: 285px;
-    font-size: 12px;
-    line-height: 14px;
-    font-weight: 600;
-    margin-bottom: 14px;
-}
-
-.octane-login-view .login-widget-button {
-    min-width: 178px;
-    height: 25px;
-    padding: 0 18px;
-    border: 1px solid #777777;
-    border-radius: 3px;
-    background: linear-gradient(#ffffff, #d4d4d4);
-    color: #111111;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
-    text-shadow: none;
-}
-
-.octane-login-view .login-widget-button:hover {
-    background: linear-gradient(#ffffff, #e9e9e9);
-}
-
-.octane-login-card {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    resize: none !important;
-    background: var(--octane-card-frame, #376275);
-    color: var(--octane-card-text, #151515);
-    font-family: Ubuntu, 'Helvetica Neue', Arial, sans-serif;
-    box-shadow: var(--octane-card-shadow, 0 4px 4px rgba(0, 0, 0, 0.349));
-}
-
-.octane-login-card .card-title {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 33px;
-    max-height: 33px;
-    margin: 0;
-    padding: 4px 38px;
-    border: 0;
-    border-bottom: 2px solid var(--octane-card-border, #283f5d);
-    border-radius: 4px 4px 0 0;
-    background: linear-gradient(
-        180deg,
-        var(--octane-card-header-highlight, #5ba4c4) 0%,
-        var(--octane-card-header, #418db0) 44%,
-        var(--octane-card-header-shadow, #2e6f8a) 100%
-    );
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.38);
-    color: #ffffff;
-    font-family: UbuntuCondensed, Ubuntu, sans-serif;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.65);
-}
-
-.octane-login-card .card-title .octane-card-close-button {
-    position: absolute;
-    top: 50%;
-    right: 6px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    padding: 0;
-}
-
-.octane-login-card .card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: auto;
-    padding: 10px;
-    overflow: visible;
-    border-radius: 0 0 4px 4px;
-    background: var(--octane-card-surface, #dfdfdf);
-    color: var(--octane-card-text, #151515);
-    font-family: Ubuntu, sans-serif;
-    font-size: 14px;
-    line-height: 1.35;
-}
-
-.octane-login-card .field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.octane-login-card .field label {
-    font-size: 13px;
-    color: var(--octane-card-text, #151515);
-    font-weight: 600;
-}
-
-.octane-login-card .field input {
-    width: 100%;
-    min-height: 32px;
-    padding: 5px 8px;
-    border: 1px solid #8d8d8d;
-    border-radius: 4px;
-    background: #f6f6f6;
-    color: var(--octane-card-text, #151515);
-    font-size: 14px;
+    font-weight: bold;
+    line-height: 21px;
     outline: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-.octane-login-card .field input:focus {
-    border-color: var(--octane-card-header, #418db0);
-    box-shadow: 0 0 0 2px rgba(65, 141, 176, 0.28);
+.login-flow-input::placeholder {
+    color: #666666;
+    opacity: 0.8;
 }
 
-.octane-login-card .remember-row {
+.login-flow-input:focus-visible {
+    filter: drop-shadow(0 0 4px rgba(126, 202, 238, 0.9));
+}
+
+.login-flow-input:disabled {
+    opacity: 0.7;
+}
+
+.login-flow-hint {
+    margin: -8px 0 0;
+    color: #7ecaee;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.login-flow-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-flow-checkbox input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #3fae2a;
+    cursor: pointer;
+}
+
+.login-flow-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: var(--octane-card-text, #151515);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
+    justify-content: flex-end;
+    gap: 20px;
+    min-height: 40px;
+    margin-top: auto;
 }
 
-.octane-login-card .remember-row input {
-    width: 13px;
-    height: 13px;
-    margin: 0;
-    cursor: pointer;
-}
-
-.octane-login-card .submit-row {
+.login-flow-links {
     display: flex;
-    justify-content: center;
-    margin-top: 2px;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-right: auto;
 }
 
-.octane-login-card button.ok-button {
-    cursor: pointer;
-    min-height: 32px;
-    padding: 5px 16px;
-    border: 2px solid var(--habbo-blue-header, #0e3f52);
-    border-radius: 4px;
-    background: linear-gradient(180deg, #5ba4c4 0%, #418db0 44%, #2e6f8a 100%);
+.login-environment-view > .login-flow-links {
+    margin-top: 20px;
+}
+
+.login-flow-link {
+    padding: 0;
+    border: 0;
+    background: none;
     color: #ffffff;
+    font-family: inherit;
     font-size: 14px;
-    font-weight: 700;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.35), 0 1px rgba(0, 0, 0, 0.15);
-}
-
-.octane-login-card button.ok-button:hover {
-    background: linear-gradient(180deg, #6eb8d4 0%, #4a9bc0 44%, #3580a0 100%);
-}
-
-.octane-login-card button.ok-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-.octane-login-card .forgot {
-    display: block;
-    text-align: center;
-    margin-top: 6px;
-    font-size: 11px;
-    line-height: 14px;
-    color: var(--habbo-blue-dark, #2e6f8a);
+    font-weight: bold;
     text-decoration: underline;
     cursor: pointer;
 }
 
-.octane-login-card .error-line {
-    color: #a81a12;
-    background: #fde6e4;
-    border: 1px solid #e0a7a2;
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 13px;
-    text-align: center;
+.login-flow-link:hover,
+.login-flow-link:focus-visible {
+    color: #7ecaee;
+    outline: none;
 }
 
-.octane-login-card .info-line {
-    color: #0a4d2e;
-    background: #e5f5ec;
-    border: 1px solid #a4d4b8;
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 13px;
-    text-align: center;
+.login-flow-step {
+    margin-right: auto;
+    color: #7ecaee;
+    font-size: 18px;
 }
 
-.octane-login-card .error-line.maintenance-notice {
-    color: #6b4a00;
-    background: #fff4d6;
-    border-color: #e6c47a;
+/* onBoardingHcUi.ColouredButton: 9-slice skin (8,10,6,4), caption padding 64. */
+.login-flow-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 24px;
+    border-style: solid;
+    border-width: 10px 10px 10px 8px;
+    border-image-slice: 10 10 10 8 fill;
+    border-image-width: 10px 10px 10px 8px;
+    border-image-repeat: stretch;
+    background: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.login-flow-button:hover:not(:disabled),
+.login-flow-button:focus-visible {
+    filter: drop-shadow(0 0 5px rgba(216, 216, 216, 0.7));
+    outline: none;
+}
+
+.login-flow-button:disabled {
+    color: #999999;
+    cursor: default;
+}
+
+.login-flow-button-green {
+    border-image-source: url("@/assets/images/login/button_green.png");
+}
+
+.login-flow-button-green:hover:not(:disabled) {
+    border-image-source: url("@/assets/images/login/button_green_rollover.png");
+}
+
+.login-flow-button-green:active:not(:disabled) {
+    border-image-source: url("@/assets/images/login/button_green_pressed.png");
+}
+
+.login-flow-button-green:disabled {
+    border-image-source: url("@/assets/images/login/button_green_inactive.png");
+}
+
+.login-flow-button-red {
+    border-image-source: url("@/assets/images/login/button_red.png");
+}
+
+.login-flow-button-red:hover:not(:disabled) {
+    border-image-source: url("@/assets/images/login/button_red_rollover.png");
+}
+
+.login-flow-button-red:active:not(:disabled) {
+    border-image-source: url("@/assets/images/login/button_red_pressed.png");
+}
+
+.login-flow-button-red:disabled {
+    border-image-source: url("@/assets/images/login/button_red_inactive.png");
+}
+
+/* LoginFlow.showErrorMessage: dark balloon, arrow down, at x=300 above the buttons. */
+.login-flow-balloon {
+    position: absolute;
+    bottom: 52px;
+    left: 300px;
+    z-index: 3;
+    max-width: 320px;
+    padding: 14px 15px;
+    border-radius: 5px;
+    background: rgba(11, 2, 2, 0.5);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.24);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 16px;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
+    animation: login-flow-balloon 3s linear forwards;
+}
+
+.login-flow-balloon::after {
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 10px);
+    border: 10px solid transparent;
+    border-top-color: rgba(11, 2, 2, 0.5);
+    border-bottom: 0;
+    content: "";
+}
+
+@keyframes login-flow-balloon {
+    0%,
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* AvatarView's information panel: a 640px dark balloon, name at x=50. */
+.login-flow-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 20px;
+    margin-top: 20px;
+    padding: 15px 20px 15px 50px;
+    border-radius: 5px;
+    background: rgba(1, 3, 7, 0.5);
+}
+
+.login-flow-panel-title {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 24px;
+}
+
+.login-flow-panel-text {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    color: #7ecaee;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.login-flow-panel-action {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+}
+
+/* EnvironmentView: 158x164 flags at half scale, 85px apart, with the selection glow behind. */
+.login-environment-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 50px;
+    padding-left: 1px;
+}
+
+.login-environment-flag {
+    position: relative;
+    width: 80px;
+    height: 82px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.login-environment-flag img {
+    position: relative;
+    z-index: 1;
+    width: 79px;
+    height: 82px;
+}
+
+.login-environment-flag.is-selected::before {
+    position: absolute;
+    top: -16px;
+    left: -17px;
+    width: 113px;
+    height: 113px;
+    background: url("@/assets/images/flag_icon/flag_icon_selected.png") center / contain no-repeat;
+    content: "";
+}
+
+.login-environment-flag:focus-visible {
+    outline: 2px solid #7ecaee;
+    outline-offset: 2px;
+}
+
+.login-environment-view .login-flow-actions {
+    margin-top: 118px;
+}
+
+.login-environment-name {
+    margin-right: auto;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Predefined looks drawn like AvatarView's character row. */
+.registration-look-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    min-height: 110px;
+}
+
+.registration-gender {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: center;
+}
+
+.registration-looks {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+}
+
+.registration-look {
+    position: relative;
+    width: 64px;
+    height: 110px;
+    padding: 0;
+    border: 0;
+    background: url("@/assets/images/login/placeholder_avatar.png") center bottom no-repeat;
+    cursor: pointer;
+}
+
+.registration-look .avatar-image {
+    position: relative;
+    z-index: 2;
+    width: 64px !important;
+    height: 110px !important;
+    background-position: center bottom !important;
+}
+
+.registration-look:has(.avatar-image) {
+    background-image: none;
+}
+
+.registration-look.is-selected::before {
+    position: absolute;
+    top: calc(50% - 160px + 15px);
+    left: calc(50% - 158px);
+    z-index: 1;
+    width: 316px;
+    height: 320px;
+    background: url("@/assets/images/login/avatar_glow.png") no-repeat;
+    content: "";
+    mix-blend-mode: plus-lighter;
+    pointer-events: none;
+}
+
+.registration-look.is-selected::after {
+    position: absolute;
+    bottom: -20px;
+    left: calc(50% - 55px);
+    z-index: 1;
+    width: 110px;
+    height: 57px;
+    background: url("@/assets/images/login/avatar_halo.png") no-repeat;
+    content: "";
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.registration-look:focus-visible,
+.registration-randomize:focus-visible {
+    outline: 2px solid #7ecaee;
+    outline-offset: 2px;
+}
+
+.registration-randomize {
+    width: 50px;
+    height: 52px;
+    align-self: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.registration-randomize:hover:not(:disabled) {
+    filter: drop-shadow(0 0 5px rgba(216, 216, 216, 0.7));
+}
+
+.registration-randomize:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* First room choices, each in the information-panel balloon. */
+.registration-rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 7px;
+}
+
+.registration-room {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    align-items: center;
+    gap: 16px;
+    min-height: 80px;
+    padding: 10px 20px 10px 10px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    background: rgba(1, 3, 7, 0.5);
+    cursor: pointer;
+}
+
+.registration-room input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.registration-room.is-selected {
+    border-color: #7ecaee;
+    box-shadow: 0 0 10px rgba(216, 216, 216, 0.7);
+}
+
+.registration-room:has(input:focus-visible) {
+    outline: 2px solid #7ecaee;
+    outline-offset: 2px;
+}
+
+.registration-room-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 60px;
+    overflow: hidden;
+}
+
+.registration-room-thumbnail img {
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.registration-room-copy {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.octane-login-card .error-line.maintenance-notice strong {
-    font-weight: 700;
+.registration-room-title {
+    font-size: 20px;
+    font-weight: bold;
 }
 
-.octane-login-card .error-line.ban-message {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 8px 10px;
-    text-align: left;
-    line-height: 1.35;
+.registration-room-description {
+    color: #7ecaee;
+    font-size: 16px;
 }
 
-.octane-login-card .error-line.ban-message .ban-title {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+.turnstile-slot {
+    align-self: flex-start;
 }
 
-.octane-login-card .error-line.ban-message .ban-status {
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-}
-
-.octane-login-card .error-line.ban-message .ban-reason {
-    font-size: 11px;
-    font-style: italic;
-    word-break: break-word;
-}
-
-.octane-login-card .register-card-body {
-    align-items: center;
-    text-align: center;
-}
-
-.octane-login-card .register-card-body .register-link {
-    width: 100%;
-    min-height: 30px;
-    border: 2px solid #006d09;
-    border-radius: 4px;
-    padding: 5px 10px;
-    background: linear-gradient(180deg, #b6e86b 0%, #7fc828 45%, #4f9a18 100%);
-    color: #ffffff;
-    cursor: pointer;
-    font-family: Ubuntu, sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.35), 0 1px rgba(0, 0, 0, 0.15);
-}
-
-.octane-login-card .register-card-body .register-link:hover {
-    filter: brightness(1.04);
-}
-
-.octane-login-view .login-language-picker {
-    position: absolute;
-    top: 18px;
-    right: 22px;
-    z-index: 60;
-    min-width: 180px;
-    padding: 0;
-    resize: none !important;
-    color: var(--octane-card-text, #151515);
-    pointer-events: auto;
-}
-
-.octane-login-view .login-language-header {
-    min-height: 31px;
-    max-height: 31px;
-    padding: 4px 28px;
-}
-
-.octane-login-view .login-language-header .octane-card-title {
-    font-size: 17px;
-}
-
-.octane-login-view .login-language-content {
-    height: auto;
-    padding: 8px;
-    overflow: visible;
-}
-
-.octane-login-view .login-language-select-wrap {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.octane-login-view .login-language-select-wrap img {
-    width: 22px;
-    height: 16px;
-    object-fit: contain;
-    image-rendering: auto;
-    flex: 0 0 auto;
-}
-
-.octane-login-view .login-language-select-wrap select {
-    min-width: 118px;
-    height: 27px;
-    padding: 3px 26px 3px 8px;
-    border: 1px solid #8d8d8d;
-    border-radius: 4px;
-    background: #f6f6f6;
-    color: var(--octane-card-text, #151515);
-    font-family: Ubuntu, sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-}
-
-.octane-login-view .login-language-select-wrap select:focus {
-    border-color: var(--octane-card-header, #418db0);
-    box-shadow: 0 0 0 2px rgba(65, 141, 176, 0.28);
-}
-
-.octane-login-view .login-language-select-wrap select:disabled {
-    cursor: wait;
-    opacity: 0.7;
-}
-
-.octane-login-view .login-language-picker .language-error {
-    max-width: 180px;
-    margin-top: 5px;
-    color: #8a1712;
-    font-size: 9px;
-    line-height: 11px;
-}
-
-.octane-login-view .login-auth-card {
-    box-shadow: var(--octane-card-shadow, 0 4px 4px rgba(0, 0, 0, 0.349));
-}
-
-.octane-login-view .login-register-card {
-    background: var(--octane-card-frame, #376275);
-}
-
-.octane-login-view .login-language-select-wrap img,
-.octane-login-view .login-language-picker img {
-    max-width: 28px;
-    max-height: 22px;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.octane-login-card .turnstile-slot {
-    display: flex;
-    justify-content: center;
-    margin-top: 4px;
-    min-height: 65px;
-}
-
-.octane-login-card .turnstile-slot iframe {
+/* landingview promo_article: 500x118 with the image at 10,36 and copy from x=170. */
+.login-promo-article {
+    position: relative;
+    width: 500px;
     max-width: 100%;
+    min-height: 118px;
+    margin-top: 30px;
+    color: #ffffff;
 }
 
-.octane-login-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 24, 35, 0.48);
+.login-promo-article-header {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-}
-
-/* Keep the tinted fallback on touch-first devices, avoiding iOS backdrop/viewport glitches. */
-@media (hover: hover) and (pointer: fine) {
-    .octane-login-modal {
-        -webkit-backdrop-filter: blur(2px);
-        backdrop-filter: blur(2px);
-    }
-}
-
-.octane-login-modal .dialog {
-    width: 320px;
-    max-width: calc(100% - 40px);
-}
-
-.octane-login-modal .dialog.dialog-avatar {
-    width: 720px;
-}
-
-/* ─── Multi-step register dialog ─── */
-
-.octane-login-card .register-intro {
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--habbo-tab, #b6bec5);
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-size: 13px;
-    line-height: 1.4;
-    color: var(--octane-card-text, #151515);
-}
-
-.octane-login-card .step-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 4px;
-}
-
-.octane-login-card .step-footer-split {
-    justify-content: space-between;
-}
-
-.octane-login-card .step-indicator {
-    font-size: 13px;
-    color: var(--octane-card-muted, #666666);
-    font-weight: 600;
-}
-
-.octane-login-card .back-button {
-    border-color: var(--habbo-blue-header-border, #376275);
-    background: linear-gradient(180deg, #f2f8fb 0%, #d4e6ef 44%, #a8c9d8 45%, #d9e9f0 100%);
-    color: var(--octane-card-text, #151515);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-
-.octane-login-card button.ok-button.back-button:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #e0eff6 44%, #b8d5e4 45%, #e8f3f8 100%);
-}
-
-/* ─── Avatar builder (pre-login) ─── */
-
-.octane-login-card .gender-row {
-    display: flex;
-    justify-content: center;
-    gap: 22px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.octane-login-card .gender-row label {
-    display: inline-flex;
     align-items: center;
     gap: 4px;
+    height: 18px;
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.login-promo-article-header::before {
+    width: 12px;
+    content: "";
+}
+
+.login-promo-article-header::before,
+.login-promo-article-header::after {
+    height: 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.55);
+}
+
+.login-promo-article-header::after {
+    flex: 1;
+    content: "";
+}
+
+.login-promo-article-navigation {
+    position: absolute;
+    top: 23px;
+    left: 10px;
+    display: flex;
+    gap: 2px;
+}
+
+.login-promo-article-navigation button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    background: transparent;
     cursor: pointer;
 }
 
-.octane-login-card .avatar-preview-panel {
+.login-promo-article-navigation button.is-active {
+    background: #ffffff;
+}
+
+.login-promo-article-body {
+    position: relative;
+    min-height: 101px;
+    padding-left: 170px;
+}
+
+.login-promo-article-image {
+    position: absolute;
+    top: 19px;
+    left: 10px;
+    max-width: 150px;
+    max-height: 82px;
+}
+
+.login-promo-article-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.login-promo-article-title {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 24px;
+}
+
+.login-promo-article-text {
+    font-size: 13px;
+    line-height: 17px;
+}
+
+.login-promo-article-button {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+}
+.login-flow .avatar-preview-panel {
     display: flex;
     flex-direction: column;
     align-self: stretch;
@@ -673,7 +673,7 @@
     background: linear-gradient(180deg, #ffffff 0%, #e9f0f3 100%);
 }
 
-.octane-login-card .avatar-preview {
+.login-flow .avatar-preview {
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -681,14 +681,14 @@
     overflow: hidden;
 }
 
-.octane-login-card .avatar-preview img {
+.login-flow .avatar-preview img {
     max-width: 100%;
     max-height: 190px;
     image-rendering: var(--octane-pixel-art, pixelated);
     image-rendering: -moz-crisp-edges;
 }
 
-.octane-login-card .registration-avatar-wardrobe {
+.login-flow .registration-avatar-wardrobe {
     min-height: 360px;
     overflow: hidden;
     border: 1px solid #8d8d8d;
@@ -696,7 +696,7 @@
     background: #cacaca;
 }
 
-.octane-login-card .registration-wardrobe-tabs {
+.login-flow .registration-wardrobe-tabs {
     display: flex;
     align-items: flex-end;
     gap: 2px;
@@ -706,7 +706,7 @@
     background: #b7b7b7;
 }
 
-.octane-login-card .registration-wardrobe-tabs button {
+.login-flow .registration-wardrobe-tabs button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -720,24 +720,24 @@
     cursor: pointer;
 }
 
-.octane-login-card .registration-wardrobe-tabs button:hover,
-.octane-login-card .registration-wardrobe-tabs button.active {
+.login-flow .registration-wardrobe-tabs button:hover,
+.login-flow .registration-wardrobe-tabs button.active {
     background: #ececec;
 }
 
-.octane-login-card .registration-wardrobe-tabs button.active {
+.login-flow .registration-wardrobe-tabs button.active {
     height: 38px;
     border-color: #686868;
 }
 
-.octane-login-card .registration-wardrobe-tabs img {
+.login-flow .registration-wardrobe-tabs img {
     max-width: 40px;
     max-height: 27px;
     image-rendering: var(--octane-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-login-card .registration-wardrobe-main {
+.login-flow .registration-wardrobe-main {
     display: grid;
     grid-template-columns: 170px minmax(0, 1fr);
     gap: 10px;
@@ -746,7 +746,7 @@
     align-items: start;
 }
 
-.octane-login-card .registration-wardrobe-preview {
+.login-flow .registration-wardrobe-preview {
     align-self: end;
     width: 170px;
     height: 270px;
@@ -754,7 +754,7 @@
     justify-content: flex-start;
 }
 
-.octane-login-card .registration-wardrobe-preview .avatar-preview {
+.login-flow .registration-wardrobe-preview .avatar-preview {
     position: relative;
     width: 100%;
     min-height: 230px;
@@ -762,13 +762,13 @@
     background: radial-gradient(circle at 50% 42%, #8792a3 0%, #677181 66%);
 }
 
-.octane-login-card .registration-wardrobe-preview .avatar-image {
+.login-flow .registration-wardrobe-preview .avatar-image {
     z-index: 2;
     margin-bottom: -6px;
     transform-origin: center bottom;
 }
 
-.octane-login-card .registration-avatar-shadow {
+.login-flow .registration-avatar-shadow {
     position: absolute;
     left: 50%;
     bottom: 9px;
@@ -780,7 +780,7 @@
     z-index: 1;
 }
 
-.octane-login-card .registration-wardrobe-rotation {
+.login-flow .registration-wardrobe-rotation {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -791,7 +791,7 @@
     background: #d8dfe4;
 }
 
-.octane-login-card .registration-wardrobe-rotation button {
+.login-flow .registration-wardrobe-rotation button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -804,23 +804,23 @@
     cursor: pointer;
 }
 
-.octane-login-card .registration-wardrobe-rotation button img {
+.login-flow .registration-wardrobe-rotation button img {
     filter: brightness(0) saturate(100%) invert(47%) sepia(86%) saturate(1316%) hue-rotate(164deg) brightness(88%) contrast(85%) drop-shadow(0 1px 0 #0e3f52);
 }
 
-.octane-login-card .registration-wardrobe-rotation button:hover,
-.octane-login-card .registration-wardrobe-rotation button:focus-visible {
+.login-flow .registration-wardrobe-rotation button:hover,
+.login-flow .registration-wardrobe-rotation button:focus-visible {
     border-color: #8b979f;
     background: #eef2f4;
     outline: none;
 }
 
-.octane-login-card .registration-wardrobe-rotation button:hover img,
-.octane-login-card .registration-wardrobe-rotation button:focus-visible img {
+.login-flow .registration-wardrobe-rotation button:hover img,
+.login-flow .registration-wardrobe-rotation button:focus-visible img {
     filter: brightness(0) saturate(100%) invert(36%) sepia(98%) saturate(1180%) hue-rotate(166deg) brightness(88%) contrast(91%) drop-shadow(0 1px 0 #0e3f52);
 }
 
-.octane-login-card .registration-wardrobe-editor {
+.login-flow .registration-wardrobe-editor {
     display: grid;
     grid-template-rows: auto auto minmax(145px, 1fr) auto 78px;
     min-width: 0;
@@ -828,7 +828,7 @@
     overflow: hidden;
 }
 
-.octane-login-card .registration-wardrobe-set-tabs {
+.login-flow .registration-wardrobe-set-tabs {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -836,7 +836,7 @@
     padding: 2px 4px;
 }
 
-.octane-login-card .registration-wardrobe-set-tabs button {
+.login-flow .registration-wardrobe-set-tabs button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -852,12 +852,12 @@
     cursor: pointer;
 }
 
-.octane-login-card .registration-wardrobe-set-tabs button > div {
+.login-flow .registration-wardrobe-set-tabs button > div {
     width: 100%;
     height: 100%;
 }
 
-.octane-login-card .registration-wardrobe-set-tabs button img {
+.login-flow .registration-wardrobe-set-tabs button img {
     width: auto !important;
     height: auto !important;
     max-width: 30px;
@@ -865,13 +865,13 @@
     object-fit: contain;
 }
 
-.octane-login-card .registration-wardrobe-set-tabs button:hover,
-.octane-login-card .registration-wardrobe-set-tabs button.active {
+.login-flow .registration-wardrobe-set-tabs button:hover,
+.login-flow .registration-wardrobe-set-tabs button.active {
     border-color: #999999;
     background: #e7e7e7;
 }
 
-.octane-login-card .registration-wardrobe-section-title {
+.login-flow .registration-wardrobe-section-title {
     min-height: 22px;
     padding: 3px 6px;
     color: #444444;
@@ -879,7 +879,7 @@
     font-weight: 700;
 }
 
-.octane-login-card .registration-wardrobe-parts {
+.login-flow .registration-wardrobe-parts {
     position: relative;
     min-height: 0;
     overflow: hidden;
@@ -889,7 +889,7 @@
     padding: 5px;
 }
 
-.octane-login-card .registration-wardrobe-parts > div {
+.login-flow .registration-wardrobe-parts > div {
     position: absolute;
     inset: 5px;
     width: auto !important;
@@ -900,28 +900,28 @@
     overscroll-behavior: contain;
 }
 
-.octane-login-card .registration-wardrobe-part {
+.login-flow .registration-wardrobe-part {
     min-height: 48px;
     background-size: 75% auto !important;
     background-position: center !important;
 }
 
-.octane-login-card .registration-wardrobe-part.wardrobe-part-hd {
+.login-flow .registration-wardrobe-part.wardrobe-part-hd {
     background-size: 64% auto !important;
 }
 
-.octane-login-card .registration-wardrobe-part:focus-visible {
+.login-flow .registration-wardrobe-part:focus-visible {
     outline: 2px solid var(--octane-card-header, #418db0);
     outline-offset: -2px;
 }
 
-.octane-login-card .registration-wardrobe-part.wardrobe-part-loading:not(:has(.octane-icon)) {
+.login-flow .registration-wardrobe-part.wardrobe-part-loading:not(:has(.octane-icon)) {
     background-image: linear-gradient(110deg, #e9e8e4 30%, #f8f8f6 45%, #e9e8e4 60%);
     background-size: 200% 100% !important;
     animation: wardrobe-loading 1.1s linear infinite;
 }
 
-.octane-login-card .registration-wardrobe-palette {
+.login-flow .registration-wardrobe-palette {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(27px, 1fr));
     gap: 4px;
@@ -933,7 +933,7 @@
     background: #eeeeeb;
 }
 
-.octane-login-card .registration-wardrobe-palette button {
+.login-flow .registration-wardrobe-palette button {
     min-width: 27px;
     height: 27px;
     padding: 0;
@@ -943,21 +943,21 @@
     box-shadow: inset 0 1px rgba(255, 255, 255, 0.45);
 }
 
-.octane-login-card .registration-wardrobe-palette button:hover {
+.login-flow .registration-wardrobe-palette button:hover {
     border-color: #777777;
 }
 
-.octane-login-card .registration-wardrobe-palette button.active {
+.login-flow .registration-wardrobe-palette button.active {
     border-color: #1d657f;
     box-shadow: 0 0 0 2px #66b6d2;
 }
 
-.octane-login-card .registration-wardrobe-palette button:disabled {
+.login-flow .registration-wardrobe-palette button:disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
 
-.octane-login-card .registration-wardrobe-loading {
+.login-flow .registration-wardrobe-loading {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -972,687 +972,12 @@
     }
 }
 
-.octane-login-card .hot-looks-row {
-    display: flex;
-    justify-content: center;
+/* The avatar step carries the wardrobe, so it packs its rows tighter to fit 900px screens. */
+.registration-step-avatar .login-flow-form {
     gap: 8px;
-    margin-top: 2px;
+    padding-top: 16px;
 }
 
-.octane-login-card .server-offline {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    text-align: left;
-}
-
-.octane-login-card .server-offline .retry-link {
-    background: linear-gradient(180deg, #f2f8fb 0%, #d4e6ef 44%, #a8c9d8 45%, #d9e9f0 100%);
-    border: 2px solid var(--habbo-blue-header-border, #376275);
-    border-radius: 4px;
-    padding: 2px 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--octane-card-text, #151515);
-    cursor: pointer;
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.8), 0 1px rgba(0, 0, 0, 0.15);
-}
-
-.octane-login-card .server-offline .retry-link:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-.octane-login-card .hot-looks-button {
-    padding: 5px 16px;
-    font-size: 13px;
-}
-
-.octane-login-card .random-look-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-@media (max-width: 540px) {
-    .octane-login-card .registration-wardrobe-main {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-
-    .octane-login-card .registration-wardrobe-preview {
-        justify-self: center;
-        min-height: 0;
-    }
-
-    .octane-login-card .registration-wardrobe-editor {
-        min-height: 300px;
-    }
-
-}
-
-@media (max-width: 1180px) {
-    .octane-login-view .login-widgets {
-        left: 210px;
-        right: 315px;
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .octane-login-view .login-widget-slot {
-        grid-template-columns: 120px minmax(0, 1fr);
-        min-height: 86px;
-        gap: 14px;
-    }
-
-    .octane-login-view .login-widget-image {
-        max-width: 110px;
-        max-height: 110px;
-    }
-}
-
-@media (max-width: 600px) {
-    .octane-login-view .login-language-picker {
-        top: 12px;
-        right: 12px;
-        min-width: 150px;
-    }
-
-    .octane-login-view .login-language-select-wrap select {
-        min-width: 104px;
-    }
-}
-
-.octane-login-view .login-news-stack {
-    position: absolute;
-    top: 25%;
-    left: 8vw;
-    transform: translateY(-50%) translate(var(--login-drag-x, 0px), var(--login-drag-y, 0px));
-    display: flex;
-    flex-direction: column;
-    width: 388px;
-    z-index: 50;
-    pointer-events: auto;
-}
-
-.octane-login-view .news-card-wrapper {
-    position: relative;
-    animation: news-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.octane-login-view .login-news-stack.is-dragging .news-card-wrapper > .octane-login-card.octane-news-card {
-    animation: none;
-}
-
-.octane-login-view .news-card-wrapper > .octane-login-card.octane-news-card {
-    position: relative;
-    overflow: visible;
-    border-width: 3px;
-    padding-top: 22px;
-    background: linear-gradient(180deg, #b9d4e3 0%, #a2bfd1 60%, #93b3c8 100%);
-    box-shadow:
-        inset 0 2px rgba(255, 255, 255, 0.5),
-        inset 0 -2px rgba(0, 0, 0, 0.12),
-        0 6px 14px rgba(0, 0, 0, 0.35),
-        0 0 0 4px rgba(63, 106, 133, 0.0);
-    animation: news-glow 3.2s ease-in-out infinite;
-}
-
-.octane-login-card.octane-news-card .card-title.news-ribbon {
-    position: absolute;
-    top: -14px;
-    left: -10px;
-    right: -10px;
-    margin: 0;
-    padding: 6px 12px;
-    background: linear-gradient(180deg, #ffe27a 0%, #ffc742 50%, #f0a812 100%);
-    color: #5a3a00;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.55);
-    border: 2px solid #8a5a00;
-    border-radius: 6px;
-    box-shadow:
-        inset 0 1px rgba(255, 255, 255, 0.7),
-        inset 0 -2px rgba(0, 0, 0, 0.15),
-        0 3px 0 rgba(0, 0, 0, 0.2);
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    text-align: center;
-    z-index: 2;
-}
-
-/* Pennant tails on the ribbon */
-.octane-login-card.octane-news-card .card-title.news-ribbon::before,
-.octane-login-card.octane-news-card .card-title.news-ribbon::after {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    width: 12px;
-    height: 12px;
-    background: #c47800;
-    border: 2px solid #8a5a00;
-    z-index: -1;
-}
-
-.octane-login-card.octane-news-card .card-title.news-ribbon::before {
-    left: -2px;
-    clip-path: polygon(0 0, 100% 0, 100% 100%);
-    transform: rotate(0deg);
-}
-
-.octane-login-card.octane-news-card .card-title.news-ribbon::after {
-    right: -2px;
-    clip-path: polygon(0 0, 100% 0, 0 100%);
-}
-
-.octane-login-card.octane-news-card .news-ribbon-text {
-    display: inline-block;
-    animation: news-ribbon-wobble 4s ease-in-out infinite;
-}
-
-/* "NEW!" star badge */
-.octane-login-view .news-new-badge {
-    position: absolute;
-    top: -28px;
-    right: -24px;
-    width: 78px;
-    height: 78px;
-    background:
-        radial-gradient(circle at 35% 30%, #fff7c2 0%, #ffd23a 45%, #d97c00 100%);
-    color: #5a1900;
-    font-weight: 900;
-    font-size: 11px;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #8a3a00;
-    box-shadow:
-        inset 0 2px rgba(255, 255, 255, 0.55),
-        inset 0 -2px rgba(0, 0, 0, 0.2),
-        0 3px 6px rgba(0, 0, 0, 0.35);
-    clip-path: polygon(
-        50% 0%, 61% 35%, 98% 35%, 68% 57%,
-        79% 91%, 50% 70%, 21% 91%, 32% 57%,
-        2% 35%, 39% 35%
-    );
-    z-index: 4;
-    animation: news-badge-spin 2.8s ease-in-out infinite;
-    pointer-events: none;
-}
-
-.octane-login-view .news-new-badge span {
-    transform: rotate(-10deg);
-    display: inline-block;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-/* Sparkles around the card */
-.octane-login-view .news-sparkle {
-    position: absolute;
-    color: #fff5b0;
-    text-shadow:
-        0 0 6px rgba(255, 220, 120, 0.9),
-        0 0 12px rgba(255, 200, 60, 0.6);
-    pointer-events: none;
-    z-index: 3;
-    user-select: none;
-    font-weight: 700;
-}
-
-.octane-login-view .news-sparkle-1 {
-    top: -8px;
-    left: 18px;
-    font-size: 14px;
-    animation: news-sparkle 2.1s ease-in-out infinite;
-    animation-delay: 0s;
-}
-
-.octane-login-view .news-sparkle-2 {
-    top: 38%;
-    left: -12px;
-    font-size: 12px;
-    animation: news-sparkle 2.4s ease-in-out infinite;
-    animation-delay: 0.6s;
-}
-
-.octane-login-view .news-sparkle-3 {
-    bottom: -6px;
-    right: 36px;
-    font-size: 16px;
-    animation: news-sparkle 2.7s ease-in-out infinite;
-    animation-delay: 1.1s;
-}
-
-/* Body */
-.octane-login-card.octane-news-card .card-body.news-body {
-    gap: 8px;
-    font-size: 14px;
-    color: #0a2e45;
-}
-
-.octane-login-card.octane-news-card .news-image {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #3f6a85;
-    border-radius: 4px;
-    background:
-        repeating-linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.15) 0 6px,
-            rgba(255, 255, 255, 0) 6px 12px
-        ),
-        linear-gradient(180deg, #cfe1ee 0%, #a8c5d6 100%);
-    overflow: hidden;
-    box-shadow:
-        inset 0 2px rgba(255, 255, 255, 0.6),
-        inset 0 -2px rgba(0, 0, 0, 0.15);
-    max-height: 150px;
-    transition: transform 0.25s ease;
-}
-
-.octane-login-card.octane-news-card .news-image:hover {
-    transform: translateY(-1px) scale(1.01);
-}
-
-.octane-login-card.octane-news-card .news-image::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 35%);
-}
-
-.octane-login-card.octane-news-card .news-image img {
-    max-width: 100%;
-    max-height: 146px;
-    width: auto;
-    height: auto;
-    display: block;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    image-rendering: -moz-crisp-edges;
-    position: relative;
-    z-index: 1;
-}
-
-.octane-login-card.octane-news-card .news-headline {
-    font-weight: 800;
-    font-size: 15px;
-    line-height: 1.25;
-    color: #0a2e45;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.5);
-    letter-spacing: 0.2px;
-    border-bottom: 1px dashed rgba(63, 106, 133, 0.4);
-    padding-bottom: 4px;
-}
-
-.octane-login-card.octane-news-card .news-text {
-    font-size: 13px;
-    line-height: 1.45;
-    color: #103e5d;
-    white-space: pre-line;
-    word-break: break-word;
-    max-height: 120px;
-    overflow-y: auto;
-    padding-right: 2px;
-}
-
-.octane-login-card.octane-news-card .news-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.octane-login-card.octane-news-card .news-link-button {
-    padding: 4px 14px;
-    font-size: 13px;
-    font-weight: 800;
-    background: linear-gradient(180deg, #ffe27a 0%, #ffc742 60%, #f0a812 100%);
-    color: #5a3a00;
-    border: 1px solid #8a5a00;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.45);
-    box-shadow:
-        inset 0 1px rgba(255, 255, 255, 0.7),
-        inset 0 -1px rgba(0, 0, 0, 0.15),
-        0 2px 0 rgba(0, 0, 0, 0.2);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.octane-login-card.octane-news-card .news-link-button:hover {
-    background: linear-gradient(180deg, #fff0a8 0%, #ffd45c 60%, #f7b822 100%);
-    transform: translateY(-1px);
-    box-shadow:
-        inset 0 1px rgba(255, 255, 255, 0.8),
-        inset 0 -1px rgba(0, 0, 0, 0.15),
-        0 3px 0 rgba(0, 0, 0, 0.25);
-}
-
-.octane-login-card.octane-news-card .news-link-button:active {
-    transform: translateY(1px);
-    box-shadow:
-        inset 0 1px rgba(0, 0, 0, 0.15),
-        0 0 0 rgba(0, 0, 0, 0);
-}
-
-.octane-login-card.octane-news-card .news-pager {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: auto;
-}
-
-.octane-login-card.octane-news-card .news-pager .arrow-btn {
-    transition: transform 0.12s ease;
-}
-
-.octane-login-card.octane-news-card .news-pager .arrow-btn:hover {
-    transform: scale(1.15);
-}
-
-.octane-login-card.octane-news-card .news-counter {
-    font-size: 12px;
-    color: #134b6e;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    min-width: 28px;
-    text-align: center;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.4);
-}
-
-@keyframes news-pop-in {
-    0%   { opacity: 0; transform: scale(0.85) translateY(8px); }
-    60%  { opacity: 1; transform: scale(1.04) translateY(0); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes news-glow {
-    0%, 100% { box-shadow:
-        inset 0 2px rgba(255, 255, 255, 0.5),
-        inset 0 -2px rgba(0, 0, 0, 0.12),
-        0 6px 14px rgba(0, 0, 0, 0.35),
-        0 0 0 0 rgba(255, 210, 60, 0.0); }
-    50% { box-shadow:
-        inset 0 2px rgba(255, 255, 255, 0.5),
-        inset 0 -2px rgba(0, 0, 0, 0.12),
-        0 6px 14px rgba(0, 0, 0, 0.35),
-        0 0 18px 4px rgba(255, 210, 60, 0.45); }
-}
-
-@keyframes news-ribbon-wobble {
-    0%, 100% { transform: rotate(0deg) translateY(0); }
-    25%      { transform: rotate(-1.2deg) translateY(-1px); }
-    75%      { transform: rotate(1.2deg) translateY(1px); }
-}
-
-@keyframes news-badge-spin {
-    0%, 100% { transform: rotate(-8deg) scale(1); }
-    50%      { transform: rotate(8deg) scale(1.08); }
-}
-
-@keyframes news-sparkle {
-    0%, 100% { opacity: 0.2; transform: scale(0.7) rotate(0deg); }
-    50%      { opacity: 1;   transform: scale(1.2) rotate(20deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .octane-login-view .news-card-wrapper,
-    .octane-login-view .news-card-wrapper > .octane-login-card.octane-news-card,
-    .octane-login-view .news-new-badge,
-    .octane-login-view .news-sparkle,
-    .octane-login-card.octane-news-card .news-ribbon-text {
-        animation: none !important;
-    }
-}
-
-@media (max-width: 1100px) {
-    .octane-login-view .login-news-stack {
-        left: 24px;
-        top: 45%;
-    }
-}
-
-@media (max-width: 900px) {
-    .octane-login-view .login-news-stack {
-        display: none;
-    }
-}
-
-/* Login news uses the same frame and content surface as in-client Octane cards. */
-.octane-login-view .news-card-wrapper {
-    animation: none;
-}
-
-.octane-login-view .news-card-wrapper > .octane-login-card.octane-card-shell.octane-news-card {
-    padding: 0;
-    overflow: hidden;
-    border-width: 2px;
-    background: var(--octane-card-frame, #376275);
-    box-shadow: var(--octane-card-shadow, 0 4px 4px rgba(0, 0, 0, 0.349));
-    animation: none;
-}
-
-.octane-login-card.octane-card-shell.octane-news-card .card-title.octane-card-header-shell {
-    position: relative;
-    inset: auto;
-    min-height: 33px;
-    max-height: 33px;
-    margin: 0;
-    padding: 4px 38px;
-    border: 0;
-    border-bottom: 2px solid var(--octane-card-border, #283f5d);
-    border-radius: 4px 4px 0 0;
-    background: linear-gradient(
-        180deg,
-        var(--octane-card-header-highlight, #5ba4c4) 0%,
-        var(--octane-card-header, #418db0) 44%,
-        var(--octane-card-header-shadow, #2e6f8a) 100%
-    );
-    color: #ffffff;
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.38);
-    text-transform: none;
-}
-
-.octane-login-card.octane-card-shell.octane-news-card .card-body.news-body {
-    padding: 10px;
-    background: var(--octane-card-surface, #dfdfdf);
-    color: var(--octane-card-text, #151515);
-}
-
-.octane-login-card.octane-card-shell.octane-news-card .news-headline,
-.octane-login-card.octane-card-shell.octane-news-card .news-text,
-.octane-login-card.octane-card-shell.octane-news-card .news-counter {
-    color: var(--octane-card-text, #151515);
-    text-shadow: none;
-}
-
-.octane-login-card.octane-card-shell.octane-news-card .news-headline {
-    border-bottom-color: var(--habbo-tab, #b6bec5);
-}
-
-/* ─── Cloud intro (plays once per session) ─── */
-
-.login-intro-clouds {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    pointer-events: none;
-    overflow: hidden;
-    animation: cloud-overlay-fade 2.8s linear forwards;
-}
-
-.intro-cloud-bank {
-    position: absolute;
-    left: -10%;
-    width: 120%;
-    height: 70%;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    will-change: transform;
-}
-
-.intro-cloud-bank-top {
-    top: -70%;
-    animation: cloud-bank-top 2.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-
-.intro-cloud-bank-bottom {
-    bottom: -70%;
-    animation: cloud-bank-bottom 2.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-
-.intro-cloud-puff {
-    flex-shrink: 0;
-    background:
-        radial-gradient(ellipse at 45% 38%, #ffffff 0%, #fbfdff 35%, rgba(247, 251, 255, 0.85) 60%, rgba(255, 255, 255, 0) 78%);
-    filter: drop-shadow(0 8px 14px rgba(140, 175, 205, 0.35));
-    border-radius: 50%;
-}
-
-.intro-cloud-bank-top .intro-cloud-puff {
-    align-self: flex-end;
-}
-
-.intro-cloud-bank-bottom .intro-cloud-puff {
-    align-self: flex-start;
-}
-
-.intro-cloud-puff-1 { width: 360px; height: 320px; transform: translateY(-10px); }
-.intro-cloud-puff-2 { width: 260px; height: 240px; transform: translateY(20px); }
-.intro-cloud-puff-3 { width: 420px; height: 380px; transform: translateY(-30px); }
-.intro-cloud-puff-4 { width: 300px; height: 280px; transform: translateY(15px); }
-.intro-cloud-puff-5 { width: 340px; height: 300px; transform: translateY(-5px); }
-
-@keyframes cloud-bank-top {
-    0%   { transform: translateY(0); }
-    35%  { transform: translateY(105%); }
-    55%  { transform: translateY(105%); }
-    100% { transform: translateY(-10%); }
-}
-
-@keyframes cloud-bank-bottom {
-    0%   { transform: translateY(0); }
-    35%  { transform: translateY(-105%); }
-    55%  { transform: translateY(-105%); }
-    100% { transform: translateY(10%); }
-}
-
-@keyframes cloud-overlay-fade {
-    0%, 88% { opacity: 1; }
-    100%    { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .login-intro-clouds,
-    .intro-cloud-bank-top,
-    .intro-cloud-bank-bottom {
-        animation-duration: 0.4s !important;
-    }
-}
-
-/* ─── Register dialog · room template step ─── */
-
-.octane-login-modal .dialog.dialog-room {
-    width: 400px;
-}
-
-.octane-login-card .room-templates-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 280px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 4px;
-    margin-top: 2px;
-}
-
-.octane-login-card .room-template-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    background: var(--octane-card-surface-raised, #ececec);
-    border: 1px solid var(--habbo-tab, #b6bec5);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-    color: var(--octane-card-text, #151515);
-    user-select: none;
-    position: relative;
-}
-
-.octane-login-card .room-template-option:hover {
-    border-color: #9aa3ab;
-    background: #f4f4f4;
-    box-shadow: none;
-}
-
-.octane-login-card .room-template-option.selected {
-    border-color: var(--habbo-blue-header, #0e3f52);
-    background: var(--habbo-select-outer, #82d1ed);
-    box-shadow: inset 0 0 0 1px var(--habbo-select, #63c5e9);
-}
-
-.octane-login-card .room-template-option input[type="radio"] {
-    flex-shrink: 0;
-    margin: 0;
-    accent-color: #2a78b8;
-    cursor: pointer;
-}
-
-.octane-login-card .room-template-thumb {
-    width: 64px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid var(--habbo-tab, #b6bec5);
-    background: #fff;
-    flex-shrink: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-login-card .room-template-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-    flex: 1;
-}
-
-.octane-login-card .room-template-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--octane-card-text, #151515);
-    line-height: 1.25;
-    text-transform: capitalize;
-}
-
-.octane-login-card .room-template-description {
-    font-size: 11px;
-    line-height: 1.4;
-    color: var(--octane-card-muted, #666666);
-    word-break: break-word;
-}
-
-/* The "Skip" option sits at the top with a softer dashed border so it
-   visually distinguishes itself from the actual templates. */
-.octane-login-card .room-template-option.room-template-skip {
-    background: var(--habbo-panel, #f7f7f2);
-    border-style: dashed;
-}
-
-.octane-login-card .room-template-option.room-template-skip.selected {
-    border-style: solid;
+.registration-step-avatar .login-flow-hint {
+    margin-top: -6px;
 }
