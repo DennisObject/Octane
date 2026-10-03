@@ -1,7 +1,9 @@
+import type { FurniEditorText } from './furniEditorText';
+
 // Suggestions the furni editor derives from data it already holds: the
 // furnidata entry, the classname and the interaction type. Each one names a
 // field, the value to put there and the reason, so the view can offer it as a
-// one-click chip and the diff modal still confirms the save.
+// one-click chip and the save confirmation still lists the change.
 
 export interface EditableFields {
     width: number;
@@ -24,36 +26,51 @@ export type SuggestionField = keyof EditableFields;
 export interface Suggestion<F extends SuggestionField = SuggestionField> {
     field: F;
     value: EditableFields[F];
-    reason: string;
+    reason: FurniEditorText;
 }
 
 // A requirement the type has that the form does not meet and no value can be
 // guessed for: shown as a warning, never applied.
 export interface Expectation {
     field: SuggestionField;
-    message: string;
+    message: FurniEditorText;
 }
 
 // Types too generic to be inferred from a classname token: "default" would match
 // half the hotel and "multiheight" is a behaviour, not a name.
 const UNSUGGESTABLE_TYPES = new Set(['default', 'multiheight']);
 
-export const suggestInteractionType = (classname: string, registered: string[]): { type: string; reason: string } | null => {
+export const suggestInteractionType = (classname: string, registered: string[]): { type: string; reason: FurniEditorText } | null => {
     const name = classname.trim().toLowerCase();
     if (!name) return null;
     const candidates = registered.filter((type) => !UNSUGGESTABLE_TYPES.has(type.toLowerCase()));
 
     const exact = candidates.find((type) => type.toLowerCase() === name);
-    if (exact) return { type: exact, reason: 'classname is a registered type' };
+    if (exact) return { type: exact, reason: { key: 'furni.editor.reason.type_exact' } };
 
     const prefix = candidates
         .filter((type) => name.startsWith(`${type.toLowerCase()}_`) || name.startsWith(`${type.toLowerCase()}-`))
         .sort((a, b) => b.length - a.length)[0];
-    if (prefix) return { type: prefix, reason: 'classname starts with it' };
+    if (prefix) return { type: prefix, reason: { key: 'furni.editor.reason.type_prefix' } };
 
     const tokens = name.split(/[_\-*]/).filter(Boolean);
     const token = candidates.filter((type) => tokens.includes(type.toLowerCase())).sort((a, b) => b.length - a.length)[0];
-    if (token) return { type: token, reason: 'classname contains it' };
+    if (token) return { type: token, reason: { key: 'furni.editor.reason.type_token' } };
+
+    return null;
+};
+
+/** Why a search row deserves a look, or null when its interaction type looks right. */
+export const searchRowFlag = (row: { itemName: string; interactionType: string }, registered: string[]): FurniEditorText | null => {
+    const stored = row.interactionType.trim().toLowerCase();
+
+    if (stored && !registered.some((known) => known.toLowerCase() === stored)) {
+        return { key: 'furni.editor.search.flag.unregistered', values: { type: row.interactionType } };
+    }
+
+    const hint = suggestInteractionType(row.itemName, registered);
+
+    if (hint && hint.type.toLowerCase() !== stored) return { key: 'furni.editor.search.flag.suggested', values: { type: hint.type } };
 
     return null;
 };
@@ -65,21 +82,22 @@ const asInt = (value: unknown): number | null => {
 
 const asBool = (value: unknown): boolean | null => (typeof value === 'boolean' ? value : value === 'true' ? true : value === 'false' ? false : null);
 
+const fromFurnidata = (key: string): FurniEditorText => ({ key: 'furni.editor.reason.furnidata', values: { key } });
+
 // What the furnidata entry says about the furni versus what items_base holds.
 // The entry is trusted only when the caller has matched it by classname.
-export const suggestFromFurnidata = (entry: Record<string, unknown> | null, form: EditableFields): Suggestion[] => {
+export const suggestFromFurnidata = (entry: Readonly<Record<string, unknown>> | null, form: EditableFields): Suggestion[] => {
     if (!entry) return [];
     const out: Suggestion[] = [];
-    const from = 'furnidata';
 
     const xdim = asInt(entry.xdim);
     const ydim = asInt(entry.ydim);
-    if (xdim !== null && xdim >= 1 && xdim !== form.width) out.push({ field: 'width', value: xdim, reason: `${from} xdim` });
-    if (ydim !== null && ydim >= 1 && ydim !== form.length) out.push({ field: 'length', value: ydim, reason: `${from} ydim` });
+    if (xdim !== null && xdim >= 1 && xdim !== form.width) out.push({ field: 'width', value: xdim, reason: fromFurnidata('xdim') });
+    if (ydim !== null && ydim >= 1 && ydim !== form.length) out.push({ field: 'length', value: ydim, reason: fromFurnidata('ydim') });
 
     const height = typeof entry.height === 'number' ? entry.height : typeof entry.height === 'string' ? Number(entry.height) : NaN;
     if (Number.isFinite(height) && height >= 0 && Math.abs(height - form.stackHeight) > 0.001)
-        out.push({ field: 'stackHeight', value: height, reason: `${from} height` });
+        out.push({ field: 'stackHeight', value: height, reason: fromFurnidata('height') });
 
     const flags: [SuggestionField & ('allowWalk' | 'allowSit' | 'allowLay' | 'allowTrade' | 'allowRecycle'), string][] = [
         ['allowWalk', 'canstandon'],
@@ -90,7 +108,7 @@ export const suggestFromFurnidata = (entry: Record<string, unknown> | null, form
     ];
     for (const [field, key] of flags) {
         const value = asBool(entry[key]);
-        if (value !== null && value !== form[field]) out.push({ field, value, reason: `${from} ${key}` });
+        if (value !== null && value !== form[field]) out.push({ field, value, reason: fromFurnidata(key) });
     }
 
     return out;
@@ -109,9 +127,9 @@ const TYPE_MODES: Record<string, number> = {
     colorplate: 2
 };
 
-const TYPE_NEEDS: Record<string, { field: 'vendingIds' | 'multiheight'; message: string }> = {
-    vendingmachine: { field: 'vendingIds', message: 'vendingmachine hands out nothing without vending ids' },
-    multiheight: { field: 'multiheight', message: 'multiheight needs its list of heights' }
+const TYPE_NEEDS: Record<string, { field: 'vendingIds' | 'multiheight'; message: FurniEditorText }> = {
+    vendingmachine: { field: 'vendingIds', message: { key: 'furni.editor.warning.vending_empty' } },
+    multiheight: { field: 'multiheight', message: { key: 'furni.editor.warning.multiheight_empty' } }
 };
 
 export const expectationsForType = (form: EditableFields): { suggestions: Suggestion[]; warnings: Expectation[] } => {
@@ -122,7 +140,7 @@ export const expectationsForType = (form: EditableFields): { suggestions: Sugges
 
     const modes = TYPE_MODES[type];
     if (modes !== undefined && form.interactionModesCount !== modes) {
-        suggestions.push({ field: 'interactionModesCount', value: modes, reason: `${type} drives ${modes} states` });
+        suggestions.push({ field: 'interactionModesCount', value: modes, reason: { key: 'furni.editor.reason.type_states', values: { type, count: modes } } });
     }
 
     const need = TYPE_NEEDS[type];
@@ -134,7 +152,7 @@ export const expectationsForType = (form: EditableFields): { suggestions: Sugges
 // The renderer resolves a type id to its classname through the furnidata id,
 // so an entry matched by classname whose id is not the sprite id means the
 // room draws a different furni than the one this row describes.
-export const spriteIdMismatch = (entry: Record<string, unknown> | null, spriteId: number): number | null => {
+export const spriteIdMismatch = (entry: Readonly<Record<string, unknown>> | null, spriteId: number): number | null => {
     if (!entry) return null;
     const id = asInt(entry.id);
     return id !== null && id !== spriteId ? id : null;
@@ -149,7 +167,7 @@ export const multiheightMismatch = (form: EditableFields, assetStates: number | 
         .map((h) => h.trim())
         .filter(Boolean).length;
     if (heights === 0 || heights === assetStates) return null;
-    return { field: 'multiheight', message: `${heights} height${heights === 1 ? '' : 's'} for ${assetStates} states in the asset` };
+    return { field: 'multiheight', message: { key: 'furni.editor.warning.multiheight_count', values: { heights, states: assetStates } } };
 };
 
 // A furni line: rows whose classname shares the prefix up to the last
@@ -227,7 +245,7 @@ export const suggestFromSiblings = (siblings: RelatedRow[], form: EditableFields
         const best = [...tally.values()].sort((a, b) => b.count - a.count)[0];
         if (!best || best.count * 2 <= siblings.length) continue;
         if (String(form[field]) === String(best.value)) continue;
-        out.push({ field, value: best.value as never, reason: `${best.count} of ${siblings.length} in the line` });
+        out.push({ field, value: best.value, reason: { key: 'furni.editor.reason.siblings', values: { count: best.count, total: siblings.length } } });
     }
     return out;
 };

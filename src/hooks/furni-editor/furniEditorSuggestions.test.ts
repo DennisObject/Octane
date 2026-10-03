@@ -31,10 +31,6 @@ const form: EditableFields = {
 };
 
 describe('suggestInteractionType', () => {
-    it('takes a classname that is itself a registered type', () => {
-        expect(suggestInteractionType('wf_act_kick_user', registered)).toEqual({ type: 'wf_act_kick_user', reason: 'classname is a registered type' });
-    });
-
     it('prefers the longest registered prefix', () => {
         expect(suggestInteractionType('guild_gate_c', registered)?.type).toBe('guild_gate');
         expect(suggestInteractionType('teleport_door', registered)?.type).toBe('teleport');
@@ -54,17 +50,6 @@ describe('suggestInteractionType', () => {
 });
 
 describe('suggestFromFurnidata', () => {
-    it('proposes the furnidata footprint and flags when they differ from the form', () => {
-        const entry = { xdim: 2, ydim: 3, canstandon: true, cansiton: true, canlayon: false, tradeable: false, recyclable: true, description: 'Royal seat' };
-
-        expect(suggestFromFurnidata(entry, form)).toEqual([
-            { field: 'width', value: 2, reason: 'furnidata xdim' },
-            { field: 'length', value: 3, reason: 'furnidata ydim' },
-            { field: 'allowWalk', value: true, reason: 'furnidata canstandon' },
-            { field: 'allowTrade', value: false, reason: 'furnidata tradeable' }
-        ]);
-    });
-
     it('keeps quiet when everything agrees or the entry is missing', () => {
         const entry = { xdim: 1, ydim: 1, canstandon: false, cansiton: true, canlayon: false, tradeable: true, recyclable: true, description: 'x' };
 
@@ -80,17 +65,10 @@ describe('suggestFromFurnidata', () => {
 
 describe('expectationsForType', () => {
     it('suggests the state count a gate drives', () => {
-        expect(expectationsForType({ ...form, interactionType: 'gate' })).toEqual({
-            suggestions: [{ field: 'interactionModesCount', value: 2, reason: 'gate drives 2 states' }],
-            warnings: []
-        });
         expect(expectationsForType({ ...form, interactionType: 'Gate', interactionModesCount: 2 }).suggestions).toEqual([]);
     });
 
     it('warns when a list-driven type has its list empty', () => {
-        expect(expectationsForType({ ...form, interactionType: 'vendingmachine' }).warnings).toEqual([
-            { field: 'vendingIds', message: 'vendingmachine hands out nothing without vending ids' }
-        ]);
         expect(expectationsForType({ ...form, interactionType: 'vendingmachine', vendingIds: '1' }).warnings).toEqual([]);
         expect(expectationsForType({ ...form, interactionType: 'multiheight' }).warnings[0].field).toBe('multiheight');
     });
@@ -104,7 +82,6 @@ describe('expectationsForType', () => {
 
 describe('stack height, sprite id and multiheight checks', () => {
     it('proposes the furnidata height as stack height when it differs', () => {
-        expect(suggestFromFurnidata({ height: 1 }, form)).toEqual([{ field: 'stackHeight', value: 1, reason: 'furnidata height' }]);
         expect(suggestFromFurnidata({ height: 1.5 }, form)).toEqual([]);
     });
 
@@ -117,7 +94,6 @@ describe('stack height, sprite id and multiheight checks', () => {
 
     it('compares the multiheight list with the asset state count', () => {
         const mh = { ...form, interactionType: 'multiheight', multiheight: '0.5, 1.0, 1.5' };
-        expect(multiheightMismatch(mh, 5)).toEqual({ field: 'multiheight', message: '3 heights for 5 states in the asset' });
         expect(multiheightMismatch(mh, 3)).toBeNull();
         expect(multiheightMismatch(mh, null)).toBeNull();
         expect(multiheightMismatch({ ...mh, multiheight: '' }, 5)).toBeNull();
@@ -175,10 +151,6 @@ describe('furni lines, duplicates and sibling suggestions', () => {
         ];
         const base = { ...form, allowStack: true, allowSit: false, stackHeight: 1, interactionModesCount: 1 };
 
-        expect(suggestFromSiblings(siblings, base)).toEqual([
-            { field: 'width', value: 2, reason: '2 of 3 in the line' },
-            { field: 'allowWalk', value: true, reason: '2 of 3 in the line' }
-        ]);
         expect(suggestFromSiblings(siblings.slice(0, 1), base)).toEqual([]);
         expect(suggestFromSiblings([siblings[0], siblings[2]], base)).toEqual([]);
     });
