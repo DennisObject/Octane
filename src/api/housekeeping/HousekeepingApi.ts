@@ -87,6 +87,7 @@ const searchUsersViaPacket = async (prefix: string, signal?: AbortSignal): Promi
     });
 };
 
+// The wire carries Unix seconds (int32); the client works in milliseconds.
 const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => ({
     id: user.id,
     username: user.username,
@@ -95,7 +96,7 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
     rank: user.rank,
     rankName: user.rankName,
     online: user.online,
-    lastOnlineAt: user.lastOnlineAt > 0 ? user.lastOnlineAt : null,
+    lastOnlineAt: user.lastOnlineAt > 0 ? user.lastOnlineAt * 1000 : null,
     creditsBalance: user.creditsBalance,
     ducketsBalance: user.ducketsBalance,
     diamondsBalance: user.diamondsBalance,
@@ -210,7 +211,7 @@ const mapRoom = (room: HousekeepingRoomData): IHousekeepingRoom => ({
     isLocked: room.isLocked,
     isMuted: room.isMuted,
     isPublic: room.isPublic,
-    createdAt: room.createdAt
+    createdAt: room.createdAt * 1000
 });
 
 const findRoomByIdViaPacket = (roomId: number): Promise<IHousekeepingRoom | null> => {
@@ -341,7 +342,7 @@ const listActionLogViaPacket = (limit: number, signal?: AbortSignal): Promise<IH
         select: (event) =>
             event.getParser()?.entries.map((entry) => ({
                 id: entry.id,
-                timestamp: entry.timestamp,
+                timestamp: entry.timestamp * 1000,
                 actorId: entry.actorId,
                 actorName: entry.actorName,
                 targetType: entry.targetType === 'room' || entry.targetType === 'hotel' ? entry.targetType : 'user',

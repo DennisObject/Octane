@@ -144,7 +144,7 @@ export const HousekeepingSoundboardTab: FC = () => {
                     <input checked={draft.enabled} disabled={draftLocked} type="checkbox" onChange={(event) => setField('enabled', event.target.checked)} />
                     {LocalizeText('housekeeping.soundboard.enabled')}
                 </label>
-                {!validation.valid && (
+                {!validation.valid && (draft.name || draft.url || draft.classname) && (
                     <span className="octane-staff-error-text" role="alert">
                         {Object.values(validation.errors)
                             .map((error) => LocalizeText(`housekeeping.soundboard.validation.${error}`))

@@ -29,6 +29,11 @@
     background: var(--staff-surface) !important;
 }
 
+.octane-staff-window .octane-staff-tabs .octane-card-tab-item {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
 .octane-staff-window .octane-staff-tabs .octane-card-tab-item.is-disabled {
     color: var(--staff-muted);
     cursor: default;
@@ -289,7 +294,7 @@ button.octane-staff-list-row:hover,
     padding: 2px 6px;
 }
 
-.octane-staff-table tbody tr:nth-child(odd) td {
+.octane-staff-table tbody tr:nth-child(odd) > * {
     background: var(--staff-row-alt);
 }
 
