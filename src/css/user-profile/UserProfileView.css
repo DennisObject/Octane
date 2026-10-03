@@ -40,13 +40,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.octane-extended-profile__avatar-stand,
-.octane-extended-profile__avatar-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+  background: url('@/assets/images/infostand/avatar-background.png') no-repeat center;
 }
 
 .octane-extended-profile__identity-copy {
@@ -325,10 +319,6 @@
   background: #ece8dc;
 }
 
-.octane-extended-profile-window__content.profile-card-background .octane-extended-profile-window__body {
-  background: transparent;
-}
-
 .octane-extended-profile-window__body--groups {
   min-height: 249px;
 }
@@ -337,24 +327,6 @@
   border: 1px solid #afafaf;
   background: #d6d3cb;
   padding: 0 !important;
-}
-
-/* Official full_profile_hidden: a 498x226 0xcccccc border at (0,5) of the bottom block, with the
-   notice in bold 0x555555 in the middle. */
-.octane-extended-profile__hidden {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 498px;
-  height: 226px;
-  margin-top: 5px;
-  border-radius: 6px;
-  background: #cccccc;
-  color: #555555;
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
 }
 
 .octane-extended-profile-groups {
@@ -591,10 +563,6 @@
 }
 
 /* Official presence: a user hiding their status sees a dimmed icon on their own profile. */
-.octane-extended-profile__presence--hidden {
-  opacity: 0.55;
-}
-
 /* The official levelRegion has no click. */
 .octane-extended-profile__summary-button--level {
   cursor: default;

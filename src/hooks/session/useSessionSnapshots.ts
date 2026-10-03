@@ -61,9 +61,7 @@ const DEFAULT_USER_DATA: Readonly<IUserDataSnapshot> = Object.freeze({
     tags: Object.freeze<string[]>([]) as ReadonlyArray<string>,
     rankId: 0,
     rankName: '',
-    rankBadge: '',
-    rankPrefix: '',
-    rankPrefixColor: ''
+    rankBadge: ''
 }) as Readonly<IUserDataSnapshot>;
 
 const EMPTY_IGNORED_LIST: ReadonlyArray<string> = Object.freeze<string[]>([]) as ReadonlyArray<string>;
@@ -149,10 +147,10 @@ export const useIsUserIgnored = (name: string): boolean => {
 };
 
 /**
- * Reactive view of the current user's rank metadata — name, badge,
- * prefix, prefix color — mirrored from `permission_ranks` via the
+ * Reactive view of the current user's rank metadata — name and badge —
+ * mirrored from `permission_ranks` via the
  * extended `UserPermissionsComposer` wire (Arcturus ≥ 4.2.10). Use
- * this in PRESENTATIONAL code only (chat prefix coloring, badge in
+ * this in PRESENTATIONAL code only (badge in
  * the avatar overlay, "rank" line in the user profile). DO NOT use
  * it for gating UI capabilities: prefer the permission-based family
  * (`useHasPermission(key)`) below, which is dynamic against
@@ -163,8 +161,6 @@ export interface IUserRank {
     readonly name: string;
     readonly level: number;
     readonly badge: string;
-    readonly prefix: string;
-    readonly prefixColor: string;
 }
 
 export const useUserRank = (): IUserRank => {
@@ -175,11 +171,9 @@ export const useUserRank = (): IUserRank => {
             id: userData.rankId,
             name: userData.rankName,
             level: userData.securityLevel,
-            badge: userData.rankBadge,
-            prefix: userData.rankPrefix,
-            prefixColor: userData.rankPrefixColor
+            badge: userData.rankBadge
         }),
-        [userData.rankId, userData.rankName, userData.securityLevel, userData.rankBadge, userData.rankPrefix, userData.rankPrefixColor]
+        [userData.rankId, userData.rankName, userData.securityLevel, userData.rankBadge]
     );
 };
 

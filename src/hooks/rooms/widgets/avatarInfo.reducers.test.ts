@@ -86,12 +86,7 @@ describe('applyUserFigureUpdate', () => {
             roomIndex: 3,
             figure: 'hr-100-7.hd-180-1',
             customInfo: 'new motto',
-            activityPoints: 1234,
-            nickIcon: 'icon-vip',
-            backgroundId: 8,
-            standId: 4,
-            overlayId: 2,
-            cardBackgroundId: 9
+            activityPoints: 1234
         } as any;
 
         const next = applyUserFigureUpdate(state, event) as AvatarInfoUser;
@@ -100,30 +95,6 @@ describe('applyUserFigureUpdate', () => {
         expect(next.figure).toBe('hr-100-7.hd-180-1');
         expect(next.motto).toBe('new motto');
         expect(next.achievementScore).toBe(1234);
-        expect(next.nickIcon).toBe('icon-vip');
-        expect(next.backgroundId).toBe(8);
-        expect(next.standId).toBe(4);
-        expect(next.overlayId).toBe(2);
-        expect(next.cardBackgroundId).toBe(9);
-    });
-
-    it('defaults cardBackgroundId to 0 when the server omits it', () => {
-        const state = buildAvatarInfoUser({ roomIndex: 3, cardBackgroundId: 7 });
-        const event = {
-            roomIndex: 3,
-            figure: 'x',
-            customInfo: '',
-            activityPoints: 0,
-            nickIcon: '',
-            backgroundId: 0,
-            standId: 0,
-            overlayId: 0
-            // no cardBackgroundId
-        } as any;
-
-        const next = applyUserFigureUpdate(state, event) as AvatarInfoUser;
-
-        expect(next.cardBackgroundId).toBe(0);
     });
 });
 

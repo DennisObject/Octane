@@ -1493,8 +1493,5 @@
             "display": "BUBBLE",
             "image": "${image.library.url}/album1584/X1517.gif"
         }
-    },
-    "backgrounds.data": [],
-    "stands.data": [],
-    "overlays.data": []
+    }
 }

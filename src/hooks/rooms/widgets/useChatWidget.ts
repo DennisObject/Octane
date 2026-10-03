@@ -292,8 +292,6 @@ const useChatWidgetState = () => {
             );
         }
 
-        chatMessage.nickIcon = event.nickIcon || '';
-
         if (isDisposed.current || roomToken !== roomTokenRef.current) {
             abandonLine(seq);
 

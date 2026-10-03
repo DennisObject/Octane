@@ -24,11 +24,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const [requestSent, setRequestSent] = useState(userProfile.requestSent);
     const isOwnProfile = userProfile.id === GetSessionDataManager().userId;
     const canSendFriendRequest = !requestSent && !isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent;
-    const infostandBackgroundClass = `background-${userProfile.backgroundId ?? 'default'}`;
-    const infostandStandClass = `stand-${userProfile.standId ?? 'default'}`;
-    const infostandOverlayClass = `overlay-${userProfile.overlayId ?? 'default'}`;
     const selectedBadges = useMemo(() => [...userBadges].slice(0, 5), [userBadges]);
-    const totalBadges = (userProfile as any).totalBadges ?? userBadges.length ?? 0;
 
     // Official badgeRank "(#N)" next to the badge count, read from the badge leaderboard.
     const [badgesRank, setBadgesRank] = useState(-1);
@@ -51,12 +47,6 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
         };
     }, [userProfile.id]);
 
-    // Official presence: onlineStatus 1 online, 0 offline, 2 hidden (sent only to the user
-    // themself). A server without the presence block leaves it at -1 and isOnline decides.
-    const isHidden = userProfile.onlineStatus === 2;
-    const isOnline = userProfile.onlineStatus === 1 || (userProfile.onlineStatus < 0 && userProfile.isOnline);
-    // Official levelRegion: the account level; without it the achievement score stands in.
-    const level = userProfile.level ?? 0;
     // Official user_activity_points is hidden unless activity.point.display.enabled.
     const showActivityPoints = GetConfigurationValue<boolean>('activity.point.display.enabled', false);
 
@@ -86,15 +76,12 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
             <div className="octane-extended-profile__top">
                 <div className="octane-extended-profile__left">
                     <div className="octane-extended-profile__identity">
-                        <div className={`octane-extended-profile__avatar-shell profile-background ${infostandBackgroundClass}`}>
-                            <div className={`octane-extended-profile__avatar-stand profile-stand ${infostandStandClass}`} />
+                        <div className="octane-extended-profile__avatar-shell">
                             <LayoutAvatarImageView figure={userProfile.figure} direction={2} classNames={['octane-extended-profile__avatar-image']} />
-                            <div className={`octane-extended-profile__avatar-overlay profile-overlay ${infostandOverlayClass}`} />
                         </div>
                         <div className="octane-extended-profile__identity-copy">
                             <UserIdentityView
                                 className="octane-extended-profile__username"
-                                nickIcon={userProfile.nickIcon}
                                 username={userProfile.username}
                             />
                             <p className="octane-extended-profile__motto">{userProfile.motto || '\u00A0'}</p>
@@ -120,7 +107,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             )}
                             <div className="octane-extended-profile__status">
                                 <div className="octane-extended-profile__presence">
-                                    <i className={`octane-icon ${isOnline ? 'icon-pf-online' : 'icon-pf-offline'}${isHidden ? ' octane-extended-profile__presence--hidden' : ''}`} />
+                                    <i className={`octane-icon ${userProfile.isOnline ? 'icon-pf-online' : 'icon-pf-offline'}`} />
                                 </div>
                                 <div className="octane-extended-profile__status-copy">
                                     {canSendFriendRequest && (
@@ -194,14 +181,14 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                 >
                     <img className="octane-extended-profile__summary-icon octane-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
                     <span className="octane-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
-                    <span className="octane-extended-profile__summary-value">{totalBadges}</span>
+                    <span className="octane-extended-profile__summary-value">{userBadges.length}</span>
                     {badgesRank > 0 && <span className="octane-extended-profile__summary-rank">(#{badgesRank})</span>}
                 </button>
                 {/* Official levelRegion: "Level N", no click and no tooltip. */}
                 <div className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center octane-extended-profile__summary-button--level">
                     <img className="octane-extended-profile__summary-icon" src={profileLevelIcon} alt="" />
-                    <span className="octane-extended-profile__summary-label">{level > 0 ? LocalizeText('generic.level') : LocalizeText('extendedprofile.achievementscore')}</span>
-                    <span className="octane-extended-profile__summary-value">{level > 0 ? level : userProfile.achievementPoints}</span>
+                    <span className="octane-extended-profile__summary-label">{LocalizeText('extendedprofile.achievementscore')}</span>
+                    <span className="octane-extended-profile__summary-value">{userProfile.achievementPoints}</span>
                 </div>
             </div>
         </div>

@@ -174,9 +174,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                 <div className="chat-content py-[5px] px-[6px] ml-[27px] leading-none min-h-[25px]">
                     <UserIdentityView
                         className="mr-1 align-middle"
-                        iconClassName="inline-block w-auto h-auto align-[-1px]"
                         nameClassName="username font-bold"
-                        nickIcon={chat.nickIcon}
                         showColon={true}
                         username={chat.username}
                     />

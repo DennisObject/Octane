@@ -41,8 +41,6 @@ interface FakeUserSnapshot {
     rankId: number;
     rankName: string;
     rankBadge: string;
-    rankPrefix: string;
-    rankPrefixColor: string;
 }
 
 const makeUserSnapshot = (overrides: Partial<FakeUserSnapshot> = {}): FakeUserSnapshot => ({
@@ -50,8 +48,6 @@ const makeUserSnapshot = (overrides: Partial<FakeUserSnapshot> = {}): FakeUserSn
     rankId: 0,
     rankName: '',
     rankBadge: '',
-    rankPrefix: '',
-    rankPrefixColor: '',
     ...overrides
 });
 
@@ -84,9 +80,7 @@ describe('useHasPermission + usePermissionValue + useUserPermissions', () => {
             securityLevel: 5,
             rankId: 5,
             rankName: 'Moderator',
-            rankBadge: 'ADM',
-            rankPrefix: '[MOD]',
-            rankPrefixColor: '#327fa8'
+            rankBadge: 'ADM'
         });
 
         const { result } = renderHook(() => useUserRank());
@@ -95,9 +89,7 @@ describe('useHasPermission + usePermissionValue + useUserPermissions', () => {
             id: 5,
             name: 'Moderator',
             level: 5,
-            badge: 'ADM',
-            prefix: '[MOD]',
-            prefixColor: '#327fa8'
+            badge: 'ADM'
         });
     });
 

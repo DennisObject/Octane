@@ -45,11 +45,6 @@ export const applyUserFigureUpdate = (state: IAvatarInfo | null, event: RoomSess
     next.figure = event.figure;
     next.motto = event.customInfo;
     next.achievementScore = event.activityPoints;
-    next.nickIcon = event.nickIcon;
-    next.backgroundId = event.backgroundId;
-    next.standId = event.standId;
-    next.overlayId = event.overlayId;
-    next.cardBackgroundId = event.cardBackgroundId ?? 0;
 
     return next;
 };
