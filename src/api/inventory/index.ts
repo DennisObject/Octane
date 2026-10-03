@@ -5,7 +5,6 @@ export * from './FurnitureUtilities';
 export * from './GroupItem';
 export * from './IBotItem';
 export * from './IFurnitureItem';
-export * from './INickIconItem';
 export * from './InventoryUtilities';
 export * from './IPetItem';
 export * from './IUnseenItemTracker';

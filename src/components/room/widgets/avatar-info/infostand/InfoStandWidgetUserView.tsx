@@ -12,9 +12,8 @@ import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCall
 import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
-import { Base, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
+import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
 import { useMessageEvent, useOctaneEvent, useRoom } from '../../../../../hooks';
-import { BackgroundsView } from '../../../../backgrounds/BackgroundsView';
 import { InfoStandBadgeSlotView } from './InfoStandBadgeSlotView';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
 import { InfoStandWidgetUserTagsView } from './InfoStandWidgetUserTagsView';
@@ -30,27 +29,11 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
     const [motto, setMotto] = useState<string>(null);
     const [isEditingMotto, setIsEditingMotto] = useState(false);
     const [relationships, setRelationships] = useState<RelationshipStatusInfoMessageParser>(null);
-    const [backgroundId, setBackgroundId] = useState<number>(null);
-    const [standId, setStandId] = useState<number>(null);
-    const [overlayId, setOverlayId] = useState<number>(null);
-    const [cardBackgroundId, setCardBackgroundId] = useState<number>(null);
-    const [borderId, setBorderId] = useState<number>(null);
-    const [isVisible, setIsVisible] = useState(false);
     const { roomSession = null } = useRoom();
 
-    const infostandBackgroundClass = `background-${backgroundId ?? 'default'}`;
-    const infostandStandClass = `stand-${standId ?? 'default'}`;
-    const infostandOverlayClass = `overlay-${overlayId ?? 'default'}`;
-    const infostandCardBackgroundClass = cardBackgroundId ? `card-background-${cardBackgroundId}` : '';
-    const infostandBorderClass = borderId ? `border-${borderId}` : '';
     const handleProfileClick = useCallback(() => {
         GetUserProfile(avatarInfo.webID);
     }, [avatarInfo.webID]);
-
-    const handleEditClick = useCallback((event: React.MouseEvent) => {
-        event.stopPropagation();
-        setIsVisible((prev) => !prev);
-    }, []);
 
     const saveMotto = (motto: string) => {
         if (!isEditingMotto || motto.length > GetConfigurationValue<number>('motto.max.length', 38) || !roomSession) return;
@@ -105,12 +88,6 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
             newValue.figure = event.figure;
             newValue.motto = event.customInfo;
             newValue.achievementScore = event.activityPoints;
-            newValue.nickIcon = event.nickIcon;
-            newValue.backgroundId = event.backgroundId;
-            newValue.standId = event.standId;
-            newValue.overlayId = event.overlayId;
-            newValue.cardBackgroundId = event.cardBackgroundId ?? 0;
-            newValue.borderId = event.borderId ?? 0;
             return newValue;
         });
     });
@@ -142,11 +119,6 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
     useEffect(() => {
         setIsEditingMotto(false);
         setMotto(avatarInfo.motto);
-        setBackgroundId(avatarInfo.backgroundId);
-        setStandId(avatarInfo.standId);
-        setOverlayId(avatarInfo.overlayId);
-        setCardBackgroundId(avatarInfo.cardBackgroundId ?? 0);
-        setBorderId(avatarInfo.borderId ?? 0);
 
         SendMessageComposer(new UserRelationshipsComposer(avatarInfo.webID));
 
@@ -164,8 +136,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
 
     return (
         <>
-            <div className={`octane-infostand pointer-events-auto z-30 profile-card-background ${infostandCardBackgroundClass}`}>
-                {borderId ? <Base className={`infostand-border ${infostandBorderClass}`} /> : null}
+            <div className="octane-infostand pointer-events-auto z-30">
                 <button type="button" className="octane-infostand__close" aria-label="Close" onClick={onClose} />
                 <div className="octane-infostand__header">
                     <button
@@ -180,26 +151,15 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                         <UserIdentityView
                             className="octane-infostand__identity"
                             nameClassName="text-white"
-                            nickIcon={avatarInfo.nickIcon}
                             username={avatarInfo.name}
                         />
                     </button>
                 </div>
                 <div className="octane-infostand__rule" />
                 <div className="octane-infostand__figure-row">
-                    <div className={`octane-infostand__avatar-well profile-background ${infostandBackgroundClass}`} onClick={handleProfileClick}>
-                        <Base position="absolute" className={`profile-stand ${infostandStandClass}`} />
+                    <div className="octane-infostand__avatar-well" onClick={handleProfileClick}>
                         <LayoutAvatarImageView direction={2} figure={avatarInfo.figure} />
-                        <Base position="absolute" className={`profile-overlay ${infostandOverlayClass}`} />
                     </div>
-                    {avatarInfo.type === AvatarInfoUser.OWN_USER && (
-                        <Base
-                            className="background-edit-icon background-edit-position"
-                            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-                            onClick={handleEditClick}
-                            aria-label="Edit profile background"
-                        />
-                    )}
                     <div className="octane-infostand__badges">
                         {(() => {
                             const maxSlots = GetConfigurationValue<number>('user.badges.max.slots', 5);
@@ -310,23 +270,6 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                     </Column>
                 )}
             </div>
-            {isVisible && avatarInfo.type === AvatarInfoUser.OWN_USER && (
-                <div className="backgrounds-view-container">
-                    <BackgroundsView
-                        setIsVisible={setIsVisible}
-                        selectedBackground={backgroundId}
-                        setSelectedBackground={setBackgroundId}
-                        selectedStand={standId}
-                        setSelectedStand={setStandId}
-                        selectedOverlay={overlayId}
-                        setSelectedOverlay={setOverlayId}
-                        selectedCardBackground={cardBackgroundId}
-                        setSelectedCardBackground={setCardBackgroundId}
-                        selectedBorder={borderId}
-                        setSelectedBorder={setBorderId}
-                    />
-                </div>
-            )}
         </>
     );
 };

@@ -185,12 +185,6 @@ export class AvatarInfoUtilities {
         userInfo.isSpectatorMode = roomSession.isSpectator;
         userInfo.name = userData.name;
         userInfo.motto = userData.custom;
-        userInfo.nickIcon = userData.nickIcon;
-        userInfo.backgroundId = userData.background;
-        userInfo.standId = userData.stand;
-        userInfo.overlayId = userData.overlay;
-        userInfo.cardBackgroundId = userData.cardBackground ?? 0;
-        userInfo.borderId = (userData as any).borderId ?? 0;
         userInfo.achievementScore = userData.activityPoints;
         userInfo.webID = userData.webID;
         userInfo.roomIndex = userData.roomIndex;

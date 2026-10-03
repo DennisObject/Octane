@@ -11,13 +11,7 @@ export class AvatarInfoUser implements IAvatarInfo {
 
     public name: string = '';
     public motto: string = '';
-    public nickIcon: string = '';
     public achievementScore: number = 0;
-    public backgroundId: number = 0;
-    public standId: number = 0;
-    public overlayId: number = 0;
-    public cardBackgroundId: number = 0;
-    public borderId: number = 0;
     public webID: number = 0;
     public xp: number = 0;
     public userType: number = -1;

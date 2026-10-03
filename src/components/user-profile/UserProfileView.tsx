@@ -125,13 +125,10 @@ export const UserProfileView: FC<{}> = () => {
 
     if (!userProfile) return null;
 
-    const cardBackgroundId = userProfile.cardBackgroundId ?? 0;
-    const cardBackgroundClass = cardBackgroundId ? `profile-card-background card-background-${cardBackgroundId}` : '';
-
     return (
         <OctaneCard className="octane-extended-profile-window w-[640px] h-[720px] max-w-[96vw] max-h-[92vh]" uniqueKey="octane-user-profile">
             <OctaneCard.Header headerText={LocalizeText('extendedprofile.caption')} onCloseClick={onClose} />
-            <OctaneCard.Content className={`octane-extended-profile-window__content overflow-hidden !p-0 flex flex-col ${cardBackgroundClass}`}>
+            <OctaneCard.Content className="octane-extended-profile-window__content overflow-hidden !p-0 flex flex-col">
                 {isBlocked && (
                     // Official blocked_container: the drama text, whose "event:profile/unblock" link
                     // opens the unblock confirm (it carries no href, so it is never followed as a
@@ -168,22 +165,14 @@ export const UserProfileView: FC<{}> = () => {
                     />
                 </div>
                 <div className="octane-extended-profile-window__body octane-extended-profile-window__body--groups flex-1 overflow-hidden px-[10px] pb-[10px] pt-[6px]">
-                    {/* Official full_profile_hidden: the owner hid the profile, so everybody else
-                        sees this notice in place of the groups section. The owner sees it all. */}
-                    {userProfile.isHidden && userProfile.id !== GetSessionDataManager().userId ? (
-                        <div className="octane-extended-profile__hidden">
-                            {localizeWithFallback('profile.full_profile_hidden', "This user's full profile is hidden")}
-                        </div>
-                    ) : (
-                        <div className="octane-extended-profile-window__panel h-full p-2">
-                            <GroupsContainerView
-                                fullWidth
-                                groups={userProfile.groups}
-                                itsMe={userProfile.id === GetSessionDataManager().userId}
-                                onLeaveGroup={onLeaveGroup}
-                            />
-                        </div>
-                    )}
+                    <div className="octane-extended-profile-window__panel h-full p-2">
+                        <GroupsContainerView
+                            fullWidth
+                            groups={userProfile.groups}
+                            itsMe={userProfile.id === GetSessionDataManager().userId}
+                            onLeaveGroup={onLeaveGroup}
+                        />
+                    </div>
                 </div>
             </OctaneCard.Content>
         </OctaneCard>

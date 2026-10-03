@@ -222,9 +222,6 @@ export const useChatInputActions = () => {
                         }
 
                         return null;
-                    case ':customize':
-                        CreateLinkEvent('customize/show');
-                        return null;
                 }
             }
 

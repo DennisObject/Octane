@@ -124,9 +124,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                     case 'avatar_effect':
                         CreateLinkEvent('avatar-effects/show');
                         break;
-                    case 'customize_nick':
-                        CreateLinkEvent('customize/show');
-                        break;
                     case 'badge_leaderboard':
                         CreateLinkEvent('badge-leaderboard/show');
                         break;
@@ -184,9 +181,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                         break;
                     case 'inspect':
                         openInspectionForUser(avatarInfo.roomIndex);
-                        break;
-                    case 'customize_nick':
-                        CreateLinkEvent('customize/show');
                         break;
                     case 'badge_leaderboard':
                         CreateLinkEvent('badge-leaderboard/show');
@@ -280,11 +274,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                         )}
 
                         {/* Polaris-only actions are appended after the official AIR rows. */}
-                        <ContextMenuListItemView onClick={() => processAction('customize_nick')}>
-                            <span className="air-avatar-menu-extra-label">
-                                {localizeWithFallback('widget.memenu.customize_nick', 'Custom nickname')}
-                            </span>
-                        </ContextMenuListItemView>
                         <ContextMenuListItemView onClick={() => processAction('badge_leaderboard')}>
                             <span className="air-avatar-menu-extra-label">
                                 {localizeWithFallback('badge_leaderboard.title.total_badges', 'Badge leaderboard')}

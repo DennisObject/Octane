@@ -188,7 +188,7 @@
     height: 130px;
     overflow: hidden;
     border-radius: 0;
-    background-color: transparent;
+    background: url('@/assets/images/infostand/avatar-background.png') no-repeat center;
     cursor: pointer;
     z-index: 1;
   }
@@ -395,10 +395,6 @@
   }
 }
 
-.octane-infostand.profile-card-background {
-  background-clip: padding-box;
-}
-
 .octane-rarity-level {
     width: 36px;
     height: 28px;
@@ -410,27 +406,6 @@
         color: #000;
         font-weight: bold;
     }
-}
-
-/* A chosen card background replaces the flat #3d3d3d the infostand is drawn
-   for: the name loses its grey patch, text gets the one-pixel black shadow the
-   client uses for text over images, and the rules stay visible. The default
-   card is untouched. */
-.octane-infostand.profile-card-background[class*="card-background-"] {
-  .octane-infostand__identity {
-    background: transparent;
-  }
-
-  .octane-infostand__identity,
-  .octane-infostand__motto-text,
-  .octane-infostand__score,
-  .text-white {
-    text-shadow: 1px 1px 0 #000000;
-  }
-
-  .octane-infostand__rule {
-    background: rgba(0, 0, 0, 0.45);
-  }
 }
 
 /* furni_view: border style 2, #3d3d3d, 6px caps. Close style 1 uses

@@ -10,7 +10,6 @@ export class ChatBubbleMessage {
     public visualOffsetBottom: number = 0;
     public elementRef: HTMLDivElement = null;
     public skipMovement: boolean = false;
-    public nickIcon: string = '';
     /** -1 follows the room setting; a wired message may ask for 0 wide, 1 normal or 2 thin. */
     public bubbleWidthOverride: number = -1;
     // The chat text size when the message arrived. A bubble keeps it for life, so
