@@ -402,6 +402,12 @@
     white-space: nowrap;
 }
 
+/* The inner text retains its natural width so flooring the field cannot feed back into measurement. */
+.octane-club-price-field-text {
+    display: inline-block;
+    white-space: pre;
+}
+
 /* price_display (1712): leading spacer + spacing = 2px; amount field y1 with a 2px gutter. */
 .octane-club-offer.is-wide .octane-club-offer-price > span {
     display: block;
@@ -763,7 +769,7 @@
     font-weight: 700;
 }
 
-.octane-club-purchase-confirm-price-part > strong {
+.octane-club-purchase-confirm-price-part > .octane-club-price-field {
     display: block;
     flex: 0 0 auto;
     height: 19px;

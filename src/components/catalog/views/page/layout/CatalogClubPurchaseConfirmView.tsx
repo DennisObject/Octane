@@ -1,7 +1,9 @@
 import { ClubOfferData } from '@octane/renderer';
-import { CSSProperties, FC, RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, LocalizeText } from '../../../../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
+import { useMeasuredFloorHeight } from '../../../../../hooks/catalog/useMeasuredFloorHeight';
+import { CatalogClubPriceFieldView } from './CatalogClubPriceFieldView';
 
 interface CatalogClubPurchaseConfirmViewProps {
     offer: ClubOfferData;
@@ -18,36 +20,6 @@ const ACTIONS_HEIGHT = 27;
 const TITLE_DEFAULT_HEIGHT = 21;
 const DISCLAIMER_DEFAULT_HEIGHT = 17;
 const DISCLAIMER_MIN_HEIGHT = 17;
-
-// Floors a measured text field to whole pixels, as the Flash text field does for auto_size.
-// The measured element is the auto-height text inside the field, so measuring it cannot feed back into its own size.
-const useMeasuredFloorHeight = (ref: RefObject<HTMLElement | null>, active: boolean, minHeight: number, fallbackHeight: number) => {
-    const [height, setHeight] = useState(fallbackHeight);
-
-    useLayoutEffect(() => {
-        const element = ref.current;
-
-        if (!active || !element) return;
-
-        const measure = () => {
-            const measured = Math.floor(element.getBoundingClientRect().height);
-
-            if (measured > 0) setHeight(Math.max(minHeight, measured));
-        };
-
-        measure();
-
-        if (typeof ResizeObserver === 'undefined') return;
-
-        const observer = new ResizeObserver(measure);
-
-        observer.observe(element);
-
-        return () => observer.disconnect();
-    }, [ref, active, minHeight]);
-
-    return height;
-};
 
 export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewProps> = (props) => {
     const { offer, productText, validUntilText, onCancel, onConfirm } = props;
@@ -66,7 +38,7 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
     const contentHeight = actionsY + ACTIONS_HEIGHT;
     const frameHeight = contentHeight + FRAME_CHROME_HEIGHT;
     // AIR centres the initial dialog once, then retains its origin when text resizes it.
-    const initialOffsetTop = useRef((frameHeight - REFERENCE_FRAME_HEIGHT) / 2).current;
+    const [initialOffsetTop] = useState(() => (frameHeight - REFERENCE_FRAME_HEIGHT) / 2);
     const layoutVars = {
         '--octane-club-confirm-title-height': `${titleHeight}px`,
         '--octane-club-confirm-product-height': `${productHeight}px`,
@@ -106,17 +78,17 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
                         </strong>
                         <span>{validUntilText}</span>
                         <div className="octane-club-purchase-confirm-cost-row">
-                            <span>{LocalizeText('catalog.purchase.confirmation.dialog.cost')}</span>
+                            <CatalogClubPriceFieldView value={LocalizeText('catalog.purchase.confirmation.dialog.cost')} />
                             <span className="octane-club-purchase-confirm-price">
                                 {showCredits && (
                                     <span className="octane-club-purchase-confirm-price-part" data-currency-type="-1">
-                                        <strong>{offer.priceCredits}</strong>
+                                        <CatalogClubPriceFieldView value={offer.priceCredits} />
                                         <LayoutCurrencyIcon type={-1} />
                                     </span>
                                 )}
                                 {offer.priceActivityPoints > 0 && (
                                     <span className="octane-club-purchase-confirm-price-part" data-currency-type={offer.priceActivityPointsType}>
-                                        <strong>{`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`}</strong>
+                                        <CatalogClubPriceFieldView value={`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`} />
                                         <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
                                     </span>
                                 )}

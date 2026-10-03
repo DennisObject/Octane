@@ -56,4 +56,4 @@ export const getClubMembershipSummary = (membership: ClubMembershipLike | null) 
 // nitro's ExternalTexts.json cuts catalog.vip.buy.hccenter off at '<a href'. The official text is used whenever the anchor is incomplete.
 const HC_CENTER_LINK_OFFICIAL = 'Find out about HC Payday, gifts, benefits and more in the <a href="event:habboUI/open/hccenter">HC Center >></a>';
 
-export const getHcCenterLinkHtml = (localized: string): string => (localized.includes('</a>') ? localized : HC_CENTER_LINK_OFFICIAL);
+export const getHcCenterLinkHtml = (localized: string): string => (localized.trimEnd().endsWith('<a href') ? HC_CENTER_LINK_OFFICIAL : localized);

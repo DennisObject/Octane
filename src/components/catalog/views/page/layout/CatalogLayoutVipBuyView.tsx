@@ -15,6 +15,7 @@ import {
     usePurse,
     useUiEvent
 } from '../../../../../hooks';
+import { CatalogClubPriceFieldView } from './CatalogClubPriceFieldView';
 import { CatalogClubPurchaseConfirmView } from './CatalogClubPurchaseConfirmView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 import { getClubMembershipSummary, getHcCenterLinkHtml, groupClubOffers, isVipPurchaseLayout } from './clubPurchase.helpers';
@@ -265,13 +266,13 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
             <span className="octane-club-offer-prices">
                 {(offer.priceCredits > 0 || offer.priceActivityPoints <= 0) && (
                     <span className="octane-club-offer-price" data-currency-type="-1">
-                        <span>{offer.priceCredits}</span>
+                        <CatalogClubPriceFieldView value={offer.priceCredits} />
                         <LayoutCurrencyIcon type={-1} />
                     </span>
                 )}
                 {offer.priceActivityPoints > 0 && (
                     <span className="octane-club-offer-price" data-currency-type={offer.priceActivityPointsType}>
-                        <span>{`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`}</span>
+                        <CatalogClubPriceFieldView value={`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`} />
                         <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
                     </span>
                 )}
@@ -347,7 +348,8 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
                             className="octane-club-teaser"
                             draggable={false}
                             src={hcCatalogTeaser}
-                            onError={(event) => {
+                            onError={(event) =>
+                            {
                                 // The bundled copy is the primary source; the configured library URL is used once if it fails.
                                 const image = event.currentTarget;
 
