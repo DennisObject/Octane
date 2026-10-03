@@ -1,10 +1,44 @@
 import type { NodeData } from '@octane/renderer';
-import { CatalogNode } from '../../../../api/catalog/CatalogNode';
-import type { ICatalogNode } from '../../../../api/catalog/ICatalogNode';
-import type { CatalogStudioCatalogType, CatalogStudioPageSnapshot } from '../../admin/studio/CatalogStudioTypes';
+import { CatalogNode } from '../../api/catalog/CatalogNode';
+import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
+import { parseCatalogTabLabel } from '../../components/catalog/useCatalogWindowWidth';
+import type { CatalogStudioCatalogType, CatalogStudioPageSnapshot } from './catalogStudio.types';
 
-const toStudioCatalogType = (catalogType: string): CatalogStudioCatalogType =>
+/** Drag payload type for catalog pages, shared by the catalog navigation and the manager tree. */
+export const CATALOG_ADMIN_PAGE_DRAG_TYPE = 'application/x-catalog-admin-page';
+
+export const toStudioCatalogType = (catalogType: string): CatalogStudioCatalogType =>
     catalogType === 'BUILDERS_CLUB' || catalogType === 'BUILDER' ? 'BUILDER' : 'NORMAL';
+
+const stripSwfSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
+
+export const getCatalogAdminNodeName = (node: ICatalogNode): string => stripSwfSuffix(parseCatalogTabLabel(node.localization).name) || node.pageName;
+
+export const findCatalogAdminNode = (node: ICatalogNode | null, pageId: number): ICatalogNode | null => {
+    if (!node) return null;
+    if (node.pageId === pageId) return node;
+
+    for (const child of node.children) {
+        const found = findCatalogAdminNode(child, pageId);
+        if (found) return found;
+    }
+
+    return null;
+};
+
+export const catalogAdminSubtreeMatches = (node: ICatalogNode, query: string): boolean => {
+    if (!query) return true;
+    if (getCatalogAdminNodeName(node).toLowerCase().includes(query)) return true;
+
+    return node.children.some((child) => catalogAdminSubtreeMatches(child, query));
+};
+
+/** Reads the page id written by a catalog admin page drag, or null for any other drag. */
+export const readCatalogAdminPageDrag = (dataTransfer: DataTransfer): number | null => {
+    const pageId = Number(dataTransfer.getData(CATALOG_ADMIN_PAGE_DRAG_TYPE));
+
+    return Number.isInteger(pageId) && pageId > 0 ? pageId : null;
+};
 
 const collectLiveNodes = (node: ICatalogNode | null, result: Map<number, ICatalogNode>) => {
     if (!node) return;
@@ -12,30 +46,29 @@ const collectLiveNodes = (node: ICatalogNode | null, result: Map<number, ICatalo
     node.children.forEach((child) => collectLiveNodes(child, result));
 };
 
-const nodeData = (
-    page: CatalogStudioPageSnapshot,
-    liveNode: ICatalogNode | undefined
-): NodeData => ({
-    visible: page.visible,
-    icon: page.iconImage,
-    pageId: page.pageId,
-    parentId: page.parentId,
-    pageName: page.captionSave || liveNode?.pageName || `page-${page.pageId}`,
-    localization: page.caption || liveNode?.localization || page.captionSave || `Page ${page.pageId}`,
-    children: [],
-    offerIds: liveNode?.offerIds ?? []
-} as unknown as NodeData);
+const nodeData = (page: CatalogStudioPageSnapshot, liveNode: ICatalogNode | undefined): NodeData =>
+    ({
+        visible: page.visible,
+        icon: page.iconImage,
+        pageId: page.pageId,
+        parentId: page.parentId,
+        pageName: page.captionSave || liveNode?.pageName || `page-${page.pageId}`,
+        localization: page.caption || liveNode?.localization || page.captionSave || `Page ${page.pageId}`,
+        children: [],
+        offerIds: liveNode?.offerIds ?? []
+    }) as unknown as NodeData;
 
-const rootData = (root: ICatalogNode): NodeData => ({
-    visible: true,
-    icon: root.iconId,
-    pageId: root.pageId,
-    parentId: root.parentId,
-    pageName: root.pageName || 'root',
-    localization: root.localization,
-    children: [],
-    offerIds: root.offerIds
-} as unknown as NodeData);
+const rootData = (root: ICatalogNode): NodeData =>
+    ({
+        visible: true,
+        icon: root.iconId,
+        pageId: root.pageId,
+        parentId: root.parentId,
+        pageName: root.pageName || 'root',
+        localization: root.localization,
+        children: [],
+        offerIds: root.offerIds
+    }) as unknown as NodeData;
 
 export type CatalogAdminPageDropPosition = 'before' | 'inside' | 'after' | 'root';
 
@@ -45,11 +78,7 @@ export interface CatalogAdminPageMovePlan {
     newIndex: number;
 }
 
-export const resolveCatalogAdminPageDropPosition = (
-    pointerY: number,
-    rowTop: number,
-    rowHeight: number
-): Exclude<CatalogAdminPageDropPosition, 'root'> => {
+export const resolveCatalogAdminPageDropPosition = (pointerY: number, rowTop: number, rowHeight: number): Exclude<CatalogAdminPageDropPosition, 'root'> => {
     const ratio = rowHeight > 0 ? (pointerY - rowTop) / rowHeight : 0.5;
     if (ratio <= 0.25) return 'before';
     if (ratio >= 0.75) return 'after';
@@ -107,11 +136,7 @@ export const planCatalogAdminPageDrop = (
     };
 };
 
-export const buildCatalogAdminDraftTree = (
-    liveRoot: ICatalogNode | null,
-    pages: CatalogStudioPageSnapshot[],
-    catalogType: string
-): ICatalogNode | null => {
+export const buildCatalogAdminDraftTree = (liveRoot: ICatalogNode | null, pages: CatalogStudioPageSnapshot[], catalogType: string): ICatalogNode | null => {
     if (!liveRoot) return null;
 
     const scopedPages = pages.filter((page) => page.catalogType === toStudioCatalogType(catalogType));
@@ -135,8 +160,7 @@ export const buildCatalogAdminDraftTree = (
         childrenByParent.set(page.parentId, siblings);
     }
 
-    const sortPages = (items: CatalogStudioPageSnapshot[]) =>
-        items.sort((left, right) => left.orderNum - right.orderNum || left.pageId - right.pageId);
+    const sortPages = (items: CatalogStudioPageSnapshot[]) => items.sort((left, right) => left.orderNum - right.orderNum || left.pageId - right.pageId);
 
     sortPages(roots);
     childrenByParent.forEach(sortPages);

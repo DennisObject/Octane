@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SendMessageComposer } from '../../../../api';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
 import { CatalogStudioProvider } from './CatalogStudioProvider';
-import { useCatalogStudio } from './useCatalogStudio';
+import { useCatalogStudio } from '../../../../hooks/catalog/useCatalogStudio';
 
 vi.mock('../../../../api', () => ({ SendMessageComposer: vi.fn() }));
 vi.mock('../../../../hooks', () => ({ useConnectionState: vi.fn(), useMessageEvent: vi.fn() }));

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { catalogAdminSmartSaveReducer, createCatalogAdminSmartSaveState, isCatalogAdminFormDirty, mergeCatalogAdminCommittedForm } from './CatalogAdminSmartSaveState';
+import { catalogAdminSmartSaveReducer, createCatalogAdminSmartSaveState, isCatalogAdminFormDirty, mergeCatalogAdminCommittedForm } from './catalogAdminSmartSave.reducer';
 
 interface FormState
 {

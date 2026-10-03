@@ -1,11 +1,11 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { FaBars, FaCog } from 'react-icons/fa';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
 import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
+import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
 import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
-import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
+import { CATALOG_ADMIN_PERMISSION, CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
 import { getCatalogHeaderDescription } from './catalogLocalization.helpers';
 import { parseCatalogTabLabel, useCatalogWindowWidth } from './useCatalogWindowWidth';
 import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
@@ -44,9 +44,7 @@ const CatalogViewInner: FC<{}> = () => {
     const catalogAdmin = useCatalogAdmin();
     const adminMode = catalogAdmin?.adminMode ?? false;
     const setAdminMode = catalogAdmin?.setAdminMode ?? (() => {});
-
-    const isMod = useHasPermission('acc_catalogfurni');
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const isMod = catalogAdmin?.canEdit ?? false;
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
     const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
@@ -166,23 +164,9 @@ const CatalogViewInner: FC<{}> = () => {
                     />
                     <div className="octane-catalog-mobile-header">
                         {isMod && (
-                            <div className="octane-catalog-mobile-burger">
-                                <button className="octane-catalog-burger-btn" onClick={() => setMobileMenuOpen((value) => !value)}>
-                                    <FaBars />
-                                </button>
-                                {mobileMenuOpen && (
-                                    <div className="octane-catalog-burger-menu">
-                                        <button
-                                            onClick={() => {
-                                                setAdminMode(!adminMode);
-                                                setMobileMenuOpen(false);
-                                            }}
-                                        >
-                                            {adminMode ? 'Exit Admin' : 'Admin'}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            <button className="octane-catalog-mobile-admin" type="button" onClick={() => setAdminMode(!adminMode)}>
+                                {LocalizeText(adminMode ? 'catalog.admin.exit' : 'catalog.admin')}
+                            </button>
                         )}
                         <div className="octane-catalog-mobile-currency">
                             <div className="octane-catalog-coin">
@@ -222,7 +206,7 @@ const CatalogViewInner: FC<{}> = () => {
                             })}
                         {isMod && (
                             <OctaneCardTabsItemView classNames={['octane-catalog-admin-tab']} isActive={adminMode} onClick={() => setAdminMode(!adminMode)}>
-                                <FaCog className={`text-[10px] ${adminMode ? 'animate-spin' : ''}`} style={adminMode ? { animationDuration: '3s' } : {}} />
+                                <span className="octane-catalog-tab-label">{LocalizeText('catalog.admin')}</span>
                             </OctaneCardTabsItemView>
                         )}
                     </OctaneCardTabsView>
@@ -301,15 +285,16 @@ export const CatalogView: FC<{}> = () => {
     const { catalogLocalizationVersion = 0 } = useCatalogData();
     const { isVisible = false } = useCatalogUiState();
 
-    const isCatalogAdmin = useHasPermission('acc_catalogfurni');
+    const isCatalogAdmin = useHasPermission(CATALOG_ADMIN_PERMISSION);
+    const adminWindowOpen = useCatalogAdminUiStore((state) => state.adminMode || !!state.pageEditor || !!state.offerEditor);
 
     // Opening a studio session is expensive on the server: it loads every
     // catalog item with FOR UPDATE and every items_base id, on the thread
     // serving this client. Tying it to authentication meant every staff login
     // stalled the hotel view — no room list, no catalog — until it finished.
-    // The session is only needed once the catalog is actually open.
+    // The session is only needed while the catalog or an admin editor window is open.
     return (
-        <CatalogStudioProvider active={isCatalogAdmin && isVisible}>
+        <CatalogStudioProvider active={isCatalogAdmin && (isVisible || adminWindowOpen)}>
             <CatalogEffectsHost />
             <CatalogAdminProvider>
                 <div className="hidden" data-catalog-localization-version={catalogLocalizationVersion} />

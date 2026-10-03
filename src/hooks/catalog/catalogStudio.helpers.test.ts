@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyCatalogStudioMutation } from './CatalogStudioMutationState';
-import { CatalogStudioMutationResult, CatalogStudioPageSnapshot, CatalogStudioSession } from './CatalogStudioTypes';
+import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from './catalogStudio.helpers';
+import { CatalogStudioMutationResult, CatalogStudioPageSnapshot, CatalogStudioSession } from './catalogStudio.types';
 
 const page = (catalogType: 'NORMAL' | 'BUILDER', pageId: number, caption: string): CatalogStudioPageSnapshot => ({
     catalogType, pageId, parentId: -1, captionSave: `page_${pageId}`, caption, pageLayout: 'default_3x3',
@@ -46,5 +46,20 @@ describe('applyCatalogStudioMutation', () =>
 
         expect(result.pages).toHaveLength(3);
         expect(result.pages.at(-1)?.pageId).toBe(55);
+    });
+});
+
+describe('nextCatalogStudioOperationId', () =>
+{
+    it('creates unique bounded identifiers with a readable action prefix', () =>
+    {
+        const first = nextCatalogStudioOperationId('savePage');
+        const second = nextCatalogStudioOperationId('savePage');
+        const long = nextCatalogStudioOperationId('x'.repeat(200));
+
+        expect(first).not.toBe(second);
+        expect(first.startsWith('savePage-')).toBe(true);
+        expect(first.length).toBeLessThanOrEqual(96);
+        expect(long.length).toBeLessThanOrEqual(96);
     });
 });

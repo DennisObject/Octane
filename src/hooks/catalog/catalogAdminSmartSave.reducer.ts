@@ -12,7 +12,7 @@ export interface CatalogAdminSmartSaveState<T>
     fieldErrors: Record<string, string>;
 }
 
-export type CatalogAdminSmartSaveAction<T> =
+export type CatalogAdminSmartSaveReducerAction<T> =
     | { type: 'hydrate'; value: T }
     | { type: 'patch'; patch: Partial<T> }
     | { type: 'submit'; operationId: string; submitted: T; closeAfter: boolean }
@@ -59,7 +59,7 @@ export const createCatalogAdminSmartSaveState = <T extends object>(initial: T): 
 
 export const catalogAdminSmartSaveReducer = <T extends object>(
     state: CatalogAdminSmartSaveState<T>,
-    action: CatalogAdminSmartSaveAction<T>): CatalogAdminSmartSaveState<T> =>
+    action: CatalogAdminSmartSaveReducerAction<T>): CatalogAdminSmartSaveState<T> =>
 {
     switch(action.type)
     {

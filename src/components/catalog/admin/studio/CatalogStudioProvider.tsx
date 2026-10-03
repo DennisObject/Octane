@@ -15,10 +15,9 @@ import {
 import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../../api';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
-import { applyCatalogStudioMutation } from './CatalogStudioMutationState';
-import { nextCatalogStudioOperationId } from './CatalogStudioOperationId';
-import { CatalogStudioDocumentResult, CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession, CatalogStudioValidationState } from './CatalogStudioTypes';
-import { CatalogStudioContext, CatalogStudioContextValue } from './useCatalogStudio';
+import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from '../../../../hooks/catalog/catalogStudio.helpers';
+import { CatalogStudioDocumentResult, CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession, CatalogStudioValidationState } from '../../../../hooks/catalog/catalogStudio.types';
+import { CatalogStudioContext, CatalogStudioContextValue } from '../../../../hooks/catalog/useCatalogStudio';
 
 export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }> = ({ active, children }) => {
     const connectionState = useConnectionState();
@@ -127,7 +126,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
 
     useMessageEvent<CatalogStudioDocumentResultEvent>(CatalogStudioDocumentResultEvent, (event) => {
         const parser = event.getParser();
-        const changes = (parser as typeof parser & { changes?: CatalogStudioDocumentResult['changes'] }).changes ?? [];
+        const changes = parser.changes ?? [];
         const result: CatalogStudioDocumentResult = {
             operationId: parser.operationId,
             success: parser.success,

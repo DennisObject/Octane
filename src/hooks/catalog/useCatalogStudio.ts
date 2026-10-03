@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { CatalogStudioDocumentResult, CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession, CatalogStudioValidationState } from './CatalogStudioTypes';
+import { CatalogStudioDocumentResult, CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession, CatalogStudioValidationState } from './catalogStudio.types';
 
 export interface CatalogStudioContextValue {
     session: CatalogStudioSession | null;
