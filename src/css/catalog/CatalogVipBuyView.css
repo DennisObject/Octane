@@ -16,6 +16,11 @@
     background: rgb(255 255 255 / 12.94%);
 }
 
+/* Shared catalogue text rules use condensed Ubuntu; AIR vip_buy uses the regular/bold faces. */
+.octane-club-purchase-layout.is-vip-page :where(span, strong, button) {
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
+}
+
 .octane-club-purchase-layout button {
     font: inherit;
 }
