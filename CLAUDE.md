@@ -35,9 +35,6 @@ mounted on `/nitro-assets` and `/swf`, reading from
 server hangs for minutes on Windows. See `vite.config.mjs` and the
 `.gitignore` note.
 
-Detailed status, decisions, and next steps live in **`docs/ARCHITECTURE.md`** —
-read that before starting anything non-trivial.
-
 ## Commands
 
 | Goal | Command |
@@ -118,8 +115,7 @@ login/WebGL, so they're not usable for in-game verification.
 
 ## Layout convention (DO NOT CHANGE)
 
-Established by the team and recorded in `docs/ARCHITECTURE.md` proposal #3
-(rejected the `src/features/` alternative). Stay on this layout — every PR
+Established by the team (rejected the `src/features/` alternative). Stay on this layout — every PR
 that violates it will need to be reworked.
 
 ```
@@ -365,7 +361,7 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 | Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`), `WiredCreatorToolsView` (`useWiredCreatorToolsUiStore` — every panel-lifecycle-relevant flag, snapshot, selection, highlight, inline editor, picker chain hoisted; what's left in the component as `useState` is genuinely transient: keepSelected, globalClock, roomEnteredAt, selectedMonitorErrorType, selectedMonitorLogDetails) |
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
 | God-hook split (Zustand-backed shared source + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends`, `catalog` (three-way: `useCatalogData` / `useCatalogUiState` / `useCatalogActions` — all 48 consumers migrated, deprecated `useCatalog` shim removed) |
-| Navigator modernization (merged to main 2026-05-28, PRs #168/#169/#170) | 492-line `useNavigator` god-hook split into a Zustand-backed shared `useNavigatorStore` + flat filters `useNavigatorData` / `useNavigatorUiState` / `useNavigatorSearch`; door bell/password lifecycle extracted to `src/hooks/rooms/widgets/useDoorState.ts` (dual-subscribes `GetGuestRoomResultEvent` + `GenericErrorEvent` alongside the nav store, each filtering by branch/errorCode); 9 UI flags + `currentTabCode`/`currentFilter` in Zustand `navigatorUiStore` (`src/hooks/navigator/navigatorUiStore.ts`); all 5 Navigator sub-views wrapped in `WidgetErrorBoundary`; old shim deleted. **`useNavigatorSearch` was reverted by duckietm (`05d71dd1`) from `useOctaneQuery` to `useMessageEvent + useEffect`** — see the useOctaneQuery fragility note. Specs/plans under `docs/superpowers/`. |
+| Navigator modernization (merged to main 2026-05-28, PRs #168/#169/#170) | 492-line `useNavigator` god-hook split into a Zustand-backed shared `useNavigatorStore` + flat filters `useNavigatorData` / `useNavigatorUiState` / `useNavigatorSearch`; door bell/password lifecycle extracted to `src/hooks/rooms/widgets/useDoorState.ts` (dual-subscribes `GetGuestRoomResultEvent` + `GenericErrorEvent` alongside the nav store, each filtering by branch/errorCode); 9 UI flags + `currentTabCode`/`currentFilter` in Zustand `navigatorUiStore` (`src/hooks/navigator/navigatorUiStore.ts`); all 5 Navigator sub-views wrapped in `WidgetErrorBoundary`; old shim deleted. **`useNavigatorSearch` was reverted by duckietm (`05d71dd1`) from `useOctaneQuery` to `useMessageEvent + useEffect`** — see the useOctaneQuery fragility note. |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella + per-widget wrap on all 13 room widgets and all 20 furniture widgets (so a crash in one widget no longer takes down its siblings) |
 | Vitest | 207/207 cases — pure helpers (incl. 4 new on `getPetPackageNameError`) + 2 Zustand store suites (`navigatorRoomCreatorStore`, `wiredCreatorToolsUiStore` with 45 cases including the picker-chain hoists) + 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the renderer-SDK mock at `src/octane-renderer.mock.ts`, 34 cases on the catalog pure helpers, 4 contract cases on the catalog filters. **Tests are co-located** under `src/`, alongside their subject. |
 | Form Actions | Login / Register / Forgot (LoginView.tsx) |
@@ -387,8 +383,6 @@ None on this branch. The two previously-open races are closed:
 - `LayoutFurniImageView` / `LayoutAvatarImageView` async fetch race →
   fixed in `97c9717` via `requestIdRef` guard on the async callback.
 
-See `docs/ARCHITECTURE.md` "Recently fixed" for fix shapes.
-
 ## House rules
 
 - **Never merge a branch that violates the layout convention** above.
@@ -405,7 +399,6 @@ See `docs/ARCHITECTURE.md` "Recently fixed" for fix shapes.
 
 ## Where everything lives
 
-- Architecture doc: `docs/ARCHITECTURE.md`
 - Test runner config: `vitest.config.mts` (separate from `vite.config.mjs`)
 - Test setup: `src/test-setup.ts`
 - Test convention: co-located under `src/` next to the subject (`src/<path>/Foo.ts` ↔ `src/<path>/Foo.test.ts`). No separate `tests/` tree.
@@ -435,7 +428,6 @@ See `docs/ARCHITECTURE.md` "Recently fixed" for fix shapes.
   (internal closure), `useNavigatorData.ts` / `useNavigatorUiState.ts` /
   `useNavigatorSearch.ts` (filters), `navigatorUiStore.ts` (Zustand UI
   flags + `setTab`/`setFilter`). Door lifecycle: `src/hooks/rooms/widgets/useDoorState.ts`.
-  Specs/plans: `docs/superpowers/specs/2026-05-2*-navigator-*.md`
 - Avatar editor thumbnails: `src/api/avatar/avatarThumbnailUrls.ts` (blob/object-URL cache, canvas shaping)
   behind `AvatarEditorThumbnailsHelper`. Part thumbnails go render target -> canvas -> one PNG encode;
   they are never turned into a `data:` URL in between. The LRU budgets real image bytes (48 MB, was
