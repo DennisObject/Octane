@@ -1,0 +1,9 @@
+destination,build,symbol,source,crop,transform
+arrow-down.png,WIN63-202609091217-117204808,habbo_icons_png,decompiled/images/2949_habbo_icons_png$8b101e792160bfac16b264f6c2a8ba2d1546660773.png,"0,0,9,10",RGB multiply 127/255; alpha unchanged
+arrow-up.png,WIN63-202609091217-117204808,habbo_icons_png,decompiled/images/2949_habbo_icons_png$8b101e792160bfac16b264f6c2a8ba2d1546660773.png,"10,0,9,10",RGB multiply 127/255; alpha unchanged
+input-border.png,WIN63-202609091217-117204808,illumina_light_input_chat_png,existing src/assets/images/friends/swf/illumina_light_input_chat.png,"0,0,29,29",none
+button-etching.png,WIN63-202609091217-117204808,illumina_light_button_unetched_png,decompiled/images/2451_illumina_light_button_unetched_png$ae4b47a8ff56c5d4acdef7d16bf1b1a5178947812.png,"0,137,11,5",none
+button-curve-left.png,WIN63-202609091217-117204808,illumina_light_button_unetched_png,decompiled/images/2451_illumina_light_button_unetched_png$ae4b47a8ff56c5d4acdef7d16bf1b1a5178947812.png,"1,31,3,5",none
+button-curve-right.png,WIN63-202609091217-117204808,illumina_light_button_unetched_png,decompiled/images/2451_illumina_light_button_unetched_png$ae4b47a8ff56c5d4acdef7d16bf1b1a5178947812.png,"7,31,3,5",none
+button-curve-left-hover.png,WIN63-202609091217-117204808,illumina_light_button_unetched_png,decompiled/images/2451_illumina_light_button_unetched_png$ae4b47a8ff56c5d4acdef7d16bf1b1a5178947812.png,"1,117,3,5",none
+button-curve-right-hover.png,WIN63-202609091217-117204808,illumina_light_button_unetched_png,decompiled/images/2451_illumina_light_button_unetched_png$ae4b47a8ff56c5d4acdef7d16bf1b1a5178947812.png,"7,117,3,5",none
