@@ -106,9 +106,16 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
     isTradeLocked: user.isTradeLocked
 });
 
-const awaitUserDetail = (): Promise<IHousekeepingUser | null> =>
+// The detail packets carry no request id, so a found user/room is matched against what
+// was asked for; a not-found reply can't be told apart and resolves whichever lookup waits.
+const awaitUserDetail = (matches: (user: HousekeepingUserDetailData) => boolean): Promise<IHousekeepingUser | null> =>
     awaitMessageEvent<HousekeepingUserDetailEvent, IHousekeepingUser | null>(HousekeepingUserDetailEvent, {
         timeoutMs: 8_000,
+        accept: (event) => {
+            const parser = event.getParser();
+
+            return !parser?.found || !parser.user || matches(parser.user);
+        },
         select: (event) => {
             const parser = event.getParser();
 
@@ -125,7 +132,7 @@ const findUserByNameViaPacket = async (username: string): Promise<IHousekeepingU
 
     SendMessageComposer(new HousekeepingFindUserByNameComposer(trimmed));
 
-    return awaitUserDetail();
+    return awaitUserDetail((user) => user.username.toLowerCase() === trimmed.toLowerCase());
 };
 
 const findUserByIdViaPacket = async (userId: number): Promise<IHousekeepingUser | null> => {
@@ -133,7 +140,7 @@ const findUserByIdViaPacket = async (userId: number): Promise<IHousekeepingUser 
 
     SendMessageComposer(new HousekeepingFindUserByIdComposer(userId));
 
-    return awaitUserDetail();
+    return awaitUserDetail((user) => user.id === userId);
 };
 
 /**
@@ -153,7 +160,7 @@ const runHkAction = async (composer: IMessageComposer<unknown[]>, expectedAction
             select: (event) => {
                 const parser = event.getParser();
 
-                if (!parser) return { ok: false, actionId: null, message: 'no_parser' };
+                if (!parser) return { ok: false, actionId: null, message: 'housekeeping.action.error' };
 
                 return {
                     ok: parser.ok,
@@ -163,9 +170,9 @@ const runHkAction = async (composer: IMessageComposer<unknown[]>, expectedAction
             }
         });
     } catch (err) {
-        const reason = err instanceof Error ? err.message : 'unknown';
+        const timedOut = err instanceof Error && err.message === 'timeout';
 
-        return { ok: false, actionId: null, message: reason };
+        return { ok: false, actionId: null, message: timedOut ? 'housekeeping.action.timeout' : 'housekeeping.action.error' };
     }
 };
 
@@ -213,6 +220,11 @@ const findRoomByIdViaPacket = (roomId: number): Promise<IHousekeepingRoom | null
 
     return awaitMessageEvent<HousekeepingRoomDetailEvent, IHousekeepingRoom | null>(HousekeepingRoomDetailEvent, {
         timeoutMs: 8_000,
+        accept: (event) => {
+            const parser = event.getParser();
+
+            return !parser?.found || !parser.room || parser.room.id === roomId;
+        },
         select: (event) => {
             const parser = event.getParser();
 
@@ -220,19 +232,6 @@ const findRoomByIdViaPacket = (roomId: number): Promise<IHousekeepingRoom | null
 
             return mapRoom(parser.room);
         }
-    });
-};
-
-const findRoomByNameViaPacket = (name: string): Promise<IHousekeepingRoom[]> => {
-    const trimmed = (name || '').trim();
-
-    if (!trimmed) return Promise.resolve([]);
-
-    SendMessageComposer(new HousekeepingSearchRoomsComposer(trimmed, true, 50));
-
-    return awaitMessageEvent<HousekeepingRoomListEvent, IHousekeepingRoom[]>(HousekeepingRoomListEvent, {
-        timeoutMs: 8_000,
-        select: (event) => event.getParser()?.rooms.map(mapRoom) ?? []
     });
 };
 
@@ -376,7 +375,6 @@ export const HousekeepingApi = {
 
     // -- room lookup -----------------------------------------------
     findRoomById: (roomId: number) => findRoomByIdViaPacket(roomId),
-    findRoomByName: (name: string) => findRoomByNameViaPacket(name),
     searchRooms: (prefix: string, signal?: AbortSignal) => searchRoomsViaPacket(prefix, signal),
 
     // -- room actions ----------------------------------------------

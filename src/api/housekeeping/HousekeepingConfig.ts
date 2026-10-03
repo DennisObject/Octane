@@ -1,5 +1,5 @@
 import { GetConfigurationValue } from '../octane';
-import { HousekeepingTabId } from './HousekeepingActionType';
+import { HousekeepingTabId } from './HousekeepingTabId';
 
 export type HousekeepingMode = 'light' | 'full';
 
@@ -38,17 +38,4 @@ export const isHousekeepingTabAvailable = (tab: HousekeepingTabId, mode: Houseke
     if (mode === 'full') return true;
 
     return LIGHT_TABS.has(tab);
-};
-
-export const housekeepingTabsForMode = (mode: HousekeepingMode): HousekeepingTabId[] => {
-    const all: HousekeepingTabId[] = [
-        HousekeepingTabId.DASHBOARD,
-        HousekeepingTabId.USERS,
-        HousekeepingTabId.ROOMS,
-        HousekeepingTabId.ECONOMY,
-        HousekeepingTabId.AUDIT,
-        HousekeepingTabId.SOUNDBOARD
-    ];
-
-    return all.filter((tab) => isHousekeepingTabAvailable(tab, mode));
 };

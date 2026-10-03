@@ -148,7 +148,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const { avatarInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
     const { openInspectionForFurni, showInspectButton } = useWiredTools();
-    const isModerator = useHasPermission('acc_anyroomowner');
+    const canEditFurni = useHasPermission('acc_catalogfurni');
     const { getValue: getRareValue } = useRareValues();
     const rareValue = useMemo(() => (avatarInfo ? getRareValue(avatarInfo.spriteId) : null), [avatarInfo, getRareValue]);
 
@@ -673,7 +673,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
         : '?';
     const showLocation = itemLocation.x > -1 && itemLocationEnabled && (!itemLocationRequireAccess || canMove);
     const showIds = godMode && canSeeFurniId;
-    const showEditFurni = godMode && isModerator;
+    const showEditFurni = godMode && canEditFurni && furniTypeId !== '?';
     const showBuildtools = godMode && !avatarInfo.isWallItem && canMove;
 
     return (
@@ -903,11 +903,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                         {showEditFurni && (
                                             <button
                                                 className="flex-1 min-w-0 text-white text-xs bg-[#418db0] hover:bg-[#3789a8] border border-[#ffffff33] rounded px-2 py-1 cursor-pointer transition-colors"
-                                                onClick={() => {
-                                                    CreateLinkEvent('furni-editor/show');
-
-                                                    if (furniTypeId !== '?') window.dispatchEvent(new CustomEvent('furni-editor:open', { detail: { spriteId: furniTypeId } }));
-                                                }}
+                                                onClick={() => CreateLinkEvent(`furni-editor/open/${furniTypeId}`)}
                                             >
                                                 {localizeWithFallback('infostand.button.edit_furni', 'Edit furni')}
                                             </button>

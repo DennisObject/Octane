@@ -1,6 +1,7 @@
 import { GetSoundManager, ISoundboardCatalogSound } from '@octane/renderer';
 import { DragEvent, FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText } from '../../../../api';
+import { Button, StaffField, StaffSection, StaffStatus } from '../../../../common';
 import { useSoundboardCatalog, useSoundboardManifest } from '../../../../hooks';
 import {
     filterCatalogSounds,
@@ -90,214 +91,125 @@ export const HousekeepingSoundboardTab: FC = () => {
 
     const resultKey = lastResult ? (RESULT_KEYS[lastResult.resultCode] ?? 'persistence_failure') : null;
 
+    const setField = <K extends keyof SoundboardCatalogDraft>(key: K, value: SoundboardCatalogDraft[K]) => setDraft((current) => ({ ...current, [key]: value }));
+
     return (
-        <div className="flex flex-col gap-2.5">
-            <div className="grid grid-cols-[1fr_auto] gap-2">
+        <>
+            <div className="octane-staff-row">
                 <input
-                    type="search"
                     aria-label={LocalizeText('housekeeping.soundboard.search')}
+                    className="grow"
                     placeholder={LocalizeText('housekeeping.soundboard.search')}
+                    type="search"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs"
                 />
-                <select
-                    aria-label={LocalizeText('housekeeping.soundboard.filter')}
-                    value={filter}
-                    onChange={(event) => setFilter(event.target.value as SoundboardCatalogFilter)}
-                    className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs"
-                >
+                <select aria-label={LocalizeText('housekeeping.soundboard.filter')} value={filter} onChange={(event) => setFilter(event.target.value as SoundboardCatalogFilter)}>
                     <option value="all">{LocalizeText('housekeeping.soundboard.filter.all')}</option>
                     <option value="enabled">{LocalizeText('housekeeping.soundboard.filter.enabled')}</option>
                     <option value="disabled">{LocalizeText('housekeeping.soundboard.filter.disabled')}</option>
                 </select>
             </div>
-
             {resultKey && (
-                <div
-                    role="status"
-                    className={`rounded border px-2 py-1 text-xs ${lastResult.resultCode === 0 ? 'border-emerald-300 bg-emerald-50' : 'border-rose-300 bg-rose-50'}`}
-                >
-                    {LocalizeText(`housekeeping.soundboard.result.${resultKey}`)}
-                </div>
+                <StaffStatus message={LocalizeText(`housekeeping.soundboard.result.${resultKey}`)} tone={lastResult.resultCode === 0 ? 'success' : 'error'} />
             )}
-
-            {previewFailed && (
-                <div role="alert" className="rounded border border-rose-300 bg-rose-50 px-2 py-1 text-xs">
-                    {LocalizeText('housekeeping.soundboard.preview_failed')}
+            {previewFailed && <StaffStatus message={LocalizeText('housekeeping.soundboard.preview_failed')} tone="error" />}
+            <StaffSection title={LocalizeText(draft.id ? 'housekeeping.soundboard.edit' : 'housekeeping.soundboard.create')}>
+                <div className="octane-staff-grid">
+                    <StaffField label={LocalizeText('housekeeping.soundboard.name')}>
+                        <input disabled={draftLocked} maxLength={64} value={draft.name} onChange={(event) => setField('name', event.target.value)} />
+                    </StaffField>
+                    <StaffField label={LocalizeText('housekeeping.soundboard.classname')}>
+                        <input
+                            disabled={draftLocked}
+                            list="soundboard-classnames"
+                            placeholder={knownClassnames[0] ?? ''}
+                            value={draft.classname}
+                            onChange={(event) => setField('classname', event.target.value)}
+                        />
+                        <datalist id="soundboard-classnames">
+                            {knownClassnames.map((classname) => (
+                                <option key={classname} value={classname} />
+                            ))}
+                        </datalist>
+                    </StaffField>
+                    <StaffField label={LocalizeText('housekeeping.soundboard.url')}>
+                        <input disabled={draftLocked} value={draft.url} onChange={(event) => setField('url', event.target.value)} />
+                    </StaffField>
+                    <StaffField label={LocalizeText('housekeeping.soundboard.min_rank')}>
+                        <input disabled={draftLocked} min={1} step={1} type="number" value={draft.minRank} onChange={(event) => setField('minRank', Number(event.target.value))} />
+                    </StaffField>
                 </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-2 rounded border border-sky-200 bg-sky-50/40 p-2">
-                <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                    {LocalizeText('housekeeping.soundboard.name')}
-                    <input
-                        aria-label={LocalizeText('housekeeping.soundboard.name')}
-                        disabled={draftLocked}
-                        value={draft.name}
-                        onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                        className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-normal normal-case"
-                    />
-                </label>
-                <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                    {LocalizeText('housekeeping.soundboard.classname')}
-                    <input
-                        aria-label={LocalizeText('housekeeping.soundboard.classname')}
-                        disabled={draftLocked}
-                        value={draft.classname}
-                        list="soundboard-classnames"
-                        placeholder={knownClassnames[0] ?? ''}
-                        onChange={(event) => setDraft((current) => ({ ...current, classname: event.target.value }))}
-                        className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-normal normal-case"
-                    />
-                    <datalist id="soundboard-classnames">
-                        {knownClassnames.map((classname) => (
-                            <option key={classname} value={classname} />
-                        ))}
-                    </datalist>
-                </label>
-                <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                    {LocalizeText('housekeeping.soundboard.url')}
-                    <input
-                        aria-label={LocalizeText('housekeeping.soundboard.url')}
-                        disabled={draftLocked}
-                        value={draft.url}
-                        onChange={(event) => setDraft((current) => ({ ...current, url: event.target.value }))}
-                        className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-normal normal-case"
-                    />
-                </label>
-                <label className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                    {LocalizeText('housekeeping.soundboard.min_rank')}
-                    <input
-                        type="number"
-                        min={1}
-                        step={1}
-                        aria-label={LocalizeText('housekeeping.soundboard.min_rank')}
-                        disabled={draftLocked}
-                        value={draft.minRank}
-                        onChange={(event) => setDraft((current) => ({ ...current, minRank: Number(event.target.value) }))}
-                        className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-normal normal-case"
-                    />
-                </label>
-                <label className="flex items-center gap-2 self-end py-1 text-xs font-semibold">
-                    <input
-                        type="checkbox"
-                        checked={draft.enabled}
-                        disabled={draftLocked}
-                        onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
-                    />
+                <label className="octane-staff-row">
+                    <input checked={draft.enabled} disabled={draftLocked} type="checkbox" onChange={(event) => setField('enabled', event.target.checked)} />
                     {LocalizeText('housekeeping.soundboard.enabled')}
                 </label>
                 {!validation.valid && (
-                    <div role="alert" className="col-span-2 text-[10px] text-rose-700">
+                    <span className="octane-staff-error-text" role="alert">
                         {Object.values(validation.errors)
                             .map((error) => LocalizeText(`housekeeping.soundboard.validation.${error}`))
                             .join(' · ')}
-                    </div>
+                    </span>
                 )}
-                <div className="col-span-2 flex flex-wrap justify-end gap-1.5">
-                    <button
-                        type="button"
-                        disabled={draftLocked}
-                        onClick={() => setDraft({ ...EMPTY_DRAFT })}
-                        className="rounded bg-zinc-200 px-2 py-1 text-xs font-semibold disabled:opacity-40"
-                    >
+                <div className="octane-staff-row justify-end">
+                    <Button disabled={draftLocked} variant="secondary" onClick={() => setDraft({ ...EMPTY_DRAFT })}>
                         {LocalizeText('housekeeping.soundboard.create')}
-                    </button>
-                    <button
-                        type="button"
-                        disabled={!validation.valid}
-                        onClick={() => preview(draft)}
-                        className="rounded bg-sky-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-40"
-                    >
+                    </Button>
+                    <Button disabled={!validation.valid} variant="secondary" onClick={() => preview(draft)}>
                         {LocalizeText('housekeeping.soundboard.preview')}
-                    </button>
-                    <button
-                        type="button"
-                        disabled={!validation.valid || pendingOperation !== null}
-                        onClick={() => upsert(draft)}
-                        className="rounded bg-emerald-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-40"
-                    >
+                    </Button>
+                    <Button disabled={!validation.valid || draftLocked} variant="primary" onClick={() => upsert(draft)}>
                         {LocalizeText('housekeeping.soundboard.save')}
-                    </button>
+                    </Button>
                 </div>
-            </div>
-
-            <div className="flex max-h-[280px] flex-col gap-1 overflow-y-auto">
+            </StaffSection>
+            <div className="octane-staff-list octane-housekeeping-sounds">
                 {filteredSounds.map((sound) => {
                     const orderIndex = orderedIds.indexOf(sound.id);
 
                     return (
                         <div
                             key={sound.id}
-                            data-testid={`soundboard-catalog-row-${sound.id}`}
                             draggable
-                            onDragStart={() => setDraggedId(sound.id)}
+                            className={`octane-staff-list-row ${draft.id === sound.id ? 'is-selected' : ''}`}
                             onDragOver={(event) => event.preventDefault()}
+                            onDragStart={() => setDraggedId(sound.id)}
                             onDrop={(event) => dropOn(event, sound.id)}
-                            className="grid grid-cols-[1fr_auto] items-center gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5"
                         >
-                            <div className="min-w-0">
-                                <div className="truncate text-xs font-semibold">
-                                    {sound.name} <span className="font-normal text-zinc-400">#{sound.id}</span>
-                                </div>
-                                <div className="truncate text-[10px] text-zinc-500">
-                                    {sound.classname || sound.url} · rank {sound.minRank} ·{' '}
-                                    {sound.enabled
-                                        ? LocalizeText('housekeeping.soundboard.filter.enabled')
-                                        : LocalizeText('housekeeping.soundboard.filter.disabled')}
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <button
-                                    type="button"
-                                    aria-label={`${LocalizeText('housekeeping.soundboard.preview')} ${sound.name}`}
-                                    onClick={() => preview(sound)}
-                                    className="rounded bg-sky-100 px-1.5 py-1 text-[10px]"
-                                >
-                                    ▶
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={draftLocked}
-                                    aria-label={`${LocalizeText('housekeeping.soundboard.edit')} ${sound.name}`}
-                                    onClick={() => editSound(sound)}
-                                    className="rounded bg-zinc-200 px-1.5 py-1 text-[10px] disabled:opacity-40"
-                                >
-                                    {LocalizeText('housekeeping.soundboard.edit')}
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={orderIndex <= 0}
-                                    aria-label={`${LocalizeText('housekeeping.soundboard.move_up')} ${sound.name}`}
-                                    onClick={() => moveByOffset(sound.id, -1)}
-                                    className="rounded bg-zinc-100 px-1.5 py-1 text-[10px] disabled:opacity-30"
-                                >
-                                    ↑
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={orderIndex < 0 || orderIndex >= orderedIds.length - 1}
-                                    aria-label={`${LocalizeText('housekeeping.soundboard.move_down')} ${sound.name}`}
-                                    onClick={() => moveByOffset(sound.id, 1)}
-                                    className="rounded bg-zinc-100 px-1.5 py-1 text-[10px] disabled:opacity-30"
-                                >
-                                    ↓
-                                </button>
-                            </div>
+                            <span className="grow truncate">
+                                {sound.name} <span className="octane-staff-muted">#{sound.id}</span>
+                                <br />
+                                <span className="octane-staff-muted">
+                                    {sound.classname || sound.url} · {LocalizeText('housekeeping.soundboard.min_rank')} {sound.minRank} ·{' '}
+                                    {LocalizeText(sound.enabled ? 'housekeeping.soundboard.filter.enabled' : 'housekeeping.soundboard.filter.disabled')}
+                                </span>
+                            </span>
+                            <Button variant="secondary" onClick={() => preview(sound)}>
+                                {LocalizeText('housekeeping.soundboard.preview')}
+                            </Button>
+                            <Button disabled={draftLocked} variant="secondary" onClick={() => editSound(sound)}>
+                                {LocalizeText('housekeeping.soundboard.edit')}
+                            </Button>
+                            <Button aria-label={LocalizeText('housekeeping.soundboard.move_up')} disabled={orderIndex <= 0} variant="secondary" onClick={() => moveByOffset(sound.id, -1)}>
+                                ▲
+                            </Button>
+                            <Button
+                                aria-label={LocalizeText('housekeeping.soundboard.move_down')}
+                                disabled={orderIndex < 0 || orderIndex >= orderedIds.length - 1}
+                                variant="secondary"
+                                onClick={() => moveByOffset(sound.id, 1)}
+                            >
+                                ▼
+                            </Button>
                         </div>
                     );
                 })}
             </div>
-
-            <button
-                type="button"
-                disabled={!orderedIds.length || pendingOperation !== null}
-                onClick={() => reorder(orderedIds)}
-                className="self-end rounded bg-violet-600 px-2.5 py-1 text-xs font-semibold text-white disabled:opacity-40"
-            >
-                {LocalizeText('housekeeping.soundboard.save_order')}
-            </button>
-        </div>
+            <div className="octane-staff-row justify-end">
+                <Button disabled={!orderedIds.length || pendingOperation !== null} variant="primary" onClick={() => reorder(orderedIds)}>
+                    {LocalizeText('housekeeping.soundboard.save_order')}
+                </Button>
+            </div>
+        </>
     );
 };
