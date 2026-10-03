@@ -55,6 +55,8 @@ import './css/inventory/InventoryFilters.css';
 
 import './css/layout/LayoutTrophy.css';
 
+import './css/staff/StaffWindow.css';
+
 import './css/octanecard/OctaneCardView.css';
 import './css/achievements/AchievementsView.css';
 
