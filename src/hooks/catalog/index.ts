@@ -10,3 +10,4 @@ export * from './useGiftConfiguration';
 export * from './useMarketplaceConfiguration';
 export * from './useSellablePetPalette';
 export * from './useScrollWindow';
+export * from './useMeasuredFloorHeight';

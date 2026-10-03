@@ -7,8 +7,13 @@
     overflow: hidden;
     background: #f1f1f1;
     color: #222;
-    font-family: Ubuntu, Arial, sans-serif;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 12px;
+}
+
+/* vip_buy root container: color 0x2121ffffff (alpha 0x21 white). Its inner vipBuyWidget has no background flag, so it paints nothing. */
+.octane-club-purchase-layout.is-vip-page {
+    background: rgb(255 255 255 / 12.94%);
 }
 
 .octane-club-purchase-layout button {
@@ -28,7 +33,8 @@
     width: 152px;
     height: 291px;
     object-fit: none;
-    object-position: center top;
+    /* 103px native GIF centred in 152px: (152 - 103) / 2 floors to 24px, keeping integer placement. */
+    object-position: 24px 0;
 }
 
 .octane-club-vip-copy {
@@ -42,21 +48,28 @@
     text-align: center;
 }
 
+/* vip_title: 178x17 field with a 2px text gutter, so the text line box is 13px. */
 .octane-club-vip-copy strong {
     display: block;
+    box-sizing: border-box;
     width: 178px;
-    min-height: 17px;
+    height: 17px;
+    padding: 2px;
     font-size: 12px;
-    line-height: 17px;
+    line-height: 13px;
     text-align: center;
 }
 
+/* vip_info: formatted field at y 21 (title 17 + list spacing 4), 2px gutter.
+   Ubuntu 12px: ascent 932 + descent 190 per 1000 = 13.464px, plus 3px leading = 16.464px. */
 .octane-club-vip-copy span {
     display: block;
+    box-sizing: border-box;
     width: 178px;
-    min-height: 17px;
     margin-top: 4px;
-    line-height: 20px;
+    padding: 0.5px 2px 3.5px;
+    font-size: 12px;
+    line-height: 16.464px;
     text-align: center;
 }
 
@@ -156,9 +169,51 @@
     box-shadow: inset 0 0 0 1px #dfdfdf;
 }
 
+/* vip_buy_item border style 2 = habbo_skin_border_colorless (2939_class_848) over the blue skin atlas.
+   The 13x13 9-slice is pre-tinted per colour (habbo-border-colorless-<hex>-13.png): channel = source * tint / 255, alpha kept.
+   Outer frame (0x969696) is z0, inner fill (0xdfdfdf, 1px inset, clipped at the right edge) is z1, content is z2. */
 .octane-club-offer.is-wide {
     width: 320px;
     height: 75px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    isolation: isolate;
+}
+
+.octane-club-offer.is-wide::before,
+.octane-club-offer.is-wide::after {
+    position: absolute;
+    border-style: solid;
+    border-width: 6px;
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+}
+
+.octane-club-offer.is-wide::before {
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 75px;
+    z-index: 0;
+    border-image-source: url("../../assets/images/catalog/air/hc/habbo-border-colorless-969696-13.png");
+}
+
+.octane-club-offer.is-wide::after {
+    top: 1px;
+    left: 1px;
+    width: 320px;
+    height: 73px;
+    z-index: 1;
+    border-image-source: url("../../assets/images/catalog/air/hc/habbo-border-colorless-dfdfdf-13.png");
+}
+
+.octane-club-offer.is-wide > * {
+    z-index: 2;
 }
 
 .octane-club-offer.is-compact {
@@ -184,6 +239,30 @@
 
 .octane-club-offer.is-wide .octane-club-offer-header {
     width: 310px;
+    background: transparent;
+    isolation: isolate;
+}
+
+.octane-club-offer.is-wide .octane-club-offer-header::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 310px;
+    height: 25px;
+    border-style: solid;
+    border-width: 6px;
+    border-image-source: url("../../assets/images/catalog/air/hc/habbo-border-colorless-969696-13.png");
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+}
+
+.octane-club-offer.is-wide .octane-club-offer-header > * {
+    z-index: 1;
 }
 
 .octane-club-offer.is-compact .octane-club-offer-header {
@@ -295,8 +374,9 @@
     left: 5px;
     width: 112px;
     height: 26px;
+    padding-left: 2px;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: 1px;
     font-size: 14px;
     font-weight: 700;
@@ -316,13 +396,28 @@
     white-space: nowrap;
 }
 
-.octane-club-price-separator {
-    font-weight: 700;
-}
-
 .octane-club-offer-price {
+    align-items: flex-start;
     gap: 1px;
     white-space: nowrap;
+}
+
+/* The inner text retains its natural width so flooring the field cannot feed back into measurement. */
+.octane-club-price-field-text {
+    display: inline-block;
+    white-space: pre;
+}
+
+/* price_display (1712): leading spacer + spacing = 2px; amount field y1 with a 2px gutter. */
+.octane-club-offer.is-wide .octane-club-offer-price > span {
+    display: block;
+    flex: 0 0 auto;
+    height: 19px;
+    margin-top: 1px;
+    padding: 2px;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 15.694px;
 }
 
 .octane-club-offer.is-wide .octane-currency-icon {
@@ -343,6 +438,10 @@
 }
 
 .octane-club-offer.is-wide .octane-club-offer-price[data-currency-type="5"] .octane-currency-icon {
+    width: 19px !important;
+    min-width: 19px !important;
+    height: 19px !important;
+    min-height: 19px !important;
     background-image: url("../../assets/images/catalog/air/currency-diamond-big.png") !important;
 }
 
@@ -370,10 +469,11 @@
     background: transparent !important;
     box-shadow: none !important;
     color: #fff !important;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif !important;
     font-size: 12px !important;
     font-weight: 700 !important;
     line-height: 18px;
-    text-shadow: 0 1px 0 rgb(0 0 0 / 35%) !important;
+    text-shadow: none !important;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
@@ -385,15 +485,15 @@
     left: 225px;
 }
 
-.octane-club-offer-action:hover:not(.pointer-events-none) {
+.octane-club-offer-action:hover:not(:disabled) {
     border-image-source: var(--habbo-skin-shiny-thick-green-hover) !important;
 }
 
-.octane-club-offer-action:active:not(.pointer-events-none) {
+.octane-club-offer-action:active:not(:disabled) {
     border-image-source: var(--habbo-skin-shiny-thick-green-pressed) !important;
 }
 
-.octane-club-offer-action.pointer-events-none {
+.octane-club-offer-action:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-green-disabled) !important;
     opacity: 1 !important;
 }
@@ -417,15 +517,15 @@
     text-shadow: none !important;
 }
 
-.octane-club-offer.is-compact .octane-club-offer-action:hover:not(.pointer-events-none) {
+.octane-club-offer.is-compact .octane-club-offer-action:hover:not(:disabled) {
     border-image-source: var(--habbo-skin-button-hover) !important;
 }
 
-.octane-club-offer.is-compact .octane-club-offer-action:active:not(.pointer-events-none) {
+.octane-club-offer.is-compact .octane-club-offer-action:active:not(:disabled) {
     border-image-source: var(--habbo-skin-button-pressed) !important;
 }
 
-.octane-club-offer.is-compact .octane-club-offer-action.pointer-events-none {
+.octane-club-offer.is-compact .octane-club-offer-action:disabled {
     border-image-source: var(--habbo-skin-button-disabled) !important;
     color: #777 !important;
 }
@@ -516,9 +616,9 @@
     width: 369px !important;
     min-width: 369px !important;
     max-width: 369px !important;
-    height: 210px !important;
-    min-height: 210px !important;
-    max-height: 210px !important;
+    height: var(--octane-club-confirm-frame-height) !important;
+    min-height: var(--octane-club-confirm-frame-height) !important;
+    max-height: var(--octane-club-confirm-frame-height) !important;
     color: #000;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
 }
@@ -527,9 +627,6 @@
     width: 369px !important;
     min-width: 369px !important;
     max-width: 369px !important;
-    height: 210px !important;
-    min-height: 210px !important;
-    max-height: 210px !important;
 }
 
 .octane-club-purchase-confirm,
@@ -539,13 +636,13 @@
 
 .octane-club-purchase-confirm > .octane-club-purchase-confirm-content.octane-card-content-shell {
     position: absolute;
-    top: 35px;
-    left: 2px;
+    top: 36px;
+    left: 3px;
     display: block;
     width: 362px;
-    height: 161px;
-    min-height: 161px !important;
-    max-height: 161px !important;
+    height: var(--octane-club-confirm-content-height);
+    min-height: var(--octane-club-confirm-content-height) !important;
+    max-height: var(--octane-club-confirm-content-height) !important;
     margin: 0;
     padding: 0 !important;
     overflow: hidden !important;
@@ -571,7 +668,7 @@
     top: 0;
     left: 0;
     width: 354px;
-    height: 97px;
+    height: var(--octane-club-confirm-product-height);
 }
 
 .octane-club-purchase-confirm-icon {
@@ -590,48 +687,53 @@
     position: absolute;
     top: 10px;
     left: 109px;
+    display: flex;
     width: 245px;
-    height: 87px;
+    flex-direction: column;
+    gap: 3px;
 }
 
 .octane-club-purchase-confirm-copy > strong {
-    position: absolute;
-    top: 0;
-    left: 0;
     display: block;
+    box-sizing: border-box;
     width: 245px;
-    height: 39px;
+    height: var(--octane-club-confirm-title-height);
+    margin: 0;
     overflow: hidden;
+}
+
+/* name field: auto height, 2px gutter, 16px bold with a 17.936px line */
+.octane-club-purchase-confirm-title-text {
+    display: block;
+    box-sizing: border-box;
+    width: 245px;
+    padding: 2px;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 16px;
     font-weight: 700;
-    line-height: 19px;
+    line-height: 17.936px;
     overflow-wrap: break-word;
 }
 
 .octane-club-purchase-confirm-copy > span {
-    position: absolute;
-    top: 42px;
-    left: 0;
     display: block;
+    box-sizing: border-box;
     width: 207px;
     height: 20px;
+    padding: 2px;
     overflow: hidden;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 15.708px;
     white-space: nowrap;
 }
 
 .octane-club-purchase-confirm-cost-row {
-    position: absolute;
-    top: 65px;
-    left: 0;
     display: flex;
     width: 288px;
     height: 22px;
-    align-items: center;
+    align-items: flex-start;
     overflow: visible;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 14px;
@@ -640,20 +742,42 @@
     white-space: nowrap;
 }
 
+.octane-club-purchase-confirm-cost-row > span:first-child {
+    flex: 0 0 auto;
+    height: 19px;
+    margin-top: 1px;
+    padding: 2px;
+    overflow: hidden;
+    line-height: 15.708px;
+}
+
 .octane-club-purchase-confirm-price,
 .octane-club-purchase-confirm-price-part {
     display: inline-flex;
     height: 22px;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .octane-club-purchase-confirm-price {
+    padding-left: 2px;
+    padding-right: 3px;
     gap: 1px;
 }
 
 .octane-club-purchase-confirm-price-part {
     gap: 1px;
     font-weight: 700;
+}
+
+.octane-club-purchase-confirm-price-part > .octane-club-price-field {
+    display: block;
+    flex: 0 0 auto;
+    height: 19px;
+    margin-top: 1px;
+    padding: 2px;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 15.694px;
 }
 
 .octane-club-purchase-confirm-price .octane-currency-icon {
@@ -674,16 +798,20 @@
 }
 
 .octane-club-purchase-confirm-price-part[data-currency-type="5"] .octane-currency-icon {
+    width: 19px !important;
+    min-width: 19px !important;
+    height: 19px !important;
+    min-height: 19px !important;
     background-image: url("../../assets/images/catalog/air/currency-diamond-big.png") !important;
 }
 
 .octane-club-purchase-confirm-disclaimer {
     position: absolute;
-    top: 107px;
+    top: var(--octane-club-confirm-disclaimer-y);
     left: 0;
     display: block;
     width: 353px;
-    height: 17px;
+    height: var(--octane-club-confirm-disclaimer-height);
     margin: 0;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 12px !important;
@@ -715,24 +843,20 @@
     position: absolute;
     top: 0;
     left: 31px;
+    box-sizing: border-box;
     width: 322px;
-    height: 17px;
-    overflow: hidden;
+    padding: 2px;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     font-size: 12px;
-    line-height: 17px;
+    line-height: 13.464px;
 }
 
 .octane-club-purchase-confirm-actions {
     position: absolute;
-    top: 107px;
+    top: var(--octane-club-confirm-actions-y);
     left: 0;
     width: 355px;
     height: 27px;
-}
-
-.octane-club-purchase-confirm-content.has-disclaimer .octane-club-purchase-confirm-actions {
-    top: 134px;
 }
 
 .octane-club-purchase-confirm-actions button {
