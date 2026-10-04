@@ -29,13 +29,15 @@ interface StatusLine {
     message: string;
 }
 
-// One status line at a time: a pending write, then the last result, then reads in flight.
+// One status line at a time: a resyncing channel, a pending write, the last result, then reads in flight.
 const statusOf = (
+    isResyncing: boolean,
     pending: FurniEditorMutationKind | null,
     notice: FurniEditorNotice | null,
     isLoadingDetail: boolean,
     isImporting: boolean
 ): StatusLine | null => {
+    if (isResyncing) return { tone: 'pending', message: LocalizeText('furni.editor.status.resyncing') };
     if (pending) return { tone: 'pending', message: LocalizeText(pending === 'delete' ? 'furni.editor.status.deleting' : 'furni.editor.status.saving') };
     // StaffStatus has no info tone; the muted one keeps an expected refusal calm.
     if (notice) return { tone: notice.tone === 'info' ? 'pending' : notice.tone, message: localizeFurniEditorText(notice) };
@@ -57,7 +59,7 @@ export const FurniEditorView: FC = () => {
     const activeTab = useFurniEditorUiStore((state) => state.activeTab);
     const setVisible = useFurniEditorUiStore((state) => state.setVisible);
     const setTab = useFurniEditorUiStore((state) => state.setTab);
-    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation } = useFurniEditorState();
+    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation, isResyncing } = useFurniEditorState();
     const { loadInteractions, refreshSearch, reloadOpenItem, closeItem, clearNotice } = useFurniEditorActions();
 
     // The sheet's form lives here, so it survives closing the window, the tabs
@@ -99,7 +101,7 @@ export const FurniEditorView: FC = () => {
         })
     ];
 
-    const status = statusOf(pendingMutation, notice, isLoadingDetail, isImporting);
+    const status = statusOf(isResyncing, pendingMutation, notice, isLoadingDetail, isImporting);
 
     return (
         <StaffWindow
