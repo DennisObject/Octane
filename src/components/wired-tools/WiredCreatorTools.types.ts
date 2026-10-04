@@ -66,9 +66,6 @@ export interface MonitorLog {
     category: string;
     amount: string;
     latest: string;
-    latestReason: string;
-    latestSourceId: number;
-    latestSourceLabel: string;
 }
 
 export interface MonitorSnapshot {
@@ -106,17 +103,6 @@ export interface MonitorSnapshot {
         severity: string;
         type: string;
     }>;
-}
-
-export interface MonitorLogDetails {
-    amount?: string;
-    latest?: string;
-    occurredAt?: string;
-    reason: string;
-    severity: string;
-    sourceId: number;
-    sourceLabel: string;
-    type: string;
 }
 
 export interface InspectionVariable {

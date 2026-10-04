@@ -48,6 +48,8 @@ import {
     userVariableHolderKey,
     WiredSelectionVisualizer
 } from '../../api';
+import wiredErrorIcon from '../../assets/images/wiredtools/icon_wired_error.png';
+import wiredWarningIcon from '../../assets/images/wiredtools/icon_wired_warning.png';
 import wiredGlobalPlaceholderImage from '../../assets/images/wiredtools/wired_global_placeholder.png';
 import wiredMonitorImage from '../../assets/images/wiredtools/wired_monitor.png';
 import {
@@ -110,7 +112,6 @@ import {
     InspectionVariable,
     ManagedHolderVariableEntry,
     MonitorLog,
-    MonitorLogDetails,
     MonitorStat,
     ParsedWallLocation,
     TeamEffectData,
@@ -135,6 +136,9 @@ import { WiredVariablesTabView } from './WiredVariablesTabView';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
 
 const WIRED_FURNI_GRAVITY_MODEL_KEY = 'wired_furni_gravity';
+
+/** icon_wired_<category>_png, as the official error view picks it. */
+const MONITOR_ERROR_ICONS: Record<string, string> = { ERROR: wiredErrorIcon, WARNING: wiredWarningIcon };
 
 export const WiredCreatorToolsView: FC<{}> = () => {
     const openVariablesExplorer = useVariablesExplorerStore((s) => s.open);
@@ -168,8 +172,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const monitorSnapshot = useWiredCreatorToolsUiStore((s) => s.monitorSnapshot);
     const setMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.setMonitorSnapshot);
     const resetMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.resetMonitorSnapshot);
-    const [selectedMonitorErrorType, setSelectedMonitorErrorType] = useState<string>(null);
-    const [selectedMonitorLogDetails, setSelectedMonitorLogDetails] = useState<MonitorLogDetails>(null);
+    const [selectedMonitorError, setSelectedMonitorError] = useState<{ type: string; category: string }>(null);
     const isMonitorHistoryOpen = useWiredCreatorToolsUiStore((s) => s.isMonitorHistoryOpen);
     const setIsMonitorHistoryOpen = useWiredCreatorToolsUiStore((s) => s.setIsMonitorHistoryOpen);
     const isRoomLogsOpen = useWiredCreatorToolsUiStore((s) => s.isRoomLogsOpen);
@@ -842,8 +845,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
     useEffect(() => {
         resetMonitorSnapshot();
-        setSelectedMonitorErrorType(null);
-        setSelectedMonitorLogDetails(null);
+        setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
         setMonitorHistorySeverityFilter('ALL');
@@ -853,17 +855,14 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     useEffect(() => {
         if (activeTab === 'monitor') return;
 
-        setSelectedMonitorErrorType(null);
-        setSelectedMonitorLogDetails(null);
+        setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
     }, [activeTab]);
 
     useEffect(() => {
-        if (selectedMonitorErrorType) return;
-
-        setSelectedMonitorLogDetails(null);
-    }, [selectedMonitorErrorType]);
+        if (!isVisible) setSelectedMonitorError(null);
+    }, [isVisible]);
 
     const requestMonitorSnapshot = useCallback(() => {
         monitorRequestGateRef.current?.request(() => {
@@ -1043,10 +1042,10 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     }, [roomSession, selectedUser, selectedUserActionVersion]);
 
     const selectedMonitorErrorInfo = useMemo(() => {
-        if (!selectedMonitorErrorType) return null;
+        if (!selectedMonitorError) return null;
 
-        return MONITOR_ERROR_INFO[selectedMonitorErrorType] ?? null;
-    }, [selectedMonitorErrorType]);
+        return MONITOR_ERROR_INFO[selectedMonitorError.type] ?? null;
+    }, [selectedMonitorError]);
     const monitorRoomStats = useMemo(() => {
         if (!roomSession) {
             return {
@@ -1074,11 +1073,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             }, 0)
         };
     }, [roomSession, globalClock]);
-    const selectedMonitorDetailSource = useMemo(() => {
-        if (!selectedMonitorLogDetails) return '';
-
-        return formatMonitorSource(selectedMonitorLogDetails.sourceLabel, selectedMonitorLogDetails.sourceId);
-    }, [selectedMonitorLogDetails]);
     const monitorHistoryTypeOptions = useMemo(() => {
         return ['ALL', ...Array.from(new Set([...MONITOR_LOG_ORDER, ...monitorSnapshot.history.map((entry) => entry.type)]))];
     }, [monitorSnapshot.history]);
@@ -1142,10 +1136,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 type,
                 category: String(log?.severity ?? fallbackInfo?.severity ?? 'ERROR'),
                 amount: String(amount),
-                latest: amount > 0 ? formatMonitorLatestOccurrence(Number(log?.latestOccurrenceSeconds ?? 0), globalClock) : '/',
-                latestReason: normalizeMonitorReason(log?.latestReason),
-                latestSourceLabel: String(log?.latestSourceLabel ?? ''),
-                latestSourceId: Number(log?.latestSourceId ?? 0)
+                latest: amount > 0 ? formatMonitorLatestOccurrence(Number(log?.latestOccurrenceSeconds ?? 0), globalClock) : '/'
             };
         });
     }, [monitorSnapshot.logs, globalClock]);
@@ -2393,26 +2384,13 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     }, [selectedManagedVariableEntry, selectedManagedHolderVariableEntry, roomSettings.canModify, variablesType, removeUserVariable, removeFurniVariable]);
 
     const clearMonitorLogs = () => {
-        setSelectedMonitorErrorType(null);
-        setSelectedMonitorLogDetails(null);
+        setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
         SendMessageComposer(new WiredMonitorRequestComposer(WIRED_MONITOR_ACTION_CLEAR_LOGS));
     };
 
-    const openMonitorLogDetails = (type: string, details: Partial<MonitorLogDetails>) => {
-        setSelectedMonitorErrorType(type);
-        setSelectedMonitorLogDetails({
-            type,
-            severity: String(details.severity ?? MONITOR_ERROR_INFO[type]?.severity ?? 'ERROR'),
-            reason: normalizeMonitorReason(details.reason),
-            sourceLabel: String(details.sourceLabel ?? ''),
-            sourceId: Number(details.sourceId ?? 0),
-            amount: details.amount ? String(details.amount) : undefined,
-            latest: details.latest ? String(details.latest) : undefined,
-            occurredAt: details.occurredAt ? String(details.occurredAt) : undefined
-        });
-    };
+    const openMonitorErrorInfo = (type: string, category: string) => setSelectedMonitorError({ type, category });
 
     const beginVariableEdit = (variable: InspectionVariable) => {
         if (!variable.editable) return;
@@ -3124,8 +3102,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     ))}
                 </div>
             )}
+            {/* Official wired_menu_view: frame 3, 500x500. The tab bodies are this hotel's, so taller ones may grow it. */}
             <OctaneCardView
-                className="min-w-[520px] max-w-[520px]"
+                className="min-h-[500px] w-[500px]"
+                frameStyle={3}
+                isResizable={false}
                 theme="primary-slim"
                 uniqueKey="wired-creator-tools"
                 windowPosition={DraggableWindowPosition.TOP_LEFT}
@@ -3148,7 +3129,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                             onOpenMonitorHistory={() => setIsMonitorHistoryOpen(true)}
                             onOpenRoomLogs={() => setIsRoomLogsOpen(true)}
                             onClearMonitorLogs={clearMonitorLogs}
-                            onOpenMonitorLogDetails={openMonitorLogDetails}
+                            onOpenMonitorErrorInfo={openMonitorErrorInfo}
                         />
                     )}
                     {activeTab === 'inspection' && (
@@ -3266,15 +3247,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                                         <tr
                                             key={row.id}
                                             className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f8f6f0]'} cursor-pointer hover:bg-[#e8eefc]`}
-                                            onClick={() =>
-                                                openMonitorLogDetails(row.type, {
-                                                    severity: row.category,
-                                                    occurredAt: row.occurredAt,
-                                                    reason: row.reason,
-                                                    sourceLabel: row.sourceLabel,
-                                                    sourceId: row.sourceId
-                                                })
-                                            }
+                                            onClick={() => openMonitorErrorInfo(row.type, row.category)}
                                         >
                                             <td className="px-2 py-1 text-[#1b57b2]">{row.type}</td>
                                             <td className="px-2 py-1">{row.category}</td>
@@ -3402,8 +3375,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 />
             )}
             {!!selectedMonitorErrorInfo && (
+                // Official error_info_view: 337 wide, frame 3, contents at (8, 3) and height = contents + 48.
                 <OctaneCardView
-                    className="min-w-[470px] max-w-[470px] max-h-[500px]"
+                    className="w-[337px]"
+                    frameStyle={3}
+                    isResizable={false}
                     theme="primary-slim"
                     uniqueKey="wired-monitor-error-info"
                     windowPosition={DraggableWindowPosition.TOP_LEFT}
@@ -3411,50 +3387,24 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     offsetTop={120}
                 >
                     <OctaneCardHeaderView
-                        headerText="Wired Error Information"
-                        onCloseClick={() => {
-                            setSelectedMonitorErrorType(null);
-                            setSelectedMonitorLogDetails(null);
-                        }}
+                        headerText={localizeWithFallback('wiredmenu.error_info.title', 'Wired Error Information')}
+                        onCloseClick={() => setSelectedMonitorError(null)}
                     />
-                    <OctaneCardContentView className="text-black bg-[#f4efe3] p-4 flex flex-col gap-3 overflow-y-auto">
-                        <div className="flex items-start justify-between gap-3">
-                            <Text bold>{selectedMonitorErrorInfo.title}</Text>
-                            <span
-                                className={`rounded px-2 py-[2px] text-[10px] font-semibold ${(selectedMonitorLogDetails?.severity ?? selectedMonitorErrorInfo.severity) === 'WARNING' ? 'bg-[#d4f0d0] text-[#2a6a24]' : 'bg-[#f6d7d7] text-[#8c2424]'}`}
-                            >
-                                {selectedMonitorLogDetails?.severity ?? selectedMonitorErrorInfo.severity}
-                            </span>
-                        </div>
-                        {!!selectedMonitorLogDetails && (
-                            <div className="rounded border border-[#d8d2c3] bg-white/60 p-3 flex flex-col gap-1">
-                                <Text>
-                                    <b>Trigger:</b> {selectedMonitorDetailSource}
-                                </Text>
-                                <Text>
-                                    <b>Motivation:</b> {selectedMonitorLogDetails.reason}
-                                </Text>
-                                {!!selectedMonitorLogDetails.amount && (
-                                    <Text>
-                                        <b>Amount:</b> {selectedMonitorLogDetails.amount}
-                                    </Text>
-                                )}
-                                {!!selectedMonitorLogDetails.latest && (
-                                    <Text>
-                                        <b>Latest occurrence:</b> {selectedMonitorLogDetails.latest}
-                                    </Text>
-                                )}
-                                {!!selectedMonitorLogDetails.occurredAt && (
-                                    <Text>
-                                        <b>Occurred at:</b> {selectedMonitorLogDetails.occurredAt}
-                                    </Text>
-                                )}
-                            </div>
+                    <div className="relative mb-[6px] ml-[5px] mt-[3px] min-h-[100px] w-[320px] text-black">
+                        {!!MONITOR_ERROR_ICONS[selectedMonitorError.category] && (
+                            <img alt="" className="absolute right-0 top-0 size-[40px]" src={MONITOR_ERROR_ICONS[selectedMonitorError.category]} />
                         )}
-                        {selectedMonitorErrorInfo.description.map((paragraph, index) => (
-                            <Text key={index}>{paragraph}</Text>
-                        ))}
-                    </OctaneCardContentView>
+                        <Text bold className="absolute left-[109px] top-[11px] whitespace-nowrap">
+                            {selectedMonitorErrorInfo.title}
+                        </Text>
+                        <div className="w-[319px] whitespace-pre-line pt-[46px]">
+                            <Text>
+                                {selectedMonitorErrorInfo.errorId === undefined
+                                    ? selectedMonitorErrorInfo.description
+                                    : localizeWithFallback(`wiredmenu.error_info.${selectedMonitorErrorInfo.errorId}`, selectedMonitorErrorInfo.description)}
+                            </Text>
+                        </div>
+                    </div>
                 </OctaneCardView>
             )}
         </>
