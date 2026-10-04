@@ -57,8 +57,10 @@
 }
 
 .octane-housekeeping .octane-housekeeping-user-head {
-    position: relative;
+    display: flex;
     flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
     width: 54px;
     height: 62px;
     overflow: hidden;
@@ -67,10 +69,19 @@
     background: #e6e6e6;
 }
 
-.octane-housekeeping .octane-housekeeping-user-head > * {
-    position: absolute !important;
-    top: -14px;
-    left: -19px;
+/* The renderer's cropped head at native scale, centred whole inside the panel. */
+.octane-housekeeping .octane-housekeeping-user-head-image {
+    position: static !important;
+    flex: 0 0 auto;
+    width: auto !important;
+    height: auto !important;
+}
+
+.octane-housekeeping .octane-housekeeping-user-head-image img {
+    display: block;
+    max-width: 52px;
+    max-height: 60px;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 .octane-housekeeping .octane-housekeeping-facts {
