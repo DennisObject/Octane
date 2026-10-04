@@ -1,23 +1,21 @@
 import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager, RoomObjectCategory } from '@octane/renderer';
 import { Dispatch, FC, PropsWithChildren, SetStateAction, useEffect, useRef } from 'react';
-import { DispatchUiEvent, GetConfigurationValue, GetRoomSession, GetUserProfile, LocalizeText, localizeWithFallback } from '../../api';
-import { Flex, LayoutItemCountView } from '../../common';
+import { DispatchUiEvent, GetConfigurationValue, GetRoomSession, GetUserProfile, localizeWithFallback } from '../../api';
+import { Flex } from '../../common';
 import { GuideToolEvent } from '../../events';
-import { useDailyTasks, useRewardTracks } from '../../hooks';
 
 export const ToolbarMeView: FC<
     PropsWithChildren<{
         useGuideTool: boolean;
-        unseenAchievementCount: number;
         setMeExpanded: Dispatch<SetStateAction<boolean>>;
     }>
-> = (props) => {
-    const { useGuideTool = false, unseenAchievementCount = 0, setMeExpanded = null, children = null, ...rest } = props;
+> = (props) =>
+{
+    const { useGuideTool = false, setMeExpanded = null, children = null } = props;
     const elementRef = useRef<HTMLDivElement>(null);
-    const { unseenCount: unseenDailyTaskCount = 0 } = useDailyTasks();
-    const { unseenCount: unseenRewardTrackCount = 0 } = useRewardTracks();
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const roomSession = GetRoomSession();
 
         if (!roomSession) return;
@@ -25,8 +23,10 @@ export const ToolbarMeView: FC<
         GetRoomEngine().selectRoomObject(roomSession.roomId, roomSession.ownRoomIndex, RoomObjectCategory.UNIT);
     }, []);
 
-    useEffect(() => {
-        const onClick = (event: MouseEvent) => {
+    useEffect(() =>
+    {
+        const onClick = (event: MouseEvent) =>
+        {
             if (elementRef.current && elementRef.current.contains(event.target as Node)) return;
 
             setMeExpanded(false);
@@ -34,70 +34,43 @@ export const ToolbarMeView: FC<
 
         const timeout = window.setTimeout(() => document.addEventListener('click', onClick), 0);
 
-        return () => {
+        return () =>
+        {
             window.clearTimeout(timeout);
             document.removeEventListener('click', onClick);
         };
     }, [setMeExpanded]);
 
+    const open = (action: () => void) =>
+    {
+        setMeExpanded(false);
+        action();
+    };
+
     return (
-        <Flex
-            alignItems="center"
-            className="octane-toolbar-me-popup"
-            gap={2}
-            innerRef={elementRef}
-        >
+        <Flex alignItems="center" className="octane-toolbar-me-popup" gap={2} innerRef={elementRef}>
             {GetConfigurationValue('guides.enabled') && useGuideTool && (
-                <div
-                    className="navigation-item relative octane-icon icon-me-helper-tool cursor-pointer"
-                    onClick={(event) => DispatchUiEvent(new GuideToolEvent(GuideToolEvent.TOGGLE_GUIDE_TOOL))}
-                />
+                <div className="tbme-item" onClick={() => open(() => DispatchUiEvent(new GuideToolEvent(GuideToolEvent.TOGGLE_GUIDE_TOOL)))}>
+                    <span className="octane-icon icon-me-helper-tool" />
+                    <span>{localizeWithFallback('widget.memenu.guide', 'Helper tool')}</span>
+                </div>
             )}
-            <div
-                className="navigation-item relative octane-icon icon-me-achievements cursor-pointer"
-                onClick={(event) => CreateLinkEvent('achievements/toggle')}
-            >
-                {unseenAchievementCount > 0 && <LayoutItemCountView count={unseenAchievementCount} />}
+            <div className="tbme-item" onClick={() => open(() => GetUserProfile(GetSessionDataManager().userId))}>
+                <span className="octane-icon icon-me-profile" />
+                <span>{localizeWithFallback('widget.memenu.profile', 'My profile')}</span>
             </div>
-            <div
-                className="navigation-item relative icon-me-quests cursor-pointer"
-                title={localizeWithFallback('toolbar.me.quests', 'Quests')}
-                onClick={(event) => CreateLinkEvent('quests/toggle')}
-            />
-            <div
-                className="navigation-item relative icon-me-dailytasks cursor-pointer"
-                title={localizeWithFallback('toolbar.me.dailytasks', 'Daily rewards')}
-                onClick={(event) => CreateLinkEvent('dailytasks/toggle')}
-            >
-                {unseenDailyTaskCount > 0 && <LayoutItemCountView count={unseenDailyTaskCount} />}
+            <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('navigator/search/myworld_view'))}>
+                <span className="octane-icon icon-me-rooms" />
+                <span>{localizeWithFallback('widget.memenu.myrooms', 'My rooms')}</span>
             </div>
-            <div
-                className="navigation-item relative icon-me-rewardtrack cursor-pointer"
-                title={localizeWithFallback('toolbar.me.rewardtrack', 'Reward track')}
-                onClick={(event) => CreateLinkEvent('reward_track/toggle')}
-            >
-                {unseenRewardTrackCount > 0 && <LayoutItemCountView count={unseenRewardTrackCount} />}
+            <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('avatar-editor/show'))}>
+                <span className="octane-icon icon-me-clothing" />
+                <span>{localizeWithFallback('widget.memenu.editavatar', 'Change looks')}</span>
             </div>
-            <div
-                className="navigation-item relative octane-icon icon-me-profile cursor-pointer"
-                onClick={(event) => GetUserProfile(GetSessionDataManager().userId)}
-            />
-            <div
-                className="navigation-item relative octane-icon icon-me-rooms cursor-pointer"
-                onClick={(event) => CreateLinkEvent('navigator/search/myworld_view')}
-            />
-            <div className="navigation-item relative octane-icon icon-me-clothing cursor-pointer" onClick={(event) => CreateLinkEvent('avatar-editor/toggle')} />
-            <div
-                className="navigation-item relative octane-icon icon-me-badge-creator cursor-pointer"
-                onClick={(event) => CreateLinkEvent('badge-creator/toggle')}
-                title={LocalizeText('toolbar.icon.label.badge_creator')}
-            />
-            <div className="navigation-item relative octane-icon icon-me-settings cursor-pointer" onClick={(event) => CreateLinkEvent('user-settings/toggle')} />
-            <div
-                className="navigation-item relative octane-icon icon-me-forums cursor-pointer"
-                onClick={(event) => CreateLinkEvent('groupforum/toggle')}
-                title={LocalizeText('toolbar.icon.label.forums')}
-            />
+            <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('groupforum/list/my'))}>
+                <span className="octane-icon icon-me-forums" />
+                <span>{localizeWithFallback('widget.memenu.forums', 'Forums')}</span>
+            </div>
             {children}
         </Flex>
     );
