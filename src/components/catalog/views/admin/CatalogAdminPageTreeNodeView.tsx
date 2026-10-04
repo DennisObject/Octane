@@ -56,6 +56,8 @@ export const CatalogAdminPageTreeNodeView: FC<CatalogAdminPageTreeNodeViewProps>
                 onDragStart={(event) => tree.onDragStart(event, node)}
                 onDrop={(event) => tree.onDrop(event, node)}
                 onKeyDown={(event) => {
+                    // Keys on the disclosure button belong to that button, not to the row.
+                    if (event.target !== event.currentTarget) return;
                     if (event.key !== 'Enter' && event.key !== ' ') return;
                     event.preventDefault();
                     tree.onSelect(node);

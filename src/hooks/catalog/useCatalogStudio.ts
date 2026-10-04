@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { CatalogAdminRequestTracker } from './catalogAdminRequestTracker';
 import {
     CatalogStudioDocumentResult,
     CatalogStudioFeature,
@@ -12,6 +13,8 @@ export interface CatalogStudioContextValue {
     session: CatalogStudioSession | null;
     /** Which optional tools this hotel supports; their controls are hidden otherwise. */
     features: Readonly<Record<CatalogStudioFeature, boolean>>;
+    /** Requests waiting for an answer that may come as a bare CatalogAdminResult. */
+    requests: CatalogAdminRequestTracker;
     revision: number;
     pendingCount: number;
     history: CatalogStudioHistoryGroup[];

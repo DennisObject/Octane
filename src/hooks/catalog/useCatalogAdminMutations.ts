@@ -2,6 +2,8 @@ import {
     IMessageComposer,
     CatalogAdminDeleteOfferComposer,
     CatalogAdminDeletePageComposer,
+    CatalogAdminOfferDetailsEvent,
+    CatalogAdminPageDetailsEvent,
     CatalogAdminMovePageComposer,
     CatalogAdminReorderOffersComposer,
     CatalogAdminResultEvent,
@@ -44,7 +46,7 @@ const STALE_REVISION = 'STALE_REVISION';
 
 const PAGE_CONTENT_ACTIONS = new Set<StructuralAction>(['deleteOffer', 'reorderOffers']);
 
-/** How long an answer that arrives after its timeout may still turn up and must not be credited to a newer request. */
+/** How long a timed-out structural change keeps waiting for its late answer before it is given up. */
 const LATE_ANSWER_WINDOW_MS = 60_000;
 
 interface StructuralRequest {
@@ -61,7 +63,6 @@ interface PendingStructuralAction extends StructuralRequest {
 
 interface PendingSave {
     action: CatalogAdminSmartSaveAction;
-    editorKey: string;
     timer: ReturnType<typeof setTimeout>;
 }
 
@@ -75,9 +76,9 @@ export interface CatalogAdminMutations {
     /** Acknowledged saves by operation id, so every open editor finds its own answer. */
     results: ReadonlyMap<string, CatalogAdminMutationResult>;
     clearError: () => void;
-    /** `editorKey` names the editor window, which a server without the Smart Save answer closes on success. */
-    savePage: (form: CatalogAdminPageForm, catalogType: string, editorKey: string) => string | null;
-    saveOffer: (form: CatalogAdminOfferForm, catalogType: string, editorKey: string) => string | null;
+    /** Saves and creates are answered only through the Smart Save acknowledgement with their operation id. */
+    savePage: (form: CatalogAdminPageForm, catalogType: string) => string | null;
+    saveOffer: (form: CatalogAdminOfferForm, catalogType: string) => string | null;
     /** Structural changes target the open catalog unless an editor passes the catalog it was opened for. */
     deletePage: (pageId: number, name: string, catalogType?: string) => boolean;
     movePage: (pageId: number, parentId: number, index: number, name: string) => boolean;
@@ -139,7 +140,6 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     const { simpleAlert } = useNotificationActions();
     const studio = useCatalogStudio();
     const closeDeleted = useCatalogAdminUiStore((state) => state.closeDeleted);
-    const closeEditor = useCatalogAdminUiStore((state) => state.closeEditor);
     const [busy, setBusy] = useState(false);
     const [pendingSaveCount, setPendingSaveCount] = useState(0);
     const [lastError, setLastError] = useState<string | null>(null);
@@ -148,14 +148,11 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     const pendingActionRef = useRef<PendingStructuralAction | null>(null);
     const queuedActionRef = useRef<{ request: StructuralRequest; timer: ReturnType<typeof setTimeout> } | null>(null);
     const pendingSavesRef = useRef(new Map<string, PendingSave>());
-    // Bare answers carry no id: one that arrives after its request timed out is swallowed, not credited to a newer one.
-    const lateAnswersRef = useRef<number[]>([]);
-    const legacySavesRef = useRef(false);
     // The session a structural change was made against; until a newer one arrives its revision is stale.
     const [staleSession, setStaleSession] = useState<CatalogStudioSession | null>(null);
     const staleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const { session, revision } = studio;
+    const { session, revision, requests } = studio;
     const awaitingRevision = staleSession !== null && session === staleSession;
     // Requests read the session at the moment they are sent: a confirmation dialog may stay open across other saves.
     const liveRef = useRef({ session, revision, awaitingRevision, currentType });
@@ -173,20 +170,6 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         },
         []
     );
-
-    const expectLateAnswer = useCallback(() => {
-        lateAnswersRef.current.push(Date.now());
-    }, []);
-
-    /** True when a bare answer belongs to a request that already timed out. */
-    const takeLateAnswer = useCallback(() => {
-        const now = Date.now();
-        lateAnswersRef.current = lateAnswersRef.current.filter((timedOutAt) => now - timedOutAt < LATE_ANSWER_WINDOW_MS);
-        if (!lateAnswersRef.current.length) return false;
-
-        lateAnswersRef.current.shift();
-        return true;
-    }, []);
 
     const publishResult = useCallback((result: CatalogAdminMutationResult) => {
         setResults((current) => {
@@ -211,20 +194,18 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     }, []);
 
     const beginSave = useCallback(
-        (action: CatalogAdminSmartSaveAction, editorKey: string) => {
+        (action: CatalogAdminSmartSaveAction) => {
             const operationId = nextCatalogStudioOperationId(action);
             const timer = setTimeout(() => {
                 if (!settleSave(operationId)) return;
-                // A Smart Save answer is matched by id; only a bare one could be mistaken for a later save.
-                if (legacySavesRef.current) expectLateAnswer();
                 publishResult(failedResult(operationId, action, 'TIMEOUT', LocalizeText('catalog.admin.error.timeout')));
             }, RESPONSE_TIMEOUT_MS);
 
-            pendingSavesRef.current.set(operationId, { action, editorKey, timer });
+            pendingSavesRef.current.set(operationId, { action, timer });
             setPendingSaveCount(pendingSavesRef.current.size);
             return operationId;
         },
-        [expectLateAnswer, publishResult, settleSave]
+        [publishResult, settleSave]
     );
 
     const finishAction = useCallback(() => {
@@ -235,23 +216,37 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         return pending;
     }, []);
 
+    /**
+     * A structural change still counts as waiting after it timed out, so its late answer is not
+     * credited to a newer request; after a while longer it is given up for good.
+     */
+    const giveUpAction = useCallback(() => {
+        if (!pendingActionRef.current) return;
+
+        requests.settle('structural');
+        finishAction();
+    }, [finishAction, requests]);
+
     /** Sends a structural change now; the session must be open and no other change outstanding. */
     const sendAction = useCallback(
         (request: StructuralRequest, liveSession: CatalogStudioSession, liveRevision: number) => {
             const operationId = nextCatalogStudioOperationId(request.action);
             const timer = setTimeout(() => {
-                if (!finishAction()) return;
-                expectLateAnswer();
+                const pending = pendingActionRef.current;
+                if (!pending) return;
+
                 setLastError(LocalizeText('catalog.admin.error.timeout'));
                 if (PAGE_CONTENT_ACTIONS.has(request.action)) refreshCurrentPage();
+                pending.timer = setTimeout(giveUpAction, LATE_ANSWER_WINDOW_MS);
             }, RESPONSE_TIMEOUT_MS);
 
             pendingActionRef.current = { ...request, timer };
+            requests.begin('structural');
             setBusy(true);
             setLastError(null);
             SendMessageComposer(request.build(liveSession.draftVersionId, liveRevision, operationId));
         },
-        [expectLateAnswer, finishAction, refreshCurrentPage]
+        [giveUpAction, refreshCurrentPage, requests]
     );
 
     /**
@@ -353,27 +348,6 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         if (pending && PAGE_CONTENT_ACTIONS.has(pending.action)) refreshCurrentPage();
     };
 
-    /** A server without the Smart Save payload answers a save with the bare success flag. */
-    const handleLegacySaveResult = (parser: CatalogAdminResultMessageParser, operationId: string) => {
-        const pending = settleSave(operationId);
-        if (!pending) return;
-
-        legacySavesRef.current = true;
-
-        if (!parser.success) {
-            const message = parser.message ? localizeCatalogAdminPlainMessage(parser.message) : LocalizeText('catalog.admin.error.failed');
-            publishResult(failedResult(operationId, pending.action, 'FAILED', message));
-            return;
-        }
-
-        const isPage = pending.action === 'createPage' || pending.action === 'savePage';
-        closeEditor(isPage ? 'page' : 'offer', pending.editorKey);
-        if (isPage) refreshIndex();
-        else refreshCurrentPage();
-        studio.refresh();
-        studio.loadHistory();
-    };
-
     useMessageEvent<CatalogAdminResultEvent>(CatalogAdminResultEvent, (event) => {
         const parser = event.getParser();
 
@@ -382,37 +356,36 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
             return;
         }
 
-        if (takeLateAnswer()) {
-            // Whatever it reports may have changed the catalog; refresh instead of guessing.
-            studio.refresh();
-            return;
-        }
+        // A bare answer belongs to the oldest request that can get one; the server answers in order.
+        const waiting = requests.takeOldest();
 
-        if (pendingActionRef.current) {
+        if (waiting?.kind === 'structural') {
             handleStructuralResult(parser);
             return;
         }
 
-        const oldestSave = pendingSavesRef.current.keys().next();
-        if (!oldestSave.done) {
-            handleLegacySaveResult(parser, oldestSave.value);
+        if (waiting && !parser.success) {
+            waiting.onRefused?.(parser.message);
             return;
         }
 
-        // An answer nothing is waiting for (e.g. the server refusing to open the session).
-        if (!parser.success) setLastError(parser.message ? localizeCatalogAdminPlainMessage(parser.message) : LocalizeText('catalog.admin.error.failed'));
-        else studio.refresh();
+        // Nothing was waiting for it: whatever it reports, show the current catalog instead of guessing.
+        studio.refresh();
     });
 
+    // Reads that got their own answer leave the queue, even when their editor has closed meanwhile.
+    useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, () => requests.settle('pageDetails'));
+    useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, () => requests.settle('offerDetails'));
+
     const savePage = useCallback(
-        (form: CatalogAdminPageForm, catalogType: string, editorKey: string) => {
+        (form: CatalogAdminPageForm, catalogType: string) => {
             const live = liveRef.current;
             if (!live.session) return null;
 
             const isNew = form.pageId === null;
             const name = form.caption || (isNew ? LocalizeText('catalog.admin.create.page') : `#${form.pageId}`);
             const summary = LocalizeText(isNew ? 'catalog.admin.history.page.created' : 'catalog.admin.history.page.updated', ['name'], [name]);
-            const operationId = beginSave(isNew ? 'createPage' : 'savePage', editorKey);
+            const operationId = beginSave(isNew ? 'createPage' : 'savePage');
 
             SendMessageComposer(
                 createPageWriteComposer(form, { catalogType, draftVersionId: live.session.draftVersionId, revision: live.revision, summary, operationId })
@@ -423,14 +396,14 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     );
 
     const saveOffer = useCallback(
-        (form: CatalogAdminOfferForm, catalogType: string, editorKey: string) => {
+        (form: CatalogAdminOfferForm, catalogType: string) => {
             const live = liveRef.current;
             if (!live.session) return null;
 
             const isNew = form.offerId === null;
             const name = form.catalogName || (isNew ? LocalizeText('catalog.admin.offer.new') : `#${form.offerId}`);
             const summary = LocalizeText(isNew ? 'catalog.admin.history.offer.created' : 'catalog.admin.history.offer.updated', ['name'], [name]);
-            const operationId = beginSave(isNew ? 'createOffer' : 'saveOffer', editorKey);
+            const operationId = beginSave(isNew ? 'createOffer' : 'saveOffer');
 
             SendMessageComposer(
                 createOfferWriteComposer(form, { catalogType, draftVersionId: live.session.draftVersionId, revision: live.revision, summary, operationId })

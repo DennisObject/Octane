@@ -6,7 +6,7 @@ import { useCatalogAdmin } from '../../components/catalog/CatalogAdminContext';
 import { isReadOnlyCatalogAdminLayout } from '../../components/catalog/views/page/layout/catalogLayoutRegistry';
 import { useMessageEvent } from '../events/useMessageEvent';
 import { useNotificationActions } from '../notification/useNotification';
-import type { CatalogAdminPageEditorTarget, CatalogAdminPageForm } from './catalogAdmin.types';
+import type { CatalogAdminPageEditorTarget, CatalogAdminPageForm, CatalogAdminStatus } from './catalogAdmin.types';
 import {
     createNewPageForm,
     createPageFormFromDetails,
@@ -15,6 +15,7 @@ import {
     nextCatalogAdminOrder,
     validatePageForm
 } from './catalogAdminForms.helpers';
+import { localizeCatalogAdminPlainMessage } from './catalogAdminServerErrors.helpers';
 import { resolveCatalogAdminEditorStatus } from './catalogAdminStatus.helpers';
 import { getCatalogAdminNodeName, toStudioCatalogType } from './catalogAdminTree.helpers';
 import { useCatalogAdminUiStore } from './catalogAdminUiStore';
@@ -60,13 +61,14 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const [detailsReady, setDetailsReady] = useState(() => target.kind === 'create' || !!findSnapshot(studio.session, pageId, studioType));
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
     const detailsRequestedRef = useRef(false);
+    const [detailsError, setDetailsError] = useState<string | null>(null);
     const [initialForm] = useState(() => createInitialForm(target, studio.session));
     const sessionReady = admin?.sessionReady ?? false;
 
     const smartSave = useCatalogAdminSmartSave<CatalogAdminPageForm>({
         initial: initialForm,
         acknowledgements: admin?.results ?? new Map(),
-        submit: (draft) => admin?.savePage(draft, target.catalogType, editorKey) ?? null,
+        submit: (draft) => admin?.savePage(draft, target.catalogType) ?? null,
         canSubmit: (draft) => sessionReady && !validatePageForm(draft),
         toCommitted: (ack) => (ack.entityType === 'PAGE' && ack.entity ? createPageFormFromSnapshot(ack.entity as CatalogStudioPageSnapshot) : null),
         onClose: () => closeEditor('page', editorKey),
@@ -111,8 +113,13 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         if (pageId === null || !studio.session || detailsRequestedRef.current) return;
         detailsRequestedRef.current = true;
 
+        // A refused read comes back as a bare CatalogAdminResult; the mutations hook hands it here.
+        studio.requests.begin('pageDetails', (message) =>
+            setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'))
+        );
+
         SendMessageComposer(new CatalogAdminLoadPageComposer(pageId, target.catalogType, studio.session.draftVersionId, studio.revision));
-    }, [pageId, studio.revision, studio.session, target.catalogType]);
+    }, [pageId, studio.requests, studio.revision, studio.session, target.catalogType]);
 
     useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, (event) => {
         const parser = event.getParser();
@@ -127,7 +134,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const validationKey = detailsReady ? validatePageForm(draft) : null;
     const fallbackName = target.kind === 'edit' ? getCatalogAdminNodeName(target.node) : '';
     const displayName = draft.caption.trim() || baseline.caption.trim() || fallbackName || LocalizeText('catalog.admin.page.untitled');
-    const status = resolveCatalogAdminEditorStatus({
+    const editorStatus = resolveCatalogAdminEditorStatus({
         sessionReady,
         detailsReady,
         loadingKey: 'catalog.admin.status.loading.page',
@@ -137,6 +144,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         saveMessage: smartSave.message,
         lastSavedAt: smartSave.lastSavedAt
     });
+    const status: CatalogAdminStatus | null = detailsError ? { tone: 'error', message: detailsError } : editorStatus;
 
     const requestDelete = () => {
         const storedPageId = baseline.pageId;

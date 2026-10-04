@@ -5,7 +5,7 @@ import { LocalizeText } from '../../api/utils/LocalizeText';
 import { useCatalogAdmin } from '../../components/catalog/CatalogAdminContext';
 import { useMessageEvent } from '../events/useMessageEvent';
 import { useNotificationActions } from '../notification/useNotification';
-import type { CatalogAdminOfferEditorTarget, CatalogAdminOfferForm } from './catalogAdmin.types';
+import type { CatalogAdminOfferEditorTarget, CatalogAdminOfferForm, CatalogAdminStatus } from './catalogAdmin.types';
 import {
     createNewOfferForm,
     createOfferFormFromDetails,
@@ -14,6 +14,7 @@ import {
     nextCatalogAdminOrder,
     validateOfferForm
 } from './catalogAdminForms.helpers';
+import { localizeCatalogAdminPlainMessage } from './catalogAdminServerErrors.helpers';
 import { resolveCatalogAdminEditorStatus } from './catalogAdminStatus.helpers';
 import { toStudioCatalogType } from './catalogAdminTree.helpers';
 import { useCatalogAdminUiStore } from './catalogAdminUiStore';
@@ -61,12 +62,13 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const [limitedSells, setLimitedSells] = useState(0);
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
     const detailsRequestedRef = useRef(false);
+    const [detailsError, setDetailsError] = useState<string | null>(null);
     const sessionReady = admin?.sessionReady ?? false;
 
     const smartSave = useCatalogAdminSmartSave<CatalogAdminOfferForm>({
         initial: initialForm,
         acknowledgements: admin?.results ?? new Map(),
-        submit: (draft) => admin?.saveOffer(draft, target.catalogType, editorKey) ?? null,
+        submit: (draft) => admin?.saveOffer(draft, target.catalogType) ?? null,
         // Runs on save, after this render, so the stored item id below is set by then.
         canSubmit: (draft) => sessionReady && !validateOfferForm(draft, storedItemIds, draft.offerId === null ? 0 : limitedSells),
         toCommitted: (ack) => (ack.entityType === 'OFFER' && ack.entity ? createOfferFormFromSnapshot(ack.entity as CatalogStudioOfferSnapshot) : null),
@@ -112,8 +114,13 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         if (offerId === null || !studio.session || detailsRequestedRef.current) return;
         detailsRequestedRef.current = true;
 
+        // A refused read comes back as a bare CatalogAdminResult; the mutations hook hands it here.
+        studio.requests.begin('offerDetails', (message) =>
+            setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'))
+        );
+
         SendMessageComposer(new CatalogAdminLoadOfferComposer(offerId, target.catalogType, studio.session.draftVersionId, studio.revision));
-    }, [offerId, studio.revision, studio.session, target.catalogType]);
+    }, [offerId, studio.requests, studio.revision, studio.session, target.catalogType]);
 
     useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, (event) => {
         const parser = event.getParser();
@@ -131,7 +138,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const validationKey = detailsReady ? validateOfferForm(draft, storedItemIds, soldCount) : null;
     const displayName =
         draft.catalogName.trim() || target.offer?.localizationName || (isNew ? LocalizeText('catalog.admin.offer.new') : `#${baseline.offerId}`);
-    const status = resolveCatalogAdminEditorStatus({
+    const editorStatus = resolveCatalogAdminEditorStatus({
         sessionReady,
         detailsReady,
         loadingKey: 'catalog.admin.status.loading.offer',
@@ -141,6 +148,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         saveMessage: smartSave.message,
         lastSavedAt: smartSave.lastSavedAt
     });
+    const status: CatalogAdminStatus | null = detailsError ? { tone: 'error', message: detailsError } : editorStatus;
 
     const requestDelete = () => {
         const storedOfferId = baseline.offerId;

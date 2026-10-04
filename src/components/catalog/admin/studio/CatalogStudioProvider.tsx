@@ -17,7 +17,8 @@ import { SendMessageComposer } from '../../../../api';
 import { GetConfigurationValue } from '../../../../api/octane/GetConfigurationValue';
 import { LocalizeText } from '../../../../api/utils/LocalizeText';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
-import { localizeCatalogAdminCode } from '../../../../hooks/catalog/catalogAdminServerErrors.helpers';
+import { createCatalogAdminRequestTracker } from '../../../../hooks/catalog/catalogAdminRequestTracker';
+import { localizeCatalogAdminCode, localizeCatalogAdminPlainMessage } from '../../../../hooks/catalog/catalogAdminServerErrors.helpers';
 import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from '../../../../hooks/catalog/catalogStudio.helpers';
 import {
     CATALOG_STUDIO_FEATURES,
@@ -61,6 +62,18 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     const sessionRef = useRef<CatalogStudioSession | null>(null);
     const historyGroupIdsRef = useRef<Set<number>>(new Set());
     const [enabledFeatures, setEnabledFeatures] = useState(configuredFeatures);
+    const [requests] = useState(createCatalogAdminRequestTracker);
+    // A refresh asked for while one is on its way is sent once that answer is in, so it reflects every change before it.
+    const refreshAgainRef = useRef(false);
+    const historyAgainRef = useRef(false);
+
+    /** The server refused a session or history read with a bare CatalogAdminResult. */
+    const onReadRefused = useCallback((message: string) => {
+        refreshAgainRef.current = false;
+        historyAgainRef.current = false;
+        setLoading(false);
+        setLastError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'));
+    }, []);
 
     /** Turns a feature off when the server says it does not support it; true when that happened. */
     const disableIfUnsupported = useCallback((feature: CatalogStudioFeature, code: string) => {
@@ -81,17 +94,41 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         setSession(next);
     }, []);
 
+    /** Sends one open-session request; while one is on its way, the next is sent after its answer. */
+    const sendOpenSession = useCallback(() => {
+        if (requests.isWaiting('session')) {
+            refreshAgainRef.current = true;
+            return;
+        }
+
+        requests.begin('session', onReadRefused);
+        SendMessageComposer(new CatalogStudioOpenSessionComposer());
+    }, [onReadRefused, requests]);
+
     const refresh = useCallback(() => {
         if (!active || !authenticated) return;
-        setLoading(true);
-        SendMessageComposer(new CatalogStudioOpenSessionComposer());
-    }, [active, authenticated]);
 
-    const refreshHistory = useCallback(() => {
-        const current = sessionRef.current;
-        if (!current) return;
-        SendMessageComposer(new CatalogStudioHistoryComposer(current.draftVersionId, 0, 50));
-    }, []);
+        setLoading(true);
+        sendOpenSession();
+    }, [active, authenticated, sendOpenSession]);
+
+    const loadHistory = useCallback(
+        (offset = 0, limit = 50) => {
+            const current = sessionRef.current;
+            if (!current) return;
+            if (requests.isWaiting('history')) {
+                historyAgainRef.current = true;
+                return;
+            }
+
+            setLoading(true);
+            requests.begin('history', onReadRefused);
+            SendMessageComposer(new CatalogStudioHistoryComposer(current.draftVersionId, offset, limit));
+        },
+        [onReadRefused, requests]
+    );
+
+    const refreshHistory = loadHistory;
 
     const updateRevision = useCallback((revision: number) => {
         setSession((current) => {
@@ -118,8 +155,13 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             pages: (parser.pages ?? []).map((page) => ({ ...page })),
             offers: (parser.offers ?? []).map((offer) => ({ ...offer }))
         });
+        requests.settle('session');
         setLoading(false);
         setLastError(null);
+        if (refreshAgainRef.current) {
+            refreshAgainRef.current = false;
+            refresh();
+        }
     });
 
     // Undo is always offered (on edit and move rows); a refusal is about that row, not the whole feature.
@@ -156,7 +198,12 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         historyGroupIdsRef.current = new Set(nextHistory.map((group) => group.id));
         setHistory(nextHistory);
         setHistoryTotalCount(parser.totalCount);
+        requests.settle('history');
         setLoading(false);
+        if (historyAgainRef.current) {
+            historyAgainRef.current = false;
+            loadHistory();
+        }
     });
 
     useMessageEvent<CatalogStudioValidationEvent>(CatalogStudioValidationEvent, (event) => {
@@ -203,22 +250,22 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         }
     });
 
+    // Closing the catalog (or losing the connection) drops the session; opening it fetches a fresh one.
+    const isOpen = active && authenticated;
+    const [wasOpen, setWasOpen] = useState(isOpen);
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+        if (!isOpen) setSession(null);
+        setLoading(isOpen);
+    }
+
     useEffect(() => {
-        if (!active || !authenticated) {
-            setSession(null);
+        if (!isOpen) {
             sessionRef.current = null;
-            setLoading(false);
             return;
         }
-        refresh();
-    }, [active, authenticated, refresh]);
-
-    const loadHistory = useCallback((offset = 0, limit = 50) => {
-        const current = sessionRef.current;
-        if (!current) return;
-        setLoading(true);
-        SendMessageComposer(new CatalogStudioHistoryComposer(current.draftVersionId, offset, limit));
-    }, []);
+        sendOpenSession();
+    }, [isOpen, sendOpenSession]);
 
     const validate = useCallback(() => {
         const current = sessionRef.current;
@@ -297,6 +344,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         () => ({
             session,
             features,
+            requests,
             revision: session?.revision ?? 0,
             pendingCount: session?.pendingCount ?? 0,
             history,
@@ -318,6 +366,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         [
             session,
             features,
+            requests,
             history,
             historyTotalCount,
             validation,
