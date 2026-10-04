@@ -3397,11 +3397,13 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                         <Text bold className="absolute left-[109px] top-[11px] whitespace-nowrap">
                             {selectedMonitorErrorInfo.title}
                         </Text>
-                        <Text className="block w-[319px] whitespace-pre-line pt-[46px]">
-                            {selectedMonitorErrorInfo.errorId === undefined
-                                ? selectedMonitorErrorInfo.description
-                                : localizeWithFallback(`wiredmenu.error_info.${selectedMonitorErrorInfo.errorId}`, selectedMonitorErrorInfo.description)}
-                        </Text>
+                        <div className="w-[319px] whitespace-pre-line pt-[46px]">
+                            <Text>
+                                {selectedMonitorErrorInfo.errorId === undefined
+                                    ? selectedMonitorErrorInfo.description
+                                    : localizeWithFallback(`wiredmenu.error_info.${selectedMonitorErrorInfo.errorId}`, selectedMonitorErrorInfo.description)}
+                            </Text>
+                        </div>
                     </div>
                 </OctaneCardView>
             )}
