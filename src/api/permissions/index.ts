@@ -12,7 +12,6 @@ export const Permission = {
     RoomDiceCloseAny: 'room.dice.close_any',
     HousekeepingAccess: 'housekeeping.access',
     RewardTrackManage: 'rewardtrack.manage',
-    SoundboardManage: 'soundboard.manage',
     NavigatorStaffPick: 'navigator.staff_pick',
     FortuneWheelManage: 'fortune_wheel.manage',
     HousekeepingRolesManage: 'housekeeping.roles.manage',

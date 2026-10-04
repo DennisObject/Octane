@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { CreateLinkEvent, GetMaxVisitorsList, getYoutubeRoomEnabled, IRoomData, LocalizeText, SendMessageComposer, setYoutubeRoomEnabled } from '../../../../api';
 import { Column, Flex, Text } from '../../../../common';
-import { useMessageEvent, useNavigatorData, useNotification, useSoundboard } from '../../../../hooks';
+import { useMessageEvent, useNavigatorData, useNotification } from '../../../../hooks';
 
 const ROOM_NAME_MIN_LENGTH = 3;
 const ROOM_NAME_MAX_LENGTH = 60;
@@ -27,7 +27,6 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
     const [youtubeEnabled, setYoutubeEnabled] = useState(getYoutubeRoomEnabled());
     const { showConfirm = null } = useNotification();
     const { categories } = useNavigatorData();
-    const { enabled: soundboardEnabled, setRoomEnabled: setSoundboardEnabled } = useSoundboard();
 
     useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, (event) => {
         setYoutubeEnabled(event.getParser().youtubeEnabled);
@@ -242,16 +241,6 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                     onChange={(event) => toggleYouTube(event.target.checked)}
                 />
                 <Text>{LocalizeText('widget.room.youtube.shared')}</Text>
-            </Flex>
-            <Flex alignItems="center" gap={1}>
-                <input
-                    aria-label={LocalizeText('soundboard.room.allow')}
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={soundboardEnabled}
-                    onChange={(event) => setSoundboardEnabled(event.target.checked)}
-                />
-                <Text>{LocalizeText('soundboard.room.allow')}</Text>
             </Flex>
             <Flex pointer alignItems="center" justifyContent="center" gap={1} onClick={deleteRoom}>
                 <FaTimes className="fa-icon shrink-0 text-[#a81a12]" />

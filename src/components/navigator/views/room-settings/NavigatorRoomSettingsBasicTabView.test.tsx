@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
 
 const sendMessageComposer = vi.fn();
-const setSoundboardRoomEnabled = vi.fn();
 
 vi.mock('@octane/renderer', () => ({
     RoomDeleteComposer: class {},
@@ -22,8 +21,7 @@ vi.mock('../../../../api', () => ({
     GetMaxVisitorsList: [25, 50],
     getYoutubeRoomEnabled: () => false,
     LocalizeText: (key: string) => ({
-        'widget.room.youtube.shared': 'YouTube is being shared',
-        'soundboard.room.allow': 'Allow Soundboard use in this room'
+        'widget.room.youtube.shared': 'YouTube is being shared'
     })[key] || key,
     SendMessageComposer: (composer: unknown) => sendMessageComposer(composer),
     setYoutubeRoomEnabled: vi.fn()
@@ -38,8 +36,7 @@ vi.mock('../../../../common', () => ({
 vi.mock('../../../../hooks', () => ({
     useMessageEvent: vi.fn(),
     useNavigatorData: () => ({ categories: [] }),
-    useNotification: () => ({ showConfirm: vi.fn() }),
-    useSoundboard: () => ({ enabled: true, setRoomEnabled: setSoundboardRoomEnabled })
+    useNotification: () => ({ showConfirm: vi.fn() })
 }));
 
 const roomData = {
@@ -71,14 +68,5 @@ describe('NavigatorRoomSettingsBasicTabView room toggles', () => {
 
         expect(sendMessageComposer).toHaveBeenCalledTimes(1);
         expect((sendMessageComposer.mock.calls[0][0] as { enabled: boolean }).enabled).toBe(true);
-    });
-
-    it('renders one whole-room soundboard toggle and no per-sound controls', () => {
-        const { container } = render(<NavigatorRoomSettingsBasicTabView handleChange={vi.fn()} roomData={roomData} onClose={vi.fn()} />);
-
-        expect(screen.getAllByRole('checkbox', { name: 'Allow Soundboard use in this room' })).toHaveLength(1);
-        expect(container.textContent).not.toContain('Block');
-        expect(container.textContent).not.toContain('Minimum rank');
-        expect(container.textContent).not.toContain('Save catalog');
     });
 });

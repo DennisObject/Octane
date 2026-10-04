@@ -89,7 +89,7 @@ export const prependSingleAlert = (alerts: NotificationAlertItem[], item: Notifi
 };
 
 export const prependSingleBubble = (alerts: NotificationBubbleItem[], item: NotificationBubbleItem): NotificationBubbleItem[] => {
-    const shouldReplace = item.notificationType === NotificationBubbleType.CLUBGIFT || item.notificationType === NotificationBubbleType.SOUNDBOARD;
+    const shouldReplace = item.notificationType === NotificationBubbleType.CLUBGIFT;
 
     return [item, ...(shouldReplace ? alerts.filter((value) => value.notificationType !== item.notificationType) : alerts)];
 };

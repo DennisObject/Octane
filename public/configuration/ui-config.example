@@ -38,7 +38,6 @@
     "game.center.enabled": false,
     "hotel_alert_animated": false,
     "radio_ui.enabled": false,
-    "soundboard.layout.url": "configuration/soundboard-layout.jsonc",
     "guides.enabled": true,
 	"housekeeping.enabled": true,
     "buildersclub.enabled": true,

@@ -10,8 +10,6 @@
     "images.url": "https://hotel.example.com/client/nitro/images",
     "gamedata.url": "https://nitro.example.com:2096/nitro-sec/file?kind=gamedata&file=",
     "sounds.url": "${asset.url}/sounds/%sample%.mp3",
-    "soundboard.asset.url": "${asset.url}/sounds/soundboard/%file%",
-    "soundboard.manifest.url": "${gamedata.url}/SoundData.json?t=%timestamp%",
     "external.texts.url": [
         "${gamedata.url}/ExternalTexts.json?t=%timestamp%",
         "${gamedata.url}/UITexts.jsonc?t=%timestamp%"
@@ -36,7 +34,6 @@
     "generic.asset.url": "${asset.url}/generic/%libname%.nitro",
     "badge.asset.url": "${image.library.url}album1584/%badgename%.gif",
 	"radio.url": "${gamedata.url}/radio-stations.jsonc?t=%timestamp%",
-	"soundboard.url": "${gamedata.url}/soundboard-sounds.jsonc?t=%timestamp%",
     "furni.rotation.bounce.steps": 20,
 	"furni.rotation.bounce.height": 0.0625,
 	"enable.avatar.arrow": false,

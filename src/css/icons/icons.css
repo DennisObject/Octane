@@ -222,12 +222,6 @@
     height: 36px;
 }
 
-.octane-icon.icon-soundboard {
-    background-image: url("@/assets/images/toolbar/icons/soundboard.png");
-    width: 32px;
-    height: 38px;
-}
-
 .octane-icon.icon-message {
     background-image: url("@/assets/images/toolbar/air/messenger.png");
     width: 26px;

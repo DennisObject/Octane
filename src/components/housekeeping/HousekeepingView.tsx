@@ -10,7 +10,6 @@ import { HousekeepingAuditTab } from './views/audit/HousekeepingAuditTab';
 import { HousekeepingDashboardTab } from './views/dashboard/HousekeepingDashboardTab';
 import { HousekeepingEconomyTab } from './views/economy/HousekeepingEconomyTab';
 import { HousekeepingRoomsTab } from './views/rooms/HousekeepingRoomsTab';
-import { HousekeepingSoundboardTab } from './views/soundboard/HousekeepingSoundboardTab';
 import { HousekeepingUsersTab } from './views/users/HousekeepingUsersTab';
 
 const TAB_ORDER: HousekeepingTabId[] = [
@@ -18,8 +17,7 @@ const TAB_ORDER: HousekeepingTabId[] = [
     HousekeepingTabId.USERS,
     HousekeepingTabId.ROOMS,
     HousekeepingTabId.ECONOMY,
-    HousekeepingTabId.AUDIT,
-    HousekeepingTabId.SOUNDBOARD
+    HousekeepingTabId.AUDIT
 ];
 
 const isTabId = (value: string): value is HousekeepingTabId => (TAB_ORDER as string[]).includes(value);
@@ -42,8 +40,6 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
             return <HousekeepingEconomyTab />;
         case HousekeepingTabId.AUDIT:
             return <HousekeepingAuditTab />;
-        case HousekeepingTabId.SOUNDBOARD:
-            return <HousekeepingSoundboardTab />;
         default:
             return <HousekeepingDashboardTab />;
     }
@@ -60,14 +56,13 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
 export const HousekeepingView: FC = () => {
     const { isVisible, openPanel, closePanel, togglePanel, activeTab, setActiveTab, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
     const isHk = useHasPermission(Permission.HousekeepingAccess);
-    const canManageSoundboard = useHasPermission(Permission.SoundboardManage);
     const isEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const mode = useMemo(() => getHousekeepingMode(), []);
     const isAllowed = isEnabled && isHk;
 
     const availableTabs = useMemo(
-        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode) && (tab !== HousekeepingTabId.SOUNDBOARD || canManageSoundboard)),
-        [mode, canManageSoundboard]
+        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode)),
+        [mode]
     );
 
     useEffect(() => {
