@@ -138,10 +138,12 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
             onSent: () => setDetailsSent(true),
             onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
             onUnanswered: (reason) => {
-                setDetailsSent(false);
+                // A timeout leaves it to the request queue's resync (the editor says so); its late answer still loads it.
+                if (reason === 'timeout') return;
+
                 // Not sent, or dropped by a close or reconnect: ask again once a session is back.
-                if (reason !== 'timeout') detailsRequestedRef.current = false;
-                else setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'));
+                setDetailsSent(false);
+                detailsRequestedRef.current = false;
             }
         });
     }, [pageId, getSession, requests, studio.session, target.catalogType]);
@@ -179,7 +181,9 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         saveMessage: smartSave.message,
         lastSavedAt: smartSave.lastSavedAt
     });
-    const status: CatalogAdminStatus | null = detailsError ? { tone: 'error', message: detailsError } : editorStatus;
+    const resyncStatus: CatalogAdminStatus | null =
+        studio.requestState === 'resync' ? { tone: 'error', message: LocalizeText('catalog.admin.studio.resync') } : null;
+    const status: CatalogAdminStatus | null = detailsError ? { tone: 'error', message: detailsError } : (resyncStatus ?? editorStatus);
 
     const requestDelete = () => {
         const storedPageId = baseline.pageId;

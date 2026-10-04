@@ -31,7 +31,7 @@ import {
 } from '../../../../hooks/catalog/catalogStudio.types';
 import { CatalogStudioContext, CatalogStudioContextValue } from '../../../../hooks/catalog/useCatalogStudio';
 
-/** How long a session or history read may stay unanswered before the studio offers a retry. */
+/** How long a session or history read may stay unanswered before the request queue goes into resync. */
 const READ_TIMEOUT_MS = 10_000;
 
 // Answer codes of a server that knows the packet but not the feature.
@@ -66,9 +66,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     const historyGroupIdsRef = useRef<Set<number>>(new Set());
     const [enabledFeatures, setEnabledFeatures] = useState(configuredFeatures);
     const [requests] = useState(createCatalogAdminRequestTracker);
-    const requestsWaiting = useSyncExternalStore(requests.subscribe, requests.isWaiting);
-    // A session or history read went unanswered; the manager offers a retry instead of waiting forever.
-    const [unresponsive, setUnresponsive] = useState(false);
+    const requestState = useSyncExternalStore(requests.subscribe, requests.getState);
 
     /** The server refused a session or history read with a bare CatalogAdminResult. */
     const onReadRefused = useCallback((_success: boolean, message: string) => {
@@ -81,7 +79,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         if (reason === 'reset') return;
 
         setLoading(false);
-        if (reason === 'timeout') setUnresponsive(true);
     }, []);
 
     /** Turns a feature off when the server says it does not support it; true when that happened. */
@@ -153,12 +150,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
 
     const refreshHistory = loadHistory;
 
-    const retry = useCallback(() => {
-        setUnresponsive(false);
-        refresh();
-        loadHistory();
-    }, [loadHistory, refresh]);
-
     const updateRevision = useCallback((revision: number) => {
         setSession((current) => {
             if (!current || current.revision === revision) return current;
@@ -184,7 +175,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             pages: (parser.pages ?? []).map((page) => ({ ...page })),
             offers: (parser.offers ?? []).map((offer) => ({ ...offer }))
         });
-        setUnresponsive(false);
         setLoading(false);
         setLastError(null);
         // After the session is stored: the next queued request may be sent right away and read it.
@@ -222,7 +212,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         historyGroupIdsRef.current = new Set(nextHistory.map((group) => group.id));
         setHistory(nextHistory);
         setHistoryTotalCount(parser.totalCount);
-        setUnresponsive(false);
         setLoading(false);
         requests.takeReply('history');
     });
@@ -278,16 +267,20 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         setWasOpen(isOpen);
         if (!isOpen) setSession(null);
         setLoading(isOpen);
-        setUnresponsive(false);
     }
 
+    // Only a real connection change resets the transport state: answers to requests sent before it never come.
     useEffect(() => {
-        // Answers to requests from before a close or reconnect never arrive, or belong to nothing now.
-        // Requests only go out while the studio is open on an authenticated connection.
         requests.reset();
+    }, [authenticated, requests]);
+
+    // Closing the studio only drops what was not sent yet. Requests go out while it is open on an
+    // authenticated connection.
+    useEffect(() => {
         requests.setCanSend(isOpen);
 
         if (!isOpen) {
+            requests.clearQueue();
             sessionRef.current = null;
             return;
         }
@@ -374,10 +367,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             session,
             features,
             requests,
-            requestsWaiting,
+            requestState,
             getSession,
-            unresponsive,
-            retry,
             revision: session?.revision ?? 0,
             pendingCount: session?.pendingCount ?? 0,
             history,
@@ -400,10 +391,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             session,
             features,
             requests,
-            requestsWaiting,
+            requestState,
             getSession,
-            unresponsive,
-            retry,
             history,
             historyTotalCount,
             validation,

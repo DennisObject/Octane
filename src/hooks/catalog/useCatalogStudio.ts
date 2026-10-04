@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { CatalogAdminRequestTracker } from './catalogAdminRequestTracker';
+import type { CatalogAdminRequestState, CatalogAdminRequestTracker } from './catalogAdminRequestTracker';
 import {
     CatalogStudioDocumentResult,
     CatalogStudioFeature,
@@ -15,13 +15,10 @@ export interface CatalogStudioContextValue {
     features: Readonly<Record<CatalogStudioFeature, boolean>>;
     /** Non-save requests go out one at a time through this queue. */
     requests: CatalogAdminRequestTracker;
-    /** A request waits for its turn or the queue is resyncing after a timeout. */
-    requestsWaiting: boolean;
+    /** A request waits for its turn, or the queue is resyncing after a request timed out. */
+    requestState: CatalogAdminRequestState;
     /** The session as of now, also between an answer and the render that shows it. */
     getSession: () => CatalogStudioSession | null;
-    /** A session or history read went unanswered; `retry` asks again. */
-    unresponsive: boolean;
-    retry: () => void;
     revision: number;
     pendingCount: number;
     history: CatalogStudioHistoryGroup[];

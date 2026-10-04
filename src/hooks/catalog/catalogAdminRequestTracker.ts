@@ -12,13 +12,20 @@
  *   details) or a bare CatalogAdminResult its kind accepts (a structural change accepts any, a read
  *   only a refusal) settles it -> idle. Any other answer is stray and changes nothing.
  * - resyncing: the request timed out. Nothing new is sent until the expired request absorbs one
- *   answer its kind accepts (its late answer), or 2 s pass without any answer (every stray answer
- *   restarts that quiet window), or `reset` runs (close, connection change) -> idle.
+ *   answer its kind accepts (its late answer) -> idle, or the socket reconnects (`reset`) -> idle.
+ *   Answers it does not accept are stray and change nothing. There is no time-based exit: a reply
+ *   that is merely slow must never be credited to the next request.
+ *
+ * Closing the studio or an editor only drops the requests still queued (`clearQueue`); a request
+ * on the wire, or an expired one, keeps the transport state until its answer or a reconnect.
  */
 export type CatalogAdminRequestKind = 'session' | 'history' | 'pageDetails' | 'offerDetails' | 'structural';
 
-/** Why a request got no answer: it timed out, it could not be sent, or tracking was reset. */
+/** Why a request got no answer: it timed out, it could not be sent, or it was dropped (close or reconnect). */
 export type CatalogAdminUnansweredReason = 'timeout' | 'cancelled' | 'reset';
+
+/** idle, a request waits for its turn, or the queue is resyncing after a timeout. */
+export type CatalogAdminRequestState = 'idle' | 'waiting' | 'resync';
 
 export interface CatalogAdminRequest {
     kind: CatalogAdminRequestKind;
@@ -55,15 +62,14 @@ export interface CatalogAdminRequestTracker {
     takeBare: (success: boolean, message: string) => CatalogAdminBareAnswer | null;
     /** Whether requests may go out now; allowing it sends what waits. */
     setCanSend: (canSend: boolean) => void;
-    /** Close or connection change: drops everything; owners of unanswered requests hear "reset". */
+    /** The studio closed: drops the requests not sent yet; their owners hear "reset". The wire state stays. */
+    clearQueue: () => void;
+    /** The socket reconnected: answers to earlier requests will never come, so everything is dropped. */
     reset: () => void;
-    /** For useSyncExternalStore: true while something waits for its turn or the queue is resyncing. */
+    /** For useSyncExternalStore. */
     subscribe: (listener: () => void) => () => void;
-    isWaiting: () => boolean;
+    getState: () => CatalogAdminRequestState;
 }
-
-/** After a timeout, how long the queue stays quiet before it trusts the wire again. */
-const RESYNC_QUIET_MS = 2_000;
 
 interface Entry extends CatalogAdminRequest {
     id: number;
@@ -88,19 +94,9 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
 
     const owner = (entry: Entry) => (entry.detached ? null : entry);
 
-    const setTimer = (callback: () => void, ms: number) => {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(callback, ms);
-    };
-
     const clearTimer = () => {
         if (timer) clearTimeout(timer);
         timer = null;
-    };
-
-    const leaveResync = () => {
-        expired = null;
-        clearTimer();
     };
 
     /** Sends the next queued request when nothing is on the wire and the queue is not resyncing. */
@@ -115,12 +111,11 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
 
             inFlight = entry;
             owner(entry)?.onSent?.();
-            setTimer(() => {
-                const timedOut = inFlight;
+            timer = setTimeout(() => {
+                timer = null;
+                expired = inFlight;
                 inFlight = null;
-                expired = timedOut;
-                setTimer(endResync, RESYNC_QUIET_MS);
-                owner(timedOut)?.onUnanswered?.('timeout');
+                owner(expired)?.onUnanswered?.('timeout');
                 notify();
             }, entry.timeoutMs);
         }
@@ -128,20 +123,25 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
         notify();
     };
 
-    function endResync() {
-        leaveResync();
-        pump();
-    }
-
     const settle = () => {
         inFlight = null;
         clearTimer();
         pump();
     };
 
-    /** While resyncing, an answer the queue cannot place restarts the quiet window. */
-    const stray = () => {
-        if (expired) setTimer(endResync, RESYNC_QUIET_MS);
+    /** The expired request took its late answer: the wire is in step again. */
+    const absorbLate = () => {
+        const late = expired;
+        expired = null;
+        owner(late)?.onLate?.();
+        pump();
+        return late;
+    };
+
+    const dropQueued = () => {
+        const dropped = queue;
+        queue = [];
+        dropped.forEach((entry) => owner(entry)?.onUnanswered?.('reset'));
     };
 
     return {
@@ -169,15 +169,7 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
                 return;
             }
 
-            if (expired && matchesReply(expired, kind, entityId)) {
-                const late = expired;
-                leaveResync();
-                owner(late)?.onLate?.();
-                pump();
-                return;
-            }
-
-            stray();
+            if (expired && matchesReply(expired, kind, entityId)) absorbLate();
         },
         takeBare: (success, message) => {
             if (inFlight && acceptsBare(inFlight.kind, success)) {
@@ -189,33 +181,31 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
                 return { kind: answered.kind, late: false };
             }
 
-            if (expired && acceptsBare(expired.kind, success)) {
-                const late = expired;
-                leaveResync();
-                owner(late)?.onLate?.();
-                pump();
-                return { kind: late.kind, late: true };
-            }
+            if (expired && acceptsBare(expired.kind, success)) return { kind: absorbLate().kind, late: true };
 
-            stray();
             return null;
         },
         setCanSend: (value) => {
             canSend = value;
             pump();
         },
+        clearQueue: () => {
+            dropQueued();
+            notify();
+        },
         reset: () => {
-            const unanswered = [...(inFlight ? [inFlight] : []), ...queue];
-            queue = [];
+            const unanswered = inFlight;
             inFlight = null;
-            leaveResync();
-            unanswered.forEach((entry) => owner(entry)?.onUnanswered?.('reset'));
+            expired = null;
+            clearTimer();
+            if (unanswered) owner(unanswered)?.onUnanswered?.('reset');
+            dropQueued();
             notify();
         },
         subscribe: (listener) => {
             listeners.add(listener);
             return () => listeners.delete(listener);
         },
-        isWaiting: () => !!expired || queue.length > 0
+        getState: () => (expired ? 'resync' : queue.length ? 'waiting' : 'idle')
     };
 };
