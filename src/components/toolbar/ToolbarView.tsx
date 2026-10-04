@@ -359,6 +359,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
             <AnimatePresence>
                 {!touchLayout && isProgressionExpanded && (
                     <motion.div
+                        key="progression-menu"
                         ref={progressionMenuRef}
                         initial={{ opacity: 0, y: 6, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -376,6 +377,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 )}
                 {!touchLayout && isMeExpanded && (
                     <motion.div
+                        key="me-menu"
                         ref={meMenuRef}
                         initial={{ opacity: 0, y: 6, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
