@@ -95,32 +95,12 @@ export const App: FC<{}> = (props) => {
     const devicePixelRatio = useDevicePixelRatio();
     const [isReady, setIsReady] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [homeUrl, setHomeUrl] = useState('');
     const [showLogin, setShowLogin] = useState(false);
     const [isEnteringHotel, setIsEnteringHotel] = useState(() => !!window.OctaneConfig?.['sso.ticket'] || hasRememberGrant());
     const [prepareTrigger, setPrepareTrigger] = useState(0);
     const [loadingProgress, setLoadingProgress] = useState(0);
-    const [loadingTask, setLoadingTask] = useState('');
-    const taskLabel = useCallback((key: string, fallback: string): string => {
-        try {
-            const locManager = GetLocalizationManager();
-            if (locManager && typeof locManager.getValue === 'function') {
-                const fromLoc = locManager.getValue(key, false);
-
-                if (typeof fromLoc === 'string' && fromLoc.length && fromLoc !== key) return fromLoc;
-            }
-        } catch {}
-
-        try {
-            const fromConfig = GetConfiguration().getValue<string>(key, '');
-            if (typeof fromConfig === 'string' && fromConfig.length) return fromConfig;
-        } catch {}
-
-        return fallback;
-    }, []);
-    const bumpProgress = useCallback((value: number, task?: string) => {
+    const bumpProgress = useCallback((value: number) => {
         setLoadingProgress((prev) => (value > prev ? value : prev));
-        if (task !== undefined) setLoadingTask(task);
     }, []);
     const warmupPromiseRef = useRef<Promise<void>>(null);
     const rendererPromiseRef = useRef<Promise<any>>(null);
@@ -162,8 +142,6 @@ export const App: FC<{}> = (props) => {
         console.warn('[App] showSessionExpired — diagnostic shown (mid-game close)');
         clearStoredCredentials();
 
-        const baseUrl = window.location.origin + '/';
-        setHomeUrl(baseUrl);
         setErrorMessage('Your session has expired.\nPlease log in again to enter the hotel.');
         setIsReady(false);
         setShowLogin(false);
@@ -181,7 +159,6 @@ export const App: FC<{}> = (props) => {
         }
         const showSignIn = () =>
         {
-            setHomeUrl('');
             setErrorMessage('');
             setIsReady(false);
             setShowLogin(true);
@@ -320,7 +297,7 @@ export const App: FC<{}> = (props) => {
 
             warmupPromiseRef.current = (async () => {
                 await GetConfiguration().init();
-                bumpProgress(25, taskLabel('loader.waiting', 'Loading content...'));
+                bumpProgress(25);
 
                 // 0 = the display's refresh rate. A cap (the old 24 default) makes
                 // Pixi skip whole animation frames: on a 60 Hz display it ticks at an
@@ -359,20 +336,20 @@ export const App: FC<{}> = (props) => {
                 loginImageUrls.forEach(preloadImage);
                 gamedataUrls.forEach((url) => preloadUrl(url));
 
-                const warmupTasks: { promise: Promise<any>; label: string }[] = [
-                    { promise: GetAssetManager().downloadAssets(assetUrls), label: taskLabel('loading.task.assets', 'Loading game assets...') },
-                    { promise: GetLocalizationManager().init(), label: taskLabel('loading.task.localization', 'Loading translations...') },
-                    { promise: GetAvatarRenderManager().init(), label: taskLabel('loading.task.avatar', 'Loading wardrobe...') },
-                    { promise: GetSoundManager().init(), label: taskLabel('loading.task.sounds', 'Loading sounds...') }
+                const warmupTasks: Promise<any>[] = [
+                    GetAssetManager().downloadAssets(assetUrls),
+                    GetLocalizationManager().init(),
+                    GetAvatarRenderManager().init(),
+                    GetSoundManager().init()
                 ];
                 let warmupDone = 0;
                 const warmupStart = 25;
                 const warmupSpan = 45;
                 await Promise.all(
-                    warmupTasks.map((t) =>
-                        t.promise.then((value) => {
+                    warmupTasks.map((task) =>
+                        task.then((value) => {
                             warmupDone++;
-                            bumpProgress(warmupStart + Math.round((warmupSpan * warmupDone) / warmupTasks.length), t.label);
+                            bumpProgress(warmupStart + Math.round((warmupSpan * warmupDone) / warmupTasks.length));
                             return value;
                         })
                     )
@@ -381,7 +358,7 @@ export const App: FC<{}> = (props) => {
 
             return warmupPromiseRef.current;
         },
-        [startRenderer, bumpProgress, taskLabel]
+        [startRenderer, bumpProgress]
     );
 
     useEffect(() => {
@@ -412,10 +389,8 @@ export const App: FC<{}> = (props) => {
                 hasRememberLocal: hasRememberGrant()
             });
 
-            const bootLabel = taskLabel('loader', 'Booting...');
             setLoadingProgress(0);
-            setLoadingTask(bootLabel);
-            bumpProgress(5, bootLabel);
+            bumpProgress(5);
 
             try {
                 if (!window.OctaneConfig) throw new Error('OctaneConfig is not defined!');
@@ -441,7 +416,7 @@ export const App: FC<{}> = (props) => {
                     await adoptLaunchRememberToken(launchRemember.token, launchRemember.expiresAt);
                 }
 
-                bumpProgress(10, taskLabel('loading.task.session', 'Verifying session...'));
+                bumpProgress(10);
 
                 if (!ssoTicket || ssoTicket === '') {
                     let configInitError: unknown = null;
@@ -482,7 +457,6 @@ export const App: FC<{}> = (props) => {
                         }
                     } else {
                         if (configInitError) {
-                            setHomeUrl(window.location.origin + '/');
                             setErrorMessage(`Unable to load renderer-config.json.\n${String((configInitError as Error)?.message ?? configInitError)}`);
                             setIsReady(false);
                             setShowLogin(false);
@@ -496,21 +470,21 @@ export const App: FC<{}> = (props) => {
                 }
 
                 const renderer = await startRenderer(width, height);
-                bumpProgress(20, taskLabel('loading.task.renderer', 'Initializing renderer...'));
+                bumpProgress(20);
 
                 await startWarmup(width, height);
-                bumpProgress(70, taskLabel('loading.task.startsession', 'Starting session...'));
+                bumpProgress(70);
 
                 if (!gameInitPromiseRef.current) {
                     gameInitPromiseRef.current = (async () => {
                         await GetSessionDataManager().init();
-                        bumpProgress(78, taskLabel('loading.task.userdata', 'Loading user data...'));
+                        bumpProgress(78);
                         await GetRoomSessionManager().init();
-                        bumpProgress(85, taskLabel('loading.task.rooms', 'Loading rooms...'));
+                        bumpProgress(85);
                         await GetRoomEngine().init();
-                        bumpProgress(92, taskLabel('loading.task.engine', 'Loading graphics engine...'));
+                        bumpProgress(92);
                         await GetCommunication().init();
-                        bumpProgress(98, taskLabel('generic.reconnecting', 'Connecting to server...'));
+                        bumpProgress(98);
                     })();
                 }
 
@@ -544,7 +518,7 @@ export const App: FC<{}> = (props) => {
                     GetTicker().add((ticker) => GetTexturePool().run());
                 }
 
-                bumpProgress(100, taskLabel('onboarding.button.ready', 'Ready!'));
+                bumpProgress(100);
                 setIsReady(true);
                 setShowLogin(false);
                 setIsEnteringHotel(false);
@@ -567,16 +541,16 @@ export const App: FC<{}> = (props) => {
             if (heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
             if (rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
         };
-    }, [prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress, taskLabel]);
+    }, [prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress]);
 
     return (
         <Base fit overflow="hidden" className={`octane-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>
             {!isReady && !showLogin && (
-                <LoadingView isError={errorMessage.length > 0} message={errorMessage} homeUrl={homeUrl} progress={loadingProgress} currentTask={loadingTask} />
+                <LoadingView isError={errorMessage.length > 0} message={errorMessage} progress={loadingProgress} />
             )}
             {!isReady && showLogin && <LoginView onAuthenticated={handleAuthenticated} isEntering={isEnteringHotel} />}
             {isReady && (
-                <SharedHookRegistry fallback={<LoadingView message="Loading…" />}>
+                <SharedHookRegistry fallback={<LoadingView progress={100} />}>
                     <MainView />
                     <ReconnectView />
                 </SharedHookRegistry>

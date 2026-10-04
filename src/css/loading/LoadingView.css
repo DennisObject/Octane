@@ -1,0 +1,126 @@
+/*
+ * Classic JS client loading screen (75_classic-js HabboAirLauncher eSe). Every
+ * child stacks from the photo's top edge: photo 434px, text 50px below it, bar
+ * 10px below the text, percent 5px below the bar, error 10px below the percent.
+ * Text fields carry Flash's 2px gutter.
+ */
+@font-face {
+    font-family: LoadingUbuntu;
+    font-weight: 400;
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: LoadingUbuntu;
+    font-weight: 700;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+.classic-loading-screen {
+    --loading-top: calc(50% - 250px);
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    overflow: hidden;
+    background: #0e151c;
+    font-family: LoadingUbuntu, sans-serif;
+    user-select: none;
+}
+
+/* The client lays out once more on failure from the already shifted photo, which moves the stack up. */
+.classic-loading-screen--error {
+    --loading-top: calc(25% - 125px);
+}
+
+.classic-loading-screen img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.classic-loading-screen__photo {
+    position: absolute;
+    top: var(--loading-top);
+    left: calc(50% - 250px);
+    width: 500px;
+    height: 434px;
+}
+
+.classic-loading-screen .classic-loading-screen__userphoto {
+    top: 51px;
+    left: 96px;
+}
+
+.classic-loading-screen__text,
+.classic-loading-screen__percent,
+.classic-loading-screen__error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    white-space: pre;
+}
+
+.classic-loading-screen__text {
+    top: calc(var(--loading-top) + 486px);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 32px;
+}
+
+.classic-loading-screen__bar {
+    position: absolute;
+    top: calc(var(--loading-top) + 526px);
+    left: calc(50% - 200px);
+    width: 401px;
+    height: 26px;
+    background:
+        linear-gradient(#fff, #fff) 1px 0 / 399px 1px no-repeat,
+        linear-gradient(#fff, #fff) 400px 1px / 1px 24px no-repeat,
+        linear-gradient(#fff, #fff) 1px 25px / 399px 1px no-repeat,
+        linear-gradient(#fff, #fff) 0 1px / 1px 24px no-repeat;
+}
+
+.classic-loading-screen__bar > div {
+    position: absolute;
+    left: 4px;
+}
+
+.classic-loading-screen .classic-loading-screen__bar-back {
+    top: 3px;
+    left: 3px;
+    width: 396px;
+    height: 21px;
+    background: #000;
+}
+
+.classic-loading-screen__bar-top {
+    top: 4px;
+    background: #bacad3;
+}
+
+.classic-loading-screen__bar-bottom {
+    background: #8ca1ad;
+}
+
+.classic-loading-screen__percent {
+    top: calc(var(--loading-top) + 559px);
+    color: #999;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 16px;
+}
+
+.classic-loading-screen__error {
+    top: calc(var(--loading-top) + 585px);
+    left: 50%;
+    right: auto;
+    width: clamp(320px, calc(100vw - 80px), 760px);
+    transform: translateX(-50%);
+    color: #7ecaee;
+    font-size: 16px;
+    line-height: 19px;
+    white-space: pre-wrap;
+}
