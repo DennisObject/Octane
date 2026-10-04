@@ -1,20 +1,26 @@
 // Which Habbo the running client session belongs to. Every new session (and
-// every logout) bumps the generation, so an answer that arrives for an older
-// session can be recognised and dropped.
+// every logout) bumps the generation, so work that started for an older
+// session can be recognised and dropped. The owner always comes from a server
+// response (login, register, remember), never from game packets.
 export type AuthSessionSource = 'credentials' | 'remember' | 'handoff' | 'none';
+
+export interface HabboOwner {
+    userId: number;
+    name: string;
+}
 
 export interface AuthSession {
     generation: number;
     ssoTicket: string;
-    owner: string;
+    owner: HabboOwner | null;
     source: AuthSessionSource;
 }
 
-let session: AuthSession = { generation: 0, ssoTicket: '', owner: '', source: 'none' };
+let session: AuthSession = { generation: 0, ssoTicket: '', owner: null, source: 'none' };
 
 export const getAuthSession = (): AuthSession => session;
 
-export const beginAuthSession = (ssoTicket: string, source: AuthSessionSource, owner = ''): AuthSession =>
+export const beginAuthSession = (ssoTicket: string, source: AuthSessionSource, owner: HabboOwner | null = null): AuthSession =>
 {
     session = { generation: session.generation + 1, ssoTicket, owner, source };
 
@@ -23,13 +29,14 @@ export const beginAuthSession = (ssoTicket: string, source: AuthSessionSource, o
 
 export const endAuthSession = (): void =>
 {
-    session = { generation: session.generation + 1, ssoTicket: '', owner: '', source: 'none' };
+    session = { generation: session.generation + 1, ssoTicket: '', owner: null, source: 'none' };
 };
 
-// A hand-off session learns its owner once the game server sends the user.
-export const setAuthSessionOwner = (owner: string): void =>
+// Same Habbo: by id when both sides know it, otherwise by name.
+export const isSameOwner = (left: HabboOwner | null, right: HabboOwner | null): boolean =>
 {
-    if (!session.owner) session = { ...session, owner };
-};
+    if (!left || !right) return false;
+    if (left.userId > 0 && right.userId > 0) return left.userId === right.userId;
 
-export const isSameHabbo = (left: string, right: string): boolean => !!left && !!right && left.toLowerCase() === right.toLowerCase();
+    return !!left.name && left.name.toLowerCase() === right.name.toLowerCase();
+};

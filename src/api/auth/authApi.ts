@@ -1,6 +1,5 @@
 import { GetConfiguration } from '@octane/renderer';
 import { AccessTokenGrant } from './accessToken';
-import { RememberGrant } from '../utils/RememberLogin';
 
 // Typed client for the hotel's /api/auth/* endpoints. Every call resolves to an
 // AuthResult instead of throwing, and failures are reduced to a small set of
@@ -31,9 +30,22 @@ export type AuthResult<T> = { ok: true; data: T; failure?: undefined } | { ok: f
 
 const failed = (failure: AuthFailure): { ok: false; failure: AuthFailure } => ({ ok: false, failure });
 
+export interface RememberGrant {
+    rememberToken?: string;
+    rememberExpiresAt?: number;
+}
+
 export interface LoginSession extends AccessTokenGrant, RememberGrant {
     ssoTicket: string;
     username: string;
+    userId: number;
+}
+
+// What /refresh returns: no ticket, a rotated remember token, and (on servers
+// that send it) the Habbo the grant belongs to.
+export interface RememberRefresh extends AccessTokenGrant, RememberGrant {
+    username: string;
+    userId: number;
 }
 
 export interface LoginRequest {
@@ -204,6 +216,7 @@ const toSession = (payload: JsonObject, fallbackUsername: string): LoginSession 
     return {
         ssoTicket,
         username: asString(payload.username) || fallbackUsername,
+        userId: asNumber(payload.userId) ?? 0,
         accessToken: asString(payload.accessToken) || undefined,
         accessTokenExpiresAt: asNumber(payload.accessTokenExpiresAt),
         rememberToken: asString(payload.rememberToken) || undefined,
@@ -234,7 +247,7 @@ export const loginWithRememberToken = async (rememberToken: string, username = '
     return mapSession(result, username);
 };
 
-export const refreshRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<RememberGrant & AccessTokenGrant>> =>
+export const refreshRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<RememberRefresh>> =>
 {
     const result = await postJson(resolveAuthEndpoint('login.refresh.endpoint', '/api/auth/refresh'), { rememberToken }, options);
 
@@ -246,7 +259,9 @@ export const refreshRememberToken = async (rememberToken: string, options: AuthR
             rememberToken: asString(result.data.rememberToken) || undefined,
             rememberExpiresAt: asNumber(result.data.rememberExpiresAt) ?? asNumber(result.data.expiresAt),
             accessToken: asString(result.data.accessToken) || undefined,
-            accessTokenExpiresAt: asNumber(result.data.accessTokenExpiresAt)
+            accessTokenExpiresAt: asNumber(result.data.accessTokenExpiresAt),
+            username: asString(result.data.username),
+            userId: asNumber(result.data.userId) ?? 0
         }
     };
 };

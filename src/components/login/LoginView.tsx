@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { getLandingBackdrop, loginText } from '../../api';
+import { getLandingBackdrop, HabboOwner, loginText } from '../../api';
 import habboLogo from '../../assets/images/login/habbo_logo.png';
 import { useHotelStatus, useLoginLocale } from '../../hooks/login';
 import { LandingBackdropView } from '../hotel-view/LandingBackdropView';
@@ -13,7 +13,7 @@ import { LoginNewsView } from './LoginNewsView';
 import { RegistrationView } from './registration/RegistrationView';
 
 export interface LoginViewProps {
-    onAuthenticated: (ssoTicket: string, username: string) => void;
+    onAuthenticated: (ssoTicket: string, owner: HabboOwner) => void;
     isEntering?: boolean;
 }
 

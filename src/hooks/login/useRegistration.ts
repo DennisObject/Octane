@@ -1,25 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-    AuthFailure,
-    checkEmailAvailable,
-    checkServerReachable,
-    checkUsernameAvailable,
-    clearRegistrationDraft,
-    describeAuthFailure,
-    fetchRoomTemplates,
-    getNameProblem,
-    getPasswordProblem,
-    isValidEmail,
-    loadRegistrationDraft,
-    loginText,
-    NAME_MAX_LENGTH,
-    NAME_MIN_LENGTH,
-    registerAccount,
-    RegistrationStep,
-    RoomTemplate,
-    saveRegistrationDraft,
-    storeLoginSession
-} from '../../api';
+import { AuthFailure, checkEmailAvailable, checkServerReachable, checkUsernameAvailable, clearRegistrationDraft, describeAuthFailure, fetchRoomTemplates, getNameProblem, getPasswordProblem, HabboOwner, isValidEmail, loadRegistrationDraft, loginText, NAME_MAX_LENGTH, NAME_MIN_LENGTH, registerAccount, RegistrationStep, RoomTemplate, saveRegistrationDraft, storeLoginSession } from '../../api';
 import { useAbortableFlow } from './useAbortableFlow';
 import { useCooldown } from './useCooldown';
 import { useRegistrationFigure } from './useRegistrationFigure';
@@ -28,7 +8,7 @@ import { TurnstileState } from './useTurnstile';
 
 interface UseRegistrationOptions {
     turnstile: TurnstileState;
-    onAuthenticated: (ssoTicket: string, username: string) => void;
+    onAuthenticated: (ssoTicket: string, owner: HabboOwner) => void;
     onRegisteredWithoutLogin: (username: string, message: string) => void;
 }
 
@@ -226,7 +206,7 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
             if (session)
             {
                 storeLoginSession(session, false);
-                onAuthenticated(session.ssoTicket, session.username);
+                onAuthenticated(session.ssoTicket, { userId: session.userId, name: session.username });
                 return;
             }
 

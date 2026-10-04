@@ -1,5 +1,5 @@
 import { useActionState, useState } from 'react';
-import { BanDetails, describeAuthFailure, GetRememberLogin, loginText, loginWithCredentials, storeLoginSession } from '../../api';
+import { BanDetails, describeAuthFailure, getRememberedName, HabboOwner, hasRememberGrant, isRememberSupported, loginText, loginWithCredentials, storeLoginSession } from '../../api';
 import { useAbortableFlow } from './useAbortableFlow';
 import { useCooldown } from './useCooldown';
 import { TurnstileState } from './useTurnstile';
@@ -7,7 +7,7 @@ import { useTimedNotice } from './useTimedNotice';
 
 interface UseLoginFormOptions {
     turnstile: TurnstileState;
-    onAuthenticated: (ssoTicket: string, username: string) => void;
+    onAuthenticated: (ssoTicket: string, owner: HabboOwner) => void;
     onMaintenance: (message: string) => void;
     initialUsername?: string;
 }
@@ -16,9 +16,9 @@ interface UseLoginFormOptions {
 // cleared once the request has been answered.
 export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initialUsername }: UseLoginFormOptions) =>
 {
-    const [username, setUsername] = useState(() => initialUsername || GetRememberLogin()?.username || '');
+    const [username, setUsername] = useState(() => initialUsername || getRememberedName());
     const [password, setPassword] = useState('');
-    const [remember, setRemember] = useState(() => !!GetRememberLogin());
+    const [remember, setRemember] = useState(() => hasRememberGrant());
     const [ban, setBan] = useState<BanDetails | null>(null);
     const cooldown = useCooldown('login');
     const startFlow = useAbortableFlow();
@@ -46,7 +46,7 @@ export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initia
         setBan(null);
 
         const signal = startFlow();
-        const result = await loginWithCredentials({ username: name, password, remember, turnstileToken: turnstile.enabled ? turnstile.token : undefined }, { signal });
+        const result = await loginWithCredentials({ username: name, password, remember: remember && isRememberSupported(), turnstileToken: turnstile.enabled ? turnstile.token : undefined }, { signal });
 
         if (signal.aborted) return null;
 
@@ -56,7 +56,7 @@ export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initia
         if (result.ok)
         {
             storeLoginSession(result.data, remember);
-            onAuthenticated(result.data.ssoTicket, result.data.username);
+            onAuthenticated(result.data.ssoTicket, { userId: result.data.userId, name: result.data.username });
             return null;
         }
 

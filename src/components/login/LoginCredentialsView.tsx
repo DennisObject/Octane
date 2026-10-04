@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { describeBanExpiry, loginText, PASSWORD_MAX_LENGTH } from '../../api';
+import { describeBanExpiry, HabboOwner, isRememberSupported, loginText, PASSWORD_MAX_LENGTH } from '../../api';
 import { useLoginForm, useTurnstile } from '../../hooks/login';
 import { LoginErrorBalloon, LoginInfoPanel } from './LoginBalloonView';
 import { LoginCooldownPanel } from './LoginCooldownPanel';
@@ -11,7 +11,7 @@ interface LoginCredentialsViewProps {
     isEntering: boolean;
     infoMessage: string | null;
     initialUsername?: string;
-    onAuthenticated: (ssoTicket: string, username: string) => void;
+    onAuthenticated: (ssoTicket: string, owner: HabboOwner) => void;
     onMaintenance: (message: string) => void;
     onCancel: () => void;
     onRegister: () => void;
@@ -64,10 +64,12 @@ export const LoginCredentialsView: FC<LoginCredentialsViewProps> = ({
                     disabled={isEntering}
                     autoFocus={!!form.username}
                 />
-                <label className="login-flow-checkbox">
-                    <input type="checkbox" name="remember" checked={form.remember} disabled={isEntering} onChange={(event) => form.setRemember(event.target.checked)} />
-                    <span>{loginText('login.remember_me', 'Remember me')}</span>
-                </label>
+                {isRememberSupported() && (
+                    <label className="login-flow-checkbox">
+                        <input type="checkbox" name="remember" checked={form.remember} disabled={isEntering} onChange={(event) => form.setRemember(event.target.checked)} />
+                        <span>{loginText('login.remember_me', 'Remember me')}</span>
+                    </label>
+                )}
                 {turnstile.enabled && (
                     <TurnstileWidget
                         siteKey={turnstile.siteKey}

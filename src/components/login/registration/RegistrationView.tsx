@@ -1,5 +1,5 @@
 import { FC, FormEvent } from 'react';
-import { loginText, RegistrationStep } from '../../../api';
+import { HabboOwner, loginText, RegistrationStep } from '../../../api';
 import { useRegistration, useTurnstile } from '../../../hooks/login';
 import { LoginErrorBalloon } from '../LoginBalloonView';
 import { LoginCooldownPanel } from '../LoginCooldownPanel';
@@ -11,7 +11,7 @@ import { RegistrationRoomView } from './RegistrationRoomView';
 
 interface RegistrationViewProps {
     isEntering: boolean;
-    onAuthenticated: (ssoTicket: string, username: string) => void;
+    onAuthenticated: (ssoTicket: string, owner: HabboOwner) => void;
     onRegisteredWithoutLogin: (username: string, message: string) => void;
     onCancel: () => void;
 }
