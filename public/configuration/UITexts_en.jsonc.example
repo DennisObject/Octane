@@ -1484,5 +1484,7 @@
     "furni.editor.names.missing": "This furni has no furnidata entry. This hotel only edits existing entries, so clients show the public name below.",
     "furni.editor.furnidata.flag.missing": "NONE",
     "furni.editor.furnidata.flag.missing.tip": "No furnidata entry for this classname",
-    "furni.editor.side.furnidata.missing": "missing"
+    "furni.editor.side.furnidata.missing": "missing",
+    "furni.editor.status.resyncing": "Connection busy, retrying...",
+    "furni.editor.status.write_unconfirmed": "The server did not confirm the change. Check the furni before you save again."
 }
