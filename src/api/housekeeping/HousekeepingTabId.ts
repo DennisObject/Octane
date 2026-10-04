@@ -3,7 +3,8 @@ export const HousekeepingTabId = {
     USERS: 'users',
     ROOMS: 'rooms',
     ECONOMY: 'economy',
-    AUDIT: 'audit'
+    AUDIT: 'audit',
+    ROLES: 'roles'
 } as const;
 
 export type HousekeepingTabId = (typeof HousekeepingTabId)[keyof typeof HousekeepingTabId];

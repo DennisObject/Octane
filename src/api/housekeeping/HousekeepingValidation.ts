@@ -9,8 +9,7 @@ export const HousekeepingErrorKey = {
     EMPTY_REASON: 'empty_reason',
     TEXT_TOO_LONG: 'text_too_long',
     INVALID_HOURS: 'invalid_hours',
-    INVALID_MINUTES: 'invalid_minutes',
-    INVALID_RANK: 'invalid_rank'
+    INVALID_MINUTES: 'invalid_minutes'
 } as const;
 
 export type HousekeepingErrorKey = (typeof HousekeepingErrorKey)[keyof typeof HousekeepingErrorKey];
@@ -24,8 +23,6 @@ export const HK_MAX_TRADE_LOCK_HOURS = 24 * 365;
 export const HK_MAX_MUTE_MINUTES = 60 * 24 * 30;
 export const HK_MAX_REASON_LENGTH = 500;
 export const HK_MAX_ALERT_LENGTH = 1000;
-export const HK_MIN_RANK = 1;
-export const HK_MAX_RANK = 12;
 
 const isPositiveInteger = (raw: number): boolean => Number.isFinite(raw) && Number.isInteger(raw) && raw > 0;
 
@@ -59,6 +56,3 @@ export const validateHours = (raw: number, max: number = HK_MAX_BAN_HOURS): Hous
 
 export const validateMinutes = (raw: number): HousekeepingErrorKey =>
     isPositiveInteger(raw) && raw <= HK_MAX_MUTE_MINUTES ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_MINUTES;
-
-export const validateRank = (raw: number): HousekeepingErrorKey =>
-    Number.isInteger(raw) && raw >= HK_MIN_RANK && raw <= HK_MAX_RANK ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_RANK;

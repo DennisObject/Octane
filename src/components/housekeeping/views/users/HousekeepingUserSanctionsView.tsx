@@ -1,7 +1,9 @@
-import { FC, useState } from 'react';
+import { CreateLinkEvent } from '@octane/renderer';
+import { Permission } from '../../../../api/permissions';
+import { FC } from 'react';
 import { findTemplateById, HK_MAX_REASON_LENGTH, HK_SANCTION_TEMPLATES, HousekeepingSanctionType, LocalizeText } from '../../../../api';
 import { Button, StaffField, StaffSection } from '../../../../common';
-import { useHousekeeping, useHousekeepingConfirm } from '../../../../hooks';
+import { useHasPermission, useHousekeeping, useHousekeepingConfirm } from '../../../../hooks';
 import { HousekeepingNumberInput } from '../HousekeepingNumberInput';
 
 export interface HousekeepingSanctionDraft {
@@ -35,10 +37,10 @@ const applyTemplate = (draft: HousekeepingSanctionDraft, templateId: string): Ho
 
 /** Reason, durations and the account actions for the selected user. */
 export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProps> = ({ draft, onDraftChange }) => {
-    const { selectedUser, isActionPending, banUser, unbanUser, kickUser, muteUser, forceDisconnectUser, resetUserPassword, setUserRank, tradeLockUser } =
+    const { selectedUser, isActionPending, banUser, unbanUser, kickUser, muteUser, forceDisconnectUser, resetUserPassword, tradeLockUser } =
         useHousekeeping();
     const confirm = useHousekeepingConfirm();
-    const [rankDraft, setRankDraft] = useState(1);
+    const canManageRoles = useHasPermission(Permission.HousekeepingRolesManage);
     const { templateId, reason, banHours, muteMinutes, tradeLockHours } = draft;
     const update = (patch: Partial<HousekeepingSanctionDraft>) => onDraftChange({ ...draft, ...patch });
 
@@ -98,16 +100,9 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                 </div>
             </StaffSection>
             <StaffSection title={LocalizeText('housekeeping.section.account')}>
-                <div className="octane-housekeeping-durations">
-                    <HousekeepingNumberInput label={LocalizeText('housekeeping.user.rank')} max={12} value={rankDraft} onChange={setRankDraft} />
-                    <Button
-                        disabled={disabled}
-                        variant="secondary"
-                        onClick={() => ask('housekeeping.confirm.set_rank', () => setUserRank(selectedUser.id, rankDraft), [['rank'], [String(rankDraft)]])}
-                    >
-                        {LocalizeText('housekeeping.action.set_rank')}
-                    </Button>
-                </div>
+                <Button disabled={disabled || !canManageRoles} variant="secondary" onClick={() => CreateLinkEvent('housekeeping/tab/roles')}>
+                    {LocalizeText('housekeeping.roles.manage_user')}
+                </Button>
                 <div className="octane-staff-grid">
                     <Button disabled={disabled} variant="danger" onClick={() => ask('housekeeping.confirm.disconnect', () => forceDisconnectUser(selectedUser.id, reasonText))}>
                         {LocalizeText('housekeeping.action.force_disconnect')}
