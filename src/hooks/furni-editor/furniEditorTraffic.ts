@@ -47,7 +47,12 @@ export type FurniWireReply = { type: 'search' | 'detail' | 'import' | 'interacti
 /** Who a reply belongs to: the request on the wire, the blocked write (its terminal answer), or nobody (null). */
 export type FurniReplyRoute = { to: 'request'; request: FurniWireRequest } | { to: 'blocked'; write: FurniWriteRequest } | null;
 
-export type FurniTrafficState = { tag: 'idle' } | { tag: 'inflight'; kind: FurniWireKind; key: string } | { tag: 'resyncing'; quietUntil: number };
+export type FurniTrafficState =
+    | { tag: 'idle' }
+    | { tag: 'inflight'; kind: FurniWireKind; key: string }
+    | { tag: 'resyncing'; quietUntil: number }
+    /** The socket closed or reopened and is not authenticated yet: requests queue, nothing goes out. */
+    | { tag: 'offline' };
 
 /**
  * A write whose outcome the client cannot know yet. It keeps its own kind and
@@ -71,6 +76,8 @@ export type FurniLostHandler = (request: FurniWireRequest, retrying: boolean) =>
 export interface FurniTrafficListener {
     onStateChange: (state: FurniTrafficState) => void;
     onBlockChange: (block: FurniWriteBlock | null) => void;
+    /** A write left the transport by any path (answered, blocked, or dropped at a socket reset). */
+    onWriteReleased: (write: FurniWriteRequest) => void;
 }
 
 interface Slot {
@@ -135,7 +142,9 @@ const LATEST_WINS: ReadonlySet<FurniWireKind> = new Set<FurniWireKind>(['list', 
  *   resyncing --any reply--> resyncing(quietUntil = now + quiet), reply discarded
  *   resyncing --quiet window over--> idle (queue resumes)
  *   idle --any reply but a blocked write's ack--> resyncing (the wire is out of step)
- *   any --socket reconnect--> idle (a read on the wire is sent again)
+ *   any --socket closed | reopened (unauthenticated)--> offline: the wire is reset, nothing is sent
+ *   offline --session authenticated--> idle (queue resumes; a read that was on the wire goes first)
+ *   offline --any reply--> offline, reply discarded (it belongs to the old socket)
  *
  * Which reply belongs to what, following PlusEMU E3 (FurniEditorResult = success, message, entity id):
  *   - a read reply belongs to the read on the wire of its packet type;
@@ -147,7 +156,7 @@ const LATEST_WINS: ReadonlySet<FurniWireKind> = new Set<FurniWireKind>(['list', 
  *
  * Write block (orthogonal): open --write timeout | id 0 result for the write--> blocked(write)
  *   blocked --result whose id is the blocked write's entity--> open (that is its terminal answer)
- *   blocked --socket reconnect--> open (no answer can come any more)
+ *   blocked --socket reset--> open (no answer can come any more)
  * While blocked no write is accepted; reads keep working, and a re-read never
  * releases the block (E3 answers furnidata writes from background tasks, so a
  * re-read can overtake them). The quiet window is only a read heuristic.
@@ -220,6 +229,8 @@ export class FurniEditorTraffic {
 
     /** Feeds a reply in and says who it belongs to (null: discarded or ignored). */
     public reply(reply: FurniWireReply): FurniReplyRoute {
+        if (this.state.tag === 'offline') return null;
+
         if (reply.type === 'result') return this.result(reply.success, reply.id, reply.message);
 
         const slot = this.inflight;
@@ -238,11 +249,12 @@ export class FurniEditorTraffic {
     }
 
     /**
-     * The socket came back: replies of the old connection can no longer
-     * arrive. Releases the block and returns the write it held (or the write
-     * that was on the wire), whose outcome stays unknown.
+     * Socket boundary (closed, or reopened and not authenticated yet): replies
+     * of the old connection can no longer arrive, so the wire is reset and
+     * held until resume(). Returns the write that was on the wire or blocked,
+     * whose outcome stays unknown; a read that was on the wire is queued again.
      */
-    public reconnect(): FurniWriteRequest | null {
+    public disconnect(): FurniWriteRequest | null {
         window.clearTimeout(this.timer);
 
         const slot = this.inflight;
@@ -251,13 +263,25 @@ export class FurniEditorTraffic {
         this.inflight = null;
 
         if (slot?.request.kind === 'write') released = slot.request.write;
-        else if (slot && !slot.discarded) this.queue.unshift({ ...slot, retried: false });
+        else if (slot && !slot.discarded && !this.queue.some((entry) => entry.request.kind === slot.request.kind))
+            this.queue.unshift({ ...slot, retried: false });
 
         this.setBlock(null);
+        this.setState({ tag: 'offline' });
+
+        if (released) this.listener.onWriteReleased(released);
+
+        return released;
+    }
+
+    /** The session is authenticated again: the queue may go out. */
+    public resume(): boolean {
+        if (this.state.tag !== 'offline') return false;
+
         this.setState({ tag: 'idle' });
         this.pump();
 
-        return released;
+        return true;
     }
 
     private result(success: boolean, id: number, message: string): FurniReplyRoute {
@@ -271,6 +295,7 @@ export class FurniEditorTraffic {
 
             if (blocked && blocked.itemId === id) {
                 this.setBlock(null);
+                this.listener.onWriteReleased(blocked);
                 this.pump();
 
                 return { to: 'blocked', write: blocked };
@@ -300,6 +325,9 @@ export class FurniEditorTraffic {
         window.clearTimeout(this.timer);
         this.inflight = null;
         this.setState({ tag: 'idle' });
+
+        if (slot.request.kind === 'write') this.listener.onWriteReleased(slot.request.write);
+
         this.pump();
 
         return slot.discarded ? null : { to: 'request', request: slot.request };
@@ -348,6 +376,7 @@ export class FurniEditorTraffic {
     private blockWrite(write: FurniWriteRequest, reason: string): void {
         this.inflight = null;
         this.setBlock({ write, since: this.now(), stale: false, reason });
+        this.listener.onWriteReleased(write);
         this.resync();
     }
 

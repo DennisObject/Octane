@@ -8,7 +8,9 @@ import {
     FurniEditorSearchResultEvent,
     FurniEditorUpdateComposer,
     FurniEditorUpdateFurnidataComposer,
+    GetCommunication,
     IMessageComposer,
+    OctaneEvent,
     OctaneEventType
 } from '@octane/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -128,18 +130,18 @@ export const useFurniEditorStore = () => {
 
     const criteriaRef = useRef<FurniSearchCriteria>(DEFAULT_SEARCH_CRITERIA);
     const shownItemRef = useRef<{ id: number; itemName: string } | null>(null);
+    // The write dropped at a socket reset, re-read once the new session is authenticated.
+    const releasedWriteRef = useRef<FurniWriteRequest | null>(null);
     // Session-wide, never reset: the sheet compares it with the last import it applied.
     const importSequenceRef = useRef(0);
 
     const [traffic] = useState(
         () =>
             new FurniEditorTraffic((composer) => SendMessageComposer(composer), {
-                onStateChange: (state) => setIsResyncing(state.tag === 'resyncing'),
-                onBlockChange: (block) => {
-                    setWriteBlock(block);
-
-                    if (block) setPendingMutation(null);
-                }
+                onStateChange: (state) => setIsResyncing(state.tag === 'resyncing' || state.tag === 'offline'),
+                onBlockChange: (block) => setWriteBlock(block),
+                // However a write leaves the transport, saving is no longer "in progress".
+                onWriteReleased: () => setPendingMutation(null)
             })
     );
 
@@ -461,18 +463,40 @@ export const useFurniEditorStore = () => {
         )
     );
 
-    // A reconnect is the sync boundary: no reply of the old socket can arrive any more.
+    // Socket boundary: the old socket is gone (closed, or reopened but not
+    // authenticated yet), so no reply of it can arrive. The wire is reset and
+    // held; PlusEMU drops staff packets sent before authentication.
     useOctaneEvent(
-        [OctaneEventType.SOCKET_RECONNECTED, OctaneEventType.SOCKET_OPENED],
+        [OctaneEventType.SOCKET_CLOSED, OctaneEventType.SOCKET_RECONNECTING, OctaneEventType.SOCKET_RECONNECTED, OctaneEventType.SOCKET_OPENED],
         useCallback(() => {
-            const released = traffic.reconnect();
+            const released = traffic.disconnect();
 
             if (!released) return;
 
+            releasedWriteRef.current = released;
             setNotice(WRITE_RELEASED_NOTICE);
+        }, [traffic])
+    );
 
-            if (released.kind !== 'delete') refreshItem(released.itemId);
-        }, [traffic, refreshItem])
+    // The session is authenticated again: SOCKET_REAUTHENTICATED after a
+    // reconnect (sent once the connection is authenticated and flushing), or
+    // the connection state turning authenticated on a fresh login. Only then
+    // does the queue resume and the dropped write's furni get re-read.
+    useOctaneEvent(
+        [OctaneEventType.SOCKET_REAUTHENTICATED, OctaneEventType.CONNECTION_STATE_CHANGED],
+        useCallback(
+            (event: OctaneEvent) => {
+                if (event.type === OctaneEventType.CONNECTION_STATE_CHANGED && !GetCommunication().connection.connectionState.authenticated) return;
+                if (!traffic.resume()) return;
+
+                const released = releasedWriteRef.current;
+
+                releasedWriteRef.current = null;
+
+                if (released && released.kind !== 'delete') refreshItem(released.itemId);
+            },
+            [traffic, refreshItem]
+        )
     );
 
     return {
