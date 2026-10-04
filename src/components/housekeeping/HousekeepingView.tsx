@@ -1,5 +1,6 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useMemo } from 'react';
+import { Permission } from '../../api/permissions';
 import { getHousekeepingMode, HousekeepingTabId, isHousekeepingEnabled, isHousekeepingTabAvailable, LocalizeText } from '../../api';
 import { DraggableWindowPosition, StaffWindow, StaffWindowTab, WidgetErrorBoundary } from '../../common';
 import { useHasPermission, useHousekeepingStore } from '../../hooks';
@@ -49,7 +50,7 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
 };
 
 /**
- * In-client housekeeping. Shown only while the server has granted `acc_housekeeping`
+ * In-client housekeeping. Shown only while the server has granted `housekeeping.access`
  * (and `housekeeping.enabled` is on); that gate is cosmetic, the server authorises
  * every request again.
  *
@@ -58,8 +59,8 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
  */
 export const HousekeepingView: FC = () => {
     const { isVisible, openPanel, closePanel, togglePanel, activeTab, setActiveTab, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
-    const isHk = useHasPermission('acc_housekeeping');
-    const canManageSoundboard = useHasPermission('acc_soundboard_manage');
+    const isHk = useHasPermission(Permission.HousekeepingAccess);
+    const canManageSoundboard = useHasPermission(Permission.SoundboardManage);
     const isEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const mode = useMemo(() => getHousekeepingMode(), []);
     const isAllowed = isEnabled && isHk;

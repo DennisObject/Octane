@@ -25,6 +25,7 @@ import {
     RewardTrackTaskFilter,
     resolveRewardTrackTheme
 } from '../../api';
+import { Permission } from '../../api/permissions';
 import availableIcon from '../../assets/images/reward-track/air/available-icon.png';
 import checkIcon from '../../assets/images/reward-track/air/checkmark.png';
 import creditBigIcon from '../../assets/images/reward-track/air/credit-big.png';
@@ -335,7 +336,7 @@ export const RewardTrackView: FC<{}> = () => {
     const [premiumConfirm, setPremiumConfirm] = useState(false);
     const [page, setPage] = useState(0);
     const [pageKey, setPageKey] = useState('');
-    const isEditor = useHasPermission('acc_rewardtrack');
+    const isEditor = useHasPermission(Permission.RewardTrackManage);
     const [editMode, setEditMode] = useState(false);
     const { tracks = [], reloadCount = 0, pendingPurchase = null, requestTracks = null, claimPrize = null, purchasePremium = null } = useRewardTracks();
     const { simpleAlert = null } = useNotification();

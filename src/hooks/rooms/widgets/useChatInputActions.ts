@@ -15,6 +15,7 @@ import {
     TriggerHabbiconComposer
 } from '@octane/renderer';
 import { useCallback } from 'react';
+import { HasPermission, Permission } from '../../../api/permissions';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { useNotification } from '../../notification';
 import { useTranslation } from '../../translation';
@@ -163,7 +164,7 @@ export const useChatInputActions = () => {
                         }
                         return null;
                     case ':pickall':
-                        if (roomSession?.isRoomOwner || GetSessionDataManager().isModerator) {
+                        if (roomSession?.isRoomOwner || HasPermission(Permission.RoomOwnerAny)) {
                             showConfirm(
                                 LocalizeText('room.confirm.pick_all'),
                                 () => {
@@ -180,7 +181,7 @@ export const useChatInputActions = () => {
                     case ':ejectall':
                         if (
                             roomSession?.isRoomOwner ||
-                            GetSessionDataManager().isModerator ||
+                            HasPermission(Permission.RoomOwnerAny) ||
                             (roomSession?.controllerLevel ?? 0) >= RoomControllerLevel.GUEST
                         ) {
                             showConfirm(
@@ -222,7 +223,7 @@ export const useChatInputActions = () => {
                         showOctaneAlert();
                         return null;
                     case ':settings':
-                        if (roomSession && (roomSession.isRoomOwner || GetSessionDataManager().isModerator)) {
+                        if (roomSession && (roomSession.isRoomOwner || HasPermission(Permission.RoomOwnerAny))) {
                             SendMessageComposer(new RoomSettingsComposer(roomSession.roomId));
                         }
 

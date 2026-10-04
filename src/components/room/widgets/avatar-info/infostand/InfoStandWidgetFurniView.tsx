@@ -46,6 +46,7 @@ import {
     Text,
     UserProfileIconView
 } from '../../../../../common';
+import { Permission } from '../../../../../api/permissions';
 import { useFurniPickupGuard, useHasPermission, useMessageEvent, useOctaneEvent, useRareValues, useRoom, useWiredTools } from '../../../../../hooks';
 import { OctaneInput } from '../../../../../layout';
 import { ImagePositionEditorView } from './ImagePositionEditorView';
@@ -148,7 +149,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const { avatarInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
     const { openInspectionForFurni, showInspectButton } = useWiredTools();
-    const canEditFurni = useHasPermission('acc_catalogfurni');
+    const canEditFurni = useHasPermission(Permission.CatalogEdit);
     const { getValue: getRareValue } = useRareValues();
     const rareValue = useMemo(() => (avatarInfo ? getRareValue(avatarInfo.spriteId) : null), [avatarInfo, getRareValue]);
 

@@ -1890,7 +1890,7 @@
     background-image: url("@/assets/images/toolbar/icons/me-menu/reward-track.png");
 }
 
-/* Reward track staff editor (the gear in the window, acc_rewardtrack). Octane only, kept clear of the
+/* Reward track staff editor (the gear in the window, rewardtrack.manage). Octane only, kept clear of the
    profile bulge and the previous arrow, skinned with the shiny button like the official controls. */
 .octane-reward-track .octane-reward-track-admin-toggle {
     position: absolute;

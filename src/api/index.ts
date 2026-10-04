@@ -24,6 +24,7 @@ export * from './octane';
 export * from './octane/room';
 export * from './octane/session';
 export * from './notification';
+export * from './permissions';
 export * from './purse';
 export * from './quests';
 export * from './room';

@@ -1,11 +1,9 @@
 import {
     ControlYoutubeDisplayPlaybackMessageComposer,
     GetRoomEngine,
-    GetSessionDataManager,
     GetYoutubeDisplayStatusMessageComposer,
     RoomEngineTriggerWidgetEvent,
     RoomId,
-    SecurityLevel,
     SetYoutubeDisplayPlaylistMessageComposer,
     YoutubeControlVideoMessageEvent,
     YoutubeDisplayPlaylist,
@@ -13,8 +11,9 @@ import {
     YoutubeDisplayVideoMessageEvent
 } from '@octane/renderer';
 import { useRef, useState } from 'react';
-import { IsOwnerOfFurniture, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../../../api';
+import { IsOwnerOfFurniture, Permission, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../../../api';
 import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useHasPermission } from '../../../session';
 import { useFurniRemovedEvent } from '../../engine';
 
 const CONTROL_COMMAND_PREVIOUS_VIDEO = 0;
@@ -32,7 +31,9 @@ const useFurnitureYoutubeWidgetState = () => {
     const [currentVideoState, setCurrentVideoState] = useState(-1);
     const [selectedVideo, setSelectedVideo] = useState<string>(null);
     const [playlists, setPlaylists] = useState<YoutubeDisplayPlaylist[]>(null);
-    const [hasControl, setHasControl] = useState(false);
+    const [isFurnitureOwner, setIsFurnitureOwner] = useState(false);
+    const canControlAny = useHasPermission(Permission.RoomYoutubeControlAny);
+    const hasControl = objectId !== -1 && (canControlAny || isFurnitureOwner);
 
     const onClose = () => {
         objectIdRef.current = -1;
@@ -44,7 +45,7 @@ const useFurnitureYoutubeWidgetState = () => {
         setCurrentVideoState(-1);
         setSelectedVideo(null);
         setPlaylists(null);
-        setHasControl(false);
+        setIsFurnitureOwner(false);
     };
 
     const previous = () => SendMessageComposer(new ControlYoutubeDisplayPlaybackMessageComposer(objectId, CONTROL_COMMAND_PREVIOUS_VIDEO));
@@ -82,7 +83,7 @@ const useFurnitureYoutubeWidgetState = () => {
         objectIdRef.current = event.objectId;
         setObjectId(event.objectId);
         setCategory(event.category);
-        setHasControl(GetSessionDataManager().hasSecurity(SecurityLevel.EMPLOYEE) || IsOwnerOfFurniture(roomObject));
+        setIsFurnitureOwner(IsOwnerOfFurniture(roomObject));
 
         SendMessageComposer(new GetYoutubeDisplayStatusMessageComposer(event.objectId));
     });

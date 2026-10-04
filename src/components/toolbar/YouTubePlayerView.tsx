@@ -7,6 +7,7 @@ import {
     YouTubeRoomWatchingComposer
 } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
+import { Permission } from '../../api/permissions';
 import { CopyToClipboard, GetRoomSession, getYoutubeRoomEnabled, LocalizeText, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../api';
 import { LayoutAvatarImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
 import { useFurnitureYoutubeWidget, useHasPermission, useMessageEvent } from '../../hooks';
@@ -52,7 +53,7 @@ export const YouTubePlayerView: FC<{}> = () => {
     const [youtubeEnabled, setYoutubeEnabled] = useState(getYoutubeRoomEnabled());
     // Reactive — must sit above the `if (!isOpen) return null` below
     // so the hook order stays stable across renders.
-    const isModerator = useHasPermission('acc_anyroomowner');
+    const isModerator = useHasPermission(Permission.RoomOwnerAny);
 
     useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, (event) => {
         setYoutubeEnabled(event.getParser().youtubeEnabled);

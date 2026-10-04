@@ -1,5 +1,6 @@
 import { GetAvatarRenderManager, GetSessionDataManager, HabboClubLevelEnum, RoomControllerLevel } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
+import { Permission } from '../../../../api/permissions';
 import { GetClubMemberLevel, GetRoomSession, LocalizeText, MannequinUtilities } from '../../../../api';
 import { Button, Column, LayoutAvatarImageView, LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
 import { useFurnitureMannequinWidget, useHasPermission } from '../../../../hooks';
@@ -27,7 +28,7 @@ export const FurnitureMannequinView: FC<{}> = (props) => {
         saveName = null,
         onClose = null
     } = useFurnitureMannequinWidget();
-    const canManageAnyRoom = useHasPermission('acc_anyroomowner');
+    const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
 
     useEffect(() => {
         if (objectId === -1) return;

@@ -1,4 +1,5 @@
-import { GetRoomEngine, GetSessionDataManager, IRoomSession, RoomControllerLevel } from '@octane/renderer';
+import { GetRoomEngine, IRoomSession, RoomControllerLevel } from '@octane/renderer';
+import { HasPermission, Permission } from '../../permissions';
 import { IsOwnerOfFurniture } from './IsOwnerOfFurniture';
 
 export function CanManipulateFurniture(roomSession: IRoomSession, objectId: number, category: number): boolean {
@@ -7,7 +8,7 @@ export function CanManipulateFurniture(roomSession: IRoomSession, objectId: numb
     return (
         roomSession.isRoomOwner ||
         roomSession.controllerLevel >= RoomControllerLevel.GUEST ||
-        GetSessionDataManager().isModerator ||
+        HasPermission(Permission.RoomOwnerAny) ||
         IsOwnerOfFurniture(GetRoomEngine().getRoomObject(roomSession.roomId, objectId, category))
     );
 }

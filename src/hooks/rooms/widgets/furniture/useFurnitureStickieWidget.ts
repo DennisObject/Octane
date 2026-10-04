@@ -1,7 +1,9 @@
-import { GetRoomEngine, GetSessionDataManager, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
 import { useState } from 'react';
+import { Permission } from '../../../../api/permissions';
 import { GetRoomSession, IsOwnerOfFurniture } from '../../../../api';
 import { useOctaneEvent } from '../../../events';
+import { useHasPermission } from '../../../session';
 import { useFurniRemovedEvent } from '../../engine';
 
 const useFurnitureStickieWidgetState = () => {
@@ -10,7 +12,9 @@ const useFurnitureStickieWidgetState = () => {
     const [color, setColor] = useState('0');
     const [text, setText] = useState('');
     const [type, setType] = useState('');
-    const [canModify, setCanModify] = useState(false);
+    const [isOwner, setIsOwner] = useState(false);
+    const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
+    const canModify = objectId !== -1 && (isOwner || canManageAnyRoom);
 
     const onClose = () => {
         setObjectId(-1);
@@ -18,7 +22,7 @@ const useFurnitureStickieWidgetState = () => {
         setColor('0');
         setText('');
         setType('');
-        setCanModify(false);
+        setIsOwner(false);
     };
 
     const updateColor = (newColor: string) => {
@@ -61,7 +65,7 @@ const useFurnitureStickieWidgetState = () => {
         setColor(color || '0');
         setText(text || '');
         setType(roomObject.type || 'post_it');
-        setCanModify(GetRoomSession().isRoomOwner || GetSessionDataManager().isModerator || IsOwnerOfFurniture(roomObject));
+        setIsOwner(GetRoomSession().isRoomOwner || IsOwnerOfFurniture(roomObject));
     });
 
     useFurniRemovedEvent(objectId !== -1 && category !== -1, (event) => {

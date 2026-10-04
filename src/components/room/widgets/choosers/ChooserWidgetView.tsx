@@ -1,5 +1,6 @@
 import { FurniturePickupAllComposer, RoomObjectCategory } from '@octane/renderer';
 import { FC, useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { Permission } from '../../../../api/permissions';
 import { chooserSelectionVisualizer, LocalizeText, RoomObjectItem, SendMessageComposer } from '../../../../api';
 import { Button, Flex, InfiniteScroll, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
 import { useFurniPickupGuard, useHasPermission } from '../../../../hooks';
@@ -22,7 +23,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = (props) => {
     const [searchValue, setSearchValue] = useState('');
     const [checkAll, setCheckAll] = useState(false);
     const [checkedIds, setCheckedIds] = useState<number[]>([]);
-    const canSeeId = useHasPermission('acc_supporttool');
+    const canSeeId = useHasPermission(Permission.ModerationTool);
     const { confirmIfWebApiBox } = useFurniPickupGuard();
 
     const ownerNames = useMemo(() => {

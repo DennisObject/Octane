@@ -1,6 +1,7 @@
 import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Permission } from '../../api/permissions';
 import { GetConfigurationValue, isHousekeepingEnabled, localizeWithFallback, MessengerIconState, OpenMessengerChat, SendMessageComposer, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
 import collapseLeftImg from '../../assets/images/toolbar/air/collapse-left.png';
 import collapseRightImg from '../../assets/images/toolbar/air/collapse-right.png';
@@ -78,8 +79,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { openMonitor, showToolbarButton } = useWiredTools();
     const { enabled: soundboardEnabled, reset: resetSoundboard } = useSoundboard();
     const { available: buildHeightAvailable, toggle: toggleBuildHeight } = useBuildHeight();
-    const isMod = useHasPermission('acc_supporttool');
-    const isHk = useHasPermission('acc_housekeeping');
+    const isMod = useHasPermission(Permission.ModerationTool);
+    const isHk = useHasPermission(Permission.HousekeepingAccess);
     const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const { tickets = [] } = useModTools();
     const openTicketsCount = useMemo(

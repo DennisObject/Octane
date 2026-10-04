@@ -1,9 +1,8 @@
 import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
+import { Permission } from '../../api/permissions';
 import { useHasPermission } from '../../hooks';
 import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
 import { CatalogAdminMutations, useCatalogAdminMutations } from '../../hooks/catalog/useCatalogAdminMutations';
-
-export const CATALOG_ADMIN_PERMISSION = 'acc_catalogfurni';
 
 interface ICatalogAdminContext extends CatalogAdminMutations {
     /**
@@ -20,7 +19,7 @@ const CatalogAdminContext = createContext<ICatalogAdminContext>(null);
 export const useCatalogAdmin = () => useContext(CatalogAdminContext);
 
 export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const canEdit = useHasPermission(CATALOG_ADMIN_PERMISSION);
+    const canEdit = useHasPermission(Permission.CatalogEdit);
     const mutations = useCatalogAdminMutations();
     const adminMode = useCatalogAdminUiStore((state) => state.adminMode);
     const setAdminMode = useCatalogAdminUiStore((state) => state.setAdminMode);

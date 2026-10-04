@@ -1268,7 +1268,7 @@
     "disconnected.info.idle": "You were away for too long, so the hotel closed your session.",
     "disconnected.info.incompatible_client_version": "Please reload the page to get the latest version.",
     "disconnected.info.generic": "You have been disconnected. Please try again.",
-    // Furni editor (staff, acc_catalogfurni)
+    // Furni editor (staff, catalog.edit)
     "furni.editor.title": "Furni Editor",
     "furni.editor.tab.search": "Search",
     "furni.editor.tab.names": "Names",
@@ -1503,7 +1503,7 @@
     "furni.editor.status.no_permission": "You do not have the right for this action.",
     "furni.editor.status.no_changes": "Nothing changed.",
     "furni.editor.names.unconfigured": "The furnidata file is not configured on this hotel. Clients show the public name below.",
-    "furni.editor.names.no_right": "Changing furnidata needs the acc_furnidata_edit right.",
+    "furni.editor.names.no_right": "Changing furnidata needs the furni.edit right.",
     "furni.editor.furnidata.flag.unconfigured": "OFF",
     "furni.editor.furnidata.flag.unconfigured.tip": "No furnidata file is configured on this hotel",
     "furni.editor.side.furnidata.unconfigured": "not configured",

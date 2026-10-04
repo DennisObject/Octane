@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { Permission } from '../../api/permissions';
 import { CalendarItemState, ICalendarItem, LocalizeText } from '../../api';
 import { Button, Column, Grid, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
 import { useHasPermission } from '../../hooks';
@@ -30,7 +31,7 @@ export const CalendarView: FC<CalendarViewProps> = (props) => {
     } = props;
     const [selectedDay, setSelectedDay] = useState(currentDay);
     const [index, setIndex] = useState(Math.max(0, selectedDay - 1));
-    const isModerator = useHasPermission('acc_calendar_force');
+    const isModerator = useHasPermission(Permission.CampaignCalendarForce);
 
     const getDayState = (day: number) => {
         if (openedDays.includes(day)) return CalendarItemState.STATE_UNLOCKED;

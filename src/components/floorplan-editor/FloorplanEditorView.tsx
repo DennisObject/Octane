@@ -4,7 +4,6 @@ import {
     FloorHeightMapEvent,
     GetOccupiedTilesMessageComposer,
     GetRoomEntryTileMessageComposer,
-    GetSessionDataManager,
     ILinkEventTracker,
     PerkAllowancesMessageEvent,
     RemoveLinkEventTracker,
@@ -15,9 +14,9 @@ import {
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { LocalizeText, SendMessageComposer } from '../../api';
+import { LocalizeText, Permission, SendMessageComposer } from '../../api';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
-import { useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
+import { useHasPermission, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
 import { AIR_FLOOR_ASSETS } from './air/airAssets';
 import { FloorplanEditorLegacyView } from './FloorplanEditorLegacyView';
 import {
@@ -70,16 +69,6 @@ const MODE_FOR_ACTION: Record<FloorActionMode, OfficialDrawMode> = {
     DOOR: 'set_enter_tile'
 };
 
-const staffCanSave = (): boolean => {
-    try {
-        const session = GetSessionDataManager();
-
-        return typeof session?.hasSecurity === 'function' && session.hasSecurity(4) === true;
-    } catch {
-        return false;
-    }
-};
-
 const asThickness = (value: number): ThicknessLevel => (value <= 0 ? 0 : value >= 3 ? 3 : (value as ThicknessLevel));
 
 export const FloorplanEditorView: FC<Props> = ({ externalSession }) => {
@@ -103,8 +92,11 @@ const OfficialFloorplanEditor: FC = () => {
     const [floorDrop, setFloorDrop] = useState<ThicknessLevel>(0);
     const [committedWall, setCommittedWall] = useState<ThicknessLevel>(0);
     const [committedFloor, setCommittedFloor] = useState<ThicknessLevel>(0);
-    const [canSave, setCanSave] = useState(false);
-    const [importCanSave, setImportCanSave] = useState(false);
+    const [canSaveWithBc, setCanSaveWithBc] = useState(false);
+    const [importCanSaveWithBc, setImportCanSaveWithBc] = useState(false);
+    const canSaveAnyRoom = useHasPermission(Permission.RoomOwnerAny);
+    const canSave = canSaveAnyRoom || canSaveWithBc;
+    const importCanSave = canSaveAnyRoom || importCanSaveWithBc;
     const bcSecondsRef = useRef(0);
     const windowCreatedRef = useRef(false);
     const roomVisibleRef = useRef(false);
@@ -139,7 +131,7 @@ const OfficialFloorplanEditor: FC = () => {
         if (!roomVisible) return;
 
         if (!windowCreatedRef.current) {
-            setCanSave(bcSecondsRef.current > 0 || staffCanSave());
+            setCanSaveWithBc(bcSecondsRef.current > 0);
             windowCreatedRef.current = true;
         }
         setWallDrop(committedWall);
@@ -186,7 +178,7 @@ const OfficialFloorplanEditor: FC = () => {
         if (bcTimerRef.current === null) {
             bcTimerRef.current = window.setInterval(() => {
                 bcSecondsRef.current -= 10;
-                if (roomVisibleRef.current) setCanSave(bcSecondsRef.current > 0 || staffCanSave());
+                if (roomVisibleRef.current) setCanSaveWithBc(bcSecondsRef.current > 0);
             }, 10000);
         }
     });
@@ -396,7 +388,7 @@ const OfficialFloorplanEditor: FC = () => {
                                 <div className="fp-bc-footer-right">
                                     <button type="button" className="fp-bc-btn" data-testid="floorplan-import-export" onClick={() => {
                                         if (importExportVisible) { setImportExportVisible(false); return; }
-                                        setImportCanSave(bcSecondsRef.current > 0 || staffCanSave());
+                                        setImportCanSaveWithBc(bcSecondsRef.current > 0);
                                         setImportExportVisible(true);
                                     }}>{LocalizeText('floor.plan.editor.import.export')}</button>
                                     <button type="button" className="fp-bc-btn" data-testid="floorplan-cancel" onClick={() => setRoomVisible(false)}>{LocalizeText('floor.plan.editor.cancel')}</button>

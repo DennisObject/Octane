@@ -10,6 +10,7 @@ import {
     OctaneEventType
 } from '@octane/renderer';
 import { useMemo } from 'react';
+import { Permission, PermissionKey } from '../../api/permissions';
 import { useExternalSnapshot } from '../events/useExternalSnapshot';
 
 /**
@@ -147,14 +148,8 @@ export const useIsUserIgnored = (name: string): boolean => {
 };
 
 /**
- * Reactive view of the current user's rank metadata — name and badge —
- * mirrored from `permission_ranks` via the
- * extended `UserPermissionsComposer` wire (Arcturus ≥ 4.2.10). Use
- * this in PRESENTATIONAL code only (badge in
- * the avatar overlay, "rank" line in the user profile). DO NOT use
- * it for gating UI capabilities: prefer the permission-based family
- * (`useHasPermission(key)`) below, which is dynamic against
- * `permission_definitions` and survives rank renumbering.
+ * Current primary role metadata for display. Gate capabilities with
+ * useHasPermission instead of the presentation-only security level.
  */
 export interface IUserRank {
     readonly id: number;
@@ -178,18 +173,9 @@ export const useUserRank = (): IUserRank => {
 };
 
 /**
- * Resolved permission map for the current user, mirroring
- * `permission_definitions` filtered to the user's rank. Backed by
- * `SessionDataManager.getPermissionsSnapshot()` and invalidated by
- * `USER_PERMISSIONS_UPDATED` (Arcturus dispatches the underlying
- * packet at login + after every `setRank`).
- *
- * Values: 1 = ALLOWED, 2 = ROOM_OWNER (legacy gate that requires
- * the user to also be the room owner). Absent key = DISALLOWED.
- *
- * Empty Map when the connected emulator doesn't ship the extension
- * (older deployments) — `useHasPermission` then returns false for
- * every key, which hides mod-only UI by default (safe).
+ * Resolved role and user grants, with denies and expired grants removed.
+ * Every granted key has value 1; absent keys are denied. The renderer
+ * invalidates this snapshot on live role and permission changes.
  */
 export const useUserPermissions = (): ReadonlyMap<string, number> =>
     useExternalSnapshot(subscribeTo(OctaneEventType.USER_PERMISSIONS_UPDATED), () => {
@@ -200,56 +186,15 @@ export const useUserPermissions = (): ReadonlyMap<string, number> =>
         return manager.getPermissionsSnapshot();
     });
 
-/**
- * Reactive predicate: does the current user have the named
- * permission **unconditionally** (ALLOWED only)? `key` must match a
- * row in `permission_definitions.permission_key` (e.g.
- * `'acc_supporttool'`, `'acc_anyroomowner'`, `'acc_catalogfurni'`).
- *
- * Mirrors the server-side semantics of `Habbo.hasPermission(key)`
- * (PermissionsManager → `Rank.hasPermission(key, isRoomOwner=false)`
- * which returns `setting == ALLOWED` — `setting == ROOM_OWNER`
- * requires the call site to pass `isRoomOwner=true`, which the
- * client doesn't have ambiently). So this hook returns `true`
- * only for ALLOWED (value 1) and `false` for ROOM_OWNER (value 2)
- * — the latter has to be re-checked against the active room
- * ownership via `usePermissionValue(key) === 2 && roomSession.isRoomOwner`.
- *
- * Prefer this over any rank-based gate — it survives rank
- * renumbering and adding new ranks without touching the React code.
- */
-export const useHasPermission = (key: string): boolean => {
+/** Reactive predicate for a concrete permission in the server's resolved map. */
+export const useHasPermission = (key: PermissionKey): boolean => {
     const permissions = useUserPermissions();
 
     return useMemo(() => permissions.get(key) === 1, [permissions, key]);
 };
 
-/**
- * Reactive raw permission value:
- *   0 = DISALLOWED (also returned for absent keys)
- *   1 = ALLOWED
- *   2 = ROOM_OWNER (granted only when the caller is the active
- *       room owner — combine with `roomSession.isRoomOwner`)
- *
- * Use this when the gate needs to distinguish ROOM_OWNER from
- * plain ALLOWED, or for the handful of permissions whose
- * `permission_definitions.max_value > 1`.
- */
-export const usePermissionValue = (key: string): number => {
-    const permissions = useUserPermissions();
-
-    return useMemo(() => permissions.get(key) ?? 0, [permissions, key]);
-};
-
-/**
- * Reactive ambassador flag. Alias of
- * `useHasPermission('acc_ambassador')` — the snapshot also carries
- * an explicit `isAmbassador` boolean (legacy
- * `UserPermissionsComposer` field), but routing it through the
- * permission map keeps a single source of truth for runtime
- * promote/demote.
- */
-export const useIsAmbassador = (): boolean => useHasPermission('acc_ambassador');
+/** The permission map is the source of truth for live ambassador changes. */
+export const useIsAmbassador = (): boolean => useHasPermission(Permission.Ambassador);
 
 export const useGroupBadgesSnapshot = (): ReadonlyMap<number, string> =>
     useExternalSnapshot(subscribeTo(OctaneEventType.GROUP_BADGES_UPDATED), () => {
