@@ -313,7 +313,7 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorDetailResultEvent) => {
                 const parser = event.getParser();
-                const reply = answered(traffic.reply({ type: 'detail' }));
+                const reply = answered(traffic.reply({ type: 'detail', id: parser?.item?.id ?? 0 }));
 
                 if (!parser?.item || reply?.kind !== 'detail') return;
 
@@ -322,8 +322,8 @@ export const useFurniEditorStore = () => {
 
                 setIsLoadingDetail(false);
 
-                // Only one request is on the wire, so this cannot happen unless the server answers another furni.
-                if ((request.by === 'id' ? item.id : item.spriteId) !== request.value) return;
+                // FurniEditorTraffic matched the id; a sprite lookup is checked against its sprite here.
+                if (request.by === 'sprite' && item.spriteId !== request.value) return;
 
                 const previous = shownItemRef.current;
 
