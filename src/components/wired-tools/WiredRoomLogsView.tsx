@@ -44,10 +44,10 @@ const levelLabel = (level: number): string => LOG_LEVELS[level] ?? String(level)
 
 /**
  * The room's wired log: a text filter, the source and level menus, auto refresh every 2.5 s
- * and the log a page of 50 at a time, each line coloured by its level. Paging keeps the page's
- * own filters; changing a filter asks for page 1 with the new ones. A page the user asked for
- * puts its filters back into the controls and scrolls to the top; an auto refresh leaves both
- * alone.
+ * and the log a page of 50 at a time, each line coloured by its level. Every request carries the
+ * filters last chosen; changing a filter asks for page 1 with the new ones. A page answering other
+ * filters (one already on its way when they changed) is dropped, so it can't put old rows or old
+ * filters back. A page the user asked for scrolls to the top; an auto refresh leaves it alone.
  */
 export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
     const [page, setPage] = useState<LogPage | null>(null);
@@ -57,13 +57,24 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
     const [autoRefresh, setAutoRefresh] = useState(true);
     const [refreshEpoch, setRefreshEpoch] = useState(0);
     const [scrollKey, setScrollKey] = useState(0);
-    // The filters the next request goes out with; paging and auto refresh leave them at the page's own.
-    const nextFilters = useRef<{ logSourceFilter: number; logLevelFilter: number; query: string } | null>(null);
+    // The filters last chosen. The server answers with the trimmed query.
+    const wantedFilters = useRef({ logSourceFilter: -1, logLevelFilter: -1, query: '' });
     const silentRequest = useRef(false);
     const pageRequestedSilently = useRef(false);
+    // Page 1 for changed filters that the limiter has not let through yet, and its one retry timer.
+    const filterPending = useRef(false);
+    const filterRetry = useRef<number | null>(null);
 
     useMessageEvent<WiredLogPageEvent>(WiredLogPageEvent, (event) => {
         const parser = event.getParser();
+        const wanted = wantedFilters.current;
+
+        if (
+            parser.logLevelFilter !== wanted.logLevelFilter ||
+            parser.logSourceFilter !== wanted.logSourceFilter ||
+            (parser.query ?? '') !== wanted.query.trim()
+        )
+            return;
 
         setPage({
             totalEntries: parser.totalEntries,
@@ -92,11 +103,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
         ratelimit: REQUEST_PAGE_RATELIMIT,
         samePageTimeout: false,
         onRequestPage: (requested) => {
-            const filters = nextFilters.current ?? {
-                logSourceFilter: page?.logSourceFilter ?? -1,
-                logLevelFilter: page?.logLevelFilter ?? -1,
-                query: page?.query ?? ''
-            };
+            const filters = wantedFilters.current;
 
             pageRequestedSilently.current = silentRequest.current;
             SendMessageComposer(
@@ -110,31 +117,39 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
         SendMessageComposer(new WiredRoomLogsPageComposer(1, WIRED_ROOM_LOGS_PAGE_SIZE, -1, -1, ''));
     }, []);
 
-    const updateFilters = (changes: Partial<{ source: number; level: number; query: string }> = {}) => {
-        if (!requests.canRequestNewPage(false)) return;
-
-        setRefreshEpoch((epoch) => epoch + 1);
-
-        nextFilters.current = {
-            logSourceFilter: changes.source ?? source,
-            logLevelFilter: changes.level ?? level,
-            query: changes.query ?? query
-        };
-        requests.requestPage(1);
-        nextFilters.current = null;
-    };
-
-    // The timer outlives renders; it asks through the limiter of the latest one.
+    // The timers outlive renders; they ask through the limiter of the latest one.
     const requestsRef = useRef(requests);
 
     useEffect(() => {
         requestsRef.current = requests;
     });
 
+    useEffect(() => () => window.clearTimeout(filterRetry.current), []);
+
+    // Held back by the limiter, it tries again once the limit has passed until it gets through.
+    const requestFilteredFirstPage = () => {
+        window.clearTimeout(filterRetry.current);
+        filterPending.current = !requestsRef.current.requestPage(1);
+
+        if (filterPending.current) filterRetry.current = window.setTimeout(requestFilteredFirstPage, REQUEST_PAGE_RATELIMIT);
+    };
+
+    const updateFilters = (changes: Partial<{ source: number; level: number; query: string }> = {}) => {
+        wantedFilters.current = {
+            logSourceFilter: changes.source ?? source,
+            logLevelFilter: changes.level ?? level,
+            query: changes.query ?? query
+        };
+        setRefreshEpoch((epoch) => epoch + 1);
+        requestFilteredFirstPage();
+    };
+
     useEffect(() => {
         if (!autoRefresh) return;
 
         const timer = setInterval(() => {
+            if (filterPending.current) return;
+
             silentRequest.current = true;
             requestsRef.current.refresh();
             silentRequest.current = false;
