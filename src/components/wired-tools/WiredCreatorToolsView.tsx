@@ -3194,7 +3194,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     theme="primary-slim"
                     uniqueKey="wired-monitor-history"
                     windowPosition={DraggableWindowPosition.TOP_LEFT}
-                    offsetLeft={560}
+                    offsetLeft={40}
                     offsetTop={40}
                 >
                     <OctaneCardHeaderView headerText="Wired Monitor Logs" onCloseClick={() => setIsMonitorHistoryOpen(false)} />

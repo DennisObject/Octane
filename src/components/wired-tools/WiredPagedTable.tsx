@@ -123,7 +123,7 @@ export const WiredPagedTable = <T,>(props: WiredPagedTableProps<T>) => {
                         <span>
                             {localizeWithFallback(
                                 'wiredmenu.paged_table.found',
-                                '%entries_count% found. Showing page',
+                                `${totalEntries} found. Showing page`,
                                 ['entries_count'],
                                 [String(totalEntries)]
                             )}
@@ -145,7 +145,7 @@ export const WiredPagedTable = <T,>(props: WiredPagedTableProps<T>) => {
                         }}
                     />
                     {currentPage !== NO_PAGE && (
-                        <span>{localizeWithFallback('wiredmenu.paged_table.of', 'of %page_count%', ['page_count'], [String(Math.max(1, lastPage))])}</span>
+                        <span>{localizeWithFallback('wiredmenu.paged_table.of', `of ${Math.max(1, lastPage)}`, ['page_count'], [String(Math.max(1, lastPage))])}</span>
                     )}
                 </div>
                 <div className="flex gap-2">
