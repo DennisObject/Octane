@@ -1,48 +1,76 @@
-import { GetConfiguration } from '@octane/renderer';
-import { getAccessToken, getAccessTokenExpiresAt, persistAccessTokenFromPayload } from './accessToken';
+import { AccessTokenGrant, clearAccessToken, getAccessTokenExpiresAt, isAccessTokenBoundTo, persistAccessToken } from './accessToken';
+import { exchangeSsoTicket } from './authApi';
 
 const EXPIRY_SLACK_SECONDS = 60;
 
-const hasUsableAccessToken = (): boolean => {
-    if (!getAccessToken()) return false;
+interface PendingExchange {
+    ssoTicket: string;
+    promise: Promise<void>;
+}
+
+let pending: PendingExchange | null = null;
+
+// The server exchanges a ticket only once, so each ticket is tried at most
+// once per page, whatever the outcome, and remounts or retries reuse it.
+let lastExchangedTicket = '';
+
+const hasUsableAccessTokenFor = (ssoTicket: string): boolean =>
+{
+    if (!isAccessTokenBoundTo(ssoTicket)) return false;
+
     const expiresAt = getAccessTokenExpiresAt();
-    if (!expiresAt) return true;
-    return (expiresAt - EXPIRY_SLACK_SECONDS) > Math.floor(Date.now() / 1000);
+
+    return !expiresAt || (expiresAt - EXPIRY_SLACK_SECONDS) > Math.floor(Date.now() / 1000);
 };
 
-let exchangePromise: Promise<void> | null = null;
+// Swaps the session's SSO ticket for an HTTP access token, unless the session
+// already got one with its ticket. A different ticket drops the old token at
+// once, and an answer that arrives after a newer ticket took over is ignored.
+export const exchangeSsoTicketForAccessToken = (ssoTicket: string): Promise<void> =>
+{
+    if (!ssoTicket || hasUsableAccessTokenFor(ssoTicket)) return Promise.resolve();
+    if (pending?.ssoTicket === ssoTicket) return pending.promise;
+    if (lastExchangedTicket === ssoTicket) return Promise.resolve();
 
-export const exchangeSsoTicketForAccessToken = (ssoTicket: string): Promise<void> => {
-    if (!ssoTicket || hasUsableAccessToken()) return Promise.resolve();
-    if (exchangePromise) return exchangePromise;
+    clearAccessToken();
+    lastExchangedTicket = ssoTicket;
 
-    exchangePromise = (async () => {
-        try {
-            const rawEndpoint = GetConfiguration().getValue<string>('login.sso-token.endpoint', '${api.url}/api/auth/sso-token');
-            const endpoint = GetConfiguration().interpolate(rawEndpoint);
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'OctaneSsoExchange'
-                },
-                body: JSON.stringify({ ssoTicket })
-            });
+    const exchange: PendingExchange = { ssoTicket, promise: null };
 
-            if (!response.ok) return;
+    // A failed exchange leaves the client working; only the token-gated HTTP
+    // features stay unavailable.
+    exchange.promise = exchangeSsoTicket(ssoTicket)
+        .then((result) =>
+        {
+            if (result.ok && pending === exchange) persistAccessToken(result.data, ssoTicket);
+        })
+        .finally(() =>
+        {
+            if (pending === exchange) pending = null;
+        });
 
-            const payload = await response.json().catch(() => null);
+    pending = exchange;
 
-            if (payload) persistAccessTokenFromPayload(payload as Record<string, unknown>);
-        } catch {
-            // Offline / misconfigured endpoint: the client still works, only the
-            // token-gated HTTP features stay unavailable — same as before.
-        } finally {
-            exchangePromise = null;
-        }
-    })();
+    return exchange.promise;
+};
 
-    return exchangePromise;
+// Called when the session ends or switches: forget the token and ignore any
+// exchange still in flight.
+export const forgetAccessToken = (): void =>
+{
+    pending = null;
+    clearAccessToken();
+};
+
+// Stores a token the server handed out together with the session's ticket
+// (login, register, remember), so that ticket is never exchanged again.
+export const adoptAccessToken = (grant: AccessTokenGrant, ssoTicket: string): void =>
+{
+    forgetAccessToken();
+
+    // Servers that hand out no token with the ticket still get one exchange.
+    if (!grant.accessToken) return;
+
+    lastExchangedTicket = ssoTicket;
+    persistAccessToken(grant, ssoTicket);
 };

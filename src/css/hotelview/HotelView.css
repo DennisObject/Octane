@@ -933,3 +933,50 @@
         display: none;
     }
 }
+
+/* Landing scenery shared with the login screen (LandingBackdropView). */
+.landing-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background-position: bottom left;
+    background-repeat: repeat;
+    pointer-events: none;
+}
+
+.landing-backdrop img {
+    position: absolute;
+    display: block;
+    max-width: none;
+    user-select: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.landing-backdrop-sun {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.landing-backdrop-drape {
+    top: 0;
+    left: 0;
+}
+
+.landing-backdrop-left {
+    bottom: 0;
+    left: 0;
+}
+
+.landing-backdrop-right {
+    right: 0;
+    bottom: 0;
+}
+
+.landing-backdrop-right-repeat {
+    position: absolute;
+    inset: 0;
+    background-position: right top;
+    background-repeat: repeat-y;
+}

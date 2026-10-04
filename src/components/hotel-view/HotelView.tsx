@@ -10,9 +10,10 @@ import {
     HotelViewLandingVoteComposer
 } from '@octane/renderer';
 import { CSSProperties, FC, FormEvent, PointerEvent, useEffect, useRef, useState } from 'react';
-import { GetConfigurationValue, SendMessageComposer } from '../../api';
+import { GetConfigurationValue, getConfiguredLandingBackdrop, getRememberedLandingScene, hasLandingArtwork, rememberLandingScene, SendMessageComposer } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
 import { useMessageEvent } from '../../hooks';
+import { LandingBackdropView } from './LandingBackdropView';
 
 interface HotelViewLandingData {
     canEdit: boolean;
@@ -187,7 +188,8 @@ export const HotelView: FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const hotelViewRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
-    const [landingData, setLandingData] = useState<HotelViewLandingData>({ canEdit: false, scene: EMPTY_SCENE, slots: [] });
+    // Start from the scene the login screen showed so entering the hotel does not swap the artwork.
+    const [landingData, setLandingData] = useState<HotelViewLandingData>(() => ({ canEdit: false, scene: { ...EMPTY_SCENE, ...getRememberedLandingScene() }, slots: [] }));
     const [editingSlot, setEditingSlot] = useState<IHotelViewLandingSlot | null>(null);
     const [countdownInput, setCountdownInput] = useState('');
     const [editingScene, setEditingScene] = useState<IHotelViewLandingScene | null>(null);
@@ -204,6 +206,7 @@ export const HotelView: FC = () => {
     useMessageEvent<HotelViewLandingEvent>(HotelViewLandingEvent, (event) => {
         const parser = event.getParser();
 
+        rememberLandingScene(parser.scene);
         setLandingData({ canEdit: parser.canEdit, scene: parser.scene, slots: parser.slots });
     });
 
@@ -502,6 +505,7 @@ export const HotelView: FC = () => {
 
     return (
         <div ref={containerRef} className="octane-hotel-view block fixed w-full h-[calc(100%-55px)]" style={containerStyle}>
+            {!hasLandingArtwork(scene) && <LandingBackdropView backdrop={getConfiguredLandingBackdrop()} />}
             {scene.leftUrl
                 ? <div className="hotelview-edge hotelview-edge-left"><img src={resolveImageUrl(scene.leftUrl, imageLibraryUrl, assetUrl)} alt="" /><LayoutAvatarImageView classNames={['hotelview-avatar']} figure={GetSessionDataManager().figure} gender={GetSessionDataManager().gender} direction={2} /></div>
                 : <LayoutAvatarImageView classNames={['hotelview-avatar hotelview-avatar-fallback']} figure={GetSessionDataManager().figure} gender={GetSessionDataManager().gender} direction={2} />}

@@ -36,6 +36,20 @@
 }
 
 @font-face {
+    font-family: Volter;
+    font-weight: normal;
+    font-style: normal;
+    src: url("@/assets/webfonts/Volter.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Volter;
+    font-weight: bold;
+    font-style: normal;
+    src: url("@/assets/webfonts/Volter-b.ttf") format("truetype");
+}
+
+@font-face {
     font-family: UbuntuRegular;
     src: url("@/assets/webfonts/Ubuntu.ttf");
 }

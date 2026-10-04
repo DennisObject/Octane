@@ -11,6 +11,14 @@ vi.mock('../../../../api', () => ({ SendMessageComposer: vi.fn() }));
 vi.mock('../../../../hooks', () => ({ useConnectionState: vi.fn(), useMessageEvent: vi.fn() }));
 
 const handlers = new Map<string, (event: any) => void>();
+const pageSnapshot = (caption: string) => ({
+    catalogType: 'NORMAL' as const, pageId: 42, parentId: -1, captionSave: 'page_42', caption,
+    pageLayout: 'default_3x3', iconColor: 1, iconImage: 1, minRank: 1, orderNum: 1,
+    visible: true, enabled: true, clubOnly: false, catalogMode: 'NORMAL', vipOnly: false,
+    pageHeadline: '', pageTeaser: '', pageSpecial: '', pageText1: '', pageText2: '',
+    pageTextDetails: '', pageTextTeaser: '', roomId: 0, includes: ''
+});
+
 const Probe = () => {
     const studio = useCatalogStudio();
 
@@ -22,7 +30,14 @@ const Probe = () => {
             <span data-testid="error">{studio.lastError ?? ''}</span>
             <span data-testid="page-caption">{studio.session?.pages.find(page => page.pageId === 42)?.caption ?? ''}</span>
             <span data-testid="history-count">{studio.historyTotalCount}</span>
-            <button onClick={() => studio.applyDocument('SQL', 'UPDATE catalog_pages SET caption = \'Shop\' WHERE id = 1;', 'fingerprint', 'Import catalog SQL file')}>apply</button>
+            <button onClick={() => studio.applyMutation({
+                operationId: 'save-page-1', action: 'savePage', revision: 8, entityType: 'PAGE', catalogType: 'NORMAL',
+                entity: pageSnapshot('Renamed'),
+                historyGroup: {
+                    id: 91, revision: 8, actorId: 9, actorName: 'Alice', summary: 'Edit page', source: 'UI', createdAt: '',
+                    entries: [ { entityType: 'PAGE', catalogType: 'NORMAL', entityId: 42, operation: 'UPDATE' } ]
+                }
+            })}>delta</button>
         </div>
     );
 };
@@ -73,6 +88,25 @@ describe('CatalogStudioProvider', () => {
         expect(screen.getByTestId('draft')).toHaveTextContent('12');
         expect(screen.getByTestId('revision')).toHaveTextContent('7');
         expect(screen.getByTestId('pending')).toHaveTextContent('3');
+    });
+
+    it('applies a mutation delta without requesting a broad session or history refresh', () => {
+        render(<CatalogStudioProvider active><Probe /></CatalogStudioProvider>);
+        emit('CatalogStudioSessionEvent', {
+            activeVersionId: 11, draftVersionId: 12, revision: 7,
+            activeUpdatedAt: '', draftCreatedAt: '', pendingCount: 3,
+            actors: [], validationCurrent: true, validationIssueCount: 0, publishedVersions: [],
+            pages: [ pageSnapshot('Original') ], offers: []
+        });
+        const callsBefore = vi.mocked(SendMessageComposer).mock.calls.length;
+
+        act(() => screen.getByText('delta').click());
+
+        expect(screen.getByTestId('revision')).toHaveTextContent('8');
+        expect(screen.getByTestId('pending')).toHaveTextContent('4');
+        expect(screen.getByTestId('page-caption')).toHaveTextContent('Renamed');
+        expect(screen.getByTestId('history-count')).toHaveTextContent('1');
+        expect(vi.mocked(SendMessageComposer).mock.calls).toHaveLength(callsBefore);
     });
 
     it('waits for authentication and opens a fresh session after reconnecting', () => {

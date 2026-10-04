@@ -8,9 +8,8 @@ import { useCatalogAdmin } from '../../CatalogAdminContext';
 import { CatalogAdminHistoryView } from './CatalogAdminHistoryView';
 import { CatalogAdminPageDetailView } from './CatalogAdminPageDetailView';
 import { CatalogAdminPageTreeView } from './CatalogAdminPageTreeView';
-import { CatalogAdminTransferView } from './CatalogAdminTransferView';
 
-type ManagerTab = 'catalog' | 'sql' | 'history';
+type ManagerTab = 'catalog' | 'history';
 
 const CatalogAdminManagerWindow: FC = () => {
     const admin = useCatalogAdmin();
@@ -27,10 +26,6 @@ const CatalogAdminManagerWindow: FC = () => {
 
     const draftRoot = useMemo(() => buildCatalogAdminDraftTree(rootNode, session?.pages ?? [], currentType), [currentType, rootNode, session?.pages]);
     const selectedNode = findCatalogAdminNode(draftRoot, selectedPageId);
-    const { features } = studio;
-    const issueCount = features.validate ? (studio.validation?.issues.length ?? session?.validationIssueCount ?? 0) : 0;
-    // Optional tools the hotel does not support have no tab (see CatalogStudioProvider).
-    const shownTab: ManagerTab = activeTab === 'sql' && !features.sql ? 'catalog' : activeTab;
 
     // Follow the page opened in the catalog itself.
     const currentPageId = currentPage?.pageId ?? null;
@@ -53,18 +48,14 @@ const CatalogAdminManagerWindow: FC = () => {
         if (liveNode) activateNode?.(liveNode);
     };
 
-    const problemsLabel =
-        issueCount > 0 ? LocalizeText('catalog.admin.tab.history.count', ['count'], [String(issueCount)]) : LocalizeText('catalog.admin.tab.history');
-    const historyLabel = features.validate ? problemsLabel : LocalizeText('catalog.admin.tab.history.only');
     const tabs: StaffWindowTab<ManagerTab>[] = [
         { id: 'catalog', label: LocalizeText('catalog.admin.tab.catalog') },
-        ...(features.sql ? [{ id: 'sql' as const, label: LocalizeText('catalog.admin.tab.sql') }] : []),
-        { id: 'history', label: historyLabel }
+        { id: 'history', label: LocalizeText('catalog.admin.tab.history') }
     ];
 
     return (
         <StaffWindow<ManagerTab>
-            activeTab={shownTab}
+            activeTab={activeTab}
             className="octane-catalog-admin-manager"
             tabs={tabs}
             title={LocalizeText('catalog.admin.title')}
@@ -80,21 +71,13 @@ const CatalogAdminManagerWindow: FC = () => {
             {!admin.lastError && !resyncing && (admin.busy || studio.requestState === 'waiting') && (
                 <StaffStatus message={LocalizeText('catalog.admin.status.working')} tone="pending" />
             )}
-            {shownTab === 'catalog' && (
+            {activeTab === 'catalog' && (
                 <div className="octane-catalog-admin-workspace">
                     <CatalogAdminPageTreeView root={draftRoot} selectedPageId={selectedPageId} onSelect={(node: ICatalogNode) => selectPage(node.pageId)} />
                     <CatalogAdminPageDetailView node={selectedNode} root={draftRoot} />
                 </div>
             )}
-            {shownTab === 'sql' && <CatalogAdminTransferView />}
-            {shownTab === 'history' && (
-                <CatalogAdminHistoryView
-                    onSelectPage={(pageId) => {
-                        selectPage(pageId);
-                        setActiveTab('catalog');
-                    }}
-                />
-            )}
+            {activeTab === 'history' && <CatalogAdminHistoryView />}
         </StaffWindow>
     );
 };
