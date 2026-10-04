@@ -113,16 +113,16 @@ export class WiredSelectionVisualizer {
 
         if (!visualization) return;
 
+        // A new array each time: the renderer only hands a sprite's filters to Pixi when the array
+        // changes, and the array may be the furni's own shared one.
         for (const sprite of visualization.sprites) {
             if (sprite.blendMode === 'add') continue;
 
-            if (!sprite.filters) sprite.filters = [];
+            const filters = sprite.filters ?? [];
 
-            if (sprite.filters.includes(filter)) continue;
+            if (filters.includes(filter)) continue;
 
-            sprite.filters.push(filter);
-
-            sprite.increaseUpdateCounter();
+            sprite.filters = [...filters, filter];
         }
     }
 
@@ -134,15 +134,9 @@ export class WiredSelectionVisualizer {
         if (!visualization) return;
 
         for (const sprite of visualization.sprites) {
-            if (!sprite.filters) continue;
+            if (!sprite.filters?.includes(filter)) continue;
 
-            const index = sprite.filters.indexOf(filter);
-
-            if (index >= 0) {
-                sprite.filters.splice(index, 1);
-
-                sprite.increaseUpdateCounter();
-            }
+            sprite.filters = sprite.filters.filter((existing) => existing !== filter);
         }
     }
 }
