@@ -14,7 +14,6 @@ import {
     validateHours,
     validateMinutes,
     validatePositiveId,
-    validateRank,
     validateText
 } from '../../api';
 import { useNotification } from '../notification';
@@ -153,19 +152,6 @@ export const useHousekeepingActions = () => {
             const result = await run(() => HousekeepingApi.tradeLockUser(userId, hours, reason.trim()));
 
             if (isOk(result)) patchSelectedUser(userId, { isTradeLocked: true });
-
-            return result;
-        },
-        [firstError, run, patchSelectedUser]
-    );
-
-    const setUserRank = useCallback(
-        async (userId: number, rank: number) => {
-            if (firstError(validatePositiveId(userId, 'user'), validateRank(rank))) return null;
-
-            const result = await run(() => HousekeepingApi.setUserRank(userId, rank));
-
-            if (isOk(result)) patchSelectedUser(userId, { rank });
 
             return result;
         },
@@ -402,7 +388,6 @@ export const useHousekeepingActions = () => {
         kickUser,
         forceDisconnectUser,
         resetUserPassword,
-        setUserRank,
         tradeLockUser,
         setRoomOpen,
         setRoomMuted,

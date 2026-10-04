@@ -10,6 +10,7 @@ import { HousekeepingAuditTab } from './views/audit/HousekeepingAuditTab';
 import { HousekeepingDashboardTab } from './views/dashboard/HousekeepingDashboardTab';
 import { HousekeepingEconomyTab } from './views/economy/HousekeepingEconomyTab';
 import { HousekeepingRoomsTab } from './views/rooms/HousekeepingRoomsTab';
+import { HousekeepingRolesTab } from './views/roles/HousekeepingRolesTab';
 import { HousekeepingUsersTab } from './views/users/HousekeepingUsersTab';
 
 const TAB_ORDER: HousekeepingTabId[] = [
@@ -17,7 +18,8 @@ const TAB_ORDER: HousekeepingTabId[] = [
     HousekeepingTabId.USERS,
     HousekeepingTabId.ROOMS,
     HousekeepingTabId.ECONOMY,
-    HousekeepingTabId.AUDIT
+    HousekeepingTabId.AUDIT,
+    HousekeepingTabId.ROLES
 ];
 
 const isTabId = (value: string): value is HousekeepingTabId => (TAB_ORDER as string[]).includes(value);
@@ -38,6 +40,8 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
             return <HousekeepingRoomsTab />;
         case HousekeepingTabId.ECONOMY:
             return <HousekeepingEconomyTab />;
+        case HousekeepingTabId.ROLES:
+            return <HousekeepingRolesTab />;
         case HousekeepingTabId.AUDIT:
             return <HousekeepingAuditTab />;
         default:
@@ -55,14 +59,15 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
  */
 export const HousekeepingView: FC = () => {
     const { isVisible, openPanel, closePanel, togglePanel, activeTab, setActiveTab, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
+    const canManageRoles = useHasPermission(Permission.HousekeepingRolesManage);
     const isHk = useHasPermission(Permission.HousekeepingAccess);
     const isEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const mode = useMemo(() => getHousekeepingMode(), []);
     const isAllowed = isEnabled && isHk;
 
     const availableTabs = useMemo(
-        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode)),
-        [mode]
+        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode) && (tab !== HousekeepingTabId.ROLES || canManageRoles)),
+        [mode, canManageRoles]
     );
 
     useEffect(() => {
@@ -132,7 +137,7 @@ export const HousekeepingView: FC = () => {
         <WidgetErrorBoundary name="HousekeepingView">
             <StaffWindow<HousekeepingTabId>
                 activeTab={activeTab}
-                className="octane-housekeeping"
+                className={`octane-housekeeping ${activeTab === HousekeepingTabId.ROLES ? 'is-roles' : ''}`}
                 tabs={tabs}
                 title={LocalizeText('housekeeping.title')}
                 uniqueKey="housekeeping"
