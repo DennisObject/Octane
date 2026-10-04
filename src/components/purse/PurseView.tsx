@@ -43,10 +43,10 @@ export const PurseView: FC<{}> = (props) => {
 
     const joinLabel = useMemo(() => localizeWithFallback('purse.join', 'Join'), []);
 
-    // When the user has active HC, show the remaining time instead of "Join"
-    // (same formula as the HC Center's getClubText).
+    // Complimentary HC has no purchased expiry to count down.
     const clubLabel = useMemo(() => {
-        if (!purse || purse.clubDays <= 0) return joinLabel;
+        if (!purse?.hasClubLeft) return joinLabel;
+        if (purse.isComplimentaryClub) return localizeWithFallback('purse.club.permanent', 'HC ∞');
         if (purse.minutesUntilExpiration > -1 && purse.minutesUntilExpiration < 60 * 24) {
             return FriendlyTime.shortFormat(purse.minutesUntilExpiration * 60);
         }
@@ -142,7 +142,7 @@ export const PurseView: FC<{}> = (props) => {
                                 type="button"
                                 className="octane-purse__btn octane-purse__btn--join octane-purse-subscription club-text"
                                 onClick={openClub}
-                                title={clubLabel}
+                                title={purse.isComplimentaryClub ? localizeWithFallback('purse.club.complimentary', 'Complimentary HC') : clubLabel}
                             >
                                 <img src={hcIcon} alt="" className="octane-purse__btn-img" />
                                 <span>{clubLabel}</span>

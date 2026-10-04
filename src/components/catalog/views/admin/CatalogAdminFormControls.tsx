@@ -15,11 +15,12 @@ const FieldError: FC<{ error?: string }> = ({ error = '' }) => (error ? <span cl
 type TextFieldProps = Omit<FieldProps<string>, 'onChange'> & {
     placeholder?: string;
     inputRef?: Ref<HTMLInputElement>;
+    list?: string;
 } & ({ readOnly: true; onChange?: never } | { readOnly?: false; onChange: (value: string) => void });
 
 /** A text input; `readOnly` shows a value the hotel decides, such as the catalog a page belongs to. */
 export const CatalogAdminTextField: FC<TextFieldProps> = (props) => {
-    const { label, value, onChange, disabled = false, error = '', className = '', placeholder = '', inputRef = null, readOnly = false } = props;
+    const { label, value, onChange, disabled = false, error = '', className = '', placeholder = '', inputRef = null, list, readOnly = false } = props;
 
     return (
         <StaffField className={className} label={label}>
@@ -27,6 +28,7 @@ export const CatalogAdminTextField: FC<TextFieldProps> = (props) => {
                 ref={inputRef}
                 aria-invalid={!!error}
                 disabled={disabled}
+                list={list}
                 placeholder={placeholder}
                 readOnly={readOnly}
                 type="text"
