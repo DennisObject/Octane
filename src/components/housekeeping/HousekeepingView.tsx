@@ -1,5 +1,6 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useMemo } from 'react';
+import { Permission } from '../../api/permissions';
 import { getHousekeepingMode, HousekeepingTabId, isHousekeepingEnabled, isHousekeepingTabAvailable, LocalizeText } from '../../api';
 import { DraggableWindowPosition, StaffWindow, StaffWindowTab, WidgetErrorBoundary } from '../../common';
 import { useHasPermission, useHousekeepingStore } from '../../hooks';
@@ -9,7 +10,6 @@ import { HousekeepingAuditTab } from './views/audit/HousekeepingAuditTab';
 import { HousekeepingDashboardTab } from './views/dashboard/HousekeepingDashboardTab';
 import { HousekeepingEconomyTab } from './views/economy/HousekeepingEconomyTab';
 import { HousekeepingRoomsTab } from './views/rooms/HousekeepingRoomsTab';
-import { HousekeepingSoundboardTab } from './views/soundboard/HousekeepingSoundboardTab';
 import { HousekeepingUsersTab } from './views/users/HousekeepingUsersTab';
 
 const TAB_ORDER: HousekeepingTabId[] = [
@@ -17,8 +17,7 @@ const TAB_ORDER: HousekeepingTabId[] = [
     HousekeepingTabId.USERS,
     HousekeepingTabId.ROOMS,
     HousekeepingTabId.ECONOMY,
-    HousekeepingTabId.AUDIT,
-    HousekeepingTabId.SOUNDBOARD
+    HousekeepingTabId.AUDIT
 ];
 
 const isTabId = (value: string): value is HousekeepingTabId => (TAB_ORDER as string[]).includes(value);
@@ -41,15 +40,13 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
             return <HousekeepingEconomyTab />;
         case HousekeepingTabId.AUDIT:
             return <HousekeepingAuditTab />;
-        case HousekeepingTabId.SOUNDBOARD:
-            return <HousekeepingSoundboardTab />;
         default:
             return <HousekeepingDashboardTab />;
     }
 };
 
 /**
- * In-client housekeeping. Shown only while the server has granted `acc_housekeeping`
+ * In-client housekeeping. Shown only while the server has granted `housekeeping.access`
  * (and `housekeeping.enabled` is on); that gate is cosmetic, the server authorises
  * every request again.
  *
@@ -58,15 +55,14 @@ const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
  */
 export const HousekeepingView: FC = () => {
     const { isVisible, openPanel, closePanel, togglePanel, activeTab, setActiveTab, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
-    const isHk = useHasPermission('acc_housekeeping');
-    const canManageSoundboard = useHasPermission('acc_soundboard_manage');
+    const isHk = useHasPermission(Permission.HousekeepingAccess);
     const isEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const mode = useMemo(() => getHousekeepingMode(), []);
     const isAllowed = isEnabled && isHk;
 
     const availableTabs = useMemo(
-        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode) && (tab !== HousekeepingTabId.SOUNDBOARD || canManageSoundboard)),
-        [mode, canManageSoundboard]
+        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode)),
+        [mode]
     );
 
     useEffect(() => {

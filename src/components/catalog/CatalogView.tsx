@@ -1,11 +1,12 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef } from 'react';
+import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
 import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
 import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
 import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
-import { CATALOG_ADMIN_PERMISSION, CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
+import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
 import { getCatalogHeaderDescription } from './catalogLocalization.helpers';
 import { parseCatalogTabLabel, useCatalogWindowWidth } from './useCatalogWindowWidth';
 import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
@@ -285,7 +286,7 @@ export const CatalogView: FC<{}> = () => {
     const { catalogLocalizationVersion = 0 } = useCatalogData();
     const { isVisible = false } = useCatalogUiState();
 
-    const isCatalogAdmin = useHasPermission(CATALOG_ADMIN_PERMISSION);
+    const isCatalogAdmin = useHasPermission(Permission.CatalogEdit);
     const adminWindowOpen = useCatalogAdminUiStore((state) => state.adminMode || !!state.pageEditor || !!state.offerEditor);
 
     // Opening a studio session is expensive on the server: it loads every

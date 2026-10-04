@@ -1,6 +1,6 @@
 import { CreateFlatMessageComposer } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { CreateLinkEvent, GetConfigurationValue, IRoomModel, LocalizeText, SendMessageComposer } from '../../../api';
+import { CreateLinkEvent, GetConfigurationValue, IRoomModel, LocalizeText, Permission, SendMessageComposer } from '../../../api';
 import dropmenuArrow from '../../../assets/images/habbo-skin/slices/dropmenu-default-arrow.png';
 import vipIconBig from '../../../assets/images/navigator/air/icon-vip-big.png';
 import vipIconSmall from '../../../assets/images/navigator/air/icon-vip-small.png';
@@ -8,7 +8,7 @@ import popupArrowDown from '../../../assets/images/navigator/air/popup-arrow-dow
 import tileIconBlack from '../../../assets/images/navigator/air/tile-icon-black.png';
 import tileIconWhite from '../../../assets/images/navigator/air/tile-icon-white.png';
 import { DraggableWindow } from '../../../common';
-import { useNavigatorData, useNavigatorUiStore, useUserDataSnapshot } from '../../../hooks';
+import { useHasPermission, useNavigatorData, useNavigatorUiStore, useUserDataSnapshot } from '../../../hooks';
 import { useRoomCreatorStore } from './navigatorRoomCreatorStore';
 
 const AIR_TRADE_KEYS = ['navigator.roomsettings.trade_not_allowed', 'navigator.roomsettings.trade_not_with_Controller', 'navigator.roomsettings.trade_allowed'];
@@ -95,7 +95,9 @@ const RoomCreatorDropmenu: FC<RoomCreatorDropmenuProps> = (props) => {
 
 export const NavigatorRoomCreatorView: FC = () => {
     const { categories } = useNavigatorData();
-    const { clubLevel, securityLevel } = useUserDataSnapshot();
+    const { clubLevel } = useUserDataSnapshot();
+    const canUseStaffModels = useHasPermission(Permission.NavigatorRoomModelsStaff);
+    const canUseStaffCategories = useHasPermission(Permission.NavigatorCategoriesStaff);
     const beginCreate = useRoomCreatorStore((state) => state.beginCreate);
 
     const hcDisabled = GetConfigurationValue<boolean>('hc.disabled', false);
@@ -116,11 +118,11 @@ export const NavigatorRoomCreatorView: FC = () => {
         return models && models.length ? models[0].name : '';
     });
 
-    const visibleModels = useMemo(() => roomModels.filter((model) => model.clubLevel >= 0 || securityLevel >= 4), [roomModels, securityLevel]);
+    const visibleModels = useMemo(() => roomModels.filter((model) => model.clubLevel >= 0 || canUseStaffModels), [roomModels, canUseStaffModels]);
 
     const selectableCategories = useMemo(
-        () => (categories ?? []).filter((category) => category.visible && !category.automatic && (!category.staffOnly || securityLevel >= 7)),
-        [categories, securityLevel]
+        () => (categories ?? []).filter((category) => category.visible && !category.automatic && (!category.staffOnly || canUseStaffCategories)),
+        [categories, canUseStaffCategories]
     );
 
     const visitorOptions = useMemo(() => buildVisitorOptions(effectiveClubLevel >= 2 ? ROOM_LIMIT_HC : ROOM_LIMIT_NON_SUBSCRIBER), [effectiveClubLevel]);
@@ -143,7 +145,7 @@ export const NavigatorRoomCreatorView: FC = () => {
             return;
         }
 
-        if (model.clubLevel < 0 && securityLevel < 4) return;
+        if (model.clubLevel < 0 && !canUseStaffModels) return;
 
         setSelectedModelName(model.name);
     };

@@ -3,8 +3,7 @@ import {
     GiftReceiverNotFoundEvent,
     OctaneEvent,
     NotEnoughBalanceMessageEvent,
-    PurchaseFromCatalogAsGiftComposer,
-    SecurityLevel
+    PurchaseFromCatalogAsGiftComposer
 } from '@octane/renderer';
 import { ChangeEvent, CSSProperties, FC, KeyboardEvent, MouseEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -15,6 +14,7 @@ import {
     MessengerFriend,
     OpenUrl,
     ProductTypeEnum,
+    Permission,
     SendMessageComposer
 } from '../../../../api';
 import giftArrowLeftImage from '../../../../assets/images/catalog/air/gift/arrow-left.png';
@@ -34,7 +34,7 @@ import {
     CatalogPurchaseNotAllowedEvent,
     CatalogPurchaseSoldOutEvent
 } from '../../../../events';
-import { useCatalogActions, useCatalogUiState, useFriends, useGiftConfiguration, useMessageEvent, useNotification, useUiEvent } from '../../../../hooks';
+import { useCatalogActions, useCatalogUiState, useFriends, useGiftConfiguration, useHasPermission, useMessageEvent, useNotification, useUiEvent } from '../../../../hooks';
 import {
     filterGiftRecipients,
     findGiftRecipientMatchIndex,
@@ -77,7 +77,7 @@ export const CatalogGiftView: FC = () => {
     const { setGiftReceiver = null } = useCatalogUiState();
     const { showConfirm = null, simpleAlert = null } = useNotification();
     const sessionDataManager = GetSessionDataManager();
-    const isModerator = sessionDataManager.hasSecurity(SecurityLevel.MODERATOR);
+    const isModerator = useHasPermission(Permission.CatalogGiftStaff);
 
     const allFriends = useMemo(() => friends.filter((friend: MessengerFriend) => friend.id !== -1), [friends]);
 

@@ -14,7 +14,7 @@ export const parseSpriteId = (value: string | undefined): number | null => {
 };
 
 interface FurniEditorLinkHandlers {
-    /** Server-confirmed acc_catalogfurni; links are ignored without it. */
+    /** Server-confirmed catalog.edit; links are ignored without it. */
     canEdit: boolean;
     onClose: () => void;
     onOpenSprite: (spriteId: number) => void;

@@ -1,4 +1,5 @@
 import { FC, useEffect } from 'react';
+import { Permission } from '../../api/permissions';
 import { LocalizeText } from '../../api';
 import { StaffStatus, StaffWindow, StaffWindowTab } from '../../common';
 import { useHasPermission } from '../../hooks';
@@ -20,8 +21,6 @@ import {
 } from '../../hooks/furni-editor';
 import { FurniEditorEditView } from './views/FurniEditorEditView';
 import { FurniEditorSearchView } from './views/FurniEditorSearchView';
-
-const PERMISSION = 'acc_catalogfurni';
 
 const MARK_SUFFIX: Record<Exclude<FurniEditorGroupMark, null>, string> = { changed: ' *', invalid: ' !' };
 
@@ -57,11 +56,11 @@ const statusOf = (
 /**
  * Staff furni editor (items_base + furnidata), opened through the
  * furni-editor/* links only. It renders for the server-confirmed
- * acc_catalogfurni permission; the emulator checks that permission again on
+ * catalog.edit permission; the emulator checks that permission again on
  * every packet, so nothing here is a security boundary.
  */
 export const FurniEditorView: FC = () => {
-    const canEdit = useHasPermission(PERMISSION);
+    const canEdit = useHasPermission(Permission.CatalogEdit);
     const isVisible = useFurniEditorUiStore((state) => state.isVisible);
     const activeTab = useFurniEditorUiStore((state) => state.activeTab);
     const setVisible = useFurniEditorUiStore((state) => state.setVisible);

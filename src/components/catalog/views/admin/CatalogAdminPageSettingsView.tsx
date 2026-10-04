@@ -1,6 +1,7 @@
-import { FC, Ref } from 'react';
+import { FC, Ref, useId } from 'react';
 import { LocalizeText } from '../../../../api';
 import { StaffSection } from '../../../../common';
+import { useUserPermissions } from '../../../../hooks';
 import type { CatalogAdminPageForm } from '../../../../hooks/catalog/catalogAdmin.types';
 import { CATALOG_STUDIO_LAYOUT_CODES } from '../page/layout/catalogLayoutRegistry';
 import { CatalogAdminCheckbox, CatalogAdminNumberField, CatalogAdminSelectField, CatalogAdminTextField } from './CatalogAdminFormControls';
@@ -20,6 +21,9 @@ const LAYOUT_OPTIONS = CATALOG_STUDIO_LAYOUT_CODES.map((code) => ({ value: code,
  * and are not offered; the mode follows the catalog the page lives in and cannot change.
  */
 export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps> = ({ draft, patch, fieldErrors, captionRef }) => {
+    const permissions = useUserPermissions();
+    const permissionSuggestionsId = useId();
+    const permissionKeys = Array.from(permissions).filter(([, value]) => value === 1).map(([key]) => key).sort();
     const modeLabel = LocalizeText(`catalog.admin.page.mode.${draft.catalogMode.toLowerCase()}`);
 
     return (
@@ -39,14 +43,17 @@ export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps>
                     onChange={(captionSave) => patch({ captionSave })}
                 />
                 <div className="octane-staff-grid">
-                    <CatalogAdminNumberField
-                        error={fieldErrors.minRank}
-                        fallback={1}
-                        label={LocalizeText('catalog.admin.page.min.rank')}
-                        min={1}
-                        value={draft.minRank}
-                        onChange={(minRank) => patch({ minRank })}
+                    <CatalogAdminTextField
+                        error={fieldErrors.requiredPermission}
+                        label={LocalizeText('catalog.admin.page.required.permission')}
+                        list={permissionSuggestionsId}
+                        placeholder={LocalizeText('catalog.admin.page.required.permission.everyone')}
+                        value={draft.requiredPermission}
+                        onChange={(requiredPermission) => patch({ requiredPermission })}
                     />
+                    <datalist id={permissionSuggestionsId}>
+                        {permissionKeys.map((key) => <option key={key} value={key} />)}
+                    </datalist>
                     <CatalogAdminNumberField
                         error={fieldErrors.iconImage}
                         label={LocalizeText('catalog.admin.page.icon.image')}
@@ -83,11 +90,6 @@ export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps>
                 <div className="octane-staff-row octane-catalog-admin-flags">
                     <CatalogAdminCheckbox label={LocalizeText('catalog.admin.visible')} value={draft.visible} onChange={(visible) => patch({ visible })} />
                     <CatalogAdminCheckbox label={LocalizeText('catalog.admin.enabled')} value={draft.enabled} onChange={(enabled) => patch({ enabled })} />
-                    <CatalogAdminCheckbox
-                        label={LocalizeText('catalog.admin.page.vip.only')}
-                        value={draft.vipOnly}
-                        onChange={(vipOnly) => patch({ vipOnly })}
-                    />
                 </div>
             </StaffSection>
         </>

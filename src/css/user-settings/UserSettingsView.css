@@ -1,7 +1,7 @@
 /*
  * WIN63 AIR sources:
  * - me_menu_settings_menu_xml: 180x140 menu, title/divider/buttons/Back
- * - me_menu_sound_settings_xml: 312x170, extended to 198px for Soundboard
+ * - me_menu_sound_settings_xml: 312x170
  * - toolbar_chat_settings_xml: 257px wide
  * - me_menu_other_settings_xml: 242x184, extended for Polaris catalog controls
  *
@@ -196,7 +196,7 @@
 
 .air-settings-audio__rows {
     margin-left: 4px;
-    /* One shared grid rather than four independent rows: the label column is
+    /* One shared grid rather than three independent rows: the label column is
        sized by the longest translation, so every slider stays in the same
        column instead of drifting row by row. */
     display: grid;

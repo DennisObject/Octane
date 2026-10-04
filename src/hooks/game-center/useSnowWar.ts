@@ -663,7 +663,7 @@ const useSnowWarState = () =>
 
     const startEditing = useCallback(() =>
     {
-        // Server verifies acc_snowwar_arena_build and removes us from the running
+        // Server verifies arena build permission and removes us from the running
         // game/queue; we keep the level snapshot and edit it in place.
         editingRef.current = true;
         setEditing(true);

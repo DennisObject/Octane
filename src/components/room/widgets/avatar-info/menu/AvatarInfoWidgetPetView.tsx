@@ -8,6 +8,7 @@ import {
     RoomUnitGiveHandItemPetComposer
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
+import { Permission } from '../../../../../api/permissions';
 import { AvatarInfoPet, GetOwnRoomObject, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { useHasPermission, useRoom, useSessionInfo } from '../../../../../hooks';
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
@@ -29,7 +30,7 @@ export const AvatarInfoWidgetPetView: FC<AvatarInfoWidgetPetViewProps> = (props)
     const [mode, setMode] = useState(MODE_NORMAL);
     const { roomSession = null, isHandItemBlocked = false } = useRoom();
     const { petRespectRemaining = 0, respectPet = null } = useSessionInfo();
-    const canManageAnyRoom = useHasPermission('acc_anyroomowner');
+    const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
 
     const canPickUp = useMemo(() => {
         return roomSession.isRoomOwner || roomSession.controllerLevel >= RoomControllerLevel.GUEST || canManageAnyRoom;

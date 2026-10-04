@@ -1,5 +1,6 @@
 import { GetSessionDataManager, RoomControllerLevel } from '@octane/renderer';
 import { FC } from 'react';
+import { Permission } from '../../../../../api/permissions';
 import { Text } from '../../../../../common';
 import { useHasPermission, useRoom } from '../../../../../hooks';
 
@@ -15,7 +16,7 @@ interface InfoStandUnitIdViewProps {
 export const InfoStandUnitIdView: FC<InfoStandUnitIdViewProps> = ({ id: webId, ownerId = -1 }) => {
     const id = Math.abs(webId);
     const { roomSession = null } = useRoom();
-    const canManageAnyRoom = useHasPermission('acc_anyroomowner');
+    const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
     const canSee =
         !!roomSession &&
         (roomSession.isRoomOwner ||

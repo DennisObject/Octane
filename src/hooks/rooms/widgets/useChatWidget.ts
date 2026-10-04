@@ -27,9 +27,8 @@ import {
     RoomChatFormatter
 } from '../../../api';
 import { getStoredChatTextSize } from '../../../components/room/widgets/chat-input/chatTextSize';
-import { SoundboardRoomMessageEvent } from '../../../events';
 import { useChatHistory } from './../../chat-history';
-import { useMessageEvent, useOctaneEvent, useUiEvent } from '../../events';
+import { useMessageEvent, useOctaneEvent } from '../../events';
 import { useUserDataSnapshot } from '../../session/useSessionSnapshots';
 import { useTranslation } from '../../translation';
 import { useRoom } from '../useRoom';
@@ -387,44 +386,6 @@ const useChatWidgetState = () => {
             // Settlement is idempotent: preserve queued text, or close a failed/skipped slot.
             abandonLine(seq);
         }
-    });
-
-    useUiEvent<SoundboardRoomMessageEvent>(SoundboardRoomMessageEvent.ROOM_MESSAGE, (event) => {
-        if (!roomSession) return;
-
-        const roomObject = GetRoomEngine().getRoomObject(roomSession.roomId, event.actorRoomIndex, RoomObjectCategory.UNIT);
-        const bubbleLocation = roomObject ? GetRoomObjectScreenLocation(roomSession.roomId, roomObject.id, RoomObjectCategory.UNIT) : { x: 0, y: 0 };
-        const message = LocalizeText('soundboard.room.played', ['user', 'sound'], [event.username, event.soundName]);
-        const bubble = new ChatBubbleMessage(
-            -1,
-            -1,
-            roomSession.roomId,
-            message,
-            RoomChatFormatter(message),
-            '',
-            bubbleLocation,
-            1,
-            SystemChatStyleEnum.BOT,
-            null,
-            null
-        );
-        bubble.textSize = getStoredChatTextSize();
-
-        const seq = reserveChatLine(lineQueueRef.current);
-
-        settleChatLine(lineQueueRef.current, seq, bubble);
-        scheduleLineFlush();
-
-        addChatEntry({
-            id: -1,
-            webId: -1,
-            entityId: event.actorRoomIndex,
-            name: LocalizeText('soundboard.title'),
-            message,
-            roomId: roomSession.roomId,
-            timestamp: ChatHistoryCurrentDate(),
-            type: ChatEntryType.TYPE_ROOM_INFO
-        });
     });
 
     useOctaneEvent<RoomDragEvent>(RoomDragEvent.ROOM_DRAG, (event) => {

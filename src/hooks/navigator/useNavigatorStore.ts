@@ -30,7 +30,6 @@ import {
     RoomEntryInfoMessageEvent,
     RoomForwardEvent,
     RoomScoreEvent,
-    SecurityLevel,
     UserEventCatsEvent,
     UserFlatCatsEvent,
     UserInfoEvent,
@@ -48,6 +47,7 @@ import {
     TryVisitRoom,
     VisitDesktop
 } from '../../api';
+import { HasPermission, Permission } from '../../api/permissions';
 import { useMessageEvent, useOctaneEvent } from '../events';
 import { useNotification } from '../notification';
 import { useNavigatorFavouritesStore } from './navigatorFavouritesStore';
@@ -126,8 +126,8 @@ export const useNavigatorStore = () => {
             const parser = event.getParser();
             setNavigatorData((prev) => ({
                 ...prev,
-                eventMod: parser.securityLevel >= SecurityLevel.MODERATOR,
-                roomPicker: parser.securityLevel >= SecurityLevel.COMMUNITY
+                eventMod: parser.permissions.get(Permission.NavigatorEventsModerate) === 1,
+                roomPicker: parser.permissions.get(Permission.NavigatorStaffPick) === 1
             }));
         }, [])
     );
@@ -182,9 +182,9 @@ export const useNavigatorStore = () => {
                 }
                 if (
                     parser.data.doorMode === RoomDataParser.NOOB_STATE &&
-                    !GetSessionDataManager().isAmbassador &&
+                    !HasPermission(Permission.Ambassador) &&
                     !GetSessionDataManager().isRealNoob &&
-                    !GetSessionDataManager().isModerator
+                    !HasPermission(Permission.RoomOwnerAny)
                 )
                     return;
                 CreateRoomSession(parser.data.roomId);

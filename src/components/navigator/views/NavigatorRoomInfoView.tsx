@@ -12,6 +12,7 @@ import {
     UpdateHomeRoomMessageComposer
 } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
+import { Permission } from '../../../api/permissions';
 import { DispatchUiEvent, GetGroupInformation, LocalizeText, ReportType, SendMessageComposer } from '../../../api';
 import weblinkIcon from '../../../assets/images/navigator/air/icon-weblink.png';
 import removeRightsIcon from '../../../assets/images/navigator/air/remove-rights.png';
@@ -40,9 +41,9 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = (props) => 
     const { report = null } = useHelp();
     const { navigatorData } = useNavigatorData();
     const { roomSession = null } = useRoom();
-    const canManageAnyRoom = useHasPermission('acc_anyroomowner');
-    const canUseRoomThumbnailCamera = useHasPermission('acc_camera');
-    const canStaffPick = useHasPermission('acc_staff_pick');
+    const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
+    const canUseRoomThumbnailCamera = useHasPermission(Permission.CameraUse);
+    const canStaffPick = useHasPermission(Permission.NavigatorStaffPick);
 
     const enteredRoomId = navigatorData?.enteredGuestRoom?.roomId ?? 0;
     const { isFavourite: isRoomInFavouritesList, toggle: toggleFavourite } = useNavigatorFavourite(enteredRoomId);

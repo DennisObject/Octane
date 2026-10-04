@@ -137,22 +137,6 @@ export class RoomControllerLevel {
     static readonly MODERATOR = 5;
 }
 
-// Mirrors `packages/api/src/octane/session/enum/SecurityLevel.ts`. Kept
-// around so any consumer that still imports the renderer enum
-// (non-deprecated code path) compiles cleanly under the mock.
-export class SecurityLevel {
-    static readonly NONE = 0;
-    static readonly CELEBRITY = 1;
-    static readonly PARTNER = 2;
-    static readonly BUS_PARTNER = 3;
-    static readonly EMPLOYEE = 4;
-    static readonly MODERATOR = 5;
-    static readonly PLAYER_SUPPORT = 6;
-    static readonly COMMUNITY = 7;
-    static readonly ADMINISTRATOR = 8;
-    static readonly SUPER_USER = 9;
-}
-
 export class RoomObjectCategory {
     static readonly MINIMUM = 0;
     static readonly ROOM = 10;

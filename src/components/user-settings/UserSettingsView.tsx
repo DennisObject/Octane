@@ -4,7 +4,6 @@ import {
     ILinkEventTracker,
     OctaneSettingsEvent,
     RemoveLinkEventTracker,
-    SoundboardSaveVolumeComposer,
     UserSettingsCameraFollowComposer,
     UserSettingsEvent,
     UserSettingsOldChatComposer,
@@ -24,10 +23,9 @@ import {
     useMessageEvent
 } from '../../hooks';
 import { AirSettingsVolumeRow } from './AirSettingsVolumeRow';
-import { SoundboardVolumeControl } from './SoundboardVolumeControl';
 
 type SettingsSection = null | 'audio' | 'chat' | 'other' | 'privacy';
-type VolumeAction = 'system_volume' | 'furni_volume' | 'trax_volume' | 'soundboard_volume';
+type VolumeAction = 'system_volume' | 'furni_volume' | 'trax_volume';
 
 interface AirSettingsFrameProps {
     backLabel: string;
@@ -125,9 +123,6 @@ export const UserSettingsView: FC<{}> = () => {
             case 'trax_volume':
                 clone.volumeTrax = clampVolume(value as number);
                 break;
-            case 'soundboard_volume':
-                clone.volumeSoundboard = clampVolume(value as number);
-                break;
         }
 
         setUserSettings(clone);
@@ -136,11 +131,6 @@ export const UserSettingsView: FC<{}> = () => {
 
     const saveVolume = (type: VolumeAction, value: number) => {
         const committedValue = Math.round(clampVolume(value));
-
-        if (type === 'soundboard_volume') {
-            SendMessageComposer(new SoundboardSaveVolumeComposer(committedValue));
-            return;
-        }
 
         SendMessageComposer(
             new UserSettingsSoundComposer(
@@ -158,7 +148,6 @@ export const UserSettingsView: FC<{}> = () => {
         settingsEvent.volumeSystem = parser.volumeSystem;
         settingsEvent.volumeFurni = parser.volumeFurni;
         settingsEvent.volumeTrax = parser.volumeTrax;
-        settingsEvent.volumeSoundboard = parser.volumeSoundboard;
         settingsEvent.oldChat = parser.oldChat;
         settingsEvent.roomInvites = parser.roomInvites;
         settingsEvent.cameraFollow = parser.cameraFollow;
@@ -297,11 +286,6 @@ export const UserSettingsView: FC<{}> = () => {
                         value={userSettings.volumeTrax}
                         onChange={(value) => processAction('trax_volume', value)}
                         onCommit={(value) => saveVolume('trax_volume', value)}
-                    />
-                    <SoundboardVolumeControl
-                        value={userSettings.volumeSoundboard}
-                        onChange={(value) => processAction('soundboard_volume', value)}
-                        onCommit={(value) => saveVolume('soundboard_volume', value)}
                     />
                 </div>
             </AirSettingsFrame>

@@ -20,13 +20,12 @@ export interface CatalogStudioPageSnapshot {
     pageLayout: string;
     iconColor: number;
     iconImage: number;
-    minRank: number;
+    requiredPermission: string;
     orderNum: number;
     visible: boolean;
     enabled: boolean;
     clubOnly: boolean;
     catalogMode: string;
-    vipOnly: boolean;
     pageHeadline: string;
     pageTeaser: string;
     pageSpecial: string;

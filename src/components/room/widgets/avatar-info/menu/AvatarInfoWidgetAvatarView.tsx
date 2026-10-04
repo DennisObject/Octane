@@ -25,6 +25,7 @@ import {
     SanitizeHtml,
     SendMessageComposer
 } from '../../../../../api';
+import { Permission } from '../../../../../api/permissions';
 import { Flex } from '../../../../../common';
 import { useFriends, useHasPermission, useHelp, useIsUserIgnored, useMessageEvent, useRoom, useSessionInfo, useWiredTools } from '../../../../../hooks';
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
@@ -57,7 +58,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
     // scope here) so useSyncExternalStore installs against the real
     // React dispatcher.
     const isIgnored = useIsUserIgnored(avatarInfo.name);
-    const canOpenHousekeeping = useHasPermission('acc_housekeeping') && isHousekeepingEnabled();
+    const canOpenHousekeeping = useHasPermission(Permission.HousekeepingAccess) && isHousekeepingEnabled();
     // Reactive controller level: starts from the cached value at popup
     // open time, then updates from FlatControllerAdded/Removed events
     // and from optimistic clicks so the Give/Remove Rights buttons flip

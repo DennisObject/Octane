@@ -1,6 +1,7 @@
 import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Permission } from '../../api/permissions';
 import { GetConfigurationValue, isHousekeepingEnabled, localizeWithFallback, MessengerIconState, OpenMessengerChat, SendMessageComposer, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
 import collapseLeftImg from '../../assets/images/toolbar/air/collapse-left.png';
 import collapseRightImg from '../../assets/images/toolbar/air/collapse-right.png';
@@ -8,8 +9,7 @@ import dividerImg from '../../assets/images/toolbar/air/divider.png';
 import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
-import { SoundboardRoomMessageEvent } from '../../events';
-import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useSoundboard, useUiEvent, useWiredTools } from '../../hooks';
+import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
 import { BottomDockLayout, resolveBottomDockLayout } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
@@ -61,8 +61,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
     const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
-    const [ soundboardPulse, setSoundboardPulse ] = useState(false);
-    const soundboardPulseTimerRef = useRef<number | null>(null);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
     const { userFigure = null } = useSessionInfo();
@@ -76,10 +74,9 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { iconState = MessengerIconState.HIDDEN } = useMessenger();
     const buildersClubEnabled = useMemo(() => GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true)), []);
     const { openMonitor, showToolbarButton } = useWiredTools();
-    const { enabled: soundboardEnabled, reset: resetSoundboard } = useSoundboard();
     const { available: buildHeightAvailable, toggle: toggleBuildHeight } = useBuildHeight();
-    const isMod = useHasPermission('acc_supporttool');
-    const isHk = useHasPermission('acc_housekeeping');
+    const isMod = useHasPermission(Permission.ModerationTool);
+    const isHk = useHasPermission(Permission.HousekeepingAccess);
     const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const { tickets = [] } = useModTools();
     const openTicketsCount = useMemo(
@@ -124,31 +121,14 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         setYoutubeRoomEnabled(enabled);
     });
 
-    useUiEvent<SoundboardRoomMessageEvent>(SoundboardRoomMessageEvent.ROOM_MESSAGE, () =>
-    {
-        setSoundboardPulse(true);
-        if(soundboardPulseTimerRef.current !== null) window.clearTimeout(soundboardPulseTimerRef.current);
-        soundboardPulseTimerRef.current = window.setTimeout(() =>
-        {
-            setSoundboardPulse(false);
-            soundboardPulseTimerRef.current = null;
-        }, 700);
-    });
-
-    useEffect(() => () =>
-    {
-        if(soundboardPulseTimerRef.current !== null) window.clearTimeout(soundboardPulseTimerRef.current);
-    }, []);
-
     useEffect(() =>
     {
         if(!isInRoom)
         {
             setYoutubeEnabled(false);
             setYoutubeRoomEnabled(false);
-            resetSoundboard();
         }
-    }, [ isInRoom, resetSoundboard ]);
+    }, [ isInRoom ]);
 
     useEffect(() =>
     {
@@ -258,7 +238,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         leftCollapsed,
         rightCollapsed,
         showToolbarButton,
-        soundboardEnabled,
         touchLayout,
         youtubeEnabled
     ]);
@@ -447,10 +426,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         <motion.div variants={ itemVariants } className="tb-slot">
                             <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } className="tb-icon" />
                         </motion.div> }
-                    { (isInRoom && soundboardEnabled) &&
-                        <motion.div variants={ itemVariants } className="tb-slot">
-                            <ToolbarItemView icon="soundboard" onClick={ () => CreateLinkEvent('soundboard/toggle') } className={ `tb-icon ${ soundboardPulse ? 'animate-pulse' : '' }` } />
-                        </motion.div> }
                     { (isInRoom && buildHeightAvailable) &&
                         <motion.div variants={ itemVariants } className="tb-slot">
                             <ToolbarItemView icon="buildheight" onClick={ toggleBuildHeight } className="tb-icon" />
@@ -569,10 +544,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     { (isInRoom && youtubeEnabled) &&
                         <motion.div variants={ itemVariants }>
                             <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } className="tb-icon" />
-                        </motion.div> }
-                    { (isInRoom && soundboardEnabled) &&
-                        <motion.div variants={ itemVariants }>
-                            <ToolbarItemView icon="soundboard" onClick={ () => CreateLinkEvent('soundboard/toggle') } className={ `tb-icon ${ soundboardPulse ? 'animate-pulse' : '' }` } />
                         </motion.div> }
                     { (isInRoom && buildHeightAvailable) &&
                         <motion.div variants={ itemVariants }>

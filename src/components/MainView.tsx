@@ -47,7 +47,6 @@ import { RadioView } from './radio/RadioView';
 import { RareValuesView } from './rare-values/RareValuesView';
 import { RightSideView } from './right-side/RightSideView';
 import { RoomView } from './room/RoomView';
-import { SoundboardView } from './soundboard/SoundboardView';
 import { ToolbarView } from './toolbar/ToolbarView';
 import { TranslationBootstrap } from './translation/TranslationBootstrap';
 import { TranslationSettingsView } from './translation/TranslationSettingsView';
@@ -195,7 +194,6 @@ export const MainView: FC<{}> = (props) =>
             <FloorplanEditorView />
             <FurniEditorView />
             <RareValuesView />
-            <SoundboardView />
             <TraxEditorView />
             {GetConfigurationValue<boolean>('radio_ui.enabled', false) && !IsTouchDevice() && <RadioView />}
             <ExternalPluginLoader />

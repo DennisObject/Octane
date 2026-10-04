@@ -9,15 +9,15 @@ export const HOUSEKEEPING_MODE_KEY = 'housekeeping.mode';
 /**
  * Default-off master switch. When false, the HK module is completely
  * hidden: no toolbar icon, no panel mount, no link-event routing.
- * Layered ON TOP of the `acc_housekeeping` permission gate — config
+ * Layered ON TOP of the `housekeeping.access` permission gate — config
  * lets the operator disable HK at the build/deploy level even when
  * the permission exists on the server.
  */
 export const isHousekeepingEnabled = (): boolean => GetConfigurationValue<boolean>(HOUSEKEEPING_ENABLED_KEY, false) === true;
 
 /**
- * `full` (default) exposes the six-tab layout: dashboard, users,
- * rooms, economy, audit, and Soundboard. `light` strips the panel down to the
+ * `full` (default) exposes the five-tab layout: dashboard, users,
+ * rooms, economy, and audit. `light` strips the panel down to the
  * essentials — Users + Rooms only — for operators who want the
  * in-client HK only for live moderation, not for economy
  * management. Anything else than `'light'` resolves to `'full'`

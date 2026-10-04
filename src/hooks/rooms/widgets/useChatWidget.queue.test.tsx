@@ -50,7 +50,6 @@ vi.mock('../../../api', async () => ({
     loadEmojiShortcodes: vi.fn(),
     PlaySound: vi.fn()
 }));
-vi.mock('../../../events', () => ({ SoundboardRoomMessageEvent: { ROOM_MESSAGE: 'soundboard' } }));
 vi.mock('../../chat-history', () => ({ useChatHistory: () => ({ addChatEntry: mocks.addChatEntry, updateChatEntry: mocks.updateChatEntry }) }));
 vi.mock('../../events', () => ({
     useOctaneEvent: (type: string, handler: (event: unknown) => unknown) => mocks.handlers.set(type, handler),
