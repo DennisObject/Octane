@@ -834,8 +834,8 @@
     font-weight: 700;
 }
 
-/* WIN63 own_avatar_menu_xml. Keep this variant scoped: avatar_menu_widget is 151px wide. */
-.octane-avatar-action-menu--own {
+/* Share the compact avatar bubble skin between self and peer menus. */
+.octane-avatar-action-menu--classic {
     isolation: isolate;
     box-sizing: border-box;
     width: 115px;
@@ -857,7 +857,7 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.octane-avatar-action-menu--own::before {
+.octane-avatar-action-menu--classic::before {
     position: absolute;
     inset: 6px;
     z-index: -2;
@@ -873,7 +873,7 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-avatar-action-menu--own::after {
+.octane-avatar-action-menu--classic::after {
     position: absolute;
     bottom: 0;
     left: calc(50% - 6px);
@@ -884,7 +884,7 @@
     pointer-events: none;
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-header {
+.octane-avatar-action-menu--classic .octane-context-menu-header {
     position: relative;
     box-sizing: border-box;
     width: 107px;
@@ -909,7 +909,7 @@
     justify-content: center !important;
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-header::after {
+.octane-avatar-action-menu--classic .octane-context-menu-header::after {
     position: absolute;
     top: 20px;
     left: 2px;
@@ -920,7 +920,7 @@
     pointer-events: none;
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-header:hover {
+.octane-avatar-action-menu--classic .octane-context-menu-header:hover {
     color: #91c2ff;
 }
 
@@ -1053,7 +1053,15 @@
     gap: 1px;
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell {
+.air-avatar-menu-relationships {
+    display: grid;
+    width: 103px;
+    margin-left: 1px;
+    grid-template-columns: 34px 33px 33px;
+    gap: 1px;
+}
+
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
@@ -1076,11 +1084,11 @@
     text-shadow: none;
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell:hover {
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell:hover {
     background: transparent;
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell::before {
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell::before {
     position: absolute;
     top: -3px;
     left: -3px;
@@ -1097,15 +1105,15 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell:hover::before {
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell:hover::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-grid-hover.png');
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell:active::before {
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell:active::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-grid-pressed.png');
 }
 
-.octane-avatar-action-menu--own .air-avatar-menu-sign-cell + .air-avatar-menu-sign-cell {
+.octane-avatar-action-menu--classic .air-avatar-menu-sign-cell + .air-avatar-menu-sign-cell {
     border: 0;
 }
 
@@ -1173,7 +1181,7 @@
     background-image: url('../../assets/images/avatar-menu/air/sign-red.png');
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-footer {
+.octane-avatar-action-menu--classic .octane-context-menu-footer {
     position: relative;
     width: 100px;
     min-width: 100px;
@@ -1186,7 +1194,7 @@
     color: transparent;
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-footer::before {
+.octane-avatar-action-menu--classic .octane-context-menu-footer::before {
     position: absolute;
     top: 7px;
     left: 45px;
@@ -1199,15 +1207,15 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-footer:hover::before {
+.octane-avatar-action-menu--classic .octane-context-menu-footer:hover::before {
     background-image: url('../../assets/images/avatar-menu/air/arrow-down-hover.png');
 }
 
-.octane-avatar-action-menu--own .octane-context-menu-footer .fa-icon {
+.octane-avatar-action-menu--classic .octane-context-menu-footer .fa-icon {
     display: none;
 }
 
-.octane-avatar-action-menu--own.menu-hidden {
+.octane-avatar-action-menu--classic.menu-hidden {
     width: 45px;
     min-width: 45px;
     max-width: 45px;
@@ -1216,7 +1224,7 @@
     padding: 0;
 }
 
-.octane-avatar-action-menu--own.menu-hidden .octane-context-menu-footer {
+.octane-avatar-action-menu--classic.menu-hidden .octane-context-menu-footer {
     width: 38px;
     min-width: 38px;
     height: 30px;
@@ -1225,7 +1233,7 @@
     background: transparent;
 }
 
-.octane-avatar-action-menu--own.menu-hidden .octane-context-menu-footer::before {
+.octane-avatar-action-menu--classic.menu-hidden .octane-context-menu-footer::before {
     top: 11px;
     left: 14px;
     width: 15px;
@@ -1233,7 +1241,7 @@
     background-image: url('../../assets/images/avatar-menu/air/arrow-up.png');
 }
 
-.octane-avatar-action-menu--own.menu-hidden .octane-context-menu-footer:hover::before {
+.octane-avatar-action-menu--classic.menu-hidden .octane-context-menu-footer:hover::before {
     background-image: url('../../assets/images/avatar-menu/air/arrow-up-hover.png');
 }
 
