@@ -166,8 +166,11 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
     };
 
     return (
+        // Official logs_overview: frame 3, 700 wide, 508 high, resizable in height between 380 and 700.
         <OctaneCardView
-            className="min-w-[760px] max-w-[760px] max-h-[560px]"
+            className="h-[508px] max-h-[700px] min-h-[380px] w-[700px]"
+            frameStyle={3}
+            resizeAxis="vertical"
             theme="primary-slim"
             uniqueKey="wired-room-logs"
             windowPosition={DraggableWindowPosition.TOP_LEFT}
@@ -175,7 +178,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
             offsetTop={40}
         >
             <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.logs_overview.title', 'Wired room logs')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
+            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 min-h-0" overflow="hidden">
                 <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
                     <Text>
                         {localizeWithFallback(
@@ -260,7 +263,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
                     requests={requests}
                     emptyText={localizeWithFallback('wiredmenu.logs_overview.empty', 'No log lines match the current filters')}
                     scrollResetKey={scrollKey}
-                    bodyClassName="h-[320px]"
+                    bodyClassName="min-h-0 grow"
                 />
             </OctaneCardContentView>
         </OctaneCardView>

@@ -23,6 +23,7 @@ const apply = <T>(prev: T, next: Updater<T>): T => (typeof next === 'function' ?
 const CLOSED_CHILD_WINDOWS = {
     isMonitorHistoryOpen: false,
     isMonitorInfoOpen: false,
+    isInspectionGiveOpen: false,
     isVariableManageOpen: false,
     isArrayInspectorOpen: false,
     isManagedGiveOpen: false,

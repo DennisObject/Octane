@@ -3102,8 +3102,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     ))}
                 </div>
             )}
+            {/* Official wired_menu_view: frame 3, 500x500. The tab bodies are this hotel's, so taller ones may grow it. */}
             <OctaneCardView
-                className="min-w-[520px] max-w-[520px]"
+                className="min-h-[500px] w-[500px]"
+                frameStyle={3}
+                isResizable={false}
                 theme="primary-slim"
                 uniqueKey="wired-creator-tools"
                 windowPosition={DraggableWindowPosition.TOP_LEFT}
