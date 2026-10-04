@@ -59,7 +59,7 @@ const DEFAULT_USER_DATA: Readonly<IUserDataSnapshot> = Object.freeze({
     isSystemOpen: false,
     isSystemShutdown: false,
     uiFlags: 0,
-    tags: Object.freeze<string[]>([]) as ReadonlyArray<string>,
+    tags: Object.freeze<string[]>([]),
     rankId: 0,
     rankName: '',
     rankBadge: ''
@@ -75,7 +75,7 @@ const DEFAULT_VOLUMES: Readonly<ISoundVolumesSnapshot> = Object.freeze({
     system: 0.5,
     furni: 0.5,
     trax: 0.5
-}) as Readonly<ISoundVolumesSnapshot>;
+});
 
 const subscribeTo =
     (eventType: string) =>
