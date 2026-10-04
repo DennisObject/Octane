@@ -4,6 +4,7 @@ export interface IPurse {
     clubDays: number;
     clubPeriods: number;
     hasClubLeft: boolean;
+    isComplimentaryClub: boolean;
     isVip: boolean;
     pastClubDays: number;
     pastVipDays: number;

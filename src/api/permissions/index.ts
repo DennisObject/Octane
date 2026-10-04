@@ -15,13 +15,10 @@ export const Permission = {
     NavigatorStaffPick: 'navigator.staff_pick',
     FortuneWheelManage: 'fortune_wheel.manage',
     HousekeepingRolesManage: 'housekeeping.roles.manage',
-    NavigatorRoomModelsStaff: 'navigator.room_models.staff',
     NavigatorCategoriesStaff: 'navigator.categories.staff',
     NavigatorEventsModerate: 'navigator.events.moderate',
     CatalogGiftStaff: 'catalog.gift.staff',
-    RoomYoutubeControlAny: 'room.youtube.control_any',
-    ChatStyleSystem: 'chat.style.system',
-    ChatStyleStaff: 'chat.style.staff'
+    RoomYoutubeControlAny: 'room.youtube.control_any'
 } as const;
 
 export type PermissionKey = (typeof Permission)[keyof typeof Permission];

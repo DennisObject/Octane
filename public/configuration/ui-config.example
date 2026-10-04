@@ -57,183 +57,6 @@
             "right.repeat": "${asset.url}/c_images/reception/US_top_right.png"
         }
     },
-    "navigator.room.models": [
-        {
-            "clubLevel": 0,
-            "tileSize": 104,
-            "name": "a"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 94,
-            "name": "b"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 36,
-            "name": "c"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 84,
-            "name": "d"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 80,
-            "name": "e"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 80,
-            "name": "f"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 416,
-            "name": "i"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 320,
-            "name": "j"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 448,
-            "name": "k"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 352,
-            "name": "l"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 384,
-            "name": "m"
-        },
-        {
-            "clubLevel": 0,
-            "tileSize": 372,
-            "name": "n"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 80,
-            "name": "g"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 74,
-            "name": "h"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 416,
-            "name": "o"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 352,
-            "name": "p"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 304,
-            "name": "q"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 336,
-            "name": "r"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 748,
-            "name": "u"
-        },
-        {
-            "clubLevel": 1,
-            "tileSize": 438,
-            "name": "v"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 540,
-            "name": "t"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 512,
-            "name": "w"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 396,
-            "name": "x"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 440,
-            "name": "y"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 456,
-            "name": "z"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 208,
-            "name": "0"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 1009,
-            "name": "1"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 1044,
-            "name": "2"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 183,
-            "name": "3"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 254,
-            "name": "4"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 1024,
-            "name": "5"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 801,
-            "name": "6"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 354,
-            "name": "7"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 888,
-            "name": "8"
-        },
-        {
-            "clubLevel": 2,
-            "tileSize": 926,
-            "name": "9"
-        }
-    ],
     "hotelview": {
         "room.pool": "791",
         "room.picnic": "2193",
@@ -313,355 +136,168 @@
     "catalog.tab.icons": false,
     "catalog.headers": false,
     "chat.input.maxlength": 100,
-    "chat.styles.disabled": [],
     "chat.styles": [
         {
-            "styleId": 0,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 0
         },
         {
-            "styleId": 1,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 1
         },
         {
-            "styleId": 2,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 2
         },
         {
-            "styleId": 3,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 3
         },
         {
-            "styleId": 4,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 4
         },
         {
-            "styleId": 5,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 5
         },
         {
-            "styleId": 6,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 6
         },
         {
-            "styleId": 7,
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 7
         },
         {
-            "styleId": 8,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 8
         },
         {
-            "styleId": 9,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 9
         },
         {
-            "styleId": 10,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 10
         },
         {
-            "styleId": 11,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 11
         },
         {
-            "styleId": 12,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 12
         },
         {
-            "styleId": 13,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 13
         },
         {
-            "styleId": 14,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 14
         },
         {
-            "styleId": 15,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 15
         },
         {
-            "styleId": 16,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 16
         },
         {
-            "styleId": 17,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 17
         },
         {
-            "styleId": 18,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 18
         },
         {
-            "styleId": 19,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 19
         },
         {
-            "styleId": 20,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 20
         },
         {
-            "styleId": 21,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 21
         },
         {
-            "styleId": 22,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 22
         },
         {
-            "styleId": 23,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 23
         },
         {
-            "styleId": 24,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 24
         },
         {
-            "styleId": 25,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 25
         },
         {
-            "styleId": 26,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 26
         },
         {
-            "styleId": 27,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 27
         },
         {
-            "styleId": 28,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 28
         },
         {
-            "styleId": 29,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 29
         },
         {
-            "styleId": 30,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 30
         },
         {
-            "styleId": 31,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 31
         },
         {
-            "styleId": 32,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 32
         },
         {
-            "styleId": 33,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 33
         },
         {
-            "styleId": 34,
-            "permission": "chat.style.staff",
-            "isSystemStyle": true,
-            "isHcOnly": false,
-            "isAmbassadorOnly": false
+            "styleId": 34
         },
         {
-            "styleId": 35,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 35
         },
         {
-            "styleId": 36,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 36
         },
         {
-            "styleId": 37,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 37
         },
         {
-            "styleId": 38,
-            "isSystemStyle": false,
-            "isHcOnly": true,
-            "isAmbassadorOnly": false
+            "styleId": 38
         },
         {
-            "styleId": 39,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 39
         },
         {
-            "styleId": 40,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 40
         },
         {
-            "styleId": 41,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 41
         },
         {
-            "styleId": 42,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 42
         },
         {
-            "styleId": 43,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 43
         },
         {
-            "styleId": 44,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 44
         },
         {
-            "styleId": 45,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 45
         },
         {
-            "styleId": 46,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 46
         },
         {
-            "styleId": 47,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 47
         },
         {
-            "styleId": 48,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 48
         },
         {
-            "styleId": 49,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 49
         },
         {
-            "styleId": 50,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 50
         },
         {
-            "styleId": 51,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 51
         },
         {
-            "styleId": 52,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 52
         },
         {
-            "styleId": 53,
-            "permission": "chat.style.staff",
-            "isSystemStyle": false,
-            "isHcOnly": false,
-            "isAmbassadorOnly": true
+            "styleId": 53
         }
     ],
     "camera.available.effects": [

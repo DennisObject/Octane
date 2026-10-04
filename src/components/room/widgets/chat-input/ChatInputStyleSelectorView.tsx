@@ -4,7 +4,7 @@ import { CHAT_TEXT_SIZES, ChatTextSize, getChatTextSizeLabel, getStoredChatTextS
 
 interface ChatInputStyleSelectorViewProps {
     chatStyleId: number;
-    chatStyleIds: number[];
+    chatStyleIds: ReadonlyArray<number>;
     selectChatStyleId: (styleId: number) => void;
 }
 
