@@ -8,11 +8,8 @@ import {
 } from '@octane/renderer';
 import type { FurniSearchCriteria } from './furniEditorData';
 
-/** How long a request may stay unanswered before the channel gives up on it. */
+/** How long a request may stay unanswered before the editor says the server is not answering. */
 export const FURNI_EDITOR_REQUEST_TIMEOUT_MS = 15_000;
-
-/** After a timeout, how long the wire must stay quiet before the queue resumes. */
-export const FURNI_EDITOR_QUIET_MS = 1_500;
 
 export type FurniEditorMutationKind = 'update' | 'delete' | 'furnidata' | 'structure' | 'revert' | 'syncName';
 
@@ -48,13 +45,14 @@ export type FurniWireReply =
     | { type: 'detail'; id: number }
     | { type: 'result'; success: boolean; id: number; message: string };
 
-/** Who a reply belongs to: the request on the wire, the blocked write (its terminal answer), or nobody (null). */
+/** Who a reply belongs to: the outstanding request, the blocked write (its terminal answer), or nobody (null). */
 export type FurniReplyRoute = { to: 'request'; request: FurniWireRequest } | { to: 'blocked'; write: FurniWriteRequest } | null;
 
 export type FurniTrafficState =
     | { tag: 'idle' }
     | { tag: 'inflight'; kind: FurniWireKind; key: string }
-    | { tag: 'resyncing'; quietUntil: number }
+    /** The outstanding read timed out: nothing else goes out until its answer arrives or the socket resets. */
+    | { tag: 'stalled'; kind: FurniWireKind; key: string }
     /** The socket closed or reopened and is not authenticated yet: requests queue, nothing goes out. */
     | { tag: 'offline' };
 
@@ -67,15 +65,12 @@ export interface FurniWriteBlock {
     since: number;
     /** Set after FURNI_EDITOR_BLOCK_HINT_MS: the UI adds a hint to reconnect. */
     stale: boolean;
-    /** The id 0 refusal that made it ambiguous, if any ('' after a timeout). */
+    /** The refusal that made it ambiguous, if any ('' after a timeout). */
     reason: string;
 }
 
 /** After this long, a blocked write gets a reconnect hint. */
 export const FURNI_EDITOR_BLOCK_HINT_MS = 30_000;
-
-/** A read went unanswered (timeout or a reply of the wrong kind); retrying = it is sent once more after the resync. */
-export type FurniLostHandler = (request: FurniWireRequest, retrying: boolean) => void;
 
 export interface FurniTrafficListener {
     onStateChange: (state: FurniTrafficState) => void;
@@ -89,7 +84,6 @@ interface Slot {
     key: string;
     /** The UI no longer wants the answer; the slot still waits for it. */
     discarded: boolean;
-    retried: boolean;
 }
 
 const keyOf = (request: FurniWireRequest): string => {
@@ -127,7 +121,7 @@ const composerOf = (request: FurniWireRequest): IMessageComposer<unknown[]> => {
     }
 };
 
-/** The furniture a request names (0 when the server cannot echo it back). */
+/** The furniture a request names; 0 for none, -1 for a sprite lookup (the server resolves it). */
 const entityOf = (request: FurniWireRequest): number => {
     switch (request.kind) {
         case 'write':
@@ -135,13 +129,13 @@ const entityOf = (request: FurniWireRequest): number => {
         case 'import':
             return request.itemId;
         case 'detail':
-            return request.detail.by === 'id' ? request.detail.value : 0;
+            return request.detail.by === 'id' ? request.detail.value : -1;
         default:
             return 0;
     }
 };
 
-/** Read replies other than detail: the packet type of the read on the wire. */
+/** Read packets other than detail: the packet type of the outstanding read. */
 const readAccepts = (kind: FurniWireKind, type: 'search' | 'import' | 'interactions'): boolean =>
     type === 'search' ? kind === 'list' || kind === 'probe' : kind === type;
 
@@ -149,74 +143,60 @@ const readAccepts = (kind: FurniWireKind, type: 'search' | 'import' | 'interacti
 const LATEST_WINS: ReadonlySet<FurniWireKind> = new Set<FurniWireKind>(['list', 'probe', 'detail', 'interactions']);
 
 /**
- * The furni editor's wire channel. Replies carry no request id, so exactly
- * ONE request (read or write) is on the wire at a time.
+ * The furni editor's wire channel. Replies carry no request id, so at most
+ * ONE request is outstanding (plus, at most, one blocked write), and nothing
+ * is ever resent or given up on short of a socket reset.
  *
  * Wire states:
  *   idle --request--> inflight(kind, key)
- *   inflight --reply that belongs to it--> idle (next queued request goes out)
- *   inflight(read) --timeout | read reply that is not its own--> resyncing (the read is retried once)
- *   inflight(write) --timeout | ambiguous refusal--> resyncing, and the write moves to the block
- *   resyncing --any unowned reply--> resyncing(quietUntil = now + quiet), reply discarded
- *   resyncing --quiet window over--> idle (queue resumes)
- *   idle --any unowned reply--> resyncing (the wire is out of step)
- *   any --socket closed | reopened (unauthenticated)--> offline: the wire is reset, nothing is sent
- *   offline --session authenticated--> idle (queue resumes; a read that was on the wire goes first)
- *   offline --any reply--> offline, reply discarded (it belongs to the old socket)
+ *   inflight --its answer--> idle (next queued request goes out)
+ *   inflight(read) --timeout--> stalled: nothing else goes out; the UI says the server is not answering
+ *   stalled --its answer--> idle (the answer is delivered as usual)
+ *   inflight(write) --timeout | ambiguous refusal--> idle, and the write moves to the block
+ *   any --socket closed | reopened (unauthenticated)--> offline: everything outstanding is dropped
+ *   offline --session authenticated--> idle (queue resumes; the dropped read goes first)
+ *   replies that belong to nothing are ignored; offline, every reply is ignored.
  *
- * Entities: detail-by-id, import and write requests name one furniture (X).
- * A read for X that times out (or is pushed off the wire by a foreign reply)
- * leaves an UNRESOLVED read for X: its answer may still come. It is absorbed
- * when a reply that can only be its answer arrives (a detail for X, or a
- * refusal for X while no write for X is on the wire or blocked); a socket
- * reset forgets them all.
+ * Owners, following PlusEMU E3 @53e6bfe2 (FurniEditorResult = success,
+ * message, entity id; refusals name the furniture the request named, sprite
+ * lookups, searches and the interaction list refuse with id 0):
+ *   - a read packet belongs to the outstanding read of its type (a detail:
+ *     the detail for that id, or a sprite lookup);
+ *   - a result with id 0: a refusal settles an outstanding read that is not a
+ *     stalled sprite lookup; for an outstanding write it is ambiguous (block);
+ *   - a result with id X > 0: settles the outstanding request for X (a write,
+ *     or a read on refusal); else, a refusal settles an outstanding sprite
+ *     lookup that is not stalled; else it settles the blocked write for X;
+ *     else it is ignored. Successes only ever settle writes.
  *
- * Which reply belongs to what, following PlusEMU E3 @53e6bfe2 (FurniEditorResult =
- * success, message, entity id; refusals name the furniture the request named;
- * sprite lookups, searches and the interaction list refuse with id 0):
- *   - a detail answer belongs to the detail on the wire for that id (or the
- *     sprite lookup on the wire); else it absorbs an unresolved read for its id;
- *   - other read answers belong to the read on the wire of their packet type;
- *   - a result with id X > 0:
- *       for the request on the wire for X: a success settles a write; a refusal
- *       settles a read, or a write when no read for X is unresolved (with one
- *       unresolved, the refusal is ambiguous and the write moves to the block);
- *       else for the blocked write for X: settles it, only when no read for X
- *       is unresolved (then the block waits for a reconnect);
- *       else a refusal absorbs an unresolved read for X; anything else is ignored;
- *   - a result with id 0 and success = false settles a read on the wire; for
- *     a write it is ambiguous and the write moves to the block;
- *   - a result with id 0 and success = true is never sent by E3 and is ignored.
+ * Unknown unresolved: a stalled sprite lookup may still be answered with any
+ * furniture's id. While it is outstanding nothing else goes out, so no write
+ * starts, and no result settles any write block; only the lookup's own detail
+ * packet, or a reconnect, ends it.
  *
  * Write block for X (orthogonal): open --write timeout | ambiguous refusal--> blocked(write X)
- *   blocked --id-matched result while no read for X is unresolved--> open (the write's terminal answer)
+ *   blocked --result with id X (see above)--> open (the write's terminal answer)
  *   blocked --socket reset--> open (no answer can come any more)
- * While blocked, no write and no read for X goes out (nor a sprite lookup,
- * whose furniture is unknown); they wait in the queue. Other reads keep
- * working. A read for X that was already unresolved when the block started
- * means only a reconnect can clear it. The quiet window is only a read heuristic.
+ * While blocked, no write, no read for X and no sprite lookup goes out; they
+ * wait in the queue. Other reads keep working, one at a time.
  *
  * The queue is FIFO; a newer list/probe/detail/interactions request replaces
- * a queued one of its kind and discards the answer of one in flight (latest
- * wins). Discarding never frees the slot. Only one write and one import may
- * be queued or in flight.
+ * a queued one of its kind and discards the answer of the outstanding one
+ * (latest wins). Discarding never frees the slot. Only one write and one
+ * import may be queued or outstanding.
  */
 export class FurniEditorTraffic {
     private state: FurniTrafficState = { tag: 'idle' };
-    private inflight: Slot | null = null;
+    private outstanding: Slot | null = null;
     private queue: Slot[] = [];
     private block: FurniWriteBlock | null = null;
-    /** Reads per furniture whose answer may still arrive. */
-    private readonly unresolved = new Map<number, number>();
     private timer = 0;
     private blockTimer = 0;
-    private onLost: FurniLostHandler = () => undefined;
 
     constructor(
         private readonly send: (composer: IMessageComposer<unknown[]>) => void,
         private readonly listener: FurniTrafficListener,
         private readonly timeoutMs = FURNI_EDITOR_REQUEST_TIMEOUT_MS,
-        private readonly quietMs = FURNI_EDITOR_QUIET_MS,
         private readonly now: () => number = () => Date.now()
     ) {}
 
@@ -224,16 +204,12 @@ export class FurniEditorTraffic {
         return this.state;
     }
 
-    public setLostHandler(handler: FurniLostHandler): void {
-        this.onLost = handler;
-    }
-
-    /** Queues a request; false for a write while one is queued, on the wire or blocked, and for a second import. */
+    /** Queues a request; false for a write while one is queued, outstanding or blocked, and for a second import. */
     public request(request: FurniWireRequest): boolean {
-        const slot: Slot = { request, key: keyOf(request), discarded: false, retried: false };
+        const slot: Slot = { request, key: keyOf(request), discarded: false };
 
         if (LATEST_WINS.has(request.kind)) {
-            if (this.inflight?.request.kind === request.kind) this.inflight.discarded = true;
+            if (this.outstanding?.request.kind === request.kind) this.outstanding.discarded = true;
 
             const queued = this.queue.findIndex((entry) => entry.request.kind === request.kind);
 
@@ -250,62 +226,57 @@ export class FurniEditorTraffic {
         return true;
     }
 
-    /** The UI drops a read: a queued one is removed, the answer of one in flight is ignored. */
+    /** The UI drops a read: a queued one is removed, the answer of the outstanding one is ignored. */
     public discard(kind: Exclude<FurniWireKind, 'write'>): void {
         this.queue = this.queue.filter((entry) => entry.request.kind !== kind);
 
-        if (this.inflight?.request.kind === kind) this.inflight.discarded = true;
+        if (this.outstanding?.request.kind === kind) this.outstanding.discarded = true;
     }
 
-    /** Whether a request of this kind is queued, on the wire (and wanted) or, for writes, blocked. */
+    /** Whether a request of this kind is queued, outstanding (and wanted) or, for writes, blocked. */
     public isPending(kind: FurniWireKind): boolean {
         if (kind === 'write' && this.block) return true;
 
-        return this.queue.some((entry) => entry.request.kind === kind) || (this.inflight?.request.kind === kind && !this.inflight.discarded);
+        return this.queue.some((entry) => entry.request.kind === kind) || (this.outstanding?.request.kind === kind && !this.outstanding.discarded);
     }
 
-    /** Feeds a reply in and says who it belongs to (null: discarded or ignored). */
+    /** Feeds a reply in and says who it belongs to (null: ignored). */
     public reply(reply: FurniWireReply): FurniReplyRoute {
         if (this.state.tag === 'offline') return null;
 
         if (reply.type === 'result') return this.result(reply.success, reply.id, reply.message);
 
-        const onWire = this.state.tag === 'inflight' ? this.inflight : null;
+        const slot = this.outstanding;
 
-        if (reply.type === 'detail') {
-            const request = onWire?.request;
+        if (!slot) return null;
 
-            if (onWire && request?.kind === 'detail' && (request.detail.by === 'sprite' || request.detail.value === reply.id)) return this.settle(onWire);
-            if (this.absorb(reply.id)) return null;
-        } else if (onWire && readAccepts(onWire.request.kind, reply.type)) {
-            return this.settle(onWire);
-        }
+        const request = slot.request;
+        const owns =
+            reply.type === 'detail'
+                ? request.kind === 'detail' && (request.detail.by === 'sprite' || request.detail.value === reply.id)
+                : readAccepts(request.kind, reply.type);
 
-        if (onWire) this.lose(onWire);
-        else this.resync();
-
-        return null;
+        return owns ? this.settle(slot) : null;
     }
 
     /**
      * Socket boundary (closed, or reopened and not authenticated yet): replies
-     * of the old connection can no longer arrive, so the wire is reset and
-     * held until resume(). Returns the write that was on the wire or blocked,
-     * whose outcome stays unknown; a read that was on the wire is queued again.
+     * of the old connection can no longer arrive, so everything outstanding is
+     * dropped and the queue is held until resume(). Returns the write that was
+     * outstanding or blocked, whose outcome stays unknown; an outstanding read
+     * is queued again.
      */
     public disconnect(): FurniWriteRequest | null {
         window.clearTimeout(this.timer);
 
-        const slot = this.inflight;
+        const slot = this.outstanding;
         let released = this.block?.write ?? null;
 
-        this.inflight = null;
+        this.outstanding = null;
 
         if (slot?.request.kind === 'write') released = slot.request.write;
-        else if (slot && !slot.discarded && !this.queue.some((entry) => entry.request.kind === slot.request.kind))
-            this.queue.unshift({ ...slot, retried: false });
+        else if (slot && !slot.discarded && !this.queue.some((entry) => entry.request.kind === slot.request.kind)) this.queue.unshift(slot);
 
-        this.unresolved.clear();
         this.setBlock(null);
         this.setState({ tag: 'offline' });
 
@@ -325,75 +296,41 @@ export class FurniEditorTraffic {
     }
 
     private result(success: boolean, id: number, message: string): FurniReplyRoute {
-        const onWire = this.state.tag === 'inflight' ? this.inflight : null;
+        const slot = this.outstanding;
+        const request = slot?.request;
+        const entity = request ? entityOf(request) : 0;
+        // A stalled sprite lookup may be answered with any furniture's id.
+        const unknownUnresolved = this.state.tag === 'stalled' && entity === -1;
 
-        if (id > 0) {
-            if (onWire && entityOf(onWire.request) === id) {
-                if (onWire.request.kind !== 'write') return success ? null : this.settle(onWire);
-                if (success || !this.unresolved.has(id)) return this.settle(onWire);
-
-                // The refusal may be the late answer of an unresolved read for this furniture.
-                this.blockWrite(onWire.request.write, message);
-
-                return null;
+        if (slot && request) {
+            if (request.kind === 'write') {
+                if (id === request.write.itemId) return this.settle(slot);
+                if (id <= 0 && !success) {
+                    // A generic refusal while a write is outstanding: its outcome stays unknown.
+                    this.moveToBlock(request.write, message);
+                    return null;
+                }
+            } else if (!success && !unknownUnresolved && (id === entity || id <= 0 || entity === -1)) {
+                return this.settle(slot);
             }
-
-            const blocked = this.block?.write;
-
-            if (blocked && blocked.itemId === id) {
-                if (this.unresolved.has(id)) return null;
-
-                this.setBlock(null);
-                this.listener.onWriteReleased(blocked);
-                this.pump();
-
-                return { to: 'blocked', write: blocked };
-            }
-
-            if (!success) this.absorb(id);
-
-            return null;
         }
 
-        if (success) return null;
+        const blocked = this.block?.write;
 
-        if (!onWire) {
-            this.resync();
-            return null;
+        if (id > 0 && blocked && blocked.itemId === id && !unknownUnresolved) {
+            this.setBlock(null);
+            this.listener.onWriteReleased(blocked);
+            this.pump();
+
+            return { to: 'blocked', write: blocked };
         }
-
-        if (onWire.request.kind !== 'write') return this.settle(onWire);
-
-        // A generic refusal while a write is on the wire: it may be that write's
-        // answer or a stray one; the write's outcome stays unknown.
-        this.blockWrite(onWire.request.write, message);
 
         return null;
     }
 
-    /** Takes one unresolved read for this furniture off the books; false when there was none. */
-    private absorb(entity: number): boolean {
-        const count = this.unresolved.get(entity) ?? 0;
-
-        if (count <= 0) return false;
-
-        if (count === 1) this.unresolved.delete(entity);
-        else this.unresolved.set(entity, count - 1);
-
-        return true;
-    }
-
-    /** Requests that may not go out while a write is blocked. */
-    private isHeld(request: FurniWireRequest): boolean {
-        if (!this.block) return false;
-        if (request.kind === 'write' || (request.kind === 'detail' && request.detail.by === 'sprite')) return true;
-
-        return entityOf(request) === this.block.write.itemId;
-    }
-
     private settle(slot: Slot): FurniReplyRoute {
         window.clearTimeout(this.timer);
-        this.inflight = null;
+        this.outstanding = null;
         this.setState({ tag: 'idle' });
 
         if (slot.request.kind === 'write') this.listener.onWriteReleased(slot.request.write);
@@ -403,55 +340,43 @@ export class FurniEditorTraffic {
         return slot.discarded ? null : { to: 'request', request: slot.request };
     }
 
+    /** Requests that may not go out while a write is blocked. */
+    private isHeld(request: FurniWireRequest): boolean {
+        if (!this.block) return false;
+        if (request.kind === 'write') return true;
+
+        const entity = entityOf(request);
+
+        return entity === -1 || entity === this.block.write.itemId;
+    }
+
     private pump(): void {
-        if (this.state.tag !== 'idle') return;
+        if (this.state.tag !== 'idle' || this.outstanding) return;
 
         const index = this.queue.findIndex((entry) => !this.isHeld(entry.request));
         const slot = index >= 0 ? this.queue.splice(index, 1)[0] : undefined;
 
         if (!slot) return;
 
-        this.inflight = slot;
+        this.outstanding = slot;
         this.setState({ tag: 'inflight', kind: slot.request.kind, key: slot.key });
         this.send(composerOf(slot.request));
         this.timer = window.setTimeout(() => {
-            if (this.inflight !== slot) return;
+            if (this.outstanding !== slot) return;
 
-            if (slot.request.kind === 'write') this.blockWrite(slot.request.write, '');
-            else this.lose(slot);
+            if (slot.request.kind === 'write') this.moveToBlock(slot.request.write, '');
+            else this.setState({ tag: 'stalled', kind: slot.request.kind, key: slot.key });
         }, this.timeoutMs);
     }
 
-    // A read on the wire is given up on: resync, then send it once more unless a newer one replaced it.
-    private lose(slot: Slot): void {
-        this.inflight = null;
-        this.resync();
-
-        const entity = slot.request.kind === 'write' ? 0 : entityOf(slot.request);
-
-        if (entity > 0) this.unresolved.set(entity, (this.unresolved.get(entity) ?? 0) + 1);
-
-        if (slot.discarded) return;
-
-        if (slot.request.kind === 'write') {
-            this.blockWrite(slot.request.write, '');
-            return;
-        }
-
-        const replaced = this.queue.some((entry) => entry.request.kind === slot.request.kind);
-        const retrying = !slot.retried && !replaced;
-
-        if (retrying) this.queue.unshift({ ...slot, retried: true });
-
-        this.onLost(slot.request, retrying);
-    }
-
-    // The write on the wire becomes ambiguous: it leaves the wire for the block, and reads resync.
-    private blockWrite(write: FurniWriteRequest, reason: string): void {
-        this.inflight = null;
+    // The outstanding write becomes ambiguous: it leaves the slot for the block, and reads may go on.
+    private moveToBlock(write: FurniWriteRequest, reason: string): void {
+        window.clearTimeout(this.timer);
+        this.outstanding = null;
         this.setBlock({ write, since: this.now(), stale: false, reason });
         this.listener.onWriteReleased(write);
-        this.resync();
+        this.setState({ tag: 'idle' });
+        this.pump();
     }
 
     private setBlock(block: FurniWriteBlock | null): void {
@@ -468,30 +393,6 @@ export class FurniEditorTraffic {
         }
 
         this.listener.onBlockChange(block);
-    }
-
-    // Opens (or extends) the quiet window; the queue resumes once it passes without a reply.
-    private resync(): void {
-        window.clearTimeout(this.timer);
-
-        const quietUntil = this.now() + this.quietMs;
-
-        this.setState({ tag: 'resyncing', quietUntil });
-        this.timer = window.setTimeout(() => this.endResync(), this.quietMs);
-    }
-
-    private endResync(): void {
-        if (this.state.tag !== 'resyncing') return;
-
-        const left = this.state.quietUntil - this.now();
-
-        if (left > 0) {
-            this.timer = window.setTimeout(() => this.endResync(), left);
-            return;
-        }
-
-        this.setState({ tag: 'idle' });
-        this.pump();
     }
 
     private setState(state: FurniTrafficState): void {

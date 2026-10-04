@@ -18,7 +18,7 @@ export const useFurniEditorState = () => {
         importUnavailable,
         pendingMutation,
         notice,
-        isResyncing,
+        channel,
         writeBlock,
         fieldError
     } = useSharedHook(useFurniEditorStore);
@@ -38,7 +38,7 @@ export const useFurniEditorState = () => {
         importUnavailable,
         pendingMutation,
         notice,
-        isResyncing,
+        channel,
         writeBlock,
         fieldError
     };

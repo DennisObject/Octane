@@ -13,7 +13,7 @@ import {
     OctaneEvent,
     OctaneEventType
 } from '@octane/renderer';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEvent, useOctaneEvent } from '../events';
 import {
@@ -59,8 +59,6 @@ const SUCCESS_TEXT: Record<FurniEditorMutationKind, string> = {
     syncName: 'furni.editor.status.name_synced'
 };
 
-const TIMEOUT_NOTICE: FurniEditorNotice = { tone: 'error', key: 'furni.editor.status.timeout' };
-
 // The socket came back while a write was unconfirmed: saving is allowed again, its outcome stays unknown.
 const WRITE_RELEASED_NOTICE: FurniEditorNotice = { tone: 'info', key: 'furni.editor.status.write_released' };
 
@@ -95,8 +93,9 @@ const answered = (route: FurniReplyRoute): FurniWireRequest | null => (route?.to
  * through useFurniEditorState / useFurniEditorActions.
  *
  * The wire carries no request ids, so every request goes through
- * FurniEditorTraffic, which keeps exactly one request on the wire and hands
- * each reply to that request (or discards it while resyncing).
+ * FurniEditorTraffic, which keeps at most one request outstanding (plus a
+ * blocked write), waits for each one's own answer, and ignores replies that
+ * belong to nothing.
  */
 export const useFurniEditorStore = () => {
     const [items, setItems] = useState<FurniItem[]>([]);
@@ -113,7 +112,8 @@ export const useFurniEditorStore = () => {
     const [importUnavailable, setImportUnavailable] = useState(false);
     const [pendingMutation, setPendingMutation] = useState<FurniEditorMutationKind | null>(null);
     const [notice, setNotice] = useState<FurniEditorNotice | null>(null);
-    const [isResyncing, setIsResyncing] = useState(false);
+    // offline: the socket is resetting; stalled: the outstanding read is overdue and nothing else goes out.
+    const [channel, setChannel] = useState<'ok' | 'offline' | 'stalled'>('ok');
     const [writeBlock, setWriteBlock] = useState<FurniWriteBlock | null>(null);
     const [fieldError, setFieldError] = useState<FurniFieldError | null>(null);
 
@@ -127,7 +127,7 @@ export const useFurniEditorStore = () => {
     const [traffic] = useState(
         () =>
             new FurniEditorTraffic((composer) => SendMessageComposer(composer), {
-                onStateChange: (state) => setIsResyncing(state.tag === 'resyncing' || state.tag === 'offline'),
+                onStateChange: (state) => setChannel(state.tag === 'offline' || state.tag === 'stalled' ? state.tag : 'ok'),
                 onBlockChange: (block) => setWriteBlock(block),
                 // However a write leaves the transport, saving is no longer "in progress".
                 onWriteReleased: () => setPendingMutation(null)
@@ -183,30 +183,6 @@ export const useFurniEditorStore = () => {
         },
         [traffic, requestDetail]
     );
-
-    // What a read that went unanswered leaves behind. A read that is sent
-    // again keeps its loading state; the status line says the channel retries.
-    const handleLost = useCallback((request: FurniWireRequest, retrying: boolean) => {
-        if (retrying) return;
-
-        switch (request.kind) {
-            case 'list':
-                setIsSearching(false);
-                break;
-            case 'detail':
-                setIsLoadingDetail(false);
-                break;
-            case 'import':
-                setIsImporting(false);
-                break;
-            default:
-                return;
-        }
-
-        setNotice(TIMEOUT_NOTICE);
-    }, []);
-
-    useEffect(() => traffic.setLostHandler(handleLost), [traffic, handleLost]);
 
     // Reopening the window re-reads the furni still open on the sheet.
     const reloadOpenItem = useCallback(() => {
@@ -511,7 +487,7 @@ export const useFurniEditorStore = () => {
         importUnavailable,
         pendingMutation,
         notice,
-        isResyncing,
+        channel,
         writeBlock,
         fieldError,
         search,
