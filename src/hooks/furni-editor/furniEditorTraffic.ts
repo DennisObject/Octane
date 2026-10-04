@@ -42,7 +42,7 @@ export type FurniWireKind = FurniWireRequest['kind'];
 export type FurniWireReply =
     | { type: 'search' | 'import' | 'interactions' }
     /** The furniture id the detail answer describes. */
-    | { type: 'detail'; id: number }
+    | { type: 'detail'; id: number; spriteId: number }
     | { type: 'result'; success: boolean; id: number; message: string };
 
 /** Who a reply belongs to: the outstanding request, the blocked write (its terminal answer), or nobody (null). */
@@ -253,7 +253,7 @@ export class FurniEditorTraffic {
         const request = slot.request;
         const owns =
             reply.type === 'detail'
-                ? request.kind === 'detail' && (request.detail.by === 'sprite' || request.detail.value === reply.id)
+                ? request.kind === 'detail' && request.detail.value === (request.detail.by === 'sprite' ? reply.spriteId : reply.id)
                 : readAccepts(request.kind, reply.type);
 
         return owns ? this.settle(slot) : null;
