@@ -251,10 +251,9 @@ const redeemInsideLock = async (generation: number): Promise<LoginSession | null
         return null;
     }
 
+    // A validated answer always carries the rotated token.
     const session = result.data;
-    const next = session.rememberToken
-        ? { ...grantFields(session, { userId: session.userId, name: session.username }), resumeReloadUsed: record.resumeReloadUsed }
-        : { ...record, pending: undefined };
+    const next = { ...grantFields(session, { userId: session.userId, name: session.username }), resumeReloadUsed: record.resumeReloadUsed };
 
     commit(record.version, next, generation);
 
@@ -306,7 +305,7 @@ export const rotateRememberGrant = async (): Promise<void> =>
 
         const refreshed = result.data;
         const confirmedOwner = { userId: refreshed.userId, name: refreshed.username };
-        const next = refreshed.rememberToken ? { ...grantFields(refreshed, ownerOf(record)), resumeReloadUsed: record.resumeReloadUsed } : { ...record, pending: undefined };
+        const next = { ...grantFields(refreshed, ownerOf(record)), resumeReloadUsed: record.resumeReloadUsed };
 
         if (!commit(record.version, next, session.generation)) return;
 

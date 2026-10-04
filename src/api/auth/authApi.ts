@@ -104,11 +104,25 @@ export const resolveAuthEndpoint = (configKey: string, fallbackPath: string): st
     return configuration.interpolate(raw) || fallbackPath;
 };
 
-const readJson = async (response: Response): Promise<JsonObject> =>
+// Reading the body can fail (stalled past the timeout, connection lost): that
+// is no answer at all (null). A body that arrived but is not a JSON object
+// (an HTML error page) reads as {} so its status still counts.
+const readJson = async (response: Response): Promise<JsonObject | null> =>
 {
+    let text: string;
+
     try
     {
-        const payload: unknown = await response.json();
+        text = await response.text();
+    }
+    catch
+    {
+        return null;
+    }
+
+    try
+    {
+        const payload: unknown = JSON.parse(text);
 
         return payload && typeof payload === 'object' && !Array.isArray(payload) ? (payload as JsonObject) : {};
     }
@@ -194,8 +208,9 @@ const send = async (url: string, init: RequestInit): Promise<{ response: Respons
     try
     {
         const response = await fetch(url, { credentials: 'include', ...init, signal: controller.signal });
+        const payload = await readJson(response);
 
-        return { response, payload: await readJson(response) };
+        return payload ? { response, payload } : null;
     }
     catch
     {
@@ -226,28 +241,39 @@ const jsonPost = (body: JsonObject, options: AuthRequestOptions): RequestInit =>
 
 const postJson = (url: string, body: JsonObject, options: AuthRequestOptions = {}): Promise<AuthResult<JsonObject>> => request(url, jsonPost(body, options));
 
-const toSession = (payload: JsonObject, fallbackUsername: string): LoginSession | null =>
+const nonEmpty = (value: unknown): string => (typeof value === 'string' && value.length ? value : '');
+const positive = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0);
+
+// Fields a session answer must carry. An answer that lacks one is not
+// accepted: for remember-me it counts as a lost answer, so the spent token
+// stays pending instead of being kept as if it were still valid.
+interface SessionRequirements {
+    remember: boolean;
+}
+
+const toSession = (payload: JsonObject, requirements: SessionRequirements): LoginSession | null =>
 {
-    const ssoTicket = asString(payload.ssoTicket) || asString(payload.sso);
-
-    if (!ssoTicket) return null;
-
-    return {
-        ssoTicket,
-        username: asString(payload.username) || fallbackUsername,
-        userId: asNumber(payload.userId) ?? 0,
-        accessToken: asString(payload.accessToken) || undefined,
+    const session: LoginSession = {
+        ssoTicket: nonEmpty(payload.ssoTicket),
+        username: nonEmpty(payload.username),
+        userId: positive(payload.userId),
+        accessToken: nonEmpty(payload.accessToken),
         accessTokenExpiresAt: asNumber(payload.accessTokenExpiresAt),
-        rememberToken: asString(payload.rememberToken) || undefined,
-        rememberExpiresAt: asNumber(payload.rememberExpiresAt) ?? asNumber(payload.expiresAt)
+        rememberToken: nonEmpty(payload.rememberToken) || undefined,
+        rememberExpiresAt: positive(payload.rememberExpiresAt) || undefined
     };
+
+    if (!session.ssoTicket || !session.username || !session.userId || !session.accessToken) return null;
+    if (requirements.remember && (!session.rememberToken || !session.rememberExpiresAt)) return null;
+
+    return session;
 };
 
-const mapSession = (result: AuthResult<JsonObject>, fallbackUsername: string): AuthResult<LoginSession> =>
+const mapSession = (result: AuthResult<JsonObject>, requirements: SessionRequirements): AuthResult<LoginSession> =>
 {
     if (!result.ok) return failed(result.failure);
 
-    const session = toSession(result.data, fallbackUsername);
+    const session = toSession(result.data, requirements);
 
     return session ? { ok: true, data: session } : failed({ kind: 'unreachable' });
 };
@@ -256,14 +282,14 @@ export const loginWithCredentials = async (body: LoginRequest, options: AuthRequ
 {
     const result = await postJson(resolveAuthEndpoint('login.endpoint', '/api/auth/login'), { ...body }, options);
 
-    return mapSession(result, body.username);
+    return mapSession(result, { remember: body.remember });
 };
 
-export const loginWithRememberToken = async (rememberToken: string, username = '', options: AuthRequestOptions = {}): Promise<AuthResult<LoginSession>> =>
+export const loginWithRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<LoginSession>> =>
 {
     const result = await postJson(resolveAuthEndpoint('login.remember.endpoint', '/api/auth/remember'), { rememberToken }, options);
 
-    return mapSession(result, username);
+    return mapSession(result, { remember: true });
 };
 
 export const refreshRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<RememberRefresh>> =>
@@ -272,17 +298,19 @@ export const refreshRememberToken = async (rememberToken: string, options: AuthR
 
     if (!result.ok) return failed(result.failure);
 
-    return {
-        ok: true,
-        data: {
-            rememberToken: asString(result.data.rememberToken) || undefined,
-            rememberExpiresAt: asNumber(result.data.rememberExpiresAt) ?? asNumber(result.data.expiresAt),
-            accessToken: asString(result.data.accessToken) || undefined,
-            accessTokenExpiresAt: asNumber(result.data.accessTokenExpiresAt),
-            username: asString(result.data.username),
-            userId: asNumber(result.data.userId) ?? 0
-        }
+    const refreshed: RememberRefresh = {
+        rememberToken: nonEmpty(result.data.rememberToken),
+        rememberExpiresAt: positive(result.data.rememberExpiresAt),
+        accessToken: nonEmpty(result.data.accessToken),
+        accessTokenExpiresAt: asNumber(result.data.accessTokenExpiresAt),
+        username: nonEmpty(result.data.username),
+        userId: positive(result.data.userId)
     };
+
+    // Incomplete answers count as lost, like a missing session answer.
+    if (!refreshed.rememberToken || !refreshed.rememberExpiresAt || !refreshed.accessToken || !refreshed.username || !refreshed.userId) return failed({ kind: 'unreachable' });
+
+    return { ok: true, data: refreshed };
 };
 
 export const exchangeSsoTicket = async (ssoTicket: string, options: AuthRequestOptions = {}): Promise<AuthResult<AccessTokenGrant>> =>
@@ -300,7 +328,13 @@ export const registerAccount = async (body: RegisterRequest, options: AuthReques
 
     if (!result.ok) return failed(result.failure);
 
-    return { ok: true, data: { session: toSession(result.data, body.username) } };
+    // No ticket at all: the account exists but this server hands out no
+    // session, so the player signs in. A ticket with missing fields is invalid.
+    if (!nonEmpty(result.data.ssoTicket)) return { ok: true, data: { session: null } };
+
+    const session = toSession(result.data, { remember: false });
+
+    return session ? { ok: true, data: { session } } : failed({ kind: 'unreachable' });
 };
 
 export const requestPasswordReset = async (email: string, turnstileToken?: string, options: AuthRequestOptions = {}): Promise<AuthResult<void>> =>
