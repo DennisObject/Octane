@@ -1,9 +1,8 @@
-import { HabboClubLevelEnum } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, Permission, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
+import { ChatMessageTypeEnum, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
-import { useChatCommandSelector, useChatInputWidget, useHasPermission, useIsAmbassador, useUserPermissions, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
+import { useChatCommandSelector, useChatInputWidget, useClientAccessLists, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
 import { ChatInputHabbiconSelectorView } from './ChatInputHabbiconSelectorView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
@@ -21,9 +20,7 @@ export const ChatInputView: FC<{}> = (props) => {
         sendChat = null
     } = useChatInputWidget();
     const { roomSession = null } = useRoom();
-    const permissions = useUserPermissions();
-    const canUseSystemStyle = useHasPermission(Permission.ChatStyleSystem);
-    const isAmbassador = useIsAmbassador();
+    const { chatStyleIds } = useClientAccessLists();
     const inputRef = useRef<HTMLInputElement>(null);
     const {
         isVisible: commandSelectorVisible,
@@ -222,48 +219,6 @@ export const ChatInputView: FC<{}> = (props) => {
         }
     });
 
-    const chatStyleIds = useMemo(() => {
-        let styleIds: number[] = [];
-
-        const styles =
-            GetConfigurationValue<{ styleId: number; permission?: string; isSystemStyle: boolean; isHcOnly: boolean; isAmbassadorOnly: boolean }[]>('chat.styles');
-
-        for (const style of styles) {
-            if (!style) continue;
-
-            if (style.permission) {
-                if (permissions.get(style.permission) === 1) styleIds.push(style.styleId);
-
-                continue;
-            }
-
-            if (style.isSystemStyle) {
-                if (canUseSystemStyle) {
-                    styleIds.push(style.styleId);
-
-                    continue;
-                }
-            }
-
-            if (GetConfigurationValue<number[]>('chat.styles.disabled').indexOf(style.styleId) >= 0) continue;
-
-            if (style.isHcOnly && GetClubMemberLevel() >= HabboClubLevelEnum.CLUB) {
-                styleIds.push(style.styleId);
-
-                continue;
-            }
-
-            if (style.isAmbassadorOnly && isAmbassador) {
-                styleIds.push(style.styleId);
-
-                continue;
-            }
-
-            if (!style.isHcOnly && !style.isAmbassadorOnly) styleIds.push(style.styleId);
-        }
-
-        return styleIds;
-    }, [permissions, canUseSystemStyle, isAmbassador]);
 
     useEffect(() => {
         document.body.addEventListener('keydown', onKeyDownEvent);

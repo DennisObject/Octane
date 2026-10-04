@@ -8,7 +8,7 @@ import popupArrowDown from '../../../assets/images/navigator/air/popup-arrow-dow
 import tileIconBlack from '../../../assets/images/navigator/air/tile-icon-black.png';
 import tileIconWhite from '../../../assets/images/navigator/air/tile-icon-white.png';
 import { DraggableWindow } from '../../../common';
-import { useHasPermission, useNavigatorData, useNavigatorUiStore, useUserDataSnapshot } from '../../../hooks';
+import { useClientAccessLists, useHasPermission, useNavigatorData, useNavigatorUiStore, useUserDataSnapshot } from '../../../hooks';
 import { useRoomCreatorStore } from './navigatorRoomCreatorStore';
 
 const AIR_TRADE_KEYS = ['navigator.roomsettings.trade_not_allowed', 'navigator.roomsettings.trade_not_with_Controller', 'navigator.roomsettings.trade_allowed'];
@@ -96,12 +96,11 @@ const RoomCreatorDropmenu: FC<RoomCreatorDropmenuProps> = (props) => {
 export const NavigatorRoomCreatorView: FC = () => {
     const { categories } = useNavigatorData();
     const { clubLevel } = useUserDataSnapshot();
-    const canUseStaffModels = useHasPermission(Permission.NavigatorRoomModelsStaff);
+    const { roomModels } = useClientAccessLists();
     const canUseStaffCategories = useHasPermission(Permission.NavigatorCategoriesStaff);
     const beginCreate = useRoomCreatorStore((state) => state.beginCreate);
 
     const hcDisabled = GetConfigurationValue<boolean>('hc.disabled', false);
-    const effectiveClubLevel = hcDisabled ? 2 : clubLevel;
 
     const [name, setName] = useState('');
     const [nameTouched, setNameTouched] = useState(false);
@@ -111,21 +110,15 @@ export const NavigatorRoomCreatorView: FC = () => {
     const [visitorsIndex, setVisitorsIndex] = useState(0);
     const [tradeIndex, setTradeIndex] = useState(0);
     const [nameError, setNameError] = useState<string>(null);
-    const [roomModels] = useState<IRoomModel[]>(() => GetConfigurationValue<IRoomModel[]>('navigator.room.models') ?? []);
-    const [selectedModelName, setSelectedModelName] = useState<string>(() => {
-        const models = GetConfigurationValue<IRoomModel[]>('navigator.room.models');
-
-        return models && models.length ? models[0].name : '';
-    });
-
-    const visibleModels = useMemo(() => roomModels.filter((model) => model.clubLevel >= 0 || canUseStaffModels), [roomModels, canUseStaffModels]);
+    const [selectedModelName, setSelectedModelName] = useState('');
+    const selectedModel = roomModels.find((model) => model.name === selectedModelName) ?? roomModels[0];
 
     const selectableCategories = useMemo(
         () => (categories ?? []).filter((category) => category.visible && !category.automatic && (!category.staffOnly || canUseStaffCategories)),
         [categories, canUseStaffCategories]
     );
 
-    const visitorOptions = useMemo(() => buildVisitorOptions(effectiveClubLevel >= 2 ? ROOM_LIMIT_HC : ROOM_LIMIT_NON_SUBSCRIBER), [effectiveClubLevel]);
+    const visitorOptions = useMemo(() => buildVisitorOptions(clubLevel >= 2 ? ROOM_LIMIT_HC : ROOM_LIMIT_NON_SUBSCRIBER), [clubLevel]);
 
     const safeCategoryIndex = categoryIndex < selectableCategories.length ? categoryIndex : 0;
     const safeVisitorsIndex = visitorsIndex < visitorOptions.length ? visitorsIndex : 0;
@@ -134,21 +127,11 @@ export const NavigatorRoomCreatorView: FC = () => {
     const descriptionPlaceholder = LocalizeText('navigator.createroom.roomdescinfo');
     const tileSizeLabel = LocalizeText('navigator.createroom.tilesize');
 
-    const getRoomModelImage = (modelName: string) => `${GetConfigurationValue<string>('images.url')}/navigator/models/model_${modelName}.png`;
+    const getRoomModelImage = (modelName: string) => `${GetConfigurationValue<string>('images.url')}/navigator/models/${modelName}.png`;
 
     const closeCreator = () => useNavigatorUiStore.getState().closeCreator();
 
-    const selectModel = (model: IRoomModel) => {
-        if (model.clubLevel > 0 && effectiveClubLevel < model.clubLevel) {
-            CreateLinkEvent('habboUI/open/hccenter');
-
-            return;
-        }
-
-        if (model.clubLevel < 0 && !canUseStaffModels) return;
-
-        setSelectedModelName(model.name);
-    };
+    const selectModel = (model: IRoomModel) => setSelectedModelName(model.name);
 
     const createRoom = () => {
         const roomName = nameTouched ? name : '';
@@ -161,7 +144,7 @@ export const NavigatorRoomCreatorView: FC = () => {
 
         setNameError(null);
 
-        if (useRoomCreatorStore.getState().isCreating) return;
+        if (!selectedModel || useRoomCreatorStore.getState().isCreating) return;
 
         beginCreate();
 
@@ -171,7 +154,7 @@ export const NavigatorRoomCreatorView: FC = () => {
             new CreateFlatMessageComposer(
                 roomName,
                 descriptionTouched ? description : '',
-                `model_${selectedModelName}`,
+                selectedModel.name,
                 category ? category.id : 0,
                 Number(visitorOptions[safeVisitorsIndex] ?? 10),
                 tradeIndex
@@ -179,7 +162,7 @@ export const NavigatorRoomCreatorView: FC = () => {
         );
     };
 
-    const showVipPromo = effectiveClubLevel < 2 && !hcDisabled;
+    const showVipPromo = clubLevel < 2 && !hcDisabled;
 
     return (
         <DraggableWindow uniqueKey="navigator-room-creator" handleSelector=".octane-room-creator-air__caption">
@@ -252,7 +235,7 @@ export const NavigatorRoomCreatorView: FC = () => {
                     onChange={setTradeIndex}
                 />
 
-                <button type="button" className="octane-room-creator-air__button octane-room-creator-air__button--create" onClick={createRoom}>
+                <button type="button" className="octane-room-creator-air__button octane-room-creator-air__button--create" onClick={createRoom} disabled={!selectedModel}>
                     {LocalizeText('navigator.createroom.create')}
                 </button>
                 <button type="button" className="octane-room-creator-air__button octane-room-creator-air__button--cancel" onClick={closeCreator}>
@@ -264,8 +247,8 @@ export const NavigatorRoomCreatorView: FC = () => {
                 </span>
                 <div className="octane-room-creator-air__layouts has-classic-scrollbar">
                     <div className="octane-room-creator-air__layout-rows">
-                        {visibleModels.map((model) => {
-                            const isSelected = selectedModelName === model.name;
+                        {roomModels.map((model) => {
+                            const isSelected = selectedModel?.name === model.name;
 
                             return (
                                 <div

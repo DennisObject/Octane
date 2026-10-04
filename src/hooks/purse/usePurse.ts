@@ -11,18 +11,27 @@ import { useEffect, useMemo, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { CloneObject, ClubStatus, GetConfigurationValue, IPurse, PlaySound, Purse, SendMessageComposer, SoundNames } from '../../api';
 import { useMessageEvent } from '../events';
+import { useUserDataSnapshot } from '../session/useSessionSnapshots';
 
 const usePurseState = () => {
-    const [purse, setPurse] = useState<IPurse>(new Purse());
+    const [purseData, setPurse] = useState<IPurse>(new Purse());
+    const { clubLevel } = useUserDataSnapshot();
     const hcDisabled = useMemo(() => GetConfigurationValue<boolean>('hc.disabled', false), []);
 
+    const purse = useMemo(() =>
+    {
+        const next = CloneObject(purseData);
+        next.clubLevel = clubLevel;
+        return next;
+    }, [purseData, clubLevel]);
+
     const clubStatus = useMemo(() => {
-        if (hcDisabled || purse.clubDays > 0) return ClubStatus.ACTIVE;
+        if (purse.hasClubLeft) return ClubStatus.ACTIVE;
 
         if (purse.pastClubDays > 0 || purse.pastVipDays > 0) return ClubStatus.EXPIRED;
 
         return ClubStatus.NONE;
-    }, [purse, hcDisabled]);
+    }, [purse]);
 
     const getCurrencyAmount = (type: number) => {
         if (type === -1) return purse.credits;

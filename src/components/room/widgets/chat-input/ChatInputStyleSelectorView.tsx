@@ -1,10 +1,11 @@
 import * as Popover from '@radix-ui/react-popover';
 import { FC, useState } from 'react';
+import { LocalizeText } from '../../../../api';
 import { CHAT_TEXT_SIZES, ChatTextSize, getChatTextSizeLabel, getStoredChatTextSize, setStoredChatTextSize } from './chatTextSize';
 
 interface ChatInputStyleSelectorViewProps {
     chatStyleId: number;
-    chatStyleIds: number[];
+    chatStyleIds: ReadonlyArray<number>;
     selectChatStyleId: (styleId: number) => void;
 }
 
@@ -57,7 +58,7 @@ export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = (
                             ))}
                     </div>
                     <div className="swf-chat-font-row">
-                        <span className="swf-chat-font-label">Dimensione del testo</span>
+                        <span className="swf-chat-font-label">{LocalizeText('widgets.chatinput.text_size')}</span>
                         {CHAT_TEXT_SIZES.map((size) => (
                             <button
                                 key={size}

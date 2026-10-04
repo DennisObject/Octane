@@ -4,6 +4,7 @@ import { IPurse } from './IPurse';
 export class Purse implements IPurse {
     private _credits: number = 0;
     private _activityPoints: Map<number, number> = new Map();
+    private _clubLevel: number = 0;
     private _clubDays: number = 0;
     private _clubPeriods: number = 0;
     private _isVIP: boolean = false;
@@ -19,6 +20,7 @@ export class Purse implements IPurse {
 
         newPurse._credits = purse._credits;
         newPurse._activityPoints = purse._activityPoints;
+        newPurse._clubLevel = purse._clubLevel;
         newPurse._clubDays = purse._clubDays;
         newPurse._clubPeriods = purse._clubPeriods;
         newPurse._isVIP = purse._isVIP;
@@ -69,7 +71,7 @@ export class Purse implements IPurse {
     }
 
     public get hasClubLeft(): boolean {
-        return this._clubDays > 0 || this._clubPeriods > 0;
+        return this._clubLevel > HabboClubLevelEnum.NO_CLUB;
     }
 
     public get isVip(): boolean {
@@ -131,10 +133,16 @@ export class Purse implements IPurse {
     }
 
     public get clubLevel(): number {
-        if (this.clubDays === 0 && this.clubPeriods === 0) return HabboClubLevelEnum.NO_CLUB;
+        return this._clubLevel;
+    }
 
-        if (this.isVip) return HabboClubLevelEnum.VIP;
+    public set clubLevel(level: number)
+    {
+        this._clubLevel = level;
+    }
 
-        return HabboClubLevelEnum.CLUB;
+    public get isComplimentaryClub(): boolean
+    {
+        return this.hasClubLeft && this.minutesUntilExpiration === 0 && this.clubDays === 0 && this.clubPeriods === 0;
     }
 }
