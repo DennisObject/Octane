@@ -310,8 +310,8 @@
 
 .tb-open-shell-right .tb-right-divider {
     position: absolute;
-    top: 3px;
-    left: 16px;
+    top: 4px;
+    left: 1px;
     margin: 0;
 }
 
@@ -319,12 +319,13 @@
 .tb-open-shell-right .tb-right-search,
 .tb-open-shell-right .tb-right-messenger {
     position: absolute;
-    top: 3px;
+    top: 2px;
+    margin: 0;
 }
 
-.tb-open-shell-right .tb-right-friends { left: 19px; }
-.tb-open-shell-right .tb-right-search { left: 65px; }
-.tb-open-shell-right .tb-right-messenger { left: 104px; }
+.tb-open-shell-right .tb-right-friends { left: 18px; }
+.tb-open-shell-right .tb-right-search { left: 64px; }
+.tb-open-shell-right .tb-right-messenger { left: 103px; }
 
 .tb-open-shell-right .tb-right-friend-bar {
     position: absolute;
@@ -344,15 +345,6 @@
     margin-left: 0;
 }
 
-.tb-open-shell-right .tb-divider {
-    margin-top: 2px;
-    margin-right: 2px;
-}
-
-.tb-open-shell-right .tb-slot:has(.icon-friendsearch) {
-    margin-left: 1px;
-}
-
 .tbme-panel {
     background: rgba(46, 45, 44, 0.92);
     border: 1px solid rgba(0, 0, 0, 0.65);
@@ -363,12 +355,12 @@
         inset 1px 1px rgba(255, 255, 255, 0.08);
 }
 
-/* me_menu_view.xml border style 6: habbo_skin_border_6, ubuntu atlas 8/4/8, window color #3b3933. */
+/* me_menu_new_view.xml border style 6: habbo_skin_border_6, ubuntu atlas 8/4/8, window color #3b3933. */
 .octane-toolbar-me-popup {
     box-sizing: border-box;
     min-width: max-content;
     height: 53px;
-    border: 8px solid transparent;
+    border: 0 solid transparent;
     border-radius: 0;
     border-image-source: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUAgMAAADw5/WeAAAACVBMVEUAAAA7OTP///+jz7UEAAAAAnRSTlM7O/sqyyQAAAABYktHRAJmC3xkAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6goECyACyQa33QAAACNJREFUCNdjYAgNDWVgYAWSAQyiQDIESoaCANVIZJMZgaQDABhZHsldPl5fAAAAGXRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNS4xLjExiggWzgAAAABJRU5ErkJggg==");
     border-image-slice: 8 fill;
@@ -376,8 +368,9 @@
     border-image-repeat: stretch;
     background: transparent;
     box-shadow: none;
-    padding: 0 4px;
+    padding: 5px 0 0 15px;
     gap: 8px;
+    align-items: flex-start;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
@@ -390,38 +383,72 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: 1px;
+    padding: 0;
     color: #fff;
     font-family: UbuntuRegular, sans-serif;
     font-size: 9px;
     line-height: 14px;
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
     cursor: pointer;
 }
 
-.octane-toolbar-me-popup .tbme-item .octane-icon {
-    display: block;
-    flex: 0 0 30px;
-    filter: grayscale(1);
+.octane-toolbar-me-popup::after {
+    width: 7px;
+    height: 30px;
+    flex: 0 0 7px;
+    content: "";
 }
 
+.octane-toolbar-me-popup .tbme-item:has(.icon-me-helper-tool) {
+    width: 50px;
+    flex-basis: 50px;
+}
+
+.octane-toolbar-me-popup .tbme-item > span:last-of-type {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    width: 60px;
+    height: 14px;
+}
+
+.octane-toolbar-me-popup .tbme-item > .octane-icon,
 .octane-toolbar-me-popup .tbme-item > [class^="icon-me-"] {
+    position: absolute;
+    top: 0;
+    left: 14px;
     display: block;
     width: 32px;
     height: 30px;
-    flex: 0 0 30px;
     background-position: center;
     background-repeat: no-repeat;
     filter: grayscale(1);
+}
+
+.octane-toolbar-me-popup .tbme-item > .icon-me-rooms {
+    background-position: left top;
+}
+
+.octane-toolbar-me-popup .tbme-item > .icon-me-helper-tool,
+.octane-toolbar-me-popup .tbme-item > .icon-me-clothing {
+    background-position: center top;
 }
 
 .octane-toolbar-me-popup .tbme-item:hover > [class^="icon-me-"] {
     filter: none;
 }
 
-.octane-toolbar-progression-popup {
-    width: 362px;
+.octane-toolbar-me-popup .tbme-item > .icon-progression-leaderboards {
+    top: 4px;
+    left: 17px;
+    width: 25px;
+    height: 25px;
+}
+
+.octane-toolbar-me-popup .tbme-item > .icon-me-rewardtrack {
+    width: 33px;
+    height: 32px;
 }
 
 .octane-icon.icon-progression-leaderboards {
