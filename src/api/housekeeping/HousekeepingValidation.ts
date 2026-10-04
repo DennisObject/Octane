@@ -1,59 +1,64 @@
+// Client-side checks only shorten the feedback loop; the server validates every action again.
 export const HousekeepingErrorKey = {
     NONE: 'none',
-    EMPTY_USERNAME: 'empty_username',
     INVALID_USER_ID: 'invalid_user_id',
     INVALID_ROOM_ID: 'invalid_room_id',
+    INVALID_ITEM_ID: 'invalid_item_id',
     INVALID_AMOUNT: 'invalid_amount',
     AMOUNT_TOO_LARGE: 'amount_too_large',
     EMPTY_REASON: 'empty_reason',
+    TEXT_TOO_LONG: 'text_too_long',
     INVALID_HOURS: 'invalid_hours',
+    INVALID_MINUTES: 'invalid_minutes',
     INVALID_RANK: 'invalid_rank'
 } as const;
 
 export type HousekeepingErrorKey = (typeof HousekeepingErrorKey)[keyof typeof HousekeepingErrorKey];
 
+// Mirrors the emulator's HousekeepingLimits so a doomed request isn't sent.
 export const HK_MAX_GIVE_AMOUNT = 1_000_000_000;
+export const HK_MAX_ITEM_QUANTITY = 100;
+export const HK_MAX_CLUB_DAYS = 3650;
 export const HK_MAX_BAN_HOURS = 24 * 365 * 100;
+export const HK_MAX_TRADE_LOCK_HOURS = 24 * 365;
+export const HK_MAX_MUTE_MINUTES = 60 * 24 * 30;
+export const HK_MAX_REASON_LENGTH = 500;
+export const HK_MAX_ALERT_LENGTH = 1000;
 export const HK_MIN_RANK = 1;
 export const HK_MAX_RANK = 12;
 
-export const validateUsername = (raw: string): HousekeepingErrorKey => {
-    if (!raw || raw.trim().length === 0) return HousekeepingErrorKey.EMPTY_USERNAME;
+const isPositiveInteger = (raw: number): boolean => Number.isFinite(raw) && Number.isInteger(raw) && raw > 0;
+
+const ID_ERRORS = {
+    user: HousekeepingErrorKey.INVALID_USER_ID,
+    room: HousekeepingErrorKey.INVALID_ROOM_ID,
+    item: HousekeepingErrorKey.INVALID_ITEM_ID
+} as const;
+
+export const validatePositiveId = (raw: number, kind: keyof typeof ID_ERRORS): HousekeepingErrorKey =>
+    isPositiveInteger(raw) ? HousekeepingErrorKey.NONE : ID_ERRORS[kind];
+
+export const validateAmount = (raw: number, max: number = HK_MAX_GIVE_AMOUNT): HousekeepingErrorKey => {
+    if (!isPositiveInteger(raw)) return HousekeepingErrorKey.INVALID_AMOUNT;
+    if (raw > max) return HousekeepingErrorKey.AMOUNT_TOO_LARGE;
 
     return HousekeepingErrorKey.NONE;
 };
 
-export const validatePositiveId = (raw: number, kind: 'user' | 'room'): HousekeepingErrorKey => {
-    if (!Number.isFinite(raw) || !Number.isInteger(raw) || raw <= 0) {
-        return kind === 'user' ? HousekeepingErrorKey.INVALID_USER_ID : HousekeepingErrorKey.INVALID_ROOM_ID;
-    }
+export const validateText = (raw: string, maxLength: number = HK_MAX_REASON_LENGTH): HousekeepingErrorKey => {
+    const trimmed = (raw ?? '').trim();
+
+    if (!trimmed.length) return HousekeepingErrorKey.EMPTY_REASON;
+    if (trimmed.length > maxLength) return HousekeepingErrorKey.TEXT_TOO_LONG;
 
     return HousekeepingErrorKey.NONE;
 };
 
-export const validateAmount = (raw: number): HousekeepingErrorKey => {
-    if (!Number.isFinite(raw) || !Number.isInteger(raw) || raw <= 0) return HousekeepingErrorKey.INVALID_AMOUNT;
-    if (raw > HK_MAX_GIVE_AMOUNT) return HousekeepingErrorKey.AMOUNT_TOO_LARGE;
+export const validateHours = (raw: number, max: number = HK_MAX_BAN_HOURS): HousekeepingErrorKey =>
+    isPositiveInteger(raw) && raw <= max ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_HOURS;
 
-    return HousekeepingErrorKey.NONE;
-};
+export const validateMinutes = (raw: number): HousekeepingErrorKey =>
+    isPositiveInteger(raw) && raw <= HK_MAX_MUTE_MINUTES ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_MINUTES;
 
-export const validateReason = (raw: string): HousekeepingErrorKey => {
-    if (!raw || raw.trim().length === 0) return HousekeepingErrorKey.EMPTY_REASON;
-
-    return HousekeepingErrorKey.NONE;
-};
-
-export const validateBanHours = (raw: number): HousekeepingErrorKey => {
-    if (!Number.isFinite(raw) || raw <= 0) return HousekeepingErrorKey.INVALID_HOURS;
-    if (raw > HK_MAX_BAN_HOURS) return HousekeepingErrorKey.INVALID_HOURS;
-
-    return HousekeepingErrorKey.NONE;
-};
-
-export const validateRank = (raw: number): HousekeepingErrorKey => {
-    if (!Number.isFinite(raw) || !Number.isInteger(raw)) return HousekeepingErrorKey.INVALID_RANK;
-    if (raw < HK_MIN_RANK || raw > HK_MAX_RANK) return HousekeepingErrorKey.INVALID_RANK;
-
-    return HousekeepingErrorKey.NONE;
-};
+export const validateRank = (raw: number): HousekeepingErrorKey =>
+    Number.isInteger(raw) && raw >= HK_MIN_RANK && raw <= HK_MAX_RANK ? HousekeepingErrorKey.NONE : HousekeepingErrorKey.INVALID_RANK;

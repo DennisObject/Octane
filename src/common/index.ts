@@ -17,6 +17,7 @@ export * from './InfiniteScroll';
 export * from './layout';
 export * from './layout/limited-edition';
 export * from './Slider';
+export * from './staff/StaffWindow';
 export * from './scroll-area/ClassicScrollAreaView';
 export * from './Text';
 export * from './types';

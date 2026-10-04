@@ -1,15 +1,7 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useMemo } from 'react';
 import { getHousekeepingMode, HousekeepingTabId, isHousekeepingEnabled, isHousekeepingTabAvailable, LocalizeText } from '../../api';
-import {
-    DraggableWindowPosition,
-    OctaneCardContentView,
-    OctaneCardHeaderView,
-    OctaneCardTabsItemView,
-    OctaneCardTabsView,
-    OctaneCardView,
-    WidgetErrorBoundary
-} from '../../common';
+import { DraggableWindowPosition, StaffWindow, StaffWindowTab, WidgetErrorBoundary } from '../../common';
 import { useHasPermission, useHousekeepingStore } from '../../hooks';
 import { HousekeepingPasswordReveal } from './HousekeepingPasswordReveal';
 import { HousekeepingStatusBanner } from './HousekeepingStatusBanner';
@@ -20,7 +12,7 @@ import { HousekeepingRoomsTab } from './views/rooms/HousekeepingRoomsTab';
 import { HousekeepingSoundboardTab } from './views/soundboard/HousekeepingSoundboardTab';
 import { HousekeepingUsersTab } from './views/users/HousekeepingUsersTab';
 
-const TAB_IDS: HousekeepingTabId[] = [
+const TAB_ORDER: HousekeepingTabId[] = [
     HousekeepingTabId.DASHBOARD,
     HousekeepingTabId.USERS,
     HousekeepingTabId.ROOMS,
@@ -29,37 +21,64 @@ const TAB_IDS: HousekeepingTabId[] = [
     HousekeepingTabId.SOUNDBOARD
 ];
 
-const isHkTabId = (value: string): value is HousekeepingTabId => (TAB_IDS as string[]).includes(value);
+const isTabId = (value: string): value is HousekeepingTabId => (TAB_ORDER as string[]).includes(value);
 
+const decodeSegment = (segment: string = ''): string => {
+    try {
+        return decodeURIComponent(segment);
+    } catch {
+        return segment;
+    }
+};
+
+const TabContent: FC<{ tab: HousekeepingTabId }> = ({ tab }) => {
+    switch (tab) {
+        case HousekeepingTabId.USERS:
+            return <HousekeepingUsersTab />;
+        case HousekeepingTabId.ROOMS:
+            return <HousekeepingRoomsTab />;
+        case HousekeepingTabId.ECONOMY:
+            return <HousekeepingEconomyTab />;
+        case HousekeepingTabId.AUDIT:
+            return <HousekeepingAuditTab />;
+        case HousekeepingTabId.SOUNDBOARD:
+            return <HousekeepingSoundboardTab />;
+        default:
+            return <HousekeepingDashboardTab />;
+    }
+};
+
+/**
+ * In-client housekeeping. Shown only while the server has granted `acc_housekeeping`
+ * (and `housekeeping.enabled` is on); that gate is cosmetic, the server authorises
+ * every request again.
+ *
+ * Links: housekeeping/show|hide|toggle, housekeeping/tab/<id>,
+ * housekeeping/user/<id>[/<name>/<figure>] (avatar menu).
+ */
 export const HousekeepingView: FC = () => {
-    const { isVisible, setIsVisible, togglePanel, activeTab, setActiveTab, closePanel, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
-    // Gate behind a dedicated HK permission so the panel stays hidden
-    // for plain users/mods on servers that haven't granted it. Reactive
-    // — promote/demote takes effect on the next render without a relog.
+    const { isVisible, openPanel, closePanel, togglePanel, activeTab, setActiveTab, lookupUserById, seedUserFromAvatar } = useHousekeepingStore();
     const isHk = useHasPermission('acc_housekeeping');
     const canManageSoundboard = useHasPermission('acc_soundboard_manage');
-    // Two-layer config gate on top of the permission:
-    //   - `housekeeping.enabled` (boolean, default false): master kill
-    //     switch for the whole module
-    //   - `housekeeping.mode` ("light" | "full", default "full"):
-    //     "light" exposes only Users + Rooms (essential moderation),
-    //     "full" exposes all six tabs
-    // Config is read after `await GetConfiguration().init()` in
-    // bootstrap.ts, so by the time React mounts we're reading a
-    // populated value — no Suspense needed.
-    const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
-    const hkMode = useMemo(() => getHousekeepingMode(), []);
+    const isEnabled = useMemo(() => isHousekeepingEnabled(), []);
+    const mode = useMemo(() => getHousekeepingMode(), []);
+    const isAllowed = isEnabled && isHk;
+
+    const availableTabs = useMemo(
+        () => TAB_ORDER.filter((tab) => isHousekeepingTabAvailable(tab, mode) && (tab !== HousekeepingTabId.SOUNDBOARD || canManageSoundboard)),
+        [mode, canManageSoundboard]
+    );
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
-                const parts = url.split('/');
+                if (!isAllowed) return;
 
-                if (parts.length < 2) return;
+                const parts = url.split('/');
 
                 switch (parts[1]) {
                     case 'show':
-                        setIsVisible(true);
+                        openPanel();
                         return;
                     case 'hide':
                         closePanel();
@@ -68,56 +87,24 @@ export const HousekeepingView: FC = () => {
                         togglePanel();
                         return;
                     case 'tab':
-                        if (parts.length > 2) {
-                            const candidate = parts[2];
-
-                            const canOpenCandidate = candidate !== HousekeepingTabId.SOUNDBOARD || canManageSoundboard;
-
-                            if (isHkTabId(candidate) && canOpenCandidate && isHousekeepingTabAvailable(candidate, getHousekeepingMode())) {
-                                setActiveTab(candidate);
-                                setIsVisible(true);
-                            }
+                        if (isTabId(parts[2]) && availableTabs.includes(parts[2])) {
+                            setActiveTab(parts[2]);
+                            openPanel();
                         }
                         return;
-                    case 'user':
-                        // housekeeping/user/<id>[/<name>/<figure>] — used by the
-                        // in-room context menu to push a target into the HK
-                        // panel and jump to the Users tab. When the optional
-                        // name + figure segments are present the panel paints
-                        // them synchronously (so the operator sees the target
-                        // even if the find-by-id packet is slow / unhandled),
-                        // and the background lookup enriches the rest. The
-                        // segments are URI-encoded so usernames with spaces or
-                        // figures with special chars survive the link round-trip.
-                        if (parts.length > 2) {
-                            const userId = parseInt(parts[2]);
+                    case 'user': {
+                        const userId = parseInt(parts[2]);
 
-                            if (Number.isFinite(userId) && userId > 0) {
-                                setActiveTab(HousekeepingTabId.USERS);
-                                setIsVisible(true);
+                        if (!Number.isInteger(userId) || userId <= 0 || !availableTabs.includes(HousekeepingTabId.USERS)) return;
 
-                                if (parts.length > 4) {
-                                    let name = '';
-                                    let figure = '';
+                        setActiveTab(HousekeepingTabId.USERS);
+                        openPanel();
 
-                                    try {
-                                        name = decodeURIComponent(parts[3] || '');
-                                    } catch {
-                                        name = parts[3] || '';
-                                    }
-                                    try {
-                                        figure = decodeURIComponent(parts[4] || '');
-                                    } catch {
-                                        figure = parts[4] || '';
-                                    }
+                        if (parts.length > 4) seedUserFromAvatar(userId, decodeSegment(parts[3]), decodeSegment(parts[4]));
 
-                                    seedUserFromAvatar(userId, name, figure);
-                                }
-
-                                lookupUserById(userId);
-                            }
-                        }
+                        lookupUserById(userId);
                         return;
+                    }
                 }
             },
             eventUrlPrefix: 'housekeeping/'
@@ -126,115 +113,41 @@ export const HousekeepingView: FC = () => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [setIsVisible, togglePanel, closePanel, setActiveTab, lookupUserById, seedUserFromAvatar, canManageSoundboard]);
+    }, [isAllowed, availableTabs, openPanel, closePanel, togglePanel, setActiveTab, lookupUserById, seedUserFromAvatar]);
 
-    // When the panel is gated off (perm revoked mid-session, or
-    // `housekeeping.enabled` is false) make sure it isn't left visible.
+    // Permission revoked mid-session (or the module switched off): close right away.
     useEffect(() => {
-        if ((!isHk || !hkEnabled) && isVisible) closePanel();
-    }, [isHk, hkEnabled, isVisible, closePanel]);
+        if (!isAllowed && isVisible) closePanel();
+    }, [isAllowed, isVisible, closePanel]);
 
-    // If light mode is active and the user is parked on a tab that
-    // light doesn't expose (e.g. they switched modes between
-    // sessions), bounce them to Users — the canonical default for
-    // the trimmed layout.
+    // A remembered tab may not exist in this mode or for this rank.
     useEffect(() => {
-        const soundboardDenied = activeTab === HousekeepingTabId.SOUNDBOARD && !canManageSoundboard;
-        if (soundboardDenied || !isHousekeepingTabAvailable(activeTab, hkMode)) setActiveTab(HousekeepingTabId.USERS);
-    }, [activeTab, hkMode, canManageSoundboard, setActiveTab]);
+        if (availableTabs.length && !availableTabs.includes(activeTab)) setActiveTab(availableTabs[0]);
+    }, [activeTab, availableTabs, setActiveTab]);
 
-    const activeView = useMemo(() => {
-        switch (activeTab) {
-            case HousekeepingTabId.ROOMS:
-                return <HousekeepingRoomsTab />;
-            case HousekeepingTabId.ECONOMY:
-                return <HousekeepingEconomyTab />;
-            case HousekeepingTabId.AUDIT:
-                return <HousekeepingAuditTab />;
-            case HousekeepingTabId.SOUNDBOARD:
-                return canManageSoundboard ? <HousekeepingSoundboardTab /> : <HousekeepingUsersTab />;
-            case HousekeepingTabId.USERS:
-                return <HousekeepingUsersTab />;
-            case HousekeepingTabId.DASHBOARD:
-            default:
-                return <HousekeepingDashboardTab />;
-        }
-    }, [activeTab, canManageSoundboard]);
+    const tabs: StaffWindowTab<HousekeepingTabId>[] = useMemo(
+        () => availableTabs.map((tab) => ({ id: tab, label: LocalizeText(`housekeeping.tab.${tab}`) })),
+        [availableTabs]
+    );
 
-    if (!hkEnabled || !isHk || !isVisible) return null;
-
-    const showDashboard = isHousekeepingTabAvailable(HousekeepingTabId.DASHBOARD, hkMode);
-    const showEconomy = isHousekeepingTabAvailable(HousekeepingTabId.ECONOMY, hkMode);
-    const showAudit = isHousekeepingTabAvailable(HousekeepingTabId.AUDIT, hkMode);
-    const showSoundboard = canManageSoundboard && isHousekeepingTabAvailable(HousekeepingTabId.SOUNDBOARD, hkMode);
-    const isLight = hkMode === 'light';
-    const headerSuffix = isLight ? ` · ${LocalizeText('housekeeping.mode.light')}` : '';
-    // Light mode is narrower because there are only 2 tabs and the
-    // content density is lower — gives the operator more screen real
-    // estate without a 600px-wide panel for two tabs.
-    const sizeClass = isLight ? 'min-w-[420px] max-w-[480px]' : 'min-w-[620px] max-w-[700px]';
+    if (!isAllowed || !isVisible) return null;
 
     return (
         <WidgetErrorBoundary name="HousekeepingView">
-            <OctaneCardView
-                className={`octane-housekeeping ${sizeClass}`}
-                theme="primary-slim"
+            <StaffWindow<HousekeepingTabId>
+                activeTab={activeTab}
+                className="octane-housekeeping"
+                tabs={tabs}
+                title={LocalizeText('housekeeping.title')}
                 uniqueKey="housekeeping"
                 windowPosition={DraggableWindowPosition.TOP_CENTER}
+                onClose={closePanel}
+                onTabChange={setActiveTab}
             >
-                <OctaneCardHeaderView headerText={`${LocalizeText('housekeeping.title')}${headerSuffix}`} onCloseClick={() => closePanel()} />
-                <OctaneCardTabsView>
-                    {showDashboard && (
-                        <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.DASHBOARD} onClick={() => setActiveTab(HousekeepingTabId.DASHBOARD)}>
-                            <div className="flex items-center gap-1.5 text-xs">
-                                <span className="octane-icon octane-icon-hk-tab icon-housekeeping" />
-                                <span>{LocalizeText('housekeeping.tab.dashboard')}</span>
-                            </div>
-                        </OctaneCardTabsItemView>
-                    )}
-                    <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.USERS} onClick={() => setActiveTab(HousekeepingTabId.USERS)}>
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <span className="octane-icon octane-icon-hk-tab icon-modtools" />
-                            <span>{LocalizeText('housekeeping.tab.users')}</span>
-                        </div>
-                    </OctaneCardTabsItemView>
-                    <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.ROOMS} onClick={() => setActiveTab(HousekeepingTabId.ROOMS)}>
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <span className="octane-icon octane-icon-hk-tab icon-rooms" />
-                            <span>{LocalizeText('housekeeping.tab.rooms')}</span>
-                        </div>
-                    </OctaneCardTabsItemView>
-                    {showEconomy && (
-                        <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.ECONOMY} onClick={() => setActiveTab(HousekeepingTabId.ECONOMY)}>
-                            <div className="flex items-center gap-1.5 text-xs">
-                                <span className="octane-icon octane-icon-hk-tab icon-catalog" />
-                                <span>{LocalizeText('housekeeping.tab.economy')}</span>
-                            </div>
-                        </OctaneCardTabsItemView>
-                    )}
-                    {showAudit && (
-                        <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.AUDIT} onClick={() => setActiveTab(HousekeepingTabId.AUDIT)}>
-                            <div className="flex items-center gap-1.5 text-xs">
-                                <span className="octane-icon octane-icon-hk-tab icon-message" />
-                                <span>{LocalizeText('housekeeping.tab.audit')}</span>
-                            </div>
-                        </OctaneCardTabsItemView>
-                    )}
-                    {showSoundboard && (
-                        <OctaneCardTabsItemView isActive={activeTab === HousekeepingTabId.SOUNDBOARD} onClick={() => setActiveTab(HousekeepingTabId.SOUNDBOARD)}>
-                            <div className="flex items-center gap-1.5 text-xs">
-                                <span className="octane-icon octane-icon-hk-tab icon-soundboard" />
-                                <span>{LocalizeText('housekeeping.tab.soundboard')}</span>
-                            </div>
-                        </OctaneCardTabsItemView>
-                    )}
-                </OctaneCardTabsView>
                 <HousekeepingStatusBanner />
                 <HousekeepingPasswordReveal />
-                <OctaneCardContentView className="text-black" gap={2}>
-                    {activeView}
-                </OctaneCardContentView>
-            </OctaneCardView>
+                <TabContent tab={activeTab} />
+            </StaffWindow>
         </WidgetErrorBoundary>
     );
 };

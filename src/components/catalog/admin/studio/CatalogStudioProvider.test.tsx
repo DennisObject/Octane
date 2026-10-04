@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SendMessageComposer } from '../../../../api';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
 import { CatalogStudioProvider } from './CatalogStudioProvider';
-import { useCatalogStudio } from './useCatalogStudio';
+import { useCatalogStudio } from '../../../../hooks/catalog/useCatalogStudio';
 
 vi.mock('../../../../api', () => ({ SendMessageComposer: vi.fn() }));
 vi.mock('../../../../hooks', () => ({ useConnectionState: vi.fn(), useMessageEvent: vi.fn() }));
@@ -30,7 +30,6 @@ const Probe = () => {
             <span data-testid="error">{studio.lastError ?? ''}</span>
             <span data-testid="page-caption">{studio.session?.pages.find(page => page.pageId === 42)?.caption ?? ''}</span>
             <span data-testid="history-count">{studio.historyTotalCount}</span>
-            <button onClick={() => studio.applyDocument('SQL', 'UPDATE catalog_pages SET caption = \'Shop\' WHERE id = 1;', 'fingerprint', 'Import catalog SQL file')}>apply</button>
             <button onClick={() => studio.applyMutation({
                 operationId: 'save-page-1', action: 'savePage', revision: 8, entityType: 'PAGE', catalogType: 'NORMAL',
                 entity: pageSnapshot('Renamed'),
@@ -166,22 +165,6 @@ describe('CatalogStudioProvider', () => {
 
         expect(vi.mocked(SendMessageComposer).mock.calls
             .filter(([ composer ]) => composer.constructor.name === 'CatalogStudioOpenSessionComposer')).toHaveLength(2);
-    });
-
-    it('applies a confirmed SQL dry-run directly without a separate root lock', () => {
-        render(<CatalogStudioProvider active><Probe /></CatalogStudioProvider>);
-        emit('CatalogStudioSessionEvent', {
-            activeVersionId: 11, draftVersionId: 12, revision: 7,
-            activeUpdatedAt: '', draftCreatedAt: '', pendingCount: 0,
-            actors: [], validationCurrent: false, validationIssueCount: 0, publishedVersions: []
-        });
-
-        act(() => screen.getByText('apply').click());
-        const apply = vi.mocked(SendMessageComposer).mock.calls.at(-1)[0] as any;
-        expect(apply.constructor.name).toBe('CatalogStudioDocumentApplyComposer');
-        expect(apply.getMessageArray().slice(1)).toEqual([
-            12, 7, '', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'fingerprint', 'Import catalog SQL file'
-        ]);
     });
 
 });

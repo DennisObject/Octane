@@ -1,8 +1,9 @@
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { CatalogType, ICatalogNode, LocalizeText } from '../../../../api';
 import { ClassicScrollAreaView } from '../../../../common';
 import { useCatalogActions, useCatalogData } from '../../../../hooks';
-import { useCatalogAdmin } from '../../CatalogAdminContext';
+import { findCatalogAdminNode, getCatalogAdminNodeName } from '../../../../hooks/catalog/catalogAdminTree.helpers';
+import { useCatalogAdminPageActions } from '../../../../hooks/catalog/useCatalogAdminPageActions';
 import { CatalogNavigationItemView } from './CatalogNavigationItemView';
 import { CatalogNavigationRuntime } from './CatalogNavigationRuntime';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
@@ -14,45 +15,29 @@ export interface CatalogNavigationViewProps {
 
 export const CatalogNavigationView: FC<CatalogNavigationViewProps> = (props) => {
     const { node = null, catalogType = CatalogType.NORMAL } = props;
-    const { searchResult = null } = useCatalogData();
+    const { searchResult = null, rootNode = null } = useCatalogData();
     const { activateNode = null } = useCatalogActions();
-    const catalogAdmin = useCatalogAdmin();
-    const adminMode = catalogAdmin?.adminMode ?? false;
-    const deletePage = catalogAdmin?.deletePage;
-    const reorderPage = catalogAdmin?.reorderPage;
-    const setCreatingPage = catalogAdmin?.setCreatingPage;
-    const setEditingPageData = catalogAdmin?.setEditingPageData;
-    const setEditingPageNode = catalogAdmin?.setEditingPageNode;
-    const setEditingRootPage = catalogAdmin?.setEditingRootPage;
-
-    const createSubpage = useCallback(
-        (targetNode: ICatalogNode) => {
-            setCreatingPage?.(true);
-            setEditingRootPage?.(false);
-            setEditingPageNode?.(targetNode);
-            setEditingPageData?.(true);
-        },
-        [setCreatingPage, setEditingPageData, setEditingPageNode, setEditingRootPage]
-    );
-
-    const removePage = useCallback(
-        (targetNode: ICatalogNode) => {
-            if (!deletePage || !confirm(LocalizeText('catalog.admin.delete.page.confirm', ['name'], [targetNode.localization]))) return;
-
-            deletePage(targetNode.pageId);
-        },
-        [deletePage]
-    );
+    const { adminMode, createSubpage, confirmDelete, confirmMove } = useCatalogAdminPageActions();
 
     const runtime = useMemo<CatalogNavigationRuntime>(
         () => ({
             activateNode,
             adminMode,
             createSubpage,
-            deletePage: removePage,
-            reorderPage: (pageId, parentId, index) => reorderPage?.(pageId, parentId, index)
+            deletePage: confirmDelete,
+            reorderPage: (pageId, parentId, index) => {
+                const dragged = findCatalogAdminNode(rootNode, pageId);
+                const destination = parentId === -1 ? null : findCatalogAdminNode(rootNode, parentId);
+                if (!dragged) return;
+
+                confirmMove(
+                    dragged,
+                    { pageId, newParentId: parentId, newIndex: index },
+                    destination ? getCatalogAdminNodeName(destination) : LocalizeText('catalog.admin.root')
+                );
+            }
         }),
-        [activateNode, adminMode, createSubpage, removePage, reorderPage]
+        [activateNode, adminMode, confirmDelete, confirmMove, createSubpage, rootNode]
     );
 
     return (

@@ -1,33 +1,30 @@
 import { useCallback } from 'react';
 import { LocalizeText } from '../../api';
 import { useNotification } from '../notification';
+import { useHousekeepingStore } from './useHousekeepingStore';
 
 /**
- * Themed confirmation wrapper around `useNotification().showConfirm`.
- *
- * Destructive HK actions (delete room, kick-all, bulk ban) used to
- * call `window.confirm` directly — that's a system-modal that breaks
- * out of the client visually and doesn't honor the LocalizeText
- * dictionary. `useHousekeepingConfirm` swaps in the in-client
- * NotificationConfirm modal, with the HK button labels and a
- * sensible default title.
- *
- * Returns a single function `confirm(message, onConfirm)` to keep
- * the call sites tight. Pass an `options.confirmText` override when
- * the action needs a custom label (e.g. "Delete forever" instead of
- * the generic confirm).
+ * The in-client confirm dialog with the housekeeping labels, for every destructive action.
+ * A dialog still open when the panel closes (or, for `selection`, when another user or
+ * room is picked) does nothing when confirmed.
  */
-export const useHousekeepingConfirm = () => {
+export const useHousekeepingConfirm = (scope: 'panel' | 'selection' = 'selection') => {
     const { showConfirm } = useNotification();
+    const { captureConfirmScope, isConfirmScopeCurrent } = useHousekeepingStore();
 
     return useCallback(
-        (message: string, onConfirm: () => void, options: { confirmText?: string; cancelText?: string; title?: string } = {}) => {
-            const confirmText = options.confirmText ?? LocalizeText('housekeeping.confirm.proceed');
-            const cancelText = options.cancelText ?? LocalizeText('housekeeping.confirm.cancel');
-            const title = options.title ?? LocalizeText('housekeeping.confirm.title');
+        (message: string, onConfirm: () => void) => {
+            const token = captureConfirmScope(scope);
 
-            showConfirm(message, onConfirm, () => {}, confirmText, cancelText, title);
+            showConfirm(
+                message,
+                () => isConfirmScopeCurrent(token) && onConfirm(),
+                () => {},
+                LocalizeText('housekeeping.confirm.proceed'),
+                LocalizeText('housekeeping.confirm.cancel'),
+                LocalizeText('housekeeping.confirm.title')
+            );
         },
-        [showConfirm]
+        [showConfirm, captureConfirmScope, isConfirmScopeCurrent, scope]
     );
 };

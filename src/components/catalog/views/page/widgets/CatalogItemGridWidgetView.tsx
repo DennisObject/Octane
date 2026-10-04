@@ -3,7 +3,7 @@ import { CSSProperties, FC, useCallback, useLayoutEffect, useMemo, useRef, useSt
 import { CatalogType, IPurchasableOffer } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView } from '../../../../../common';
 import { useCatalogActions, useCatalogData, useCatalogUiState, useInventoryFurni, useScrollWindow } from '../../../../../hooks';
-import { replaceCatalogPageOffers } from '../../../../../hooks/catalog/useCatalog.helpers';
+import { useCatalogAdminOfferReorder } from '../../../../../hooks/catalog/useCatalogAdminOfferReorder';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { getAirCatalogColumnCount, getVisibleAirGridEntries, isAirBaseCatalogOffer, layoutAirCatalogOffers } from '../common/catalogAirGrid.helpers';
@@ -28,9 +28,9 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     } = props;
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const { selectCatalogOffer = null } = useCatalogActions();
-    const { currentType = CatalogType.NORMAL, setCurrentPage } = useCatalogUiState();
-    const catalogAdmin = useCatalogAdmin();
-    const adminMode = catalogAdmin?.adminMode ?? false;
+    const { currentType = CatalogType.NORMAL } = useCatalogUiState();
+    const adminMode = useCatalogAdmin()?.adminMode ?? false;
+    const reorderOffers = useCatalogAdminOfferReorder();
     const elementRef = useRef<HTMLDivElement>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -118,23 +118,12 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
 
     const handleDrop = useCallback(
         (index: number) => {
-            if (dragIndex !== null && dragIndex !== index && currentPage?.offers) {
-                const reordered = [...currentPage.offers];
-                const [moved] = reordered.splice(dragIndex, 1);
-
-                reordered.splice(index, 0, moved);
-
-                setCurrentPage(replaceCatalogPageOffers(currentPage, reordered));
-
-                const orders = reordered.map((o, i) => ({ id: o.offerId, orderNumber: i }));
-
-                catalogAdmin?.reorderOffers(orders, `Reordered offers on page #${currentPage.pageId}`);
-            }
+            if (dragIndex !== null && currentPage) reorderOffers(currentPage, dragIndex, index, `#${currentPage.pageId}`);
 
             setDragIndex(null);
             setDropIndex(null);
         },
-        [dragIndex, currentPage, catalogAdmin, setCurrentPage]
+        [dragIndex, currentPage, reorderOffers]
     );
 
     const handleDragEnd = useCallback(() => {
@@ -155,7 +144,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         return (
             <div
                 key={offer.offerId}
-                className={`${isDragging ? 'opacity-40' : ''} ${isDropTarget ? 'ring-2 ring-primary ring-offset-1 rounded' : ''}`}
+                className={`${isDragging ? 'octane-catalog-admin-dragging' : ''} ${isDropTarget ? 'octane-catalog-admin-drop-target' : ''}`}
                 data-air-offer-index={airPosition ? index : undefined}
                 draggable={adminMode}
                 style={

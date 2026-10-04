@@ -44,9 +44,6 @@ describe('UI CSS ownership', () =>
     {
         const groupCreatorView = readSource('src/components/groups/views/GroupCreatorView.tsx');
         const catalogView = readSource('src/components/catalog/CatalogView.tsx');
-        const catalogAdminOfferEditView = readSource('src/components/catalog/views/admin/CatalogAdminOfferEditView.tsx');
-        const catalogAdminPageEditView = readSource('src/components/catalog/views/admin/CatalogAdminPageEditView.tsx');
-        const catalogAdminModalView = readSource('src/components/catalog/views/admin/CatalogAdminModalView.tsx');
         const catalogLayoutColorGroupingView = readSource('src/components/catalog/views/page/layout/CatalogLayoutColorGroupingView.tsx');
         const catalogLayoutSoundMachineView = readSource('src/components/catalog/views/page/layout/CatalogLayoutSoundMachineView.tsx');
         const catalogLayoutVipBuyView = readSource('src/components/catalog/views/page/layout/CatalogLayoutVipBuyView.tsx');
@@ -90,20 +87,6 @@ describe('UI CSS ownership', () =>
 
         expect(groupCreatorView).not.toContain('border border-[solid] border-[#283F5D]');
         expect(catalogView).not.toContain('habbo-swf-window');
-        expect(catalogAdminModalView).toContain('createPortal');
-        expect(catalogAdminModalView).toContain('octane-card-shell');
-        expect(catalogAdminModalView).toContain('fixed inset-0 z-[1000]');
-        expect(catalogAdminModalView).toContain('max-w-[calc(100vw-16px)]');
-        expect(catalogAdminModalView).toContain('max-h-[calc(100vh-16px)]');
-        expect(catalogAdminModalView).toContain('overflow-hidden');
-        expect(catalogCss).toContain('.octane-catalog-admin-form-scroll');
-        expect(catalogAdminOfferEditView).not.toContain('style={ { zIndex: 1000 } }');
-        expect(catalogAdminOfferEditView).not.toContain('border-2 border-card-grid-item-border rounded px-2 py-1 bg-white');
-        expect(catalogAdminOfferEditView).not.toContain('bg-white rounded border-2 border-card-grid-item-border p-2.5');
-        expect(catalogAdminOfferEditView).toContain('octane-catalog-admin-input');
-        expect(catalogAdminOfferEditView).toContain('octane-catalog-admin-form-sheet');
-        expect(catalogAdminOfferEditView).toContain('<CatalogAdminModalView');
-        expect(catalogAdminOfferEditView).toContain('widthClassName="w-[500px]"');
         expect(catalogLayoutColorGroupingView).not.toContain('style={ { maxHeight: 154 } }');
         expect(catalogLayoutSoundMachineView).not.toContain('style={ { height: 140 } }');
         expect(catalogLayoutVipBuyView).not.toContain('backgroundSize: \'contain\'');
@@ -111,19 +94,9 @@ describe('UI CSS ownership', () =>
         expect(catalogLayoutTrophiesView).not.toContain('boxShadow: \'0 0 8px');
         expect(catalogLayoutTrophiesView).not.toContain('background: trophyText.length');
         expect(catalogLayoutTrophiesView).toContain('octane-catalog-trophy-inscription');
-        expect(catalogAdminPageEditView).toContain('<CatalogAdminModalView');
-        expect(catalogAdminPageEditView).toContain('widthClassName="w-[540px]"');
-        expect(catalogAdminPageEditView).toContain('octane-catalog-admin-form-sheet');
-        expect(catalogAdminPageEditView).not.toContain('border-2 border-card-grid-item-border rounded px-2 py-1 bg-white');
-        expect(catalogAdminPageEditView).toContain('octane-catalog-admin-input');
         expect(catalogCss).toContain('.octane-catalog-window :where(.bg-white, .bg-gray-50, .bg-card-grid-item)');
         expect(catalogCss).toContain('.octane-catalog-window :where(input, select, textarea)');
         expect(catalogCss).toContain('.octane-catalog-window :where(.text-muted, .text-dark)');
-        expect(catalogCss).toContain('.octane-catalog-admin-body :where(.uppercase.font-bold)');
-        expect(catalogCss).toContain('.octane-catalog-admin-input');
-        expect(catalogCss).toContain('.octane-catalog-admin-form-sheet');
-        expect(catalogCss).toContain('.octane-catalog-admin-form-section');
-        expect(catalogCss).toContain('.octane-catalog-admin-button.is-primary');
         expect(catalogCss).toContain('.octane-catalog-trophy-inscription.has-text');
         expect(catalogCss).toContain('.octane-catalog-marketplace-item-icon');
         expect(catalogCss).toContain('.octane-catalog-vip-hc-banner');

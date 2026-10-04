@@ -1,6 +1,12 @@
 import { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { FaArrowsAlt, FaCaretDown, FaCaretUp, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
 import { ICatalogNode, LocalizeText } from '../../../../api';
+import {
+    CATALOG_ADMIN_PAGE_DRAG_TYPE,
+    findCatalogAdminNode,
+    planCatalogAdminPageDrop,
+    readCatalogAdminPageDrag
+} from '../../../../hooks/catalog/catalogAdminTree.helpers';
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
 import { CatalogNavigationRuntime } from './CatalogNavigationRuntime';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
@@ -24,7 +30,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
         (e: React.DragEvent) => {
             if (!adminMode) return;
 
-            e.dataTransfer.setData('text/plain', JSON.stringify({ pageId: node.pageId, parentId: node.parent?.pageId ?? -1 }));
+            e.dataTransfer.setData(CATALOG_ADMIN_PAGE_DRAG_TYPE, String(node.pageId));
             e.dataTransfer.effectAllowed = 'move';
         },
         [adminMode, node]
@@ -32,7 +38,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
 
     const handleDragOver = useCallback(
         (e: React.DragEvent) => {
-            if (!adminMode) return;
+            if (!adminMode || !e.dataTransfer.types.includes(CATALOG_ADMIN_PAGE_DRAG_TYPE)) return;
 
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -52,20 +58,15 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
             e.preventDefault();
             setIsDragOver(false);
 
-            try {
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const pageId = readCatalogAdminPageDrag(e.dataTransfer);
+            if (pageId === null) return;
 
-                if (data.pageId && data.pageId !== node.pageId) {
-                    // Drop onto a branch = reparent under this node
-                    // Drop onto a leaf = reorder as sibling
-                    const targetParentId = node.isBranch ? node.pageId : (node.parent?.pageId ?? -1);
-                    const targetIndex = node.isBranch ? 0 : (node.parent?.children?.indexOf(node) ?? 0);
+            // Dropping onto a branch moves the page into it, onto a leaf places it before that leaf.
+            let root = node;
+            while (root.parent) root = root.parent;
 
-                    reorderPage(data.pageId, targetParentId, targetIndex);
-                }
-            } catch (err) {
-                // Invalid drag data
-            }
+            const plan = planCatalogAdminPageDrop(findCatalogAdminNode(root, pageId), node, node.isBranch ? 'inside' : 'before', root);
+            if (plan) reorderPage(plan.pageId, plan.newParentId, plan.newIndex);
         },
         [adminMode, node, reorderPage]
     );
@@ -90,7 +91,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
         <div className={`octane-catalog-navigation-node ${child ? 'is-child' : ''}`}>
             <div
                 ref={dragRef}
-                className={`octane-catalog-navigation-item group/nav ${node.isActive ? 'is-active' : ''} ${node.isBranch ? 'is-branch' : 'is-leaf'} ${node.isOpen ? 'is-open' : ''} ${isDragOver ? 'is-drag-over' : ''}`}
+                className={`octane-catalog-navigation-item ${adminMode ? 'is-admin' : ''} ${node.isActive ? 'is-active' : ''} ${node.isBranch ? 'is-branch' : 'is-leaf'} ${node.isOpen ? 'is-open' : ''} ${isDragOver ? 'is-drag-over' : ''}`}
                 draggable={adminMode}
                 role="treeitem"
                 tabIndex={0}
@@ -104,34 +105,42 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
                 onDragStart={adminMode ? handleDragStart : undefined}
                 onDrop={adminMode ? handleDrop : undefined}
             >
-                {adminMode && (
-                    <FaArrowsAlt className="octane-catalog-navigation-drag text-[7px] text-muted cursor-grab shrink-0 opacity-0 group-hover/nav:opacity-60" />
-                )}
                 <div className="octane-catalog-navigation-icon">
                     <CatalogIconView icon={node.iconId} />
                 </div>
-                <span className="octane-catalog-navigation-label" title={adminMode ? `Page ID: ${node.pageId}` : undefined}>
+                <span
+                    className="octane-catalog-navigation-label"
+                    title={adminMode ? LocalizeText('catalog.admin.page.id.title', ['id'], [String(node.pageId)]) : undefined}
+                >
                     {swfLabel}
                 </span>
                 {adminMode && (
-                    <div className="octane-catalog-navigation-admin flex items-center gap-1 opacity-0 group-hover/nav:opacity-100 transition-opacity">
-                        <FaPlus
-                            className="text-[8px] text-success hover:text-green-800"
+                    <span className="octane-catalog-navigation-admin">
+                        <button
+                            className="octane-catalog-navigation-admin-action"
                             title={LocalizeText('catalog.admin.create.subpage')}
+                            type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 createSubpage(node);
                             }}
-                        />
-                        <FaTrash
-                            className="text-[8px] text-danger hover:text-red-700"
+                            onKeyDown={(e) => e.stopPropagation()}
+                        >
+                            {LocalizeText('catalog.admin.new')}
+                        </button>
+                        <button
+                            className="octane-catalog-navigation-admin-action"
                             title={LocalizeText('catalog.admin.delete.page')}
+                            type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 deletePage(node);
                             }}
-                        />
-                    </div>
+                            onKeyDown={(e) => e.stopPropagation()}
+                        >
+                            {LocalizeText('catalog.admin.delete')}
+                        </button>
+                    </span>
                 )}
                 {node.isBranch && (
                     <span className="octane-catalog-navigation-caret text-[9px] text-muted shrink-0">{node.isOpen ? <FaCaretUp /> : <FaCaretDown />}</span>

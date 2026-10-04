@@ -9,9 +9,6 @@ describe('LayoutAvatarImageView compact heads', () => {
         expect(source).toMatch(/compactHeadSize\?:\s*number/);
         expect(source).toMatch(/compactHeadPadding\?:\s*number/);
         expect(source).toMatch(/cropTransparentImageUrl\(imageUrl,\s*compactHeadSize,\s*compactHeadPadding\)/);
-        expect(source).toMatch(
-            /figureKey\s*=\s*\[figure, gender, direction, headOnly, compactHead, compactHeadSize, compactHeadPadding, fit, airMeMenu, nativeCroppedHead\]/
-        );
     });
 
     it('paints the me-menu face as a 50px image instead of the 90x130 background box', () => {

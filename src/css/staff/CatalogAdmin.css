@@ -1,0 +1,338 @@
+/* Catalog admin editor windows on the staff frame (see StaffWindow.css). */
+
+.octane-catalog-admin-manager {
+    width: 720px;
+    height: 560px;
+}
+
+.octane-catalog-admin-editor {
+    width: 470px;
+    height: 600px;
+}
+
+.octane-catalog-admin-grow {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-catalog-admin-spacer {
+    flex: 1 1 auto;
+}
+
+.octane-catalog-admin-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.octane-catalog-admin-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.octane-catalog-admin-flags {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+.octane-catalog-admin-checkbox {
+    gap: 4px;
+    cursor: pointer;
+}
+
+/* Manager: page tree on the left, the selected page and its offers on the right. */
+.octane-catalog-admin-workspace {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 6px;
+    min-height: 0;
+}
+
+.octane-catalog-admin-tree-section,
+.octane-catalog-admin-detail,
+.octane-catalog-admin-offers,
+.octane-catalog-admin-history {
+    min-height: 0;
+}
+
+.octane-catalog-admin-tree-section > .octane-staff-section-body,
+.octane-catalog-admin-offers > .octane-staff-section-body,
+.octane-catalog-admin-history .octane-staff-section-body {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.octane-catalog-admin-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.octane-catalog-admin-offers {
+    flex: 1 1 auto;
+}
+
+.octane-catalog-admin-tree,
+.octane-catalog-admin-offer-list {
+    flex: 1 1 auto;
+}
+
+.octane-catalog-admin-tree-row {
+    gap: 4px;
+    padding-right: 6px;
+    user-select: none;
+}
+
+.octane-catalog-admin-tree-row.is-hidden .octane-catalog-admin-tree-label {
+    color: var(--staff-muted);
+    font-style: italic;
+}
+
+.octane-catalog-admin-tree-row.is-drop-before {
+    box-shadow: inset 0 2px 0 var(--habbo-blue, #418db0);
+}
+
+.octane-catalog-admin-tree-row.is-drop-after {
+    box-shadow: inset 0 -2px 0 var(--habbo-blue, #418db0);
+}
+
+.octane-catalog-admin-tree-row.is-drop-inside {
+    box-shadow: inset 0 0 0 1px var(--habbo-blue, #418db0);
+}
+
+.octane-catalog-admin-tree-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-catalog-admin-tree-icon {
+    display: inline-flex;
+    flex: 0 0 20px;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+/* Text-only disclosure arrow, drawn so it needs no icon font. */
+.octane-catalog-admin-tree-caret {
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    margin: 0 3px;
+    padding: 0;
+    border-width: 4px 0 4px 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--staff-text);
+    background: none;
+    cursor: pointer;
+}
+
+.octane-catalog-admin-tree-caret.is-open {
+    border-width: 5px 4px 0;
+    border-color: var(--staff-text) transparent transparent;
+}
+
+.octane-catalog-admin-tree-caret.is-empty {
+    border-color: transparent;
+    cursor: inherit;
+}
+
+.octane-catalog-admin-root-drop {
+    padding: 3px 6px;
+    border: 1px dashed var(--staff-line);
+    border-radius: 3px;
+    color: var(--staff-muted);
+    text-align: center;
+}
+
+.octane-catalog-admin-root-drop.is-active {
+    border-color: var(--habbo-blue, #418db0);
+    background: var(--staff-row-hover);
+    color: var(--staff-text);
+}
+
+/* Offer rows */
+.octane-catalog-admin-offer-list .octane-staff-list-row {
+    min-height: 34px;
+}
+
+.octane-catalog-admin-offer-list .octane-staff-list-row.is-drop-target {
+    box-shadow: inset 0 2px 0 var(--habbo-blue, #418db0);
+}
+
+.octane-catalog-admin-offer-icon-box {
+    display: inline-flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+}
+
+.octane-catalog-admin-offer-icon {
+    max-width: 32px;
+    max-height: 32px;
+    image-rendering: pixelated;
+}
+
+.octane-catalog-admin-offer-price {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 3px;
+    font-weight: 700;
+}
+
+.octane-catalog-admin-offer-price-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Page and offer editors: scrolling fields above a fixed status line and button row. */
+.octane-catalog-admin-editor-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+}
+
+.octane-catalog-admin-editor-scroll {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.octane-catalog-admin-editor-footer {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.octane-catalog-admin-editor-head {
+    gap: 8px;
+}
+
+.octane-catalog-admin-editor-icon {
+    display: inline-flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    border: 1px solid var(--staff-line);
+    border-radius: 3px;
+    background: var(--staff-panel);
+}
+
+.octane-catalog-admin-editor-titles {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.octane-catalog-admin-editor-titles > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-catalog-admin-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.octane-catalog-admin-fieldset:disabled {
+    opacity: 0.6;
+}
+
+.octane-catalog-admin-translate {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+/* History */
+.octane-catalog-admin-history {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.octane-catalog-admin-history > .octane-staff-section {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.octane-catalog-admin-history-list {
+    flex: 1 1 auto;
+}
+
+.octane-catalog-admin-history-main {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Admin controls inside the catalog window itself, in the catalog's own look. */
+.octane-catalog-navigation-admin {
+    display: none;
+    flex: 0 0 auto;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.octane-catalog-navigation-item.is-admin:hover .octane-catalog-navigation-admin,
+.octane-catalog-navigation-item.is-admin.is-active .octane-catalog-navigation-admin,
+.octane-catalog-navigation-item.is-admin:focus-within .octane-catalog-navigation-admin {
+    display: inline-flex;
+}
+
+.octane-catalog-navigation-admin-action {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 10px;
+    text-decoration: underline;
+    text-shadow: none;
+    cursor: pointer;
+}
+
+.octane-catalog-navigation-item.is-drag-over {
+    box-shadow: inset 0 0 0 1px var(--catalog-standard-blue, #418db0);
+}
+
+.octane-catalog-admin-dragging {
+    opacity: 0.4;
+}
+
+.octane-catalog-admin-drop-target {
+    border-radius: 3px;
+    outline: 2px solid var(--catalog-standard-blue, #418db0);
+    outline-offset: 1px;
+}
+
+.octane-catalog-mobile-admin {
+    padding: 2px 6px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+}

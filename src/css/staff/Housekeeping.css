@@ -1,0 +1,166 @@
+/* Housekeeping window on the staff frame (see StaffWindow.css). */
+.octane-staff-window.octane-housekeeping {
+    width: 500px;
+    height: 580px;
+}
+
+.octane-housekeeping .octane-housekeeping-durations .octane-staff-row > *,
+.octane-housekeeping .octane-housekeeping-durations > :not(label) {
+    white-space: nowrap;
+}
+
+.octane-housekeeping .octane-housekeeping-search {
+    position: relative;
+}
+
+.octane-housekeeping .octane-housekeeping-suggestions {
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    left: 0;
+    z-index: 5;
+    max-height: 200px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.octane-housekeeping .octane-housekeeping-suggestion {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.octane-housekeeping .octane-housekeeping-presence {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9b9b9b;
+}
+
+.octane-housekeeping .octane-housekeeping-presence.is-online {
+    background: #00a80b;
+}
+
+.octane-housekeeping .octane-housekeeping-user {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.octane-housekeeping .octane-housekeeping-user-head {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 62px;
+    overflow: hidden;
+    border: 1px solid var(--staff-line);
+    border-radius: 3px;
+    background: #e6e6e6;
+}
+
+/* The renderer's cropped head at native scale, centred whole inside the panel. */
+.octane-housekeeping .octane-housekeeping-user-head-image {
+    position: static !important;
+    flex: 0 0 auto;
+    width: auto !important;
+    height: auto !important;
+}
+
+.octane-housekeeping .octane-housekeeping-user-head-image img {
+    display: block;
+    max-width: 52px;
+    max-height: 60px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-housekeeping .octane-housekeeping-facts {
+    flex: 1 1 auto;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.octane-housekeeping .octane-housekeeping-facts th {
+    width: 78px;
+}
+
+.octane-housekeeping .octane-housekeeping-balance {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.octane-housekeeping .octane-housekeeping-balance > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Number + unit next to the button it feeds, two pairs per row. */
+.octane-housekeeping .octane-housekeeping-durations {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 5px;
+}
+
+.octane-housekeeping .octane-housekeeping-number {
+    display: inline-flex;
+    white-space: nowrap;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.octane-housekeeping .octane-housekeeping-number input {
+    width: 64px;
+}
+
+.octane-housekeeping .octane-housekeeping-number.grow input {
+    width: 100%;
+}
+
+.octane-housekeeping .octane-housekeeping-grant {
+    display: grid;
+    grid-template-columns: 18px auto minmax(0, 1fr);
+    align-items: center;
+    gap: 5px;
+}
+
+.octane-housekeeping .octane-housekeeping-log {
+    flex: 1 1 auto;
+}
+
+.octane-housekeeping .octane-housekeeping-log-time {
+    flex: 0 0 92px;
+    white-space: nowrap;
+}
+
+.octane-housekeeping .octane-housekeeping-log-actor {
+    flex: 0 0 82px;
+    font-weight: 700;
+}
+
+.octane-housekeeping .octane-housekeeping-log-action {
+    flex: 0 1 110px;
+    text-align: right;
+}
+
+.octane-housekeeping .octane-housekeeping-sounds {
+    max-height: 220px;
+}
+
+.octane-housekeeping .octane-housekeeping-password-value {
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+}

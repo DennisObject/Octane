@@ -1,16 +1,21 @@
 import { useCallback } from 'react';
 import {
     GetRoomSession,
+    HK_MAX_ALERT_LENGTH,
+    HK_MAX_CLUB_DAYS,
+    HK_MAX_ITEM_QUANTITY,
+    HK_MAX_TRADE_LOCK_HOURS,
     HousekeepingApi,
     HousekeepingErrorKey,
     IHousekeepingActionResult,
     LocalizeText,
     NotificationBubbleType,
     validateAmount,
-    validateBanHours,
+    validateHours,
+    validateMinutes,
     validatePositiveId,
     validateRank,
-    validateReason
+    validateText
 } from '../../api';
 import { useNotification } from '../notification';
 import { useHousekeepingStore } from './useHousekeepingStore';
@@ -18,503 +23,376 @@ import { useHousekeepingStore } from './useHousekeepingStore';
 const SUCCESS_KEY = 'housekeeping.action.success';
 const ERROR_KEY = 'housekeeping.action.error';
 
-type ToastFn = (message: string, type: string, imageUrl?: string, internalLink?: string, senderName?: string) => void;
+/** Server messages may be localisation keys or plain text. */
+export const localizeHousekeepingMessage = (message: string | null): string => {
+    if (!message) return '';
+    if (!message.includes('.')) return message;
 
-const localizeOrPassthrough = (key: string): string => {
-    if (!key) return '';
-    if (!key.includes('.')) return key;
-
-    const localized = LocalizeText(key);
-
-    return localized === key ? key : localized;
+    return LocalizeText(message);
 };
 
-const wrap = async (
-    runner: () => Promise<IHousekeepingActionResult>,
-    markPending: () => void,
-    markDone: (errorKey: string | null, successKey: string | null) => void,
-    toast: ToastFn,
-    recordMetric: (action: string, latencyMs: number, isError: boolean) => void,
-    actionLabel: string
-): Promise<IHousekeepingActionResult | null> => {
-    markPending();
-
-    const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-    const measure = (isError: boolean) => {
-        const endedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-
-        recordMetric(actionLabel, endedAt - startedAt, isError);
-    };
-
-    try {
-        const result = await runner();
-
-        if (result && result.ok === false) {
-            // Error path: status banner only — the banner is inline
-            // and stays put until dismissed, more visible than a
-            // transient bubble for a failure that needs operator
-            // attention.
-            markDone(result.message || ERROR_KEY, null);
-            measure(true);
-
-            return result;
-        }
-
-        const successKey = result?.message || SUCCESS_KEY;
-
-        markDone(null, successKey);
-        // Success path also fires a transient toast so the operator
-        // gets feedback without scanning the banner — banner stays
-        // as a fallback for users that have bubbles disabled.
-        toast(localizeOrPassthrough(successKey), NotificationBubbleType.INFO);
-        measure(false);
-
-        return result;
-    } catch (error) {
-        markDone(String((error as Error)?.message ?? error), null);
-        measure(true);
-
-        return null;
-    }
-};
-
-const validationOr = (key: HousekeepingErrorKey, markDone: (e: string | null, s: string | null) => void): boolean => {
-    if (key === HousekeepingErrorKey.NONE) return true;
-
-    markDone(`housekeeping.validation.${key}`, null);
-
-    return false;
-};
+const isOk = (result: IHousekeepingActionResult | null) => !!result && result.ok !== false;
 
 /**
- * Imperative facade for every HK admin action. State (selected
- * user/room, status banner) lives in `useHousekeepingStore`; this
- * hook reads it for context (e.g. the currently-selected target)
- * and writes only the action-pending / status flags via
- * `markActionPending` / `markActionDone`. Keeping the read-only
- * state in a separate filter would still work, but the singleton
- * store keeps invocation simple for the panel views that already
- * pull state via `useHousekeepingStore`.
+ * Every housekeeping action: validate, claim the single action slot (a second click
+ * while one is waiting for its ack is ignored), send, report. The server re-checks
+ * permissions and limits on every one of these.
  */
 export const useHousekeepingActions = () => {
-    const { selectedUser, selectedRoom, markActionPending, markActionDone, setSelectedUser, setSelectedRoom, recordActionMetric, revealPassword } =
+    const { selectedUser, patchSelectedUser, patchSelectedRoom, clearSelectedRoom, beginAction, endAction, reportStatus, captureRevealGeneration, revealPassword } =
         useHousekeepingStore();
     const { showSingleBubble } = useNotification();
-    // Stable closure-bound runner so every action below stays a
-    // one-liner: only the runner thunk + a per-action telemetry
-    // label change per call site. The label keys into the metrics
-    // map; a missing label defaults to "anonymous" so untagged calls
-    // still produce a metric row.
-    const runAction = useCallback(
-        (runner: () => Promise<IHousekeepingActionResult>, actionLabel: string = 'anonymous') =>
-            wrap(runner, markActionPending, markActionDone, showSingleBubble, recordActionMetric, actionLabel),
-        [markActionPending, markActionDone, showSingleBubble, recordActionMetric]
+
+    const firstError = useCallback(
+        (...checks: HousekeepingErrorKey[]): boolean => {
+            const failed = checks.find((check) => check !== HousekeepingErrorKey.NONE);
+
+            if (!failed) return false;
+
+            reportStatus(`housekeeping.validation.${failed}`);
+
+            return true;
+        },
+        [reportStatus]
     );
 
-    // -- USER --------------------------------------------------------
+    const run = useCallback(
+        async (send: () => Promise<IHousekeepingActionResult>): Promise<IHousekeepingActionResult | null> => {
+            if (!beginAction()) return null;
+
+            try {
+                const result = await send();
+
+                if (!isOk(result)) {
+                    endAction(result?.message || ERROR_KEY, null);
+
+                    return result;
+                }
+
+                const successKey = result.message || SUCCESS_KEY;
+
+                endAction(null, successKey);
+                showSingleBubble(localizeHousekeepingMessage(successKey), NotificationBubbleType.INFO);
+
+                return result;
+            } catch {
+                endAction(ERROR_KEY, null);
+
+                return null;
+            }
+        },
+        [beginAction, endAction, showSingleBubble]
+    );
+
+    // -- user ------------------------------------------------------------------------
     const banUser = useCallback(
         async (userId: number, reason: string, hours: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateReason(reason), markActionDone)) return null;
-            if (!validationOr(validateBanHours(hours), markActionDone)) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason), validateHours(hours))) return null;
 
-            return runAction(() => HousekeepingApi.banUser(userId, reason, hours), 'banUser');
+            const result = await run(() => HousekeepingApi.banUser(userId, reason.trim(), hours));
+
+            if (isOk(result)) patchSelectedUser(userId, { isBanned: true });
+
+            return result;
         },
-        [runAction, markActionDone]
+        [firstError, run, patchSelectedUser]
     );
 
     const unbanUser = useCallback(
         async (userId: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
+            if (firstError(validatePositiveId(userId, 'user'))) return null;
 
-            return runAction(() => HousekeepingApi.unbanUser(userId), 'unbanUser');
+            const result = await run(() => HousekeepingApi.unbanUser(userId));
+
+            if (isOk(result)) patchSelectedUser(userId, { isBanned: false });
+
+            return result;
         },
-        [runAction, markActionDone]
+        [firstError, run, patchSelectedUser]
     );
 
     const muteUser = useCallback(
         async (userId: number, reason: string, minutes: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateReason(reason), markActionDone)) return null;
-            if (!validationOr(validateBanHours(minutes), markActionDone)) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason), validateMinutes(minutes))) return null;
 
-            return runAction(() => HousekeepingApi.muteUser(userId, reason, minutes), 'muteUser');
+            const result = await run(() => HousekeepingApi.muteUser(userId, reason.trim(), minutes));
+
+            if (isOk(result)) patchSelectedUser(userId, { isMuted: true });
+
+            return result;
         },
-        [runAction, markActionDone]
+        [firstError, run, patchSelectedUser]
     );
 
     const kickUser = useCallback(
-        async (userId: number, reason: string) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateReason(reason), markActionDone)) return null;
+        (userId: number, reason: string) => {
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason))) return null;
 
-            return runAction(() => HousekeepingApi.kickUser(userId, reason), 'kickUser');
+            return run(() => HousekeepingApi.kickUser(userId, reason.trim()));
         },
-        [runAction, markActionDone]
+        [firstError, run]
     );
 
     const forceDisconnectUser = useCallback(
         async (userId: number, reason: string) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateReason(reason), markActionDone)) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason))) return null;
 
-            return runAction(() => HousekeepingApi.forceDisconnectUser(userId, reason), 'forceDisconnectUser');
-        },
-        [runAction, markActionDone]
-    );
+            const result = await run(() => HousekeepingApi.forceDisconnectUser(userId, reason.trim()));
 
-    const resetUserPassword = useCallback(
-        async (userId: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-
-            // Run the action with a localizable success message — we
-            // INTERCEPT before `wrap`'s default behavior leaks the plaintext
-            // into the auto-dismissing status banner. The emulator returns
-            // the freshly-generated plaintext in `result.message`; we lift it
-            // into the dedicated `passwordReveal` slot which renders a
-            // persistent card with a copy button. The wrapping `runAction`
-            // would also fire a transient toast with whatever string lands
-            // in `message`, so we bypass it via a direct API call + manual
-            // status writes here.
-            const username = selectedUser && selectedUser.id === userId ? selectedUser.username : '';
-
-            markActionPending();
-            const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-            const measure = (isError: boolean) => {
-                const endedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-                recordActionMetric('resetUserPassword', endedAt - startedAt, isError);
-            };
-
-            try {
-                const result = await HousekeepingApi.resetUserPassword(userId);
-
-                if (!result || result.ok === false) {
-                    markActionDone(result?.message || 'housekeeping.action.error', null);
-                    measure(true);
-                    return result ?? null;
-                }
-
-                const plaintext = result.message ?? '';
-
-                if (plaintext) revealPassword(userId, username, plaintext);
-
-                // Generic success key — does NOT include the plaintext, so
-                // even if the banner is visible the password isn't in it.
-                markActionDone(null, 'housekeeping.action.reset_password.done');
-                measure(false);
-                return result;
-            } catch (error) {
-                markActionDone(String((error as Error)?.message ?? error), null);
-                measure(true);
-                return null;
-            }
-        },
-        [markActionPending, markActionDone, selectedUser, revealPassword, recordActionMetric]
-    );
-
-    const setUserRank = useCallback(
-        async (userId: number, rank: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateRank(rank), markActionDone)) return null;
-
-            const result = await runAction(() => HousekeepingApi.setUserRank(userId, rank), 'setUserRank');
-
-            if (result && result.ok !== false && selectedUser && selectedUser.id === userId) {
-                setSelectedUser({ ...selectedUser, rank });
-            }
+            if (isOk(result)) patchSelectedUser(userId, { online: false });
 
             return result;
         },
-        [runAction, markActionDone, selectedUser, setSelectedUser]
+        [firstError, run, patchSelectedUser]
     );
 
     const tradeLockUser = useCallback(
         async (userId: number, hours: number, reason: string) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateReason(reason), markActionDone)) return null;
-            if (!validationOr(validateBanHours(hours), markActionDone)) return null;
+            if (firstError(validatePositiveId(userId, 'user'), validateText(reason), validateHours(hours, HK_MAX_TRADE_LOCK_HOURS))) return null;
 
-            return runAction(() => HousekeepingApi.tradeLockUser(userId, hours, reason), 'tradeLockUser');
-        },
-        [runAction, markActionDone]
-    );
+            const result = await run(() => HousekeepingApi.tradeLockUser(userId, hours, reason.trim()));
 
-    // -- ROOM --------------------------------------------------------
-    const openRoom = useCallback(
-        async (roomId: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
-
-            const result = await runAction(() => HousekeepingApi.openRoom(roomId), 'openRoom');
-
-            if (result && result.ok !== false && selectedRoom && selectedRoom.id === roomId) {
-                setSelectedRoom({ ...selectedRoom, isLocked: false });
-            }
+            if (isOk(result)) patchSelectedUser(userId, { isTradeLocked: true });
 
             return result;
         },
-        [runAction, markActionDone, selectedRoom, setSelectedRoom]
+        [firstError, run, patchSelectedUser]
     );
 
-    const closeRoom = useCallback(
-        async (roomId: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
+    const setUserRank = useCallback(
+        async (userId: number, rank: number) => {
+            if (firstError(validatePositiveId(userId, 'user'), validateRank(rank))) return null;
 
-            const result = await runAction(() => HousekeepingApi.closeRoom(roomId), 'closeRoom');
+            const result = await run(() => HousekeepingApi.setUserRank(userId, rank));
 
-            if (result && result.ok !== false && selectedRoom && selectedRoom.id === roomId) {
-                setSelectedRoom({ ...selectedRoom, isLocked: true });
-            }
+            if (isOk(result)) patchSelectedUser(userId, { rank });
 
             return result;
         },
-        [runAction, markActionDone, selectedRoom, setSelectedRoom]
+        [firstError, run, patchSelectedUser]
     );
 
-    const muteRoom = useCallback(
-        async (roomId: number, minutes: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
-            if (!validationOr(validateBanHours(minutes), markActionDone)) return null;
+    // The new password comes back in `message`; it goes to the reveal card only, never
+    // through `run`'s banner and toast. An empty message (e.g. a mailed reset) shows nothing.
+    const resetUserPassword = useCallback(
+        async (userId: number) => {
+            if (firstError(validatePositiveId(userId, 'user'))) return null;
+            if (!beginAction()) return null;
 
-            return runAction(() => HousekeepingApi.muteRoom(roomId, minutes), 'muteRoom');
+            const username = selectedUser?.id === userId ? selectedUser.username : '';
+            const generation = captureRevealGeneration();
+
+            try {
+                const result = await HousekeepingApi.resetUserPassword(userId);
+
+                if (!isOk(result)) {
+                    endAction(result?.message || ERROR_KEY, null);
+
+                    return result;
+                }
+
+                revealPassword(generation, userId, username, result.message ?? '');
+                endAction(null, 'housekeeping.action.reset_password.done');
+
+                return result;
+            } catch {
+                endAction(ERROR_KEY, null);
+
+                return null;
+            }
         },
-        [runAction, markActionDone]
+        [firstError, beginAction, endAction, selectedUser, captureRevealGeneration, revealPassword]
+    );
+
+    // -- room ------------------------------------------------------------------------
+    const setRoomOpen = useCallback(
+        async (roomId: number, open: boolean) => {
+            if (firstError(validatePositiveId(roomId, 'room'))) return null;
+
+            const result = await run(() => (open ? HousekeepingApi.openRoom(roomId) : HousekeepingApi.closeRoom(roomId)));
+
+            if (isOk(result)) patchSelectedRoom(roomId, { isLocked: !open });
+
+            return result;
+        },
+        [firstError, run, patchSelectedRoom]
+    );
+
+    // PlusEMU room mutes are an on/off switch: any positive minutes mutes, 0 unmutes.
+    const setRoomMuted = useCallback(
+        async (roomId: number, muted: boolean) => {
+            if (firstError(validatePositiveId(roomId, 'room'))) return null;
+
+            const result = await run(() => HousekeepingApi.muteRoom(roomId, muted ? 1 : 0));
+
+            if (isOk(result)) patchSelectedRoom(roomId, { isMuted: muted });
+
+            return result;
+        },
+        [firstError, run, patchSelectedRoom]
     );
 
     const kickAllFromRoom = useCallback(
         async (roomId: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
+            if (firstError(validatePositiveId(roomId, 'room'))) return null;
 
-            return runAction(() => HousekeepingApi.kickAllFromRoom(roomId), 'kickAllFromRoom');
+            const result = await run(() => HousekeepingApi.kickAllFromRoom(roomId));
+
+            if (isOk(result)) patchSelectedRoom(roomId, { userCount: 0 });
+
+            return result;
         },
-        [runAction, markActionDone]
+        [firstError, run, patchSelectedRoom]
     );
 
     const transferRoomOwnership = useCallback(
         async (roomId: number, newOwnerId: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
-            if (!validationOr(validatePositiveId(newOwnerId, 'user'), markActionDone)) return null;
+            if (firstError(validatePositiveId(roomId, 'room'), validatePositiveId(newOwnerId, 'user'))) return null;
 
-            return runAction(() => HousekeepingApi.transferRoomOwnership(roomId, newOwnerId), 'transferRoomOwnership');
+            const result = await run(() => HousekeepingApi.transferRoomOwnership(roomId, newOwnerId));
+
+            if (isOk(result)) patchSelectedRoom(roomId, { ownerId: newOwnerId, ownerName: '' });
+
+            return result;
         },
-        [runAction, markActionDone]
+        [firstError, run, patchSelectedRoom]
     );
 
     const deleteRoom = useCallback(
         async (roomId: number) => {
-            if (!validationOr(validatePositiveId(roomId, 'room'), markActionDone)) return null;
+            if (firstError(validatePositiveId(roomId, 'room'))) return null;
 
-            const result = await runAction(() => HousekeepingApi.deleteRoom(roomId), 'deleteRoom');
+            const result = await run(() => HousekeepingApi.deleteRoom(roomId));
 
-            if (result && result.ok !== false && selectedRoom && selectedRoom.id === roomId) {
-                setSelectedRoom(null);
-            }
+            if (isOk(result)) clearSelectedRoom(roomId);
 
             return result;
         },
-        [runAction, markActionDone, selectedRoom, setSelectedRoom]
+        [firstError, run, clearSelectedRoom]
     );
 
-    // -- ECONOMY -----------------------------------------------------
-    const giveCredits = useCallback(
-        async (userId: number, amount: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateAmount(amount), markActionDone)) return null;
+    // -- economy & hotel -------------------------------------------------------------
+    const giveCurrency = useCallback(
+        (userId: number, amount: number, send: (userId: number, amount: number) => Promise<IHousekeepingActionResult>, max?: number) => {
+            if (firstError(validatePositiveId(userId, 'user'), validateAmount(amount, max))) return null;
 
-            return runAction(() => HousekeepingApi.giveCredits(userId, amount), 'giveCredits');
+            return run(() => send(userId, amount));
         },
-        [runAction, markActionDone]
+        [firstError, run]
     );
 
-    const giveDuckets = useCallback(
-        async (userId: number, amount: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateAmount(amount), markActionDone)) return null;
-
-            return runAction(() => HousekeepingApi.giveDuckets(userId, amount), 'giveDuckets');
-        },
-        [runAction, markActionDone]
-    );
-
-    const giveDiamonds = useCallback(
-        async (userId: number, amount: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateAmount(amount), markActionDone)) return null;
-
-            return runAction(() => HousekeepingApi.giveDiamonds(userId, amount), 'giveDiamonds');
-        },
-        [runAction, markActionDone]
-    );
+    const giveCredits = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveCredits), [giveCurrency]);
+    const giveDuckets = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveDuckets), [giveCurrency]);
+    const giveDiamonds = useCallback((userId: number, amount: number) => giveCurrency(userId, amount, HousekeepingApi.giveDiamonds), [giveCurrency]);
+    const setHcSubscription = useCallback((userId: number, days: number) => giveCurrency(userId, days, HousekeepingApi.setHcSubscription, HK_MAX_CLUB_DAYS), [giveCurrency]);
 
     const grantItem = useCallback(
-        async (userId: number, itemId: number, quantity: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validatePositiveId(itemId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateAmount(quantity), markActionDone)) return null;
+        (userId: number, itemId: number, quantity: number) => {
+            if (firstError(validatePositiveId(userId, 'user'), validatePositiveId(itemId, 'item'), validateAmount(quantity, HK_MAX_ITEM_QUANTITY))) return null;
 
-            return runAction(() => HousekeepingApi.grantItem(userId, itemId, quantity), 'grantItem');
+            return run(() => HousekeepingApi.grantItem(userId, itemId, quantity));
         },
-        [runAction, markActionDone]
-    );
-
-    const setHcSubscription = useCallback(
-        async (userId: number, days: number) => {
-            if (!validationOr(validatePositiveId(userId, 'user'), markActionDone)) return null;
-            if (!validationOr(validateAmount(days), markActionDone)) return null;
-
-            return runAction(() => HousekeepingApi.setHcSubscription(userId, days), 'setHcSubscription');
-        },
-        [runAction, markActionDone]
+        [firstError, run]
     );
 
     const sendHotelAlert = useCallback(
-        async (message: string) => {
-            if (!validationOr(validateReason(message), markActionDone)) return null;
+        (message: string) => {
+            if (firstError(validateText(message, HK_MAX_ALERT_LENGTH))) return null;
 
-            return runAction(() => HousekeepingApi.sendHotelAlert(message), 'sendHotelAlert');
+            return run(() => HousekeepingApi.sendHotelAlert(message.trim()));
         },
-        [runAction, markActionDone]
+        [firstError, run]
     );
 
-    // -- LIVE IN-ROOM ACTIONS ---------------------------------------
-    // These bridge directly to the active RoomSession so the
-    // sanction lands on the current game state (no server roundtrip
-    // through the HTTP layer). Use for "the user is here, right
-    // now" sanctions; persistent admin actions still go through the
-    // HTTP API above.
+    // -- in the current room -----------------------------------------------------------
+    // Uses the same room packets as the avatar menu; the server checks room rights.
+    const inCurrentRoom = useCallback(
+        (send: (session: ReturnType<typeof GetRoomSession>) => void, successKey: string) => {
+            const session = GetRoomSession();
+
+            if (!session) {
+                reportStatus('housekeeping.live.no_room');
+
+                return false;
+            }
+
+            send(session);
+            reportStatus(null, successKey);
+            showSingleBubble(LocalizeText(successKey), NotificationBubbleType.INFO);
+
+            return true;
+        },
+        [reportStatus, showSingleBubble]
+    );
+
     const kickFromCurrentRoom = useCallback(
-        (webUserId: number) => {
-            const session = GetRoomSession();
-
-            if (!session) {
-                markActionDone('housekeeping.live.no_room', null);
-
-                return false;
-            }
-
-            try {
-                session.sendKickMessage(webUserId);
-                markActionDone(null, 'housekeeping.live.kicked');
-                showSingleBubble(localizeOrPassthrough('housekeeping.live.kicked'), NotificationBubbleType.INFO);
-
-                return true;
-            } catch (error) {
-                markActionDone(String((error as Error)?.message ?? error), null);
-
-                return false;
-            }
-        },
-        [markActionDone, showSingleBubble]
-    );
-
-    const banFromCurrentRoom = useCallback(
-        (webUserId: number, severity: 'hour' | 'day' | 'perm' = 'hour') => {
-            const session = GetRoomSession();
-
-            if (!session) {
-                markActionDone('housekeeping.live.no_room', null);
-
-                return false;
-            }
-
-            const code = severity === 'perm' ? 'RWUAM_BAN_USER_PERM' : severity === 'day' ? 'RWUAM_BAN_USER_DAY' : 'RWUAM_BAN_USER_HOUR';
-
-            try {
-                session.sendBanMessage(webUserId, code);
-                markActionDone(null, 'housekeeping.live.banned');
-                showSingleBubble(localizeOrPassthrough('housekeeping.live.banned'), NotificationBubbleType.INFO);
-
-                return true;
-            } catch (error) {
-                markActionDone(String((error as Error)?.message ?? error), null);
-
-                return false;
-            }
-        },
-        [markActionDone, showSingleBubble]
-    );
-
-    // -- BULK HTTP ACTIONS ------------------------------------------
-    // Loop with Promise.allSettled so a single failure doesn't abort
-    // the rest of the batch. Aggregated success/failure counts land
-    // in the status banner; per-user errors fall through to the audit
-    // log on the server side.
-    const runBulk = useCallback(
-        async (
-            userIds: ReadonlyArray<number>,
-            single: (id: number) => Promise<IHousekeepingActionResult | null>,
-            actionLabel: string
-        ): Promise<{ ok: number; failed: number }> => {
-            if (userIds.length === 0) return { ok: 0, failed: 0 };
-
-            markActionPending();
-
-            const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-            const settled = await Promise.allSettled(userIds.map((id) => single(id)));
-            let ok = 0;
-            let failed = 0;
-
-            for (const outcome of settled) {
-                if (outcome.status === 'fulfilled' && outcome.value && outcome.value.ok !== false) ok++;
-                else failed++;
-            }
-
-            // One metric sample per bulk run rather than per user — the
-            // bulk timing is what the operator cares about. Bucket suffix
-            // `:bulk` keeps the metric separate from the matching single
-            // action in the telemetry panel.
-            const endedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-
-            recordActionMetric(`${actionLabel}:bulk`, endedAt - startedAt, failed > 0);
-
-            const summaryKey = failed === 0 ? 'housekeeping.bulk.success' : 'housekeeping.bulk.partial';
-
-            markActionDone(failed > 0 && ok === 0 ? 'housekeeping.bulk.failed' : null, failed === 0 ? summaryKey : null);
-            showSingleBubble(`${localizeOrPassthrough('housekeeping.bulk.done')} — ${ok}/${userIds.length}`, NotificationBubbleType.INFO);
-
-            return { ok, failed };
-        },
-        [markActionPending, markActionDone, showSingleBubble, recordActionMetric]
-    );
-
-    const banUsersBulk = useCallback(
-        (userIds: ReadonlyArray<number>, reason: string, hours: number) => runBulk(userIds, (id) => HousekeepingApi.banUser(id, reason, hours), 'banUser'),
-        [runBulk]
-    );
-
-    const kickUsersBulk = useCallback(
-        (userIds: ReadonlyArray<number>, reason: string) => runBulk(userIds, (id) => HousekeepingApi.kickUser(id, reason), 'kickUser'),
-        [runBulk]
-    );
-
-    const muteUsersBulk = useCallback(
-        (userIds: ReadonlyArray<number>, reason: string, minutes: number) =>
-            runBulk(userIds, (id) => HousekeepingApi.muteUser(id, reason, minutes), 'muteUser'),
-        [runBulk]
+        (userId: number) => inCurrentRoom((session) => session.sendKickMessage(userId), 'housekeeping.live.kicked'),
+        [inCurrentRoom]
     );
 
     const muteInCurrentRoom = useCallback(
-        (webUserId: number, minutes: number) => {
-            const session = GetRoomSession();
+        (userId: number, minutes: number) => inCurrentRoom((session) => session.sendMuteMessage(userId, minutes), 'housekeeping.live.muted'),
+        [inCurrentRoom]
+    );
 
-            if (!session) {
-                markActionDone('housekeeping.live.no_room', null);
+    const banFromCurrentRoom = useCallback(
+        (userId: number, severity: 'hour' | 'day') =>
+            inCurrentRoom((session) => session.sendBanMessage(userId, severity === 'day' ? 'RWUAM_BAN_USER_DAY' : 'RWUAM_BAN_USER_HOUR'), 'housekeeping.live.banned'),
+        [inCurrentRoom]
+    );
 
-                return false;
+    // -- bulk ------------------------------------------------------------------------
+    // Sequential on purpose: acks are matched by action key only, so parallel requests of
+    // the same kind could resolve against each other's replies.
+    const runBulk = useCallback(
+        async (userIds: ReadonlyArray<number>, send: (userId: number) => Promise<IHousekeepingActionResult>) => {
+            if (!userIds.length || !beginAction()) return null;
+
+            let ok = 0;
+
+            for (const userId of userIds) {
+                try {
+                    if (isOk(await send(userId))) ok++;
+                } catch {
+                    // Counted as failed below.
+                }
             }
 
-            try {
-                session.sendMuteMessage(webUserId, minutes);
-                markActionDone(null, 'housekeeping.live.muted');
-                showSingleBubble(localizeOrPassthrough('housekeeping.live.muted'), NotificationBubbleType.INFO);
+            const failed = userIds.length - ok;
 
-                return true;
-            } catch (error) {
-                markActionDone(String((error as Error)?.message ?? error), null);
+            endAction(failed && !ok ? 'housekeeping.bulk.failed' : null, failed ? null : 'housekeeping.bulk.success');
+            showSingleBubble(LocalizeText('housekeeping.bulk.done', ['ok', 'count'], [String(ok), String(userIds.length)]), NotificationBubbleType.INFO);
 
-                return false;
-            }
+            return { ok, failed };
         },
-        [markActionDone, showSingleBubble]
+        [beginAction, endAction, showSingleBubble]
+    );
+
+    const banUsersBulk = useCallback(
+        (userIds: ReadonlyArray<number>, reason: string, hours: number) => {
+            if (firstError(validateText(reason), validateHours(hours))) return null;
+
+            return runBulk(userIds, (id) => HousekeepingApi.banUser(id, reason.trim(), hours));
+        },
+        [firstError, runBulk]
+    );
+
+    const kickUsersBulk = useCallback(
+        (userIds: ReadonlyArray<number>, reason: string) => {
+            if (firstError(validateText(reason))) return null;
+
+            return runBulk(userIds, (id) => HousekeepingApi.kickUser(id, reason.trim()));
+        },
+        [firstError, runBulk]
+    );
+
+    const muteUsersBulk = useCallback(
+        (userIds: ReadonlyArray<number>, reason: string, minutes: number) => {
+            if (firstError(validateText(reason), validateMinutes(minutes))) return null;
+
+            return runBulk(userIds, (id) => HousekeepingApi.muteUser(id, reason.trim(), minutes));
+        },
+        [firstError, runBulk]
     );
 
     return {
@@ -526,9 +404,8 @@ export const useHousekeepingActions = () => {
         resetUserPassword,
         setUserRank,
         tradeLockUser,
-        openRoom,
-        closeRoom,
-        muteRoom,
+        setRoomOpen,
+        setRoomMuted,
         kickAllFromRoom,
         transferRoomOwnership,
         deleteRoom,

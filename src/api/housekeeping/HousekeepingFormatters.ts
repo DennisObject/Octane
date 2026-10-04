@@ -24,27 +24,6 @@ export const formatUptime = (seconds: number): string => {
     return `${m}m`;
 };
 
-/**
- * "5m ago", "2h ago", "3d ago" — past-tense relative formatter for
- * audit-log timestamps. Anything older than a day rolls to a fixed
- * date string so the log entries stay scannable even after a week.
- */
-export const formatRelativePast = (timestampMs: number, nowMs: number = Date.now()): string => {
-    if (!Number.isFinite(timestampMs) || timestampMs <= 0) return '—';
-
-    const deltaSeconds = Math.max(0, Math.floor((nowMs - timestampMs) / 1000));
-
-    if (deltaSeconds < 5) return 'now';
-    if (deltaSeconds < MINUTE) return `${deltaSeconds}s ago`;
-    if (deltaSeconds < HOUR) return `${Math.floor(deltaSeconds / MINUTE)}m ago`;
-    if (deltaSeconds < DAY) return `${Math.floor(deltaSeconds / HOUR)}h ago`;
-    if (deltaSeconds < 7 * DAY) return `${Math.floor(deltaSeconds / DAY)}d ago`;
-
-    const date = new Date(timestampMs);
-
-    return date.toISOString().slice(0, 10);
-};
-
 export const formatCompactNumber = (value: number): string => {
     if (!Number.isFinite(value)) return '—';
 

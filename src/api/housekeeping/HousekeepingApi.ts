@@ -87,6 +87,7 @@ const searchUsersViaPacket = async (prefix: string, signal?: AbortSignal): Promi
     });
 };
 
+// The wire carries Unix seconds (int32); the client works in milliseconds.
 const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => ({
     id: user.id,
     username: user.username,
@@ -95,7 +96,7 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
     rank: user.rank,
     rankName: user.rankName,
     online: user.online,
-    lastOnlineAt: user.lastOnlineAt > 0 ? user.lastOnlineAt : null,
+    lastOnlineAt: user.lastOnlineAt > 0 ? user.lastOnlineAt * 1000 : null,
     creditsBalance: user.creditsBalance,
     ducketsBalance: user.ducketsBalance,
     diamondsBalance: user.diamondsBalance,
@@ -106,9 +107,39 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
     isTradeLocked: user.isTradeLocked
 });
 
-const awaitUserDetail = (): Promise<IHousekeepingUser | null> =>
+/**
+ * One lookup at a time per channel, latest wins: a request queued behind the one in flight
+ * is replaced by a newer one and resolves null without being sent. The detail packets carry
+ * no request id, so this keeps a not-found reply from answering a different lookup.
+ * Known limit: after an 8 s timeout the next lookup goes out, so a late untagged not-found
+ * for the old one can still answer it (accepted as a read-availability limitation).
+ */
+const createLookupChannel = () => {
+    let tail: Promise<unknown> = Promise.resolve();
+    let newest = 0;
+
+    return <T>(send: () => Promise<T | null>): Promise<T | null> => {
+        const ticket = ++newest;
+        const result = tail.then(() => (ticket === newest ? send() : null));
+
+        tail = result.catch(() => null);
+
+        return result;
+    };
+};
+
+const userLookups = createLookupChannel();
+const roomLookups = createLookupChannel();
+
+// A found user/room is still matched against what was asked for.
+const awaitUserDetail = (matches: (user: HousekeepingUserDetailData) => boolean): Promise<IHousekeepingUser | null> =>
     awaitMessageEvent<HousekeepingUserDetailEvent, IHousekeepingUser | null>(HousekeepingUserDetailEvent, {
         timeoutMs: 8_000,
+        accept: (event) => {
+            const parser = event.getParser();
+
+            return !parser?.found || !parser.user || matches(parser.user);
+        },
         select: (event) => {
             const parser = event.getParser();
 
@@ -123,17 +154,21 @@ const findUserByNameViaPacket = async (username: string): Promise<IHousekeepingU
 
     if (!trimmed) return null;
 
-    SendMessageComposer(new HousekeepingFindUserByNameComposer(trimmed));
+    return userLookups(() => {
+        SendMessageComposer(new HousekeepingFindUserByNameComposer(trimmed));
 
-    return awaitUserDetail();
+        return awaitUserDetail((user) => user.username.toLowerCase() === trimmed.toLowerCase());
+    });
 };
 
 const findUserByIdViaPacket = async (userId: number): Promise<IHousekeepingUser | null> => {
     if (!Number.isFinite(userId) || userId <= 0) return null;
 
-    SendMessageComposer(new HousekeepingFindUserByIdComposer(userId));
+    return userLookups(() => {
+        SendMessageComposer(new HousekeepingFindUserByIdComposer(userId));
 
-    return awaitUserDetail();
+        return awaitUserDetail((user) => user.id === userId);
+    });
 };
 
 /**
@@ -153,7 +188,7 @@ const runHkAction = async (composer: IMessageComposer<unknown[]>, expectedAction
             select: (event) => {
                 const parser = event.getParser();
 
-                if (!parser) return { ok: false, actionId: null, message: 'no_parser' };
+                if (!parser) return { ok: false, actionId: null, message: 'housekeeping.action.error' };
 
                 return {
                     ok: parser.ok,
@@ -163,9 +198,9 @@ const runHkAction = async (composer: IMessageComposer<unknown[]>, expectedAction
             }
         });
     } catch (err) {
-        const reason = err instanceof Error ? err.message : 'unknown';
+        const timedOut = err instanceof Error && err.message === 'timeout';
 
-        return { ok: false, actionId: null, message: reason };
+        return { ok: false, actionId: null, message: timedOut ? 'housekeeping.action.timeout' : 'housekeeping.action.error' };
     }
 };
 
@@ -203,36 +238,30 @@ const mapRoom = (room: HousekeepingRoomData): IHousekeepingRoom => ({
     isLocked: room.isLocked,
     isMuted: room.isMuted,
     isPublic: room.isPublic,
-    createdAt: room.createdAt
+    createdAt: room.createdAt * 1000
 });
 
 const findRoomByIdViaPacket = (roomId: number): Promise<IHousekeepingRoom | null> => {
     if (!Number.isFinite(roomId) || roomId <= 0) return Promise.resolve(null);
 
-    SendMessageComposer(new HousekeepingFindRoomByIdComposer(roomId));
+    return roomLookups(() => {
+        SendMessageComposer(new HousekeepingFindRoomByIdComposer(roomId));
 
-    return awaitMessageEvent<HousekeepingRoomDetailEvent, IHousekeepingRoom | null>(HousekeepingRoomDetailEvent, {
-        timeoutMs: 8_000,
-        select: (event) => {
-            const parser = event.getParser();
+        return awaitMessageEvent<HousekeepingRoomDetailEvent, IHousekeepingRoom | null>(HousekeepingRoomDetailEvent, {
+            timeoutMs: 8_000,
+            accept: (event) => {
+                const parser = event.getParser();
 
-            if (!parser || !parser.found || !parser.room) return null;
+                return !parser?.found || !parser.room || parser.room.id === roomId;
+            },
+            select: (event) => {
+                const parser = event.getParser();
 
-            return mapRoom(parser.room);
-        }
-    });
-};
+                if (!parser || !parser.found || !parser.room) return null;
 
-const findRoomByNameViaPacket = (name: string): Promise<IHousekeepingRoom[]> => {
-    const trimmed = (name || '').trim();
-
-    if (!trimmed) return Promise.resolve([]);
-
-    SendMessageComposer(new HousekeepingSearchRoomsComposer(trimmed, true, 50));
-
-    return awaitMessageEvent<HousekeepingRoomListEvent, IHousekeepingRoom[]>(HousekeepingRoomListEvent, {
-        timeoutMs: 8_000,
-        select: (event) => event.getParser()?.rooms.map(mapRoom) ?? []
+                return mapRoom(parser.room);
+            }
+        });
     });
 };
 
@@ -342,7 +371,7 @@ const listActionLogViaPacket = (limit: number, signal?: AbortSignal): Promise<IH
         select: (event) =>
             event.getParser()?.entries.map((entry) => ({
                 id: entry.id,
-                timestamp: entry.timestamp,
+                timestamp: entry.timestamp * 1000,
                 actorId: entry.actorId,
                 actorName: entry.actorName,
                 targetType: entry.targetType === 'room' || entry.targetType === 'hotel' ? entry.targetType : 'user',
@@ -376,7 +405,6 @@ export const HousekeepingApi = {
 
     // -- room lookup -----------------------------------------------
     findRoomById: (roomId: number) => findRoomByIdViaPacket(roomId),
-    findRoomByName: (name: string) => findRoomByNameViaPacket(name),
     searchRooms: (prefix: string, signal?: AbortSignal) => searchRoomsViaPacket(prefix, signal),
 
     // -- room actions ----------------------------------------------
