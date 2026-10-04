@@ -174,7 +174,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
             theme="primary-slim"
             uniqueKey="wired-room-logs"
             windowPosition={DraggableWindowPosition.TOP_LEFT}
-            offsetLeft={560}
+            offsetLeft={40}
             offsetTop={40}
         >
             <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.logs_overview.title', 'Wired room logs')} onCloseClick={onClose} />
