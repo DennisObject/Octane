@@ -1,4 +1,5 @@
 import { GetConfiguration } from '@octane/renderer';
+import { captureLaunchCredentials } from './api/auth/launchCredentials';
 import { derivePetConfig, DerivedPetConfig, PetDefinition } from './api/octane/PetData';
 import { parseJsonDocument, UiJsonMode } from './json/JsonDocumentParser';
 import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';
@@ -26,6 +27,9 @@ const ensureMobileViewport = () => {
 
     viewport.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
 };
+
+// Before any request: lift sso/remember tokens out of the URL.
+const launchCredentials = captureLaunchCredentials();
 
 ensureMobileViewport();
 
@@ -117,7 +121,7 @@ const petConfig = await loadPetConfig();
 (window as any).OctaneConfig = {
     'config.urls': [configFileUrl('renderer-config.json', true), configFileUrl('ui-config.json', true)],
     ...(petConfig ?? {}),
-    'sso.ticket': search.get('sso') || null,
+    'sso.ticket': launchCredentials.ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
     'friend.id': search.get('friend') || 0
