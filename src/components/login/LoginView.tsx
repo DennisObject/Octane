@@ -6,6 +6,7 @@ import { LandingBackdropView } from '../hotel-view/LandingBackdropView';
 import { LoginInfoPanel } from './LoginBalloonView';
 import { LoginCredentialsView } from './LoginCredentialsView';
 import { LoginEnvironmentView } from './LoginEnvironmentView';
+import { LoginFlowBackgroundView } from './LoginFlowBackgroundView';
 import { LoginFlowButton } from './LoginFlowButton';
 import { LoginForgotPasswordView } from './LoginForgotPasswordView';
 import { LoginNewsView } from './LoginNewsView';
@@ -18,9 +19,10 @@ export interface LoginViewProps {
 
 type LoginScreen = 'environment' | 'login' | 'register' | 'forgot';
 
-// login.LoginFlow over the hotel view's own backdrop: the Habbo logo at 40,40
-// (left out when the hotel's drape already carries it) and one centred 640px
-// column holding the current screen.
+// login.LoginFlow as AIR draws it: its gradient stage with the landing images,
+// the Habbo logo at 40,40 and one centred 640px column at y=100 holding the
+// current screen. The hotel view's scenery sits underneath; while entering the
+// hotel the AIR stage fades out onto it, so the hotel opens on the same scene.
 export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = false }) =>
 {
     const [backdrop] = useState(getLandingBackdrop);
@@ -46,7 +48,8 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
     return (
         <div className={`octane-login-view login-flow${isEntering ? ' is-entering' : ''}`} lang={localeState.locale.code}>
             <LandingBackdropView backdrop={backdrop} />
-            {!backdrop.drapeUrl && <img className="login-flow-logo" src={habboLogo} alt="Habbo" draggable={false} />}
+            <LoginFlowBackgroundView leftUrl={backdrop.leftUrl} rightUrl={backdrop.rightUrl} />
+            <img className="login-flow-logo" src={habboLogo} alt="Habbo" draggable={false} />
             <main className="login-flow-main">
                 {screen === 'environment' && (
                     <LoginEnvironmentView

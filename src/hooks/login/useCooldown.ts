@@ -1,31 +1,42 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AuthAction, useAuthCooldownStore } from './authCooldownStore';
 
-// Counts down a server-imposed wait (HTTP 429 Retry-After) in whole seconds.
-export const useCooldown = () =>
+const secondsLeft = (until: number): number => Math.max(0, Math.ceil((until - Date.now()) / 1000));
+
+// Counts down the shared cooldown of one auth action in whole seconds.
+export const useCooldown = (action: AuthAction) =>
 {
-    const [until, setUntil] = useState(0);
-    const [remaining, setRemaining] = useState(0);
+    const until = useAuthCooldownStore((state) => state.until[action]);
+    const startCooldown = useAuthCooldownStore((state) => state.start);
+    const [remaining, setRemaining] = useState(() => secondsLeft(until));
 
     useEffect(() =>
     {
-        if (!until) return;
+        let timer = 0;
 
         const tick = () =>
         {
-            const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+            const left = secondsLeft(until);
 
-            setRemaining(seconds);
-            if (!seconds) setUntil(0);
+            setRemaining(left);
+            if (!left) window.clearInterval(timer);
         };
 
-        tick();
+        // The first tick runs as a callback too, so a new cooldown shows at once.
+        const first = window.setTimeout(tick, 0);
 
-        const timer = window.setInterval(tick, 1000);
+        timer = window.setInterval(tick, 1000);
 
-        return () => window.clearInterval(timer);
+        return () =>
+        {
+            window.clearTimeout(first);
+            window.clearInterval(timer);
+        };
     }, [until]);
 
-    const start = useCallback((seconds: number) => setUntil(Date.now() + seconds * 1000), []);
+    const start = useCallback((seconds: number) => startCooldown(action, seconds), [action, startCooldown]);
 
     return { active: remaining > 0, remaining, start };
 };
+
+export type Cooldown = ReturnType<typeof useCooldown>;

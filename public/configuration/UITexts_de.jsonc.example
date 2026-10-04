@@ -41,6 +41,7 @@
     "login.create_avatar.choose_name.name_too_short": "Leider ist der von dir gewählte Name zu kurz",
     "login.create_avatar.choose_name.title": "Gib deinem Habbo einen Namen",
     "login.create_avatar.title": "Wähle deinen Habbo Avatar",
+    "login.feature.unavailable": "Das ist in diesem Hotel nicht verfügbar.",
     "login.environment.create.account": "Melde dich hier an!",
     "login.environment.forgot.password": "Ich habe mein Passwort vergessen",
     "login.loading": "wird geladen...",

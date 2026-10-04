@@ -36,6 +36,7 @@ declare module '*.sass';
 interface Window {
     OctaneConfig?: Record<string, unknown>;
     OctaneSecureApiUrl?: string;
+    __octaneLaunchCredentials?: { ssoTicket: string; rememberToken: string; rememberExpiresAt: number };
 }
 
 interface ImportMeta {

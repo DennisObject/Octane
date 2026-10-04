@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <!-- Hand-off URLs carry ?sso= / ?token=; never send them on in a Referer. -->
+    <meta name="referrer" content="strict-origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Octane</title>
     <!-- Connection hints for the two domains the loader hits first.

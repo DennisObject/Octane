@@ -21,6 +21,7 @@ export type AuthFailure =
     | { kind: 'security-check' }
     | { kind: 'conflict'; message: string }
     | { kind: 'rejected'; message: string }
+    | { kind: 'not-implemented' }
     | { kind: 'unreachable' };
 
 // Both arms declare both fields so callers can read `failure` after an `ok`
@@ -52,9 +53,15 @@ export interface RegisterRequest {
     turnstileToken?: string;
 }
 
+// `available` is null when the hotel has no availability endpoint (or it
+// failed): the check is then skipped and /register has the final say.
 export interface Availability {
-    available: boolean;
+    available: boolean | null;
     message: string;
+}
+
+export interface AuthRequestOptions {
+    signal?: AbortSignal;
 }
 
 export interface RoomTemplate {
@@ -108,8 +115,17 @@ const parseRetryAfter = (response: Response, payload: JsonObject): number =>
     return asNumber(payload.retryAfter) ?? DEFAULT_RETRY_AFTER_SECONDS;
 };
 
+// Accepts the `{ code: 'banned', banReason, banExpiresAt }` contract as well as
+// the older nested `{ ban: { reason, expiresAt, permanent } }` shape.
 const parseBan = (payload: JsonObject): BanDetails | null =>
 {
+    if (payload.code === 'banned')
+    {
+        const expiresAt = asNumber(payload.banExpiresAt);
+
+        return { type: 'account', reason: asString(payload.banReason), permanent: !expiresAt, expiresAt };
+    }
+
     const ban = payload.ban;
 
     if (!ban || typeof ban !== 'object') return null;
@@ -124,45 +140,60 @@ const parseBan = (payload: JsonObject): BanDetails | null =>
     };
 };
 
+// Prefers the machine-readable `code`; the status/text checks keep servers
+// without codes working.
 const toFailure = (response: Response, payload: JsonObject): AuthFailure =>
 {
     const message = asString(payload.error);
+    const code = asString(payload.code);
 
-    if (response.status === 429) return { kind: 'rate-limited', retryAfterSeconds: parseRetryAfter(response, payload) };
-    if (payload.maintenance === true || payload.code === 'maintenance') return { kind: 'maintenance', message };
+    if (response.status === 429 || code === 'rate_limited') return { kind: 'rate-limited', retryAfterSeconds: parseRetryAfter(response, payload) };
+    if (payload.maintenance === true || code === 'maintenance') return { kind: 'maintenance', message };
 
     const ban = parseBan(payload);
 
     if (ban) return { kind: 'banned', ban };
-    if (response.status === 401) return { kind: 'invalid-credentials' };
-    if (response.status === 403 && message === 'Security check failed.') return { kind: 'security-check' };
-    if (response.status === 409) return { kind: 'conflict', message };
-    if (response.status >= 500) return { kind: 'unreachable' };
+    if (code === 'invalid_credentials' || code === 'invalid_ticket' || response.status === 401) return { kind: 'invalid-credentials' };
+    if (code === 'turnstile_failed' || (response.status === 403 && message === 'Security check failed.')) return { kind: 'security-check' };
+    if (code === 'name_taken' || code === 'email_taken' || response.status === 409) return { kind: 'conflict', message };
+    if (code === 'not_implemented' || response.status === 501) return { kind: 'not-implemented' };
+    if (code === 'server_error' || response.status >= 500) return { kind: 'unreachable' };
 
     return { kind: 'rejected', message };
 };
 
-const request = async (url: string, init: RequestInit): Promise<AuthResult<JsonObject>> =>
+// Null when the request never got an answer (offline, aborted, CORS).
+const send = async (url: string, init: RequestInit): Promise<{ response: Response; payload: JsonObject } | null> =>
 {
     try
     {
         const response = await fetch(url, { credentials: 'include', ...init });
-        const payload = await readJson(response);
 
-        return response.ok ? { ok: true, data: payload } : failed(toFailure(response, payload));
+        return { response, payload: await readJson(response) };
     }
     catch
     {
-        return failed({ kind: 'unreachable' });
+        return null;
     }
 };
 
-const postJson = (url: string, body: JsonObject): Promise<AuthResult<JsonObject>> =>
-    request(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'OctaneLoginView' },
-        body: JSON.stringify(body)
-    });
+const request = async (url: string, init: RequestInit): Promise<AuthResult<JsonObject>> =>
+{
+    const answer = await send(url, init);
+
+    if (!answer) return failed({ kind: 'unreachable' });
+
+    return answer.response.ok ? { ok: true, data: answer.payload } : failed(toFailure(answer.response, answer.payload));
+};
+
+const jsonPost = (body: JsonObject, options: AuthRequestOptions): RequestInit => ({
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'OctaneLoginView' },
+    body: JSON.stringify(body),
+    signal: options.signal
+});
+
+const postJson = (url: string, body: JsonObject, options: AuthRequestOptions = {}): Promise<AuthResult<JsonObject>> => request(url, jsonPost(body, options));
 
 const toSession = (payload: JsonObject, fallbackUsername: string): LoginSession | null =>
 {
@@ -189,9 +220,9 @@ const mapSession = (result: AuthResult<JsonObject>, fallbackUsername: string): A
     return session ? { ok: true, data: session } : failed({ kind: 'unreachable' });
 };
 
-export const loginWithCredentials = async (body: LoginRequest): Promise<AuthResult<LoginSession>> =>
+export const loginWithCredentials = async (body: LoginRequest, options: AuthRequestOptions = {}): Promise<AuthResult<LoginSession>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.endpoint', '/api/auth/login'), { ...body });
+    const result = await postJson(resolveAuthEndpoint('login.endpoint', '/api/auth/login'), { ...body }, options);
 
     return mapSession(result, body.username);
 };
@@ -220,49 +251,72 @@ export const refreshRememberToken = async (rememberToken: string): Promise<AuthR
     };
 };
 
-export const exchangeSsoTicket = async (ssoTicket: string): Promise<AuthResult<AccessTokenGrant>> =>
+export const exchangeSsoTicket = async (ssoTicket: string, options: AuthRequestOptions = {}): Promise<AuthResult<AccessTokenGrant>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.sso-token.endpoint', '/api/auth/sso-token'), { ssoTicket });
+    const result = await postJson(resolveAuthEndpoint('login.sso-token.endpoint', '/api/auth/sso-token'), { ssoTicket }, options);
 
     if (!result.ok) return failed(result.failure);
 
     return { ok: true, data: { accessToken: asString(result.data.accessToken) || undefined, accessTokenExpiresAt: asNumber(result.data.accessTokenExpiresAt) } };
 };
 
-export const registerAccount = async (body: RegisterRequest): Promise<AuthResult<{ session: LoginSession | null }>> =>
+export const registerAccount = async (body: RegisterRequest, options: AuthRequestOptions = {}): Promise<AuthResult<{ session: LoginSession | null }>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.register.endpoint', '/api/auth/register'), { ...body });
+    const result = await postJson(resolveAuthEndpoint('login.register.endpoint', '/api/auth/register'), { ...body }, options);
 
     if (!result.ok) return failed(result.failure);
 
     return { ok: true, data: { session: toSession(result.data, body.username) } };
 };
 
-export const requestPasswordReset = async (email: string, turnstileToken?: string): Promise<AuthResult<void>> =>
+export const requestPasswordReset = async (email: string, turnstileToken?: string, options: AuthRequestOptions = {}): Promise<AuthResult<void>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.forgot.endpoint', '/api/auth/forgot-password'), { email, turnstileToken });
+    const result = await postJson(resolveAuthEndpoint('login.forgot.endpoint', '/api/auth/forgot-password'), { email, turnstileToken }, options);
 
     return result.ok ? { ok: true, data: undefined } : failed(result.failure);
 };
 
-const checkAvailability = async (configKey: string, path: string, body: JsonObject): Promise<AuthResult<Availability>> =>
+const isTrue = (value: unknown): boolean => value === true || value === 'true' || value === 1 || value === '1';
+const isFalse = (value: unknown): boolean => value === false || value === 'false' || value === 0 || value === '0';
+const TAKEN_FLAGS = ['exists', 'taken', 'inUse', 'in_use'];
+
+// Reads `{ available }` as well as the older `{ exists | taken | inUse | in_use }` shapes.
+const readAvailability = (payload: JsonObject): boolean | null =>
 {
-    const result = await postJson(resolveAuthEndpoint(configKey, path), body);
+    if (isTrue(payload.available) || TAKEN_FLAGS.some((flag) => isFalse(payload[flag]))) return true;
+    if (isFalse(payload.available) || TAKEN_FLAGS.some((flag) => isTrue(payload[flag]))) return false;
 
-    if (!result.ok) return failed(result.failure);
-
-    return { ok: true, data: { available: result.data.available !== false, message: asString(result.data.error) } };
+    return null;
 };
 
-export const checkUsernameAvailable = (username: string): Promise<AuthResult<Availability>> =>
-    checkAvailability('login.check-username.endpoint', '/api/auth/check-username', { username });
-
-export const checkEmailAvailable = (email: string): Promise<AuthResult<Availability>> =>
-    checkAvailability('login.check-email.endpoint', '/api/auth/check-email', { email });
-
-export const fetchRoomTemplates = async (): Promise<AuthResult<RoomTemplate[]>> =>
+// Availability checks are optional: a hotel without them (404/405/501), a
+// failing one or no answer at all leaves the result unknown so sign-up can
+// continue. Only "taken" (409 or a taken flag) and rate limits stop it.
+const checkAvailability = async (configKey: string, path: string, body: JsonObject, options: AuthRequestOptions): Promise<AuthResult<Availability>> =>
 {
-    const result = await request(resolveAuthEndpoint('login.room_templates.endpoint', '/api/auth/room-templates'), { method: 'GET' });
+    const answer = await send(resolveAuthEndpoint(configKey, path), jsonPost(body, options));
+
+    if (!answer) return { ok: true, data: { available: null, message: '' } };
+
+    const { response, payload } = answer;
+    const message = asString(payload.error);
+
+    if (response.status === 429) return failed(toFailure(response, payload));
+    if (response.status === 409) return { ok: true, data: { available: false, message } };
+    if (!response.ok) return { ok: true, data: { available: null, message: '' } };
+
+    return { ok: true, data: { available: readAvailability(payload), message } };
+};
+
+export const checkUsernameAvailable = (username: string, options: AuthRequestOptions = {}): Promise<AuthResult<Availability>> =>
+    checkAvailability('login.check-username.endpoint', '/api/auth/check-username', { username }, options);
+
+export const checkEmailAvailable = (email: string, options: AuthRequestOptions = {}): Promise<AuthResult<Availability>> =>
+    checkAvailability('login.check-email.endpoint', '/api/auth/check-email', { email }, options);
+
+export const fetchRoomTemplates = async (options: AuthRequestOptions = {}): Promise<AuthResult<RoomTemplate[]>> =>
+{
+    const result = await request(resolveAuthEndpoint('login.room_templates.endpoint', '/api/auth/room-templates'), { method: 'GET', signal: options.signal });
 
     if (!result.ok) return failed(result.failure);
 
@@ -310,4 +364,20 @@ export const checkServerReachable = async (): Promise<boolean> =>
     {
         return false;
     }
+};
+
+// Ends the session on the server: revokes the access token (Bearer) and, for
+// servers that still read them, the SSO ticket and remember token.
+export const logoutSession = async (credentials: { accessToken: string; ssoTicket: string; rememberToken: string }): Promise<void> =>
+{
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'OctaneLogout' };
+
+    if (credentials.accessToken) headers.Authorization = `Bearer ${credentials.accessToken}`;
+
+    await send(resolveAuthEndpoint('login.logout.endpoint', '/api/auth/logout'), {
+        method: 'POST',
+        keepalive: true,
+        headers,
+        body: JSON.stringify({ ssoTicket: credentials.ssoTicket, rememberToken: credentials.rememberToken })
+    });
 };

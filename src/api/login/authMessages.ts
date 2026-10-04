@@ -26,6 +26,8 @@ export const describeAuthFailure = (failure: AuthFailure, context: AuthContext):
             if (context === 'login') return loginText('generic.error', 'Something went wrong.');
 
             return failure.message || loginText('generic.error', 'Something went wrong.');
+        case 'not-implemented':
+            return loginText('login.feature.unavailable', 'This is not available on this hotel.');
         case 'unreachable':
             return loginText('connection.login.error.-400.desc', 'Connecting to the server failed');
     }

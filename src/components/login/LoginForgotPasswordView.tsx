@@ -1,7 +1,8 @@
 import { FC, useActionState, useState } from 'react';
 import { describeAuthFailure, EMAIL_MAX_LENGTH, isValidEmail, loginText, requestPasswordReset } from '../../api';
-import { useTimedNotice, useTurnstile } from '../../hooks/login';
-import { LoginErrorBalloon } from './LoginBalloonView';
+import { useAbortableFlow, useCooldown, useTimedNotice, useTurnstile } from '../../hooks/login';
+import { LoginErrorBalloon, LoginInfoPanel } from './LoginBalloonView';
+import { LoginCooldownPanel } from './LoginCooldownPanel';
 import { LoginFlowButton } from './LoginFlowButton';
 import { LoginInputField } from './LoginInputField';
 import { TurnstileWidget } from './TurnstileWidget';
@@ -15,12 +16,17 @@ interface LoginForgotPasswordViewProps {
 export const LoginForgotPasswordView: FC<LoginForgotPasswordViewProps> = ({ onDone, onCancel }) =>
 {
     const [email, setEmail] = useState('');
+    const [unavailable, setUnavailable] = useState(false);
     const turnstile = useTurnstile();
     const { notice, noticeId, show } = useTimedNotice();
+    const cooldown = useCooldown('forgot');
+    const startFlow = useAbortableFlow();
 
     const submit = async (): Promise<null> =>
     {
         const address = email.trim();
+
+        if (cooldown.active) return null;
 
         if (!isValidEmail(address))
         {
@@ -34,13 +40,19 @@ export const LoginForgotPasswordView: FC<LoginForgotPasswordViewProps> = ({ onDo
             return null;
         }
 
-        const result = await requestPasswordReset(address, turnstile.enabled ? turnstile.token : undefined);
+        const signal = startFlow();
+        const result = await requestPasswordReset(address, turnstile.enabled ? turnstile.token : undefined, { signal });
+
+        if (signal.aborted) return null;
 
         turnstile.reset();
 
         if (!result.ok)
         {
-            show(describeAuthFailure(result.failure, 'forgot'));
+            if (result.failure.kind === 'rate-limited') cooldown.start(result.failure.retryAfterSeconds);
+            else if (result.failure.kind === 'not-implemented') setUnavailable(true);
+            else show(describeAuthFailure(result.failure, 'forgot'));
+
             return null;
         }
 
@@ -73,14 +85,16 @@ export const LoginForgotPasswordView: FC<LoginForgotPasswordViewProps> = ({ onDo
                 )}
                 <LoginErrorBalloon key={noticeId} text={notice} />
                 <div className="login-flow-actions">
-                    <LoginFlowButton colour="red" onClick={onCancel}>
+                    <LoginFlowButton colour="red" disabled={pending} onClick={onCancel}>
                         {loginText('generic.cancel', 'Cancel')}
                     </LoginFlowButton>
-                    <LoginFlowButton colour="green" type="submit" disabled={pending}>
+                    <LoginFlowButton colour="green" type="submit" disabled={pending || unavailable || cooldown.active}>
                         {loginText('connection.password.reminder', 'Send')}
                     </LoginFlowButton>
                 </div>
             </form>
+            {unavailable && <LoginInfoPanel title={loginText('connection.password.reminder.title', 'Reset password')}>{loginText('login.feature.unavailable', 'This is not available on this hotel.')}</LoginInfoPanel>}
+            <LoginCooldownPanel cooldown={cooldown} />
         </section>
     );
 };

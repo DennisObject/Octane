@@ -1,7 +1,8 @@
 import { useActionState, useState } from 'react';
 import { BanDetails, describeAuthFailure, GetRememberLogin, loginText, loginWithCredentials, storeLoginSession } from '../../api';
-import { TurnstileState } from './useTurnstile';
+import { useAbortableFlow } from './useAbortableFlow';
 import { useCooldown } from './useCooldown';
+import { TurnstileState } from './useTurnstile';
 import { useTimedNotice } from './useTimedNotice';
 
 interface UseLoginFormOptions {
@@ -19,7 +20,8 @@ export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initia
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(() => !!GetRememberLogin());
     const [ban, setBan] = useState<BanDetails | null>(null);
-    const cooldown = useCooldown();
+    const cooldown = useCooldown('login');
+    const startFlow = useAbortableFlow();
     const { notice, noticeId, show: showNotice, clear: clearNotice } = useTimedNotice();
 
     const submit = async (): Promise<null> =>
@@ -43,7 +45,10 @@ export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initia
         clearNotice();
         setBan(null);
 
-        const result = await loginWithCredentials({ username: name, password, remember, turnstileToken: turnstile.enabled ? turnstile.token : undefined });
+        const signal = startFlow();
+        const result = await loginWithCredentials({ username: name, password, remember, turnstileToken: turnstile.enabled ? turnstile.token : undefined }, { signal });
+
+        if (signal.aborted) return null;
 
         setPassword('');
         turnstile.reset();

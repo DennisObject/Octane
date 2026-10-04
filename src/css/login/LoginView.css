@@ -34,41 +34,73 @@
     user-select: none;
 }
 
-/*
- * LoginFlow._mainSprite: centred, 50px logo area plus the 50px screen offset.
- * The official screens sit on LoginFlow's Background (a #0c5a7f to #0c3a65
- * gradient with faint scanlines); here that background backs the column so
- * the light-blue captions stay readable over the bright hotel view.
- */
+/* login.Background: gradient (colour 0 held to 50%) under the 2x3 scanline tile, filling the stage. */
+.login-flow-stage {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    transition: opacity 0.8s ease;
+}
+
+.login-flow-background {
+    position: absolute;
+    inset: 0;
+    background:
+        url("@/assets/images/login/background_tiles.png") repeat,
+        linear-gradient(180deg, #0c5a7f 49.8%, #0c3a65 100%);
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.login-flow-landing-left,
+.login-flow-landing-right {
+    position: absolute;
+    bottom: -50px;
+    max-width: none;
+    opacity: 0;
+    user-select: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.login-flow-landing-left {
+    left: -50px;
+}
+
+.login-flow-landing-right {
+    left: max(400px, calc(100% - var(--landing-right-width, 0px) + 50px));
+}
+
+.login-flow-landing-left.is-loaded,
+.login-flow-landing-right.is-loaded {
+    animation: login-flow-fade-in 1.2s linear forwards;
+}
+
+@keyframes login-flow-fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Entering the hotel: the AIR stage fades out onto the hotel view scenery beneath. */
+.login-flow.is-entering .login-flow-stage {
+    opacity: 0;
+}
+
+/* LoginFlow._mainSprite: x = (stageWidth - (width + 20)) / 2 (at least 5), y = 50, screens 50 lower. */
 .login-flow-main {
     position: absolute;
     top: 100px;
-    left: 50%;
+    left: max(5px, calc((100% - 660px) / 2));
     z-index: 5;
-    box-sizing: border-box;
-    width: 680px;
-    max-height: calc(100% - 110px);
-    padding: 16px 20px 24px;
+    width: 640px;
+    max-width: calc(100% - 10px);
+    max-height: calc(100% - 100px);
     overflow-x: hidden;
     overflow-y: auto;
-    border-radius: 6px;
-    background:
-        repeating-linear-gradient(180deg, rgba(134, 134, 134, 0.07) 0 1px, transparent 1px 3px),
-        linear-gradient(180deg, rgba(12, 90, 127, 0.9) 50%, rgba(12, 58, 101, 0.9) 100%);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
-    transform: translateX(-50%);
 }
 
 .login-flow.is-entering .login-flow-main {
     pointer-events: none;
-}
-
-@media (max-width: 690px) {
-    .login-flow-main {
-        left: 5px;
-        width: calc(100% - 10px);
-        transform: none;
-    }
 }
 
 .login-flow-screen {
@@ -197,7 +229,12 @@
     cursor: pointer;
 }
 
-.login-flow-link:hover,
+.login-flow-link:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.login-flow-link:hover:not(:disabled),
 .login-flow-link:focus-visible {
     color: #7ecaee;
     outline: none;

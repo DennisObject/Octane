@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { describeBanExpiry, loginText, PASSWORD_MAX_LENGTH } from '../../api';
 import { useLoginForm, useTurnstile } from '../../hooks/login';
 import { LoginErrorBalloon, LoginInfoPanel } from './LoginBalloonView';
+import { LoginCooldownPanel } from './LoginCooldownPanel';
 import { LoginFlowButton } from './LoginFlowButton';
 import { LoginInputField } from './LoginInputField';
 import { TurnstileWidget } from './TurnstileWidget';
@@ -80,10 +81,10 @@ export const LoginCredentialsView: FC<LoginCredentialsViewProps> = ({
                 <LoginErrorBalloon key={form.noticeId} text={form.notice} />
                 <div className="login-flow-actions">
                     <div className="login-flow-links">
-                        <button type="button" className="login-flow-link" onClick={onForgotPassword}>
+                        <button type="button" className="login-flow-link" disabled={busy} onClick={onForgotPassword}>
                             {loginText('login.environment.forgot.password', 'I Forgot my password')}
                         </button>
-                        <button type="button" className="login-flow-link" onClick={onRegister}>
+                        <button type="button" className="login-flow-link" disabled={busy} onClick={onRegister}>
                             {loginText('login.environment.create.account', 'Join here!')}
                         </button>
                     </div>
@@ -96,11 +97,7 @@ export const LoginCredentialsView: FC<LoginCredentialsViewProps> = ({
                 </div>
             </form>
             {infoMessage && <LoginInfoPanel title={infoMessage} />}
-            {form.cooldown.active && (
-                <LoginInfoPanel title={loginText('login.banned.temporary_blocked', 'Your login has been temporarily blocked. Please try again later.')}>
-                    {loginText('login.try_again_in', 'Try again in %seconds% seconds.', { seconds: String(form.cooldown.remaining) })}
-                </LoginInfoPanel>
-            )}
+            <LoginCooldownPanel cooldown={form.cooldown} />
             {form.ban && (
                 <LoginInfoPanel title={loginText('connection.login.error.banned.desc', 'The account has been banned.')}>
                     {form.ban.reason && (

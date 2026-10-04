@@ -2,6 +2,7 @@ import { FC, FormEvent } from 'react';
 import { loginText, RegistrationStep } from '../../../api';
 import { useRegistration, useTurnstile } from '../../../hooks/login';
 import { LoginErrorBalloon } from '../LoginBalloonView';
+import { LoginCooldownPanel } from '../LoginCooldownPanel';
 import { LoginFlowButton } from '../LoginFlowButton';
 import { TurnstileWidget } from '../TurnstileWidget';
 import { RegistrationAccountView } from './RegistrationAccountView';
@@ -60,11 +61,12 @@ export const RegistrationView: FC<RegistrationViewProps> = ({ isEntering, onAuth
                     <LoginFlowButton colour="red" disabled={busy} onClick={previous ? () => registration.goTo(previous) : onCancel}>
                         {previous ? loginText('generic.back', 'Back') : loginText('generic.cancel', 'Cancel')}
                     </LoginFlowButton>
-                    <LoginFlowButton colour="green" type="submit" disabled={busy}>
+                    <LoginFlowButton colour="green" type="submit" disabled={busy || registration.cooldown.active}>
                         {busy ? loginText('login.loading', 'loading...') : step === 'room' ? loginText('connection.login.play', 'Play!') : loginText('generic.continue', 'Continue')}
                     </LoginFlowButton>
                 </div>
             </form>
+            <LoginCooldownPanel cooldown={registration.cooldown} />
         </section>
     );
 };

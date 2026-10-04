@@ -21,7 +21,7 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { ClearRememberLogin, exchangeSsoTicketForAccessToken, GetRememberLogin, GetUIVersion, loginWithRememberToken, persistAccessToken, refreshRememberToken, SetRememberLogin, StoreRememberGrant } from './api';
+import { adoptAccessToken, captureLaunchCredentials, ClearRememberLogin, exchangeSsoTicketForAccessToken, forgetAccessToken, getAccessToken, GetRememberLogin, GetUIVersion, loginWithRememberToken, logoutSession, refreshRememberToken, SetRememberLogin, StoreRememberGrant } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -123,6 +123,13 @@ export const App: FC<{}> = (props) => {
     const previousConnectionPhaseRef = useRef(connectionState.phase);
 
     const clearStoredCredentials = useCallback(() => {
+        // Revoke server-side first (best effort), then forget everything locally.
+        const accessToken = getAccessToken();
+        const rememberToken = GetRememberLogin()?.token ?? '';
+
+        if (accessToken || rememberToken) void logoutSession({ accessToken, ssoTicket: '', rememberToken });
+
+        forgetAccessToken();
         ClearStoredChatHistory();
         ClearRememberLogin();
         try {
@@ -203,8 +210,9 @@ export const App: FC<{}> = (props) => {
 
         const result = await loginWithRememberToken(remembered.token, remembered.username);
 
-        if (result.ok) {
-            persistAccessToken(result.data);
+        if (result.ok)
+        {
+            adoptAccessToken(result.data, result.data.ssoTicket);
             StoreRememberGrant(result.data, result.data.username);
             return result.data.ssoTicket;
         }
@@ -222,8 +230,12 @@ export const App: FC<{}> = (props) => {
 
         const result = await refreshRememberToken(remembered.token);
 
-        if (result.ok) {
-            persistAccessToken(result.data);
+        if (result.ok)
+        {
+            const ssoTicket = GetConfiguration().getValue<string>('sso.ticket', '');
+
+            // The refreshed token belongs to the running session's ticket.
+            if (ssoTicket) adoptAccessToken(result.data, ssoTicket);
             StoreRememberGrant(result.data, remembered.username);
             return;
         }
@@ -388,19 +400,14 @@ export const App: FC<{}> = (props) => {
                 let ssoTicket = window.OctaneConfig['sso.ticket'];
                 if (ssoTicket) GetConfiguration().setValue('sso.ticket', ssoTicket);
 
-                // A website hand-off may pass a remember token in the URL; keep it and drop it from the address bar.
-                const url = new URL(window.location.href);
-                const tokenParam = url.searchParams.get('token');
+                // A website hand-off may pass a remember token; bootstrap already took it out of the URL.
+                const launch = captureLaunchCredentials();
 
-                if (tokenParam && !GetRememberLogin()) {
-                    const parsedExpiry = Number(url.searchParams.get('token_exp') || 0);
-                    const expiresAt = Number.isFinite(parsedExpiry) && parsedExpiry > 0 ? parsedExpiry : Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-                    SetRememberLogin({ token: tokenParam, expiresAt });
-                }
+                if (launch.rememberToken && !GetRememberLogin())
+                {
+                    const expiresAt = launch.rememberExpiresAt || Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 
-                if (url.searchParams.has('token') || url.searchParams.has('token_exp') || url.searchParams.has('sso')) {
-                    for (const key of ['token', 'token_exp', 'sso']) url.searchParams.delete(key);
-                    window.history.replaceState(window.history.state, '', url.toString());
+                    SetRememberLogin({ token: launch.rememberToken, expiresAt });
                 }
 
                 bumpProgress(10, taskLabel('loading.task.session', 'Verifying session...'));

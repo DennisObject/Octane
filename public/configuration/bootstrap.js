@@ -1,4 +1,20 @@
 (() => {
+  // Lift hand-off credentials out of the URL before the first request so they
+  // never reach history or Referer headers; the app reads them from memory.
+  (() => {
+    const url = new URL(location.href);
+    const keys = [ "sso", "token", "token_exp" ];
+    window.__octaneLaunchCredentials = {
+      ssoTicket: url.searchParams.get("sso") || "",
+      rememberToken: url.searchParams.get("token") || "",
+      rememberExpiresAt: Number(url.searchParams.get("token_exp") || 0) || 0
+    };
+    if(keys.some((key) => url.searchParams.has(key))) {
+      keys.forEach((key) => url.searchParams.delete(key));
+      history.replaceState(history.state, "", url.toString());
+    }
+  })();
+
   const FALLBACK_API_BASE = "";
 
   const getBase = () => {

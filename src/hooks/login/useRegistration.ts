@@ -12,7 +12,6 @@ import {
     isValidEmail,
     loadRegistrationDraft,
     loginText,
-    loginWithCredentials,
     NAME_MAX_LENGTH,
     NAME_MIN_LENGTH,
     registerAccount,
@@ -21,6 +20,8 @@ import {
     saveRegistrationDraft,
     storeLoginSession
 } from '../../api';
+import { useAbortableFlow } from './useAbortableFlow';
+import { useCooldown } from './useCooldown';
 import { useRegistrationFigure } from './useRegistrationFigure';
 import { useTimedNotice } from './useTimedNotice';
 import { TurnstileState } from './useTurnstile';
@@ -74,6 +75,8 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
     const [busy, setBusy] = useState(false);
     const figure = useRegistrationFigure(draft?.gender ?? 'F', draft?.selection ?? {}, step === 'avatar');
     const { notice, noticeId, show: showNotice, clear: clearNotice } = useTimedNotice();
+    const cooldown = useCooldown('register');
+    const startFlow = useAbortableFlow();
 
     useEffect(() =>
     {
@@ -84,14 +87,11 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
     {
         if (step !== 'room' || templates) return;
 
-        let cancelled = false;
+        const controller = new AbortController();
 
-        void fetchRoomTemplates().then((result) => !cancelled && setTemplates(result.ok ? result.data : []));
+        void fetchRoomTemplates({ signal: controller.signal }).then((result) => !controller.signal.aborted && setTemplates(result.ok ? result.data : []));
 
-        return () =>
-        {
-            cancelled = true;
-        };
+        return () => controller.abort();
     }, [step, templates]);
 
     const goTo = useCallback(
@@ -103,27 +103,39 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
         [clearNotice]
     );
 
-    const failWith = (failure: AuthFailure) => showNotice(describeAuthFailure(failure, 'register'));
-
-    const runChecked = async (work: () => Promise<void>) =>
+    const failWith = (failure: AuthFailure) =>
     {
-        if (busy) return;
+        if (failure.kind === 'rate-limited') cooldown.start(failure.retryAfterSeconds);
+        else showNotice(describeAuthFailure(failure, 'register'));
+    };
+
+    // Runs one step's server work. Leaving the sign-up (or starting another
+    // step) aborts it, and `work` must stop once its signal is aborted.
+    const runChecked = async (work: (signal: AbortSignal) => Promise<void>) =>
+    {
+        if (busy || cooldown.active) return;
+
+        const signal = startFlow();
 
         setBusy(true);
 
         try
         {
-            if (!(await checkServerReachable()))
+            const reachable = await checkServerReachable();
+
+            if (signal.aborted) return;
+
+            if (!reachable)
             {
                 showNotice(loginText('connection.login.error.-400.desc', 'Connecting to the server failed'));
                 return;
             }
 
-            await work();
+            await work(signal);
         }
         finally
         {
-            setBusy(false);
+            if (!signal.aborted) setBusy(false);
         }
     };
 
@@ -137,12 +149,13 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
 
         if (passwordProblem) return showNotice(passwordProblem);
 
-        void runChecked(async () =>
+        void runChecked(async (signal) =>
         {
-            const result = await checkEmailAvailable(address);
+            const result = await checkEmailAvailable(address, { signal });
 
+            if (signal.aborted) return;
             if (!result.ok) return failWith(result.failure);
-            if (!result.data.available) return showNotice(result.data.message || loginText('login.create_account.email.in_use', 'This email is already in use.'));
+            if (result.data.available === false) return showNotice(result.data.message || loginText('login.create_account.email.in_use', 'This email is already in use.'));
 
             goTo('avatar');
         });
@@ -155,22 +168,16 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
 
         if (nameProblem) return showNotice(nameProblem);
 
-        void runChecked(async () =>
+        void runChecked(async (signal) =>
         {
-            const result = await checkUsernameAvailable(name);
+            const result = await checkUsernameAvailable(name, { signal });
 
+            if (signal.aborted) return;
             if (!result.ok) return failWith(result.failure);
-            if (!result.data.available) return showNotice(loginText('login.create_avatar.choose_name.name_already_in_use', 'Sorry, the name you picked is already in use.'));
+            if (result.data.available === false) return showNotice(loginText('login.create_avatar.choose_name.name_already_in_use', 'Sorry, the name you picked is already in use.'));
 
             goTo('room');
         });
-    };
-
-    const signIn = async (name: string) =>
-    {
-        const result = await loginWithCredentials({ username: name, password, remember: false });
-
-        return result.ok ? result.data : null;
     };
 
     const submitRoom = () =>
@@ -179,7 +186,7 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
 
         const name = username.trim();
 
-        void runChecked(async () =>
+        void runChecked(async (signal) =>
         {
             const created = await registerAccount({
                 username: name,
@@ -189,7 +196,9 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
                 gender: figure.gender,
                 templateId: templateId ?? undefined,
                 turnstileToken: turnstile.enabled ? turnstile.token : undefined
-            });
+            }, { signal });
+
+            if (signal.aborted) return;
 
             turnstile.reset();
 
@@ -197,9 +206,9 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
 
             clearRegistrationDraft();
 
-            // Straight into the hotel. Turnstile tokens are single use, so with a
-            // captcha configured the player signs in once more instead.
-            const session = created.data.session ?? (turnstile.enabled ? null : await signIn(name));
+            // Straight into the hotel with the ticket /register hands out. A server
+            // that returns none sends the player to Sign In with the name filled in.
+            const session = created.data.session;
 
             setPassword('');
             setConfirmation('');
@@ -231,6 +240,7 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
         templates,
         figure,
         busy,
+        cooldown,
         notice,
         noticeId,
         submitAccount,

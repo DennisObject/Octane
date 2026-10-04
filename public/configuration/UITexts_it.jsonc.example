@@ -40,6 +40,7 @@
     "login.create_avatar.choose_name.name_too_short": "Ci dispiace ma il nome che hai scelto è troppo corto.",
     "login.create_avatar.choose_name.title": "Scegli un nome per il tuo Habbo",
     "login.create_avatar.title": "Scegli il tuo avatar Habbo",
+    "login.feature.unavailable": "Non è disponibile in questo hotel.",
     "login.environment.create.account": "Registrati qui!",
     "login.environment.forgot.password": "Ho dimenticato la password",
     "login.loading": "loading...",

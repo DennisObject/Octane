@@ -38,6 +38,7 @@
     "login.create_avatar.choose_name.name_too_short": "Sorry, de naam die je gekozen hebt, is te kort.",
     "login.create_avatar.choose_name.title": "Geef je Habbo een naam.",
     "login.create_avatar.title": "Kies je Habbo avatar",
+    "login.feature.unavailable": "Dit is niet beschikbaar in dit hotel.",
     "login.environment.create.account": "Word lid!",
     "login.environment.forgot.password": "Ik ben mijn wachtwoord vergeten",
     "login.loading": "laden...",

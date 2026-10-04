@@ -1,6 +1,6 @@
 import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@octane/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { ClearRememberLogin, FriendlyTime, GetConfigurationValue, GetRememberLogin, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../api';
+import { ClearRememberLogin, forgetAccessToken, FriendlyTime, GetConfigurationValue, getAccessToken, GetRememberLogin, LocalizeText, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
 import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
@@ -70,7 +70,6 @@ export const PurseView: FC<{}> = (props) => {
     const handleLogout = useCallback(async (event: React.MouseEvent) => {
         event.stopPropagation();
 
-        const logoutUrl = GetConfigurationValue<string>('login.logout.endpoint', '/api/auth/logout');
         const ssoTicket = (window.OctaneConfig?.['sso.ticket'] as string) ?? '';
         const rememberToken = GetRememberLogin()?.token || '';
 
@@ -81,21 +80,8 @@ export const PurseView: FC<{}> = (props) => {
             /* best-effort — the HTTP logout below still performs server cleanup */
         }
 
-        try {
-            await fetch(logoutUrl, {
-                method: 'POST',
-                credentials: 'include',
-                keepalive: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'OctanePurseLogout'
-                },
-                body: JSON.stringify({ ssoTicket, rememberToken })
-            });
-        } catch {
-            /* best-effort — proceed with local logout regardless */
-        }
+        // Best effort: the server revokes the access token; local logout proceeds regardless.
+        await logoutSession({ accessToken: getAccessToken(), ssoTicket, rememberToken });
 
         try {
             GetCommunication().connection.dispose();
@@ -103,6 +89,7 @@ export const PurseView: FC<{}> = (props) => {
             /* best-effort — page reload will drop the transport if it is already closed */
         }
 
+        forgetAccessToken();
         ClearRememberLogin();
         ClearStoredChatHistory();
         if (window.OctaneConfig) window.OctaneConfig['sso.ticket'] = '';

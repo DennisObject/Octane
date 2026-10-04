@@ -413,7 +413,8 @@ None on this branch. The two previously-open races are closed:
   `src/components/wired-tools/`
 - User account settings (cherry-picked from upstream PR #126):
   `src/components/user-settings/UserAccountSettingsView.tsx`
-- Access token (sessionStorage, with expiry): `src/api/auth/accessToken.ts`;
+- Access token (sessionStorage, with expiry, bound to its SSO ticket): `src/api/auth/accessToken.ts`;
+  URL hand-off credentials are lifted before any request by `captureLaunchCredentials`;
   login/remember storage: `storeLoginSession` in `src/api/login/loginSession.ts`
 - Asset middleware: `octaneAssetsServer()` in `vite.config.mjs`
 - Configuration pre-init: `src/bootstrap.ts` (`await GetConfiguration().init()`
