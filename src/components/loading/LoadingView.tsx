@@ -1,132 +1,103 @@
-import { GetConfiguration } from '@octane/renderer';
-import { FC, useMemo } from 'react';
-import octaneLogo from '@/assets/images/loading/octane-logo.png';
-import { Base, Column, Text } from '../../common';
+import { FC, useEffect, useState } from 'react';
+import splashBackground from '@/assets/images/loading/splash_bg.png';
+import splashTop from '@/assets/images/loading/splash_top.png';
+
+// Classic JS client loading screen (75_classic-js HabboAirLauncher: eSe + JRe).
+
+const USER_PHOTOS = Object.values(import.meta.glob('../../assets/images/loading/userphoto_*.png', { eager: true, import: 'default' }) as Record<string, string>);
+
+// default_localizations_en client.starting.revolving
+const REVOLVING_MESSAGES = [
+    'For science, you monster',
+    'Loading funny message…please wait.',
+    'Would you like fries with that?',
+    'Follow the yellow duck.',
+    'Time is just an illusion.',
+    'Are we there yet?!',
+    'I like your t-shirt.',
+    'Look left. Look right. Blink twice. Ta da!',
+    "It's not you, it's me.",
+    "Shhh! I'm trying to think here.",
+    'Loading pixel universe.'
+];
+
+const BAR_WIDTH = 400;
+const BAR_HEIGHT = 25;
+const BAR_INSET = 4;
+const BAR_TICK_MS = 750;
+
+// The loading screen opens once the bootstrap is done, so real progress fills the last 40%.
+const BOOTSTRAP_PROGRESS = 0.6;
+
+const randomBetween = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 interface LoadingViewProps {
     isError?: boolean;
     message?: string;
-    homeUrl?: string;
     progress?: number;
-    currentTask?: string;
 }
 
-const resolveConfigUrl = (key: string): string => {
-    try {
-        const raw = GetConfiguration().getValue<string>(key, '');
-        if (!raw) return '';
-
-        const interpolated = GetConfiguration().interpolate(raw) || raw;
-        return interpolated;
-    } catch {
-        return '';
-    }
-};
-
-const resolveConfigString = (key: string, fallback = ''): string => {
-    try {
-        const raw = GetConfiguration().getValue<string>(key, '');
-        if (!raw) return fallback;
-        return raw;
-    } catch {
-        return fallback;
-    }
-};
-
 export const LoadingView: FC<LoadingViewProps> = (props) => {
-    const { isError = false, message = '', homeUrl = '', progress, currentTask = '' } = props;
+    const { isError = false, message = '', progress = 0 } = props;
+    const [photo] = useState(() => USER_PHOTOS[randomBetween(0, USER_PHOTOS.length - 1)]);
+    const [firstMessageIndex] = useState(() => randomBetween(0, REVOLVING_MESSAGES.length - 1));
+    const [messageIndex, setMessageIndex] = useState(firstMessageIndex);
+    const [barProgress, setBarProgress] = useState<number | null>(null);
 
-    const customLogoUrl = useMemo(() => resolveConfigUrl('loading.logo.url'), []);
-    const customBackground = useMemo(() => resolveConfigString('loading.background', ''), []);
-    const progressBarColor = useMemo(() => resolveConfigString('loading.progress.color', 'linear-gradient(90deg,#4f8cff,#2563eb)'), []);
+    useEffect(() => {
+        if (isError) return;
 
-    const clampedProgress = typeof progress === 'number' && Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : null;
+        // The bar is decorative: it fills in random steps, holds full for one tick, then restarts with the next message.
+        let value = 0;
+        let swapMessage = false;
+        let nextIndex = firstMessageIndex;
 
-    const backgroundStyle = customBackground ? { background: customBackground } : undefined;
+        const interval = window.setInterval(() => {
+            if (value === 100) {
+                if (swapMessage) {
+                    setMessageIndex(nextIndex);
+                    swapMessage = false;
+                }
 
-    const backgroundClassName = customBackground ? 'fixed inset-0 z-[2147483000]' : 'fixed inset-0 z-[2147483000] bg-[radial-gradient(#1d1a24,#003a6b)]';
+                value = 0;
+            } else {
+                value += Math.min(randomBetween(35, Math.min(randomBetween(45, 55), 100 - value)), 100 - value);
+            }
+
+            if (value === 100) {
+                swapMessage = true;
+                nextIndex = (nextIndex + 1) % (REVOLVING_MESSAGES.length - 1);
+            }
+
+            setBarProgress(value / 100);
+        }, BAR_TICK_MS);
+
+        return () => window.clearInterval(interval);
+    }, [isError, firstMessageIndex]);
+
+    const percent = Math.round(Math.min(1, BOOTSTRAP_PROGRESS + (Math.max(0, Math.min(100, progress)) / 100) * (1 - BOOTSTRAP_PROGRESS)) * 100);
+    const fillWidth = (BAR_WIDTH - BAR_INSET * 2) * (barProgress ?? 0);
+    const fillHeight = BAR_HEIGHT - BAR_INSET * 2;
 
     return (
-        <Column fullHeight position="fixed" className={backgroundClassName} style={backgroundStyle}>
-            <Base fullHeight className="container h-100">
-                <Column fullHeight alignItems="center" justifyContent="center">
-                    {isError && message && message.length ? (
-                        <Column alignItems="center" className="absolute bottom-[20px] left-1/2 z-[3] -translate-x-1/2 max-w-[80%]" gap={2}>
-                            <Text fontSizeCustom={20} variant="white" className="text-center [text-shadow:0px_4px_4px_rgba(0,0,0,0.25)]">
-                                {message}
-                            </Text>
-                            {homeUrl && (
-                                <a
-                                    href={homeUrl}
-                                    className="mt-3 px-6 py-3 rounded-lg bg-[#3b82f6] hover:bg-[#2563eb] text-white text-base font-semibold no-underline cursor-pointer transition-colors duration-200 [text-shadow:none]"
-                                >
-                                    Back to Hotel
-                                </a>
-                            )}
-                        </Column>
-                    ) : (
-                        <>
-                            <Column alignItems="center" justifyContent="center" className="z-[3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <img
-                                    src={customLogoUrl || octaneLogo}
-                                    alt="Octane"
-                                    draggable={false}
-                                    className="block w-auto h-auto max-w-[min(80vw,780px)] max-h-[32vh] select-none pointer-events-none drop-shadow-[0_10px_24px_rgba(0,0,0,0.5)]"
-                                />
-                                {message && message.length ? (
-                                    <Text
-                                        fontSizeCustom={22}
-                                        variant="white"
-                                        className="text-center mt-4 [text-shadow:0px_4px_4px_rgba(0,0,0,0.4)] tracking-wide"
-                                    >
-                                        {message}
-                                    </Text>
-                                ) : null}
-                            </Column>
-                            {clampedProgress !== null && (
-                                <Column alignItems="center" gap={2} className="absolute bottom-[8vh] left-1/2 -translate-x-1/2 z-[4] w-[min(900px,90vw)]">
-                                    <Base
-                                        className="relative w-full h-8 rounded-full overflow-hidden border border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
-                                        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
-                                    >
-                                        <Base
-                                            className="h-full rounded-full transition-[width] duration-300 ease-out"
-                                            style={{ width: `${clampedProgress}%`, background: progressBarColor, boxShadow: '0 0 18px rgba(79,140,255,0.55)' }}
-                                        />
-                                        <Base
-                                            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                                            style={{
-                                                fontFamily: '"Poppins","Segoe UI",system-ui,sans-serif',
-                                                fontWeight: 700,
-                                                fontSize: '16px',
-                                                color: '#fff',
-                                                letterSpacing: '0.08em',
-                                                textShadow: '0 2px 4px rgba(0,0,0,0.6)'
-                                            }}
-                                        >
-                                            {clampedProgress}%
-                                        </Base>
-                                    </Base>
-                                    <Base
-                                        className="text-center"
-                                        style={{
-                                            fontFamily: '"Poppins","Segoe UI",system-ui,sans-serif',
-                                            fontWeight: 500,
-                                            fontSize: '15px',
-                                            color: 'rgba(255,255,255,0.85)',
-                                            letterSpacing: '0.04em',
-                                            textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                            minHeight: '22px'
-                                        }}
-                                    >
-                                        {currentTask}
-                                    </Base>
-                                </Column>
-                            )}
-                        </>
-                    )}
-                </Column>
-            </Base>
-        </Column>
+        <div className={isError ? 'classic-loading-screen classic-loading-screen--error' : 'classic-loading-screen'}>
+            <div className="classic-loading-screen__photo">
+                <img src={splashBackground} alt="" draggable={false} />
+                <img src={photo} alt="" draggable={false} className="classic-loading-screen__userphoto" />
+                <img src={splashTop} alt="" draggable={false} />
+            </div>
+            <div className="classic-loading-screen__text">{isError ? 'Loading failed' : REVOLVING_MESSAGES[messageIndex]}</div>
+            <div className="classic-loading-screen__bar">
+                {barProgress !== null && (
+                    <>
+                        <div className="classic-loading-screen__bar-back" />
+                        <div className="classic-loading-screen__bar-top" style={{ width: fillWidth, height: fillHeight / 2 }} />
+                        <div className="classic-loading-screen__bar-bottom" style={{ width: fillWidth, top: BAR_INSET + fillHeight / 2, height: fillHeight / 2 + 1 }} />
+                    </>
+                )}
+            </div>
+            {!isError && <div className="classic-loading-screen__percent">{percent}%</div>}
+            {isError && <div className="classic-loading-screen__error">{message}</div>}
+        </div>
     );
 };

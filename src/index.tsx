@@ -45,6 +45,7 @@ import './css/help/HelpView.css';
 import './css/hotelview/HotelView.css';
 
 import './css/login/LoginView.css';
+import './css/loading/LoadingView.css';
 
 import './css/icons/icons.css';
 
@@ -100,7 +101,6 @@ createRoot(document.getElementById('root')).render(
                     <LoadingView
                         isError={true}
                         message={`Something went wrong.\n${(error as Error)?.message ?? 'Unknown error'}`}
-                        homeUrl={window.location.origin + '/'}
                     />
                 )}
             >
