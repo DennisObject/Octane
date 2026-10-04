@@ -321,7 +321,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
                         transition={ME_POPOVER_TRANSITION}
-                        className="pointer-events-auto fixed bottom-[46px] left-[3px] z-[100]"
+                        className="pointer-events-auto fixed bottom-[51px] left-[3px] z-[100]"
                     >
                         <ToolbarProgressionView
                             achievementCount={getTotalUnseen}
@@ -337,7 +337,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
                         transition={ME_POPOVER_TRANSITION}
-                        className="pointer-events-auto fixed bottom-[46px] left-[3px] z-[100]"
+                        className="pointer-events-auto fixed bottom-[51px] left-[3px] z-[100]"
                     >
                         <ToolbarMeView setMeExpanded={setMeExpanded} useGuideTool={useGuideTool} />
                     </motion.div>
