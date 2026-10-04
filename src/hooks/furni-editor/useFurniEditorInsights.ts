@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { entryText, FurniEditorDetail, FurniItem } from './furniEditorData';
-import { EditForm, furnidataStructureDiff } from './furniEditorForm';
+import { EditField, EditForm, furnidataStructureDiff, HOTEL_UNSUPPORTED_FIELDS } from './furniEditorForm';
 import {
     expectationsForType,
     multiheightMismatch,
@@ -19,10 +19,11 @@ const PUBLIC_NAME_MAX = 56;
 
 /**
  * - editable: the entry was resolved for this classname, so it can be edited;
- * - creatable: no entry at all, saving creates one from items_base;
- * - locked: an entry resolved by id for another classname, left alone to avoid an id collision.
+ * - missing: no entry for this classname; PlusEMU only edits existing entries, so nothing to write;
+ * - locked: an entry resolved by id for another classname, left alone to avoid an id collision;
+ * - unconfigured: the hotel has no furnidata file configured (diagnostic source_missing).
  */
-export type FurnidataState = 'editable' | 'creatable' | 'locked';
+export type FurnidataState = 'editable' | 'missing' | 'locked' | 'unconfigured';
 
 /**
  * Everything the sheet can tell about the open furni beyond its own columns:
@@ -34,12 +35,12 @@ export const useFurniEditorInsights = (detail: FurniEditorDetail, form: EditForm
     const { assetStates, assets } = useFurniAssetChecks(item.itemName);
 
     const furnidataState = useMemo<FurnidataState>(() => {
-        if (!entry) return 'creatable';
+        if (!entry) return diagnostic?.reason === 'source_missing' ? 'unconfigured' : 'missing';
 
         const classname = entryText(entry, 'classname').trim().toLowerCase();
 
         return !classname || classname === item.itemName.trim().toLowerCase() ? 'editable' : 'locked';
-    }, [entry, item.itemName]);
+    }, [entry, diagnostic, item.itemName]);
 
     const isEditable = furnidataState === 'editable';
     const furnidataReason = diagnostic?.reason || 'not_found';
@@ -84,12 +85,18 @@ export const useFurniEditorInsights = (detail: FurniEditorDetail, form: EditForm
         if (assetStates !== null && assetStates > 0 && assetStates !== form.interactionModesCount) {
             const fromType = typed.suggestions.some((s) => s.field === 'interactionModesCount' && s.value === assetStates);
 
-            if (!fromType) all.push({ field: 'interactionModesCount', value: assetStates, reason: { key: 'furni.editor.reason.asset_states', values: { count: assetStates } } });
+            if (!fromType)
+                all.push({
+                    field: 'interactionModesCount',
+                    value: assetStates,
+                    reason: { key: 'furni.editor.reason.asset_states', values: { count: assetStates } }
+                });
         }
 
         const mismatch = multiheightMismatch(form, assetStates);
+        const supported = ({ field }: { field: EditField }) => !HOTEL_UNSUPPORTED_FIELDS.has(field);
 
-        return { suggestions: all, warnings: mismatch ? [...typed.warnings, mismatch] : typed.warnings };
+        return { suggestions: all.filter(supported), warnings: (mismatch ? [...typed.warnings, mismatch] : typed.warnings).filter(supported) };
     }, [isEditable, entry, form, assetStates, related.siblings]);
 
     // A furnidata entry found by classname but carrying another id: the room

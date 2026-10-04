@@ -18,11 +18,7 @@ export const useFurniEditorConfirm = () => {
     return useCallback(
         ({ titleKey, messageKey, confirmKey, values, details = [] }: FurniEditorConfirmText, onConfirm: () => void) => {
             const names = values ? Object.keys(values) : null;
-            const message = LocalizeText(
-                messageKey,
-                names,
-                names ? names.map((name) => String(values[name])) : null
-            );
+            const message = LocalizeText(messageKey, names, names ? names.map((name) => String(values[name])) : null);
 
             showConfirm([message, ...details].join('\n'), onConfirm, null, LocalizeText(confirmKey), null, LocalizeText(titleKey));
         },

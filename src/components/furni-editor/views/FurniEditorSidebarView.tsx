@@ -3,7 +3,7 @@ import { LocalizeText } from '../../../api';
 import { Button } from '../../../common';
 import {
     AssetPresence,
-    EDIT_FIELDS,
+    EDITABLE_FIELDS,
     EditField,
     EditForm,
     fieldLabelKey,
@@ -12,6 +12,7 @@ import {
     FurniEditorFormApi,
     FurniEditorGroup,
     FurniEditorInsights,
+    FurniEditorRights,
     FurniEditorSheetActions,
     furniEditorText
 } from '../../../hooks/furni-editor';
@@ -43,6 +44,7 @@ interface FurniEditorSidebarViewProps {
     insights: FurniEditorInsights;
     actions: FurniEditorSheetActions;
     isBusy: boolean;
+    rights: FurniEditorRights;
     onBack: () => void;
     onGroup: (group: FurniEditorGroup) => void;
     onJump: (field: EditField) => void;
@@ -50,13 +52,14 @@ interface FurniEditorSidebarViewProps {
 
 /** Who the open furni is, what state it is in, and the sheet actions. Never scrolls away. */
 export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) => {
-    const { detail, form, stored, sheet, displayName, insights, actions, isBusy, onBack, onGroup, onJump } = props;
+    const { detail, form, stored, sheet, displayName, insights, actions, isBusy, rights, onBack, onGroup, onJump } = props;
     const { item, catalogItems } = detail;
     const { suggestions, warnings, duplicates, related, furnidataIdMismatch, interactionUnregistered, assets, furnidataState } = insights;
     const { changedFields, isDirty, isValid } = sheet;
     const [jumpQuery, setJumpQuery] = useState('');
 
-    const furnidataStatus = furnidataState === 'locked' ? furnidataReasonText(insights.furnidataReason) : LocalizeText(`furni.editor.side.furnidata.${furnidataState}`);
+    const furnidataStatus =
+        furnidataState === 'locked' ? furnidataReasonText(insights.furnidataReason) : LocalizeText(`furni.editor.side.furnidata.${furnidataState}`);
 
     const jump = (query: string) => {
         setJumpQuery(query);
@@ -66,7 +69,7 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
         if (!needle) return;
 
         const label = (field: EditField) => LocalizeText(fieldLabelKey(field)).toLowerCase();
-        const match = EDIT_FIELDS.find((field) => label(field) === needle) ?? EDIT_FIELDS.find((field) => label(field).startsWith(needle));
+        const match = EDITABLE_FIELDS.find((field) => label(field) === needle) ?? EDITABLE_FIELDS.find((field) => label(field).startsWith(needle));
 
         if (!match) return;
 
@@ -89,7 +92,9 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
             <FurniEditorCopyValueView value={furniEditorText('furni.editor.side.identity', { classname: item.itemName, id: item.id, sprite: item.spriteId })} />
             <table className="octane-staff-table octane-furni-editor-facts">
                 <tbody>
-                    <Fact label={LocalizeText('furni.editor.side.type')}>{LocalizeText(item.type === 's' ? 'furni.editor.type.floor' : 'furni.editor.type.wall')}</Fact>
+                    <Fact label={LocalizeText('furni.editor.side.type')}>
+                        {LocalizeText(item.type === 's' ? 'furni.editor.type.floor' : 'furni.editor.type.wall')}
+                    </Fact>
                     <Fact label={LocalizeText('furni.editor.side.catalogue')}>
                         <Link onClick={() => onGroup('catalogue')}>
                             {catalogItems.length === 0
@@ -166,8 +171,8 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                     <ul>
                         {changedFields.map((field) => (
                             <li key={field}>
-                                <Link onClick={() => onJump(field)}>{LocalizeText(fieldLabelKey(field))}</Link>{' '}
-                                {formatFurniEditorValue(stored[field])} → {formatFurniEditorValue(form[field])}
+                                <Link onClick={() => onJump(field)}>{LocalizeText(fieldLabelKey(field))}</Link> {formatFurniEditorValue(stored[field])} →{' '}
+                                {formatFurniEditorValue(form[field])}
                             </li>
                         ))}
                     </ul>
@@ -182,7 +187,7 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                 onChange={(event) => jump(event.target.value)}
             />
             <datalist id="furni-editor-fields">
-                {EDIT_FIELDS.map((field) => (
+                {EDITABLE_FIELDS.map((field) => (
                     <option key={field} value={LocalizeText(fieldLabelKey(field))} />
                 ))}
             </datalist>
@@ -196,15 +201,17 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                             {LocalizeText('furni.editor.side.discard')}
                         </Button>
                     )}
-                    <Button
-                        grow
-                        disabled={isBusy || item.usageCount > 0}
-                        title={item.usageCount > 0 ? LocalizeText('furni.editor.side.delete.placed') : undefined}
-                        variant="danger"
-                        onClick={actions.remove}
-                    >
-                        {LocalizeText('furni.editor.side.delete')}
-                    </Button>
+                    {rights.canDelete && (
+                        <Button
+                            grow
+                            disabled={isBusy || item.usageCount > 0}
+                            title={item.usageCount > 0 ? LocalizeText('furni.editor.side.delete.placed') : undefined}
+                            variant="danger"
+                            onClick={actions.remove}
+                        >
+                            {LocalizeText('furni.editor.side.delete')}
+                        </Button>
+                    )}
                 </div>
                 {sheet.canUndo && (
                     <Button disabled={isBusy} fullWidth title={LocalizeText('furni.editor.side.undo.tip')} variant="secondary" onClick={sheet.undoLastSave}>

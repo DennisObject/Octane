@@ -4,8 +4,9 @@ import { FurnidataState } from '../../../hooks/furni-editor';
 
 const FLAG_TONE: Record<FurnidataState, string> = {
     editable: 'is-ok',
-    creatable: 'is-muted',
-    locked: 'is-danger'
+    missing: 'is-muted',
+    locked: 'is-danger',
+    unconfigured: 'is-muted'
 };
 
 /** The emulator's furnidata resolution code (matched_id, not_found, ...) in words; an unknown code reads as itself. */

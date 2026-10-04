@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { FurniDetail } from './furniEditorData';
-import { changedFieldsOf, EditField, EditForm, editableForm, FIELD_GROUP, rebaseForm, validateForm } from './furniEditorForm';
+import type { FurniEditorMutationKind } from './furniEditorTraffic';
+import { changedFieldsOf, EditField, EditForm, editableForm, FIELD_GROUP, MIRRORED_FIELDS, rebaseForm, validateForm } from './furniEditorForm';
 import { FURNI_EDITOR_GROUPS, FurniEditorGroup } from './furniEditorUiStore';
 
 export type FurniEditorGroupMark = 'changed' | 'invalid' | null;
@@ -10,13 +11,16 @@ const NO_MARKS = Object.fromEntries(FURNI_EDITOR_GROUPS.map((group) => [group, n
 /**
  * The items_base form of the open furni. A fresh server copy of the same
  * furni (after any save) is rebased under the form, so unsaved edits in other
- * fields survive; another furni resets it.
+ * fields survive; another furni resets it. refreshedAfter marks the re-read
+ * that follows a successful write, so the fields just saved take the server
+ * value even when the server normalised it.
  */
-export const useFurniEditorForm = (item: FurniDetail | null) => {
+export const useFurniEditorForm = (item: FurniDetail | null, refreshedAfter: FurniEditorMutationKind | null) => {
     const stored = useMemo(() => (item ? editableForm(item) : null), [item]);
     const [form, setForm] = useState<EditForm | null>(stored);
     const [baseline, setBaseline] = useState<{ id: number; values: EditForm | null }>({ id: item?.id ?? 0, values: stored });
     const [lastSave, setLastSave] = useState<{ id: number; previous: EditForm } | null>(null);
+    const [submitted, setSubmitted] = useState<{ id: number; values: Partial<EditForm> } | null>(null);
 
     if (baseline.values !== stored) {
         const previous = baseline.values;
@@ -25,15 +29,22 @@ export const useFurniEditorForm = (item: FurniDetail | null) => {
         setBaseline({ id: item?.id ?? 0, values: stored });
 
         if (sameItem && form && previous && stored) {
-            setForm(rebaseForm(form, previous, stored));
+            const saved = refreshedAfter === 'update' && submitted?.id === item.id ? submitted.values : null;
+
+            setForm(rebaseForm(form, previous, stored, saved));
+
+            if (saved) setSubmitted(null);
         } else {
             setForm(stored);
             setLastSave(null);
+            setSubmitted(null);
         }
     }
 
     const setField = useCallback(<K extends EditField>(field: K, value: EditForm[K]) => {
-        setForm((previous) => (previous ? { ...previous, [field]: value } : previous));
+        const mirror = MIRRORED_FIELDS[field];
+
+        setForm((previous) => (previous ? { ...previous, [field]: value, ...(mirror ? { [mirror]: value } : {}) } : previous));
     }, []);
 
     const applyValues = useCallback((values: Partial<EditForm>) => {
@@ -56,11 +67,17 @@ export const useFurniEditorForm = (item: FurniDetail | null) => {
 
     const discard = useCallback(() => setForm(stored), [stored]);
 
-    // The values a save replaced, so one click can put them back into the form
-    // while the sheet stays open.
-    const rememberSave = useCallback(() => {
-        if (item && stored) setLastSave({ id: item.id, previous: stored });
-    }, [item, stored]);
+    // The values a save replaced (so one click can put them back while the
+    // sheet stays open) and the values it sent (see refreshedAfter).
+    const rememberSave = useCallback(
+        (changes: Partial<EditForm>) => {
+            if (!item || !stored) return;
+
+            setLastSave({ id: item.id, previous: stored });
+            setSubmitted({ id: item.id, values: changes });
+        },
+        [item, stored]
+    );
 
     const canUndo = !!lastSave && !!item && !!stored && lastSave.id === item.id && changedFieldsOf(lastSave.previous, stored).length > 0;
 

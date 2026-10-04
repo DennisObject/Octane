@@ -1,4 +1,5 @@
 import type { CatalogRefData, FurniDetailData, FurniItemData } from '@octane/renderer';
+import type { FurniEditorMutationKind } from './furniEditorTraffic';
 
 // Client-side shapes of the furni editor packets (10040-10049). The parser
 // classes are mapped into plain objects so React state never holds a parser
@@ -63,6 +64,8 @@ export interface FurniEditorDetail {
     catalogItems: CatalogRef[];
     furniDataEntry: FurniDataEntry | null;
     furniDataDiagnostic: FurniDataDiagnostic | null;
+    /** Set when this copy is the re-read after a successful write of that kind. */
+    refreshedAfter: FurniEditorMutationKind | null;
 }
 
 export interface FurniImportResult {

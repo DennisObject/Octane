@@ -48,7 +48,14 @@ export const FurniEditorSearchTableView: FC<FurniEditorSearchTableViewProps> = (
                         const note = flag ? localizeFurniEditorText(flag) : undefined;
 
                         return (
-                            <tr key={item.id} className="octane-furni-editor-result" tabIndex={0} title={note} onClick={() => onOpen(item.id)} onKeyDown={(event) => openOnKey(event, item.id)}>
+                            <tr
+                                key={item.id}
+                                className="octane-furni-editor-result"
+                                tabIndex={0}
+                                title={note}
+                                onClick={() => onOpen(item.id)}
+                                onKeyDown={(event) => openOnKey(event, item.id)}
+                            >
                                 <td className="octane-furni-editor-result-icon">
                                     <LayoutFurniIconImageView productClassId={item.spriteId} productType={item.type} />
                                 </td>

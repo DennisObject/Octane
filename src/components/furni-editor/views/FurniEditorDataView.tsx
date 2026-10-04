@@ -1,7 +1,14 @@
 import { FC } from 'react';
 import { LocalizeText } from '../../../api';
 import { Button, StaffSection } from '../../../common';
-import { formatFurniEditorValue, FurniEditorDetail, FurniEditorInsights, FurniEditorSheetActions, furniEditorText } from '../../../hooks/furni-editor';
+import {
+    formatFurniEditorValue,
+    FurniEditorDetail,
+    FurniEditorInsights,
+    FurniEditorRights,
+    FurniEditorSheetActions,
+    furniEditorText
+} from '../../../hooks/furni-editor';
 import { furnidataReasonText } from './FurniEditorFurnidataFlagView';
 import { FurniEditorRelatedView } from './FurniEditorRelatedView';
 
@@ -10,11 +17,12 @@ interface FurniEditorDataViewProps {
     insights: FurniEditorInsights;
     actions: FurniEditorSheetActions;
     isBusy: boolean;
+    rights: FurniEditorRights;
     onOpen: (id: number) => void;
 }
 
 /** Furnidata structure and resolution, plus the furni that share this line or duplicate it. */
-export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insights, actions, isBusy, onOpen }) => {
+export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insights, actions, isBusy, rights, onOpen }) => {
     const { item, furniDataEntry: entry, furniDataDiagnostic: diagnostic } = detail;
     const { structureDiff, furnidataIdMismatch, furnidataState } = insights;
 
@@ -40,11 +48,15 @@ export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insi
                                     ))}
                                 </tbody>
                             </table>
-                            <div className="octane-staff-row">
-                                <Button disabled={isBusy} variant="secondary" onClick={actions.writeStructure}>
-                                    {LocalizeText('furni.editor.data.structure.write')}
-                                </Button>
-                            </div>
+                            {rights.canEditFurnidata ? (
+                                <div className="octane-staff-row">
+                                    <Button disabled={isBusy} variant="secondary" onClick={actions.writeStructure}>
+                                        {LocalizeText('furni.editor.data.structure.write')}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <p className="octane-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
+                            )}
                         </>
                     )}
                 </StaffSection>

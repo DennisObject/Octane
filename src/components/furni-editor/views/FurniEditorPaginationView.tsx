@@ -24,7 +24,9 @@ export const FurniEditorPaginationView: FC<FurniEditorPaginationViewProps> = ({ 
 
     return (
         <div className="octane-staff-row">
-            <span className="octane-staff-muted octane-furni-editor-grow">{furniEditorText('furni.editor.search.total', { total: total.toLocaleString() })}</span>
+            <span className="octane-staff-muted octane-furni-editor-grow">
+                {furniEditorText('furni.editor.search.total', { total: total.toLocaleString() })}
+            </span>
             <Button disabled={page <= 1} title={LocalizeText('furni.editor.page.first')} variant="secondary" onClick={() => goTo(1)}>
                 «
             </Button>

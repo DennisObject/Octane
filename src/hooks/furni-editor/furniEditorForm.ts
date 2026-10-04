@@ -59,18 +59,33 @@ export const FIELD_GROUP: Record<EditField, FurniEditorGroup> = {
 
 export const EDIT_FIELDS = Object.keys(FIELD_GROUP) as EditField[];
 
+/**
+ * Columns PlusEMU's items_base does not have: the server reports them as
+ * false/empty and refuses any change, so the sheet shows them read-only or
+ * not at all. They stay in the form so the wire payload keeps its shape.
+ */
+export const HOTEL_UNSUPPORTED_FIELDS: ReadonlySet<EditField> = new Set<EditField>(['allowLay', 'customparams', 'clothingOnWalk']);
+
+/**
+ * PlusEMU stores one effect id for both genders and refuses two different
+ * values, so the female id follows the male one and is never shown on its own.
+ */
+export const MIRRORED_FIELDS: Readonly<Partial<Record<EditField, EditField>>> = { effectIdMale: 'effectIdFemale' };
+
+const MIRROR_TARGETS: ReadonlySet<EditField> = new Set(Object.values(MIRRORED_FIELDS));
+
+/** The fields a user can change on this hotel (the jump list, the unsaved list, the save diff). */
+export const EDITABLE_FIELDS = EDIT_FIELDS.filter((field) => !HOTEL_UNSUPPORTED_FIELDS.has(field) && !MIRROR_TARGETS.has(field));
+
 export const fieldLabelKey = (field: EditField): string => `furni.editor.field.${field}`;
 
 const TIP_FIELDS: ReadonlySet<EditField> = new Set<EditField>([
     'stackHeight',
     'interactionType',
     'interactionModesCount',
-    'customparams',
     'vendingIds',
     'multiheight',
-    'effectIdMale',
-    'effectIdFemale',
-    'clothingOnWalk'
+    'effectIdMale'
 ]);
 
 export const fieldTipKey = (field: EditField): string | null => (TIP_FIELDS.has(field) ? `furni.editor.tip.${field}` : null);
@@ -95,9 +110,17 @@ export type FormErrors = Partial<Record<EditField, FurniEditorText>>;
 
 const isWholeIn = (value: number, min: number, max: number) => Number.isInteger(value) && value >= min && value <= max;
 
-// Mirrors FurniEditorUpdatePayload.validateValue on the emulator, plus the
-// whole-number rule the server would otherwise apply by truncating. This is
-// for the user only: the server validates every field again.
+// Comma separated lists as the item loader parses them (spaces are dropped, empty is allowed).
+const isNumberList = (value: string, integers: boolean) => {
+    const text = value.replace(/ /g, '');
+
+    if (!text) return true;
+
+    return text.split(',').every((entry) => (integers ? /^\d+$/.test(entry) : /^(\d+\.?\d*|\.\d+)$/.test(entry) && Number(entry) <= 99.99));
+};
+
+// Mirrors FurniEditorUpdatePayload on the emulator (PlusEMU E3). This is for
+// the user only: the server validates every field again.
 export const validateForm = (form: EditForm): FormErrors => {
     const errors: FormErrors = {};
     const wholeRange = (field: NumberField, min: number, max: number) => {
@@ -113,39 +136,58 @@ export const validateForm = (form: EditForm): FormErrors => {
     wholeRange('width', 1, 64);
     wholeRange('length', 1, 64);
     wholeRange('interactionModesCount', 0, 100);
-    wholeMin('effectIdMale', 0);
-    wholeMin('effectIdFemale', 0);
+    wholeRange('effectIdMale', 0, 999);
 
     if (!Number.isFinite(form.stackHeight) || form.stackHeight < 0 || form.stackHeight > 99.99) {
         errors.stackHeight = { key: 'furni.editor.error.range', values: { min: 0, max: 99.99 } };
     }
 
-    maxLength('interactionType', 500);
-    maxLength('customparams', 256);
+    maxLength('interactionType', 25);
     maxLength('vendingIds', 255);
-    maxLength('clothingOnWalk', 255);
     maxLength('multiheight', 50);
+
+    if (!errors.vendingIds && !isNumberList(form.vendingIds, true)) errors.vendingIds = { key: 'furni.editor.error.number_list' };
+    if (!errors.multiheight && !isNumberList(form.multiheight, false)) errors.multiheight = { key: 'furni.editor.error.height_list' };
 
     return errors;
 };
 
 const sameValue = (a: unknown, b: unknown) => Object.is(a, b);
 
-export const changedFieldsOf = (form: EditForm, stored: EditForm): EditField[] => EDIT_FIELDS.filter((field) => !sameValue(form[field], stored[field]));
+/** Changed fields, without mirror targets (they change with their source). */
+export const changedFieldsOf = (form: EditForm, stored: EditForm): EditField[] =>
+    EDIT_FIELDS.filter((field) => !MIRROR_TARGETS.has(field) && !sameValue(form[field], stored[field]));
 
-/** Only the changed fields go to the server, so a save never rewrites a column another staff member just changed. */
-export const changesPayload = (form: EditForm, stored: EditForm): Partial<EditForm> =>
-    Object.fromEntries(changedFieldsOf(form, stored).map((field) => [field, form[field]]));
+/**
+ * Only the changed fields go to the server, so a save never rewrites a column
+ * another staff member just changed. A mirrored pair always travels together.
+ */
+export const changesPayload = (form: EditForm, stored: EditForm): Partial<EditForm> => {
+    const fields = changedFieldsOf(form, stored);
+
+    for (const field of [...fields]) {
+        const mirror = MIRRORED_FIELDS[field];
+
+        if (mirror) fields.push(mirror);
+    }
+
+    return Object.fromEntries(fields.map((field) => [field, form[field]]));
+};
 
 /**
  * Applies a fresh server copy under the form: fields the user left alone take
- * the new value, fields the user changed keep the user's value.
+ * the new value, fields the user changed keep the user's value. After a save,
+ * fields still holding what was submitted take the server value too, since
+ * the server may have normalised it (lowercased type, rounded height, ...).
  */
-export const rebaseForm = (form: EditForm, previous: EditForm, next: EditForm): EditForm => {
+export const rebaseForm = (form: EditForm, previous: EditForm, next: EditForm, submitted: Partial<EditForm> | null = null): EditForm => {
     const rebased = { ...next };
 
     for (const field of EDIT_FIELDS) {
-        if (!sameValue(form[field], previous[field])) (rebased as Record<EditField, unknown>)[field] = form[field];
+        const untouched = sameValue(form[field], previous[field]);
+        const justSaved = !!submitted && field in submitted && sameValue(form[field], submitted[field]);
+
+        if (!untouched && !justSaved) (rebased as Record<EditField, unknown>)[field] = form[field];
     }
 
     return rebased;
@@ -165,16 +207,14 @@ export interface StructureRow {
 export const furnidataStructureDiff = (entry: FurniDataEntry | null, stored: EditForm): StructureRow[] => {
     if (!entry) return [];
 
+    // No canlayon: items_base on this hotel has no lay flag, so its "false" says nothing about the entry.
     const candidates: [StructureKey, number | boolean][] = [
         ['xdim', stored.width],
         ['ydim', stored.length],
         ['height', stored.stackHeight],
         ['canstandon', stored.allowWalk],
-        ['cansiton', stored.allowSit],
-        ['canlayon', stored.allowLay]
+        ['cansiton', stored.allowSit]
     ];
 
-    return candidates
-        .filter(([key, to]) => key in entry && entryText(entry, key) !== String(to))
-        .map(([key, to]) => ({ key, from: entry[key], to }));
+    return candidates.filter(([key, to]) => key in entry && entryText(entry, key) !== String(to)).map(([key, to]) => ({ key, from: entry[key], to }));
 };

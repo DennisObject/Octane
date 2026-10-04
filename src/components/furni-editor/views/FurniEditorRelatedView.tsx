@@ -33,7 +33,9 @@ export const FurniEditorRelatedView: FC<FurniEditorRelatedViewProps> = ({ duplic
                     {siblings.map((row) => (
                         <button key={row.id} className="octane-staff-list-row" type="button" onClick={() => onOpen(row.id)}>
                             <span className="octane-furni-editor-grow">{row.itemName}</span>
-                            <span className="octane-staff-muted">{furniEditorText('furni.editor.preview.footprint', { width: row.width, length: row.length })}</span>
+                            <span className="octane-staff-muted">
+                                {furniEditorText('furni.editor.preview.footprint', { width: row.width, length: row.length })}
+                            </span>
                             <span className="octane-staff-muted">{row.interactionType || LocalizeText('furni.editor.interaction.none')}</span>
                         </button>
                     ))}

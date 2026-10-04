@@ -1,12 +1,21 @@
 import { FC } from 'react';
 import { LocalizeText } from '../../../api';
 import { Button, StaffSection } from '../../../common';
-import { FurniDetail, FurnidataDraftApi, FurniEditorInsights, FurniEditorSheetActions, furniEditorText, localizeFurniEditorText } from '../../../hooks/furni-editor';
+import {
+    FurniDetail,
+    FurnidataDraftApi,
+    FurniEditorInsights,
+    FurniEditorRights,
+    FurniEditorSheetActions,
+    furniEditorText,
+    localizeFurniEditorText
+} from '../../../hooks/furni-editor';
 import { FurniEditorCopyValueView } from './FurniEditorCopyValueView';
 import { furnidataReasonText, FurniEditorFurnidataFlagView } from './FurniEditorFurnidataFlagView';
 
-/** Furnidata names cap (FurnitureTextProvider sanitises again on the server). */
-const FURNIDATA_TEXT_MAX = 256;
+/** FurnidataEditPayload limits on PlusEMU; the server checks them again. */
+const FURNIDATA_NAME_MAX = 100;
+const FURNIDATA_DESCRIPTION_MAX = 512;
 
 interface FurniEditorNamesViewProps {
     item: FurniDetail;
@@ -15,12 +24,15 @@ interface FurniEditorNamesViewProps {
     actions: FurniEditorSheetActions;
     isBusy: boolean;
     isImporting: boolean;
+    /** The server said the import is not configured on this hotel. */
+    importUnavailable: boolean;
+    rights: FurniEditorRights;
 }
 
-export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draft, insights, actions, isBusy, isImporting }) => {
+export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draft, insights, actions, isBusy, isImporting, importUnavailable, rights }) => {
     const { furnidataState } = insights;
     const isEditable = furnidataState === 'editable';
-    const isCreatable = furnidataState === 'creatable';
+    const canWrite = rights.canEditFurnidata && isEditable;
 
     return (
         <>
@@ -29,25 +41,39 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                     <FurniEditorFurnidataFlagView state={furnidataState} />
                     {isEditable && draft.isDirty && <span className="octane-furni-editor-warning">{LocalizeText('furni.editor.names.unsaved')}</span>}
                 </div>
-                {furnidataState === 'locked' ? (
-                    <p className="octane-staff-muted">{furniEditorText('furni.editor.names.locked', { reason: furnidataReasonText(insights.furnidataReason) })}</p>
-                ) : (
+                {furnidataState === 'unconfigured' && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.unconfigured')}</p>}
+                {furnidataState === 'locked' && (
+                    <p className="octane-staff-muted">
+                        {furniEditorText('furni.editor.names.locked', { reason: furnidataReasonText(insights.furnidataReason) })}
+                    </p>
+                )}
+                {isEditable && !rights.canEditFurnidata && (
+                    <>
+                        <div className="octane-staff-grid">
+                            <div className="octane-staff-field">
+                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
+                                <FurniEditorCopyValueView value={draft.storedName} />
+                            </div>
+                            <div className="octane-staff-field">
+                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
+                                <FurniEditorCopyValueView value={draft.storedDescription} />
+                            </div>
+                        </div>
+                        <p className="octane-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
+                    </>
+                )}
+                {furnidataState === 'missing' && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.missing')}</p>}
+                {canWrite && (
                     <>
                         <div className="octane-staff-grid">
                             <label className="octane-staff-field">
                                 <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
-                                <input
-                                    maxLength={FURNIDATA_TEXT_MAX}
-                                    placeholder={isCreatable ? item.publicName || item.itemName : undefined}
-                                    type="text"
-                                    value={draft.name}
-                                    onChange={(event) => draft.setName(event.target.value)}
-                                />
+                                <input maxLength={FURNIDATA_NAME_MAX} type="text" value={draft.name} onChange={(event) => draft.setName(event.target.value)} />
                             </label>
                             <label className="octane-staff-field">
                                 <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
                                 <input
-                                    maxLength={FURNIDATA_TEXT_MAX}
+                                    maxLength={FURNIDATA_DESCRIPTION_MAX}
                                     type="text"
                                     value={draft.description}
                                     onChange={(event) => draft.setDescription(event.target.value)}
@@ -55,27 +81,25 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                             </label>
                         </div>
                         <div className="octane-staff-row">
-                            <Button disabled={isBusy || (isEditable && !draft.isDirty)} variant="primary" onClick={actions.saveFurnidata}>
-                                {LocalizeText(isEditable ? 'furni.editor.names.save' : 'furni.editor.names.create')}
+                            <Button disabled={isBusy || !draft.isDirty} variant="primary" onClick={actions.saveFurnidata}>
+                                {LocalizeText('furni.editor.names.save')}
                             </Button>
-                            {isEditable && (
-                                <>
-                                    <Button disabled={isBusy} variant="secondary" onClick={actions.revert}>
-                                        {LocalizeText('furni.editor.names.revert')}
-                                    </Button>
-                                    <Button
-                                        className="octane-furni-editor-push"
-                                        disabled={isBusy || isImporting}
-                                        title={LocalizeText('furni.editor.names.import.tip')}
-                                        variant="secondary"
-                                        onClick={actions.importFromHabbo}
-                                    >
-                                        {LocalizeText(isImporting ? 'furni.editor.names.import.pending' : 'furni.editor.names.import')}
-                                    </Button>
-                                </>
+                            <Button disabled={isBusy} variant="secondary" onClick={actions.revert}>
+                                {LocalizeText('furni.editor.names.revert')}
+                            </Button>
+                            {!importUnavailable && (
+                                <Button
+                                    className="octane-furni-editor-push"
+                                    disabled={isBusy || isImporting}
+                                    title={LocalizeText('furni.editor.names.import.tip')}
+                                    variant="secondary"
+                                    onClick={actions.importFromHabbo}
+                                >
+                                    {LocalizeText(isImporting ? 'furni.editor.names.import.pending' : 'furni.editor.names.import')}
+                                </Button>
                             )}
                         </div>
-                        {isCreatable && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.create.hint')}</p>}
+                        {importUnavailable && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.import.unconfigured')}</p>}
                         {draft.importNote && <p className="octane-staff-muted">{localizeFurniEditorText(draft.importNote)}</p>}
                     </>
                 )}
@@ -89,7 +113,7 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                     <div className="octane-staff-field">
                         <span className="octane-staff-field-label">{LocalizeText('furni.editor.basic.public_name')}</span>
                         <FurniEditorCopyValueView value={item.publicName} />
-                        {insights.canSyncPublicName && (
+                        {insights.canSyncPublicName && rights.canEditFurnidata && (
                             <Button disabled={isBusy} variant="secondary" onClick={actions.syncName}>
                                 {LocalizeText('furni.editor.basic.sync_name')}
                             </Button>

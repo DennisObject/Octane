@@ -58,19 +58,33 @@ interface TokenedSearchRequest extends FurniSearchRequest {
  * that carries neither the query nor a request id. Only one search is put on
  * the wire at a time, so an answer always belongs to the request in flight.
  * A newer request of the same kind replaces a queued one and makes the one in
- * flight stale, so the editor only ever shows the latest answer.
+ * flight stale, so the editor only ever shows the latest answer. A request
+ * that timed out may still be answered; that late answer is swallowed instead
+ * of being credited to the next search.
  */
 export class FurniSearchChannel {
     private inFlight: TokenedSearchRequest | null = null;
     private readonly queued: Partial<Record<FurniSearchKind, TokenedSearchRequest>> = {};
     private readonly tokens: Record<FurniSearchKind, number> = { list: 0, probe: 0 };
+    private lateAnswers = 0;
     private timer = 0;
 
     constructor(
         private readonly send: (request: FurniSearchRequest) => void,
         private readonly onLost: (request: FurniSearchRequest) => void,
+        /** Searches wait while this says no (a write is pending). */
+        private readonly canSend: () => boolean = () => true,
         private readonly timeoutMs = FURNI_EDITOR_REQUEST_TIMEOUT_MS
     ) {}
+
+    public get isInFlight(): boolean {
+        return this.inFlight !== null;
+    }
+
+    /** Sends the next queued search once the gate opens again. */
+    public resume(): void {
+        this.pump();
+    }
 
     public request(request: FurniSearchRequest): void {
         this.queued[request.kind] = { ...request, token: ++this.tokens[request.kind] };
@@ -85,6 +99,11 @@ export class FurniSearchChannel {
 
     /** Settles the request in flight; returns it only while it is still the latest of its kind. */
     public settle(): FurniSearchRequest | null {
+        if (this.lateAnswers > 0) {
+            this.lateAnswers--;
+            return null;
+        }
+
         const done = this.inFlight;
 
         this.inFlight = null;
@@ -102,7 +121,7 @@ export class FurniSearchChannel {
     }
 
     private pump(): void {
-        if (this.inFlight) return;
+        if (this.inFlight || !this.canSend()) return;
 
         const next = this.queued.list ?? this.queued.probe;
 
@@ -115,6 +134,7 @@ export class FurniSearchChannel {
             const lost = this.inFlight;
 
             this.inFlight = null;
+            this.lateAnswers++;
 
             if (lost && this.isLatest(lost)) this.onLost(lost);
 

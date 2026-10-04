@@ -9,6 +9,7 @@ import { useFurniEditorConfirm } from './useFurniEditorConfirm';
 import type { FurniEditorFormApi } from './useFurniEditorForm';
 import type { FurniEditorInsights } from './useFurniEditorInsights';
 import type { FurnidataDraftApi } from './useFurnidataDraft';
+import type { FurniEditorRights } from './useFurniEditorRights';
 
 const change = (label: string, from: unknown, to: unknown) => `${label}: ${formatFurniEditorValue(from)} → ${formatFurniEditorValue(to)}`;
 
@@ -23,13 +24,15 @@ export const useFurniEditorSheetActions = (
     stored: EditForm,
     sheet: FurniEditorFormApi,
     draft: FurnidataDraftApi,
-    insights: FurniEditorInsights
+    insights: FurniEditorInsights,
+    rights: FurniEditorRights
 ) => {
     const { item, furniDataEntry } = detail;
     const { updateItem, deleteItem, updateFurnidata, updateFurnidataStructure, revertFurnidata, syncPublicName, importText } = useFurniEditorActions();
     const confirm = useFurniEditorConfirm();
     const { changedFields, isValid, isDirty, rememberSave, setField, applyValues } = sheet;
     const displayName = draft.name || item.publicName || item.itemName;
+    const { canEditFurnidata, canDelete } = rights;
 
     const save = useCallback(() => {
         if (!isValid || !isDirty) return;
@@ -50,13 +53,13 @@ export const useFurniEditorSheetActions = (
                 details
             },
             () => {
-                if (updateItem(item.id, changes)) rememberSave();
+                if (updateItem(item.id, changes)) rememberSave(changes);
             }
         );
     }, [isValid, isDirty, form, stored, changedFields, item, displayName, confirm, updateItem, rememberSave]);
 
     const remove = useCallback(() => {
-        if (item.usageCount > 0) return;
+        if (!canDelete || item.usageCount > 0) return;
 
         confirm(
             {
@@ -67,20 +70,18 @@ export const useFurniEditorSheetActions = (
             },
             () => deleteItem(item.id)
         );
-    }, [item, displayName, confirm, deleteItem]);
+    }, [canDelete, item, displayName, confirm, deleteItem]);
 
     const saveFurnidata = useCallback(() => {
-        const creating = insights.furnidataState === 'creatable';
+        // PlusEMU only edits entries that exist, so only an editable entry is written.
+        if (!canEditFurnidata || insights.furnidataState !== 'editable' || !draft.isDirty) return;
 
-        if (insights.furnidataState === 'locked' || (!creating && !draft.isDirty)) return;
-
-        // A new entry without a typed name takes the name the field suggests.
-        const name = creating && !draft.name.trim() ? item.publicName || item.itemName : draft.name;
+        const name = draft.name;
 
         confirm(
             {
                 titleKey: 'furni.editor.confirm.furnidata.title',
-                messageKey: creating ? 'furni.editor.confirm.furnidata.create' : 'furni.editor.confirm.furnidata.message',
+                messageKey: 'furni.editor.confirm.furnidata.message',
                 confirmKey: 'furni.editor.confirm.furnidata.button',
                 values: { classname: item.itemName },
                 details: [
@@ -89,25 +90,31 @@ export const useFurniEditorSheetActions = (
                     change(LocalizeText('furni.editor.names.description'), draft.storedDescription, draft.description)
                 ]
             },
-            () => updateFurnidata(item.id, name, draft.description)
+            () => {
+                if (updateFurnidata(item.id, name, draft.description)) draft.rememberSubmit(name, draft.description);
+            }
         );
-    }, [insights.furnidataState, draft, item, confirm, updateFurnidata]);
+    }, [canEditFurnidata, insights.furnidataState, draft, item, confirm, updateFurnidata]);
 
+    // PlusEMU undoes the last logged furnidata change of this furni.
     const revert = useCallback(() => {
+        if (!canEditFurnidata) return;
+
         confirm(
             {
                 titleKey: 'furni.editor.confirm.revert.title',
                 messageKey: 'furni.editor.confirm.revert.message',
-                confirmKey: 'furni.editor.confirm.revert.button'
+                confirmKey: 'furni.editor.confirm.revert.button',
+                values: { classname: item.itemName }
             },
             () => revertFurnidata(item.id)
         );
-    }, [item.id, confirm, revertFurnidata]);
+    }, [canEditFurnidata, item, confirm, revertFurnidata]);
 
     const writeStructure = useCallback(() => {
         const rows = insights.structureDiff;
 
-        if (!rows.length) return;
+        if (!canEditFurnidata || !rows.length) return;
 
         confirm(
             {
@@ -119,13 +126,15 @@ export const useFurniEditorSheetActions = (
             },
             () => updateFurnidataStructure(item.id, Object.fromEntries(rows.map((row) => [row.key, row.to])))
         );
-    }, [insights.structureDiff, item, confirm, updateFurnidataStructure]);
+    }, [canEditFurnidata, insights.structureDiff, item, confirm, updateFurnidataStructure]);
 
     const syncName = useCallback(() => {
-        if (insights.canSyncPublicName) syncPublicName(item.id, entryText(furniDataEntry, 'name'));
-    }, [insights.canSyncPublicName, item.id, furniDataEntry, syncPublicName]);
+        if (canEditFurnidata && insights.canSyncPublicName) syncPublicName(item.id, entryText(furniDataEntry, 'name'));
+    }, [canEditFurnidata, insights.canSyncPublicName, item.id, furniDataEntry, syncPublicName]);
 
-    const importFromHabbo = useCallback(() => importText(item.id), [item.id, importText]);
+    const importFromHabbo = useCallback(() => {
+        if (canEditFurnidata) importText(item.id);
+    }, [canEditFurnidata, item.id, importText]);
 
     const applySuggestion = useCallback((suggestion: Suggestion) => setField(suggestion.field, suggestion.value), [setField]);
 

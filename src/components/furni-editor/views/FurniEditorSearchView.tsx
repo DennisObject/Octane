@@ -79,11 +79,7 @@ export const FurniEditorSearchView: FC<{ onOpen: (id: number) => void }> = ({ on
                 onOpen={onOpen}
                 onSort={(sortField, sortDir) => search({ ...criteria, query: queryText, sortField, sortDir, page: 1 })}
             />
-            <FurniEditorPaginationView
-                page={page}
-                total={total}
-                onPage={(next) => search({ ...criteria, query: queryText, page: next })}
-            />
+            <FurniEditorPaginationView page={page} total={total} onPage={(next) => search({ ...criteria, query: queryText, page: next })} />
         </div>
     );
 };

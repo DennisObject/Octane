@@ -1,15 +1,10 @@
 import {
-    FurniEditorBySpriteComposer,
     FurniEditorDeleteComposer,
-    FurniEditorDetailComposer,
     FurniEditorDetailResultEvent,
-    FurniEditorImportTextComposer,
     FurniEditorImportTextResultEvent,
-    FurniEditorInteractionsComposer,
     FurniEditorInteractionsResultEvent,
     FurniEditorResultEvent,
     FurniEditorRevertFurnidataComposer,
-    FurniEditorSearchComposer,
     FurniEditorSearchResultEvent,
     FurniEditorUpdateComposer,
     FurniEditorUpdateFurnidataComposer,
@@ -31,27 +26,16 @@ import {
     toFurniItem
 } from './furniEditorData';
 import type { EditForm, StructureKey } from './furniEditorForm';
-import { FurniSearchChannel, PendingRequest } from './furniEditorRequests';
 import { lineQueryFor } from './furniEditorSuggestions';
+import { FurniDetailRequest, FurniEditorMutationKind, FurniEditorTraffic, FurniWriteRequest } from './furniEditorTraffic';
 import type { FurniEditorText } from './furniEditorText';
 import { useFurniEditorUiStore } from './furniEditorUiStore';
 
-export type FurniEditorMutationKind = 'update' | 'delete' | 'furnidata' | 'structure' | 'revert' | 'syncName';
+export type { FurniEditorMutationKind } from './furniEditorTraffic';
 
 export interface FurniEditorNotice extends FurniEditorText {
-    tone: 'success' | 'error';
-}
-
-interface DetailRequest {
-    by: 'id' | 'sprite';
-    value: number;
-    /** A request the user made (open a furni) as opposed to a refresh after a save. */
-    reveal: boolean;
-}
-
-interface PendingMutation {
-    kind: FurniEditorMutationKind;
-    itemId: number;
+    /** info: an expected refusal (e.g. no furnidata file on this hotel), shown as a calm status line. */
+    tone: 'success' | 'error' | 'info';
 }
 
 const SUCCESS_TEXT: Record<FurniEditorMutationKind, string> = {
@@ -67,21 +51,48 @@ const TIMEOUT_NOTICE: FurniEditorNotice = { tone: 'error', key: 'furni.editor.st
 
 // The server answers every failure (permission, validation, not found, rate
 // limit) with the generic result packet and an English message of its own.
-const failureNotice = (message: string): FurniEditorNotice =>
-    message ? { tone: 'error', key: 'furni.editor.status.failed', values: { message } } : { tone: 'error', key: 'furni.editor.status.failed_generic' };
+// The messages PlusEMU (E3) uses for expected refusals get a localised line;
+// anything else is shown as the server worded it.
+const KNOWN_REFUSALS: Record<string, FurniEditorNotice> = {
+    'furnidata source not configured': { tone: 'info', key: 'furni.editor.status.furnidata_unconfigured' },
+    'no furnidata entry for this classname': { tone: 'info', key: 'furni.editor.status.furnidata_no_entry' },
+    'nothing to revert': { tone: 'info', key: 'furni.editor.status.nothing_to_revert' },
+    'too many requests': { tone: 'error', key: 'furni.editor.status.too_many' },
+    'no permission': { tone: 'error', key: 'furni.editor.status.no_permission' }
+};
+
+// E3 names what still uses a furni ("Cannot delete: still used by 1 unopened gifts, catalog deals #5"): shown as it is.
+const DELETE_REFUSAL = /^cannot delete:/i;
+
+/**
+ * E3 does not tell yet: with no ImportUrl it answers "not found", like a real
+ * miss. A refusal such as "Import from Habbo is not configured" turns the
+ * button off for the session.
+ */
+const IMPORT_UNCONFIGURED = /\bimport\b.*\bnot configured\b/i;
+
+const failureNotice = (message: string): FurniEditorNotice => {
+    const text = message.trim();
+    const known = KNOWN_REFUSALS[text.toLowerCase()];
+
+    if (known) return known;
+    if (DELETE_REFUSAL.test(text)) return { tone: 'error', key: 'furni.editor.status.message', values: { message: text } };
+
+    return message ? { tone: 'error', key: 'furni.editor.status.failed', values: { message } } : { tone: 'error', key: 'furni.editor.status.failed_generic' };
+};
+
+// E3 answers a write that changes nothing with success and "No changes".
+const successNotice = (kind: FurniEditorMutationKind, message: string): FurniEditorNotice =>
+    message.trim().toLowerCase() === 'no changes' ? { tone: 'success', key: 'furni.editor.status.no_changes' } : { tone: 'success', key: SUCCESS_TEXT[kind] };
 
 /**
  * Internal shared source of the furni editor: every packet listener, the
  * data they deliver and the actions that request it. Consumers read it
  * through useFurniEditorState / useFurniEditorActions.
  *
- * Correlation, since the wire carries no request ids:
- * - detail answers are matched to the latest detail request by item id or
- *   sprite id, so a slow answer for furni A never replaces furni B;
- * - searches go out one at a time (FurniSearchChannel), so the list and the
- *   line probe can share the result packet;
- * - one mutation at a time; its result is matched by the item id the server
- *   echoes (or -1 for deletes and failures).
+ * The wire carries no request ids, so FurniEditorTraffic decides who an
+ * answer belongs to: detail answers by item or sprite id, searches one at a
+ * time, and never a write on the wire together with a read.
  */
 export const useFurniEditorStore = () => {
     const [items, setItems] = useState<FurniItem[]>([]);
@@ -95,44 +106,38 @@ export const useFurniEditorStore = () => {
     const [relatedItems, setRelatedItems] = useState<FurniItem[]>([]);
     const [importResult, setImportResult] = useState<FurniImportResult | null>(null);
     const [isImporting, setIsImporting] = useState(false);
+    const [importUnavailable, setImportUnavailable] = useState(false);
     const [pendingMutation, setPendingMutation] = useState<FurniEditorMutationKind | null>(null);
     const [notice, setNotice] = useState<FurniEditorNotice | null>(null);
 
     const criteriaRef = useRef<FurniSearchCriteria>(DEFAULT_SEARCH_CRITERIA);
     const shownItemRef = useRef<{ id: number; itemName: string } | null>(null);
+    // Session-wide, never reset: the sheet compares it with the last import it applied.
+    const importSequenceRef = useRef(0);
 
-    const [requests] = useState(() => ({
-        search: new FurniSearchChannel(
-            (request) => SendMessageComposer(new FurniEditorSearchComposer(request.query, request.type, request.page, request.sortField, request.sortDir)),
-            (request) => {
-                if (request.kind !== 'list') return;
+    const [traffic] = useState(
+        () =>
+            new FurniEditorTraffic(
+                (composer) => SendMessageComposer(composer),
+                (kind) => {
+                    if (kind === 'list') setIsSearching(false);
+                    if (kind === 'detail') setIsLoadingDetail(false);
+                    if (kind === 'import') setIsImporting(false);
+                    if (kind === 'write') setPendingMutation(null);
 
-                setIsSearching(false);
-                setNotice(TIMEOUT_NOTICE);
-            }
-        ),
-        detail: new PendingRequest<DetailRequest>(() => {
-            setIsLoadingDetail(false);
-            setNotice(TIMEOUT_NOTICE);
-        }),
-        mutation: new PendingRequest<PendingMutation>(() => {
-            setPendingMutation(null);
-            setNotice(TIMEOUT_NOTICE);
-        }),
-        importText: new PendingRequest<number>(() => {
-            setIsImporting(false);
-            setNotice(TIMEOUT_NOTICE);
-        })
-    }));
+                    setNotice(TIMEOUT_NOTICE);
+                }
+            )
+    );
 
     const search = useCallback(
         (next: FurniSearchCriteria) => {
             criteriaRef.current = next;
             setCriteria(next);
             setIsSearching(true);
-            requests.search.request({ ...next, kind: 'list' });
+            traffic.requestSearch({ ...next, kind: 'list' });
         },
-        [requests]
+        [traffic]
     );
 
     const refreshSearch = useCallback(() => search(criteriaRef.current), [search]);
@@ -142,40 +147,37 @@ export const useFurniEditorStore = () => {
     const probeRelated = useCallback(
         (classname: string) => {
             setRelatedItems([]);
-            requests.search.cancel('probe');
+            traffic.cancelSearch('probe');
 
             const query = lineQueryFor(classname);
 
-            if (query) requests.search.request({ query, type: '', page: 1, sortField: 'itemName', sortDir: 'asc', kind: 'probe' });
+            if (query) traffic.requestSearch({ query, type: '', page: 1, sortField: 'itemName', sortDir: 'asc', kind: 'probe' });
         },
-        [requests]
+        [traffic]
     );
 
     const requestDetail = useCallback(
-        (request: DetailRequest) => {
-            requests.detail.start(request);
+        (request: FurniDetailRequest) => {
+            traffic.requestDetail(request);
             setIsLoadingDetail(true);
 
             if (request.reveal) setNotice(null);
-
-            SendMessageComposer(request.by === 'id' ? new FurniEditorDetailComposer(request.value) : new FurniEditorBySpriteComposer(request.value));
         },
-        [requests]
+        [traffic]
     );
 
-    const openItem = useCallback((id: number) => requestDetail({ by: 'id', value: id, reveal: true }), [requestDetail]);
+    const openItem = useCallback((id: number) => requestDetail({ by: 'id', value: id, reveal: true, after: null }), [requestDetail]);
 
-    const openSprite = useCallback((spriteId: number) => requestDetail({ by: 'sprite', value: spriteId, reveal: true }), [requestDetail]);
+    const openSprite = useCallback((spriteId: number) => requestDetail({ by: 'sprite', value: spriteId, reveal: true, after: null }), [requestDetail]);
 
-    // After a save the open sheet re-reads the item, unless the user is
-    // already on the way to another furni.
+    // Re-reads the open sheet, unless the user is already on the way to another furni.
     const refreshItem = useCallback(
-        (id: number) => {
-            if (shownItemRef.current?.id !== id || requests.detail.pending) return;
+        (id: number, after: FurniEditorMutationKind | null = null) => {
+            if (shownItemRef.current?.id !== id || traffic.isDetailPending) return;
 
-            requestDetail({ by: 'id', value: id, reveal: false });
+            requestDetail({ by: 'id', value: id, reveal: false, after });
         },
-        [requests, requestDetail]
+        [traffic, requestDetail]
     );
 
     // Reopening the window re-reads the furni still open on the sheet.
@@ -184,31 +186,29 @@ export const useFurniEditorStore = () => {
     }, [refreshItem]);
 
     const closeItem = useCallback(() => {
-        if (requests.detail.finish()) setIsLoadingDetail(false);
+        if (traffic.cancelDetail()) setIsLoadingDetail(false);
 
-        requests.search.cancel('probe');
+        traffic.cancelSearch('probe');
         shownItemRef.current = null;
         setDetail(null);
         setRelatedItems([]);
         setImportResult(null);
-    }, [requests]);
+    }, [traffic]);
 
-    const loadInteractions = useCallback(() => SendMessageComposer(new FurniEditorInteractionsComposer()), []);
+    const loadInteractions = useCallback(() => traffic.requestInteractions(), [traffic]);
 
     const clearNotice = useCallback(() => setNotice(null), []);
 
     const mutate = useCallback(
         (kind: FurniEditorMutationKind, itemId: number, composer: IMessageComposer<unknown[]>): boolean => {
-            if (requests.mutation.pending) return false;
+            if (!traffic.requestWrite({ kind, itemId, composer })) return false;
 
-            requests.mutation.start({ kind, itemId });
             setPendingMutation(kind);
             setNotice(null);
-            SendMessageComposer(composer);
 
             return true;
         },
-        [requests]
+        [traffic]
     );
 
     const updateItem = useCallback(
@@ -242,14 +242,12 @@ export const useFurniEditorStore = () => {
 
     const importText = useCallback(
         (id: number) => {
-            if (requests.importText.pending !== null) return;
+            if (!traffic.requestImport(id)) return;
 
-            requests.importText.start(id);
             setIsImporting(true);
             setNotice(null);
-            SendMessageComposer(new FurniEditorImportTextComposer(id));
         },
-        [requests]
+        [traffic]
     );
 
     useMessageEvent<FurniEditorSearchResultEvent>(
@@ -257,7 +255,7 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorSearchResultEvent) => {
                 const parser = event.getParser();
-                const request = requests.search.settle();
+                const request = traffic.answerSearch();
 
                 if (!parser || !request) return;
 
@@ -273,7 +271,7 @@ export const useFurniEditorStore = () => {
                 setPage(parser.page);
                 setIsSearching(false);
             },
-            [requests]
+            [traffic]
         )
     );
 
@@ -282,15 +280,14 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorDetailResultEvent) => {
                 const parser = event.getParser();
-                const request = requests.detail.pending;
 
-                if (!parser?.item || !request) return;
+                if (!parser?.item) return;
 
                 const item = toFurniDetail(parser.item);
+                const request = traffic.answerDetail(item);
 
-                if ((request.by === 'id' ? item.id : item.spriteId) !== request.value) return;
+                if (!request) return;
 
-                requests.detail.finish();
                 setIsLoadingDetail(false);
 
                 const previous = shownItemRef.current;
@@ -300,7 +297,8 @@ export const useFurniEditorStore = () => {
                     item,
                     catalogItems: (parser.catalogItems ?? []).map(toCatalogRef),
                     furniDataEntry: parseJsonObject(parser.furniDataJson),
-                    furniDataDiagnostic: toDiagnostic(parser.furniDataDiagnosticJson)
+                    furniDataDiagnostic: toDiagnostic(parser.furniDataDiagnosticJson),
+                    refreshedAfter: request.after
                 });
 
                 if (previous?.id !== item.id) setImportResult(null);
@@ -312,13 +310,19 @@ export const useFurniEditorStore = () => {
                     if (ui.activeTab === 'search') ui.setTab('names');
                 }
             },
-            [requests, probeRelated]
+            [traffic, probeRelated]
         )
     );
 
     useMessageEvent<FurniEditorInteractionsResultEvent>(
         FurniEditorInteractionsResultEvent,
-        useCallback((event: FurniEditorInteractionsResultEvent) => setInteractions(event.getParser()?.interactions ?? []), [])
+        useCallback(
+            (event: FurniEditorInteractionsResultEvent) => {
+                traffic.answerInteractions();
+                setInteractions(event.getParser()?.interactions ?? []);
+            },
+            [traffic]
+        )
     );
 
     useMessageEvent<FurniEditorImportTextResultEvent>(
@@ -326,26 +330,26 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorImportTextResultEvent) => {
                 const parser = event.getParser();
-                const itemId = requests.importText.finish();
+                const itemId = traffic.answerImport();
 
                 if (!parser || itemId === null) return;
 
                 setIsImporting(false);
-                setImportResult((previous) => ({
+                setImportResult({
                     itemId,
                     found: parser.found,
                     name: parser.name ?? '',
                     description: parser.description ?? '',
                     classname: parser.classname ?? '',
-                    sequence: (previous?.sequence ?? 0) + 1
-                }));
+                    sequence: ++importSequenceRef.current
+                });
             },
-            [requests]
+            [traffic]
         )
     );
 
-    const settleMutation = useCallback(
-        (mutation: PendingMutation, success: boolean, message: string) => {
+    const settleWrite = useCallback(
+        (write: FurniWriteRequest, success: boolean, message: string) => {
             setPendingMutation(null);
 
             if (!success) {
@@ -353,32 +357,20 @@ export const useFurniEditorStore = () => {
                 return;
             }
 
-            setNotice({ tone: 'success', key: SUCCESS_TEXT[mutation.kind] });
+            setNotice(successNotice(write.kind, message));
 
-            if (mutation.kind === 'delete') {
-                if (shownItemRef.current?.id === mutation.itemId) {
+            if (write.kind === 'delete') {
+                if (shownItemRef.current?.id === write.itemId) {
                     closeItem();
                     useFurniEditorUiStore.getState().setTab('search');
                 }
             } else {
-                refreshItem(mutation.itemId);
+                refreshItem(write.itemId, write.kind);
             }
 
             refreshSearch();
         },
         [closeItem, refreshItem, refreshSearch]
-    );
-
-    // A failed read: detail, by-sprite, search and import errors all arrive on the result packet.
-    const settleFailedRead = useCallback(
-        (message: string) => {
-            if (requests.detail.finish()) setIsLoadingDetail(false);
-            else if (requests.importText.finish() !== null) setIsImporting(false);
-            else if (requests.search.settle()?.kind === 'list') setIsSearching(false);
-
-            setNotice(failureNotice(message));
-        },
-        [requests]
     );
 
     useMessageEvent<FurniEditorResultEvent>(
@@ -390,23 +382,32 @@ export const useFurniEditorStore = () => {
                 if (!parser) return;
 
                 const { success, message = '', id } = parser;
-                const mutation = requests.mutation.pending;
+                const route = traffic.routeResult(success, id);
 
-                if (mutation && (id <= 0 || id === mutation.itemId)) {
-                    requests.mutation.finish();
-                    settleMutation(mutation, success, message);
+                if (route.to === 'write') {
+                    settleWrite(route.write, success, message);
                     return;
                 }
 
                 // A late success (after a timeout) still refreshes the sheet it belongs to.
-                if (success) {
-                    if (id > 0) refreshItem(id);
+                if (route.to === 'late-success') {
+                    if (route.itemId > 0) refreshItem(route.itemId);
                     return;
                 }
 
-                settleFailedRead(message);
+                if (route.read === 'detail') setIsLoadingDetail(false);
+                if (route.read === 'import') setIsImporting(false);
+                if (route.read === 'list') setIsSearching(false);
+
+                if (route.read === 'import' && IMPORT_UNCONFIGURED.test(message)) {
+                    setImportUnavailable(true);
+                    setNotice({ tone: 'info', key: 'furni.editor.status.import_unconfigured' });
+                    return;
+                }
+
+                setNotice(failureNotice(message));
             },
-            [requests, settleMutation, settleFailedRead, refreshItem]
+            [traffic, settleWrite, refreshItem]
         )
     );
 
@@ -422,6 +423,7 @@ export const useFurniEditorStore = () => {
         relatedItems,
         importResult,
         isImporting,
+        importUnavailable,
         pendingMutation,
         notice,
         search,

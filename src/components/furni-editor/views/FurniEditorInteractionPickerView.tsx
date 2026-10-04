@@ -89,7 +89,9 @@ export const FurniEditorInteractionPickerView: FC<FurniEditorInteractionPickerVi
                             {type}
                         </li>
                     ))}
-                    {needle && matches.length === 0 && <li className="octane-staff-list-row octane-furni-editor-warning">{LocalizeText('furni.editor.interaction.no_match')}</li>}
+                    {needle && matches.length === 0 && (
+                        <li className="octane-staff-list-row octane-furni-editor-warning">{LocalizeText('furni.editor.interaction.no_match')}</li>
+                    )}
                 </ul>
             )}
         </div>

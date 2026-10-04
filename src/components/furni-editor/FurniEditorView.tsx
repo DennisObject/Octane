@@ -30,9 +30,15 @@ interface StatusLine {
 }
 
 // One status line at a time: a pending write, then the last result, then reads in flight.
-const statusOf = (pending: FurniEditorMutationKind | null, notice: FurniEditorNotice | null, isLoadingDetail: boolean, isImporting: boolean): StatusLine | null => {
+const statusOf = (
+    pending: FurniEditorMutationKind | null,
+    notice: FurniEditorNotice | null,
+    isLoadingDetail: boolean,
+    isImporting: boolean
+): StatusLine | null => {
     if (pending) return { tone: 'pending', message: LocalizeText(pending === 'delete' ? 'furni.editor.status.deleting' : 'furni.editor.status.saving') };
-    if (notice) return { tone: notice.tone, message: localizeFurniEditorText(notice) };
+    // StaffStatus has no info tone; the muted one keeps an expected refusal calm.
+    if (notice) return { tone: notice.tone === 'info' ? 'pending' : notice.tone, message: localizeFurniEditorText(notice) };
     if (isLoadingDetail) return { tone: 'pending', message: LocalizeText('furni.editor.status.loading') };
     if (isImporting) return { tone: 'pending', message: LocalizeText('furni.editor.status.importing') };
 
@@ -57,9 +63,10 @@ export const FurniEditorView: FC = () => {
     // The sheet's form lives here, so it survives closing the window, the tabs
     // can mark unsaved groups and leaving the open furni can ask first.
     const item = detail?.item ?? null;
-    const sheet = useFurniEditorForm(item);
-    const draft = useFurnidataDraft(item, detail?.furniDataEntry ?? null, importResult);
-    const navigation = useFurniEditorNavigation(item?.id ?? 0, sheet.isDirty || draft.isDirty);
+    const refreshedAfter = detail?.refreshedAfter ?? null;
+    const sheet = useFurniEditorForm(item, refreshedAfter);
+    const draft = useFurnidataDraft(item, detail?.furniDataEntry ?? null, importResult, refreshedAfter);
+    const navigation = useFurniEditorNavigation(item, sheet.isDirty || draft.isDirty);
     const isOpen = isVisible && canEdit;
 
     useFurniEditorLinkEvents({ canEdit, onClose: navigation.close, onOpenSprite: navigation.openBySprite });

@@ -8,8 +8,10 @@ import { useFurniEditorUiStore } from './furniEditorUiStore';
  * first while the sheet holds unsaved changes. Closing the window does not:
  * the sheet keeps its state until the window opens again.
  */
-export const useFurniEditorNavigation = (openItemId: number, hasUnsavedChanges: boolean) => {
-    const { openItem, openSprite, closeItem } = useFurniEditorActions();
+export const useFurniEditorNavigation = (openItem: { id: number; spriteId: number } | null, hasUnsavedChanges: boolean) => {
+    const { openItem: loadItem, openSprite, closeItem } = useFurniEditorActions();
+    const openItemId = openItem?.id ?? 0;
+    const openSpriteId = openItem?.spriteId ?? 0;
     const confirm = useFurniEditorConfirm();
     const setTab = useFurniEditorUiStore((state) => state.setTab);
     const setVisible = useFurniEditorUiStore((state) => state.setVisible);
@@ -40,12 +42,23 @@ export const useFurniEditorNavigation = (openItemId: number, hasUnsavedChanges: 
                 return;
             }
 
-            unlessUnsaved(() => openItem(id));
+            unlessUnsaved(() => loadItem(id));
         },
-        [openItemId, unlessUnsaved, openItem, setTab]
+        [openItemId, unlessUnsaved, loadItem, setTab]
     );
 
-    const openBySprite = useCallback((spriteId: number) => unlessUnsaved(() => openSprite(spriteId)), [unlessUnsaved, openSprite]);
+    // A link for the furni already on the sheet just shows it.
+    const openBySprite = useCallback(
+        (spriteId: number) => {
+            if (spriteId === openSpriteId) {
+                setTab('names');
+                return;
+            }
+
+            unlessUnsaved(() => openSprite(spriteId));
+        },
+        [openSpriteId, unlessUnsaved, openSprite, setTab]
+    );
 
     const back = useCallback(
         () =>
