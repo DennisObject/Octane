@@ -13,7 +13,9 @@ export const HousekeepingUserCardView: FC = () => {
         <StaffSection title={`${selectedUser.username} (#${selectedUser.id})`}>
             <div className="octane-housekeeping-user">
                 <div className="octane-housekeeping-user-head">
-                    {selectedUser.figure && <LayoutAvatarImageView direction={2} figure={selectedUser.figure} headOnly={true} />}
+                    {selectedUser.figure && (
+                        <LayoutAvatarImageView headOnly nativeCroppedHead trimmed classNames={['octane-housekeeping-user-head-image']} direction={2} figure={selectedUser.figure} />
+                    )}
                 </div>
                 <table className="octane-staff-table octane-housekeeping-facts">
                     <tbody>

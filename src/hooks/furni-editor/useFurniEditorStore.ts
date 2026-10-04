@@ -289,7 +289,7 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorDetailResultEvent) => {
                 const parser = event.getParser();
-                const reply = answered(traffic.reply({ type: 'detail', id: parser?.item?.id ?? 0 }));
+                const reply = answered(traffic.reply({ type: 'detail', id: parser?.item?.id ?? 0, spriteId: parser?.item?.spriteId ?? 0 }));
 
                 if (!parser?.item || reply?.kind !== 'detail') return;
 
@@ -297,9 +297,6 @@ export const useFurniEditorStore = () => {
                 const item = toFurniDetail(parser.item);
 
                 setIsLoadingDetail(false);
-
-                // FurniEditorTraffic matched the id; a sprite lookup is checked against its sprite here.
-                if (request.by === 'sprite' && item.spriteId !== request.value) return;
 
                 const previous = shownItemRef.current;
 

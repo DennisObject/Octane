@@ -1,8 +1,9 @@
 import { ClubOfferData, CreateLinkEvent, PurchaseFromCatalogComposer } from '@octane/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { CatalogPurchaseState, DispatchUiEvent, GetConfigurationValue, LocalizeText, OpenUrl, SanitizeHtml, SendMessageComposer } from '../../../../../api';
+import hcCatalogTeaser from '../../../../../assets/images/catalog/air/hc/hc-catalog-teaser.gif';
 import vipIconMedium from '../../../../../assets/images/catalog/air/vip-icon-medium.png';
-import { Button, LayoutCurrencyIcon, LayoutLoadingSpinnerView } from '../../../../../common';
+import { LayoutCurrencyIcon, LayoutLoadingSpinnerView } from '../../../../../common';
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent } from '../../../../../events';
 import {
     useCatalogActions,
@@ -10,14 +11,14 @@ import {
     useCatalogSkipPurchaseConfirmation,
     useCatalogUiState,
     useClubOffers,
-    useGiftConfiguration,
     useNotification,
     usePurse,
     useUiEvent
 } from '../../../../../hooks';
+import { CatalogClubPriceFieldView } from './CatalogClubPriceFieldView';
 import { CatalogClubPurchaseConfirmView } from './CatalogClubPurchaseConfirmView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
-import { getClubMembershipSummary, groupClubOffers, isVipPurchaseLayout } from './clubPurchase.helpers';
+import { getClubMembershipSummary, getHcCenterLinkHtml, groupClubOffers, isVipPurchaseLayout } from './clubPurchase.helpers';
 
 const CLUB_WINDOW_ID = 1;
 
@@ -29,7 +30,6 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
     const { currentPage = null } = useCatalogData();
     const { resetPlacedOfferData = null } = useCatalogActions();
     const { giftReceiver = null } = useCatalogUiState();
-    const { data: giftConfiguration = null } = useGiftConfiguration();
     const { purse = null, getCurrencyAmount = null } = usePurse();
     const { showConfirm = null, simpleAlert = null } = useNotification();
     const { data: offers = null } = useClubOffers(CLUB_WINDOW_ID);
@@ -37,7 +37,10 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
     const pageData = currentPage ?? page;
     const layoutCode = pageData?.layoutCode ?? 'club_buy';
     const isVipPage = isVipPurchaseLayout(layoutCode);
-    const offerGroups = useMemo(() => groupClubOffers(layoutCode, offers ?? []), [layoutCode, offers]);
+    const offerGroups = useMemo(
+        () => groupClubOffers(layoutCode, offers ?? [], GetConfigurationValue<string>('catalog.vip.buy.promo', '')),
+        [layoutCode, offers]
+    );
     const membership = useMemo(() => getClubMembershipSummary(purse), [purse]);
 
     const onCatalogEvent = useCallback((event: CatalogEvent) => {
@@ -67,10 +70,10 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
             if (!isVipPage) return LocalizeText('catalog.club.item.header', ['months'], [offer.months.toString()]);
 
             if (offer.months > 0) {
-                return LocalizeText('catalog.vip.item.header.months', ['num_months'], [offer.months.toString()]);
+                return LocalizeText('catalog.vip.item.header.months', ['NUM_MONTHS'], [offer.months.toString()]);
             }
 
-            return LocalizeText('catalog.vip.item.header.days', ['num_days'], [offer.extraDays.toString()]);
+            return LocalizeText('catalog.vip.item.header.days', ['NUM_DAYS'], [offer.extraDays.toString()]);
         },
         [isVipPage]
     );
@@ -81,7 +84,7 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
             const daysOrMonths = offer.months === 0 ? 'days' : 'months';
             const value = offer.months === 0 ? offer.extraDays : offer.months;
 
-            return LocalizeText(`catalog.vip.buy.confirm.${extensionOrSubscription}${daysOrMonths}`, [`num_${daysOrMonths}`], [value.toString()]);
+            return LocalizeText(`catalog.vip.buy.confirm.${extensionOrSubscription}${daysOrMonths}`, [`NUM_${daysOrMonths.toUpperCase()}`], [value.toString()]);
         },
         [membership.tier]
     );
@@ -261,20 +264,17 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
 
         return (
             <span className="octane-club-offer-prices">
-                {offer.priceCredits > 0 && (
+                {(offer.priceCredits > 0 || offer.priceActivityPoints <= 0) && (
                     <span className="octane-club-offer-price" data-currency-type="-1">
-                        <span>{offer.priceCredits}</span>
+                        <CatalogClubPriceFieldView value={offer.priceCredits} />
                         <LayoutCurrencyIcon type={-1} />
                     </span>
                 )}
                 {offer.priceActivityPoints > 0 && (
-                    <>
-                        {offer.priceCredits > 0 && <span className="octane-club-price-separator">+</span>}
-                        <span className="octane-club-offer-price" data-currency-type={offer.priceActivityPointsType}>
-                            <span>{offer.priceActivityPoints}</span>
-                            <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
-                        </span>
-                    </>
+                    <span className="octane-club-offer-price" data-currency-type={offer.priceActivityPointsType}>
+                        <CatalogClubPriceFieldView value={`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`} />
+                        <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
+                    </span>
                 )}
             </span>
         );
@@ -300,18 +300,23 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
                 <div className="octane-club-offer-footer">
                     {renderPrice(offer)}
                     <div className="octane-club-offer-actions">
-                        {isVipPage && giftConfiguration?.isEnabled && offer.giftable && (
-                            <Button classNames={['octane-club-offer-action']} disabled={isPurchasingRef.current} onClick={() => startGift(offer)}>
+                        {isVipPage && offer.giftable && (
+                            <button className="octane-club-offer-action" disabled={isPurchasingRef.current} type="button" onClick={() => startGift(offer)}>
                                 {LocalizeText('catalog.purchase_confirmation.gift')}
-                            </Button>
+                            </button>
                         )}
-                        <Button classNames={['octane-club-offer-action', 'is-buy']} disabled={isPurchasingRef.current} onClick={() => startPurchase(offer)}>
+                        <button
+                            className="octane-club-offer-action is-buy"
+                            disabled={isPurchasingRef.current}
+                            type="button"
+                            onClick={() => startPurchase(offer)}
+                        >
                             {isPending && purchaseState === CatalogPurchaseState.PURCHASE ? (
                                 <LayoutLoadingSpinnerView />
                             ) : (
                                 LocalizeText('catalog.club.button.buy')
                             )}
-                        </Button>
+                        </button>
                     </div>
                 </div>
             </article>
@@ -329,7 +334,6 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
         vip: 'catalog.club.buy.info.vip'
     }[membership.tier];
     const remainingKey = membership.tier === 'vip' ? 'catalog.club.buy.remaining.vip' : 'catalog.club.buy.remaining.hc';
-    const teaserImage = pageData?.localization.getImage(1) ?? '';
     const vipTitleKey = membership.tier === 'vip' ? 'catalog.vip.extend.title' : 'catalog.vip.buy.title';
     const vipInfo =
         membership.tier === 'vip' ? LocalizeText('catalog.vip.extend.info', ['days'], [membership.totalDays.toString()]) : LocalizeText('catalog.vip.buy.info');
@@ -339,16 +343,31 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
             {isVipPage ? (
                 <>
                     <div className="octane-club-vip-intro">
-                        {teaserImage ? <img alt="" className="octane-club-teaser" src={teaserImage} /> : <span className="octane-club-teaser" />}
+                        <img
+                            alt=""
+                            className="octane-club-teaser"
+                            draggable={false}
+                            src={hcCatalogTeaser}
+                            onError={(event) =>
+                            {
+                                // The bundled copy is the primary source; the configured library URL is used once if it fails.
+                                const image = event.currentTarget;
+
+                                if (image.dataset.fallback) return;
+
+                                image.dataset.fallback = 'true';
+                                image.src = `${GetConfigurationValue<string>('image.library.url', '')}catalogue/hc_catalog_teaser.gif`;
+                            }}
+                        />
                         <div className="octane-club-vip-copy">
                             <strong>{LocalizeText(vipTitleKey)}</strong>
-                            <span>{vipInfo}</span>
+                            <span dangerouslySetInnerHTML={{ __html: SanitizeHtml(vipInfo) }} />
                         </div>
                     </div>
                     <div className="octane-club-vip-offers">{offerGroups.vip.map(renderOffer)}</div>
                     <div
                         className="octane-club-center-link"
-                        dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('catalog.vip.buy.hccenter')) }}
+                        dangerouslySetInnerHTML={{ __html: SanitizeHtml(getHcCenterLinkHtml(LocalizeText('catalog.vip.buy.hccenter'))) }}
                         role="link"
                         tabIndex={0}
                         onClick={(event) => {
@@ -384,7 +403,9 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
                         </section>
                         <section className="octane-club-vip-column">{offerGroups.vip.map(renderOffer)}</section>
                     </div>
-                    {membership.active && <div className="octane-club-remaining">{LocalizeText(remainingKey, ['days'], [membership.totalDays.toString()])}</div>}
+                    {membership.active && (
+                        <div className="octane-club-remaining">{LocalizeText(remainingKey, ['days'], [membership.totalDays.toString()])}</div>
+                    )}
                     <button className="octane-club-center-link" type="button" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
                         {LocalizeText('catalog.club.buy.link')}
                     </button>

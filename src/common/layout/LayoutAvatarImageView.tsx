@@ -21,6 +21,8 @@ export interface LayoutAvatarImageViewProps extends BaseProps<HTMLDivElement> {
     compactHeadPadding?: number;
     airMeMenu?: boolean;
     nativeCroppedHead?: boolean;
+    /** With nativeCroppedHead: also trim the transparent margin, so the head can be centred. */
+    trimmed?: boolean;
 }
 
 export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = (props) => {
@@ -36,6 +38,7 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = (props) => 
         compactHeadPadding = 1,
         airMeMenu = false,
         nativeCroppedHead = false,
+        trimmed = false,
         classNames = [],
         style = {},
         ...rest
@@ -93,7 +96,7 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = (props) => 
         if (!isReady) return;
 
         const requestId = ++requestIdRef.current;
-        const figureKey = [figure, gender, direction, headOnly, compactHead, compactHeadSize, compactHeadPadding, fit, airMeMenu, nativeCroppedHead].join('-');
+        const figureKey = [figure, gender, direction, headOnly, compactHead, compactHeadSize, compactHeadPadding, fit, airMeMenu, nativeCroppedHead, trimmed].join('-');
 
         const applyImage = (image: Blob | string) => {
             if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
@@ -135,6 +138,8 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = (props) => 
                 // tiny and drifts sideways inside the tile.
                 if (imageUrl && fit && !nativeCroppedHead) imageUrl = await cropOpaqueBoundsImageUrl(imageUrl);
 
+                if (imageUrl && nativeCroppedHead && trimmed) imageUrl = await cropOpaqueBoundsImageUrl(imageUrl, 0);
+
                 if (imageUrl && !isDisposed.current && requestIdRef.current === requestId) {
                     const blob = dataUrlToBlob(imageUrl);
 
@@ -155,7 +160,7 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = (props) => 
 
             resetFigure(figure);
         }
-    }, [figure, gender, direction, headOnly, compactHead, compactHeadSize, compactHeadPadding, fit, airMeMenu, nativeCroppedHead, isReady]);
+    }, [figure, gender, direction, headOnly, compactHead, compactHeadSize, compactHeadPadding, fit, airMeMenu, nativeCroppedHead, trimmed, isReady]);
 
     useEffect(() => {
         isDisposed.current = false;
