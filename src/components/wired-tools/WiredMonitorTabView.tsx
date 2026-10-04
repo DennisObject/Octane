@@ -1,6 +1,6 @@
 import wiredMonitorImage from '../../assets/images/wiredtools/wired_monitor.png';
 import { Button, Text } from '../../common';
-import { MonitorLog, MonitorLogDetails, MonitorStat } from './WiredCreatorTools.types';
+import { MonitorLog, MonitorStat } from './WiredCreatorTools.types';
 
 export interface WiredMonitorTabViewProps {
     monitorStats: MonitorStat[];
@@ -16,7 +16,8 @@ export interface WiredMonitorTabViewProps {
     /** Opens the room's paged wired log window. */
     onOpenRoomLogs: () => void;
     onClearMonitorLogs: () => void;
-    onOpenMonitorLogDetails: (type: string, details: Pick<MonitorLogDetails, 'severity' | 'amount' | 'latest' | 'reason' | 'sourceLabel' | 'sourceId'>) => void;
+    /** Opens the error information window for a log type; every row links to it, as officially. */
+    onOpenMonitorErrorInfo: (type: string, category: string) => void;
 }
 
 /**
@@ -27,7 +28,7 @@ export interface WiredMonitorTabViewProps {
  * Info, Error Info) are mounted outside the OctaneCardView by the parent.
  */
 export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
-    const { monitorStats, monitorLogs, monitorHistoryRows, onOpenMonitorInfo, onOpenMonitorHistory, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorLogDetails } = props;
+    const { monitorStats, monitorLogs, monitorHistoryRows, onOpenMonitorInfo, onOpenMonitorHistory, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorErrorInfo } = props;
 
     return (
         <div className="p-3 flex flex-col gap-3 relative">
@@ -71,16 +72,7 @@ export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
                                 <tr
                                     key={log.type}
                                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f8f6f0]'} cursor-pointer hover:bg-[#e8eefc]`}
-                                    onClick={() =>
-                                        onOpenMonitorLogDetails(log.type, {
-                                            severity: log.category,
-                                            amount: log.amount,
-                                            latest: log.latest,
-                                            reason: log.latestReason,
-                                            sourceLabel: log.latestSourceLabel,
-                                            sourceId: log.latestSourceId
-                                        })
-                                    }
+                                    onClick={() => onOpenMonitorErrorInfo(log.type, log.category)}
                                 >
                                     <td className="px-2 py-1 text-[#1b57b2] underline-offset-2 hover:underline">{log.type}</td>
                                     <td className="px-2 py-1">{log.category}</td>

@@ -463,7 +463,6 @@ describe('useWiredCreatorToolsUiStore', () => {
         });
 
         it('the managed picker chain persists across the panel close/reopen lifecycle', () => {
-            useWiredCreatorToolsUiStore.getState().setSelectedManagedVariableEntry(entry);
             useWiredCreatorToolsUiStore.getState().setSelectedManagedHolderVariableId(11);
             useWiredCreatorToolsUiStore.getState().setManagedGiveVariableItemId(33);
 
@@ -471,7 +470,6 @@ describe('useWiredCreatorToolsUiStore', () => {
             useWiredCreatorToolsUiStore.getState().setIsVisible(true);
 
             const state = useWiredCreatorToolsUiStore.getState();
-            expect(state.selectedManagedVariableEntry).toEqual(entry);
             expect(state.selectedManagedHolderVariableId).toBe(11);
             expect(state.managedGiveVariableItemId).toBe(33);
         });

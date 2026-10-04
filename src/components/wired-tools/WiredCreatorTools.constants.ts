@@ -21,87 +21,62 @@ export const WIRED_VARIABLES_POLL_MS = 250;
 export const WIRED_INSPECTION_REFRESH_MS = 50;
 export const WIRED_CLOCK_REFRESH_MS = 50;
 
-export const MONITOR_ERROR_INFO: Record<string, { description: string[]; severity: string; title: string }> = {
+/**
+ * Monitor log types. `errorId` marks the six the official client knows: their text is its
+ * `wiredmenu.error_info.<errorId>` localization (pinned from the AIR default localizations as the
+ * fallback). The other types are this hotel's own and keep their own text.
+ */
+export const MONITOR_ERROR_INFO: Record<string, { description: string; errorId?: number; severity: string; title: string }> = {
     WIRED_LOG: {
         title: 'WIRED_LOG',
         severity: 'INFO',
-        description: [
-            'A line a "write to logs" box in this room wrote, at the level the box was set to.',
-            'Nothing is wrong with the engine: the room itself asked for this line, usually to show what a setup is doing while it is being built.',
-            'Open the room log to read the lines and filter them by level.'
-        ]
+        description: 'A line a "write to logs" box in this room wrote, at the level the box was set to.\n\nNothing is wrong with the engine: the room itself asked for this line, usually to show what a setup is doing while it is being built.\n\nOpen the room log to read the lines and filter them by level.'
     },
     UNREACHABLE: {
         title: 'UNREACHABLE',
         severity: 'WARNING',
-        description: [
-            'A furni in this room is waiting on something the room has no way of producing, so it will sit there doing nothing.',
-            'A highscore board is the usual case: it only fills when a game ends, and a game can only end through a game timer. Without one in the room the board stays empty forever.',
-            'Nothing has failed. The furni is fine and so is the engine - the room is simply missing the piece that would feed it.'
-        ]
+        description: 'A furni in this room is waiting on something the room has no way of producing, so it will sit there doing nothing.\n\nA highscore board is the usual case: it only fills when a game ends, and a game can only end through a game timer. Without one in the room the board stays empty forever.\n\nNothing has failed. The furni is fine and so is the engine - the room is simply missing the piece that would feed it.'
     },
     NO_TARGETS: {
         title: 'NO_TARGETS',
         severity: 'WARNING',
-        description: [
-            'A chain fired and one of its effects had nothing to act on, so it did nothing.',
-            'The reason names which source came back empty. "The triggering item" is empty when the trigger is not about a furni at all; "the selector" is empty when no selector picked anything; "the picked furni" is empty when the chosen furni have since been taken up.',
-            'This is not an engine error. It means the setup asked for something that was not there, which until now was the one way a chain could fail in complete silence.'
-        ]
+        description: 'A chain fired and one of its effects had nothing to act on, so it did nothing.\n\nThe reason names which source came back empty. "The triggering item" is empty when the trigger is not about a furni at all; "the selector" is empty when no selector picked anything; "the picked furni" is empty when the chosen furni have since been taken up.\n\nThis is not an engine error. It means the setup asked for something that was not there, which until now was the one way a chain could fail in complete silence.'
     },
     EXECUTION_CAP: {
         title: 'EXECUTION_CAP',
         severity: 'ERROR',
-        description: [
-            'This error occurs when the maximum Wired usage limit is about to be exceeded by a Wired execution.',
-            'When this happens, the current execution is cancelled so the room never goes over the configured usage budget.',
-            'If this happens too often, it usually means the setup is too complex for the amount of triggers firing in a short time.'
-        ]
+        errorId: 0,
+        description: 'This error occurs when the maximum Wired usage limit (which can be observed in the "Monitor" tab) is about to be exceeded by a Wired execution.\nWhen this happens, the execution of Wired will be cancelled, such that the Wired usage limit is never exceeded.\n\nReaching the execution cap too quickly may be a sign of an inefficient Wired setup.\nIf your Wired setup is not too complex, you should investigate how to improve the setup to avoid this error from unexpectedly happening. The Wired usage is a great indicator of your room\'s Wired complexity, and other factors (such as lag in the Habbo servers) are not at play.'
     },
     DELAYED_EVENTS_CAP: {
         title: 'DELAYED_EVENTS_CAP',
         severity: 'ERROR',
-        description: [
-            'Delayed Wired events happen when effects are scheduled to run later.',
-            'There is a limit to how many delayed events can be pending at the same time. Once the limit is reached, new delayed executions are refused.',
-            'If this appears often, the setup is likely relying too heavily on delayed effects and should be simplified.'
-        ]
+        errorId: 1,
+        description: 'Delayed Wired events happen when you execute a Wired effect that has a delay configured.\nThere is a limit to how many of these delayed Wired events can be awaiting execution at the same time, otherwise a smart setup with Wired signals could cause a memory leak in the Habbo servers.\n\nIn any normal scenario, it would be rare to receive this error. If for some reason you do, you may have made an error in your Wired setup. If you haven\'t made an error, you should transform your Wired setup to use Wired counters instead'
     },
     EXECUTOR_OVERLOAD: {
         title: 'EXECUTOR_OVERLOAD',
         severity: 'ERROR',
-        description: [
-            'This error occurs when the Wired engine is receiving a lot of instructions and the room cannot keep up with the execution time.',
-            'This can be a sign of server pressure or of a setup that is too expensive to evaluate repeatedly.',
-            'If the room is also marked as heavy, it is a good sign that the setup should be reduced or optimized.'
-        ]
+        errorId: 2,
+        description: 'This error occurs when the Wired engine is receiving a lot of instructions, but the Habbo servers can not keep up with it.\nThis is usually a sign of server issues, and may not necessarily have to do anything with your room.\n\nIf your room also gives the "MARKED_AS_HEAVY" warning, your room may be a contributing factor and you could look into making the Wired setup less complex'
     },
     MARKED_AS_HEAVY: {
         title: 'MARKED_AS_HEAVY',
         severity: 'WARNING',
-        description: [
-            'The room is being considered heavy because its Wired usage stays high across multiple monitor windows.',
-            'This is not a fatal error by itself, but it means the room is consuming a significant portion of the execution budget.',
-            'If the room is not intentionally complex, it is worth reviewing the setup before it starts triggering harder limits.'
-        ]
+        errorId: 3,
+        description: 'The Habbo servers are analyzing the time it takes to execute your Wired setup at all times, and may consider it to be a "heavy" Wired setup if certain boundaries are exceeded. What happens as a result, is that your room is treated slightly different to avoid it from interfering with other rooms in the hotel. There is no reason to panic as this is not an error, but just a warning. However, you shouldn\'t completely ignore it too.\n\nWhat this means for a wired creator is:\n- Ignore the message if Habbo is lagging, it may not be related to your wired setup.\n- Ignore this message if your room is actually a complex wired room. It\'s just a notification in that case, so you\'re aware.\n- If none of the above, and it\'s supposed to be a simple room, then you\'re doing something wrong and should probably improve the Wired setup.'
     },
     KILLED: {
         title: 'KILLED',
         severity: 'ERROR',
-        description: [
-            'This happens when the room is temporarily halted by the protection layer because the Wired flow looks abusive or unstable.',
-            'While the room is killed, Wired execution is paused for a cooldown period.',
-            'This is usually caused by loops, event spam, or repeated limit violations.'
-        ]
+        errorId: 4,
+        description: 'This is an error that occurs when the Habbo server suspect your room from having malicious Wired intentions. For that reason, the exact criteria for when this happens will not be disclosed.\n\nThe penalty for this error is that Wired execution is halted for 10 minutes.'
     },
     RECURSION_TIMEOUT: {
         title: 'RECURSION_TIMEOUT',
         severity: 'ERROR',
-        description: [
-            'Recursive Wired events happen when signals keep re-triggering other stacks in the same room.',
-            'When the recursion depth limit is reached, execution is stopped to prevent runaway loops.',
-            'In most cases this means two or more stacks are indirectly calling each other too many times.'
-        ]
+        errorId: 5,
+        description: 'Recursive wired events happen when signals execute other Wired stacks in the room. It may do that 10, 100, or 1000+ times before actually concluding the Wired execution. If the Habbo servers analyze that this is taking too long, it will stop your Wired execution.\n\nThis Wired error rarely occurs, but it sometimes does when there is lag on the Habbo servers and the Wired room is either inefficient or complex.\nIn most cases, another Wired error will already have stopped your Wired execution before this error can occur.'
     }
 };
 

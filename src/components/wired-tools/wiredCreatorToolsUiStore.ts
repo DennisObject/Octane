@@ -18,6 +18,19 @@ type Updater<T> = T | ((prev: T) => T);
 
 const apply = <T>(prev: T, next: Updater<T>): T => (typeof next === 'function' ? (next as (p: T) => T)(prev) : next);
 
+/** The windows the tools open beside themselves. Like the official menu disposing its error view, they
+ * close with the tools and stay closed when the tools open again. */
+const CLOSED_CHILD_WINDOWS = {
+    isMonitorHistoryOpen: false,
+    isMonitorInfoOpen: false,
+    isVariableManageOpen: false,
+    isArrayInspectorOpen: false,
+    isManagedGiveOpen: false,
+    isRoomLogsOpen: false,
+    isSelfDonationOpen: false,
+    selectedManagedVariableEntry: null
+} satisfies Partial<WiredCreatorToolsUiState>;
+
 interface WiredCreatorToolsUiState {
     isVisible: boolean;
     activeTab: WiredToolsTab;
@@ -213,7 +226,7 @@ export const useWiredCreatorToolsUiStore = createOctaneStore<WiredCreatorToolsUi
     managedGiveVariableItemId: 0,
     managedGiveValue: '0',
 
-    setIsVisible: (next) => set((state) => ({ isVisible: apply(state.isVisible, next) })),
+    setIsVisible: (next) => set((state) => (apply(state.isVisible, next) ? { isVisible: true } : { isVisible: false, ...CLOSED_CHILD_WINDOWS })),
     setActiveTab: (next) => set({ activeTab: next }),
     setInspectionType: (next) => set({ inspectionType: next }),
     setVariablesType: (next) => set({ variablesType: next }),
