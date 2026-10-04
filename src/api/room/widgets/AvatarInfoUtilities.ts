@@ -205,7 +205,9 @@ export class AvatarInfoUtilities {
 
         if (userInfo.type === AvatarInfoUser.PEER) {
             if (roomObject) {
-                userInfo.targetRoomControllerLevel = roomObject.model.getValue<number>(RoomObjectVariable.FIGURE_FLAT_CONTROL);
+                const targetControllerLevel = roomObject.model.getValue<number>(RoomObjectVariable.FIGURE_FLAT_CONTROL);
+
+                userInfo.targetRoomControllerLevel = Number.isFinite(targetControllerLevel) ? targetControllerLevel : RoomControllerLevel.NONE;
                 userInfo.canBeMuted = this.canBeMuted(userInfo);
                 userInfo.canBeKicked = this.canBeKicked(userInfo);
                 userInfo.canBeBanned = this.canBeBanned(userInfo);
