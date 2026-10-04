@@ -254,8 +254,6 @@
     "catalog.admin.tab.history.only": "History",
     "catalog.admin.offer.error.items.single": "Enter one furni ID; this hotel sells one furni per offer.",
     "catalog.admin.server.code.CONFLICT": "This page or offer has changed again since then. Reload the history and undo the newer change first.",
-    "catalog.admin.studio.unresponsive": "The catalog editor is not responding. Retry to load it again.",
-    "catalog.admin.studio.retry": "Retry",
     "catalog.admin.server.message.page.created": "Page created.",
     "catalog.admin.server.message.page.saved": "Page saved.",
     "catalog.admin.server.message.page.deleted": "Page deleted.",
@@ -320,6 +318,7 @@
     "catalog.admin.server.message.studio.validate": "This hotel has no catalog health check.",
     "catalog.admin.server.message.studio.export": "This hotel cannot export the catalog.",
     "catalog.admin.server.message.studio.import": "This hotel cannot import a catalog file.",
+    "catalog.admin.studio.resync": "The server did not answer. Waiting for it, or reload the client to continue editing.",
     "catalog.admin.server.code.UNSUPPORTED": "This hotel does not support that tool.",
     "catalog.admin.server.code.FORBIDDEN": "You do not have the right to change the catalog.",
     "catalog.admin.server.code.NOT_FOUND": "That page or offer no longer exists. Reload the catalog.",
@@ -1289,7 +1288,6 @@
     "furni.editor.status.reverted": "Last furnidata change undone.",
     "furni.editor.status.name_synced": "Public name filled from the furnidata.",
     "furni.editor.status.failed_generic": "The server refused the request.",
-    "furni.editor.status.timeout": "The server did not answer. Please try again.",
     "furni.editor.search.placeholder": "Search by ID, name or sprite ID",
     "furni.editor.search.type.all": "All",
     "furni.editor.search.showing": "Showing %from%-%to% of %total%",
@@ -1516,7 +1514,6 @@
     "furni.editor.furnidata.flag.missing": "NONE",
     "furni.editor.furnidata.flag.missing.tip": "No furnidata entry for this classname",
     "furni.editor.side.furnidata.missing": "missing",
-    "furni.editor.status.resyncing": "Connection busy, retrying...",
     "furni.editor.status.write_paused": "Previous save not yet confirmed by the server; editing is paused.",
     "furni.editor.status.write_paused_reconnect": "Previous save not yet confirmed by the server; editing is paused. If this lasts, reconnect to the hotel (reload the page) to continue.",
     "furni.editor.status.write_released": "Reconnected. Saving is enabled again; the previous save is unconfirmed, so check the furni first.",
@@ -1554,5 +1551,7 @@
     "furni.editor.server.invalid_text": "The name or description is not valid.",
     "furni.editor.server.structure_not_object": "The structure change is not valid.",
     "furni.editor.server.invalid_structure": "The structure field %key% is not valid.",
-    "furni.editor.server.nothing_sent": "Nothing to change was sent."
+    "furni.editor.server.nothing_sent": "Nothing to change was sent.",
+    "furni.editor.status.stalled": "The server did not answer. Waiting for it, or reload the client to continue editing.",
+    "furni.editor.status.reconnecting": "Connection lost. Waiting for the hotel to reconnect..."
 }
