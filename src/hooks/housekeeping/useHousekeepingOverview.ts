@@ -16,9 +16,9 @@ const resolvePollInterval = (): number => {
 };
 
 /**
- * Dashboard counters and the staff action log. Both refresh when the panel opens and
- * then poll while it stays open and the browser tab is visible; the dashboard only
- * while its tab is showing.
+ * Dashboard counters and the staff action log. The store refreshes both when the panel
+ * opens (and the dashboard when its tab is picked); this hook then polls while the panel
+ * stays open and the browser tab is visible, the dashboard only while its tab shows.
  */
 export const useHousekeepingOverview = (isVisible: boolean, isDashboardActive: boolean) => {
     const [dashboard, setDashboard] = useState<IHousekeepingDashboard | null>(null);
@@ -67,16 +67,6 @@ export const useHousekeepingOverview = (isVisible: boolean, isDashboardActive: b
     useEffect(() => {
         if (!isVisible) return;
 
-        refreshAuditLog();
-    }, [isVisible, refreshAuditLog]);
-
-    useEffect(() => {
-        if (isVisible && isDashboardActive) refreshDashboard();
-    }, [isVisible, isDashboardActive, refreshDashboard]);
-
-    useEffect(() => {
-        if (!isVisible) return;
-
         const intervalMs = resolvePollInterval();
 
         if (!intervalMs) return;
@@ -92,13 +82,13 @@ export const useHousekeepingOverview = (isVisible: boolean, isDashboardActive: b
         return () => clearInterval(handle);
     }, [isVisible, isDashboardActive, refreshAuditLog, refreshDashboard]);
 
-    // Closing the panel invalidates in-flight requests so a late reply can't land.
-    useEffect(() => {
-        if (isVisible) return;
-
+    /** Called on close: in-flight replies can't land any more and nothing shows as loading. */
+    const invalidate = useCallback(() => {
         dashboardTokenRef.current++;
         auditTokenRef.current++;
-    }, [isVisible]);
+        setIsDashboardLoading(false);
+        setIsAuditLoading(false);
+    }, []);
 
-    return { dashboard, dashboardUpdatedAt, isDashboardLoading, refreshDashboard, actionLog, isAuditLoading, refreshAuditLog };
+    return { dashboard, dashboardUpdatedAt, isDashboardLoading, refreshDashboard, actionLog, isAuditLoading, refreshAuditLog, invalidate };
 };

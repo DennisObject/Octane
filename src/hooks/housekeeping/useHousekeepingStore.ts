@@ -42,7 +42,7 @@ const createSeedUser = (id: number, username: string, figure: string): IHousekee
 const useHousekeepingStoreInner = () => {
     const [isVisible, setIsVisible] = useState(false);
     // Scoped per user by useLocalStorage; HousekeepingView bounces an unavailable tab.
-    const [activeTab, setActiveTab] = useLocalStorage<HousekeepingTabId>('nitro.housekeeping.last_tab', HousekeepingTabId.DASHBOARD);
+    const [activeTab, setStoredTab] = useLocalStorage<HousekeepingTabId>('nitro.housekeeping.last_tab', HousekeepingTabId.DASHBOARD);
     const [selectedUser, setSelectedUserState] = useState<IHousekeepingUser | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<IHousekeepingRoom | null>(null);
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -56,12 +56,23 @@ const useHousekeepingStoreInner = () => {
     // gone when the panel closes or another user is selected.
     const [passwordReveal, setPasswordReveal] = useState<HousekeepingPasswordReveal | null>(null);
     const actionPendingRef = useRef(false);
-    const isVisibleRef = useRef(false);
-    const selectedUserIdRef = useRef(0);
+    // Bumped on close and on every selection change; a reset reply only reveals when the
+    // generation it was sent under is still current.
+    const revealGenerationRef = useRef(0);
     const userTokenRef = useRef(0);
     const roomTokenRef = useRef(0);
 
-    const overview = useHousekeepingOverview(isVisible, activeTab === HousekeepingTabId.DASHBOARD);
+    const { invalidate: invalidateOverview, ...overview } = useHousekeepingOverview(isVisible, activeTab === HousekeepingTabId.DASHBOARD);
+    const { refreshAuditLog, refreshDashboard } = overview;
+
+    const setActiveTab = useCallback(
+        (tab: HousekeepingTabId) => {
+            setStoredTab(tab);
+
+            if (tab === HousekeepingTabId.DASHBOARD && isVisible) refreshDashboard();
+        },
+        [setStoredTab, isVisible, refreshDashboard]
+    );
     const { suggestions: userSuggestions, request: requestUserSuggestions } = useHousekeepingSuggestions(HousekeepingApi.searchUsers);
     const { suggestions: roomSuggestions, request: requestRoomSuggestions } = useHousekeepingSuggestions(HousekeepingApi.searchRooms);
 
@@ -71,7 +82,7 @@ const useHousekeepingStoreInner = () => {
     }, []);
 
     const setSelectedUser = useCallback((user: IHousekeepingUser | null) => {
-        selectedUserIdRef.current = user?.id ?? 0;
+        revealGenerationRef.current++;
         setSelectedUserState(user);
         setPasswordReveal((reveal) => (reveal && reveal.userId === user?.id ? reveal : null));
     }, []);
@@ -199,24 +210,30 @@ const useHousekeepingStoreInner = () => {
         setLastSuccess(successKey);
     }, []);
 
-    // A reply that lands after the panel closed or another user was picked is dropped.
-    const revealPassword = useCallback((userId: number, username: string, password: string) => {
-        if (password && isVisibleRef.current && selectedUserIdRef.current === userId) setPasswordReveal({ userId, username, password });
+    const captureRevealGeneration = useCallback(() => revealGenerationRef.current, []);
+
+    const revealPassword = useCallback((generation: number, userId: number, username: string, password: string) => {
+        if (password && generation === revealGenerationRef.current) setPasswordReveal({ userId, username, password });
     }, []);
 
     const clearPasswordReveal = useCallback(() => setPasswordReveal(null), []);
 
     const openPanel = useCallback(() => {
-        isVisibleRef.current = true;
+        if (!isVisible) {
+            refreshAuditLog();
+            refreshDashboard();
+        }
+
         setIsVisible(true);
-    }, []);
+    }, [isVisible, refreshAuditLog, refreshDashboard]);
 
     const closePanel = useCallback(() => {
-        isVisibleRef.current = false;
+        revealGenerationRef.current++;
         setIsVisible(false);
         setPasswordReveal(null);
         clearStatus();
-    }, [clearStatus]);
+        invalidateOverview();
+    }, [clearStatus, invalidateOverview]);
 
     const togglePanel = useCallback(() => (isVisible ? closePanel() : openPanel()), [isVisible, closePanel, openPanel]);
 
@@ -262,6 +279,7 @@ const useHousekeepingStoreInner = () => {
         lastSuccess,
         clearStatus,
         passwordReveal,
+        captureRevealGeneration,
         revealPassword,
         clearPasswordReveal,
         ...overview

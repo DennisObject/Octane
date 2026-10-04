@@ -107,8 +107,30 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
     isTradeLocked: user.isTradeLocked
 });
 
-// The detail packets carry no request id, so a found user/room is matched against what
-// was asked for; a not-found reply can't be told apart and resolves whichever lookup waits.
+/**
+ * One lookup on the wire at a time per channel, latest wins: a request queued behind the
+ * one in flight is replaced by a newer one and resolves null without being sent. The
+ * detail packets carry no request id, so this keeps a not-found reply from answering a
+ * different lookup.
+ */
+const createLookupChannel = () => {
+    let tail: Promise<unknown> = Promise.resolve();
+    let newest = 0;
+
+    return <T>(send: () => Promise<T | null>): Promise<T | null> => {
+        const ticket = ++newest;
+        const result = tail.then(() => (ticket === newest ? send() : null));
+
+        tail = result.catch(() => null);
+
+        return result;
+    };
+};
+
+const userLookups = createLookupChannel();
+const roomLookups = createLookupChannel();
+
+// A found user/room is still matched against what was asked for.
 const awaitUserDetail = (matches: (user: HousekeepingUserDetailData) => boolean): Promise<IHousekeepingUser | null> =>
     awaitMessageEvent<HousekeepingUserDetailEvent, IHousekeepingUser | null>(HousekeepingUserDetailEvent, {
         timeoutMs: 8_000,
@@ -131,17 +153,21 @@ const findUserByNameViaPacket = async (username: string): Promise<IHousekeepingU
 
     if (!trimmed) return null;
 
-    SendMessageComposer(new HousekeepingFindUserByNameComposer(trimmed));
+    return userLookups(() => {
+        SendMessageComposer(new HousekeepingFindUserByNameComposer(trimmed));
 
-    return awaitUserDetail((user) => user.username.toLowerCase() === trimmed.toLowerCase());
+        return awaitUserDetail((user) => user.username.toLowerCase() === trimmed.toLowerCase());
+    });
 };
 
 const findUserByIdViaPacket = async (userId: number): Promise<IHousekeepingUser | null> => {
     if (!Number.isFinite(userId) || userId <= 0) return null;
 
-    SendMessageComposer(new HousekeepingFindUserByIdComposer(userId));
+    return userLookups(() => {
+        SendMessageComposer(new HousekeepingFindUserByIdComposer(userId));
 
-    return awaitUserDetail((user) => user.id === userId);
+        return awaitUserDetail((user) => user.id === userId);
+    });
 };
 
 /**
@@ -217,22 +243,24 @@ const mapRoom = (room: HousekeepingRoomData): IHousekeepingRoom => ({
 const findRoomByIdViaPacket = (roomId: number): Promise<IHousekeepingRoom | null> => {
     if (!Number.isFinite(roomId) || roomId <= 0) return Promise.resolve(null);
 
-    SendMessageComposer(new HousekeepingFindRoomByIdComposer(roomId));
+    return roomLookups(() => {
+        SendMessageComposer(new HousekeepingFindRoomByIdComposer(roomId));
 
-    return awaitMessageEvent<HousekeepingRoomDetailEvent, IHousekeepingRoom | null>(HousekeepingRoomDetailEvent, {
-        timeoutMs: 8_000,
-        accept: (event) => {
-            const parser = event.getParser();
+        return awaitMessageEvent<HousekeepingRoomDetailEvent, IHousekeepingRoom | null>(HousekeepingRoomDetailEvent, {
+            timeoutMs: 8_000,
+            accept: (event) => {
+                const parser = event.getParser();
 
-            return !parser?.found || !parser.room || parser.room.id === roomId;
-        },
-        select: (event) => {
-            const parser = event.getParser();
+                return !parser?.found || !parser.room || parser.room.id === roomId;
+            },
+            select: (event) => {
+                const parser = event.getParser();
 
-            if (!parser || !parser.found || !parser.room) return null;
+                if (!parser || !parser.found || !parser.room) return null;
 
-            return mapRoom(parser.room);
-        }
+                return mapRoom(parser.room);
+            }
+        });
     });
 };
 

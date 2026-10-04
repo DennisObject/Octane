@@ -39,7 +39,8 @@ const isOk = (result: IHousekeepingActionResult | null) => !!result && result.ok
  * permissions and limits on every one of these.
  */
 export const useHousekeepingActions = () => {
-    const { selectedUser, patchSelectedUser, patchSelectedRoom, clearSelectedRoom, beginAction, endAction, reportStatus, revealPassword } = useHousekeepingStore();
+    const { selectedUser, patchSelectedUser, patchSelectedRoom, clearSelectedRoom, beginAction, endAction, reportStatus, captureRevealGeneration, revealPassword } =
+        useHousekeepingStore();
     const { showSingleBubble } = useNotification();
 
     const firstError = useCallback(
@@ -179,6 +180,7 @@ export const useHousekeepingActions = () => {
             if (!beginAction()) return null;
 
             const username = selectedUser?.id === userId ? selectedUser.username : '';
+            const generation = captureRevealGeneration();
 
             try {
                 const result = await HousekeepingApi.resetUserPassword(userId);
@@ -189,7 +191,7 @@ export const useHousekeepingActions = () => {
                     return result;
                 }
 
-                revealPassword(userId, username, result.message ?? '');
+                revealPassword(generation, userId, username, result.message ?? '');
                 endAction(null, 'housekeeping.action.reset_password.done');
 
                 return result;
@@ -199,7 +201,7 @@ export const useHousekeepingActions = () => {
                 return null;
             }
         },
-        [firstError, beginAction, endAction, selectedUser, revealPassword]
+        [firstError, beginAction, endAction, selectedUser, captureRevealGeneration, revealPassword]
     );
 
     // -- room ------------------------------------------------------------------------
