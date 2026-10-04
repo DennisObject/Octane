@@ -64,14 +64,14 @@ export const FurniEditorView: FC = () => {
     const activeTab = useFurniEditorUiStore((state) => state.activeTab);
     const setVisible = useFurniEditorUiStore((state) => state.setVisible);
     const setTab = useFurniEditorUiStore((state) => state.setTab);
-    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation, isResyncing, writeBlock } = useFurniEditorState();
+    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation, isResyncing, writeBlock, fieldError } = useFurniEditorState();
     const { loadInteractions, refreshSearch, reloadOpenItem, closeItem, clearNotice } = useFurniEditorActions();
 
     // The sheet's form lives here, so it survives closing the window, the tabs
     // can mark unsaved groups and leaving the open furni can ask first.
     const item = detail?.item ?? null;
     const refreshedAfter = detail?.refreshedAfter ?? null;
-    const sheet = useFurniEditorForm(item, refreshedAfter);
+    const sheet = useFurniEditorForm(item, refreshedAfter, fieldError);
     const draft = useFurnidataDraft(item, detail?.furniDataEntry ?? null, importResult, refreshedAfter);
     const navigation = useFurniEditorNavigation(item, sheet.isDirty || draft.isDirty);
     const isOpen = isVisible && canEdit;

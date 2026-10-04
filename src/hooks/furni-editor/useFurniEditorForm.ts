@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { FurniDetail } from './furniEditorData';
 import type { FurniEditorMutationKind } from './furniEditorTraffic';
+import type { FurniFieldError } from './useFurniEditorStore';
 import { changedFieldsOf, EditField, EditForm, editableForm, FIELD_GROUP, MIRRORED_FIELDS, rebaseForm, validateForm } from './furniEditorForm';
 import { FURNI_EDITOR_GROUPS, FurniEditorGroup } from './furniEditorUiStore';
 
@@ -15,7 +16,7 @@ const NO_MARKS = Object.fromEntries(FURNI_EDITOR_GROUPS.map((group) => [group, n
  * that follows a successful write, so the fields just saved take the server
  * value even when the server normalised it.
  */
-export const useFurniEditorForm = (item: FurniDetail | null, refreshedAfter: FurniEditorMutationKind | null) => {
+export const useFurniEditorForm = (item: FurniDetail | null, refreshedAfter: FurniEditorMutationKind | null, serverError: FurniFieldError | null = null) => {
     const stored = useMemo(() => (item ? editableForm(item) : null), [item]);
     const [form, setForm] = useState<EditForm | null>(stored);
     const [baseline, setBaseline] = useState<{ id: number; values: EditForm | null }>({ id: item?.id ?? 0, values: stored });
@@ -52,7 +53,18 @@ export const useFurniEditorForm = (item: FurniDetail | null, refreshedAfter: Fur
     }, []);
 
     const changedFields = useMemo(() => (form && stored ? changedFieldsOf(form, stored) : []), [form, stored]);
-    const errors = useMemo(() => (form ? validateForm(form) : {}), [form]);
+    // The client checks, plus a field the server refused while it still holds the value that was sent.
+    const errors = useMemo(() => {
+        if (!form) return {};
+
+        const local = validateForm(form);
+        const sent = submitted?.id === serverError?.itemId ? submitted?.values : undefined;
+
+        if (!serverError || item?.id !== serverError.itemId || !sent || !(serverError.field in sent)) return local;
+        if (!Object.is(form[serverError.field], sent[serverError.field])) return local;
+
+        return { [serverError.field]: serverError.text, ...local };
+    }, [form, item, serverError, submitted]);
     const isValid = Object.keys(errors).length === 0;
     const isDirty = changedFields.length > 0;
 

@@ -28,7 +28,8 @@ import {
     toFurniDetail,
     toFurniItem
 } from './furniEditorData';
-import type { EditForm, StructureKey } from './furniEditorForm';
+import type { EditField, EditForm, StructureKey } from './furniEditorForm';
+import { interpretFurniEditorMessage } from './furniEditorServerMessages';
 import { lineQueryFor } from './furniEditorSuggestions';
 import {
     FurniDetailRequest,
@@ -63,41 +64,28 @@ const TIMEOUT_NOTICE: FurniEditorNotice = { tone: 'error', key: 'furni.editor.st
 // The socket came back while a write was unconfirmed: saving is allowed again, its outcome stays unknown.
 const WRITE_RELEASED_NOTICE: FurniEditorNotice = { tone: 'info', key: 'furni.editor.status.write_released' };
 
-// The server answers every failure (permission, validation, not found, rate
-// limit) with the generic result packet and an English message of its own.
-// The messages PlusEMU (E3) uses for expected refusals get a localised line;
-// anything else is shown as the server worded it.
-const KNOWN_REFUSALS: Record<string, FurniEditorNotice> = {
-    'furnidata source not configured': { tone: 'info', key: 'furni.editor.status.furnidata_unconfigured' },
-    'no furnidata entry for this classname': { tone: 'info', key: 'furni.editor.status.furnidata_no_entry' },
-    'nothing to revert': { tone: 'info', key: 'furni.editor.status.nothing_to_revert' },
-    'too many requests': { tone: 'error', key: 'furni.editor.status.too_many' },
-    'no permission': { tone: 'error', key: 'furni.editor.status.no_permission' }
+/** A server sentence as a status line: the furniEditorServerMessages table, or the text itself when unknown. */
+const serverNotice = (message: string, success: boolean): FurniEditorNotice => {
+    const mapped = interpretFurniEditorMessage(message, success);
+
+    if (!mapped) return success ? { tone: 'success', key: 'furni.editor.status.saved' } : { tone: 'error', key: 'furni.editor.status.failed_generic' };
+
+    return { ...mapped.text, tone: mapped.tone };
 };
 
-// E3 names what still uses a furni ("Cannot delete: still used by 1 unopened gifts, catalog deals #5"): shown as it is.
-const DELETE_REFUSAL = /^cannot delete:/i;
+// The kind's own success line, unless the server says nothing changed.
+const successNotice = (kind: FurniEditorMutationKind, message: string): FurniEditorNotice => {
+    const mapped = interpretFurniEditorMessage(message, true);
 
-/**
- * E3 does not tell yet: with no ImportUrl it answers "not found", like a real
- * miss. A refusal such as "Import from Habbo is not configured" turns the
- * button off for the session.
- */
-const IMPORT_UNCONFIGURED = /\bimport\b.*\bnot configured\b/i;
-
-const failureNotice = (message: string): FurniEditorNotice => {
-    const text = message.trim();
-    const known = KNOWN_REFUSALS[text.toLowerCase()];
-
-    if (known) return known;
-    if (DELETE_REFUSAL.test(text)) return { tone: 'error', key: 'furni.editor.status.message', values: { message: text } };
-
-    return message ? { tone: 'error', key: 'furni.editor.status.failed', values: { message } } : { tone: 'error', key: 'furni.editor.status.failed_generic' };
+    return mapped?.text.key === 'furni.editor.status.no_changes' ? { ...mapped.text, tone: 'success' } : { tone: 'success', key: SUCCESS_TEXT[kind] };
 };
 
-// E3 answers a write that changes nothing with success and "No changes".
-const successNotice = (kind: FurniEditorMutationKind, message: string): FurniEditorNotice =>
-    message.trim().toLowerCase() === 'no changes' ? { tone: 'success', key: 'furni.editor.status.no_changes' } : { tone: 'success', key: SUCCESS_TEXT[kind] };
+/** A refused update that named a field: shown on that field while it still holds the refused value. */
+export interface FurniFieldError {
+    itemId: number;
+    field: EditField;
+    text: FurniEditorText;
+}
 
 const answered = (route: FurniReplyRoute): FurniWireRequest | null => (route?.to === 'request' ? route.request : null);
 
@@ -127,6 +115,7 @@ export const useFurniEditorStore = () => {
     const [notice, setNotice] = useState<FurniEditorNotice | null>(null);
     const [isResyncing, setIsResyncing] = useState(false);
     const [writeBlock, setWriteBlock] = useState<FurniWriteBlock | null>(null);
+    const [fieldError, setFieldError] = useState<FurniFieldError | null>(null);
 
     const criteriaRef = useRef<FurniSearchCriteria>(DEFAULT_SEARCH_CRITERIA);
     const shownItemRef = useRef<{ id: number; itemName: string } | null>(null);
@@ -229,6 +218,7 @@ export const useFurniEditorStore = () => {
         traffic.discard('probe');
         setIsLoadingDetail(false);
         shownItemRef.current = null;
+        setFieldError(null);
         setDetail(null);
         setRelatedItems([]);
         setImportResult(null);
@@ -243,6 +233,8 @@ export const useFurniEditorStore = () => {
     const mutate = useCallback(
         (kind: FurniEditorMutationKind, itemId: number, composer: IMessageComposer<unknown[]>): boolean => {
             if (!traffic.request({ kind: 'write', write: { kind, itemId, composer } })) return false;
+
+            setFieldError(null);
 
             setPendingMutation(kind);
             setNotice(null);
@@ -344,7 +336,10 @@ export const useFurniEditorStore = () => {
                     refreshedAfter: request.after
                 });
 
-                if (previous?.id !== item.id) setImportResult(null);
+                if (previous?.id !== item.id) {
+                    setImportResult(null);
+                    setFieldError(null);
+                }
                 if (previous?.id !== item.id || previous.itemName !== item.itemName) probeRelated(item.itemName);
 
                 if (request.reveal) {
@@ -399,7 +394,13 @@ export const useFurniEditorStore = () => {
             setPendingMutation(null);
 
             if (!success) {
-                setNotice(failureNotice(message));
+                const mapped = interpretFurniEditorMessage(message);
+
+                setNotice(serverNotice(message, false));
+
+                // A refusal that names a form field is shown on that field too.
+                if (write.kind === 'update' && mapped?.field) setFieldError({ itemId: write.itemId, field: mapped.field, text: mapped.text });
+
                 return;
             }
 
@@ -451,13 +452,9 @@ export const useFurniEditorStore = () => {
                 if (request.kind === 'list') setIsSearching(false);
                 if (request.kind === 'probe' || request.kind === 'interactions') return;
 
-                if (request.kind === 'import' && IMPORT_UNCONFIGURED.test(message)) {
-                    setImportUnavailable(true);
-                    setNotice({ tone: 'info', key: 'furni.editor.status.import_unconfigured' });
-                    return;
-                }
+                if (request.kind === 'import' && interpretFurniEditorMessage(message)?.importUnconfigured) setImportUnavailable(true);
 
-                setNotice(failureNotice(message));
+                setNotice(serverNotice(message, false));
             },
             [traffic, settleWrite]
         )
@@ -516,6 +513,7 @@ export const useFurniEditorStore = () => {
         notice,
         isResyncing,
         writeBlock,
+        fieldError,
         search,
         refreshSearch,
         openItem,

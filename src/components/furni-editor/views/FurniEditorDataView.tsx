@@ -7,7 +7,9 @@ import {
     FurniEditorInsights,
     FurniEditorRights,
     FurniEditorSheetActions,
-    furniEditorText
+    furniEditorText,
+    interpretFurniEditorMessage,
+    localizeFurniEditorText
 } from '../../../hooks/furni-editor';
 import { furnidataReasonText } from './FurniEditorFurnidataFlagView';
 import { FurniEditorRelatedView } from './FurniEditorRelatedView';
@@ -20,6 +22,13 @@ interface FurniEditorDataViewProps {
     rights: FurniEditorRights;
     onOpen: (id: number) => void;
 }
+
+// The diagnostic reuses the server sentences; an unknown one reads as it is.
+const diagnosticMessage = (message: string): string => {
+    const mapped = interpretFurniEditorMessage(message);
+
+    return mapped ? localizeFurniEditorText(mapped.text) : '';
+};
 
 /** Furnidata structure and resolution, plus the furni that share this line or duplicate it. */
 export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insights, actions, isBusy, rights, onOpen }) => {
@@ -95,7 +104,7 @@ export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insi
                         {diagnostic?.message && (
                             <tr>
                                 <th>{LocalizeText('furni.editor.data.resolution.message')}</th>
-                                <td className="octane-furni-editor-break">{diagnostic.message}</td>
+                                <td className="octane-furni-editor-break">{diagnosticMessage(diagnostic.message)}</td>
                             </tr>
                         )}
                     </tbody>

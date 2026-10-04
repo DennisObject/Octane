@@ -123,6 +123,20 @@ const composerOf = (request: FurniWireRequest): IMessageComposer<unknown[]> => {
     }
 };
 
+/** The furniture a request names (0 when the server cannot echo it back). */
+const entityOf = (request: FurniWireRequest): number => {
+    switch (request.kind) {
+        case 'write':
+            return request.write.itemId;
+        case 'import':
+            return request.itemId;
+        case 'detail':
+            return request.detail.by === 'id' ? request.detail.value : 0;
+        default:
+            return 0;
+    }
+};
+
 /** Read replies: the packet type of the read on the wire. */
 const readAccepts = (kind: FurniWireKind, type: 'search' | 'detail' | 'import' | 'interactions'): boolean =>
     type === 'search' ? kind === 'list' || kind === 'probe' : kind === type;
@@ -146,13 +160,21 @@ const LATEST_WINS: ReadonlySet<FurniWireKind> = new Set<FurniWireKind>(['list', 
  *   offline --session authenticated--> idle (queue resumes; a read that was on the wire goes first)
  *   offline --any reply--> offline, reply discarded (it belongs to the old socket)
  *
- * Which reply belongs to what, following PlusEMU E3 (FurniEditorResult = success, message, entity id):
+ * Which reply belongs to what, following PlusEMU E3 @53e6bfe2 (FurniEditorResult =
+ * success, message, entity id; every refusal names the furniture the request
+ * named, only sprite lookups, searches and the interaction list answer with 0):
  *   - a read reply belongs to the read on the wire of its packet type;
- *   - a result with id > 0 belongs only to the write with that entity id:
- *     the one on the wire, or the blocked one; otherwise it is ignored;
- *   - a result with id 0 and success = false (a generic refusal or a read
- *     failure) settles a read on the wire; for a write it is ambiguous;
+ *   - a result with id > 0:
+ *       success: only the write for that entity (on the wire, else the blocked one);
+ *       failure: the request on the wire for that entity (a write, a detail
+ *       by id or an import), else the blocked write for it, else a sprite
+ *       lookup on the wire (its furniture id is only known to the server);
+ *       anything else is ignored;
+ *   - a result with id 0 and success = false settles a read on the wire; for
+ *     a write it is ambiguous and the write moves to the block;
  *   - a result with id 0 and success = true is never sent by E3 and is ignored.
+ * A refusal for the blocked entity while a read of that entity is on the
+ * wire goes to the read: the block stays, which is the safe side.
  *
  * Write block (orthogonal): open --write timeout | id 0 result for the write--> blocked(write)
  *   blocked --result whose id is the blocked write's entity--> open (that is its terminal answer)
@@ -289,7 +311,9 @@ export class FurniEditorTraffic {
         const onWire = this.state.tag === 'inflight' ? slot : null;
 
         if (id > 0) {
-            if (onWire?.request.kind === 'write' && onWire.request.write.itemId === id) return this.settle(onWire);
+            const onWireEntity = onWire ? entityOf(onWire.request) : 0;
+
+            if (onWire && onWireEntity === id && (onWire.request.kind === 'write' || !success)) return this.settle(onWire);
 
             const blocked = this.block?.write;
 
@@ -301,7 +325,9 @@ export class FurniEditorTraffic {
                 return { to: 'blocked', write: blocked };
             }
 
-            // Only a write for that entity can own it, and there is none: ignore it.
+            if (onWire && !success && onWire.request.kind === 'detail' && onWire.request.detail.by === 'sprite') return this.settle(onWire);
+
+            // Nothing on the wire or blocked is about that furniture: ignore it.
             return null;
         }
 

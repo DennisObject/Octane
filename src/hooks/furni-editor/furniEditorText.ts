@@ -3,12 +3,22 @@ import type { CatalogRef } from './furniEditorData';
 
 /**
  * A localisation key plus its %placeholder% values. Pure helpers return these
- * instead of English text so the view localises at render time.
+ * instead of English text so the view localises at render time. A value may
+ * itself be a text (localised first), or a list of texts joined with ", ".
  */
 export interface FurniEditorText {
     key: string;
-    values?: Record<string, string | number>;
+    values?: Record<string, FurniEditorTextValue>;
 }
+
+export type FurniEditorTextValue = string | number | FurniEditorText | FurniEditorText[];
+
+const valueText = (value: FurniEditorTextValue): string => {
+    if (Array.isArray(value)) return value.map(localizeFurniEditorText).join(', ');
+    if (typeof value === 'object') return localizeFurniEditorText(value);
+
+    return String(value);
+};
 
 export const localizeFurniEditorText = ({ key, values }: FurniEditorText): string => {
     if (!values) return LocalizeText(key);
@@ -18,7 +28,7 @@ export const localizeFurniEditorText = ({ key, values }: FurniEditorText): strin
     return LocalizeText(
         key,
         names,
-        names.map((name) => String(values[name]))
+        names.map((name) => valueText(values[name]))
     );
 };
 

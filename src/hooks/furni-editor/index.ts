@@ -16,3 +16,4 @@ export * from './useFurnidataDraft';
 export type { FurniEditorMutationKind, FurniEditorNotice } from './useFurniEditorStore';
 export * from './useFurniEditorRights';
 export type { FurniWriteBlock } from './furniEditorTraffic';
+export * from './furniEditorServerMessages';

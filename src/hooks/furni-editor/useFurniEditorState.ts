@@ -19,7 +19,8 @@ export const useFurniEditorState = () => {
         pendingMutation,
         notice,
         isResyncing,
-        writeBlock
+        writeBlock,
+        fieldError
     } = useSharedHook(useFurniEditorStore);
 
     return {
@@ -38,7 +39,8 @@ export const useFurniEditorState = () => {
         pendingMutation,
         notice,
         isResyncing,
-        writeBlock
+        writeBlock,
+        fieldError
     };
 };
 
