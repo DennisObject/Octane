@@ -63,6 +63,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
+    const meSlotRef = useRef<HTMLDivElement>(null);
+    const progressionSlotRef = useRef<HTMLDivElement>(null);
+    const meMenuRef = useRef<HTMLDivElement>(null);
+    const progressionMenuRef = useRef<HTMLDivElement>(null);
     const { userFigure = null } = useSessionInfo();
     const { getFullCount = 0 } = useInventoryUnseenTracker();
     const { getTotalUnseen = 0 } = useAchievements();
@@ -266,6 +270,44 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         };
     }, [ isInRoom ]);
 
+    useLayoutEffect(() =>
+    {
+        if(touchLayout) return;
+
+        const positionMenus = () =>
+        {
+            for(const [ slot, menu ] of [
+                [ meSlotRef.current, meMenuRef.current ],
+                [ progressionSlotRef.current, progressionMenuRef.current ]
+            ])
+            {
+                if(!slot || !menu) continue;
+
+                const bounds = slot.getBoundingClientRect();
+                const left = bounds.left + bounds.width / 2 - menu.offsetWidth / 2;
+
+                menu.style.left = `${ Math.round(Math.max(3, Math.min(left, window.innerWidth - menu.offsetWidth - 3))) }px`;
+            }
+        };
+
+        positionMenus();
+
+        const observer = new ResizeObserver(positionMenus);
+
+        for(const element of [ leftDockRef.current, meMenuRef.current, progressionMenuRef.current ])
+        {
+            if(element) observer.observe(element);
+        }
+
+        window.addEventListener('resize', positionMenus);
+
+        return () =>
+        {
+            observer.disconnect();
+            window.removeEventListener('resize', positionMenus);
+        };
+    }, [ isMeExpanded, isProgressionExpanded, leftCollapsed, touchLayout ]);
+
     const openYouTubePlayer = () => window.dispatchEvent(new CustomEvent('youtube:toggle'));
 
     useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
@@ -317,6 +359,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
             <AnimatePresence>
                 {!touchLayout && isProgressionExpanded && (
                     <motion.div
+                        ref={progressionMenuRef}
                         initial={{ opacity: 0, y: 6, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
@@ -333,6 +376,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 )}
                 {!touchLayout && isMeExpanded && (
                     <motion.div
+                        ref={meMenuRef}
                         initial={{ opacity: 0, y: 6, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
@@ -377,7 +421,11 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
             >
                 <button
                     type="button"
-                    onClick={() => setLeftCollapsed((value) => !value)}
+                    onClick={() =>
+                    {
+                        setProgressionExpanded(false);
+                        setLeftCollapsed((value) => !value);
+                    }}
                     aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
                     className={`tb-collapse pointer-events-auto ${leftCollapsed ? 'tb-collapse--right' : 'tb-collapse--left'}`}
                 />
@@ -395,7 +443,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                 <ToolbarItemView icon="rooms" onClick={() => CreateLinkEvent('navigator/toggle')} className="tb-icon" />
                             </motion.div>
                             {isInRoom && (
-                                <motion.div variants={itemVariants} className="relative tb-slot">
+                                <motion.div ref={progressionSlotRef} variants={itemVariants} className="relative tb-slot">
                                     <ToolbarItemView
                                         icon="progression"
                                         onClick={(event) =>
@@ -435,6 +483,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         </motion.div>
                     )}
                     <motion.div
+                        ref={meSlotRef}
                         variants={itemVariants}
                         className="relative tb-slot tb-slot-tall tb-slot-memenu"
                         data-toolbar-tooltip={localizeWithFallback('toolbar.icon.label.memenu', 'Me')}
