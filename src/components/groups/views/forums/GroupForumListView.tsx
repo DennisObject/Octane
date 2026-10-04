@@ -8,12 +8,13 @@ const FORUMS_PER_PAGE = 20;
 
 interface GroupForumListViewProps {
     onOpenForum: (groupId: number) => void;
+    initialMode?: number;
 }
 
 export const GroupForumListView: FC<GroupForumListViewProps> = (props) => {
-    const { onOpenForum = null } = props;
+    const { onOpenForum = null, initialMode = 0 } = props;
     const [forums, setForums] = useState<ForumData[]>([]);
-    const [listMode, setListMode] = useState<number>(0); // 0 = most active
+    const [listMode, setListMode] = useState<number>(initialMode); // 0 = most active, 2 = my forums
     const [startIndex, setStartIndex] = useState<number>(0);
     const [totalForums, setTotalForums] = useState<number>(0);
 

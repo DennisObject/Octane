@@ -30,6 +30,7 @@ export const GroupForumView: FC<{}> = (props) => {
     const [threadId, setThreadId] = useState<number>(0);
     const [currentThread, setCurrentThread] = useState<GuildForumThread>(null);
     const [forumData, setForumData] = useState<ExtendedForumData>(null);
+    const [forumListMode, setForumListMode] = useState<number>(0);
 
     useMessageEvent<ForumDataMessageEvent>(ForumDataMessageEvent, (event) => {
         const parser = event.getParser();
@@ -85,6 +86,11 @@ export const GroupForumView: FC<{}> = (props) => {
                     case 'show':
                         setIsVisible(true);
                         return;
+                    case 'list':
+                        setForumListMode(parts[2] === 'my' ? 2 : 0);
+                        setCurrentView(VIEW_FORUM_LIST);
+                        setIsVisible(true);
+                        return;
                     case 'hide':
                         setIsVisible(false);
                         return;
@@ -129,7 +135,7 @@ export const GroupForumView: FC<{}> = (props) => {
         <OctaneCardView className="octane-group-forum w-[600px] h-[500px]" theme="primary" uniqueKey="group-forum">
             <OctaneCardHeaderView headerText={getHeaderText()} onCloseClick={() => setIsVisible(false)} />
             <OctaneCardContentView overflow="hidden" className="p-0">
-                {currentView === VIEW_FORUM_LIST && <GroupForumListView onOpenForum={openForum} />}
+                {currentView === VIEW_FORUM_LIST && <GroupForumListView key={forumListMode} initialMode={forumListMode} onOpenForum={openForum} />}
                 {currentView === VIEW_THREAD_LIST && (
                     <GroupForumThreadListView
                         groupId={groupId}
