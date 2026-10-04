@@ -20,12 +20,11 @@ export const createNewPageForm = (parentId: number, catalogMode: string, orderNu
     pageLayout: 'default_3x3',
     iconColor: 1,
     iconImage: 0,
-    minRank: 1,
+    requiredPermission: '',
     orderNum,
     visible: true,
     enabled: true,
     clubOnly: false,
-    vipOnly: false,
     pageHeadline: '',
     pageTeaser: '',
     pageSpecial: '',
@@ -58,12 +57,11 @@ export const createPageFormFromSnapshot = (snapshot: CatalogStudioPageSnapshot):
     pageLayout: snapshot.pageLayout,
     iconColor: snapshot.iconColor,
     iconImage: snapshot.iconImage,
-    minRank: snapshot.minRank,
+    requiredPermission: snapshot.requiredPermission,
     orderNum: snapshot.orderNum,
     visible: snapshot.visible,
     enabled: snapshot.enabled,
     clubOnly: snapshot.clubOnly,
-    vipOnly: snapshot.vipOnly,
     pageHeadline: snapshot.pageHeadline,
     pageTeaser: snapshot.pageTeaser,
     pageSpecial: snapshot.pageSpecial,
@@ -84,12 +82,11 @@ export const createPageFormFromDetails = (details: CatalogAdminPageDetailsMessag
     pageLayout: details.layout,
     iconColor: details.iconColor,
     iconImage: details.iconImage,
-    minRank: details.minRank,
+    requiredPermission: details.requiredPermission,
     orderNum: details.orderNum,
     visible: details.visible,
     enabled: details.enabled,
     clubOnly: details.clubOnly,
-    vipOnly: details.vipOnly,
     pageHeadline: details.headline,
     pageTeaser: details.teaser,
     pageSpecial: details.special,
@@ -108,7 +105,6 @@ export const createPageFormFromDetails = (details: CatalogAdminPageDetailsMessag
 export const validatePageForm = (form: CatalogAdminPageForm): string | null => {
     if (!form.caption.trim()) return 'catalog.admin.page.error.caption';
     if (!isCatalogStudioLayoutCode(form.pageLayout)) return 'catalog.admin.page.error.layout';
-    if (form.minRank < 1) return 'catalog.admin.page.error.rank';
     if (form.iconImage < 0) return 'catalog.admin.page.error.icon';
     if (form.parentId < -1) return 'catalog.admin.page.error.parent';
 
