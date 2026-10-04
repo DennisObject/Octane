@@ -7,7 +7,7 @@ import { useTimedNotice } from './useTimedNotice';
 
 interface UseLoginFormOptions {
     turnstile: TurnstileState;
-    onAuthenticated: (ssoTicket: string) => void;
+    onAuthenticated: (ssoTicket: string, username: string) => void;
     onMaintenance: (message: string) => void;
     initialUsername?: string;
 }
@@ -56,7 +56,7 @@ export const useLoginForm = ({ turnstile, onAuthenticated, onMaintenance, initia
         if (result.ok)
         {
             storeLoginSession(result.data, remember);
-            onAuthenticated(result.data.ssoTicket);
+            onAuthenticated(result.data.ssoTicket, result.data.username);
             return null;
         }
 

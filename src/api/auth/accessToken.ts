@@ -1,89 +1,50 @@
-// The access token only authorises HTTP features for the running session, so it
-// lives in sessionStorage (dropped when the tab closes) instead of localStorage.
-// It is bound to the SSO ticket it was issued with: a session started with a
-// different ticket (another Habbo in the same tab) never reuses it.
-const STORAGE_KEY = 'octane.access.token';
+// The access token only authorises HTTP features for the running session, so
+// it is kept in memory, together with the SSO ticket it belongs to. SSO tickets
+// are single use, so every page load starts a new session (login, remember-me
+// or a website hand-off) that hands out its own token; nothing is stored.
 const LEGACY_STORAGE_KEYS = ['nitro.access.token', 'nitro.access.token.exp'];
+const LEGACY_SESSION_KEY = 'octane.access.token';
 
-interface StoredAccessToken {
+interface HeldAccessToken {
     token: string;
     expiresAt: number;
-    ticketTag: string;
+    ssoTicket: string;
 }
 
-const removeLegacyTokens = (): void =>
+let held: HeldAccessToken | null = null;
+
+const removeStoredTokens = (): void =>
 {
     try
     {
         for (const key of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(key);
+
+        window.sessionStorage.removeItem(LEGACY_SESSION_KEY);
     }
     catch
     {}
 };
 
-removeLegacyTokens();
+removeStoredTokens();
 
-// A one-way 53-bit fingerprint (cyrb53) of the ticket, so the binding can be
-// checked without keeping the ticket itself in storage.
-export const ssoTicketTag = (ssoTicket: string): string =>
+const readHeldToken = (): HeldAccessToken | null =>
 {
-    let h1 = 0xdeadbeef;
-    let h2 = 0x41c6ce57;
+    if (held?.expiresAt && held.expiresAt <= Math.floor(Date.now() / 1000)) held = null;
 
-    for (let index = 0; index < ssoTicket.length; index++)
-    {
-        const code = ssoTicket.charCodeAt(index);
-
-        h1 = Math.imul(h1 ^ code, 2654435761);
-        h2 = Math.imul(h2 ^ code, 1597334677);
-    }
-
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
-};
-
-const readStoredToken = (): StoredAccessToken | null =>
-{
-    try
-    {
-        const stored = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY) || 'null') as Partial<StoredAccessToken> | null;
-
-        if (!stored || typeof stored.token !== 'string' || !stored.token.length || typeof stored.ticketTag !== 'string') return null;
-
-        const expiresAt = typeof stored.expiresAt === 'number' ? stored.expiresAt : 0;
-
-        if (expiresAt && expiresAt <= Math.floor(Date.now() / 1000))
-        {
-            window.sessionStorage.removeItem(STORAGE_KEY);
-            return null;
-        }
-
-        return { token: stored.token, expiresAt, ticketTag: stored.ticketTag };
-    }
-    catch
-    {
-        return null;
-    }
+    return held;
 };
 
 export const clearAccessToken = (): void =>
 {
-    try
-    {
-        window.sessionStorage.removeItem(STORAGE_KEY);
-    }
-    catch
-    {}
+    held = null;
 };
 
-export const getAccessToken = (): string => readStoredToken()?.token ?? '';
+export const getAccessToken = (): string => readHeldToken()?.token ?? '';
 
-export const getAccessTokenExpiresAt = (): number => readStoredToken()?.expiresAt ?? 0;
+export const getAccessTokenExpiresAt = (): number => readHeldToken()?.expiresAt ?? 0;
 
-// True when the stored token was issued for this SSO ticket.
-export const isAccessTokenBoundTo = (ssoTicket: string): boolean => !!ssoTicket && readStoredToken()?.ticketTag === ssoTicketTag(ssoTicket);
+// True when the held token was issued for this SSO ticket.
+export const isAccessTokenBoundTo = (ssoTicket: string): boolean => !!ssoTicket && readHeldToken()?.ssoTicket === ssoTicket;
 
 export interface AccessTokenGrant {
     accessToken?: string;
@@ -94,16 +55,9 @@ export const persistAccessToken = (grant: AccessTokenGrant, ssoTicket: string): 
 {
     if (!grant.accessToken || !ssoTicket) return;
 
-    const stored: StoredAccessToken = {
+    held = {
         token: grant.accessToken,
         expiresAt: grant.accessTokenExpiresAt && grant.accessTokenExpiresAt > 0 ? grant.accessTokenExpiresAt : 0,
-        ticketTag: ssoTicketTag(ssoTicket)
+        ssoTicket
     };
-
-    try
-    {
-        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-    }
-    catch
-    {}
 };

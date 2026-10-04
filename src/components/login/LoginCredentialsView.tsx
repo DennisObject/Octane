@@ -11,7 +11,7 @@ interface LoginCredentialsViewProps {
     isEntering: boolean;
     infoMessage: string | null;
     initialUsername?: string;
-    onAuthenticated: (ssoTicket: string) => void;
+    onAuthenticated: (ssoTicket: string, username: string) => void;
     onMaintenance: (message: string) => void;
     onCancel: () => void;
     onRegister: () => void;

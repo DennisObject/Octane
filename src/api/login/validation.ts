@@ -1,14 +1,15 @@
-// Client-side checks mirror the server's rules so obvious mistakes are caught
-// before a request; the server stays authoritative.
+// Client-side checks mirror the server's RegistrationValidator (PlusEMU) so
+// obvious mistakes are caught before a request; the server stays authoritative,
+// including its reserved-name and word-filter rules.
 export const NAME_MIN_LENGTH = 3;
-export const NAME_MAX_LENGTH = 16;
-export const NAME_ALLOWED_CHARACTERS = '. _ -';
+export const NAME_MAX_LENGTH = 15;
+export const NAME_ALLOWED_CHARACTERS = '. , _ - ; : ? !';
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
-export const EMAIL_MAX_LENGTH = 120;
+export const EMAIL_MAX_LENGTH = 254;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const NAME_PATTERN = /^[A-Za-z0-9._-]+$/;
+const NAME_PATTERN = /^[A-Za-z0-9.,_\-;:?!]+$/;
 
 export type NameProblem = 'too-short' | 'too-long' | 'invalid' | null;
 export type PasswordProblem = 'too-short' | 'mismatch' | null;

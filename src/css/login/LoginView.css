@@ -34,7 +34,11 @@
     user-select: none;
 }
 
-/* login.Background: gradient (colour 0 held to 50%) under the 2x3 scanline tile, filling the stage. */
+/*
+ * login.Background: createGradientBox(50, 100) rotated a quarter turn and scaled to
+ * (W / 50, H / 100) spans the top half of the stage, so ratios 127 and 255 land at
+ * 24.902% and 50% (padded beyond), under the 2x3 scanline tile.
+ */
 .login-flow-stage {
     position: absolute;
     inset: 0;
@@ -48,7 +52,7 @@
     inset: 0;
     background:
         url("@/assets/images/login/background_tiles.png") repeat,
-        linear-gradient(180deg, #0c5a7f 49.8%, #0c3a65 100%);
+        linear-gradient(180deg, #0c5a7f 24.902%, #0c3a65 50%);
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 

@@ -18,10 +18,11 @@ import {
     OctaneEventType,
     OctaneLogger,
     OctaneVersion,
-    PrepareRenderer
+    PrepareRenderer,
+    UserInfoEvent
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, captureLaunchCredentials, ClearRememberLogin, exchangeSsoTicketForAccessToken, forgetAccessToken, getAccessToken, GetRememberLogin, GetUIVersion, loginWithRememberToken, logoutSession, refreshRememberToken, SetRememberLogin, StoreRememberGrant } from './api';
+import { adoptAccessToken, beginAuthSession, ClaimRememberLogin, ClearRememberLogin, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, getAccessToken, getAuthSession, GetRememberLogin, GetUIVersion, isSameHabbo, logoutSession, redeemRememberGrant, rotateRememberGrant, SetRememberLogin, setAuthSessionOwner, takeLaunchRememberToken } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -126,12 +127,14 @@ export const App: FC<{}> = (props) => {
         // Revoke server-side first (best effort), then forget everything locally.
         const accessToken = getAccessToken();
         const rememberToken = GetRememberLogin()?.token ?? '';
+        const ssoTicket = getAuthSession().ssoTicket;
 
-        if (accessToken || rememberToken) void logoutSession({ accessToken, ssoTicket: '', rememberToken });
+        if (accessToken || rememberToken || ssoTicket) void logoutSession({ accessToken, ssoTicket, rememberToken });
 
+        endAuthSession();
         forgetAccessToken();
         ClearStoredChatHistory();
-        ClearRememberLogin();
+        void ClearRememberLogin();
         try {
             delete (window as any).OctaneConfig?.['sso.ticket'];
         } catch {}
@@ -193,8 +196,10 @@ export const App: FC<{}> = (props) => {
     }, []);
 
     const handleAuthenticated = useCallback(
-        (ssoTicket: string) => {
+        (ssoTicket: string, username: string) =>
+        {
             if (!ssoTicket) return;
+            beginAuthSession(ssoTicket, 'credentials', username);
             applySsoTicket(ssoTicket);
             setIsEnteringHotel(true);
             setErrorMessage('');
@@ -204,44 +209,35 @@ export const App: FC<{}> = (props) => {
     );
 
     const tryRememberLogin = useCallback(async (): Promise<string> => {
-        const remembered = GetRememberLogin();
+        const generation = getAuthSession().generation;
+        const { session } = await redeemRememberGrant();
 
-        if (!remembered) return '';
+        // Another session started while the request ran: it wins.
+        if (!session || getAuthSession().generation !== generation) return '';
 
-        const result = await loginWithRememberToken(remembered.token, remembered.username);
+        beginAuthSession(session.ssoTicket, 'remember', session.username);
+        adoptAccessToken(session, session.ssoTicket);
 
-        if (result.ok)
-        {
-            adoptAccessToken(result.data, result.data.ssoTicket);
-            StoreRememberGrant(result.data, result.data.username);
-            return result.data.ssoTicket;
-        }
-
-        // A maintenance or rate-limit answer is temporary, so the token is kept for the next visit.
-        if (result.failure.kind !== 'maintenance' && result.failure.kind !== 'rate-limited' && result.failure.kind !== 'unreachable') ClearRememberLogin();
-
-        return '';
+        return session.ssoTicket;
     }, []);
 
-    const rotateRememberLogin = useCallback(async (): Promise<void> => {
+    // The game server names the Habbo of a hand-off session. A remember grant
+    // that belongs to someone else is dropped, one without an owner joins it.
+    useMessageEvent<UserInfoEvent>(UserInfoEvent, (event) =>
+    {
+        const username = event.getParser()?.userInfo?.username;
+
+        if (!username) return;
+
+        setAuthSessionOwner(username);
+
         const remembered = GetRememberLogin();
 
         if (!remembered) return;
 
-        const result = await refreshRememberToken(remembered.token);
-
-        if (result.ok)
-        {
-            const ssoTicket = GetConfiguration().getValue<string>('sso.ticket', '');
-
-            // The refreshed token belongs to the running session's ticket.
-            if (ssoTicket) adoptAccessToken(result.data, ssoTicket);
-            StoreRememberGrant(result.data, remembered.username);
-            return;
-        }
-
-        if (result.failure.kind === 'invalid-credentials' || result.failure.kind === 'rejected' || result.failure.kind === 'banned') ClearRememberLogin();
-    }, []);
+        if (!remembered.username) ClaimRememberLogin(username);
+        else if (!isSameHabbo(remembered.username, username)) void ClearRememberLogin();
+    });
 
     useEffect(() => {
         const previousPhase = previousConnectionPhaseRef.current;
@@ -399,15 +395,16 @@ export const App: FC<{}> = (props) => {
 
                 let ssoTicket = window.OctaneConfig['sso.ticket'];
                 if (ssoTicket) GetConfiguration().setValue('sso.ticket', ssoTicket);
+                if (typeof ssoTicket === 'string' && ssoTicket && getAuthSession().ssoTicket !== ssoTicket) beginAuthSession(ssoTicket, 'handoff');
 
-                // A website hand-off may pass a remember token; bootstrap already took it out of the URL.
-                const launch = captureLaunchCredentials();
+                // A website hand-off may pass a remember token (bootstrap took it out of the URL); it is used once.
+                const launchRemember = takeLaunchRememberToken();
 
-                if (launch.rememberToken && !GetRememberLogin())
+                if (launchRemember && !GetRememberLogin())
                 {
-                    const expiresAt = launch.rememberExpiresAt || Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+                    const expiresAt = launchRemember.expiresAt || Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 
-                    SetRememberLogin({ token: launch.rememberToken, expiresAt });
+                    void SetRememberLogin({ token: launchRemember.token, expiresAt });
                 }
 
                 bumpProgress(10, taskLabel('loading.task.session', 'Verifying session...'));
@@ -496,7 +493,7 @@ export const App: FC<{}> = (props) => {
 
                 const rotateMinutes = Math.max(1, Number(GetConfiguration().getValue<unknown>('login.remember.rotate.interval.minutes', 15)) || 15);
                 if (GetRememberLogin())
-                    rememberRotateIntervalRef.current = window.setInterval(() => rotateRememberLogin(), rotateMinutes * 60 * 1000);
+                    rememberRotateIntervalRef.current = window.setInterval(() => void rotateRememberGrant(), rotateMinutes * 60 * 1000);
 
                 if (!tickersStartedRef.current) {
                     tickersStartedRef.current = true;
@@ -526,7 +523,7 @@ export const App: FC<{}> = (props) => {
             if (heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
             if (rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
         };
-    }, [prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, rotateRememberLogin, bumpProgress, taskLabel]);
+    }, [prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress, taskLabel]);
 
     return (
         <Base fit overflow="hidden" className={`octane-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>

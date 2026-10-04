@@ -43,3 +43,18 @@ export const captureLaunchCredentials = (): LaunchCredentials =>
 
     return captured;
 };
+
+// The hand-off remember token is used once: after that the stored grant (or
+// its absence, if it was rejected or cleared) is what counts.
+export const takeLaunchRememberToken = (): { token: string; expiresAt: number } | null =>
+{
+    const launch = captureLaunchCredentials();
+
+    if (!launch.rememberToken) return null;
+
+    const grant = { token: launch.rememberToken, expiresAt: launch.rememberExpiresAt };
+
+    captured = { ...launch, rememberToken: '', rememberExpiresAt: 0 };
+
+    return grant;
+};

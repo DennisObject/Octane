@@ -11,7 +11,7 @@ import { RegistrationRoomView } from './RegistrationRoomView';
 
 interface RegistrationViewProps {
     isEntering: boolean;
-    onAuthenticated: (ssoTicket: string) => void;
+    onAuthenticated: (ssoTicket: string, username: string) => void;
     onRegisteredWithoutLogin: (username: string, message: string) => void;
     onCancel: () => void;
 }

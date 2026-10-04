@@ -1,4 +1,5 @@
 import { AVATAR_SET_TYPES, FigureSelection, Gender } from './avatarFigure';
+import { EMAIL_MAX_LENGTH, NAME_MAX_LENGTH } from './validation';
 
 // Unfinished sign-ups survive a reload of the same tab. The draft never holds
 // the password and lives in sessionStorage, so the email is gone with the tab.
@@ -60,8 +61,8 @@ export const loadRegistrationDraft = (): RegistrationDraft | null =>
         if (!candidate || typeof candidate !== 'object') return null;
 
         return {
-            email: typeof candidate.email === 'string' ? candidate.email.slice(0, 120) : '',
-            username: typeof candidate.username === 'string' ? candidate.username.slice(0, 32) : '',
+            email: typeof candidate.email === 'string' ? candidate.email.slice(0, EMAIL_MAX_LENGTH) : '',
+            username: typeof candidate.username === 'string' ? candidate.username.slice(0, NAME_MAX_LENGTH) : '',
             gender: candidate.gender === 'M' ? 'M' : 'F',
             selection: sanitizeSelection(candidate.selection),
             templateId: Number.isInteger(candidate.templateId) && (candidate.templateId) > 0 ? (candidate.templateId) : null

@@ -413,7 +413,9 @@ None on this branch. The two previously-open races are closed:
   `src/components/wired-tools/`
 - User account settings (cherry-picked from upstream PR #126):
   `src/components/user-settings/UserAccountSettingsView.tsx`
-- Access token (sessionStorage, with expiry, bound to its SSO ticket): `src/api/auth/accessToken.ts`;
+- Access token (memory only, bound to its SSO ticket, exchanged once per ticket): `src/api/auth/accessToken.ts`
+  + `ssoTokenExchange.ts`; remember-me spends its rotating token one request at a time across tabs
+  (Web Locks, IndexedDB copy) in `src/api/auth/rememberSession.ts`;
   URL hand-off credentials are lifted before any request by `captureLaunchCredentials`;
   login/remember storage: `storeLoginSession` in `src/api/login/loginSession.ts`
 - Asset middleware: `octaneAssetsServer()` in `vite.config.mjs`

@@ -9,6 +9,6 @@ export const storeLoginSession = (session: LoginSession, remember: boolean): voi
 {
     adoptAccessToken(session, session.ssoTicket);
 
-    if (remember) StoreRememberGrant(session, session.username);
-    else ClearRememberLogin();
+    if (remember) void StoreRememberGrant(session, session.username);
+    else void ClearRememberLogin();
 };

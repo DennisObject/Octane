@@ -153,7 +153,7 @@ const toFailure = (response: Response, payload: JsonObject): AuthFailure =>
     const ban = parseBan(payload);
 
     if (ban) return { kind: 'banned', ban };
-    if (code === 'invalid_credentials' || code === 'invalid_ticket' || response.status === 401) return { kind: 'invalid-credentials' };
+    if (code === 'invalid_credentials' || code === 'invalid_ticket' || code === 'invalid_remember_token' || response.status === 401) return { kind: 'invalid-credentials' };
     if (code === 'turnstile_failed' || (response.status === 403 && message === 'Security check failed.')) return { kind: 'security-check' };
     if (code === 'name_taken' || code === 'email_taken' || response.status === 409) return { kind: 'conflict', message };
     if (code === 'not_implemented' || response.status === 501) return { kind: 'not-implemented' };
@@ -227,16 +227,16 @@ export const loginWithCredentials = async (body: LoginRequest, options: AuthRequ
     return mapSession(result, body.username);
 };
 
-export const loginWithRememberToken = async (rememberToken: string, username = ''): Promise<AuthResult<LoginSession>> =>
+export const loginWithRememberToken = async (rememberToken: string, username = '', options: AuthRequestOptions = {}): Promise<AuthResult<LoginSession>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.remember.endpoint', '/api/auth/remember'), { rememberToken });
+    const result = await postJson(resolveAuthEndpoint('login.remember.endpoint', '/api/auth/remember'), { rememberToken }, options);
 
     return mapSession(result, username);
 };
 
-export const refreshRememberToken = async (rememberToken: string): Promise<AuthResult<RememberGrant & AccessTokenGrant>> =>
+export const refreshRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<RememberGrant & AccessTokenGrant>> =>
 {
-    const result = await postJson(resolveAuthEndpoint('login.refresh.endpoint', '/api/auth/refresh'), { rememberToken });
+    const result = await postJson(resolveAuthEndpoint('login.refresh.endpoint', '/api/auth/refresh'), { rememberToken }, options);
 
     if (!result.ok) return failed(result.failure);
 

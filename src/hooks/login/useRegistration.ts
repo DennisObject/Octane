@@ -28,7 +28,7 @@ import { TurnstileState } from './useTurnstile';
 
 interface UseRegistrationOptions {
     turnstile: TurnstileState;
-    onAuthenticated: (ssoTicket: string) => void;
+    onAuthenticated: (ssoTicket: string, username: string) => void;
     onRegisteredWithoutLogin: (username: string, message: string) => void;
 }
 
@@ -202,6 +202,16 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
 
             turnstile.reset();
 
+            // The account exists but no session came with it: sign in with it.
+            if (!created.ok && created.failure.kind === 'invalid-credentials')
+            {
+                clearRegistrationDraft();
+                setPassword('');
+                setConfirmation('');
+
+                return onRegisteredWithoutLogin(name, loginText('login.create_account.done', 'Your Habbo is ready! Sign in to start playing.'));
+            }
+
             if (!created.ok) return failWith(created.failure);
 
             clearRegistrationDraft();
@@ -216,7 +226,7 @@ export const useRegistration = ({ turnstile, onAuthenticated, onRegisteredWithou
             if (session)
             {
                 storeLoginSession(session, false);
-                onAuthenticated(session.ssoTicket);
+                onAuthenticated(session.ssoTicket, session.username);
                 return;
             }
 

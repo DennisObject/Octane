@@ -13,7 +13,7 @@ import { LoginNewsView } from './LoginNewsView';
 import { RegistrationView } from './registration/RegistrationView';
 
 export interface LoginViewProps {
-    onAuthenticated: (ssoTicket: string) => void;
+    onAuthenticated: (ssoTicket: string, username: string) => void;
     isEntering?: boolean;
 }
 

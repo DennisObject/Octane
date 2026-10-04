@@ -1,6 +1,6 @@
 import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@octane/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { ClearRememberLogin, forgetAccessToken, FriendlyTime, GetConfigurationValue, getAccessToken, GetRememberLogin, LocalizeText, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
+import { ClearRememberLogin, endAuthSession, forgetAccessToken, FriendlyTime, GetConfigurationValue, getAccessToken, GetRememberLogin, LocalizeText, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
 import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
@@ -89,8 +89,9 @@ export const PurseView: FC<{}> = (props) => {
             /* best-effort — page reload will drop the transport if it is already closed */
         }
 
+        endAuthSession();
         forgetAccessToken();
-        ClearRememberLogin();
+        await ClearRememberLogin();
         ClearStoredChatHistory();
         if (window.OctaneConfig) window.OctaneConfig['sso.ticket'] = '';
 
