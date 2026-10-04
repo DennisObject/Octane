@@ -18,7 +18,6 @@ export * from './localizeWithFallback';
 export * from './PlaySound';
 export * from './ProductImageUtility';
 export * from './Randomizer';
-export * from './RememberLogin';
 export * from './RoomChatFormatter';
 export * from './SanitizeHtml';
 export * from './SetLocalStorage';

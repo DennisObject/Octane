@@ -326,10 +326,12 @@ as an umbrella; per-widget wrapping is a follow-up.
 
 ### Form Actions
 
-Login / Register / Forgot in `src/components/login/LoginView.tsx` use
-`useActionState` + `useFormStatus`. The legacy non-Action versions in
-`src/components/login/components/{Register,Forgot}Dialog.tsx` and
-`shared.ts` have been **removed** (dead code).
+The login screen follows the official AIR `login.LoginFlow` (onboarding chrome,
+official `connection.login.*` / `login.create_*` text keys) over the shared
+hotel-view backdrop (`LandingBackdropView`). `src/components/login/LoginView.tsx`
+only picks the screen; sign-in and forgot-password use `useActionState`, state
+lives in `src/hooks/login/`, and every `/api/auth/*` call goes through the typed
+`src/api/auth/authApi.ts` (`AuthResult` + `AuthFailure` kinds).
 
 ### Configuration pre-init in bootstrap
 
@@ -411,8 +413,12 @@ None on this branch. The two previously-open races are closed:
   `src/components/wired-tools/`
 - User account settings (cherry-picked from upstream PR #126):
   `src/components/user-settings/UserAccountSettingsView.tsx`
-- Access-token persistence helper (used by login + remember + rotate):
-  `src/api/auth/accessToken.ts` (`persistAccessTokenFromPayload`)
+- Access token (memory only, bound to its SSO ticket, exchanged once per ticket): `src/api/auth/accessToken.ts`
+  + `ssoTokenExchange.ts`; remember-me: every grant change goes through `src/api/auth/rememberStore.ts`
+  under one Web Lock (compare-and-set on a versioned localStorage record, pending-spend retry within
+  the server's reuse grace; no Web Locks = remember-me off);
+  URL hand-off credentials are lifted before any request by `captureLaunchCredentials`;
+  login/remember storage: `storeLoginSession` in `src/api/login/loginSession.ts`
 - Asset middleware: `octaneAssetsServer()` in `vite.config.mjs`
 - Configuration pre-init: `src/bootstrap.ts` (`await GetConfiguration().init()`
   before `import('./index')`)

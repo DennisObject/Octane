@@ -1,52 +1,23 @@
 import {
-    CatalogStudioDocumentApplyComposer,
-    CatalogStudioDocumentDryRunComposer,
-    CatalogStudioDocumentResultEvent,
-    CatalogStudioExportComposer,
     CatalogStudioHistoryComposer,
     CatalogStudioHistoryEvent,
     CatalogStudioOpenSessionComposer,
     CatalogStudioSessionEvent,
     CatalogStudioUndoComposer,
-    CatalogStudioUndoEvent,
-    CatalogStudioValidateComposer,
-    CatalogStudioValidationEvent
+    CatalogStudioUndoEvent
 } from '@octane/renderer';
 import { FC, ReactNode, useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react';
 import { SendMessageComposer } from '../../../../api';
-import { GetConfigurationValue } from '../../../../api/octane/GetConfigurationValue';
 import { LocalizeText } from '../../../../api/utils/LocalizeText';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
 import { CatalogAdminUnansweredReason, createCatalogAdminRequestTracker } from '../../../../hooks/catalog/catalogAdminRequestTracker';
 import { localizeCatalogAdminCode, localizeCatalogAdminPlainMessage } from '../../../../hooks/catalog/catalogAdminServerErrors.helpers';
 import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from '../../../../hooks/catalog/catalogStudio.helpers';
-import {
-    CATALOG_STUDIO_FEATURES,
-    CatalogStudioDocumentResult,
-    CatalogStudioFeature,
-    CatalogStudioHistoryGroup,
-    CatalogStudioMutationResult,
-    CatalogStudioSession,
-    CatalogStudioValidationState
-} from '../../../../hooks/catalog/catalogStudio.types';
+import { CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession } from '../../../../hooks/catalog/catalogStudio.types';
 import { CatalogStudioContext, CatalogStudioContextValue } from '../../../../hooks/catalog/useCatalogStudio';
 
 /** How long a session or history read may stay unanswered before the request queue goes into resync. */
 const READ_TIMEOUT_MS = 10_000;
-
-// Answer codes of a server that knows the packet but not the feature.
-const UNSUPPORTED_CODES = new Set(['UNSUPPORTED', 'NOT_SUPPORTED', 'NOT_IMPLEMENTED']);
-
-/**
- * The session packet carries no capability flags, so the health check and the SQL tools stay off
- * unless the client configuration lists them (`catalog.admin.studio.features`: "validate", "sql"),
- * and turn off again when the server answers them as unsupported (PlusEMU does).
- */
-const configuredFeatures = (): ReadonlySet<CatalogStudioFeature> => {
-    const configured = GetConfigurationValue<string[]>('catalog.admin.studio.features', []) ?? [];
-
-    return new Set(CATALOG_STUDIO_FEATURES.filter((feature) => configured.includes(feature)));
-};
 
 export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }> = ({ active, children }) => {
     const connectionState = useConnectionState();
@@ -54,8 +25,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     const [session, setSession] = useState<CatalogStudioSession | null>(null);
     const [history, setHistory] = useState<CatalogStudioHistoryGroup[]>([]);
     const [historyTotalCount, setHistoryTotalCount] = useState(0);
-    const [validation, setValidation] = useState<CatalogStudioValidationState | null>(null);
-    const [documentResult, setDocumentResult] = useState<CatalogStudioDocumentResult | null>(null);
     const [loading, setLoading] = useState(false);
     // Each reported error gets a new id, so dismissing one does not also hide the same text when it happens again.
     const [{ message: lastError, id: lastErrorId }, setLastError] = useReducer(
@@ -64,7 +33,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     );
     const sessionRef = useRef<CatalogStudioSession | null>(null);
     const historyGroupIdsRef = useRef<Set<number>>(new Set());
-    const [enabledFeatures, setEnabledFeatures] = useState(configuredFeatures);
     const [requests] = useState(createCatalogAdminRequestTracker);
     const requestState = useSyncExternalStore(requests.subscribe, requests.getState);
 
@@ -79,20 +47,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         if (reason === 'reset') return;
 
         setLoading(false);
-    }, []);
-
-    /** Turns a feature off when the server says it does not support it; true when that happened. */
-    const disableIfUnsupported = useCallback((feature: CatalogStudioFeature, code: string, message: string) => {
-        if (!UNSUPPORTED_CODES.has(code)) return false;
-
-        setEnabledFeatures((current) => {
-            const next = new Set(current);
-            next.delete(feature);
-            return next;
-        });
-        setLoading(false);
-        setLastError(localizeCatalogAdminCode(code, message, {}));
-        return true;
     }, []);
 
     /** The session as of now, also between an answer and the render that shows it. */
@@ -216,50 +170,6 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         requests.takeReply('history');
     });
 
-    useMessageEvent<CatalogStudioValidationEvent>(CatalogStudioValidationEvent, (event) => {
-        const parser = event.getParser();
-        if (disableIfUnsupported('validate', parser.code, parser.message)) return;
-        const next: CatalogStudioValidationState = {
-            operationId: parser.operationId,
-            success: parser.success,
-            code: parser.code,
-            message: parser.message,
-            revision: parser.revision,
-            current: parser.current,
-            issues: parser.issues.map((issue) => ({ ...issue })),
-            receivedAt: Date.now()
-        };
-        setValidation(next);
-        updateRevision(parser.revision);
-        setLoading(false);
-        setLastError(parser.success ? null : localizeCatalogAdminCode(parser.code, parser.message, {}));
-    });
-
-    useMessageEvent<CatalogStudioDocumentResultEvent>(CatalogStudioDocumentResultEvent, (event) => {
-        const parser = event.getParser();
-        if (disableIfUnsupported('sql', parser.code, parser.message)) return;
-        const changes = parser.changes ?? [];
-        const result: CatalogStudioDocumentResult = {
-            operationId: parser.operationId,
-            success: parser.success,
-            code: parser.code,
-            message: parser.message,
-            revision: parser.revision,
-            format: parser.format,
-            document: parser.document,
-            fingerprint: parser.fingerprint,
-            changedEntities: parser.changedEntities,
-            changes: changes.map((change) => ({ ...change, fields: [...change.fields] }))
-        };
-        setDocumentResult(result);
-        setLoading(false);
-        setLastError(result.success ? null : localizeCatalogAdminCode(result.code, result.message, {}));
-        if (result.code === 'APPLIED' || result.code === 'ALREADY_APPLIED') {
-            refresh();
-            refreshHistory();
-        }
-    });
-
     // Closing the catalog (or losing the connection) drops the session; opening it fetches a fresh one.
     const isOpen = active && authenticated;
     const [wasOpen, setWasOpen] = useState(isOpen);
@@ -289,62 +199,12 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
 
     useEffect(() => () => requests.reset(), [requests]);
 
-    const validate = useCallback(() => {
-        const current = sessionRef.current;
-        if (!current || !enabledFeatures.has('validate')) return;
-        setLoading(true);
-        SendMessageComposer(new CatalogStudioValidateComposer(nextCatalogStudioOperationId('validate'), current.draftVersionId, current.revision));
-    }, [enabledFeatures]);
-
     const undo = useCallback((groupId: number) => {
         const current = sessionRef.current;
         if (!current) return;
         setLoading(true);
         SendMessageComposer(new CatalogStudioUndoComposer(nextCatalogStudioOperationId('undo'), current.draftVersionId, current.revision, groupId));
     }, []);
-
-    const exportDocument = useCallback(
-        (format: 'SQL') => {
-            const current = sessionRef.current;
-            if (!current || !enabledFeatures.has('sql')) return;
-            setLoading(true);
-            SendMessageComposer(new CatalogStudioExportComposer(nextCatalogStudioOperationId('export'), current.draftVersionId, current.revision, format));
-        },
-        [enabledFeatures]
-    );
-
-    const dryRunDocument = useCallback(
-        (format: 'SQL', document: string) => {
-            const current = sessionRef.current;
-            if (!current || !enabledFeatures.has('sql')) return;
-            setLoading(true);
-            SendMessageComposer(
-                new CatalogStudioDocumentDryRunComposer(nextCatalogStudioOperationId('dry-run'), current.draftVersionId, current.revision, format, document)
-            );
-        },
-        [enabledFeatures]
-    );
-
-    const applyDocument = useCallback(
-        (format: 'SQL', document: string, fingerprint: string, summary: string) => {
-            const current = sessionRef.current;
-            if (!current || !enabledFeatures.has('sql')) return;
-            setLoading(true);
-            SendMessageComposer(
-                new CatalogStudioDocumentApplyComposer(
-                    nextCatalogStudioOperationId('apply'),
-                    current.draftVersionId,
-                    current.revision,
-                    '',
-                    format,
-                    document,
-                    fingerprint,
-                    summary
-                )
-            );
-        },
-        [enabledFeatures]
-    );
 
     const applyMutation = useCallback((mutation: CatalogStudioMutationResult) => {
         setSession((current) => {
@@ -360,12 +220,9 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         }
     }, []);
 
-    const features = useMemo(() => ({ validate: enabledFeatures.has('validate'), sql: enabledFeatures.has('sql') }), [enabledFeatures]);
-
     const value = useMemo<CatalogStudioContextValue>(
         () => ({
             session,
-            features,
             requests,
             requestState,
             getSession,
@@ -373,42 +230,15 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             pendingCount: session?.pendingCount ?? 0,
             history,
             historyTotalCount,
-            validation,
-            documentResult,
             loading,
             lastError,
             lastErrorId,
             refresh,
             loadHistory,
             undo,
-            validate,
-            exportDocument,
-            dryRunDocument,
-            applyDocument,
             applyMutation
         }),
-        [
-            session,
-            features,
-            requests,
-            requestState,
-            getSession,
-            history,
-            historyTotalCount,
-            validation,
-            documentResult,
-            loading,
-            lastError,
-            lastErrorId,
-            refresh,
-            loadHistory,
-            undo,
-            validate,
-            exportDocument,
-            dryRunDocument,
-            applyDocument,
-            applyMutation
-        ]
+        [session, requests, requestState, getSession, history, historyTotalCount, loading, lastError, lastErrorId, refresh, loadHistory, undo, applyMutation]
     );
 
     return <CatalogStudioContext value={value}>{children}</CatalogStudioContext>;

@@ -53,14 +53,13 @@
 .octane-catalog-admin-tree-section,
 .octane-catalog-admin-detail,
 .octane-catalog-admin-offers,
-.octane-catalog-admin-history,
-.octane-catalog-admin-transfer {
+.octane-catalog-admin-history {
     min-height: 0;
 }
 
 .octane-catalog-admin-tree-section > .octane-staff-section-body,
 .octane-catalog-admin-offers > .octane-staff-section-body,
-.octane-catalog-admin-transfer > .octane-staff-section-body {
+.octane-catalog-admin-history .octane-staff-section-body {
     flex: 1 1 auto;
     min-height: 0;
 }
@@ -268,46 +267,25 @@
     gap: 4px;
 }
 
-/* History and health check */
+/* History */
 .octane-catalog-admin-history {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
-    gap: 6px;
 }
 
-.octane-catalog-admin-problem-list,
-.octane-catalog-admin-history-list,
-.octane-catalog-admin-sql-diff {
-    max-height: 190px;
+.octane-catalog-admin-history > .octane-staff-section {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
-.octane-catalog-admin-problem-head {
-    width: 100%;
-}
-
-.octane-catalog-admin-problem-row {
-    width: 100%;
-    padding-left: 22px;
-}
-
-.octane-catalog-admin-problem-row:disabled {
-    cursor: default;
-}
-
-.octane-catalog-admin-problem-more {
-    padding: 2px 22px;
+.octane-catalog-admin-history-list {
+    flex: 1 1 auto;
 }
 
 .octane-catalog-admin-history-main {
     display: flex;
     flex-direction: column;
-}
-
-.octane-catalog-admin-sql {
-    flex: 1 1 auto;
-    min-height: 180px;
-    font-family: Consolas, 'Courier New', monospace !important;
-    white-space: pre;
 }
 
 /* Admin controls inside the catalog window itself, in the catalog's own look. */
