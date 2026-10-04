@@ -4,7 +4,8 @@
  *
  * The server answers in the order it received the requests. Two kinds of answer arrive:
  * - a request's own packet (session, history, page or offer details). It settles the oldest entry
- *   of its kind, and of its entity id when it carries one. Entries ahead of it were answered
+ *   of its kind, and of its entity id when it carries one, together with every identical read
+ *   queued after it (reads are idempotent). Entries ahead of the first match were answered
  *   before it or never will be, so they leave the queue too, as unanswered.
  * - a bare CatalogAdminResult (success + message, no id). It belongs to the head of the queue,
  *   and only if the head's kind accepts it: a structural change accepts any, a read only a
@@ -12,7 +13,11 @@
  *
  * A request without an answer after its timeout is reported as unanswered and stays in place as
  * "expired": if it reaches the head, it absorbs the next bare answer its kind accepts (its late
- * answer); a later own-packet answer drops it with everything else ahead of that answer.
+ * answer); a later own-packet answer drops it with everything else ahead of that answer, or
+ * settles it together with its retry when it is the same read.
+ *
+ * Nothing here sends: requests are only made while the connection reports `authenticated` (the
+ * renderer sets it on AuthenticationOK), and a close or reconnect resets the queue.
  */
 export type CatalogAdminRequestKind = 'session' | 'history' | 'pageDetails' | 'offerDetails' | 'structural';
 
@@ -100,12 +105,17 @@ export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker =
             if (entry) entry.handlers = null;
         },
         takeReply: (kind, entityId) => {
-            const index = queue.findIndex((entry) => entry.kind === kind && (entityId === undefined || entry.entityId === entityId));
+            const matches = (entry: CatalogAdminRequestEntry) => entry.kind === kind && (entityId === undefined || entry.entityId === entityId);
+            const index = queue.findIndex(matches);
             if (index < 0) return false;
 
+            // Reads are idempotent: the answer serves every identical read still queued (an expired one and
+            // its retry alike), so a retry is not left waiting for a reply the expired read already took.
+            // Only entries ahead of the first match were passed; the ones between keep their places.
             const passed = queue.slice(0, index);
-            stopTimer(queue[index]);
-            queue = queue.slice(index + 1);
+            const answered = queue.filter((entry, position) => position >= index && matches(entry));
+            answered.forEach(stopTimer);
+            queue = queue.filter((entry, position) => position > index && !matches(entry));
             drop(passed, 'skipped');
             return true;
         },
