@@ -108,10 +108,11 @@ const mapUserDetail = (user: HousekeepingUserDetailData): IHousekeepingUser => (
 });
 
 /**
- * One lookup on the wire at a time per channel, latest wins: a request queued behind the
- * one in flight is replaced by a newer one and resolves null without being sent. The
- * detail packets carry no request id, so this keeps a not-found reply from answering a
- * different lookup.
+ * One lookup at a time per channel, latest wins: a request queued behind the one in flight
+ * is replaced by a newer one and resolves null without being sent. The detail packets carry
+ * no request id, so this keeps a not-found reply from answering a different lookup.
+ * Known limit: after an 8 s timeout the next lookup goes out, so a late untagged not-found
+ * for the old one can still answer it (accepted as a read-availability limitation).
  */
 const createLookupChannel = () => {
     let tail: Promise<unknown> = Promise.resolve();

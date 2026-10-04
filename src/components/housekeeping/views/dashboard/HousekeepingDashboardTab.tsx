@@ -20,7 +20,7 @@ export const HousekeepingDashboardTab: FC = () => {
         isActionPending,
         sendHotelAlert
     } = useHousekeeping();
-    const confirm = useHousekeepingConfirm();
+    const confirm = useHousekeepingConfirm('panel');
     const [alertText, setAlertText] = useState('');
     const trimmedAlert = alertText.trim();
     const recentSanctions = actionLog.filter((entry) => entry.success && entry.targetType === 'user').slice(0, RECENT_SANCTIONS);

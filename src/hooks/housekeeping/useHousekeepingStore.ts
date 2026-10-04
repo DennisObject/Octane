@@ -44,7 +44,7 @@ const useHousekeepingStoreInner = () => {
     // Scoped per user by useLocalStorage; HousekeepingView bounces an unavailable tab.
     const [activeTab, setStoredTab] = useLocalStorage<HousekeepingTabId>('nitro.housekeeping.last_tab', HousekeepingTabId.DASHBOARD);
     const [selectedUser, setSelectedUserState] = useState<IHousekeepingUser | null>(null);
-    const [selectedRoom, setSelectedRoom] = useState<IHousekeepingRoom | null>(null);
+    const [selectedRoom, setSelectedRoomState] = useState<IHousekeepingRoom | null>(null);
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
     const [isUserLoading, setIsUserLoading] = useState(false);
     const [isRoomLoading, setIsRoomLoading] = useState(false);
@@ -59,6 +59,10 @@ const useHousekeepingStoreInner = () => {
     // Bumped on close and on every selection change; a reset reply only reveals when the
     // generation it was sent under is still current.
     const revealGenerationRef = useRef(0);
+    // Confirm dialogs: `panel` changes on close, `selection` also on every user/room pick.
+    const panelGenerationRef = useRef(0);
+    const isVisibleRef = useRef(false);
+    const selectedUserIdRef = useRef(0);
     const userTokenRef = useRef(0);
     const roomTokenRef = useRef(0);
 
@@ -83,6 +87,7 @@ const useHousekeepingStoreInner = () => {
 
     const setSelectedUser = useCallback((user: IHousekeepingUser | null) => {
         revealGenerationRef.current++;
+        selectedUserIdRef.current = user?.id ?? 0;
         setSelectedUserState(user);
         setPasswordReveal((reveal) => (reveal && reveal.userId === user?.id ? reveal : null));
     }, []);
@@ -93,10 +98,15 @@ const useHousekeepingStoreInner = () => {
     }, []);
 
     const patchSelectedRoom = useCallback((roomId: number, patch: Partial<IHousekeepingRoom>) => {
-        setSelectedRoom((current) => (current?.id === roomId ? { ...current, ...patch } : current));
+        setSelectedRoomState((current) => (current?.id === roomId ? { ...current, ...patch } : current));
     }, []);
 
-    const clearSelectedRoom = useCallback((roomId: number) => setSelectedRoom((current) => (current?.id === roomId ? null : current)), []);
+    const setSelectedRoom = useCallback((room: IHousekeepingRoom | null) => {
+        revealGenerationRef.current++;
+        setSelectedRoomState(room);
+    }, []);
+
+    const clearSelectedRoom = useCallback((roomId: number) => setSelectedRoomState((current) => (current?.id === roomId ? null : current)), []);
 
     const rememberLookup = useCallback((entry: RecentLookupEntry) => {
         setRecentLookups((prev) => {
@@ -182,7 +192,7 @@ const useHousekeepingStoreInner = () => {
                 if (token === roomTokenRef.current) setIsRoomLoading(false);
             }
         },
-        [clearStatus, rememberLookup]
+        [clearStatus, rememberLookup, setSelectedRoom]
     );
 
     /** Claims the single action slot; false while another action is still waiting for its ack. */
@@ -212,9 +222,25 @@ const useHousekeepingStoreInner = () => {
 
     const captureRevealGeneration = useCallback(() => revealGenerationRef.current, []);
 
+    // Shown only for the submit's generation, while the panel is open on that same user.
     const revealPassword = useCallback((generation: number, userId: number, username: string, password: string) => {
-        if (password && generation === revealGenerationRef.current) setPasswordReveal({ userId, username, password });
+        if (!password || generation !== revealGenerationRef.current) return;
+        if (!isVisibleRef.current || selectedUserIdRef.current !== userId) return;
+
+        setPasswordReveal({ userId, username, password });
     }, []);
+
+    /** Token for an open confirm dialog; it stays valid until close (or a new pick, for `selection`). */
+    const captureConfirmScope = useCallback(
+        (scope: 'panel' | 'selection') => ({ scope, panel: panelGenerationRef.current, selection: revealGenerationRef.current }),
+        []
+    );
+
+    const isConfirmScopeCurrent = useCallback(
+        (token: { scope: 'panel' | 'selection'; panel: number; selection: number }) =>
+            isVisibleRef.current && token.panel === panelGenerationRef.current && (token.scope === 'panel' || token.selection === revealGenerationRef.current),
+        []
+    );
 
     const clearPasswordReveal = useCallback(() => setPasswordReveal(null), []);
 
@@ -224,11 +250,14 @@ const useHousekeepingStoreInner = () => {
             refreshDashboard();
         }
 
+        isVisibleRef.current = true;
         setIsVisible(true);
     }, [isVisible, refreshAuditLog, refreshDashboard]);
 
     const closePanel = useCallback(() => {
         revealGenerationRef.current++;
+        panelGenerationRef.current++;
+        isVisibleRef.current = false;
         setIsVisible(false);
         setPasswordReveal(null);
         clearStatus();
@@ -280,6 +309,8 @@ const useHousekeepingStoreInner = () => {
         clearStatus,
         passwordReveal,
         captureRevealGeneration,
+        captureConfirmScope,
+        isConfirmScopeCurrent,
         revealPassword,
         clearPasswordReveal,
         ...overview

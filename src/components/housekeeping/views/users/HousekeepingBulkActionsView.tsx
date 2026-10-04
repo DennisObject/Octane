@@ -11,7 +11,7 @@ interface HousekeepingBulkActionsViewProps {
 /** Applies the drafted sanction to every user ticked in the search results. Always asks first. */
 export const HousekeepingBulkActionsView: FC<HousekeepingBulkActionsViewProps> = ({ draft }) => {
     const { selectedUserIds, clearUserSelection, isActionPending, banUsersBulk, kickUsersBulk, muteUsersBulk } = useHousekeeping();
-    const confirm = useHousekeepingConfirm();
+    const confirm = useHousekeepingConfirm('panel');
 
     if (!selectedUserIds.length) return null;
 
