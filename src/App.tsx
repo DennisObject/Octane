@@ -21,7 +21,7 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, logoutSession, redeemRememberGrant, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -80,29 +80,6 @@ const revokeSession = async (accessToken: string, ssoTicket: string): Promise<vo
     if (!accessToken && !ssoTicket && !rememberTokens.length) return;
 
     await logoutSession({ accessToken, ssoTicket, rememberToken: rememberTokens[0] ?? '' });
-};
-
-const REMEMBER_RESUME_KEY = 'octane.remember.resume';
-const REMEMBER_RESUME_WINDOW_MS = 60000;
-
-// One automatic reload per minute at most, so a hotel that keeps refusing the
-// session ends on Sign In instead of a reload loop.
-const shouldRetryRememberResume = (): boolean =>
-{
-    try
-    {
-        const last = Number(window.sessionStorage.getItem(REMEMBER_RESUME_KEY) || 0);
-
-        if (Date.now() - last < REMEMBER_RESUME_WINDOW_MS) return false;
-
-        window.sessionStorage.setItem(REMEMBER_RESUME_KEY, String(Date.now()));
-
-        return true;
-    }
-    catch
-    {
-        return false;
-    }
 };
 
 const asStringArray = (value: unknown): string[] => {
@@ -202,31 +179,40 @@ export const App: FC<{}> = (props) => {
             showSessionExpired();
             return;
         }
+        const showSignIn = () =>
+        {
+            setHomeUrl('');
+            setErrorMessage('');
+            setIsReady(false);
+            setShowLogin(true);
+            setIsEnteringHotel(false);
+        };
+
         // A remembered session whose ticket was replaced (the server keeps one ticket
-        // per Habbo, e.g. a second tab redeemed meanwhile) resumes with a fresh one:
-        // reload once. If that fails too, show Sign In but keep the grant.
+        // per Habbo, e.g. a second tab redeemed meanwhile) resumes with a fresh one: one
+        // reload per grant until it authenticates again. After that, Sign In, keeping
+        // the grant.
         if (getAuthSession().source === 'remember' && hasRememberGrant())
         {
-            if (shouldRetryRememberResume())
+            void claimResumeReload().then((claimed) =>
             {
-                window.location.reload();
-                return;
-            }
+                if (claimed)
+                {
+                    window.location.reload();
+                    return;
+                }
 
-            endAuthSession();
-            forgetAccessToken();
-        }
-        else
-        {
-            console.warn('[App] fallbackToLogin — surfacing login form, credentials cleared');
-            clearStoredCredentials();
+                endAuthSession();
+                forgetAccessToken();
+                showSignIn();
+            });
+
+            return;
         }
 
-        setHomeUrl('');
-        setErrorMessage('');
-        setIsReady(false);
-        setShowLogin(true);
-        setIsEnteringHotel(false);
+        console.warn('[App] fallbackToLogin — surfacing login form, credentials cleared');
+        clearStoredCredentials();
+        showSignIn();
     }, [clearStoredCredentials, showSessionExpired]);
 
     const applySsoTicket = useCallback((ssoTicket: string) => {
@@ -532,6 +518,9 @@ export const App: FC<{}> = (props) => {
 
                 releaseRememberLockRef.current?.();
                 releaseRememberLockRef.current = null;
+
+                // Authenticated: a later ticket loss may resume with a reload again.
+                if (getAuthSession().source === 'remember') void resetResumeReload();
 
                 if (!bootstrapDoneRef.current) {
                     bootstrapDoneRef.current = true;

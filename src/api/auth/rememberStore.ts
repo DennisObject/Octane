@@ -14,12 +14,15 @@ const LOCK_NAME = 'octane-remember';
 const DEFAULT_REMEMBER_SECONDS = 30 * 24 * 60 * 60;
 
 // A token marked as being spent may be sent again only this soon after the
-// first attempt, inside the server's reuse grace window; later it is dropped.
+// first attempt, inside the server's reuse grace window, and only this many
+// times (the server allows three grace reuses); otherwise it is dropped.
 const PENDING_RETRY_MS = 25000;
+const PENDING_MAX_RETRIES = 2;
 
 interface PendingSpend {
     token: string;
     at: number;
+    retries: number;
 }
 
 interface RememberRecord {
@@ -29,6 +32,9 @@ interface RememberRecord {
     ownerName: string;
     version: number;
     pending?: PendingSpend;
+    // Set once a remembered session that failed before authenticating has
+    // reloaded to resume; cleared by a successful authentication or a login.
+    resumeReloadUsed?: boolean;
 }
 
 const now = (): number => Date.now();
@@ -41,7 +47,9 @@ const readRecord = (): RememberRecord | null =>
 
         if (!raw || typeof raw.token !== 'string' || !raw.token.length) return null;
 
-        const pending = raw.pending && typeof raw.pending.token === 'string' && typeof raw.pending.at === 'number' ? { token: raw.pending.token, at: raw.pending.at } : undefined;
+        const pending = raw.pending && typeof raw.pending.token === 'string' && typeof raw.pending.at === 'number'
+            ? { token: raw.pending.token, at: raw.pending.at, retries: typeof raw.pending.retries === 'number' ? raw.pending.retries : 0 }
+            : undefined;
 
         return {
             token: raw.token,
@@ -50,7 +58,8 @@ const readRecord = (): RememberRecord | null =>
             // Grants written by earlier client versions kept the name the login response returned.
             ownerName: typeof raw.ownerName === 'string' ? raw.ownerName : typeof raw.username === 'string' ? raw.username : '',
             version: typeof raw.version === 'number' ? raw.version : 0,
-            pending
+            pending,
+            resumeReloadUsed: raw.resumeReloadUsed === true || undefined
         };
     }
     catch
@@ -137,13 +146,17 @@ const spendToken = async <T>(send: (token: string) => Promise<AuthResult<T>>): P
 
     if (stored.pending)
     {
-        if (now() - stored.pending.at >= PENDING_RETRY_MS)
+        const { pending } = stored;
+
+        if (now() - pending.at >= PENDING_RETRY_MS || pending.retries >= PENDING_MAX_RETRIES)
         {
             commit(stored.version, null);
             return null;
         }
 
-        return { record: stored, sent: stored.pending.token, result: await send(stored.pending.token) };
+        if (!commit(stored.version, { ...stored, pending: { ...pending, retries: pending.retries + 1 } })) return null;
+
+        return { record: readRecord(), sent: pending.token, result: await send(pending.token) };
     }
 
     if (isExpired(stored))
@@ -152,7 +165,7 @@ const spendToken = async <T>(send: (token: string) => Promise<AuthResult<T>>): P
         return null;
     }
 
-    if (!commit(stored.version, { ...stored, pending: { token: stored.token, at: now() } })) return null;
+    if (!commit(stored.version, { ...stored, pending: { token: stored.token, at: now(), retries: 0 } })) return null;
 
     const record = readRecord();
 
@@ -239,7 +252,9 @@ const redeemInsideLock = async (generation: number): Promise<LoginSession | null
     }
 
     const session = result.data;
-    const next = session.rememberToken ? grantFields(session, { userId: session.userId, name: session.username }) : { ...record, pending: undefined };
+    const next = session.rememberToken
+        ? { ...grantFields(session, { userId: session.userId, name: session.username }), resumeReloadUsed: record.resumeReloadUsed }
+        : { ...record, pending: undefined };
 
     commit(record.version, next, generation);
 
@@ -265,8 +280,8 @@ export const redeemRememberGrant = (): Promise<RedeemedSession | null> => new Pr
 });
 
 // Periodic rotation while playing, only for the grant's own Habbo. The access
-// token that comes back is taken only by a session that was itself started
-// from this grant, is still running, and whose owner the server confirmed.
+// token that comes back is taken by the running session when the server
+// confirms the same owner and the session has not changed meanwhile.
 export const rotateRememberGrant = async (): Promise<void> =>
 {
     const session = getAuthSession();
@@ -291,10 +306,36 @@ export const rotateRememberGrant = async (): Promise<void> =>
 
         const refreshed = result.data;
         const confirmedOwner = { userId: refreshed.userId, name: refreshed.username };
-        const next = refreshed.rememberToken ? grantFields(refreshed, ownerOf(record)) : { ...record, pending: undefined };
+        const next = refreshed.rememberToken ? { ...grantFields(refreshed, ownerOf(record)), resumeReloadUsed: record.resumeReloadUsed } : { ...record, pending: undefined };
 
         if (!commit(record.version, next, session.generation)) return;
 
-        if (session.source === 'remember' && isSameOwner(confirmedOwner, ownerOf(record))) adoptAccessToken(refreshed, session.ssoTicket);
+        // Any running session of the grant's own Habbo (password login with
+        // "Remember me", or one resumed from the grant) takes the new token.
+        if ((session.source === 'remember' || session.source === 'credentials') && isSameOwner(confirmedOwner, ownerOf(record)) && isSameOwner(session.owner, ownerOf(record)))
+            adoptAccessToken(refreshed, session.ssoTicket);
+    });
+};
+
+// A remembered session that failed before authenticating may reload once per
+// grant to resume with a fresh ticket. True when this call used that reload.
+export const claimResumeReload = async (): Promise<boolean> =>
+    (await withRememberLock(async () =>
+    {
+        const stored = readRecord();
+
+        if (!stored || stored.resumeReloadUsed) return false;
+
+        return commit(stored.version, { ...stored, resumeReloadUsed: true });
+    })) ?? false;
+
+// A successful authentication makes the resume reload available again.
+export const resetResumeReload = async (): Promise<void> =>
+{
+    await withRememberLock(async () =>
+    {
+        const stored = readRecord();
+
+        if (stored?.resumeReloadUsed) commit(stored.version, { ...stored, resumeReloadUsed: undefined });
     });
 };

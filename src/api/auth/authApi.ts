@@ -175,17 +175,36 @@ const toFailure = (response: Response, payload: JsonObject): AuthFailure =>
 };
 
 // Null when the request never got an answer (offline, aborted, CORS).
+// No auth request may hang: one that gets no complete answer within this time
+// is aborted and treated like a network failure.
+const REQUEST_TIMEOUT_MS = 10000;
+
+// Null when the request never got a complete answer (offline, timed out,
+// aborted, CORS).
 const send = async (url: string, init: RequestInit): Promise<{ response: Response; payload: JsonObject } | null> =>
 {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const callerSignal = init.signal;
+    const forwardAbort = () => controller.abort();
+
+    if (callerSignal?.aborted) controller.abort();
+    callerSignal?.addEventListener('abort', forwardAbort);
+
     try
     {
-        const response = await fetch(url, { credentials: 'include', ...init });
+        const response = await fetch(url, { credentials: 'include', ...init, signal: controller.signal });
 
         return { response, payload: await readJson(response) };
     }
     catch
     {
         return null;
+    }
+    finally
+    {
+        window.clearTimeout(timer);
+        callerSignal?.removeEventListener('abort', forwardAbort);
     }
 };
 
