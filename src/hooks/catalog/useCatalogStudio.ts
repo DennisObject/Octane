@@ -13,8 +13,12 @@ export interface CatalogStudioContextValue {
     session: CatalogStudioSession | null;
     /** Which optional tools this hotel supports; their controls are hidden otherwise. */
     features: Readonly<Record<CatalogStudioFeature, boolean>>;
-    /** Requests waiting for an answer that may come as a bare CatalogAdminResult. */
+    /** Non-save requests go out one at a time through this queue. */
     requests: CatalogAdminRequestTracker;
+    /** A request waits for its turn or the queue is resyncing after a timeout. */
+    requestsWaiting: boolean;
+    /** The session as of now, also between an answer and the render that shows it. */
+    getSession: () => CatalogStudioSession | null;
     /** A session or history read went unanswered; `retry` asks again. */
     unresponsive: boolean;
     retry: () => void;

@@ -52,6 +52,7 @@ const createInitialForm = (target: CatalogAdminPageEditorTarget, session: Catalo
  */
 export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) => {
     const studio = useCatalogStudio();
+    const { getSession, requests } = studio;
     const admin = useCatalogAdmin();
     const { showConfirm } = useNotificationActions();
     const closeEditor = useCatalogAdminUiStore((state) => state.closeEditor);
@@ -66,6 +67,8 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const detailsRequestedRef = useRef(false);
     const detailsRequestIdRef = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState<string | null>(null);
+    // The details read waits in the request queue until it is its turn; until then the editor waits for the server.
+    const [detailsSent, setDetailsSent] = useState(false);
     const [initialForm] = useState(() => createInitialForm(target, studio.session));
     const sessionReady = admin?.sessionReady ?? false;
 
@@ -73,7 +76,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         initial: initialForm,
         acknowledgements: admin?.results ?? new Map(),
         submit: (draft) => admin?.savePage(draft, target.catalogType) ?? null,
-        canSubmit: (draft) => sessionReady && !validatePageForm(draft),
+        canSubmit: (draft) => sessionReady && detailsReady && !validatePageForm(draft),
         toCommitted: (ack) => (ack.entityType === 'PAGE' && ack.entity ? createPageFormFromSnapshot(ack.entity as CatalogStudioPageSnapshot) : null),
         onClose: () => closeEditor('page', editorKey),
         confirmDiscard: (discard) =>
@@ -117,19 +120,33 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         if (pageId === null || !studio.session || detailsRequestedRef.current) return;
         detailsRequestedRef.current = true;
 
-        // A refusal comes back as a bare CatalogAdminResult; the mutations hook routes it here.
-        detailsRequestIdRef.current = studio.requests.begin('pageDetails', {
-            entityId: pageId,
+        const requestedId = pageId;
+        const catalogType = target.catalogType;
+
+        // Waits in the studio's request queue for its turn; a refusal comes back as a bare CatalogAdminResult.
+        detailsRequestIdRef.current = requests.enqueue({
+            kind: 'pageDetails',
+            entityId: requestedId,
             timeoutMs: DETAILS_TIMEOUT_MS,
+            send: () => {
+                const current = getSession();
+                if (!current) return false;
+
+                SendMessageComposer(new CatalogAdminLoadPageComposer(requestedId, catalogType, current.draftVersionId, current.revision));
+                return true;
+            },
+            onSent: () => setDetailsSent(true),
             onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
-            onUnanswered: (reason) => reason !== 'reset' && setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'))
+            onUnanswered: (reason) => {
+                setDetailsSent(false);
+                // Not sent, or dropped by a close or reconnect: ask again once a session is back.
+                if (reason !== 'timeout') detailsRequestedRef.current = false;
+                else setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'));
+            }
         });
+    }, [pageId, getSession, requests, studio.session, target.catalogType]);
 
-        SendMessageComposer(new CatalogAdminLoadPageComposer(pageId, target.catalogType, studio.session.draftVersionId, studio.revision));
-    }, [pageId, studio.requests, studio.revision, studio.session, target.catalogType]);
-
-    // A closed editor leaves its request in the queue (answers keep their order) but hears nothing more.
-    const { requests } = studio;
+    // A closed editor drops its queued read; one already on the wire stays but its answers go nowhere.
     useEffect(
         () => () => {
             if (detailsRequestIdRef.current !== null) requests.detach(detailsRequestIdRef.current);
@@ -155,7 +172,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const editorStatus = resolveCatalogAdminEditorStatus({
         sessionReady,
         detailsReady,
-        loadingKey: 'catalog.admin.status.loading.page',
+        loadingKey: detailsSent ? 'catalog.admin.status.loading.page' : 'catalog.admin.status.working',
         validationKey,
         isDirty: smartSave.isDirty,
         saveStatus: smartSave.status,

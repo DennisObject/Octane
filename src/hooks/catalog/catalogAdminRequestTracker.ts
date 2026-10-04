@@ -1,136 +1,221 @@
 /**
- * Every catalog admin request on the wire that is not a save, in the order it was sent. Saves are
- * not here: they are matched by the operation id of their Smart Save acknowledgement.
+ * Catalog admin requests that are not saves go out one at a time: session, history, page details,
+ * offer details and structural changes (delete, move, show/hide, reorder). Their answers carry no
+ * request id, and a refusal of any of them is a bare CatalogAdminResult, so only one may be on the
+ * wire for an answer to be attributed safely. Saves are matched by their operation id and do not
+ * pass through here.
  *
- * The server answers in the order it received the requests. Two kinds of answer arrive:
- * - a request's own packet (session, history, page or offer details). It settles the oldest entry
- *   of its kind, and of its entity id when it carries one, together with every identical read
- *   queued after it (reads are idempotent). Entries ahead of the first match were answered
- *   before it or never will be, so they leave the queue too, as unanswered.
- * - a bare CatalogAdminResult (success + message, no id). It belongs to the head of the queue,
- *   and only if the head's kind accepts it: a structural change accepts any, a read only a
- *   refusal. Otherwise it is credited to nothing. The queue is never reordered.
- *
- * A request without an answer after its timeout is reported as unanswered and stays in place as
- * "expired": if it reaches the head, it absorbs the next bare answer its kind accepts (its late
- * answer); a later own-packet answer drops it with everything else ahead of that answer, or
- * settles it together with its retry when it is the same read.
- *
- * Nothing here sends: requests are only made while the connection reports `authenticated` (the
- * renderer sets it on AuthenticationOK), and a close or reconnect resets the queue.
+ * States:
+ * - idle: nothing on the wire. The next queued request is sent, but only while sending is allowed
+ *   (`setCanSend`: the studio is open on an authenticated connection).
+ * - in flight: one request is on the wire. Its own answer packet (same kind, and same entity id for
+ *   details) or a bare CatalogAdminResult its kind accepts (a structural change accepts any, a read
+ *   only a refusal) settles it -> idle. Any other answer is stray and changes nothing.
+ * - resyncing: the request timed out. Nothing new is sent until the expired request absorbs one
+ *   answer its kind accepts (its late answer), or 2 s pass without any answer (every stray answer
+ *   restarts that quiet window), or `reset` runs (close, connection change) -> idle.
  */
 export type CatalogAdminRequestKind = 'session' | 'history' | 'pageDetails' | 'offerDetails' | 'structural';
 
-/** Why a request never got its answer: it timed out, a later answer passed it, or tracking was reset. */
-export type CatalogAdminUnansweredReason = 'timeout' | 'skipped' | 'reset';
+/** Why a request got no answer: it timed out, it could not be sent, or tracking was reset. */
+export type CatalogAdminUnansweredReason = 'timeout' | 'cancelled' | 'reset';
 
-export interface CatalogAdminRequestHandlers {
+export interface CatalogAdminRequest {
+    kind: CatalogAdminRequestKind;
     /** For details reads: the page or offer id the answer names. */
     entityId?: number;
-    timeoutMs?: number;
-    /** A bare CatalogAdminResult answered this request. */
+    timeoutMs: number;
+    /** Sends the request when its turn comes, from the state current then; false when it cannot be sent. */
+    send: () => boolean;
+    /** The request went on the wire (it may have waited in the queue before). */
+    onSent?: () => void;
+    /** A bare CatalogAdminResult answered it. */
     onBare?: (success: boolean, message: string) => void;
     onUnanswered?: (reason: CatalogAdminUnansweredReason) => void;
+    /** Its answer arrived only after it had timed out. */
+    onLate?: () => void;
 }
 
-interface CatalogAdminRequestEntry {
-    id: number;
-    kind: CatalogAdminRequestKind;
-    entityId: number | null;
-    expired: boolean;
-    handlers: CatalogAdminRequestHandlers | null;
-    timer: ReturnType<typeof setTimeout> | null;
-}
-
+/** What a bare CatalogAdminResult settled: the request on the wire, or the late answer of an expired one. */
 export interface CatalogAdminBareAnswer {
     kind: CatalogAdminRequestKind;
-    /** The request had already timed out: this is its late answer. */
-    expired: boolean;
-    /** Null when the request timed out or its owner is gone. */
-    onBare: CatalogAdminRequestHandlers['onBare'] | null;
+    late: boolean;
 }
 
 export interface CatalogAdminRequestTracker {
-    /** A request of this kind is on its way and has not timed out. */
-    isWaiting: (kind: CatalogAdminRequestKind) => boolean;
-    /** Call right before sending; returns the entry id. */
-    begin: (kind: CatalogAdminRequestKind, handlers?: CatalogAdminRequestHandlers) => number;
-    /** The owner (e.g. a closed editor) is gone: the entry keeps its place but answers go nowhere. */
+    /** Queues a request; returns its id. */
+    enqueue: (request: CatalogAdminRequest) => number;
+    /** The owner is gone: a queued request is dropped, one on the wire stays but its callbacks are not called. */
     detach: (id: number) => void;
-    /** A request's own answer packet arrived; true when it matched an entry. */
-    takeReply: (kind: CatalogAdminRequestKind, entityId?: number) => boolean;
-    /** A bare CatalogAdminResult arrived: the head that accepts it, or null when none does. */
-    takeBare: (success: boolean) => CatalogAdminBareAnswer | null;
-    /** Connection change or close: forget everything; waiting owners hear "reset". */
+    /** A request of this kind waits in the queue and has not been sent yet. */
+    isQueued: (kind: CatalogAdminRequestKind) => boolean;
+    /** A request's own answer packet arrived. */
+    takeReply: (kind: CatalogAdminRequestKind, entityId?: number) => void;
+    /** A bare CatalogAdminResult arrived; null when it settled nothing. */
+    takeBare: (success: boolean, message: string) => CatalogAdminBareAnswer | null;
+    /** Whether requests may go out now; allowing it sends what waits. */
+    setCanSend: (canSend: boolean) => void;
+    /** Close or connection change: drops everything; owners of unanswered requests hear "reset". */
     reset: () => void;
+    /** For useSyncExternalStore: true while something waits for its turn or the queue is resyncing. */
+    subscribe: (listener: () => void) => () => void;
+    isWaiting: () => boolean;
+}
+
+/** After a timeout, how long the queue stays quiet before it trusts the wire again. */
+const RESYNC_QUIET_MS = 2_000;
+
+interface Entry extends CatalogAdminRequest {
+    id: number;
+    detached: boolean;
 }
 
 const acceptsBare = (kind: CatalogAdminRequestKind, success: boolean) => kind === 'structural' || !success;
 
-export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker => {
-    let queue: CatalogAdminRequestEntry[] = [];
-    let sequence = 0;
+const matchesReply = (entry: Entry, kind: CatalogAdminRequestKind, entityId: number | undefined) =>
+    entry.kind === kind && (entityId === undefined || entry.entityId === entityId);
 
-    const stopTimer = (entry: CatalogAdminRequestEntry) => {
-        if (entry.timer) clearTimeout(entry.timer);
-        entry.timer = null;
+export const createCatalogAdminRequestTracker = (): CatalogAdminRequestTracker => {
+    let canSend = false;
+    let queue: Entry[] = [];
+    let inFlight: Entry | null = null;
+    let expired: Entry | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let sequence = 0;
+    const listeners = new Set<() => void>();
+
+    const notify = () => listeners.forEach((listener) => listener());
+
+    const owner = (entry: Entry) => (entry.detached ? null : entry);
+
+    const setTimer = (callback: () => void, ms: number) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(callback, ms);
     };
 
-    /** Removes entries for good; the ones still waiting are told why. */
-    const drop = (entries: CatalogAdminRequestEntry[], reason: CatalogAdminUnansweredReason) => {
-        for (const entry of entries) {
-            stopTimer(entry);
-            if (!entry.expired) entry.handlers?.onUnanswered?.(reason);
+    const clearTimer = () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+    };
+
+    const leaveResync = () => {
+        expired = null;
+        clearTimer();
+    };
+
+    /** Sends the next queued request when nothing is on the wire and the queue is not resyncing. */
+    const pump = () => {
+        while (!inFlight && !expired && queue.length && canSend) {
+            const entry = queue.shift();
+
+            if (!entry.send()) {
+                owner(entry)?.onUnanswered?.('cancelled');
+                continue;
+            }
+
+            inFlight = entry;
+            owner(entry)?.onSent?.();
+            setTimer(() => {
+                const timedOut = inFlight;
+                inFlight = null;
+                expired = timedOut;
+                setTimer(endResync, RESYNC_QUIET_MS);
+                owner(timedOut)?.onUnanswered?.('timeout');
+                notify();
+            }, entry.timeoutMs);
         }
+
+        notify();
+    };
+
+    function endResync() {
+        leaveResync();
+        pump();
+    }
+
+    const settle = () => {
+        inFlight = null;
+        clearTimer();
+        pump();
+    };
+
+    /** While resyncing, an answer the queue cannot place restarts the quiet window. */
+    const stray = () => {
+        if (expired) setTimer(endResync, RESYNC_QUIET_MS);
     };
 
     return {
-        isWaiting: (kind) => queue.some((entry) => entry.kind === kind && !entry.expired),
-        begin: (kind, handlers = {}) => {
-            const entry: CatalogAdminRequestEntry = { id: ++sequence, kind, entityId: handlers.entityId ?? null, expired: false, handlers, timer: null };
-
-            if (handlers.timeoutMs) {
-                entry.timer = setTimeout(() => {
-                    entry.timer = null;
-                    entry.expired = true;
-                    entry.handlers?.onUnanswered?.('timeout');
-                }, handlers.timeoutMs);
-            }
-
+        enqueue: (request) => {
+            const entry: Entry = { ...request, id: ++sequence, detached: false };
             queue.push(entry);
+            pump();
             return entry.id;
         },
         detach: (id) => {
-            const entry = queue.find((candidate) => candidate.id === id);
-            if (entry) entry.handlers = null;
+            const queued = queue.find((entry) => entry.id === id);
+            if (queued) {
+                queue = queue.filter((entry) => entry !== queued);
+                notify();
+                return;
+            }
+
+            if (inFlight?.id === id) inFlight.detached = true;
+            if (expired?.id === id) expired.detached = true;
         },
+        isQueued: (kind) => queue.some((entry) => entry.kind === kind),
         takeReply: (kind, entityId) => {
-            const matches = (entry: CatalogAdminRequestEntry) => entry.kind === kind && (entityId === undefined || entry.entityId === entityId);
-            const index = queue.findIndex(matches);
-            if (index < 0) return false;
+            if (inFlight && matchesReply(inFlight, kind, entityId)) {
+                settle();
+                return;
+            }
 
-            // Reads are idempotent: the answer serves every identical read still queued (an expired one and
-            // its retry alike), so a retry is not left waiting for a reply the expired read already took.
-            // Only entries ahead of the first match were passed; the ones between keep their places.
-            const passed = queue.slice(0, index);
-            const answered = queue.filter((entry, position) => position >= index && matches(entry));
-            answered.forEach(stopTimer);
-            queue = queue.filter((entry, position) => position > index && !matches(entry));
-            drop(passed, 'skipped');
-            return true;
+            if (expired && matchesReply(expired, kind, entityId)) {
+                const late = expired;
+                leaveResync();
+                owner(late)?.onLate?.();
+                pump();
+                return;
+            }
+
+            stray();
         },
-        takeBare: (success) => {
-            const head = queue[0];
-            if (!head || !acceptsBare(head.kind, success)) return null;
+        takeBare: (success, message) => {
+            if (inFlight && acceptsBare(inFlight.kind, success)) {
+                const answered = inFlight;
+                inFlight = null;
+                clearTimer();
+                owner(answered)?.onBare?.(success, message);
+                pump();
+                return { kind: answered.kind, late: false };
+            }
 
-            queue = queue.slice(1);
-            stopTimer(head);
-            return { kind: head.kind, expired: head.expired, onBare: head.expired ? null : (head.handlers?.onBare ?? null) };
+            if (expired && acceptsBare(expired.kind, success)) {
+                const late = expired;
+                leaveResync();
+                owner(late)?.onLate?.();
+                pump();
+                return { kind: late.kind, late: true };
+            }
+
+            stray();
+            return null;
+        },
+        setCanSend: (value) => {
+            canSend = value;
+            pump();
         },
         reset: () => {
-            const entries = queue;
+            const unanswered = [...(inFlight ? [inFlight] : []), ...queue];
             queue = [];
-            drop(entries, 'reset');
-        }
+            inFlight = null;
+            leaveResync();
+            unanswered.forEach((entry) => owner(entry)?.onUnanswered?.('reset'));
+            notify();
+        },
+        subscribe: (listener) => {
+            listeners.add(listener);
+            return () => listeners.delete(listener);
+        },
+        isWaiting: () => !!expired || queue.length > 0
     };
 };

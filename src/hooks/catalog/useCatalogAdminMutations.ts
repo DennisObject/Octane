@@ -55,7 +55,7 @@ interface StructuralRequest {
     action: StructuralAction;
     entityType: 'PAGE' | 'OFFER';
     entityId: number;
-    /** Built when the request is sent, from the session and revision current at that moment. */
+    /** Built when the request goes out, from the session and revision current at that moment. */
     build: (draftVersionId: number, revision: number, operationId: string) => IMessageComposer<unknown[]>;
 }
 
@@ -133,9 +133,9 @@ const collectPageSubtree = (session: CatalogStudioSession | null, pageId: number
 };
 
 /**
- * Sends catalog admin changes and routes the CatalogAdminResult answers back to them.
- * Saves are correlated by operation id; structural changes carry no id on the wire, so only
- * one runs at a time and a second request is refused instead of racing the first.
+ * Sends catalog admin changes and routes the CatalogAdminResult answers back to them. Saves are
+ * matched by operation id; structural changes go through the studio's serial request queue, one
+ * at a time, and a second one is refused until the first is answered.
  */
 export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     const { currentType } = useCatalogUiState();
@@ -149,29 +149,16 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     const [dismissedStudioErrorId, setDismissedStudioErrorId] = useState(0);
     const [results, setResults] = useState<ReadonlyMap<string, CatalogAdminMutationResult>>(new Map());
     const pendingActionRef = useRef<PendingStructuralAction | null>(null);
-    const queuedActionRef = useRef<{ request: StructuralRequest; timer: ReturnType<typeof setTimeout> } | null>(null);
     const pendingSavesRef = useRef(new Map<string, PendingSave>());
-    // The session a structural change was made against; until a newer one arrives its revision is stale.
-    const [staleSession, setStaleSession] = useState<CatalogStudioSession | null>(null);
-    const staleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const { session, revision, requests } = studio;
-    const awaitingRevision = staleSession !== null && session === staleSession;
-    // Requests read the session at the moment they are sent: a confirmation dialog may stay open across other saves.
-    const liveRef = useRef({ session, revision, awaitingRevision, currentType });
+    const { session, requests, getSession } = studio;
+    // A confirmation dialog may stay open while the catalog type changes; read it when the change is made.
+    const currentTypeRef = useRef(currentType);
 
     useLayoutEffect(() => {
-        liveRef.current = { session, revision, awaitingRevision, currentType };
+        currentTypeRef.current = currentType;
     });
 
-    useEffect(
-        () => () => {
-            if (queuedActionRef.current) clearTimeout(queuedActionRef.current.timer);
-            if (staleTimerRef.current) clearTimeout(staleTimerRef.current);
-            pendingSavesRef.current.forEach((pending) => clearTimeout(pending.timer));
-        },
-        []
-    );
+    useEffect(() => () => pendingSavesRef.current.forEach((pending) => clearTimeout(pending.timer)), []);
 
     const publishResult = useCallback((result: CatalogAdminMutationResult) => {
         setResults((current) => {
@@ -213,7 +200,7 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
     const finishAction = useCallback(() => {
         const pending = pendingActionRef.current;
         pendingActionRef.current = null;
-        setBusy(!!queuedActionRef.current);
+        setBusy(false);
         return pending;
     }, []);
 
@@ -225,74 +212,51 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         refreshCurrentPage();
     }, [refreshCurrentPage, refreshIndex, studio]);
 
-    /** Sends a structural change now; the session must be open and no other change outstanding. */
-    const sendAction = useCallback(
-        (request: StructuralRequest, liveSession: CatalogStudioSession, liveRevision: number) => {
-            const operationId = nextCatalogStudioOperationId(request.action);
-            // Without an answer the change is released after the timeout: its queue entry stays, so its
-            // late answer is still absorbed by it instead of being credited to a newer request.
-            const requestId = requests.begin('structural', {
+    /**
+     * Queues one structural change; a second one is refused until the first is answered. It goes out
+     * when the request queue reaches it, built from the session current then, so a session read
+     * queued before it (after the previous change, or while the studio opens) is always answered first.
+     */
+    const runAction = useCallback(
+        (request: StructuralRequest) => {
+            if (pendingActionRef.current) {
+                setLastError(LocalizeText('catalog.admin.error.busy'));
+                return false;
+            }
+
+            if (!getSession()) studio.refresh();
+
+            const requestId = requests.enqueue({
+                kind: 'structural',
                 timeoutMs: RESPONSE_TIMEOUT_MS,
+                send: () => {
+                    const current = getSession();
+                    if (!current) return false;
+
+                    SendMessageComposer(request.build(current.draftVersionId, current.revision, nextCatalogStudioOperationId(request.action)));
+                    return true;
+                },
                 onUnanswered: (reason) => {
                     if (pendingActionRef.current?.requestId !== requestId) return;
 
                     finishAction();
-                    if (reason === 'timeout') setLastError(LocalizeText('catalog.admin.error.timeout'));
-                    if (reason !== 'reset') resync();
-                }
+                    if (reason === 'cancelled') setLastError(LocalizeText('catalog.admin.status.connecting'));
+                    if (reason === 'timeout') {
+                        setLastError(LocalizeText('catalog.admin.error.timeout'));
+                        resync();
+                    }
+                },
+                // Its answer came after the timeout released it: whatever it did, show the current state.
+                onLate: resync
             });
 
             pendingActionRef.current = { ...request, requestId };
             setBusy(true);
             setLastError(null);
-            SendMessageComposer(request.build(liveSession.draftVersionId, liveRevision, operationId));
-        },
-        [finishAction, requests, resync]
-    );
-
-    /**
-     * Runs one structural change. While the studio session is still opening a single change waits
-     * for it (the old editor did the same); anything beyond that is refused rather than raced.
-     */
-    const runAction = useCallback(
-        (request: StructuralRequest) => {
-            const live = liveRef.current;
-
-            if (pendingActionRef.current || queuedActionRef.current || live.awaitingRevision) {
-                setLastError(LocalizeText('catalog.admin.error.busy'));
-                return false;
-            }
-
-            if (!live.session) {
-                const timer = setTimeout(() => {
-                    if (!queuedActionRef.current) return;
-                    queuedActionRef.current = null;
-                    setBusy(!!pendingActionRef.current);
-                    setLastError(LocalizeText('catalog.admin.error.timeout'));
-                }, RESPONSE_TIMEOUT_MS);
-
-                queuedActionRef.current = { request, timer };
-                setBusy(true);
-                setLastError(null);
-                studio.refresh();
-                return true;
-            }
-
-            sendAction(request, live.session, live.revision);
             return true;
         },
-        [sendAction, studio]
+        [finishAction, getSession, requests, resync, studio]
     );
-
-    // Sends the change that waited for the session as soon as one is open.
-    useEffect(() => {
-        const queued = queuedActionRef.current;
-        if (!queued || !session || awaitingRevision || pendingActionRef.current) return;
-
-        clearTimeout(queued.timer);
-        queuedActionRef.current = null;
-        sendAction(queued.request, session, revision);
-    }, [awaitingRevision, revision, sendAction, session]);
 
     const handleSmartSave = (parser: CatalogAdminResultMessageParser, smartSave: CatalogAdminSmartSaveResult) => {
         const pending = pendingSavesRef.current.get(smartSave.operationId);
@@ -335,14 +299,11 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         setLastError(null);
         if (pending?.action === 'deletePage') {
             // The editors of the page, its sub-pages and their offers all point at rows that are gone.
-            closeDeleted(collectPageSubtree(session, pending.entityId, toStudioCatalogType(currentType)), []);
+            closeDeleted(collectPageSubtree(getSession(), pending.entityId, toStudioCatalogType(currentTypeRef.current)), []);
         }
         if (pending?.action === 'deleteOffer') closeDeleted([], [pending.entityId]);
 
-        // Live edits move the revision on; the next change waits for the refreshed session (or gives up after a while).
-        setStaleSession(session);
-        if (staleTimerRef.current) clearTimeout(staleTimerRef.current);
-        staleTimerRef.current = setTimeout(() => setStaleSession(null), RESPONSE_TIMEOUT_MS);
+        // Live edits move the revision on: the session read queued here goes out before any later change.
         studio.refresh();
         studio.loadHistory();
         if (pending && PAGE_INDEX_ACTIONS.has(pending.action)) refreshIndex();
@@ -357,35 +318,21 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
             return;
         }
 
-        // A bare answer belongs to the head of the request queue, if its kind accepts it (see the tracker).
-        const answer = requests.takeBare(parser.success);
+        // A bare answer settles the one request on the wire, if its kind accepts it (see the request queue).
+        // Reads hear it through their own callback; a late answer resyncs through the request's onLate.
+        const answer = requests.takeBare(parser.success, parser.message);
 
-        if (!answer) {
-            // Credited to nothing: show the current catalog instead of guessing what it reported.
-            studio.refresh();
-            return;
-        }
-
-        // The late answer of a request that already timed out: it was released, so only resync.
-        if (answer.expired) {
-            if (answer.kind === 'structural') resync();
-            else studio.refresh();
-            return;
-        }
-
-        // Only one structural change is outstanding at a time, so the head is the pending one.
-        if (answer.kind === 'structural') handleStructuralResult(parser);
-        else answer.onBare?.(parser.success, parser.message);
+        if (!answer) studio.refresh();
+        else if (answer.kind === 'structural' && !answer.late) handleStructuralResult(parser);
     });
 
-    // A details answer settles its own entry (matched by id), even when its editor has closed meanwhile.
     useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, (event) => requests.takeReply('pageDetails', event.getParser().pageId));
     useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, (event) => requests.takeReply('offerDetails', event.getParser().offerId));
 
     const savePage = useCallback(
         (form: CatalogAdminPageForm, catalogType: string) => {
-            const live = liveRef.current;
-            if (!live.session) return null;
+            const current = getSession();
+            if (!current) return null;
 
             const isNew = form.pageId === null;
             const name = form.caption || (isNew ? LocalizeText('catalog.admin.create.page') : `#${form.pageId}`);
@@ -393,17 +340,17 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
             const operationId = beginSave(isNew ? 'createPage' : 'savePage');
 
             SendMessageComposer(
-                createPageWriteComposer(form, { catalogType, draftVersionId: live.session.draftVersionId, revision: live.revision, summary, operationId })
+                createPageWriteComposer(form, { catalogType, draftVersionId: current.draftVersionId, revision: current.revision, summary, operationId })
             );
             return operationId;
         },
-        [beginSave]
+        [beginSave, getSession]
     );
 
     const saveOffer = useCallback(
         (form: CatalogAdminOfferForm, catalogType: string) => {
-            const live = liveRef.current;
-            if (!live.session) return null;
+            const current = getSession();
+            if (!current) return null;
 
             const isNew = form.offerId === null;
             const name = form.catalogName || (isNew ? LocalizeText('catalog.admin.offer.new') : `#${form.offerId}`);
@@ -411,16 +358,16 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
             const operationId = beginSave(isNew ? 'createOffer' : 'saveOffer');
 
             SendMessageComposer(
-                createOfferWriteComposer(form, { catalogType, draftVersionId: live.session.draftVersionId, revision: live.revision, summary, operationId })
+                createOfferWriteComposer(form, { catalogType, draftVersionId: current.draftVersionId, revision: current.revision, summary, operationId })
             );
             return operationId;
         },
-        [beginSave]
+        [beginSave, getSession]
     );
 
     const deletePage = useCallback(
         (pageId: number, name: string, catalogType?: string) => {
-            const type = catalogType ?? liveRef.current.currentType;
+            const type = catalogType ?? currentTypeRef.current;
             const summary = LocalizeText('catalog.admin.history.page.deleted', ['name'], [name]);
 
             return runAction({
@@ -436,7 +383,7 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     const movePage = useCallback(
         (pageId: number, parentId: number, index: number, name: string) => {
-            const type = liveRef.current.currentType;
+            const type = currentTypeRef.current;
             const summary = LocalizeText('catalog.admin.history.page.moved', ['name'], [name]);
 
             return runAction({
@@ -452,7 +399,7 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     const setPageVisible = useCallback(
         (pageId: number, visible: boolean, name: string) => {
-            const type = liveRef.current.currentType;
+            const type = currentTypeRef.current;
             const summary = LocalizeText(visible ? 'catalog.admin.history.page.shown' : 'catalog.admin.history.page.hidden', ['name'], [name]);
 
             return runAction({
@@ -468,7 +415,7 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     const deleteOffer = useCallback(
         (offerId: number, name: string, catalogType?: string) => {
-            const type = catalogType ?? liveRef.current.currentType;
+            const type = catalogType ?? currentTypeRef.current;
             const summary = LocalizeText('catalog.admin.history.offer.deleted', ['name'], [name]);
 
             return runAction({
@@ -486,7 +433,7 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
         (orders: CatalogAdminOfferOrder[], pageName: string) => {
             if (!orders.length) return false;
 
-            const type = liveRef.current.currentType;
+            const type = currentTypeRef.current;
             const summary = LocalizeText('catalog.admin.history.offers.reordered', ['name'], [pageName]);
 
             return runAction({
@@ -507,8 +454,8 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     return {
         sessionReady: !!session,
-        loading: busy || awaitingRevision || pendingSaveCount > 0,
-        busy: busy || awaitingRevision,
+        loading: busy || pendingSaveCount > 0,
+        busy,
         lastError: lastError || (studio.lastErrorId !== dismissedStudioErrorId ? studio.lastError : null),
         results,
         clearError,

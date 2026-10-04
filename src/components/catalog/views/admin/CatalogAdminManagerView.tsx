@@ -86,7 +86,9 @@ const CatalogAdminManagerWindow: FC = () => {
             {!admin.lastError && !studio.unresponsive && !admin.sessionReady && (
                 <StaffStatus message={LocalizeText('catalog.admin.status.connecting')} tone="pending" />
             )}
-            {!admin.lastError && admin.busy && <StaffStatus message={LocalizeText('catalog.admin.status.working')} tone="pending" />}
+            {!admin.lastError && (admin.busy || studio.requestsWaiting) && (
+                <StaffStatus message={LocalizeText('catalog.admin.status.working')} tone="pending" />
+            )}
             {shownTab === 'catalog' && (
                 <div className="octane-catalog-admin-workspace">
                     <CatalogAdminPageTreeView root={draftRoot} selectedPageId={selectedPageId} onSelect={(node: ICatalogNode) => selectPage(node.pageId)} />

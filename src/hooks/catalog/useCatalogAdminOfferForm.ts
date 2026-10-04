@@ -51,6 +51,7 @@ const createInitialForm = (target: CatalogAdminOfferEditorTarget, session: Catal
  */
 export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) => {
     const studio = useCatalogStudio();
+    const { getSession, requests } = studio;
     const admin = useCatalogAdmin();
     const { showConfirm } = useNotificationActions();
     const closeEditor = useCatalogAdminUiStore((state) => state.closeEditor);
@@ -72,6 +73,8 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const [hadSession, setHadSession] = useState(!!studio.session);
     const detailsRequestIdRef = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState<string | null>(null);
+    // The details read waits in the request queue until it is its turn; until then the editor waits for the server.
+    const [detailsSent, setDetailsSent] = useState(false);
     const sessionReady = admin?.sessionReady ?? false;
 
     const smartSave = useCatalogAdminSmartSave<CatalogAdminOfferForm>({
@@ -79,7 +82,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         acknowledgements: admin?.results ?? new Map(),
         submit: (draft) => admin?.saveOffer(draft, target.catalogType) ?? null,
         // Runs on save, after this render, so the stored item id below is set by then.
-        canSubmit: (draft) => sessionReady && !validateOfferForm(draft, storedItemIds, draft.offerId === null ? 0 : limitedSells),
+        canSubmit: (draft) => sessionReady && detailsReady && !validateOfferForm(draft, storedItemIds, draft.offerId === null ? 0 : limitedSells),
         toCommitted: (ack) => (ack.entityType === 'OFFER' && ack.entity ? createOfferFormFromSnapshot(ack.entity as CatalogStudioOfferSnapshot) : null),
         onClose: () => closeEditor('offer', editorKey),
         confirmDiscard: (discard) =>
@@ -113,6 +116,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         setHadSession(!!studio.session);
         if (studio.session && sessionSeen) {
             setSessionEpoch((epoch) => epoch + 1);
+            setDetailsSent(false);
             if (storedOfferId !== null) setDetailsReady(false);
         }
     }
@@ -132,19 +136,33 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         if (storedOfferId === null || !studio.session || detailsRequestKeyRef.current === requestKey) return;
         detailsRequestKeyRef.current = requestKey;
 
-        // A refusal comes back as a bare CatalogAdminResult; the mutations hook routes it here.
-        detailsRequestIdRef.current = studio.requests.begin('offerDetails', {
-            entityId: storedOfferId,
+        const requestedId = storedOfferId;
+        const catalogType = target.catalogType;
+
+        // Waits in the studio's request queue for its turn; a refusal comes back as a bare CatalogAdminResult.
+        detailsRequestIdRef.current = requests.enqueue({
+            kind: 'offerDetails',
+            entityId: requestedId,
             timeoutMs: DETAILS_TIMEOUT_MS,
+            send: () => {
+                const current = getSession();
+                if (!current) return false;
+
+                SendMessageComposer(new CatalogAdminLoadOfferComposer(requestedId, catalogType, current.draftVersionId, current.revision));
+                return true;
+            },
+            onSent: () => setDetailsSent(true),
             onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
-            onUnanswered: (reason) => reason !== 'reset' && setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'))
+            onUnanswered: (reason) => {
+                setDetailsSent(false);
+                // Not sent, or dropped by a close or reconnect: ask again once a session is back.
+                if (reason !== 'timeout') detailsRequestKeyRef.current = null;
+                else setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'));
+            }
         });
+    }, [sessionEpoch, storedOfferId, getSession, requests, studio.session, target.catalogType]);
 
-        SendMessageComposer(new CatalogAdminLoadOfferComposer(storedOfferId, target.catalogType, studio.session.draftVersionId, studio.revision));
-    }, [sessionEpoch, storedOfferId, studio.requests, studio.revision, studio.session, target.catalogType]);
-
-    // A closed editor leaves its request in the queue (answers keep their order) but hears nothing more.
-    const { requests } = studio;
+    // A closed editor drops its queued read; one already on the wire stays but its answers go nowhere.
     useEffect(
         () => () => {
             if (detailsRequestIdRef.current !== null) requests.detach(detailsRequestIdRef.current);
@@ -173,7 +191,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const editorStatus = resolveCatalogAdminEditorStatus({
         sessionReady,
         detailsReady,
-        loadingKey: 'catalog.admin.status.loading.offer',
+        loadingKey: detailsSent ? 'catalog.admin.status.loading.offer' : 'catalog.admin.status.working',
         validationKey,
         isDirty: smartSave.isDirty,
         saveStatus: smartSave.status,
