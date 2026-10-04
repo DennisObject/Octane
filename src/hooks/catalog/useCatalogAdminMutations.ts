@@ -26,7 +26,12 @@ import type {
     CatalogAdminSmartSaveAction
 } from './catalogAdmin.types';
 import { createOfferWriteComposer, createPageWriteComposer } from './catalogAdminComposers.helpers';
-import { localizeCatalogAdminCode, localizeCatalogAdminFieldErrors, localizeCatalogAdminPlainMessage } from './catalogAdminServerErrors.helpers';
+import {
+    localizeCatalogAdminCode,
+    localizeCatalogAdminFieldErrors,
+    localizeCatalogAdminMessage,
+    localizeCatalogAdminPlainMessage
+} from './catalogAdminServerErrors.helpers';
 import { toStudioCatalogType } from './catalogAdminTree.helpers';
 import { useCatalogAdminUiStore } from './catalogAdminUiStore';
 import type { CatalogStudioSession } from './catalogStudio.types';
@@ -90,7 +95,7 @@ const toMutationResult = (parser: CatalogAdminResultMessageParser, result: Catal
     action: result.action,
     success: parser.success,
     code: result.code,
-    message: parser.success ? parser.message : localizeCatalogAdminCode(result.code, parser.message, result.fieldErrors),
+    message: parser.success ? localizeCatalogAdminMessage(parser.message) : localizeCatalogAdminCode(result.code, parser.message, result.fieldErrors),
     entityType: result.entityType,
     catalogType: result.catalogType,
     entityId: result.entityId,

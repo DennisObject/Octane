@@ -61,10 +61,15 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const studioType = toStudioCatalogType(target.catalogType);
     const { offerId } = target;
     const [initialForm] = useState(() => createInitialForm(target, studio.session));
-    const [detailsReady, setDetailsReady] = useState(() => offerId === null || !!findSnapshot(studio.session, offerId, studioType));
+    // The server binds an offer to this connection when it is loaded (or created) and refuses a save
+    // without that, so an existing offer is always loaded before saving is enabled.
+    const [detailsReady, setDetailsReady] = useState(offerId === null);
     const [limitedSells, setLimitedSells] = useState(0);
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
-    const detailsRequestedRef = useRef(false);
+    const detailsRequestKeyRef = useRef<string | null>(null);
+    // Counts sessions after the first one: a reconnect gets a new session that has to load the offer again.
+    const [sessionEpoch, setSessionEpoch] = useState(0);
+    const [hadSession, setHadSession] = useState(!!studio.session);
     const detailsRequestIdRef = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState<string | null>(null);
     const sessionReady = admin?.sessionReady ?? false;
@@ -91,7 +96,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
 
     const canReplaceDraft = !smartSave.isDirty && !smartSave.inFlight;
     const { confirmLeave } = smartSave;
-    const createdId = smartSave.baseline.offerId;
+    const storedOfferId = smartSave.baseline.offerId;
 
     // Opening another offer asks this editor first, so unsaved changes are never dropped silently.
     useEffect(() => {
@@ -101,33 +106,42 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
 
     // After a create the editor edits the new row; the store has to know it to close it on delete.
     useEffect(() => {
-        if (target.entityId === null && createdId !== null) bindCreated('offer', editorKey, createdId);
-    }, [bindCreated, createdId, editorKey, target.entityId]);
+        if (target.entityId === null && storedOfferId !== null) bindCreated('offer', editorKey, storedOfferId);
+    }, [bindCreated, editorKey, storedOfferId, target.entityId]);
+
+    if (!!studio.session !== hadSession) {
+        setHadSession(!!studio.session);
+        if (studio.session && sessionSeen) {
+            setSessionEpoch((epoch) => epoch + 1);
+            if (storedOfferId !== null) setDetailsReady(false);
+        }
+    }
 
     // The editor may open before the studio session: fill in the stored values once it arrives.
     if (studio.session && !sessionSeen) {
         setSessionSeen(true);
 
-        if (offerId === null || findSnapshot(studio.session, offerId, studioType)) {
-            if (canReplaceDraft) smartSave.hydrate(createInitialForm(target, studio.session));
-            setDetailsReady(true);
+        if (offerId === null) setDetailsReady(true);
+        if ((offerId === null || findSnapshot(studio.session, offerId, studioType)) && canReplaceDraft) {
+            smartSave.hydrate(createInitialForm(target, studio.session));
         }
     }
 
     useEffect(() => {
-        if (offerId === null || !studio.session || detailsRequestedRef.current) return;
-        detailsRequestedRef.current = true;
+        const requestKey = `${storedOfferId}:${sessionEpoch}`;
+        if (storedOfferId === null || !studio.session || detailsRequestKeyRef.current === requestKey) return;
+        detailsRequestKeyRef.current = requestKey;
 
         // A refusal comes back as a bare CatalogAdminResult; the mutations hook routes it here.
         detailsRequestIdRef.current = studio.requests.begin('offerDetails', {
-            entityId: offerId,
+            entityId: storedOfferId,
             timeoutMs: DETAILS_TIMEOUT_MS,
             onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
             onUnanswered: (reason) => reason !== 'reset' && setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'))
         });
 
-        SendMessageComposer(new CatalogAdminLoadOfferComposer(offerId, target.catalogType, studio.session.draftVersionId, studio.revision));
-    }, [offerId, studio.requests, studio.revision, studio.session, target.catalogType]);
+        SendMessageComposer(new CatalogAdminLoadOfferComposer(storedOfferId, target.catalogType, studio.session.draftVersionId, studio.revision));
+    }, [sessionEpoch, storedOfferId, studio.requests, studio.revision, studio.session, target.catalogType]);
 
     // A closed editor leaves its request in the queue (answers keep their order) but hears nothing more.
     const { requests } = studio;
@@ -140,7 +154,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
 
     useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, (event) => {
         const parser = event.getParser();
-        if (!detailsRequestedRef.current || parser.offerId !== offerId) return;
+        if (detailsRequestKeyRef.current === null || parser.offerId !== storedOfferId) return;
 
         setDetailsError(null);
 

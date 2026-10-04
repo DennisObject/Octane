@@ -96,7 +96,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     );
 
     /** Turns a feature off when the server says it does not support it; true when that happened. */
-    const disableIfUnsupported = useCallback((feature: CatalogStudioFeature, code: string) => {
+    const disableIfUnsupported = useCallback((feature: CatalogStudioFeature, code: string, message: string) => {
         if (!UNSUPPORTED_CODES.has(code)) return false;
 
         setEnabledFeatures((current) => {
@@ -105,7 +105,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             return next;
         });
         setLoading(false);
-        setLastError(LocalizeText('catalog.admin.server.code.UNSUPPORTED'));
+        setLastError(localizeCatalogAdminCode(code, message, {}));
         return true;
     }, []);
 
@@ -198,11 +198,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             updateRevision(parser.revision);
             setLoading(false);
             if (!parser.success) {
-                setLastError(
-                    parser.code === 'UNSUPPORTED'
-                        ? LocalizeText('catalog.admin.history.undo.unsupported')
-                        : localizeCatalogAdminCode(parser.code, parser.message, {})
-                );
+                // The server's sentence says which: a create/delete/reorder row, a newer change, a stale revision.
+                setLastError(localizeCatalogAdminCode(parser.code, parser.message, {}));
                 // The catalog moved on, or the entity changed again since that row: show the current state.
                 if (parser.code === 'STALE_REVISION' || parser.code === 'CONFLICT') refresh();
                 return;
@@ -236,7 +233,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
 
     useMessageEvent<CatalogStudioValidationEvent>(CatalogStudioValidationEvent, (event) => {
         const parser = event.getParser();
-        if (disableIfUnsupported('validate', parser.code)) return;
+        if (disableIfUnsupported('validate', parser.code, parser.message)) return;
         const next: CatalogStudioValidationState = {
             operationId: parser.operationId,
             success: parser.success,
@@ -250,12 +247,12 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         setValidation(next);
         updateRevision(parser.revision);
         setLoading(false);
-        setLastError(parser.success ? null : parser.message || parser.code);
+        setLastError(parser.success ? null : localizeCatalogAdminCode(parser.code, parser.message, {}));
     });
 
     useMessageEvent<CatalogStudioDocumentResultEvent>(CatalogStudioDocumentResultEvent, (event) => {
         const parser = event.getParser();
-        if (disableIfUnsupported('sql', parser.code)) return;
+        if (disableIfUnsupported('sql', parser.code, parser.message)) return;
         const changes = parser.changes ?? [];
         const result: CatalogStudioDocumentResult = {
             operationId: parser.operationId,
@@ -271,7 +268,7 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         };
         setDocumentResult(result);
         setLoading(false);
-        setLastError(result.success ? null : result.message || result.code);
+        setLastError(result.success ? null : localizeCatalogAdminCode(result.code, result.message, {}));
         if (result.code === 'APPLIED' || result.code === 'ALREADY_APPLIED') {
             refresh();
             refreshHistory();
