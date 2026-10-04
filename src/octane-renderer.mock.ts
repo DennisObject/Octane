@@ -489,14 +489,10 @@ export class CatalogStudioRenewLockComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioReleaseLockComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioHistoryComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioUndoComposer extends CatalogStudioComposerStub {}
-export class CatalogStudioValidateComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioPublishComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioDiscardComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioRestoreComposer extends CatalogStudioComposerStub {}
 export class CatalogStudioPreviewComposer extends CatalogStudioComposerStub {}
-export class CatalogStudioExportComposer extends CatalogStudioComposerStub {}
-export class CatalogStudioDocumentDryRunComposer extends CatalogStudioComposerStub {}
-export class CatalogStudioDocumentApplyComposer extends CatalogStudioComposerStub {}
 export class CatalogAdminDeletePageComposer extends CatalogStudioComposerStub {}
 export class CatalogAdminMovePageComposer extends CatalogStudioComposerStub {}
 export class CatalogAdminSetPageEnabledComposer extends CatalogStudioComposerStub {}
@@ -516,12 +512,10 @@ export class CatalogStudioRenewLockEvent extends MessageEvent {}
 export class CatalogStudioReleaseLockEvent extends MessageEvent {}
 export class CatalogStudioHistoryEvent extends MessageEvent {}
 export class CatalogStudioUndoEvent extends MessageEvent {}
-export class CatalogStudioValidationEvent extends MessageEvent {}
 export class CatalogStudioPublishEvent extends MessageEvent {}
 export class CatalogStudioDiscardEvent extends MessageEvent {}
 export class CatalogStudioRestoreEvent extends MessageEvent {}
 export class CatalogStudioPreviewEvent extends MessageEvent {}
-export class CatalogStudioDocumentResultEvent extends MessageEvent {}
 // `ChooserSelectionFilter` is used as a string enum in some call sites.
 export const ChooserSelectionFilter = makeEnumProxy('ChooserSelectionFilter');
 

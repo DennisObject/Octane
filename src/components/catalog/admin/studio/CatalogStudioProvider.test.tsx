@@ -30,7 +30,6 @@ const Probe = () => {
             <span data-testid="error">{studio.lastError ?? ''}</span>
             <span data-testid="page-caption">{studio.session?.pages.find(page => page.pageId === 42)?.caption ?? ''}</span>
             <span data-testid="history-count">{studio.historyTotalCount}</span>
-            <button onClick={() => studio.applyDocument('SQL', 'UPDATE catalog_pages SET caption = \'Shop\' WHERE id = 1;', 'fingerprint', 'Import catalog SQL file')}>apply</button>
             <button onClick={() => studio.applyMutation({
                 operationId: 'save-page-1', action: 'savePage', revision: 8, entityType: 'PAGE', catalogType: 'NORMAL',
                 entity: pageSnapshot('Renamed'),

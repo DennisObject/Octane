@@ -90,45 +90,6 @@ export interface CatalogStudioHistoryGroup {
     entries: CatalogStudioHistoryEntry[];
 }
 
-export interface CatalogStudioValidationIssue {
-    code: string;
-    entityType: string;
-    entityId: number;
-    field: string;
-    message: string;
-}
-
-export interface CatalogStudioValidationState {
-    operationId: string;
-    success: boolean;
-    code: string;
-    message: string;
-    revision: number;
-    current: boolean;
-    issues: CatalogStudioValidationIssue[];
-    /** When this report reached the client. A report says nothing without the moment it was taken. */
-    receivedAt: number;
-}
-
-export interface CatalogStudioDocumentResult {
-    operationId: string;
-    success: boolean;
-    code: string;
-    message: string;
-    revision: number;
-    format: string;
-    document: string;
-    fingerprint: string;
-    changedEntities: number;
-    changes: Array<{
-        entityType: string;
-        catalogType: string;
-        entityId: number;
-        operation: string;
-        fields: string[];
-    }>;
-}
-
 export interface CatalogStudioMutationResult {
     operationId: string;
     action: 'createPage' | 'savePage' | 'createOffer' | 'saveOffer';
@@ -139,10 +100,5 @@ export interface CatalogStudioMutationResult {
     historyGroup: CatalogStudioHistoryGroup;
 }
 
-/** Optional studio tools; the session, history and undo are always there. */
-export const CATALOG_STUDIO_FEATURES = ['validate', 'sql'] as const;
-
 /** History operations the server can undo; creates, deletes and reorders cannot be. */
 export const CATALOG_STUDIO_UNDOABLE_OPERATIONS: readonly string[] = ['UPDATE', 'MOVE'];
-
-export type CatalogStudioFeature = (typeof CATALOG_STUDIO_FEATURES)[number];

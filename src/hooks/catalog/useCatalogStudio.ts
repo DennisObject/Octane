@@ -1,18 +1,9 @@
 import { createContext, useContext } from 'react';
 import type { CatalogAdminRequestState, CatalogAdminRequestTracker } from './catalogAdminRequestTracker';
-import {
-    CatalogStudioDocumentResult,
-    CatalogStudioFeature,
-    CatalogStudioHistoryGroup,
-    CatalogStudioMutationResult,
-    CatalogStudioSession,
-    CatalogStudioValidationState
-} from './catalogStudio.types';
+import { CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession } from './catalogStudio.types';
 
 export interface CatalogStudioContextValue {
     session: CatalogStudioSession | null;
-    /** Which optional tools this hotel supports; their controls are hidden otherwise. */
-    features: Readonly<Record<CatalogStudioFeature, boolean>>;
     /** Non-save requests go out one at a time through this queue. */
     requests: CatalogAdminRequestTracker;
     /** A request waits for its turn, or the queue is resyncing after a request timed out. */
@@ -23,8 +14,6 @@ export interface CatalogStudioContextValue {
     pendingCount: number;
     history: CatalogStudioHistoryGroup[];
     historyTotalCount: number;
-    validation: CatalogStudioValidationState | null;
-    documentResult: CatalogStudioDocumentResult | null;
     loading: boolean;
     lastError: string | null;
     /** Increases with every reported error, so a dismissal applies to one occurrence only. */
@@ -32,10 +21,6 @@ export interface CatalogStudioContextValue {
     refresh: () => void;
     loadHistory: (offset?: number, limit?: number) => void;
     undo: (groupId: number) => void;
-    validate: () => void;
-    exportDocument: (format: 'SQL') => void;
-    dryRunDocument: (format: 'SQL', document: string) => void;
-    applyDocument: (format: 'SQL', document: string, fingerprint: string, summary: string) => void;
     applyMutation: (mutation: CatalogStudioMutationResult) => void;
 }
 

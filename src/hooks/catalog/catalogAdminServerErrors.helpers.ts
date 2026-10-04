@@ -4,8 +4,8 @@ import { localizeWithFallback } from '../../api/utils/localizeWithFallback';
 const FORM_FIELD = '_form';
 
 /**
- * Every sentence the server (PlusEMU E3) puts in a CatalogAdminResult message, a field error or a
- * studio reply, with the localisation key that replaces it. `{name}` marks a value the server fills
+ * Every sentence the server (PlusEMU E3) puts in a CatalogAdminResult message, a field error or an
+ * undo reply, with the localisation key that replaces it. `{name}` marks a value the server fills
  * in; it is handed to the text as `%name%`. A sentence that is not listed is shown as sent.
  */
 const KNOWN_SENTENCES: ReadonlyArray<readonly [template: string, key: string]> = [
@@ -72,11 +72,7 @@ const KNOWN_SENTENCES: ReadonlyArray<readonly [template: string, key: string]> =
     ['Extra data is limited to 1024 characters.', 'catalog.admin.server.message.field.extradata'],
     ['Offer id cannot be negative.', 'catalog.admin.server.message.field.offer.id'],
     ['Limited stack must be between 0 and 1000000.', 'catalog.admin.server.message.field.limited.range'],
-    ['{n} are already sold.', 'catalog.admin.server.message.field.limited.sold'],
-    // Studio tools the hotel does not have
-    ['Catalog validation is not supported by this hotel.', 'catalog.admin.server.message.studio.validate'],
-    ['Catalog export is not supported by this hotel.', 'catalog.admin.server.message.studio.export'],
-    ['Catalog import is not supported by this hotel.', 'catalog.admin.server.message.studio.import']
+    ['{n} are already sold.', 'catalog.admin.server.message.field.limited.sold']
 ];
 
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
