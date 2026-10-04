@@ -1,8 +1,17 @@
 import { createContext, useContext } from 'react';
-import { CatalogStudioDocumentResult, CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession, CatalogStudioValidationState } from './catalogStudio.types';
+import {
+    CatalogStudioDocumentResult,
+    CatalogStudioFeature,
+    CatalogStudioHistoryGroup,
+    CatalogStudioMutationResult,
+    CatalogStudioSession,
+    CatalogStudioValidationState
+} from './catalogStudio.types';
 
 export interface CatalogStudioContextValue {
     session: CatalogStudioSession | null;
+    /** Which optional tools this hotel supports; their controls are hidden otherwise. */
+    features: Readonly<Record<CatalogStudioFeature, boolean>>;
     revision: number;
     pendingCount: number;
     history: CatalogStudioHistoryGroup[];
@@ -11,6 +20,8 @@ export interface CatalogStudioContextValue {
     documentResult: CatalogStudioDocumentResult | null;
     loading: boolean;
     lastError: string | null;
+    /** Increases with every reported error, so a dismissal applies to one occurrence only. */
+    lastErrorId: number;
     refresh: () => void;
     loadHistory: (offset?: number, limit?: number) => void;
     undo: (groupId: number) => void;

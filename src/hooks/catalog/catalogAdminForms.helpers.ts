@@ -8,8 +8,6 @@ import { isCatalogStudioLayoutCode } from '../../components/catalog/views/page/l
 import type { CatalogAdminOfferForm, CatalogAdminPageForm } from './catalogAdmin.types';
 import type { CatalogStudioOfferSnapshot, CatalogStudioPageSnapshot } from './catalogStudio.types';
 
-export const CATALOG_ADMIN_PAGE_MODES = ['NORMAL', 'BUILDER', 'BOTH'] as const;
-
 /** Next free order number after the given siblings, 0 for the first one. */
 export const nextCatalogAdminOrder = (orders: number[]): number => (orders.length ? Math.max(...orders) + 1 : 0);
 
@@ -103,17 +101,16 @@ export const createPageFormFromDetails = (details: CatalogAdminPageDetailsMessag
     includes: details.includes
 });
 
-/** Returns the localisation key of the first problem, or null when the page can be sent. */
+/**
+ * Returns the localisation key of the first problem, or null when the page can be sent. HC-only,
+ * room link, included pages and icon colour are not edited here, so they are not checked either.
+ */
 export const validatePageForm = (form: CatalogAdminPageForm): string | null => {
     if (!form.caption.trim()) return 'catalog.admin.page.error.caption';
     if (!isCatalogStudioLayoutCode(form.pageLayout)) return 'catalog.admin.page.error.layout';
     if (form.minRank < 1) return 'catalog.admin.page.error.rank';
-    if (form.iconImage < 0 || form.iconColor < 0) return 'catalog.admin.page.error.icon';
+    if (form.iconImage < 0) return 'catalog.admin.page.error.icon';
     if (form.parentId < -1) return 'catalog.admin.page.error.parent';
-    if (form.roomId < 0) return 'catalog.admin.page.error.room';
-
-    const includes = form.includes.replace(/\s+/g, '');
-    if (includes && includes.split(/[;,]/).some((id) => !/^[1-9]\d*$/.test(id))) return 'catalog.admin.page.error.includes';
 
     return null;
 };
@@ -188,20 +185,23 @@ export const createOfferFormFromDetails = (details: CatalogAdminOfferDetailsMess
     orderNumber: details.orderNumber
 });
 
-/** Returns the localisation key of the first problem, or null when the offer can be sent. */
-export const validateOfferForm = (form: CatalogAdminOfferForm, builderCatalog: boolean, limitedSells: number): string | null => {
+/** Highest quantity one offer may sell; the hotel refuses more. */
+export const CATALOG_ADMIN_MAX_OFFER_AMOUNT = 100;
+
+/**
+ * Returns the localisation key of the first problem, or null when the offer can be sent. The hotel
+ * sells one furni per offer (no bundles); an item id it stored some other way may stay as it is.
+ */
+export const validateOfferForm = (form: CatalogAdminOfferForm, storedItemIds: string | null, limitedSells: number): string | null => {
     if (form.pageId <= 0) return 'catalog.admin.offer.error.page';
     if (!form.catalogName.trim()) return 'catalog.admin.offer.error.name';
 
-    const itemIds = form.itemIds.replace(/\s+/g, '');
-    if (!builderCatalog && !itemIds) return 'catalog.admin.offer.error.items.required';
-    if (itemIds && itemIds.split(/[;,]/).some((entry) => !/^\d+(?::[1-9]\d*)?$/.test(entry) || Number(entry.split(':')[0]) <= 0)) {
-        return 'catalog.admin.offer.error.items.format';
-    }
+    const itemIds = form.itemIds.trim();
+    if (!itemIds) return 'catalog.admin.offer.error.items.required';
+    if (itemIds !== storedItemIds?.trim() && !/^[1-9]\d*$/.test(itemIds)) return 'catalog.admin.offer.error.items.single';
 
     if (form.costCredits < 0 || form.costPoints < 0 || form.pointsType < 0) return 'catalog.admin.offer.error.price';
-    if (form.amount < 1 || form.amount > 10000) return 'catalog.admin.offer.error.amount';
-    if (form.songId < 0) return 'catalog.admin.offer.error.song';
+    if (form.amount < 1 || form.amount > CATALOG_ADMIN_MAX_OFFER_AMOUNT) return 'catalog.admin.offer.error.amount';
     if (form.limitedStack < limitedSells) return 'catalog.admin.offer.error.limited';
 
     return null;

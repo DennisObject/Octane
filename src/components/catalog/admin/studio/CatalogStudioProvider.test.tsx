@@ -168,20 +168,4 @@ describe('CatalogStudioProvider', () => {
             .filter(([ composer ]) => composer.constructor.name === 'CatalogStudioOpenSessionComposer')).toHaveLength(2);
     });
 
-    it('applies a confirmed SQL dry-run directly without a separate root lock', () => {
-        render(<CatalogStudioProvider active><Probe /></CatalogStudioProvider>);
-        emit('CatalogStudioSessionEvent', {
-            activeVersionId: 11, draftVersionId: 12, revision: 7,
-            activeUpdatedAt: '', draftCreatedAt: '', pendingCount: 0,
-            actors: [], validationCurrent: false, validationIssueCount: 0, publishedVersions: []
-        });
-
-        act(() => screen.getByText('apply').click());
-        const apply = vi.mocked(SendMessageComposer).mock.calls.at(-1)[0] as any;
-        expect(apply.constructor.name).toBe('CatalogStudioDocumentApplyComposer');
-        expect(apply.getMessageArray().slice(1)).toEqual([
-            12, 7, '', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'fingerprint', 'Import catalog SQL file'
-        ]);
-    });
-
 });

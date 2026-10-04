@@ -10,9 +10,6 @@ import { CatalogAdminEditorFooterView } from './CatalogAdminEditorFooterView';
 import { CatalogAdminPageContentView } from './CatalogAdminPageContentView';
 import { CatalogAdminPageSettingsView } from './CatalogAdminPageSettingsView';
 
-const targetKey = (target: CatalogAdminPageEditorTarget) =>
-    target.kind === 'edit' ? `edit:${target.catalogType}:${target.node.pageId}` : `create:${target.catalogType}:${target.parent.pageId}`;
-
 const CatalogAdminPageEditorWindow: FC<{ target: CatalogAdminPageEditorTarget }> = ({ target }) => {
     const form = useCatalogAdminPageForm(target);
     const captionRef = useRef<HTMLInputElement>(null);
@@ -50,7 +47,7 @@ const CatalogAdminPageEditorWindow: FC<{ target: CatalogAdminPageEditorTarget }>
                     )}
                     <fieldset className="octane-catalog-admin-fieldset" disabled={!form.detailsReady}>
                         <CatalogAdminPageSettingsView captionRef={captionRef} draft={draft} fieldErrors={form.fieldErrors} patch={form.patch} />
-                        <CatalogAdminPageContentView draft={draft} patch={form.patch} />
+                        <CatalogAdminPageContentView draft={draft} fieldErrors={form.fieldErrors} patch={form.patch} />
                     </fieldset>
                 </div>
                 <CatalogAdminEditorFooterView
@@ -76,5 +73,5 @@ export const CatalogAdminPageEditView: FC = () => {
 
     if (!target || !canEdit) return null;
 
-    return <CatalogAdminPageEditorWindow key={targetKey(target)} target={target} />;
+    return <CatalogAdminPageEditorWindow key={target.key} target={target} />;
 };

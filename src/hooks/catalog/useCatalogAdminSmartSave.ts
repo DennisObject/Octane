@@ -59,13 +59,15 @@ export const useCatalogAdminSmartSave = <T extends object>(options: UseCatalogAd
         if (operationId) dispatch({ type: 'submit', operationId, submitted: current.draft, closeAfter });
     }, []);
 
-    const requestClose = useCallback(() => {
+    /** Runs `proceed` straight away, or after the user agreed to drop unsaved or unanswered changes. */
+    const confirmLeave = useCallback((proceed: () => void) => {
         const current = stateRef.current;
-        const { onClose, confirmDiscard } = optionsRef.current;
 
-        if (current.inFlight || isCatalogAdminFormDirty(current.baseline, current.draft)) confirmDiscard(onClose);
-        else onClose();
+        if (current.inFlight || isCatalogAdminFormDirty(current.baseline, current.draft)) optionsRef.current.confirmDiscard(proceed);
+        else proceed();
     }, []);
+
+    const requestClose = useCallback(() => confirmLeave(() => optionsRef.current.onClose()), [confirmLeave]);
 
     /** Ctrl+S / Cmd+S saves, but only for the editor window that has focus. */
     const onKeyDown = useCallback(
@@ -136,6 +138,7 @@ export const useCatalogAdminSmartSave = <T extends object>(options: UseCatalogAd
         reset,
         save,
         requestClose,
+        confirmLeave,
         onKeyDown
     };
 };

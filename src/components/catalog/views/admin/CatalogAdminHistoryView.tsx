@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { Button, StaffEmpty, StaffSection } from '../../../../common';
 import { useNotificationActions } from '../../../../hooks';
-import type { CatalogStudioHistoryGroup, CatalogStudioValidationIssue } from '../../../../hooks/catalog/catalogStudio.types';
+import { CATALOG_STUDIO_UNDOABLE_OPERATIONS, CatalogStudioHistoryGroup, CatalogStudioValidationIssue } from '../../../../hooks/catalog/catalogStudio.types';
 import { useCatalogStudio } from '../../../../hooks/catalog/useCatalogStudio';
 
 const MAX_ROWS_PER_RULE = 50;
@@ -31,9 +31,11 @@ interface CatalogAdminHistoryViewProps {
     onSelectPage: (pageId: number) => void;
 }
 
-/** Live catalog health check and the undoable operation history. */
+/** The live operation history with undo on edits and moves, plus the health check where the hotel has one. */
 export const CatalogAdminHistoryView: FC<CatalogAdminHistoryViewProps> = ({ onSelectPage }) => {
-    const { session, revision, validation, history, loading, validate, undo } = useCatalogStudio();
+    const { session, revision, validation, history, loading, validate, undo, features } = useCatalogStudio();
+    const isUndoable = (group: CatalogStudioHistoryGroup) =>
+        group.entries.length > 0 && group.entries.every((entry) => CATALOG_STUDIO_UNDOABLE_OPERATIONS.includes(entry.operation));
     const { showConfirm } = useNotificationActions();
     const [openRules, setOpenRules] = useState<string[] | null>(null);
     const issues = useMemo(() => validation?.issues ?? [], [validation]);
@@ -44,8 +46,8 @@ export const CatalogAdminHistoryView: FC<CatalogAdminHistoryViewProps> = ({ onSe
 
     // Check once per catalog revision instead of after every answer.
     useEffect(() => {
-        if (sessionReady && validatedRevision !== revision) validate();
-    }, [revision, sessionReady, validate, validatedRevision]);
+        if (features.validate && sessionReady && validatedRevision !== revision) validate();
+    }, [features.validate, revision, sessionReady, validate, validatedRevision]);
 
     const toggleRule = (code: string) =>
         setOpenRules((current) => {
@@ -68,59 +70,63 @@ export const CatalogAdminHistoryView: FC<CatalogAdminHistoryViewProps> = ({ onSe
 
     return (
         <div className="octane-catalog-admin-history">
-            <StaffSection title={LocalizeText('catalog.admin.problems')}>
-                <div className="octane-staff-row">
-                    <span className="octane-staff-muted octane-catalog-admin-grow">
-                        {checkedAt ? LocalizeText('catalog.admin.problems.checked', ['time'], [checkedAt]) : LocalizeText('catalog.admin.problems.unchecked')}
-                    </span>
-                    <Button disabled={loading || !sessionReady} variant="secondary" onClick={() => !loading && sessionReady && validate()}>
-                        {LocalizeText('catalog.admin.problems.recheck')}
-                    </Button>
-                </div>
-                <div className="octane-staff-list octane-catalog-admin-problem-list">
-                    {!issues.length && <StaffEmpty>{LocalizeText('catalog.admin.problems.none')}</StaffEmpty>}
-                    {ruleGroups.map((group) => {
-                        const isOpen = expandedRules.includes(group.code);
+            {features.validate && (
+                <StaffSection title={LocalizeText('catalog.admin.problems')}>
+                    <div className="octane-staff-row">
+                        <span className="octane-staff-muted octane-catalog-admin-grow">
+                            {checkedAt
+                                ? LocalizeText('catalog.admin.problems.checked', ['time'], [checkedAt])
+                                : LocalizeText('catalog.admin.problems.unchecked')}
+                        </span>
+                        <Button disabled={loading || !sessionReady} variant="secondary" onClick={() => !loading && sessionReady && validate()}>
+                            {LocalizeText('catalog.admin.problems.recheck')}
+                        </Button>
+                    </div>
+                    <div className="octane-staff-list octane-catalog-admin-problem-list">
+                        {!issues.length && <StaffEmpty>{LocalizeText('catalog.admin.problems.none')}</StaffEmpty>}
+                        {ruleGroups.map((group) => {
+                            const isOpen = expandedRules.includes(group.code);
 
-                        return (
-                            <div key={group.code} className="octane-catalog-admin-problem-group">
-                                <button
-                                    aria-expanded={isOpen}
-                                    className="octane-staff-list-row octane-catalog-admin-problem-head"
-                                    type="button"
-                                    onClick={() => toggleRule(group.code)}
-                                >
-                                    <span className={`octane-catalog-admin-tree-caret ${isOpen ? 'is-open' : ''}`} />
-                                    <strong className="octane-catalog-admin-grow">{group.label}</strong>
-                                    <span className="octane-staff-flag is-danger">{group.issues.length}</span>
-                                </button>
-                                {isOpen &&
-                                    group.issues.slice(0, MAX_ROWS_PER_RULE).map((issue, index) => (
-                                        <button
-                                            key={`${issue.entityType}-${issue.entityId}-${issue.field}-${index}`}
-                                            className="octane-staff-list-row octane-catalog-admin-problem-row"
-                                            disabled={issue.entityType !== 'PAGE'}
-                                            type="button"
-                                            onClick={() => issue.entityType === 'PAGE' && onSelectPage(issue.entityId)}
-                                        >
-                                            <strong>
-                                                {issue.entityType} #{issue.entityId}
-                                            </strong>
-                                            <span className="octane-staff-muted">
-                                                {issue.field} · {issue.message}
-                                            </span>
-                                        </button>
-                                    ))}
-                                {isOpen && group.issues.length > MAX_ROWS_PER_RULE && (
-                                    <span className="octane-staff-muted octane-catalog-admin-problem-more">
-                                        {LocalizeText('catalog.admin.problems.more', ['count'], [String(group.issues.length - MAX_ROWS_PER_RULE)])}
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </StaffSection>
+                            return (
+                                <div key={group.code} className="octane-catalog-admin-problem-group">
+                                    <button
+                                        aria-expanded={isOpen}
+                                        className="octane-staff-list-row octane-catalog-admin-problem-head"
+                                        type="button"
+                                        onClick={() => toggleRule(group.code)}
+                                    >
+                                        <span className={`octane-catalog-admin-tree-caret ${isOpen ? 'is-open' : ''}`} />
+                                        <strong className="octane-catalog-admin-grow">{group.label}</strong>
+                                        <span className="octane-staff-flag is-danger">{group.issues.length}</span>
+                                    </button>
+                                    {isOpen &&
+                                        group.issues.slice(0, MAX_ROWS_PER_RULE).map((issue, index) => (
+                                            <button
+                                                key={`${issue.entityType}-${issue.entityId}-${issue.field}-${index}`}
+                                                className="octane-staff-list-row octane-catalog-admin-problem-row"
+                                                disabled={issue.entityType !== 'PAGE'}
+                                                type="button"
+                                                onClick={() => issue.entityType === 'PAGE' && onSelectPage(issue.entityId)}
+                                            >
+                                                <strong>
+                                                    {issue.entityType} #{issue.entityId}
+                                                </strong>
+                                                <span className="octane-staff-muted">
+                                                    {issue.field} · {issue.message}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    {isOpen && group.issues.length > MAX_ROWS_PER_RULE && (
+                                        <span className="octane-staff-muted octane-catalog-admin-problem-more">
+                                            {LocalizeText('catalog.admin.problems.more', ['count'], [String(group.issues.length - MAX_ROWS_PER_RULE)])}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </StaffSection>
+            )}
             <StaffSection title={LocalizeText('catalog.admin.history')}>
                 <div className="octane-staff-list octane-catalog-admin-history-list">
                     {!history.length && <StaffEmpty>{LocalizeText('catalog.admin.history.empty')}</StaffEmpty>}
@@ -136,9 +142,11 @@ export const CatalogAdminHistoryView: FC<CatalogAdminHistoryViewProps> = ({ onSe
                                     )}
                                 </span>
                             </div>
-                            <Button disabled={loading} variant="secondary" onClick={() => !loading && confirmUndo(group)}>
-                                {LocalizeText('catalog.admin.history.undo')}
-                            </Button>
+                            {isUndoable(group) && (
+                                <Button disabled={loading} variant="secondary" onClick={() => !loading && confirmUndo(group)}>
+                                    {LocalizeText('catalog.admin.history.undo')}
+                                </Button>
+                            )}
                         </div>
                     ))}
                 </div>

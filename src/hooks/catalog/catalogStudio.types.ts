@@ -138,3 +138,11 @@ export interface CatalogStudioMutationResult {
     entity: CatalogStudioPageSnapshot | CatalogStudioOfferSnapshot;
     historyGroup: CatalogStudioHistoryGroup;
 }
+
+/** Optional studio tools; the session, history and undo are always there. */
+export const CATALOG_STUDIO_FEATURES = ['validate', 'sql'] as const;
+
+/** History operations the server can undo; creates, deletes and reorders cannot be. */
+export const CATALOG_STUDIO_UNDOABLE_OPERATIONS: readonly string[] = ['UPDATE', 'MOVE'];
+
+export type CatalogStudioFeature = (typeof CATALOG_STUDIO_FEATURES)[number];

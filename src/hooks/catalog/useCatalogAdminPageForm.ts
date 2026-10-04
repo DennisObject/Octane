@@ -50,7 +50,11 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const studio = useCatalogStudio();
     const admin = useCatalogAdmin();
     const { showConfirm } = useNotificationActions();
-    const closePageEditor = useCatalogAdminUiStore((state) => state.closePageEditor);
+    const closeEditor = useCatalogAdminUiStore((state) => state.closeEditor);
+    const bindCreated = useCatalogAdminUiStore((state) => state.bindCreated);
+    const registerGuard = useCatalogAdminUiStore((state) => state.registerGuard);
+    const unregisterGuard = useCatalogAdminUiStore((state) => state.unregisterGuard);
+    const editorKey = target.key;
     const studioType = toStudioCatalogType(target.catalogType);
     const pageId = target.kind === 'edit' ? target.node.pageId : null;
     const [detailsReady, setDetailsReady] = useState(() => target.kind === 'create' || !!findSnapshot(studio.session, pageId, studioType));
@@ -62,10 +66,10 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const smartSave = useCatalogAdminSmartSave<CatalogAdminPageForm>({
         initial: initialForm,
         acknowledgements: admin?.results ?? new Map(),
-        submit: (draft) => admin?.savePage(draft, target.catalogType) ?? null,
+        submit: (draft) => admin?.savePage(draft, target.catalogType, editorKey) ?? null,
         canSubmit: (draft) => sessionReady && !validatePageForm(draft),
         toCommitted: (ack) => (ack.entityType === 'PAGE' && ack.entity ? createPageFormFromSnapshot(ack.entity as CatalogStudioPageSnapshot) : null),
-        onClose: closePageEditor,
+        onClose: () => closeEditor('page', editorKey),
         confirmDiscard: (discard) =>
             showConfirm(
                 LocalizeText('catalog.admin.discard.confirm'),
@@ -79,6 +83,19 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     });
 
     const canReplaceDraft = !smartSave.isDirty && !smartSave.inFlight;
+    const { confirmLeave } = smartSave;
+    const createdId = smartSave.baseline.pageId;
+
+    // Opening another page asks this editor first, so unsaved changes are never dropped silently.
+    useEffect(() => {
+        registerGuard('page', editorKey, confirmLeave);
+        return () => unregisterGuard('page', editorKey);
+    }, [confirmLeave, editorKey, registerGuard, unregisterGuard]);
+
+    // After a create the editor edits the new row; the store has to know it to close it on delete.
+    useEffect(() => {
+        if (target.entityId === null && createdId !== null) bindCreated('page', editorKey, createdId);
+    }, [bindCreated, createdId, editorKey, target.entityId]);
 
     // The editor may open before the studio session: fill in the stored values once it arrives.
     if (studio.session && !sessionSeen) {
@@ -148,7 +165,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         displayName,
         readOnlyLayout: isReadOnlyCatalogAdminLayout(baseline.pageLayout),
         status,
-        canSave: sessionReady && detailsReady && !validationKey && smartSave.isDirty && !smartSave.inFlight,
+        canSave: sessionReady && detailsReady && !validationKey && smartSave.isDirty && !smartSave.inFlight && !admin?.busy,
         canDelete: !isNew && !admin?.busy,
         save: smartSave.save,
         reset: smartSave.reset,

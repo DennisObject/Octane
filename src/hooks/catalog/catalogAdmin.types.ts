@@ -48,19 +48,23 @@ export interface CatalogAdminOfferForm {
     orderNumber: number;
 }
 
-/**
- * Which page the page editor is open for. The catalog type is captured when the editor
- * opens, so switching between the normal and Builders Club catalog never redirects a save.
- */
-export type CatalogAdminPageEditorTarget =
-    | { kind: 'create'; parent: ICatalogNode; catalogType: string }
-    | { kind: 'edit'; node: ICatalogNode; catalogType: string };
+/** What every editor target carries besides its own data. */
+interface CatalogAdminEditorIdentity {
+    /** Unique per opened editor, so a second "New" is a fresh window and a stale dialog cannot close a newer one. */
+    key: string;
+    /** The stored row being edited: set on open for edits, after the first save for creates. */
+    entityId: number | null;
+    /** Captured when the editor opens, so switching between the normal and Builders Club catalog never redirects a save. */
+    catalogType: string;
+}
 
-export interface CatalogAdminOfferEditorTarget {
+/** Which page the page editor is open for. */
+export type CatalogAdminPageEditorTarget = CatalogAdminEditorIdentity & ({ kind: 'create'; parent: ICatalogNode } | { kind: 'edit'; node: ICatalogNode });
+
+export interface CatalogAdminOfferEditorTarget extends CatalogAdminEditorIdentity {
     /** null while creating a new offer. */
     offerId: number | null;
     pageId: number;
-    catalogType: string;
     /** The live catalog offer, used as a placeholder until the server sends the stored row. */
     offer: IPurchasableOffer | null;
 }

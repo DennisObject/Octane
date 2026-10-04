@@ -1,6 +1,5 @@
 import { CatalogAdminLoadOfferComposer, CatalogAdminOfferDetailsEvent } from '@octane/renderer';
 import { useEffect, useRef, useState } from 'react';
-import { CatalogType } from '../../api/catalog/CatalogType';
 import { SendMessageComposer } from '../../api/octane/SendMessageComposer';
 import { LocalizeText } from '../../api/utils/LocalizeText';
 import { useCatalogAdmin } from '../../components/catalog/CatalogAdminContext';
@@ -50,7 +49,11 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const studio = useCatalogStudio();
     const admin = useCatalogAdmin();
     const { showConfirm } = useNotificationActions();
-    const closeOfferEditor = useCatalogAdminUiStore((state) => state.closeOfferEditor);
+    const closeEditor = useCatalogAdminUiStore((state) => state.closeEditor);
+    const bindCreated = useCatalogAdminUiStore((state) => state.bindCreated);
+    const registerGuard = useCatalogAdminUiStore((state) => state.registerGuard);
+    const unregisterGuard = useCatalogAdminUiStore((state) => state.unregisterGuard);
+    const editorKey = target.key;
     const studioType = toStudioCatalogType(target.catalogType);
     const { offerId } = target;
     const [initialForm] = useState(() => createInitialForm(target, studio.session));
@@ -59,15 +62,15 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
     const detailsRequestedRef = useRef(false);
     const sessionReady = admin?.sessionReady ?? false;
-    const builderCatalog = target.catalogType === CatalogType.BUILDER;
 
     const smartSave = useCatalogAdminSmartSave<CatalogAdminOfferForm>({
         initial: initialForm,
         acknowledgements: admin?.results ?? new Map(),
-        submit: (draft) => admin?.saveOffer(draft, target.catalogType) ?? null,
-        canSubmit: (draft) => sessionReady && !validateOfferForm(draft, builderCatalog, draft.offerId === null ? 0 : limitedSells),
+        submit: (draft) => admin?.saveOffer(draft, target.catalogType, editorKey) ?? null,
+        // Runs on save, after this render, so the stored item id below is set by then.
+        canSubmit: (draft) => sessionReady && !validateOfferForm(draft, storedItemIds, draft.offerId === null ? 0 : limitedSells),
         toCommitted: (ack) => (ack.entityType === 'OFFER' && ack.entity ? createOfferFormFromSnapshot(ack.entity as CatalogStudioOfferSnapshot) : null),
-        onClose: closeOfferEditor,
+        onClose: () => closeEditor('offer', editorKey),
         confirmDiscard: (discard) =>
             showConfirm(
                 LocalizeText('catalog.admin.discard.confirm'),
@@ -81,6 +84,19 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     });
 
     const canReplaceDraft = !smartSave.isDirty && !smartSave.inFlight;
+    const { confirmLeave } = smartSave;
+    const createdId = smartSave.baseline.offerId;
+
+    // Opening another offer asks this editor first, so unsaved changes are never dropped silently.
+    useEffect(() => {
+        registerGuard('offer', editorKey, confirmLeave);
+        return () => unregisterGuard('offer', editorKey);
+    }, [confirmLeave, editorKey, registerGuard, unregisterGuard]);
+
+    // After a create the editor edits the new row; the store has to know it to close it on delete.
+    useEffect(() => {
+        if (target.entityId === null && createdId !== null) bindCreated('offer', editorKey, createdId);
+    }, [bindCreated, createdId, editorKey, target.entityId]);
 
     // The editor may open before the studio session: fill in the stored values once it arrives.
     if (studio.session && !sessionSeen) {
@@ -111,7 +127,8 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const { draft, baseline } = smartSave;
     const isNew = baseline.offerId === null;
     const soldCount = isNew ? 0 : limitedSells;
-    const validationKey = detailsReady ? validateOfferForm(draft, builderCatalog, soldCount) : null;
+    const storedItemIds = isNew ? null : baseline.itemIds;
+    const validationKey = detailsReady ? validateOfferForm(draft, storedItemIds, soldCount) : null;
     const displayName =
         draft.catalogName.trim() || target.offer?.localizationName || (isNew ? LocalizeText('catalog.admin.offer.new') : `#${baseline.offerId}`);
     const status = resolveCatalogAdminEditorStatus({
@@ -152,7 +169,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         displayName,
         limitedSells: soldCount,
         status,
-        canSave: sessionReady && detailsReady && !validationKey && smartSave.isDirty && !smartSave.inFlight,
+        canSave: sessionReady && detailsReady && !validationKey && smartSave.isDirty && !smartSave.inFlight && !admin?.busy,
         canDelete: !isNew && !admin?.busy,
         save: smartSave.save,
         reset: smartSave.reset,

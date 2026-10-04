@@ -1,8 +1,8 @@
 import { FC, Ref } from 'react';
 import { LocalizeText, localizeWithFallback } from '../../../../api';
 import { StaffSection } from '../../../../common';
-import { usePurse } from '../../../../hooks';
 import type { CatalogAdminOfferForm } from '../../../../hooks/catalog/catalogAdmin.types';
+import { CATALOG_ADMIN_MAX_OFFER_AMOUNT } from '../../../../hooks/catalog/catalogAdminForms.helpers';
 import { CatalogAdminCheckbox, CatalogAdminNumberField, CatalogAdminSelectField, CatalogAdminTextField } from './CatalogAdminFormControls';
 
 interface CatalogAdminOfferFieldsViewProps {
@@ -15,10 +15,11 @@ interface CatalogAdminOfferFieldsViewProps {
     itemIdsRef: Ref<HTMLInputElement>;
 }
 
-/** Credits, duckets and diamonds plus every seasonal currency the user's purse knows about. */
-const useCurrencyOptions = (selected: number) => {
-    const { purse = null } = usePurse();
-    const types = Array.from(new Set([0, 5, 101, selected, ...Array.from(purse?.activityPoints?.keys?.() ?? [])]))
+/** The hotel prices offers in duckets (0) or diamonds (5); a stored other type stays listed so it shows. */
+const SUPPORTED_POINT_TYPES = [0, 5];
+
+const currencyOptions = (selected: number) => {
+    const types = Array.from(new Set([...SUPPORTED_POINT_TYPES, selected]))
         .filter((type) => type >= 0)
         .sort((left, right) => left - right);
 
@@ -29,9 +30,10 @@ const useCurrencyOptions = (selected: number) => {
     });
 };
 
+/** Offer fields the hotel stores; it sells one furni per offer and keeps no song id, so neither is offered. */
 export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> = (props) => {
     const { draft, patch, fieldErrors, isNew, limitedSells, nameRef, itemIdsRef } = props;
-    const currencyOptions = useCurrencyOptions(draft.pointsType);
+    const pointTypeOptions = currencyOptions(draft.pointsType);
 
     return (
         <>
@@ -54,18 +56,22 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                 />
                 <div className="octane-staff-grid octane-catalog-admin-grid-3">
                     <CatalogAdminNumberField
+                        error={fieldErrors.amount}
                         fallback={1}
                         label={LocalizeText('catalog.admin.offer.quantity')}
+                        max={CATALOG_ADMIN_MAX_OFFER_AMOUNT}
                         min={1}
                         value={draft.amount}
                         onChange={(amount) => patch({ amount })}
                     />
                     <CatalogAdminNumberField
+                        error={fieldErrors.orderNumber}
                         label={LocalizeText('catalog.admin.order')}
                         value={draft.orderNumber}
                         onChange={(orderNumber) => patch({ orderNumber })}
                     />
                     <CatalogAdminNumberField
+                        error={fieldErrors.offerIdGroup}
                         fallback={-1}
                         label={LocalizeText('catalog.admin.offer.client.id')}
                         value={draft.offerIdGroup}
@@ -76,12 +82,14 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
             <StaffSection title={LocalizeText('catalog.admin.offer.prices')}>
                 <div className="octane-staff-grid octane-catalog-admin-grid-3">
                     <CatalogAdminNumberField
+                        error={fieldErrors.costCredits}
                         label={LocalizeText('catalog.admin.offer.credits')}
                         min={0}
                         value={draft.costCredits}
                         onChange={(costCredits) => patch({ costCredits })}
                     />
                     <CatalogAdminNumberField
+                        error={fieldErrors.costPoints}
                         label={LocalizeText('catalog.admin.offer.points')}
                         min={0}
                         value={draft.costPoints}
@@ -89,7 +97,8 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                     />
                     <CatalogAdminSelectField
                         label={LocalizeText('catalog.admin.offer.points.type')}
-                        options={currencyOptions}
+                        error={fieldErrors.pointsType}
+                        options={pointTypeOptions}
                         value={String(draft.pointsType)}
                         onChange={(value) => patch({ pointsType: Number(value) })}
                     />
@@ -112,14 +121,9 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                             onChange={() => undefined}
                         />
                     )}
-                    <CatalogAdminNumberField
-                        label={LocalizeText('catalog.admin.offer.song.id')}
-                        min={0}
-                        value={draft.songId}
-                        onChange={(songId) => patch({ songId })}
-                    />
                 </div>
                 <CatalogAdminTextField
+                    error={fieldErrors.extradata}
                     label={LocalizeText('catalog.admin.offer.extradata')}
                     value={draft.extradata}
                     onChange={(extradata) => patch({ extradata })}

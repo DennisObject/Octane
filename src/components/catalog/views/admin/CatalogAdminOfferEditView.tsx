@@ -11,8 +11,6 @@ import { CatalogAdminOfferFieldsView } from './CatalogAdminOfferFieldsView';
 import { CatalogAdminOfferIconView } from './CatalogAdminOfferIconView';
 import { CatalogAdminOfferPriceView } from './CatalogAdminOfferPriceView';
 
-const targetKey = (target: CatalogAdminOfferEditorTarget) => `${target.catalogType}:${target.pageId}:${target.offerId ?? 'new'}`;
-
 const CatalogAdminOfferEditorWindow: FC<{ target: CatalogAdminOfferEditorTarget }> = ({ target }) => {
     const form = useCatalogAdminOfferForm(target);
     const nameRef = useRef<HTMLInputElement>(null);
@@ -82,5 +80,5 @@ export const CatalogAdminOfferEditView: FC = () => {
 
     if (!target || !canEdit) return null;
 
-    return <CatalogAdminOfferEditorWindow key={targetKey(target)} target={target} />;
+    return <CatalogAdminOfferEditorWindow key={target.key} target={target} />;
 };
