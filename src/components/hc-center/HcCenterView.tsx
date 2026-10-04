@@ -48,6 +48,8 @@ export const HcCenterView: FC<{}> = (props) => {
     };
 
     const getInfoText = () => {
+        if (!kickbackData || !purse) return '';
+
         switch (clubStatus) {
             case ClubStatus.ACTIVE:
                 return LocalizeText(
@@ -67,7 +69,9 @@ export const HcCenterView: FC<{}> = (props) => {
             ? LocalizeText('hccenter.special.time.soon')
             : FriendlyTime.shortFormat(kickbackData.timeUntilPayday * 60);
     const getHcPaydayAmount = () =>
-        LocalizeText('hccenter.special.sum', ['credits'], [(kickbackData?.creditRewardForStreakBonus + kickbackData?.creditRewardForMonthlySpent).toString()]);
+        kickbackData
+            ? LocalizeText('hccenter.special.sum', ['credits'], [(kickbackData.creditRewardForStreakBonus + kickbackData.creditRewardForMonthlySpent).toString()])
+            : '';
 
     useMessageEvent<ClubGiftInfoEvent>(ClubGiftInfoEvent, (event) => {
         const parser = event.getParser();
@@ -178,7 +182,7 @@ export const HcCenterView: FC<{}> = (props) => {
                         <Text small className="text-gray-700" dangerouslySetInnerHTML={{ __html: getInfoText() }} />
                     </Column>
                 </Flex>
-                {GetConfigurationValue('hc.center')['payday.info'] && (
+                {kickbackData && purse && GetConfigurationValue('hc.center')['payday.info'] && (
                     <Flex className="rounded overflow-hidden border border-card-grid-item-border">
                         <Column className="bg-primary p-3 flex-1 text-white" gap={1}>
                             <Text bold className="text-white">
@@ -227,7 +231,7 @@ export const HcCenterView: FC<{}> = (props) => {
                         </Column>
                     </Flex>
                 )}
-                {GetConfigurationValue('hc.center')['gift.info'] && (
+                {kickbackData && purse && GetConfigurationValue('hc.center')['gift.info'] && (
                     <Flex className="rounded bg-success/90 p-3" alignItems="center" gap={2}>
                         <Column gap={0} className="flex-1">
                             <Text bold className="text-white">
