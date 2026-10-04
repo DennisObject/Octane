@@ -17,7 +17,7 @@ import { SendMessageComposer } from '../../../../api';
 import { GetConfigurationValue } from '../../../../api/octane/GetConfigurationValue';
 import { LocalizeText } from '../../../../api/utils/LocalizeText';
 import { useConnectionState, useMessageEvent } from '../../../../hooks';
-import { createCatalogAdminRequestTracker } from '../../../../hooks/catalog/catalogAdminRequestTracker';
+import { CatalogAdminUnansweredReason, createCatalogAdminRequestTracker } from '../../../../hooks/catalog/catalogAdminRequestTracker';
 import { localizeCatalogAdminCode, localizeCatalogAdminPlainMessage } from '../../../../hooks/catalog/catalogAdminServerErrors.helpers';
 import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from '../../../../hooks/catalog/catalogStudio.helpers';
 import {
@@ -30,6 +30,9 @@ import {
     CatalogStudioValidationState
 } from '../../../../hooks/catalog/catalogStudio.types';
 import { CatalogStudioContext, CatalogStudioContextValue } from '../../../../hooks/catalog/useCatalogStudio';
+
+/** How long a session or history read may stay unanswered before the studio offers a retry. */
+const READ_TIMEOUT_MS = 10_000;
 
 // Answer codes of a server that knows the packet but not the feature.
 const UNSUPPORTED_CODES = new Set(['UNSUPPORTED', 'NOT_SUPPORTED', 'NOT_IMPLEMENTED']);
@@ -66,14 +69,31 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
     // A refresh asked for while one is on its way is sent once that answer is in, so it reflects every change before it.
     const refreshAgainRef = useRef(false);
     const historyAgainRef = useRef(false);
+    // A session or history read went unanswered; the manager offers a retry instead of waiting forever.
+    const [unresponsive, setUnresponsive] = useState(false);
 
     /** The server refused a session or history read with a bare CatalogAdminResult. */
-    const onReadRefused = useCallback((message: string) => {
+    const onReadRefused = useCallback((_success: boolean, message: string) => {
         refreshAgainRef.current = false;
         historyAgainRef.current = false;
         setLoading(false);
         setLastError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'));
     }, []);
+
+    /** A session or history read got no answer: release the slot instead of wedging the studio. */
+    const onReadUnanswered = useCallback((reason: CatalogAdminUnansweredReason) => {
+        if (reason === 'reset') return;
+
+        refreshAgainRef.current = false;
+        historyAgainRef.current = false;
+        setLoading(false);
+        if (reason === 'timeout') setUnresponsive(true);
+    }, []);
+
+    const readHandlers = useMemo(
+        () => ({ timeoutMs: READ_TIMEOUT_MS, onBare: onReadRefused, onUnanswered: onReadUnanswered }),
+        [onReadRefused, onReadUnanswered]
+    );
 
     /** Turns a feature off when the server says it does not support it; true when that happened. */
     const disableIfUnsupported = useCallback((feature: CatalogStudioFeature, code: string) => {
@@ -101,9 +121,9 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             return;
         }
 
-        requests.begin('session', onReadRefused);
+        requests.begin('session', readHandlers);
         SendMessageComposer(new CatalogStudioOpenSessionComposer());
-    }, [onReadRefused, requests]);
+    }, [readHandlers, requests]);
 
     const refresh = useCallback(() => {
         if (!active || !authenticated) return;
@@ -122,13 +142,19 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             }
 
             setLoading(true);
-            requests.begin('history', onReadRefused);
+            requests.begin('history', readHandlers);
             SendMessageComposer(new CatalogStudioHistoryComposer(current.draftVersionId, offset, limit));
         },
-        [onReadRefused, requests]
+        [readHandlers, requests]
     );
 
     const refreshHistory = loadHistory;
+
+    const retry = useCallback(() => {
+        setUnresponsive(false);
+        refresh();
+        loadHistory();
+    }, [loadHistory, refresh]);
 
     const updateRevision = useCallback((revision: number) => {
         setSession((current) => {
@@ -155,7 +181,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             pages: (parser.pages ?? []).map((page) => ({ ...page })),
             offers: (parser.offers ?? []).map((offer) => ({ ...offer }))
         });
-        requests.settle('session');
+        requests.takeReply('session');
+        setUnresponsive(false);
         setLoading(false);
         setLastError(null);
         if (refreshAgainRef.current) {
@@ -198,7 +225,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         historyGroupIdsRef.current = new Set(nextHistory.map((group) => group.id));
         setHistory(nextHistory);
         setHistoryTotalCount(parser.totalCount);
-        requests.settle('history');
+        requests.takeReply('history');
+        setUnresponsive(false);
         setLoading(false);
         if (historyAgainRef.current) {
             historyAgainRef.current = false;
@@ -257,15 +285,23 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
         setWasOpen(isOpen);
         if (!isOpen) setSession(null);
         setLoading(isOpen);
+        setUnresponsive(false);
     }
 
     useEffect(() => {
+        // Answers to requests from before a close or reconnect never arrive, or belong to nothing now.
+        refreshAgainRef.current = false;
+        historyAgainRef.current = false;
+        requests.reset();
+
         if (!isOpen) {
             sessionRef.current = null;
             return;
         }
         sendOpenSession();
-    }, [isOpen, sendOpenSession]);
+    }, [isOpen, requests, sendOpenSession]);
+
+    useEffect(() => () => requests.reset(), [requests]);
 
     const validate = useCallback(() => {
         const current = sessionRef.current;
@@ -345,6 +381,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             session,
             features,
             requests,
+            unresponsive,
+            retry,
             revision: session?.revision ?? 0,
             pendingCount: session?.pendingCount ?? 0,
             history,
@@ -367,6 +405,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             session,
             features,
             requests,
+            unresponsive,
+            retry,
             history,
             historyTotalCount,
             validation,

@@ -15,6 +15,9 @@ export interface CatalogStudioContextValue {
     features: Readonly<Record<CatalogStudioFeature, boolean>>;
     /** Requests waiting for an answer that may come as a bare CatalogAdminResult. */
     requests: CatalogAdminRequestTracker;
+    /** A session or history read went unanswered; `retry` asks again. */
+    unresponsive: boolean;
+    retry: () => void;
     revision: number;
     pendingCount: number;
     history: CatalogStudioHistoryGroup[];

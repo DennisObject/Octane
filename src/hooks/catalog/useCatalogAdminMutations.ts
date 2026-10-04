@@ -46,9 +46,6 @@ const STALE_REVISION = 'STALE_REVISION';
 
 const PAGE_CONTENT_ACTIONS = new Set<StructuralAction>(['deleteOffer', 'reorderOffers']);
 
-/** How long a timed-out structural change keeps waiting for its late answer before it is given up. */
-const LATE_ANSWER_WINDOW_MS = 60_000;
-
 interface StructuralRequest {
     action: StructuralAction;
     entityType: 'PAGE' | 'OFFER';
@@ -58,7 +55,8 @@ interface StructuralRequest {
 }
 
 interface PendingStructuralAction extends StructuralRequest {
-    timer: ReturnType<typeof setTimeout>;
+    /** Its entry in the studio's request queue. */
+    requestId: number;
 }
 
 interface PendingSave {
@@ -163,7 +161,6 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     useEffect(
         () => () => {
-            if (pendingActionRef.current) clearTimeout(pendingActionRef.current.timer);
             if (queuedActionRef.current) clearTimeout(queuedActionRef.current.timer);
             if (staleTimerRef.current) clearTimeout(staleTimerRef.current);
             pendingSavesRef.current.forEach((pending) => clearTimeout(pending.timer));
@@ -210,43 +207,42 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
     const finishAction = useCallback(() => {
         const pending = pendingActionRef.current;
-        if (pending) clearTimeout(pending.timer);
         pendingActionRef.current = null;
         setBusy(!!queuedActionRef.current);
         return pending;
     }, []);
 
-    /**
-     * A structural change still counts as waiting after it timed out, so its late answer is not
-     * credited to a newer request; after a while longer it is given up for good.
-     */
-    const giveUpAction = useCallback(() => {
-        if (!pendingActionRef.current) return;
-
-        requests.settle('structural');
-        finishAction();
-    }, [finishAction, requests]);
+    /** Reloads everything a structural change may have touched, when its answer cannot be trusted or never came. */
+    const resync = useCallback(() => {
+        studio.refresh();
+        studio.loadHistory();
+        refreshIndex();
+        refreshCurrentPage();
+    }, [refreshCurrentPage, refreshIndex, studio]);
 
     /** Sends a structural change now; the session must be open and no other change outstanding. */
     const sendAction = useCallback(
         (request: StructuralRequest, liveSession: CatalogStudioSession, liveRevision: number) => {
             const operationId = nextCatalogStudioOperationId(request.action);
-            const timer = setTimeout(() => {
-                const pending = pendingActionRef.current;
-                if (!pending) return;
+            // Without an answer the change is released after the timeout: its queue entry stays, so its
+            // late answer is still absorbed by it instead of being credited to a newer request.
+            const requestId = requests.begin('structural', {
+                timeoutMs: RESPONSE_TIMEOUT_MS,
+                onUnanswered: (reason) => {
+                    if (pendingActionRef.current?.requestId !== requestId) return;
 
-                setLastError(LocalizeText('catalog.admin.error.timeout'));
-                if (PAGE_CONTENT_ACTIONS.has(request.action)) refreshCurrentPage();
-                pending.timer = setTimeout(giveUpAction, LATE_ANSWER_WINDOW_MS);
-            }, RESPONSE_TIMEOUT_MS);
+                    finishAction();
+                    if (reason === 'timeout') setLastError(LocalizeText('catalog.admin.error.timeout'));
+                    if (reason !== 'reset') resync();
+                }
+            });
 
-            pendingActionRef.current = { ...request, timer };
-            requests.begin('structural');
+            pendingActionRef.current = { ...request, requestId };
             setBusy(true);
             setLastError(null);
             SendMessageComposer(request.build(liveSession.draftVersionId, liveRevision, operationId));
         },
-        [giveUpAction, refreshCurrentPage, requests]
+        [finishAction, requests, resync]
     );
 
     /**
@@ -356,26 +352,30 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
             return;
         }
 
-        // A bare answer belongs to the oldest request that can get one; the server answers in order.
-        const waiting = requests.takeOldest();
+        // A bare answer belongs to the head of the request queue, if its kind accepts it (see the tracker).
+        const answer = requests.takeBare(parser.success);
 
-        if (waiting?.kind === 'structural') {
-            handleStructuralResult(parser);
+        if (!answer) {
+            // Credited to nothing: show the current catalog instead of guessing what it reported.
+            studio.refresh();
             return;
         }
 
-        if (waiting && !parser.success) {
-            waiting.onRefused?.(parser.message);
+        // The late answer of a request that already timed out: it was released, so only resync.
+        if (answer.expired) {
+            if (answer.kind === 'structural') resync();
+            else studio.refresh();
             return;
         }
 
-        // Nothing was waiting for it: whatever it reports, show the current catalog instead of guessing.
-        studio.refresh();
+        // Only one structural change is outstanding at a time, so the head is the pending one.
+        if (answer.kind === 'structural') handleStructuralResult(parser);
+        else answer.onBare?.(parser.success, parser.message);
     });
 
-    // Reads that got their own answer leave the queue, even when their editor has closed meanwhile.
-    useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, () => requests.settle('pageDetails'));
-    useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, () => requests.settle('offerDetails'));
+    // A details answer settles its own entry (matched by id), even when its editor has closed meanwhile.
+    useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, (event) => requests.takeReply('pageDetails', event.getParser().pageId));
+    useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, (event) => requests.takeReply('offerDetails', event.getParser().offerId));
 
     const savePage = useCallback(
         (form: CatalogAdminPageForm, catalogType: string) => {

@@ -23,6 +23,9 @@ import type { CatalogStudioPageSnapshot, CatalogStudioSession } from './catalogS
 import { useCatalogAdminSmartSave } from './useCatalogAdminSmartSave';
 import { useCatalogStudio } from './useCatalogStudio';
 
+/** A details read without an answer after this long is reported, so the editor does not wait forever. */
+const DETAILS_TIMEOUT_MS = 10_000;
+
 const findSnapshot = (session: CatalogStudioSession | null, pageId: number | null, catalogType: string) =>
     pageId === null ? null : (session?.pages.find((page) => page.pageId === pageId && page.catalogType === catalogType) ?? null);
 
@@ -61,6 +64,7 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
     const [detailsReady, setDetailsReady] = useState(() => target.kind === 'create' || !!findSnapshot(studio.session, pageId, studioType));
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
     const detailsRequestedRef = useRef(false);
+    const detailsRequestIdRef = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState<string | null>(null);
     const [initialForm] = useState(() => createInitialForm(target, studio.session));
     const sessionReady = admin?.sessionReady ?? false;
@@ -113,17 +117,31 @@ export const useCatalogAdminPageForm = (target: CatalogAdminPageEditorTarget) =>
         if (pageId === null || !studio.session || detailsRequestedRef.current) return;
         detailsRequestedRef.current = true;
 
-        // A refused read comes back as a bare CatalogAdminResult; the mutations hook hands it here.
-        studio.requests.begin('pageDetails', (message) =>
-            setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'))
-        );
+        // A refusal comes back as a bare CatalogAdminResult; the mutations hook routes it here.
+        detailsRequestIdRef.current = studio.requests.begin('pageDetails', {
+            entityId: pageId,
+            timeoutMs: DETAILS_TIMEOUT_MS,
+            onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
+            onUnanswered: (reason) => reason !== 'reset' && setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'))
+        });
 
         SendMessageComposer(new CatalogAdminLoadPageComposer(pageId, target.catalogType, studio.session.draftVersionId, studio.revision));
     }, [pageId, studio.requests, studio.revision, studio.session, target.catalogType]);
 
+    // A closed editor leaves its request in the queue (answers keep their order) but hears nothing more.
+    const { requests } = studio;
+    useEffect(
+        () => () => {
+            if (detailsRequestIdRef.current !== null) requests.detach(detailsRequestIdRef.current);
+        },
+        [requests]
+    );
+
     useMessageEvent<CatalogAdminPageDetailsEvent>(CatalogAdminPageDetailsEvent, (event) => {
         const parser = event.getParser();
         if (!detailsRequestedRef.current || parser.pageId !== pageId) return;
+
+        setDetailsError(null);
 
         if (canReplaceDraft) smartSave.hydrate(createPageFormFromDetails(parser));
         setDetailsReady(true);

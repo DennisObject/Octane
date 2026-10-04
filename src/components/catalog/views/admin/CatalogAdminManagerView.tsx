@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { ICatalogNode, LocalizeText } from '../../../../api';
-import { StaffStatus, StaffWindow, StaffWindowTab } from '../../../../common';
+import { Button, StaffStatus, StaffWindow, StaffWindowTab } from '../../../../common';
 import { useCatalogActions, useCatalogData, useCatalogUiState } from '../../../../hooks';
 import { buildCatalogAdminDraftTree, findCatalogAdminNode } from '../../../../hooks/catalog/catalogAdminTree.helpers';
 import { useCatalogStudio } from '../../../../hooks/catalog/useCatalogStudio';
@@ -73,7 +73,19 @@ const CatalogAdminManagerWindow: FC = () => {
             {admin.lastError && (
                 <StaffStatus dismissLabel={LocalizeText('generic.close')} message={admin.lastError} tone="error" onDismiss={admin.clearError} />
             )}
-            {!admin.lastError && !admin.sessionReady && <StaffStatus message={LocalizeText('catalog.admin.status.connecting')} tone="pending" />}
+            {studio.unresponsive && (
+                <div className="octane-staff-row">
+                    <span className="octane-catalog-admin-grow">
+                        <StaffStatus message={LocalizeText('catalog.admin.studio.unresponsive')} tone="error" />
+                    </span>
+                    <Button variant="secondary" onClick={studio.retry}>
+                        {LocalizeText('catalog.admin.studio.retry')}
+                    </Button>
+                </div>
+            )}
+            {!admin.lastError && !studio.unresponsive && !admin.sessionReady && (
+                <StaffStatus message={LocalizeText('catalog.admin.status.connecting')} tone="pending" />
+            )}
             {!admin.lastError && admin.busy && <StaffStatus message={LocalizeText('catalog.admin.status.working')} tone="pending" />}
             {shownTab === 'catalog' && (
                 <div className="octane-catalog-admin-workspace">

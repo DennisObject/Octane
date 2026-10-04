@@ -22,6 +22,9 @@ import type { CatalogStudioOfferSnapshot, CatalogStudioSession } from './catalog
 import { useCatalogAdminSmartSave } from './useCatalogAdminSmartSave';
 import { useCatalogStudio } from './useCatalogStudio';
 
+/** A details read without an answer after this long is reported, so the editor does not wait forever. */
+const DETAILS_TIMEOUT_MS = 10_000;
+
 const findSnapshot = (session: CatalogStudioSession | null, offerId: number | null, catalogType: string) =>
     offerId === null ? null : (session?.offers.find((offer) => offer.offerId === offerId && offer.catalogType === catalogType) ?? null);
 
@@ -62,6 +65,7 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
     const [limitedSells, setLimitedSells] = useState(0);
     const [sessionSeen, setSessionSeen] = useState(!!studio.session);
     const detailsRequestedRef = useRef(false);
+    const detailsRequestIdRef = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState<string | null>(null);
     const sessionReady = admin?.sessionReady ?? false;
 
@@ -114,17 +118,31 @@ export const useCatalogAdminOfferForm = (target: CatalogAdminOfferEditorTarget) 
         if (offerId === null || !studio.session || detailsRequestedRef.current) return;
         detailsRequestedRef.current = true;
 
-        // A refused read comes back as a bare CatalogAdminResult; the mutations hook hands it here.
-        studio.requests.begin('offerDetails', (message) =>
-            setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed'))
-        );
+        // A refusal comes back as a bare CatalogAdminResult; the mutations hook routes it here.
+        detailsRequestIdRef.current = studio.requests.begin('offerDetails', {
+            entityId: offerId,
+            timeoutMs: DETAILS_TIMEOUT_MS,
+            onBare: (_success, message) => setDetailsError(message ? localizeCatalogAdminPlainMessage(message) : LocalizeText('catalog.admin.error.failed')),
+            onUnanswered: (reason) => reason !== 'reset' && setDetailsError(LocalizeText('catalog.admin.studio.unresponsive'))
+        });
 
         SendMessageComposer(new CatalogAdminLoadOfferComposer(offerId, target.catalogType, studio.session.draftVersionId, studio.revision));
     }, [offerId, studio.requests, studio.revision, studio.session, target.catalogType]);
 
+    // A closed editor leaves its request in the queue (answers keep their order) but hears nothing more.
+    const { requests } = studio;
+    useEffect(
+        () => () => {
+            if (detailsRequestIdRef.current !== null) requests.detach(detailsRequestIdRef.current);
+        },
+        [requests]
+    );
+
     useMessageEvent<CatalogAdminOfferDetailsEvent>(CatalogAdminOfferDetailsEvent, (event) => {
         const parser = event.getParser();
         if (!detailsRequestedRef.current || parser.offerId !== offerId) return;
+
+        setDetailsError(null);
 
         setLimitedSells(parser.limitedSells);
         if (canReplaceDraft) smartSave.hydrate(createOfferFormFromDetails(parser));
