@@ -18,7 +18,8 @@ export const useFurniEditorState = () => {
         importUnavailable,
         pendingMutation,
         notice,
-        isResyncing
+        isResyncing,
+        writeBlock
     } = useSharedHook(useFurniEditorStore);
 
     return {
@@ -36,7 +37,8 @@ export const useFurniEditorState = () => {
         importUnavailable,
         pendingMutation,
         notice,
-        isResyncing
+        isResyncing,
+        writeBlock
     };
 };
 

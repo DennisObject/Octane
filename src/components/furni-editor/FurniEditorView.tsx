@@ -7,6 +7,7 @@ import {
     FurniEditorGroupMark,
     FurniEditorMutationKind,
     FurniEditorNotice,
+    FurniWriteBlock,
     FurniEditorTab,
     localizeFurniEditorText,
     useFurniEditorActions,
@@ -29,14 +30,18 @@ interface StatusLine {
     message: string;
 }
 
-// One status line at a time: a resyncing channel, a pending write, the last result, then reads in flight.
+// One status line at a time: an unconfirmed write, a resyncing channel, a pending write, the last result, then reads in flight.
 const statusOf = (
+    writeBlock: FurniWriteBlock | null,
     isResyncing: boolean,
     pending: FurniEditorMutationKind | null,
     notice: FurniEditorNotice | null,
     isLoadingDetail: boolean,
     isImporting: boolean
 ): StatusLine | null => {
+    if (writeBlock) {
+        return { tone: 'pending', message: LocalizeText(writeBlock.stale ? 'furni.editor.status.write_paused_reconnect' : 'furni.editor.status.write_paused') };
+    }
     if (isResyncing) return { tone: 'pending', message: LocalizeText('furni.editor.status.resyncing') };
     if (pending) return { tone: 'pending', message: LocalizeText(pending === 'delete' ? 'furni.editor.status.deleting' : 'furni.editor.status.saving') };
     // StaffStatus has no info tone; the muted one keeps an expected refusal calm.
@@ -59,7 +64,7 @@ export const FurniEditorView: FC = () => {
     const activeTab = useFurniEditorUiStore((state) => state.activeTab);
     const setVisible = useFurniEditorUiStore((state) => state.setVisible);
     const setTab = useFurniEditorUiStore((state) => state.setTab);
-    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation, isResyncing } = useFurniEditorState();
+    const { detail, importResult, notice, isLoadingDetail, isImporting, pendingMutation, isResyncing, writeBlock } = useFurniEditorState();
     const { loadInteractions, refreshSearch, reloadOpenItem, closeItem, clearNotice } = useFurniEditorActions();
 
     // The sheet's form lives here, so it survives closing the window, the tabs
@@ -101,7 +106,7 @@ export const FurniEditorView: FC = () => {
         })
     ];
 
-    const status = statusOf(isResyncing, pendingMutation, notice, isLoadingDetail, isImporting);
+    const status = statusOf(writeBlock, isResyncing, pendingMutation, notice, isLoadingDetail, isImporting);
 
     return (
         <StaffWindow

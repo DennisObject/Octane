@@ -33,7 +33,7 @@ interface FurniEditorEditViewProps {
 }
 
 export const FurniEditorEditView: FC<FurniEditorEditViewProps> = ({ detail, group, form, stored, sheet, draft, onOpen, onBack }) => {
-    const { interactions, relatedItems, pendingMutation, isImporting, importUnavailable, isLoadingDetail } = useFurniEditorState();
+    const { interactions, relatedItems, pendingMutation, writeBlock, isImporting, importUnavailable, isLoadingDetail } = useFurniEditorState();
     const setTab = useFurniEditorUiStore((state) => state.setTab);
     const insights = useFurniEditorInsights(detail, form, stored, interactions, relatedItems);
     const rights = useFurniEditorRights();
@@ -41,7 +41,8 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = ({ detail, grou
     // While a furni loads (another one, or the re-read after a save) the sheet
     // is locked, so nothing typed there is silently replaced by the answer.
     const isLocked = isLoadingDetail;
-    const isBusy = pendingMutation !== null || isLocked;
+    // An unconfirmed write pauses every save until the server answers it or the socket reconnects.
+    const isBusy = pendingMutation !== null || writeBlock !== null || isLocked;
     const { item } = detail;
     const displayName = draft.name || item.publicName || item.itemName;
 

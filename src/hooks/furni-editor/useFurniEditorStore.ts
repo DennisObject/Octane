@@ -8,11 +8,12 @@ import {
     FurniEditorSearchResultEvent,
     FurniEditorUpdateComposer,
     FurniEditorUpdateFurnidataComposer,
-    IMessageComposer
+    IMessageComposer,
+    OctaneEventType
 } from '@octane/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
-import { useMessageEvent } from '../events';
+import { useMessageEvent, useOctaneEvent } from '../events';
 import {
     DEFAULT_SEARCH_CRITERIA,
     FurniEditorDetail,
@@ -27,7 +28,15 @@ import {
 } from './furniEditorData';
 import type { EditForm, StructureKey } from './furniEditorForm';
 import { lineQueryFor } from './furniEditorSuggestions';
-import { FurniDetailRequest, FurniEditorMutationKind, FurniEditorTraffic, FurniWireRequest, FurniWriteRequest } from './furniEditorTraffic';
+import {
+    FurniDetailRequest,
+    FurniEditorMutationKind,
+    FurniEditorTraffic,
+    FurniReplyRoute,
+    FurniWireRequest,
+    FurniWriteBlock,
+    FurniWriteRequest
+} from './furniEditorTraffic';
 import type { FurniEditorText } from './furniEditorText';
 import { useFurniEditorUiStore } from './furniEditorUiStore';
 
@@ -49,8 +58,8 @@ const SUCCESS_TEXT: Record<FurniEditorMutationKind, string> = {
 
 const TIMEOUT_NOTICE: FurniEditorNotice = { tone: 'error', key: 'furni.editor.status.timeout' };
 
-// A write that got no answer may or may not have been applied; it is never resent.
-const WRITE_UNCONFIRMED_NOTICE: FurniEditorNotice = { tone: 'error', key: 'furni.editor.status.write_unconfirmed' };
+// The socket came back while a write was unconfirmed: saving is allowed again, its outcome stays unknown.
+const WRITE_RELEASED_NOTICE: FurniEditorNotice = { tone: 'info', key: 'furni.editor.status.write_released' };
 
 // The server answers every failure (permission, validation, not found, rate
 // limit) with the generic result packet and an English message of its own.
@@ -88,6 +97,8 @@ const failureNotice = (message: string): FurniEditorNotice => {
 const successNotice = (kind: FurniEditorMutationKind, message: string): FurniEditorNotice =>
     message.trim().toLowerCase() === 'no changes' ? { tone: 'success', key: 'furni.editor.status.no_changes' } : { tone: 'success', key: SUCCESS_TEXT[kind] };
 
+const answered = (route: FurniReplyRoute): FurniWireRequest | null => (route?.to === 'request' ? route.request : null);
+
 /**
  * Internal shared source of the furni editor: every packet listener, the
  * data they deliver and the actions that request it. Consumers read it
@@ -113,6 +124,7 @@ export const useFurniEditorStore = () => {
     const [pendingMutation, setPendingMutation] = useState<FurniEditorMutationKind | null>(null);
     const [notice, setNotice] = useState<FurniEditorNotice | null>(null);
     const [isResyncing, setIsResyncing] = useState(false);
+    const [writeBlock, setWriteBlock] = useState<FurniWriteBlock | null>(null);
 
     const criteriaRef = useRef<FurniSearchCriteria>(DEFAULT_SEARCH_CRITERIA);
     const shownItemRef = useRef<{ id: number; itemName: string } | null>(null);
@@ -121,10 +133,14 @@ export const useFurniEditorStore = () => {
 
     const [traffic] = useState(
         () =>
-            new FurniEditorTraffic(
-                (composer) => SendMessageComposer(composer),
-                (state) => setIsResyncing(state.tag === 'resyncing')
-            )
+            new FurniEditorTraffic((composer) => SendMessageComposer(composer), {
+                onStateChange: (state) => setIsResyncing(state.tag === 'resyncing'),
+                onBlockChange: (block) => {
+                    setWriteBlock(block);
+
+                    if (block) setPendingMutation(null);
+                }
+            })
     );
 
     const search = useCallback(
@@ -177,42 +193,31 @@ export const useFurniEditorStore = () => {
         [traffic, requestDetail]
     );
 
-    // Reopening the window re-reads the furni still open on the sheet.
-    // What a request that went unanswered leaves behind. A read that is sent
+    // What a read that went unanswered leaves behind. A read that is sent
     // again keeps its loading state; the status line says the channel retries.
-    const handleLost = useCallback(
-        (request: FurniWireRequest, retrying: boolean) => {
-            if (retrying) return;
+    const handleLost = useCallback((request: FurniWireRequest, retrying: boolean) => {
+        if (retrying) return;
 
-            switch (request.kind) {
-                case 'list':
-                    setIsSearching(false);
-                    break;
-                case 'detail':
-                    setIsLoadingDetail(false);
-                    break;
-                case 'import':
-                    setIsImporting(false);
-                    break;
-                case 'write':
-                    setPendingMutation(null);
-                    setNotice(WRITE_UNCONFIRMED_NOTICE);
+        switch (request.kind) {
+            case 'list':
+                setIsSearching(false);
+                break;
+            case 'detail':
+                setIsLoadingDetail(false);
+                break;
+            case 'import':
+                setIsImporting(false);
+                break;
+            default:
+                return;
+        }
 
-                    // Show what the server holds now, whether or not the write landed.
-                    if (request.write.kind !== 'delete') refreshItem(request.write.itemId);
-
-                    return;
-                default:
-                    return;
-            }
-
-            setNotice(TIMEOUT_NOTICE);
-        },
-        [refreshItem]
-    );
+        setNotice(TIMEOUT_NOTICE);
+    }, []);
 
     useEffect(() => traffic.setLostHandler(handleLost), [traffic, handleLost]);
 
+    // Reopening the window re-reads the furni still open on the sheet.
     const reloadOpenItem = useCallback(() => {
         if (shownItemRef.current) refreshItem(shownItemRef.current.id);
     }, [refreshItem]);
@@ -289,7 +294,7 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorSearchResultEvent) => {
                 const parser = event.getParser();
-                const request = traffic.reply({ type: 'search' });
+                const request = answered(traffic.reply({ type: 'search' }));
 
                 if (!parser || (request?.kind !== 'list' && request?.kind !== 'probe')) return;
 
@@ -314,11 +319,11 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorDetailResultEvent) => {
                 const parser = event.getParser();
-                const answered = traffic.reply({ type: 'detail' });
+                const reply = answered(traffic.reply({ type: 'detail' }));
 
-                if (!parser?.item || answered?.kind !== 'detail') return;
+                if (!parser?.item || reply?.kind !== 'detail') return;
 
-                const request = answered.detail;
+                const request = reply.detail;
                 const item = toFurniDetail(parser.item);
 
                 setIsLoadingDetail(false);
@@ -354,7 +359,7 @@ export const useFurniEditorStore = () => {
         FurniEditorInteractionsResultEvent,
         useCallback(
             (event: FurniEditorInteractionsResultEvent) => {
-                if (traffic.reply({ type: 'interactions' })?.kind !== 'interactions') return;
+                if (answered(traffic.reply({ type: 'interactions' }))?.kind !== 'interactions') return;
 
                 setInteractions(event.getParser()?.interactions ?? []);
             },
@@ -367,7 +372,7 @@ export const useFurniEditorStore = () => {
         useCallback(
             (event: FurniEditorImportTextResultEvent) => {
                 const parser = event.getParser();
-                const request = traffic.reply({ type: 'import' });
+                const request = answered(traffic.reply({ type: 'import' }));
 
                 if (!parser || request?.kind !== 'import') return;
 
@@ -420,9 +425,17 @@ export const useFurniEditorStore = () => {
 
                 if (!parser) return;
 
-                // The generic result answers whatever is on the wire: a write, or a read that failed.
-                const { success, message = '' } = parser;
-                const request = traffic.reply({ type: 'result', success });
+                // FurniEditorTraffic decides the owner from the entity id: a write
+                // (on the wire or blocked) or a read that failed.
+                const { success, message = '', id } = parser;
+                const route = traffic.reply({ type: 'result', success, id, message });
+
+                if (route?.to === 'blocked') {
+                    settleWrite(route.write, success, message);
+                    return;
+                }
+
+                const request = answered(route);
 
                 if (!request) return;
 
@@ -448,6 +461,20 @@ export const useFurniEditorStore = () => {
         )
     );
 
+    // A reconnect is the sync boundary: no reply of the old socket can arrive any more.
+    useOctaneEvent(
+        [OctaneEventType.SOCKET_RECONNECTED, OctaneEventType.SOCKET_OPENED],
+        useCallback(() => {
+            const released = traffic.reconnect();
+
+            if (!released) return;
+
+            setNotice(WRITE_RELEASED_NOTICE);
+
+            if (released.kind !== 'delete') refreshItem(released.itemId);
+        }, [traffic, refreshItem])
+    );
+
     return {
         items,
         total,
@@ -464,6 +491,7 @@ export const useFurniEditorStore = () => {
         pendingMutation,
         notice,
         isResyncing,
+        writeBlock,
         search,
         refreshSearch,
         openItem,

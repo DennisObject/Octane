@@ -15,3 +15,4 @@ export * from './useFurniEditorState';
 export * from './useFurnidataDraft';
 export type { FurniEditorMutationKind, FurniEditorNotice } from './useFurniEditorStore';
 export * from './useFurniEditorRights';
+export type { FurniWriteBlock } from './furniEditorTraffic';
