@@ -29,6 +29,7 @@ import './css/floorplan-editor/FloorplanEditorView.css';
 import './css/chat/Chats.css';
 import './css/chat/ChatHistoryView.css';
 import './css/chat/ChatInputHabbiconSelectorView.css';
+import './css/chat/ChatInputCommandSelectorView.css';
 
 import './css/common/Buttons.css';
 import './css/habbo/HabboSkin.css';
