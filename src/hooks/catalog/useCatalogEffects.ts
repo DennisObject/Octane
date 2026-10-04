@@ -23,6 +23,7 @@ import {
     RoomEngineObjectPlacedEvent,
     RoomObjectVariable,
     RoomPreviewer,
+    UserPermissionsEvent,
     Vector3d
 } from '@octane/renderer';
 import { useQueryClient } from '@tanstack/react-query';
@@ -213,7 +214,17 @@ export const useCatalogEffects = (): void => {
         const { activeNodes, pageId: activePageId } = useCatalogStore.getState();
 
         if (activePageId > -1 && (!activeNodes.length || activeNodes.at(-1).pageId !== activePageId || !isNodeInTree(activeNodes.at(-1) ?? null, data.rootNode))) {
-            useCatalogStore.setState({ activeNodes: restoreCatalogActivePath(data.rootNode, activePageId) });
+            const restoredNodes = restoreCatalogActivePath(data.rootNode, activePageId);
+
+            if (!restoredNodes.length)
+            {
+                useCatalogStore.setState({ activeNodes: [], pageId: -1, pageOverride: null, currentOffer: null, searchResult: null });
+                useCatalogStore.getState().resolvePendingRequest();
+            }
+            else
+            {
+                useCatalogStore.setState({ activeNodes: restoredNodes });
+            }
         }
     }, [indexQuery.data]);
 
@@ -301,6 +312,13 @@ export const useCatalogEffects = (): void => {
         if (!connectionState.authenticated) return;
 
         invalidateCatalogIndex(useCatalogStore.getState().currentType);
+        invalidateCatalogPages();
+    });
+
+    useMessageEvent<UserPermissionsEvent>(UserPermissionsEvent, () =>
+    {
+        invalidateCatalogIndex(CatalogType.NORMAL);
+        invalidateCatalogIndex(CatalogType.BUILDER);
         invalidateCatalogPages();
     });
 
