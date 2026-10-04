@@ -1,4 +1,5 @@
 {
+    "widgets.chatinput.text_size": "Text size",
     // ------------------------------------------------------------------
     // UITexts — English (en). Full UI text set (630 keys),
     // parallel to UITexts_it.jsonc. Placeholders (%...%) kept verbatim.
