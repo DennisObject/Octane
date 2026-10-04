@@ -255,6 +255,8 @@
     "catalog.admin.offer.error.items.single": "Enter one furni ID; this hotel sells one furni per offer.",
     "catalog.admin.server.code.CONFLICT": "This page or offer has changed again since then. Reload the history and undo the newer change first.",
     "catalog.admin.history.undo.unsupported": "Only edits and moves can be undone; delete or recreate the page or offer instead.",
+    "catalog.admin.studio.unresponsive": "The catalog editor is not responding. Retry to load it again.",
+    "catalog.admin.studio.retry": "Retry",
     "catalog.admin.server.code.UNSUPPORTED": "This hotel does not support that tool.",
     "catalog.admin.server.code.FORBIDDEN": "You do not have the right to change the catalog.",
     "catalog.admin.server.code.NOT_FOUND": "That page or offer no longer exists. Reload the catalog.",
@@ -1486,5 +1488,7 @@
     "furni.editor.furnidata.flag.missing.tip": "No furnidata entry for this classname",
     "furni.editor.side.furnidata.missing": "missing",
     "furni.editor.status.resyncing": "Connection busy, retrying...",
-    "furni.editor.status.write_unconfirmed": "The server did not confirm the change. Check the furni before you save again."
+    "furni.editor.status.write_paused": "Previous save not yet confirmed by the server; editing is paused.",
+    "furni.editor.status.write_paused_reconnect": "Previous save not yet confirmed by the server; editing is paused. If this lasts, reconnect to the hotel (reload the page) to continue.",
+    "furni.editor.status.write_released": "Reconnected. Saving is enabled again; the previous save is unconfirmed, so check the furni first."
 }
