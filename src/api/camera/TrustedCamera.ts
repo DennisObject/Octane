@@ -42,6 +42,26 @@ const pendingRequests = new Map<
     }
 >();
 
+// The server and renderer reject room canvases above this size on either axis.
+const MAX_VIEWPORT_SIZE = 2048;
+
+/**
+ * Room content sits at trunc(size / 2) + floor(offset) on a canvas, so a window
+ * wider or taller than the renderer allows is sent as a smaller canvas with the
+ * crop and offset shifted by whole pixels. The photographed region is unchanged.
+ */
+const fitViewportAxis = (size: number, offset: number, crop: number, cropSize: number): { size: number; offset: number; crop: number } => {
+    if (size <= MAX_VIEWPORT_SIZE) return { size, offset, crop };
+
+    const fittedCrop = Math.min(Math.max(crop, 0), MAX_VIEWPORT_SIZE - cropSize);
+
+    return {
+        size: MAX_VIEWPORT_SIZE,
+        offset: offset + (fittedCrop - crop) + Math.trunc(size / 2) - Math.trunc(MAX_VIEWPORT_SIZE / 2),
+        crop: fittedCrop
+    };
+};
+
 /** The request contains only a viewpoint. The server supplies every room object and pixel. */
 export const getTrustedCameraViewport = (frame: InstanceType<typeof OctaneRectangle>): CameraViewport => {
     const canvas = GetCameraRoomCanvas();
@@ -53,13 +73,16 @@ export const getTrustedCameraViewport = (frame: InstanceType<typeof OctaneRectan
         throw new Error('Camera requires the standard room view');
     }
 
+    const horizontal = fitViewportAxis(canvas.width, canvas.screenOffsetX, frame.x, frame.width);
+    const vertical = fitViewportAxis(canvas.height, canvas.screenOffsetY, frame.y, frame.height);
+
     return {
-        width: canvas.width,
-        height: canvas.height,
-        offsetX: canvas.screenOffsetX,
-        offsetY: canvas.screenOffsetY,
-        x: frame.x,
-        y: frame.y,
+        width: horizontal.size,
+        height: vertical.size,
+        offsetX: horizontal.offset,
+        offsetY: vertical.offset,
+        x: horizontal.crop,
+        y: vertical.crop,
         cropWidth: frame.width,
         cropHeight: frame.height,
         scale: 1,
