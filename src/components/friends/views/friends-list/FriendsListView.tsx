@@ -8,7 +8,7 @@ import { getClassicScrollbarMetrics } from '../../../../common/scroll-area/class
 import { useFriends, useNotificationActions } from '../../../../hooks';
 import './FriendsListView.css';
 import { FriendsRemoveConfirmationView } from './FriendsListRemoveConfirmationView';
-import { FriendsRoomInviteView } from './FriendsListRoomInviteView';
+import { FRIENDS_DIALOG_SIZES, FriendsDialogSnapshot, FriendsRoomInviteView } from './FriendsListRoomInviteView';
 import { FriendsSearchView } from './FriendsListSearchView';
 import { FriendsListSkinView } from './friends-list-group/FriendsListGroupItemView';
 import { FriendsListGroupView } from './friends-list-group/FriendsListGroupView';
@@ -96,8 +96,9 @@ const FriendsListScrollView = ({ children, positionRef }: { children: ReactNode;
 export const FriendsListView: FC<{}> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
     const [selectedFriendsIds, setSelectedFriendsIds] = useState<number[]>([]);
-    const [showRoomInvite, setShowRoomInvite] = useState<boolean>(false);
-    const [showRemoveFriendsConfirmation, setShowRemoveFriendsConfirmation] = useState<boolean>(false);
+    const [roomInviteSnapshot, setRoomInviteSnapshot] = useState<FriendsDialogSnapshot>(null);
+    const [removeConfirmationSnapshot, setRemoveConfirmationSnapshot] = useState<FriendsDialogSnapshot>(null);
+    const nextDialogKeyRef = useRef(0);
     const [activePanel, setActivePanel] = useState<'friends' | 'requests' | 'search' | null>('friends');
     const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
     const [friendSearchValue, setFriendSearchValue] = useState('');
@@ -179,13 +180,33 @@ export const FriendsListView: FC<{}> = (props) => {
         setAppliedFriendSearch('');
         setIsFriendSearchOpen(false);
     };
+    const createDialogSnapshot = (kind: keyof typeof FRIENDS_DIALOG_SIZES): FriendsDialogSnapshot => {
+        const selected = new Set(selectedFriendsIds);
+        const friends = [...onlineFriends.filter((friend) => friend.categoryId === 0), ...offlineFriends].filter((friend) => selected.has(friend.id));
+        const ids = friends.map((friend) => friend.id);
+        const names = friends.map((friend) => friend.name);
+        const bounds = windowRef.current?.getBoundingClientRect();
+        const size = FRIENDS_DIALOG_SIZES[kind];
+        return {
+            key: ++nextDialogKeyRef.current,
+            ids,
+            names,
+            caption: kind === 'invite' ? LocalizeText('friendlist.invite.summary', ['count'], [String(ids.length)])
+                : LocalizeText('friendlist.removefriendconfirm.userlist', ['user_names'], [names.join(', ')]),
+            initialPosition: bounds ? { x: Math.trunc(bounds.x + (bounds.width - size.width) / 2), y: Math.trunc(bounds.y + (bounds.height - size.height) / 2) }
+                : { x: 300, y: 200 }
+        };
+    };
     const openRoomInvite = () => {
         if (!selectedFriendsIds.length) return;
         if (Date.now() - lastInviteRef.current < 60000) {
             simpleAlert(LocalizeText('friendlist.invite.frequentalert.text'), null, null, null, LocalizeText('friendlist.invite.frequentalert.title'));
             return;
         }
-        setShowRoomInvite(true);
+        setRoomInviteSnapshot(createDialogSnapshot('invite'));
+    };
+    const openRemoveConfirmation = () => {
+        if (selectedFriendsIds.length) setRemoveConfirmationSnapshot(createDialogSnapshot('remove'));
     };
     const openFriendHomepage = () => {
         if (selectedFriendsIds.length !== 1) return;
@@ -198,24 +219,6 @@ export const FriendsListView: FC<{}> = (props) => {
     const hoverTip = (key: string) => ({ onMouseEnter: () => setHoverInfo(LocalizeText(key)), onMouseLeave: () => setHoverInfo('') });
     const pendingRequestCount = requests.filter((request) => request.state === MessengerRequest.PENDING).length;
     let rowIndex = 0;
-
-    const removeFriendsText = useMemo(() => {
-        if (!selectedFriendsIds || !selectedFriendsIds.length) return '';
-
-        const userNames: string[] = [];
-
-        for (const userId of selectedFriendsIds) {
-            let existingFriend: MessengerFriend = onlineFriends.find((f) => f.id === userId);
-
-            if (!existingFriend) existingFriend = offlineFriends.find((f) => f.id === userId);
-
-            if (!existingFriend) continue;
-
-            userNames.push(existingFriend.name);
-        }
-
-        return LocalizeText('friendlist.removefriendconfirm.userlist', ['user_names'], [userNames.join('\n')]);
-    }, [offlineFriends, onlineFriends, selectedFriendsIds]);
 
     const selectFriend = useCallback(
         (userId: number) => {
@@ -258,22 +261,22 @@ export const FriendsListView: FC<{}> = (props) => {
         });
     }, [applyCurrentFilter]);
 
-    const sendRoomInvite = (message: string) => {
-        if (!selectedFriendsIds.length || !message || !message.length || message.length > 255) return;
+    const sendRoomInvite = (message: string, ids: number[]) => {
+        if (!ids.length || !message) return;
 
-        SendMessageComposer(new SendRoomInviteComposer(message, selectedFriendsIds));
+        SendMessageComposer(new SendRoomInviteComposer(message, ids));
         lastInviteRef.current = Date.now();
 
-        setShowRoomInvite(false);
+        setRoomInviteSnapshot(null);
     };
 
-    const removeSelectedFriends = () => {
-        if (selectedFriendsIds.length === 0) return;
+    const removeSelectedFriends = (ids: number[]) => {
+        if (ids.length === 0) return;
 
-        SendMessageComposer(new RemoveFriendComposer(...selectedFriendsIds));
+        SendMessageComposer(new RemoveFriendComposer(...ids));
         setSelectedFriendsIds([]);
 
-        setShowRemoveFriendsConfirmation(false);
+        setRemoveConfirmationSnapshot(null);
     };
 
     useEffect(() => {
@@ -450,7 +453,7 @@ export const FriendsListView: FC<{}> = (props) => {
                                     disabled={!selectedFriendsIds.length}
                                     {...hoverTip('friendlist.tip.remove')}
                                     aria-label={LocalizeText('friendlist.tip.remove')}
-                                    onClick={() => selectedFriendsIds.length && setShowRemoveFriendsConfirmation(true)}
+                                    onClick={openRemoveConfirmation}
                                 ><FriendsListSkinView /></button>
                             </div>
                         </div>
@@ -473,15 +476,15 @@ export const FriendsListView: FC<{}> = (props) => {
                         onPointerUp={stopResize} onPointerCancel={stopResize} onLostPointerCapture={stopResize} />
                 </div>
             </DraggableWindow>
-            {showRoomInvite && (
-                <FriendsRoomInviteView selectedFriendsIds={selectedFriendsIds} sendRoomInvite={sendRoomInvite} onCloseClick={() => setShowRoomInvite(false)} />
+            {roomInviteSnapshot && (
+                <FriendsRoomInviteView key={roomInviteSnapshot.key} snapshot={roomInviteSnapshot} sendRoomInvite={sendRoomInvite} onCloseClick={() => setRoomInviteSnapshot(null)} />
             )}
-            {showRemoveFriendsConfirmation && (
+            {removeConfirmationSnapshot && (
                 <FriendsRemoveConfirmationView
-                    removeFriendsText={removeFriendsText}
+                    key={removeConfirmationSnapshot.key}
+                    snapshot={removeConfirmationSnapshot}
                     removeSelectedFriends={removeSelectedFriends}
-                    selectedFriendsIds={selectedFriendsIds}
-                    onCloseClick={() => setShowRemoveFriendsConfirmation(false)}
+                    onCloseClick={() => setRemoveConfirmationSnapshot(null)}
                 />
             )}
         </>

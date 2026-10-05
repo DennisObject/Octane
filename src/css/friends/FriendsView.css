@@ -273,100 +273,221 @@
     }
 }
 
-.octane-friends-room-invite {
-    width: min(270px, calc(100vw - 16px));
-    height: min(225px, calc(100vh - 16px));
-    min-width: 0;
-    min-height: 0;
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
-    resize: none !important;
-
-    & .octane-card-content-shell {
-        padding: 10px !important;
-        gap: 8px !important;
-    }
+.friends-native-dialog {
+    position: relative;
+    box-sizing: border-box;
+    color: #000;
+    font: 9px/12px Volter, sans-serif;
+    resize: none;
+    overflow: visible;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, .35));
 }
 
-.octane-friends-room-invite-content {
-    height: 100%;
+.friends-native-dialog :is(button, textarea, span) {
+    font-family: Volter, sans-serif !important;
+    font-size: 9px !important;
+}
+
+.friends-dialog-frame,
+.friends-dialog-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.friends-dialog-titlebar {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 6px;
+    height: 15px;
+    background: url("@/assets/images/friends/swf/friends-blue-header.png") repeat-x;
+    cursor: move;
+}
+
+.friends-dialog-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 100%;
+    height: 15px;
+    padding: 1px 8px;
+    overflow: hidden;
+    color: #fff;
+    background: #418db0;
+    font-weight: 700;
+    line-height: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.friends-dialog-close {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.friends-dialog-close-skin,
+.friends-dialog-button-skin {
+    display: none;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.friends-dialog-close-skin.is-default,
+.friends-dialog-button-skin.is-default {
+    display: block;
+}
+
+:is(.friends-dialog-close, .friends-dialog-button):hover > .is-default,
+:is(.friends-dialog-close, .friends-dialog-button):active > :is(.is-default, .is-hover),
+.friends-dialog-button:disabled > :is(.is-default, .is-hover, .is-pressed) {
+    display: none;
+}
+
+:is(.friends-dialog-close, .friends-dialog-button):hover:not(:active):not(:disabled) > .is-hover,
+:is(.friends-dialog-close, .friends-dialog-button):active > .is-pressed,
+.friends-dialog-button:disabled > .is-disabled {
+    display: block;
+}
+
+.friends-dialog-content {
+    position: absolute;
+    left: 6px;
+    top: 25px;
+    right: 6px;
+    bottom: 7px;
+}
+
+.octane-friends-room-invite-summary,
+.octane-friends-room-invite-note,
+.octane-friends-remove-confirmation-text {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 2px;
+    color: #000;
+    font: 9px/12px Volter, sans-serif;
+    white-space: pre;
+    overflow: hidden;
 }
 
 .octane-friends-room-invite-summary {
-    padding: 6px 8px;
-    color: #111;
-    font-size: 13px;
-    line-height: 1.3;
-    font-weight: 700;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, .35);
-    border-radius: 8px;
+    left: 10px;
+    top: 5px;
+    width: 180px;
+    height: 20px;
 }
 
 .octane-friends-room-invite-textarea {
-    width: 100%;
-    height: 92px;
-    padding: 7px 8px;
-    color: #111;
-    font-size: 13px;
-    line-height: 1.3;
+    position: absolute;
+    box-sizing: border-box;
+    left: 10px;
+    top: 24px;
+    width: 180px;
+    height: 70px;
+    min-height: 0;
+    padding: 1px;
+    margin: 0;
+    color: #000;
     background: #fff;
-    border: 1px solid #888;
-    border-radius: 2px;
-    resize: none;
+    border: 1px solid #000;
+    border-radius: 0;
+    font-weight: 400;
+    line-height: 12px;
+    box-shadow: none;
     outline: none;
+    resize: none;
+    scrollbar-width: none;
+}
 
-    &::placeholder {
-        color: #666;
-        opacity: 1;
-    }
+.octane-friends-room-invite-textarea::-webkit-scrollbar {
+    display: none;
 }
 
 .octane-friends-room-invite-note {
-    padding: 4px 6px;
-    color: #111 !important;
-    font-size: 12px !important;
-    line-height: 1.3;
-    background: rgba(255, 255, 255, .75);
-    border-radius: 8px;
-}
-
-.octane-friends-room-invite-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: auto;
-}
-
-.octane-friends-remove-confirmation {
-    width: min(270px, calc(100vw - 16px));
-    height: min(225px, calc(100vh - 16px));
-    min-width: 0;
-    min-height: 0;
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
-    resize: none !important;
+    left: 10px;
+    top: 98px;
+    width: 180px;
+    height: 20px;
 }
 
 .octane-friends-remove-confirmation-text {
-    color: #111;
-    font-size: 13px;
-    line-height: 1.35;
+    left: 10px;
+    top: 10px;
+    width: 130px;
+    height: 120px;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
-.octane-friends-remove-confirmation-content {
-    height: 100%;
+.friends-dialog-actions {
+    position: absolute;
+    left: 0;
+    top: 122px;
+    width: 199px;
+    height: 21px;
 }
 
-.octane-friends-remove-confirmation-names {
-    margin-top: 4px;
+.octane-friends-remove-confirmation .friends-dialog-actions {
+    top: 147px;
+    width: 148px;
 }
 
-.octane-friends-remove-confirmation-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: auto;
+.friends-dialog-button {
+    position: absolute;
+    box-sizing: border-box;
+    left: 0;
+    top: 0;
+    width: 60px;
+    height: 21px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: #000;
+    font-weight: 400;
+    appearance: none;
+    cursor: pointer;
+}
+
+.friends-dialog-button:last-child {
+    left: 139px;
+}
+
+.octane-friends-remove-confirmation .friends-dialog-button:last-child {
+    left: 88px;
+}
+
+.friends-dialog-button.is-thick {
+    font-weight: 700;
+}
+
+.friends-dialog-button > span {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 4px;
+    height: 13px;
+    line-height: 12px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .friend-bar {
@@ -926,9 +1047,7 @@
     background: #f3f3ef;
 }
 
-.octane-friends-category-manager :where(input, select, textarea),
-.octane-friends-room-invite :where(input, select, textarea),
-.octane-friends-remove-confirmation :where(input, select, textarea) {
+.octane-friends-category-manager :where(input, select, textarea) {
     min-height: 22px;
     border: 1px solid #858585 !important;
     border-radius: 3px !important;
@@ -938,17 +1057,13 @@
     font-size: 11px !important;
 }
 
-.octane-friends-category-manager :where(input:focus, select:focus, textarea:focus),
-.octane-friends-room-invite :where(input:focus, select:focus, textarea:focus),
-.octane-friends-remove-confirmation :where(input:focus, select:focus, textarea:focus) {
+.octane-friends-category-manager :where(input:focus, select:focus, textarea:focus) {
     border-color: #4a7d8c !important;
     box-shadow: 0 0 0 2px rgba(74, 125, 140, 0.24), inset 0 1px 0 rgba(0, 0, 0, 0.14) !important;
     outline: none !important;
 }
 
-.octane-friends-category-manager :where(.text-muted, .text-dark),
-.octane-friends-room-invite :where(.text-muted, .text-dark),
-.octane-friends-remove-confirmation :where(.text-muted, .text-dark) {
+.octane-friends-category-manager :where(.text-muted, .text-dark) {
     color: #565656 !important;
 }
 
