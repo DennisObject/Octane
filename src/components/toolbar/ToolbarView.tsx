@@ -7,7 +7,6 @@ import dividerImg from '../../assets/images/toolbar/air/divider.png';
 import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
-import { ToolbarUnseenCountView } from './ToolbarUnseenCountView';
 import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
 import { BottomDockLayout, resolveBottomDockLayout } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -457,7 +456,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                         }}
                                         className="tb-icon"
                                     />
-                                    <ToolbarUnseenCountView count={unseenProgMenuCount} />
                                 </motion.div>
                             )}
                             {GetConfigurationValue('game.center.enabled') && (
@@ -483,7 +481,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     {isInRoom && (
                         <motion.div variants={itemVariants} className="relative tb-slot tb-slot-inventory">
                             <ToolbarItemView icon="inventory" onClick={() => CreateLinkEvent('inventory/toggle')} className="tb-icon" />
-                            <ToolbarUnseenCountView count={getFullCount} />
+                            {getFullCount > 0 && <LayoutItemCountView count={getFullCount} className="absolute -right-1 top-0" />}
                         </motion.div>
                     )}
                     <motion.div
@@ -506,6 +504,9 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <LayoutAvatarImageView airMeMenu={true} direction={3} figure={userFigure} />
                         </motion.div>
                         <img src={memenuCircleImg} alt="" className="tb-memenu-circle" />
+                        {unseenProgMenuCount > 0 && (
+                            <LayoutItemCountView count={unseenProgMenuCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
+                        )}
                     </motion.div>
                     {isInRoom && showToolbarButton && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
