@@ -252,9 +252,10 @@
     }
 }
 
+/* updateWindowPosition centres the arrows on the panel, or on the stage when the panel is taller. */
 .octane-photo-viewer__browse {
     position: absolute;
-    top: 80px;
+    top: min(200px, calc(50vh - 32px));
     width: 64px;
     height: 64px;
     background: url('@/assets/images/camera/photo-viewer/browse-ffwd.png') 0 0 / 64px 64px no-repeat !important;
