@@ -49,8 +49,12 @@ const MAIN_TAB_ORDER: string[] = [
     AvatarEditorFigureCategory.PETS
 ];
 
+// The v75 AvatarEditor window opens at (100, 30) and is never recentred.
+const INITIAL_EDITOR_POSITION = { x: 100, y: 30 };
+
 export const AvatarEditorView: FC<{}> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [editorPosition, setEditorPosition] = useState(INITIAL_EDITOR_POSITION);
     const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
     const {
         setIsVisible: setEditorVisibility,
@@ -68,7 +72,8 @@ export const AvatarEditorView: FC<{}> = (props) => {
 
     const isPetsOpen = activeModelKey === AvatarEditorFigureCategory.PETS;
     const isNftOpen = activeModelKey === AvatarEditorFigureCategory.NFT;
-    const canUseWardrobe = !clothingChangeData && !isNftOpen;
+    const hasWardrobe = !clothingChangeData;
+    const canUseWardrobe = hasWardrobe && !isNftOpen;
     const orderedModelKeys = Object.keys(avatarModels)
         .filter((modelKey) => modelKey !== AvatarEditorFigureCategory.WARDROBE)
         .sort((left, right) => {
@@ -162,14 +167,16 @@ export const AvatarEditorView: FC<{}> = (props) => {
         <OctaneCardView
             className={`octane-avatar-editor${isWardrobeOpen ? ' is-wardrobe-open' : ''}`}
             frameStyle={3}
+            initialPosition={editorPosition}
             isResizable={false}
+            onPositionChange={setEditorPosition}
             uniqueKey="avatar-editor"
         >
             <OctaneCardHeaderView
                 headerText={LocalizeText(clothingChangeData ? 'widget.furni.clothingchange.editor.title' : 'avatareditor.title')}
                 onCloseClick={(event) => setIsVisible(false)}
             />
-            <OctaneCardContentView className="octane-avatar-editor-content">
+            <OctaneCardContentView className="octane-avatar-editor-content" gap={0}>
                 <div className="octane-avatar-editor-stage">
                     <div className="octane-avatar-editor-nameplate">
                         <span>{GetSessionDataManager().userName}</span>
@@ -188,9 +195,10 @@ export const AvatarEditorView: FC<{}> = (props) => {
                             ))}
                         </OctaneCardTabsView>
                     </div>
-                    {canUseWardrobe && (
+                    {hasWardrobe && (
                         <button
                             type="button"
+                            disabled={!canUseWardrobe}
                             className={`octane-avatar-editor-wardrobe-toggle${isWardrobeOpen ? ' is-open' : ''}`}
                             aria-pressed={isWardrobeOpen}
                             aria-label={LocalizeText('avatareditor.wardrobe.title')}

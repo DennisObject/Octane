@@ -80,12 +80,12 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                 onMouseEnter={retargetPopup}
             >
                 <LayoutRoomThumbnailView className="octane-navigator-air__tile-thumb" customUrl={roomData.officialRoomPicRef} roomId={roomData.roomId}>
-                    {roomData.habboGroupId > 0 && (
-                        <LayoutBadgeImageView badgeCode={roomData.groupBadgeCode} className="octane-navigator-air__tile-badge" isGroup={true} />
-                    )}
                     <NavigatorUserCountView userCount={roomData.userCount} maxUserCount={roomData.maxUserCount} />
                     {roomData.doorMode !== RoomDataParser.OPEN_STATE && <i className={`octane-navigator-air__tile-door ${doorClass()}`} />}
                 </LayoutRoomThumbnailView>
+                {roomData.habboGroupId > 0 && (
+                    <LayoutBadgeImageView badgeCode={roomData.groupBadgeCode} className="octane-navigator-air__tile-badge" isGroup={true} />
+                )}
                 <div className="octane-navigator-air__tile-name">
                     <span>{title}</span>
                     <NavigatorSearchResultItemInfoView roomData={roomData} thumbnail={true} />

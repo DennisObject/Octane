@@ -7,7 +7,7 @@ import categoryShowMore from '../../../../assets/images/navigator/air/category-s
 import navViewMini from '../../../../assets/images/navigator/air/nav-view-mini.png';
 import navViewRow from '../../../../assets/images/navigator/air/nav-view-row.png';
 import navViewThumbs from '../../../../assets/images/navigator/air/nav-view-thumbs.png';
-import { LayoutSearchSavesView } from '../../../../common';
+import quicklinkAdd from '../../../../assets/images/navigator/air/quicklink-add.png';
 import { useNavigatorData, useNavigatorUiStore } from '../../../../hooks';
 import { NavigatorSearchResultItemView } from './NavigatorSearchResultItemView';
 
@@ -60,7 +60,7 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
     const resultTitle = getResultTitle();
     const listViewLabel = localizeWithFallback('navigator.viewmode.list', 'Show rooms as a list');
     const tileViewLabel = localizeWithFallback('navigator.viewmode.tiles', 'Show rooms as tiles');
-    const hideSave = parentCode === 'official_view' || searchResult.code === 'official_view';
+    const hideSave = parentCode.includes('official_view');
     const eventTitle = isEventView(searchResult.code) || isEventView(parentCode);
 
     return (
@@ -73,7 +73,7 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                     aria-expanded={isExtended}
                     onClick={() => useNavigatorUiStore.getState().setResultCollapsed(searchResult.code, isExtended)}
                 >
-                    <img src={isExtended ? categoryCollapse : categoryExpand} alt="" />
+                    {(!isExtended || searchResult.action !== 2) && <img src={isExtended ? categoryCollapse : categoryExpand} alt="" />}
                     <span>{resultTitle}</span>
                 </button>
                 <div className="octane-navigator-air__category-controls">
@@ -104,16 +104,21 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                             <img src={categoryShowMore} alt="" />
                         </button>
                     )}
-                    {searchResult.action > 0 && searchResult.action !== 1 && (
+                    {isExtended && searchResult.action === 2 && (
                         <button type="button" className="octane-navigator-air__icon-button" title={LocalizeText('navigator.back')} onClick={showMore}>
                             <img src={navViewMini} alt="" />
                         </button>
                     )}
                     {!hideSave && (
-                        <LayoutSearchSavesView
+                        <button
+                            type="button"
+                            className="octane-navigator-air__category-save"
+                            aria-label={LocalizeText('navigator.tooltip.add.saved.search')}
                             title={LocalizeText('navigator.tooltip.add.saved.search')}
                             onClick={() => SendMessageComposer(new NavigatorSearchSaveComposer(searchResult.code, parentFilter))}
-                        />
+                        >
+                            <img src={quicklinkAdd} alt="" />
+                        </button>
                     )}
                 </div>
             </header>

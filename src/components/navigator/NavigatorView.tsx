@@ -11,7 +11,7 @@ import {
     RemoveLinkEventTracker,
     RoomSessionEvent
 } from '@octane/renderer';
-import { CSSProperties, FC, PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, PointerEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, localizeWithFallback, SendMessageComposer, TryVisitRoom } from '../../api';
 import createRoomImg from '../../assets/images/navigator/air/create-room.png';
 import promoteRoomImg from '../../assets/images/navigator/air/promote-room.png';
@@ -52,12 +52,17 @@ const persistNavigatorBounds = (element: HTMLElement | null) => {
 export const NavigatorView: FC<{}> = () => {
     const { topLevelContext, topLevelContexts, navigatorData, navigatorSearches } = useNavigatorData();
     const { searchResult, isFetching } = useNavigatorSearch();
-    const { isVisible, isCreatorOpen, isRoomInfoOpen, isRoomLinkOpen, isOpenSavesSearches, needsInit, currentTabCode, windowHeight } = useNavigatorUiState();
+    const { isVisible, isCreatorOpen, isRoomInfoOpen, isRoomLinkOpen, isOpenSavesSearches, needsInit, currentTabCode, windowX, windowY, windowHeight } =
+        useNavigatorUiState();
     const elementRef = useRef<HTMLDivElement>(null);
     const [resultsScrollable, setResultsScrollable] = useState(false);
     const frameRef = useRef<HTMLDivElement>(null);
     const tabsRef = useRef<HTMLDivElement>(null);
     const resizeRef = useRef<{ y: number; height: number; scale: number } | null>(null);
+    const onPositionChange = useCallback((position: { x: number; y: number }) => {
+        useNavigatorUiStore.setState({ windowX: position.x, windowY: position.y });
+        requestAnimationFrame(() => persistNavigatorBounds(frameRef.current));
+    }, []);
 
     useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, () => {
         useNavigatorUiStore.getState().hide();
@@ -143,7 +148,7 @@ export const NavigatorView: FC<{}> = () => {
         };
         AddLinkEventTracker(linkTracker);
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [navigatorData]);
+    }, [navigatorData.homeRoomId]);
 
     useEffect(() => {
         if (!searchResult) return;
@@ -152,11 +157,11 @@ export const NavigatorView: FC<{}> = () => {
     }, [searchResult]);
 
     useEffect(() => {
-        if (!isVisible || !needsInit) return;
+        if (!needsInit) return;
         SendMessageComposer(new NavigatorInitComposer());
         SendMessageComposer(new GetCategoriesWithUserCountMessageComposer());
         useNavigatorUiStore.getState().markInitDone();
-    }, [isVisible, needsInit]);
+    }, [needsInit]);
 
     useEffect(() => {
         LegacyExternalInterface.addCallback(HabboWebTools.OPENROOM, (k: string) => SendMessageComposer(new ConvertGlobalRoomIdMessageComposer(k)));
@@ -201,7 +206,7 @@ export const NavigatorView: FC<{}> = () => {
         updateScrollState();
 
         return () => observer.disconnect();
-    }, [isVisible, isCreatorOpen, searchResult]);
+    }, [isVisible, isCreatorOpen, searchResult, topLevelContexts]);
 
     const quickLinksLabel = localizeWithFallback('navigator.quick.links.title', 'Quick links');
     const navigatorLabel = localizeWithFallback('navigator.title', 'Navigator');
@@ -216,7 +221,7 @@ export const NavigatorView: FC<{}> = () => {
     const onToggleQuickLinks = () => {
         useNavigatorRoomInfoPopupStore.getState().hide();
         useNavigatorUiStore.getState().toggleSavesSearches();
-        persistNavigatorBounds(document.querySelector('.octane-navigator-air') as HTMLElement | null);
+        requestAnimationFrame(() => persistNavigatorBounds(frameRef.current));
     };
 
     const onCreateRoom = () => {
@@ -232,7 +237,7 @@ export const NavigatorView: FC<{}> = () => {
 
     const onPromoteRoom = () => {
         useNavigatorRoomInfoPopupStore.getState().hide();
-        CreateLinkEvent('catalog/open/room_event');
+        CreateLinkEvent('catalog/open/room_ad');
     };
 
     const onResizeStart = (event: PointerEvent<HTMLButtonElement>) => {
@@ -264,11 +269,17 @@ export const NavigatorView: FC<{}> = () => {
 
     return (
         <>
-            {isVisible && (
-                <DraggableWindow uniqueKey="navigator" handleSelector=".octane-navigator-air__caption">
+            {isVisible && topLevelContexts?.length > 0 && (
+                <DraggableWindow
+                    uniqueKey="navigator"
+                    handleSelector=".octane-navigator-air__caption"
+                    initialPosition={{ x: windowX, y: windowY }}
+                    constrainToViewport={true}
+                    onPositionChange={onPositionChange}
+                >
                     <div
                         ref={frameRef}
-                        className={`octane-navigator-air max-w-[calc(100vw-16px)]${isOpenSavesSearches ? ' is-quick-links' : ''}`}
+                        className={`octane-navigator-air${isOpenSavesSearches ? ' is-quick-links' : ''}`}
                         data-air-frame="ubuntu-3"
                         style={{ '--navigator-height': `${windowHeight || 628}px` } as CSSProperties}
                     >
@@ -332,7 +343,6 @@ export const NavigatorView: FC<{}> = () => {
                                     <main className="octane-navigator-air__main" aria-label={navigatorLabel}>
                                         <NavigatorSearchView searchResult={searchResult} />
                                         <div ref={elementRef} className="octane-navigator-air__results has-air-scrollbar" data-scrollable={resultsScrollable}>
-                                            {isFetching && <div className="octane-navigator-air__busy-mask" aria-hidden="true" />}
                                             {searchResult &&
                                                 searchResult.results.map((result, index) => (
                                                     <NavigatorSearchResultView
@@ -347,6 +357,7 @@ export const NavigatorView: FC<{}> = () => {
                                                 <NavigatorEmptyStateView code={searchResult.code} />
                                             )}
                                         </div>
+                                        {isFetching && <div className="octane-navigator-air__busy-mask" aria-hidden="true" />}
                                         <div className="octane-navigator-air__actions">
                                             <button
                                                 type="button"

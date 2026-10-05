@@ -30,6 +30,9 @@ export interface DraggableWindowProps {
     dragStyle?: CSSProperties;
     offsetLeft?: number;
     offsetTop?: number;
+    initialPosition?: { x: number; y: number };
+    constrainToViewport?: boolean;
+    onPositionChange?: (position: { x: number; y: number }) => void;
     children?: ReactNode;
 }
 
@@ -42,7 +45,10 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         dragStyle = {},
         children = null,
         offsetLeft = 0,
-        offsetTop = 0
+        offsetTop = 0,
+        initialPosition,
+        constrainToViewport = false,
+        onPositionChange
     } = props;
     const [delta, setDelta] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -94,13 +100,23 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         const windowHeight = elementRef.current.offsetHeight;
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
+        if (constrainToViewport) {
+            return {
+                x: Math.min(viewportWidth - windowWidth, Math.max(0, newX)),
+                y: Math.min(viewportHeight - windowHeight, Math.max(0, newY))
+            };
+        }
         const maxOutX = windowWidth * DRAG_OUTSIDE_PERCENT;
         const maxOutY = windowHeight * DRAG_OUTSIDE_PERCENT;
         const clampedX = Math.max(-maxOutX, Math.min(newX, viewportWidth - windowWidth + maxOutX));
         const clampedY = Math.max(BOUNDS_THRESHOLD_TOP, Math.min(newY, viewportHeight - windowHeight + maxOutY));
 
         return { x: clampedX, y: clampedY };
-    }, []);
+    }, [constrainToViewport]);
+
+    const initialX = initialPosition?.x;
+    const initialY = initialPosition?.y;
+    const hasInitialPosition = initialPosition !== undefined;
 
     useLayoutEffect(() => {
         const element = elementRef.current as HTMLElement;
@@ -108,6 +124,16 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
 
         CURRENT_WINDOWS.push(element);
         bringToTop();
+
+        return () => {
+            const index = CURRENT_WINDOWS.indexOf(element);
+            if (index >= 0) CURRENT_WINDOWS.splice(index, 1);
+        };
+    }, [handleSelector, windowPosition, uniqueKey, disableDrag, offsetLeft, offsetTop, bringToTop]);
+
+    useLayoutEffect(() => {
+        const element = elementRef.current as HTMLElement;
+        if (!element) return;
 
         if (!disableDrag) {
             const handle = element.querySelector(handleSelector);
@@ -134,18 +160,38 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
                 break;
         }
 
-        const clampedPos = clampPosition(offsetX, offsetY);
+        const clampedPos = clampPosition(initialX ?? offsetX, initialY ?? offsetY);
         offsetRef.current = { x: clampedPos.x, y: clampedPos.y };
         deltaRef.current = { x: 0, y: 0 };
         setOffset({ x: clampedPos.x, y: clampedPos.y });
         setDelta({ x: 0, y: 0 });
         setIsPositioned(true);
+        if (hasInitialPosition && (clampedPos.x !== initialX || clampedPos.y !== initialY)) onPositionChange?.(clampedPos);
+
+    }, [handleSelector, windowPosition, uniqueKey, disableDrag, offsetLeft, offsetTop, clampPosition, initialX, initialY, hasInitialPosition, onPositionChange]);
+
+    useLayoutEffect(() => {
+        if (!constrainToViewport || !elementRef.current) return;
+
+        const updateBounds = () => {
+            if (dragRef.current?.active) return;
+
+            const position = clampPosition(offsetRef.current.x, offsetRef.current.y);
+            if (position.x === offsetRef.current.x && position.y === offsetRef.current.y) return;
+
+            offsetRef.current = position;
+            setOffset(position);
+            onPositionChange?.(position);
+        };
+        const observer = new ResizeObserver(updateBounds);
+        observer.observe(elementRef.current);
+        window.addEventListener('resize', updateBounds);
 
         return () => {
-            const index = CURRENT_WINDOWS.indexOf(element);
-            if (index >= 0) CURRENT_WINDOWS.splice(index, 1);
+            observer.disconnect();
+            window.removeEventListener('resize', updateBounds);
         };
-    }, [handleSelector, windowPosition, uniqueKey, disableDrag, offsetLeft, offsetTop, bringToTop]);
+    }, [constrainToViewport, clampPosition, onPositionChange]);
 
 
     useEffect(() => {
@@ -202,7 +248,9 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
             setOffset(clampedPos);
             setIsDragging(false);
 
-            if (uniqueKey !== null) {
+            onPositionChange?.(clampedPos);
+
+            if (uniqueKey !== null && !hasInitialPosition) {
                 const newStorage = { ...GetLocalStorage<WindowSaveOptions>(`nitro.windows.${uniqueKey}`) };
                 newStorage.offset = { x: clampedPos.x, y: clampedPos.y };
                 SetLocalStorage<WindowSaveOptions>(`nitro.windows.${uniqueKey}`, newStorage);
@@ -220,10 +268,10 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
             dragHandler.removeEventListener('pointerup', onPointerEnd);
             dragHandler.removeEventListener('pointercancel', onPointerEnd);
         };
-    }, [dragHandler, uniqueKey, clampPosition]);
+    }, [dragHandler, uniqueKey, clampPosition, hasInitialPosition, onPositionChange]);
 
     useEffect(() => {
-        if (!uniqueKey) return;
+        if (!uniqueKey || hasInitialPosition) return;
 
         const localStorage = GetLocalStorage<WindowSaveOptions>(`nitro.windows.${uniqueKey}`);
         if (!localStorage || !localStorage.offset) return;
@@ -234,13 +282,14 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         setDelta({ x: 0, y: 0 });
         setOffset({ x: clampedPos.x, y: clampedPos.y });
         setIsPositioned(true);
-    }, [uniqueKey, clampPosition]);
+    }, [uniqueKey, clampPosition, hasInitialPosition]);
 
     return createPortal(
         <div
             ref={elementRef}
             className="absolute draggable-window"
             data-window-key={uniqueKey ?? undefined}
+            data-native-position={hasInitialPosition ? '' : undefined}
             style={{
                 ...dragStyle,
                 left: 0,

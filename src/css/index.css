@@ -36,6 +36,38 @@
 }
 
 @font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-i.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-ib.ttf") format("truetype");
+}
+
+@font-face {
     font-family: Volter;
     font-weight: normal;
     font-style: normal;
