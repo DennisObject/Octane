@@ -13,7 +13,8 @@
     font-size: 12px;
 }
 
-.octane-room-settings > .octane-card-header-shell {
+.octane-room-settings > .octane-card-header-shell,
+.octane-ros-confirm > .octane-card-header-shell {
     min-height: 33px !important;
     max-height: 33px !important;
     flex: 0 0 33px;
@@ -74,7 +75,7 @@
     margin-left: 0;
 }
 
-.octane-room-settings .ros-at {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-at {
     position: absolute;
     box-sizing: border-box;
 }
@@ -274,7 +275,7 @@
 }
 
 /* shiny buttons */
-.octane-room-settings .ros-button {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button {
     appearance: none;
     position: absolute;
     left: 0;
@@ -306,7 +307,7 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-room-settings .ros-button.ros-button-fit {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button.ros-button-fit {
     position: relative;
     width: max-content;
     max-width: 137px;
@@ -316,43 +317,43 @@
     border-image-width: 5px;
 }
 
-.octane-room-settings .ros-button-label {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button-label {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.octane-room-settings .ros-button:hover {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button:hover {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.octane-room-settings .ros-button:active {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button:active {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.octane-room-settings .ros-button:disabled {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button:disabled {
     cursor: default;
     border-image-source: var(--habbo-skin-shiny-disabled);
 }
 
-.octane-room-settings .ros-button.ros-button-thick {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button.ros-button-thick {
     border-image-source: var(--habbo-skin-shiny-thick);
 }
 
-.octane-room-settings .ros-button.ros-button-thick:hover {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button.ros-button-thick:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover);
 }
 
-.octane-room-settings .ros-button.ros-button-thick:active {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button.ros-button-thick:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed);
 }
 
-.octane-room-settings .ros-button.ros-button-thick:disabled {
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button.ros-button-thick:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-disabled);
 }
 
-.octane-room-settings .ros-button:focus-visible,
+:is(.octane-room-settings, .octane-ros-confirm) .ros-button:focus-visible,
 .octane-room-settings .ros-link:focus-visible {
     outline: 2px solid var(--octane-card-focus, #ffd95a);
     outline-offset: 1px;
@@ -439,4 +440,58 @@
 
 .octane-room-settings .ros-user-arrow.is-friend {
     left: 1px;
+}
+
+/* ros_room_delete_confirm: 215x203 frame, message (10,7 190x122) and the red 199x29 ok button at (5,129). */
+.octane-ros-confirm {
+    width: 215px;
+    min-width: 215px;
+    max-width: 215px;
+    height: 203px;
+    min-height: 203px;
+    max-height: 203px;
+    resize: none !important;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+}
+
+.octane-ros-confirm .octane-ros-confirm-content.octane-card-content-shell {
+    position: absolute;
+    top: 33px;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 170px;
+    min-height: 0;
+    max-height: 170px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent;
+}
+
+.octane-ros-confirm .ros-confirm-message {
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    width: 190px;
+    height: 122px;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 17px;
+    word-wrap: break-word;
+}
+
+.octane-ros-confirm .ros-button.ros-button-red {
+    border-image-source: var(--habbo-skin-shiny-red);
+    color: #fff;
+    font-weight: 700;
+}
+
+.octane-ros-confirm .ros-button.ros-button-red:hover {
+    border-image-source: var(--habbo-skin-shiny-red-hover);
+}
+
+.octane-ros-confirm .ros-button.ros-button-red:active {
+    border-image-source: var(--habbo-skin-shiny-red-pressed);
 }

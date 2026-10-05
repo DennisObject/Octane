@@ -1,9 +1,10 @@
-import { RoomBannedUsersComposer, RoomDataParser, RoomSettingsDataEvent, SaveRoomSettingsComposer } from '@octane/renderer';
+import { RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, SaveRoomSettingsComposer } from '@octane/renderer';
 import { FC, useState } from 'react';
 import { CreateLinkEvent, GetClubMemberLevel, GetMaxVisitorsList, GetSelectedMaxVisitors, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../../../common';
-import { useMessageEvent, useNavigatorData } from '../../../../hooks';
+import { useMessageEvent, useNavigatorData, useNotificationActions } from '../../../../hooks';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
+import { NavigatorRoomSettingsDeleteConfirmView } from './NavigatorRoomSettingsDeleteConfirmView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
 import { NavigatorRoomSettingsRightsTabView } from './NavigatorRoomSettingsRightsTabView';
@@ -35,7 +36,9 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
     const [inputError, setInputError] = useState<{ field: IdleTimeoutField; key: string }>(null);
     const roomData = form?.roomData;
     const [selectedTab, setSelectedTab] = useState(TABS[0]);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const { navigatorData } = useNavigatorData();
+    const { simpleAlert } = useNotificationActions();
 
     useMessageEvent<RoomSettingsDataEvent>(RoomSettingsDataEvent, (event) => {
         const parser = event.getParser();
@@ -45,6 +48,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         const data = parser.data;
 
         setInputError(null);
+        setIsDeleteConfirmOpen(false);
         setForm({
             idle_sleep_timeout_seconds: data.idleSleepTimeoutSeconds > 0 ? String(data.idleSleepTimeoutSeconds) : '',
             idle_autokick_timeout_seconds: data.idleAutokickTimeoutSeconds > 0 ? String(data.idleAutokickTimeoutSeconds) : '',
@@ -91,8 +95,30 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
 
     const onClose = () => {
         setForm(null);
+        setIsDeleteConfirmOpen(false);
         setInputError(null);
         setSelectedTab(TABS[0]);
+    };
+
+    // _r0787a808a9d38d: the home room and a room that carries a group cannot be deleted; anything else asks first.
+    const onDeleteRequest = () => {
+        if (navigatorData.homeRoomId === roomData.roomId) {
+            simpleAlert(LocalizeText('navigator.delete.homeroom.body'), null, null, null, LocalizeText('navigator.delete.homeroom.title'));
+            return;
+        }
+
+        if ((enteredRoom?.habboGroupId ?? 0) > 0) {
+            simpleAlert(LocalizeText('group.deletebase.body'), null, null, null, LocalizeText('group.deletebase.title'));
+            return;
+        }
+
+        setIsDeleteConfirmOpen(true);
+    };
+
+    const onDeleteConfirm = () => {
+        SendMessageComposer(new RoomDeleteComposer(roomData.roomId));
+        onClose();
+        CreateLinkEvent('navigator/search/myworld_view');
     };
 
     const handleDraftChange = (field: IdleTimeoutField, value: string) => {
@@ -260,49 +286,52 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
     const tabWidth = Math.floor(FRAME_WIDTH / visibleTabs.length) - 1;
 
     return (
-        <OctaneCardView className="octane-room-settings" frameStyle={3} isResizable={false} uniqueKey="octane-room-settings">
-            <OctaneCardHeaderView
-                headerText={LocalizeText('navigator.roomsettings')}
-                isInfoToHabboPages={currentTab === TABS[3]}
-                onClickInfoHabboPages={() => {
-                    if (currentTab === TABS[3]) CreateLinkEvent('habbopages/chat/options');
-                }}
-                onCloseClick={onClose}
-            />
-            <OctaneCardTabsView classNames={['octane-room-settings-tabs']}>
-                {visibleTabs.map((tab) => {
-                    return (
-                        <OctaneCardTabsItemView
-                            key={tab}
-                            isActive={currentTab === tab}
-                            style={{ width: tabWidth, minWidth: tabWidth, maxWidth: tabWidth }}
-                            onClick={(event) => setSelectedTab(tab)}
-                        >
-                            {LocalizeText(tab)}
-                        </OctaneCardTabsItemView>
-                    );
-                })}
-            </OctaneCardTabsView>
-            <OctaneCardContentView className="octane-room-settings-content" gap={0}>
-                <div className="ros-viewport">
-                    {currentTab === TABS[0] && (
-                        <NavigatorRoomSettingsBasicTabView handleChange={handleChange} isEnteredRoom={isEnteredRoom} roomData={roomData} onClose={onClose} />
-                    )}
-                    {currentTab === TABS[1] && (
-                        <NavigatorRoomSettingsAccessTabView handleChange={handleChange} hasGroup={(enteredRoom?.habboGroupId ?? 0) > 0} roomData={roomData} />
-                    )}
-                    {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
-                    {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView
-                        handleChange={handleChange}
-                        handleDraftChange={handleDraftChange}
-                        roomData={roomData}
-                        idleSleepTimeoutSeconds={form.idle_sleep_timeout_seconds}
-                        idleAutokickTimeoutSeconds={form.idle_autokick_timeout_seconds}
-                        inputError={inputError}
-                    />}
-                    {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
-                </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+        <>
+            <OctaneCardView className="octane-room-settings" frameStyle={3} isResizable={false} uniqueKey="octane-room-settings">
+                <OctaneCardHeaderView
+                    headerText={LocalizeText('navigator.roomsettings')}
+                    isInfoToHabboPages={currentTab === TABS[3]}
+                    onClickInfoHabboPages={() => {
+                        if (currentTab === TABS[3]) CreateLinkEvent('habbopages/chat/options');
+                    }}
+                    onCloseClick={onClose}
+                />
+                <OctaneCardTabsView classNames={['octane-room-settings-tabs']}>
+                    {visibleTabs.map((tab) => {
+                        return (
+                            <OctaneCardTabsItemView
+                                key={tab}
+                                isActive={currentTab === tab}
+                                style={{ width: tabWidth, minWidth: tabWidth, maxWidth: tabWidth }}
+                                onClick={(event) => setSelectedTab(tab)}
+                            >
+                                {LocalizeText(tab)}
+                            </OctaneCardTabsItemView>
+                        );
+                    })}
+                </OctaneCardTabsView>
+                <OctaneCardContentView className="octane-room-settings-content" gap={0}>
+                    <div className="ros-viewport">
+                        {currentTab === TABS[0] && (
+                            <NavigatorRoomSettingsBasicTabView handleChange={handleChange} isEnteredRoom={isEnteredRoom} roomData={roomData} onDelete={onDeleteRequest} />
+                        )}
+                        {currentTab === TABS[1] && (
+                            <NavigatorRoomSettingsAccessTabView handleChange={handleChange} hasGroup={(enteredRoom?.habboGroupId ?? 0) > 0} roomData={roomData} />
+                        )}
+                        {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
+                        {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView
+                            handleChange={handleChange}
+                            handleDraftChange={handleDraftChange}
+                            roomData={roomData}
+                            idleSleepTimeoutSeconds={form.idle_sleep_timeout_seconds}
+                            idleAutokickTimeoutSeconds={form.idle_autokick_timeout_seconds}
+                            inputError={inputError}
+                        />}
+                        {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
+                    </div>
+                </OctaneCardContentView>
+            </OctaneCardView>
+            {isDeleteConfirmOpen && <NavigatorRoomSettingsDeleteConfirmView roomName={roomData.roomName} onConfirm={onDeleteConfirm} onClose={() => setIsDeleteConfirmOpen(false)} />}
+        </>
     );
 };

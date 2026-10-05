@@ -1,21 +1,15 @@
-import {
-    RoomDeleteComposer,
-    RoomSettingsSaveErrorEvent,
-    RoomSettingsSaveErrorParser
-} from '@octane/renderer';
+import { RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
-    CreateLinkEvent,
     GetClubMemberLevel,
     GetMaxVisitorsList,
     GetSelectedMaxVisitors,
     IRoomData,
-    LocalizeText,
-    SendMessageComposer
+    LocalizeText
 } from '../../../../api';
 import declineSrc from '../../../../assets/images/navigator/room-settings/decline.png';
 import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
-import { useMessageEvent, useNavigatorData, useNotification } from '../../../../hooks';
+import { useMessageEvent, useNavigatorData } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 
 const ROOM_NAME_MIN_LENGTH = 3;
@@ -27,18 +21,17 @@ interface NavigatorRoomSettingsTabViewProps {
     roomData: IRoomData;
     isEnteredRoom?: boolean;
     handleChange: (field: string, value: string | number | boolean | string[]) => void;
-    onClose: () => void;
+    onDelete: () => void;
 }
 
 export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewProps> = (props) => {
-    const { roomData = null, isEnteredRoom = true, handleChange = null, onClose = null } = props;
+    const { roomData = null, isEnteredRoom = true, handleChange = null, onDelete = null } = props;
     const [roomName, setRoomName] = useState<string>('');
     const [roomDescription, setRoomDescription] = useState<string>('');
     const [roomTag1, setRoomTag1] = useState<string>('');
     const [roomTag2, setRoomTag2] = useState<string>('');
     const [tagIndex, setTagIndex] = useState(0);
     const [typeError, setTypeError] = useState<string>('');
-    const { showConfirm = null } = useNotification();
     const { categories } = useNavigatorData();
     const visitorOptions = GetMaxVisitorsList(GetClubMemberLevel() > 0, roomData.userCount);
     const selectedVisitors = GetSelectedMaxVisitors(visitorOptions, roomData.userCount);
@@ -63,23 +56,6 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                 break;
         }
     });
-
-    const deleteRoom = () => {
-        showConfirm(
-            LocalizeText('navigator.roomsettings.deleteroom.confirm.message', ['room_name'], [roomData.roomName]),
-            () => {
-                SendMessageComposer(new RoomDeleteComposer(roomData.roomId));
-
-                if (onClose) onClose();
-
-                CreateLinkEvent('navigator/search/myworld_view');
-            },
-            null,
-            null,
-            null,
-            LocalizeText('navigator.roomsettings.deleteroom.confirm.title')
-        );
-    };
 
     const saveRoomName = (value = roomName) => {
         if (value === roomData.roomName || value.length < ROOM_NAME_MIN_LENGTH || value.length > ROOM_NAME_MAX_LENGTH) return;
@@ -236,7 +212,7 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                             <span className="ros-decline" style={{ maskImage: `url(${declineSrc})`, WebkitMaskImage: `url(${declineSrc})` }} />
                         </NavigatorRoomSettingsAtView>
                         <NavigatorRoomSettingsAtView h={18} w={180} x={60} y={339}>
-                            <button type="button" className="ros-link" onClick={deleteRoom}>
+                            <button type="button" className="ros-link" onClick={onDelete}>
                                 {LocalizeText('navigator.roomsettings.delete')}
                             </button>
                         </NavigatorRoomSettingsAtView>
