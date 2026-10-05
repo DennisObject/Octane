@@ -1,5 +1,5 @@
-import { RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, SaveRoomSettingsComposer } from '@octane/renderer';
-import { FC, useState } from 'react';
+import { RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser, SaveRoomSettingsComposer } from '@octane/renderer';
+import { FC, useRef, useState } from 'react';
 import { CreateLinkEvent, GetClubMemberLevel, GetMaxVisitorsList, GetSelectedMaxVisitors, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../../../common';
 import { useMessageEvent, useNavigatorData, useNotificationActions } from '../../../../hooks';
@@ -9,6 +9,7 @@ import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicT
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
 import { NavigatorRoomSettingsRightsTabView } from './NavigatorRoomSettingsRightsTabView';
 import { NavigatorRoomSettingsVipChatTabView } from './NavigatorRoomSettingsVipChatTabView';
+import { RoomSettingsFieldError } from './RoomSettingsFieldErrorView';
 
 const TABS: string[] = [
     'navigator.roomsettings.tab.1',
@@ -36,7 +37,10 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
     const [inputError, setInputError] = useState<{ field: IdleTimeoutField; key: string }>(null);
     const roomData = form?.roomData;
     const [selectedTab, setSelectedTab] = useState(TABS[0]);
+    const [fieldError, setFieldError] = useState<RoomSettingsFieldError>(null);
+    const [overlayNode, setOverlayNode] = useState<HTMLDivElement>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const pendingSaveRoomId = useRef(0);
     const { navigatorData } = useNavigatorData();
     const { simpleAlert } = useNotificationActions();
 
@@ -48,6 +52,8 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         const data = parser.data;
 
         setInputError(null);
+        setFieldError(null);
+        pendingSaveRoomId.current = 0;
         setIsDeleteConfirmOpen(false);
         setForm({
             idle_sleep_timeout_seconds: data.idleSleepTimeoutSeconds > 0 ? String(data.idleSleepTimeoutSeconds) : '',
@@ -93,7 +99,66 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         SendMessageComposer(new RoomBannedUsersComposer(data.roomId));
     });
 
+    // ros_room_settings _ra619f74b35d0dc: a save error jumps to the tab of the field and marks it, but only for a save we sent.
+    useMessageEvent<RoomSettingsSaveErrorEvent>(RoomSettingsSaveErrorEvent, (event) => {
+        const parser = event.getParser();
+
+        if (!parser || !pendingSaveRoomId.current || parser.roomId !== pendingSaveRoomId.current) return;
+
+        pendingSaveRoomId.current = 0;
+
+        const tagText = (parser.message ?? '').toLowerCase();
+
+        switch (parser.code) {
+            case RoomSettingsSaveErrorParser.ERROR_INVALID_NAME:
+                setFieldError({ field: 'name', message: LocalizeText('navigator.roomsettings.roomnameismandatory') });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_UNACCEPTABLE_NAME:
+                setFieldError({ field: 'name', message: LocalizeText('navigator.roomsettings.unacceptablewords') });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_UNACCEPTABLE_DESCRIPTION:
+                setFieldError({ field: 'description', message: LocalizeText('navigator.roomsettings.unacceptablewords') });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_INVALID_TAG:
+                setFieldError({ field: 'tags', message: LocalizeText('navigator.roomsettings.unacceptablewords'), tagText });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_NON_USER_CHOOSABLE_TAG:
+                setFieldError({ field: 'tags', message: LocalizeText('navigator.roomsettings.nonuserchoosabletag'), tagText });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_TOO_MANY_CHARACTERS_IN_TAG:
+                setFieldError({ field: 'tags', message: LocalizeText('navigator.roomsettings.toomanycharacters'), tagText });
+                setSelectedTab(TABS[0]);
+                return;
+            case RoomSettingsSaveErrorParser.ERROR_INVALID_PASSWORD:
+                setFieldError({ field: 'password', message: LocalizeText('navigator.roomsettings.passwordismandatory') });
+                setSelectedTab(TABS[1]);
+                return;
+            case 16:
+                if (parser.message === 'idleSleepTimeoutSeconds' || parser.message === 'idleAutokickTimeoutSeconds') {
+                    setInputError({
+                        field: parser.message === 'idleSleepTimeoutSeconds' ? 'idle_sleep_timeout_seconds' : 'idle_autokick_timeout_seconds',
+                        key: parser.message === 'idleSleepTimeoutSeconds'
+                            ? 'navigator.roomsettings.idle_sleep_timeout.invalid'
+                            : 'navigator.roomsettings.idle_autokick_timeout.invalid'
+                    });
+                    setSelectedTab(TABS[3]);
+                    return;
+                }
+            // falls through
+            default:
+                setFieldError({ field: 'name', message: `Update failed: error ${parser.code}` });
+                setSelectedTab(TABS[0]);
+        }
+    });
+
     const onClose = () => {
+        setFieldError(null);
+        pendingSaveRoomId.current = 0;
         setForm(null);
         setIsDeleteConfirmOpen(false);
         setInputError(null);
@@ -212,6 +277,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
 
         newForm.roomData = newValue;
         setInputError(null);
+        setFieldError(null);
 
         if (GetClubMemberLevel() > 0) {
             const sleepTimeout = parseIdleTimeout(newForm.idle_sleep_timeout_seconds);
@@ -238,6 +304,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         }
 
         setForm(newForm);
+        pendingSaveRoomId.current = newValue.roomId;
 
         SendMessageComposer(
             new SaveRoomSettingsComposer(
@@ -313,10 +380,25 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                 <OctaneCardContentView className="octane-room-settings-content" gap={0}>
                     <div className="ros-viewport">
                         {currentTab === TABS[0] && (
-                            <NavigatorRoomSettingsBasicTabView handleChange={handleChange} isEnteredRoom={isEnteredRoom} roomData={roomData} onDelete={onDeleteRequest} />
+                            <NavigatorRoomSettingsBasicTabView
+                                handleChange={handleChange}
+                                isEnteredRoom={isEnteredRoom}
+                                roomData={roomData}
+                                fieldError={fieldError}
+                                overlayNode={overlayNode}
+                                onFieldError={setFieldError}
+                                onDelete={onDeleteRequest}
+                            />
                         )}
                         {currentTab === TABS[1] && (
-                            <NavigatorRoomSettingsAccessTabView handleChange={handleChange} hasGroup={(enteredRoom?.habboGroupId ?? 0) > 0} roomData={roomData} />
+                            <NavigatorRoomSettingsAccessTabView
+                                handleChange={handleChange}
+                                hasGroup={(enteredRoom?.habboGroupId ?? 0) > 0}
+                                roomData={roomData}
+                                fieldError={fieldError}
+                                overlayNode={overlayNode}
+                                onFieldError={setFieldError}
+                            />
                         )}
                         {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
                         {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView
@@ -329,6 +411,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                         />}
                         {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
                     </div>
+                    <div ref={setOverlayNode} className="ros-overlay" />
                 </OctaneCardContentView>
             </OctaneCardView>
             {isDeleteConfirmOpen && <NavigatorRoomSettingsDeleteConfirmView roomName={roomData.roomName} onConfirm={onDeleteConfirm} onClose={() => setIsDeleteConfirmOpen(false)} />}

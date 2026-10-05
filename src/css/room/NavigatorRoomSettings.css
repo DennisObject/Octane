@@ -43,7 +43,8 @@
     position: absolute;
     top: 33px;
     left: 0;
-    z-index: 1;
+    z-index: 4;
+    pointer-events: none;
     display: block;
     width: 100%;
     height: 444px;
@@ -56,6 +57,7 @@
 
 /* content_container (10,42): the scroll area starts 6px higher so XML y values (labels sit at -3) stay inside it. */
 .octane-room-settings .ros-viewport {
+    pointer-events: auto;
     position: absolute;
     top: 36px;
     left: 10px;
@@ -161,8 +163,30 @@
     padding: 1px;
 }
 
-.octane-room-settings .ros-input.ros-idle-timeout.is-invalid {
+.octane-room-settings .ros-input.is-invalid {
     background-color: #f18f9b !important;
+}
+
+/* the Habbo font has no bullet glyph, so masked password text uses the system face */
+.octane-room-settings .ros-input[type='password'] {
+    font-family: sans-serif;
+}
+
+/* an errored field falls back to the text field's 1px #959595 border so the error colour fills it */
+.octane-room-settings .ros-input:not(.ros-idle-timeout).is-invalid {
+    border: 1px solid #959595 !important;
+    border-image: none !important;
+}
+
+/* window-level layer for error popups: same origin as .ros-tab (viewport 10,36 + tab margin 6,6), never scrolled or clipped */
+.octane-room-settings .ros-overlay {
+    position: absolute;
+    top: 42px;
+    left: 16px;
+    z-index: 8;
+    width: 321px;
+    height: 0;
+    pointer-events: none;
 }
 
 /* Qd/nav_error_popup: textWidth + 20, centered above the input, 33px high. */

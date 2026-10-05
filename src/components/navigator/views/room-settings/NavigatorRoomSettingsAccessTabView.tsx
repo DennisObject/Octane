@@ -1,24 +1,38 @@
 import { RoomDataParser } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { IRoomData, LocalizeText } from '../../../../api';
+import { IRoomData, LocalizeText, localizeWithFallback } from '../../../../api';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
+import { RoomSettingsFieldError, RoomSettingsFieldErrorView } from './RoomSettingsFieldErrorView';
 
 const PASSWORD_MAX_LENGTH = 30;
 
 interface NavigatorRoomSettingsTabViewProps {
     roomData: IRoomData;
     hasGroup?: boolean;
+    fieldError?: RoomSettingsFieldError;
+    overlayNode?: HTMLElement;
+    onFieldError: (error: RoomSettingsFieldError) => void;
     handleChange: (field: string, value: string | number | boolean) => void;
 }
 
 export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabViewProps> = (props) => {
-    const { roomData = null, hasGroup = false, handleChange = null } = props;
+    const { roomData = null, hasGroup = false, fieldError = null, overlayNode = null, onFieldError = null, handleChange = null } = props;
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isTryingPassword, setIsTryingPassword] = useState(false);
 
     const saveRoomPassword = () => {
-        if (!isTryingPassword || password.length <= 0 || confirmPassword.length <= 0 || password !== confirmPassword) return;
+        if (!isTryingPassword) return;
+
+        if (password.length <= 0) {
+            onFieldError({ field: 'password', message: LocalizeText('navigator.roomsettings.passwordismandatory') });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            onFieldError({ field: 'confirm', message: LocalizeText('navigator.roomsettings.invalidconfirm') });
+            return;
+        }
 
         handleChange('password', password);
     };
@@ -81,15 +95,10 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
                     <NavigatorRoomSettingsAtView className="ros-text" h={17} w={189} x={41} y={188}>
                         {LocalizeText('navigator.roomsettings.password')}
                     </NavigatorRoomSettingsAtView>
-                    {isTryingPassword && password.length <= 0 && (
-                        <NavigatorRoomSettingsAtView className="ros-text ros-bold ros-error" h={17} w={120} x={180} y={188}>
-                            {LocalizeText('navigator.roomsettings.passwordismandatory')}
-                        </NavigatorRoomSettingsAtView>
-                    )}
                     <NavigatorRoomSettingsAtView h={15} w={193} x={42} y={203}>
                         <input
                             type="password"
-                            className="ros-input"
+                            className={`ros-input${fieldError?.field === 'password' ? ' is-invalid' : ''}`}
                             maxLength={PASSWORD_MAX_LENGTH}
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
@@ -99,15 +108,10 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
                     <NavigatorRoomSettingsAtView className="ros-text" h={17} w={234} x={41} y={220}>
                         {LocalizeText('navigator.roomsettings.passwordconfirm')}
                     </NavigatorRoomSettingsAtView>
-                    {isTryingPassword && password.length > 0 && password !== confirmPassword && (
-                        <NavigatorRoomSettingsAtView className="ros-text ros-bold ros-error" h={17} w={120} x={180} y={220}>
-                            {LocalizeText('navigator.roomsettings.invalidconfirm')}
-                        </NavigatorRoomSettingsAtView>
-                    )}
                     <NavigatorRoomSettingsAtView h={15} w={193} x={42} y={236}>
                         <input
                             type="password"
-                            className="ros-input"
+                            className={`ros-input${fieldError?.field === 'confirm' ? ' is-invalid' : ''}`}
                             maxLength={PASSWORD_MAX_LENGTH}
                             value={confirmPassword}
                             onChange={(event) => setConfirmPassword(event.target.value)}
@@ -116,6 +120,8 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
                     </NavigatorRoomSettingsAtView>
                 </>
             )}
+            {showPassword && fieldError?.field === 'password' && <RoomSettingsFieldErrorView h={15} message={fieldError.message} overlayNode={overlayNode} w={193} x={42} y={203} />}
+            {showPassword && fieldError?.field === 'confirm' && <RoomSettingsFieldErrorView h={15} message={fieldError.message} overlayNode={overlayNode} w={193} x={42} y={236} />}
             {hasGroup && (
                 <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={30} w={277} x={0} y={260}>
                     {LocalizeText('navigator.roomsettings.roomaccess.guild.disclaimer')}
@@ -158,7 +164,7 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
                 />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-text" h={17} w={215} x={18} y={petsY + 58}>
-                <label htmlFor="ros-mute-pets">{LocalizeText('navigator.roomsettings.mute_all_pets')}</label>
+                <label htmlFor="ros-mute-pets">{localizeWithFallback('navigator.roomsettings.mute_all_pets', 'Mute all pets')}</label>
             </NavigatorRoomSettingsAtView>
         </div>
     );
