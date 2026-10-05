@@ -681,8 +681,8 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                         roomId={roomSession.roomId}
                                         style={{
                                             maxWidth: 140,
-                                            maxHeight: 120,
-                                            backgroundSize: 'contain',
+                                            maxHeight: 200,
+                                            backgroundSize: 'auto',
                                             backgroundPosition: 'center',
                                             backgroundRepeat: 'no-repeat'
                                         }}
@@ -694,13 +694,8 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                     )}
                     {avatarInfo.ownerId !== 0 && (
                         <div className="octane-furni-infostand__owner">
-                            {showOwnerProfileIcon && <UserProfileIconView userId={avatarInfo.ownerId} />}
-                            <span className="octane-furni-infostand__text">{avatarInfo.ownerName}</span>
-                        </div>
-                    )}
-                    {avatarInfo.purchaseOfferId > 0 && (
-                        <div className="octane-furni-infostand__text octane-furni-infostand__link" onClick={() => processButtonAction('buy_one')}>
-                            {LocalizeText('infostand.button.buy')}
+                            {showOwnerProfileIcon && <UserProfileIconView className="octane-furni-infostand__owner-icon" userId={avatarInfo.ownerId} />}
+                            <span className="octane-furni-infostand__owner-name">{avatarInfo.ownerName}</span>
                         </div>
                     )}
                     {(isJukeBox || isSongDisk) && (
@@ -778,13 +773,21 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                         {avatarInfo.groupId > 0 && (
                             <>
                                 <div className="octane-furni-infostand__rule" />
-                                <Flex pointer alignItems="center" gap={2} onClick={() => GetGroupInformation(avatarInfo.groupId)}>
-                                    <LayoutBadgeImageView badgeCode={getGroupBadgeCode()} isGroup={true} />
-                                    <Text underline variant="white">
-                                        {groupName}
-                                    </Text>
-                                </Flex>
+                                <div className="octane-furni-infostand__group" onClick={() => GetGroupInformation(avatarInfo.groupId)}>
+                                    <div className="octane-furni-infostand__group-badge">
+                                        <LayoutBadgeImageView badgeCode={getGroupBadgeCode()} isGroup={true} />
+                                    </div>
+                                    <span className="octane-furni-infostand__group-name">{groupName}</span>
+                                </div>
                             </>
+                        )}
+                        {avatarInfo.purchaseOfferId > 0 && (
+                            <div className="octane-furni-infostand__purchase">
+                                <button type="button" className="octane-furni-infostand__shop" onClick={() => processButtonAction('buy_one')}>
+                                    <span className="octane-furni-infostand__shop-icon" />
+                                    <span className="octane-furni-infostand__shop-text">{LocalizeText('infostand.button.buy')}</span>
+                                </button>
+                            </div>
                         )}
                         {showIds && (
                             <>
