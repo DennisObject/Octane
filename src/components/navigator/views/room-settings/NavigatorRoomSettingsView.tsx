@@ -1,11 +1,11 @@
-import { RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser, SaveRoomSettingsComposer } from '@octane/renderer';
+import { RemoveAllRightsMessageComposer, RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser, SaveRoomSettingsComposer } from '@octane/renderer';
 import { FC, useRef, useState } from 'react';
 import { CreateLinkEvent, GetClubMemberLevel, GetMaxVisitorsList, GetSelectedMaxVisitors, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../../../common';
 import { useMessageEvent, useNavigatorData, useNotificationActions } from '../../../../hooks';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
-import { NavigatorRoomSettingsDeleteConfirmView } from './NavigatorRoomSettingsDeleteConfirmView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
+import { NavigatorRoomSettingsConfirmView } from './NavigatorRoomSettingsConfirmView';
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
 import { NavigatorRoomSettingsRightsTabView } from './NavigatorRoomSettingsRightsTabView';
 import { NavigatorRoomSettingsVipChatTabView } from './NavigatorRoomSettingsVipChatTabView';
@@ -39,7 +39,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
     const [selectedTab, setSelectedTab] = useState(TABS[0]);
     const [fieldError, setFieldError] = useState<RoomSettingsFieldError>(null);
     const [overlayNode, setOverlayNode] = useState<HTMLDivElement>(null);
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [confirmKind, setConfirmKind] = useState<'delete' | 'removeAllRights'>(null);
     const pendingSaveRoomId = useRef(0);
     const { navigatorData } = useNavigatorData();
     const { simpleAlert } = useNotificationActions();
@@ -54,7 +54,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         setInputError(null);
         setFieldError(null);
         pendingSaveRoomId.current = 0;
-        setIsDeleteConfirmOpen(false);
+        setConfirmKind(null);
         setForm({
             idle_sleep_timeout_seconds: data.idleSleepTimeoutSeconds > 0 ? String(data.idleSleepTimeoutSeconds) : '',
             idle_autokick_timeout_seconds: data.idleAutokickTimeoutSeconds > 0 ? String(data.idleAutokickTimeoutSeconds) : '',
@@ -160,7 +160,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
         setFieldError(null);
         pendingSaveRoomId.current = 0;
         setForm(null);
-        setIsDeleteConfirmOpen(false);
+        setConfirmKind(null);
         setInputError(null);
         setSelectedTab(TABS[0]);
     };
@@ -177,10 +177,16 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
             return;
         }
 
-        setIsDeleteConfirmOpen(true);
+        setConfirmKind('delete');
     };
 
-    const onDeleteConfirm = () => {
+    const onConfirm = () => {
+        if (confirmKind === 'removeAllRights') {
+            SendMessageComposer(new RemoveAllRightsMessageComposer(roomData.roomId));
+            setConfirmKind(null);
+            return;
+        }
+
         SendMessageComposer(new RoomDeleteComposer(roomData.roomId));
         onClose();
         CreateLinkEvent('navigator/search/myworld_view');
@@ -400,7 +406,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                                 onFieldError={setFieldError}
                             />
                         )}
-                        {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
+                        {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} onRemoveAll={() => setConfirmKind('removeAllRights')} />}
                         {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView
                             handleChange={handleChange}
                             handleDraftChange={handleDraftChange}
@@ -414,7 +420,18 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                     <div ref={setOverlayNode} className="ros-overlay" />
                 </OctaneCardContentView>
             </OctaneCardView>
-            {isDeleteConfirmOpen && <NavigatorRoomSettingsDeleteConfirmView roomName={roomData.roomName} onConfirm={onDeleteConfirm} onClose={() => setIsDeleteConfirmOpen(false)} />}
+            {confirmKind && (
+                <NavigatorRoomSettingsConfirmView
+                    title={LocalizeText(confirmKind === 'delete' ? 'navigator.roomsettings' : 'navigator.flatctrls.removeconfirm.title')}
+                    message={
+                        confirmKind === 'delete'
+                            ? LocalizeText('navigator.roomsettings.deleteroom.confirm.message', ['room_name'], [roomData.roomName])
+                            : LocalizeText('navigator.flatctrls.removeconfirm.info')
+                    }
+                    onConfirm={onConfirm}
+                    onClose={() => setConfirmKind(null)}
+                />
+            )}
         </>
     );
 };

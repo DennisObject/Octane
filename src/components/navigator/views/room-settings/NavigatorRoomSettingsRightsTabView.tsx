@@ -2,7 +2,6 @@ import {
     FlatControllerAddedEvent,
     FlatControllerRemovedEvent,
     FlatControllersEvent,
-    RemoveAllRightsMessageComposer,
     RoomGiveRightsComposer,
     RoomTakeRightsComposer,
     RoomUsersWithRightsComposer
@@ -16,6 +15,7 @@ import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 interface NavigatorRoomSettingsTabViewProps {
     roomData: IRoomData;
     handleChange: (field: string, value: string | number | boolean) => void;
+    onRemoveAll: () => void;
 }
 
 // Polaris Staff Chat is not a real friend; keep it out of the rights picker.
@@ -23,7 +23,7 @@ const STAFF_CHAT_ID = -1;
 const STAFF_CHAT_NAME = 'Staff Chat';
 
 export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabViewProps> = (props) => {
-    const { roomData = null } = props;
+    const { roomData = null, onRemoveAll = null } = props;
     const [usersWithRights, setUsersWithRights] = useState<Map<number, string>>(new Map());
     const [filter, setFilter] = useState<string>('');
     const { onlineFriends = [], offlineFriends = [] } = useFriends();
@@ -130,8 +130,8 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={0} y={74}>
                 <div className="ros-list" style={{ height: 246 }}>
-                    {shownUsersWithRights.map(([id, name]) => (
-                        <div key={id} className="ros-user-row">
+                    {shownUsersWithRights.map(([id, name], index) => (
+                        <div key={id} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}`}>
                             <button type="button" className="ros-user-bg" onClick={() => guardedSend(`take_${id}`, new RoomTakeRightsComposer(id))}>
                                 <span className="ros-user-name">{name}</span>
                                 <img alt="" className="ros-user-arrow is-rights" draggable={false} src={`${imageLibraryUrl}Events/arrow_move_right.png`} />
@@ -145,15 +145,15 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                     className="ros-button ros-button-thick"
                     disabled={!filteredUsersWithRights.size}
                     style={{ left: 4, top: 256, width: 142, height: 29 }}
-                    onClick={() => roomData && guardedSend('removeAll', new RemoveAllRightsMessageComposer(roomData.roomId))}
+                    onClick={onRemoveAll}
                 >
                     {LocalizeText('navigator.flatctrls.clear')}
                 </button>
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={173} y={74}>
                 <div className="ros-list" style={{ height: 281 }}>
-                    {shownFriends.map((friend) => (
-                        <div key={friend.id} className="ros-user-row">
+                    {shownFriends.map((friend, index) => (
+                        <div key={friend.id} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}`}>
                             <button
                                 type="button"
                                 className="ros-user-bg"

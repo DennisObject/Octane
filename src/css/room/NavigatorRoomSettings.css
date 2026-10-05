@@ -410,8 +410,29 @@
     height: 20px;
 }
 
+/* zI row colours: even e9e9e1, odd white, selected 9ab8d9, hover b6d9ff (hover wins); the hover arrow only shows on hover */
+.octane-room-settings .ros-user-row {
+    background: #e9e9e1;
+}
+
+.octane-room-settings .ros-user-row.is-odd {
+    background: #fff;
+}
+
 .octane-room-settings .ros-user-row.is-selected {
-    background: rgb(0 0 0 / 0.12);
+    background: #9ab8d9;
+}
+
+.octane-room-settings .ros-user-row:hover {
+    background: #b6d9ff;
+}
+
+.octane-room-settings .ros-user-arrow {
+    display: none;
+}
+
+.octane-room-settings .ros-user-row:hover .ros-user-arrow {
+    display: block;
 }
 
 /* bg_region 111x20: the whole row is the click target, the eye sits above it */

@@ -44,8 +44,6 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
         SendMessageComposer(new RoomBannedUsersComposer(roomData.roomId));
     }, [roomData.roomId]);
 
-    const selectedUser = selectedUserId > 0 ? bannedUsers.find((user) => user.userId === selectedUserId) : null;
-
     return (
         <div className="ros-tab ros-tab-wide" style={{ height: 356 }}>
             <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={37} w={317} x={6} y={5}>
@@ -96,8 +94,8 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={156} w={172} x={8} y={200}>
                 <div className="ros-list" style={{ left: 3, top: 3, width: 146, height: 150 }}>
-                    {bannedUsers.map((user) => (
-                        <div key={user.userId} className={`ros-user-row${selectedUserId === user.userId ? ' is-selected' : ''}`}>
+                    {bannedUsers.map((user, index) => (
+                        <div key={user.userId} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}${selectedUserId === user.userId ? ' is-selected' : ''}`}>
                             <button type="button" className="ros-user-bg" onClick={(event) => setSelectedUserId(user.userId)}>
                                 <span className="ros-user-name">{user.userName}</span>
                             </button>
@@ -111,9 +109,7 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView h={32} x={190} y={261}>
                 <button type="button" className="ros-button ros-button-fit" disabled={selectedUserId <= 0} onClick={(event) => unBanUser(selectedUserId)}>
-                    <span className="ros-button-label">
-                        {LocalizeText('navigator.roomsettings.moderation.unban')} {selectedUser?.userName}
-                    </span>
+                    <span className="ros-button-label">{LocalizeText('navigator.roomsettings.moderation.unban')}</span>
                 </button>
             </NavigatorRoomSettingsAtView>
         </div>
