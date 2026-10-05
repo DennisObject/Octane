@@ -1,10 +1,6 @@
-/**
- * The looks a wired box window can wear. The official client ships six (its default is "illumina");
- * the three whose layouts we have are reproduced colour for colour from them, and "default" is the
- * look this client had before the picker existed.
- */
+/** Explicit shell choices; default retains the original Octane appearance. */
 export const WIRED_STYLE_DEFAULT = 'default';
-export const WIRED_STYLE_OPTIONS = [WIRED_STYLE_DEFAULT, 'volter', 'ubuntu', 'volter_blue'] as const;
+export const WIRED_STYLE_OPTIONS = [WIRED_STYLE_DEFAULT, 'volter', 'ubuntu', 'volter_blue', 'illumina'] as const;
 
 export type WiredStyleName = (typeof WIRED_STYLE_OPTIONS)[number];
 

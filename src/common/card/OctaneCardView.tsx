@@ -35,6 +35,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
         offsetTop,
         initialPosition,
         constrainToViewport,
+        unconstrainedPosition,
         onPositionChange,
         ...rest
     } = props;
@@ -67,6 +68,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
                 offsetTop={offsetTop}
                 initialPosition={initialPosition}
                 constrainToViewport={constrainToViewport}
+                unconstrainedPosition={unconstrainedPosition}
                 onPositionChange={onPositionChange}
                 uniqueKey={uniqueKey}
                 windowPosition={windowPosition}

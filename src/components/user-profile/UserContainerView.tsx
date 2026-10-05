@@ -3,7 +3,9 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { ensureBadgeLeaderboardLoaded, FriendlyTime, GetConfigurationValue, getBadgesRank, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
-import { LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../common';
+import offlineIcon from '../../assets/images/user-profile/swf/offline_icon.png';
+import onlineIcon from '../../assets/images/user-profile/swf/online_icon.png';
+import { LayoutAvatarImageView, LayoutBadgeImageView, UserIdentityView } from '../../common';
 import { RelationshipsContainerView } from './RelationshipsContainerView';
 
 interface UserContainerViewProps {
@@ -26,7 +28,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const canSendFriendRequest = !requestSent && !isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent;
     const selectedBadges = useMemo(() => [...userBadges].slice(0, 5), [userBadges]);
 
-    // Official badgeRank "(#N)" next to the badge count, read from the badge leaderboard.
+    // Retain the legacy badge leaderboard rank until the native profile fields are parsed.
     const [badgesRank, setBadgesRank] = useState(-1);
 
     useEffect(() => {
@@ -77,7 +79,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                 <div className="octane-extended-profile__left">
                     <div className="octane-extended-profile__identity">
                         <div className="octane-extended-profile__avatar-shell">
-                            <LayoutAvatarImageView figure={userProfile.figure} direction={2} classNames={['octane-extended-profile__avatar-image']} />
+                            <LayoutAvatarImageView figure={userProfile.figure} direction={2} nativeCroppedHead classNames={['octane-extended-profile__avatar-image']} />
                         </div>
                         <div className="octane-extended-profile__identity-copy">
                             <UserIdentityView
@@ -85,13 +87,13 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                                 username={userProfile.username}
                             />
                             <p className="octane-extended-profile__motto">{userProfile.motto || '\u00A0'}</p>
-                            <p className="octane-extended-profile__meta">
+                            <p className="octane-extended-profile__meta octane-extended-profile__meta--created">
                                 <span
                                     dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('extendedprofile.created').replace(/%\w+%/g, '').trim()) }}
                                 />{' '}
                                 {userProfile.registration}
                             </p>
-                            <p className="octane-extended-profile__meta">
+                            <p className="octane-extended-profile__meta octane-extended-profile__meta--login">
                                 <span
                                     dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('extendedprofile.last.login').replace(/%\w+%/g, '').trim()) }}
                                 />{' '}
@@ -99,7 +101,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             </p>
                             {showActivityPoints && (
                                 <p
-                                    className="octane-extended-profile__meta"
+                                    className="octane-extended-profile__meta octane-extended-profile__meta--activity"
                                     dangerouslySetInnerHTML={{
                                         __html: SanitizeHtml(LocalizeText('extendedprofile.activitypoints', ['activitypoints'], [userProfile.achievementPoints.toString()]))
                                     }}
@@ -107,7 +109,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             )}
                             <div className="octane-extended-profile__status">
                                 <div className="octane-extended-profile__presence">
-                                    <i className={`octane-icon ${userProfile.isOnline ? 'icon-pf-online' : 'icon-pf-offline'}`} />
+                                    <img className={userProfile.isOnline ? 'is-online' : ''} src={userProfile.isOnline ? onlineIcon : offlineIcon} alt="" />
                                 </div>
                                 <div className="octane-extended-profile__status-copy">
                                     {canSendFriendRequest && (
@@ -115,15 +117,16 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                                             {LocalizeText('extendedprofile.addasafriend')}
                                         </button>
                                     )}
-                                    {!canSendFriendRequest && (
+                                    {(isOwnProfile || userProfile.isMyFriend) && (
                                         <>
                                             <i className="octane-icon icon-pf-tick" />
                                             <span className="octane-extended-profile__status-text">
-                                                {isOwnProfile && LocalizeText('extendedprofile.me')}
-                                                {userProfile.isMyFriend && LocalizeText('extendedprofile.friend')}
-                                                {(requestSent || userProfile.requestSent) && LocalizeText('extendedprofile.friendrequestsent')}
+                                                {LocalizeText(userProfile.isMyFriend ? 'extendedprofile.friend' : 'extendedprofile.me')}
                                             </span>
                                         </>
+                                    )}
+                                    {(requestSent || userProfile.requestSent) && (
+                                        <span className="octane-extended-profile__request-sent">{LocalizeText('extendedprofile.friendrequestsent')}</span>
                                     )}
                                 </div>
                             </div>
@@ -154,18 +157,14 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
 
                 <div className="octane-extended-profile__right">
                     <p
-                        className="text-sm leading-none"
+                        className="octane-extended-profile__friend-count"
                         dangerouslySetInnerHTML={{
-                            __html: SanitizeHtml(LocalizeText('extendedprofile.friends.count', ['count'], [userProfile.friendsCount.toString()]))
+                            __html: SanitizeHtml(LocalizeText('extendedprofile.friends.count', ['count'], [userProfile.friendsCount < 0 ? '-' : userProfile.friendsCount.toString()]))
                         }}
                     />
                     <p className="octane-extended-profile__relationships-label">{LocalizeText('extendedprofile.relstatus')}</p>
                     {userRelationships && <RelationshipsContainerView relationships={userRelationships} onClose={onClose} />}
-                    {!userRelationships && (
-                        <Text small variant="muted">
-                            {LocalizeText('generic.loading')}
-                        </Text>
-                    )}
+
                 </div>
             </div>
 
@@ -184,7 +183,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     <span className="octane-extended-profile__summary-value">{userBadges.length}</span>
                     {badgesRank > 0 && <span className="octane-extended-profile__summary-rank">(#{badgesRank})</span>}
                 </button>
-                {/* Official levelRegion: "Level N", no click and no tooltip. */}
+                {/* Retain the legacy achievement metric until the native level field is parsed. */}
                 <div className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center octane-extended-profile__summary-button--level">
                     <img className="octane-extended-profile__summary-icon" src={profileLevelIcon} alt="" />
                     <span className="octane-extended-profile__summary-label">{LocalizeText('extendedprofile.achievementscore')}</span>

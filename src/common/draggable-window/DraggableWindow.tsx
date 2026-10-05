@@ -32,6 +32,7 @@ export interface DraggableWindowProps {
     offsetTop?: number;
     initialPosition?: { x: number; y: number };
     constrainToViewport?: boolean;
+    unconstrainedPosition?: boolean;
     onPositionChange?: (position: { x: number; y: number }) => void;
     children?: ReactNode;
 }
@@ -48,6 +49,7 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         offsetTop = 0,
         initialPosition,
         constrainToViewport = false,
+        unconstrainedPosition = false,
         onPositionChange
     } = props;
     const [delta, setDelta] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -94,6 +96,7 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
     );
 
     const clampPosition = useCallback((newX: number, newY: number) => {
+        if (unconstrainedPosition) return { x: newX, y: newY };
         if (!elementRef.current) return { x: newX, y: newY };
 
         const windowWidth = elementRef.current.offsetWidth;
@@ -112,7 +115,7 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         const clampedY = Math.max(BOUNDS_THRESHOLD_TOP, Math.min(newY, viewportHeight - windowHeight + maxOutY));
 
         return { x: clampedX, y: clampedY };
-    }, [constrainToViewport]);
+    }, [constrainToViewport, unconstrainedPosition]);
 
     const initialX = initialPosition?.x;
     const initialY = initialPosition?.y;

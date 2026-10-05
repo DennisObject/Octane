@@ -1379,3 +1379,497 @@
         color: #222 !important;
     }
 }
+
+/* Wired's frame margins override the WindowManager's generic frame defaults. */
+.octane-wired.octane-wired--official {
+    --wired-section-spacing: 7px;
+    --wired-footer-inset: 7px;
+    --wired-body-font-size: 12px;
+    isolation: isolate;
+    box-sizing: border-box;
+    padding: 33px 1px 8px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    color: #222;
+    font-family: HabboAirUbuntu, sans-serif !important;
+    font-size: var(--wired-body-font-size);
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349));
+
+    * {
+        font-family: HabboAirUbuntu, sans-serif !important;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        border: solid transparent;
+        border-width: 33px 10px 10px;
+        border-image: url('../assets/images/habbo-skin/slices/frame-ubuntu-3-teal.png') 33 10 10 10 fill / 33px 10px 10px 10px stretch;
+        image-rendering: pixelated;
+        pointer-events: none;
+    }
+
+    .octane-wired__content {
+        z-index: 1;
+        height: auto !important;
+        min-height: 0 !important;
+        flex: none;
+        border-radius: 0;
+        background: transparent !important;
+        overflow: visible !important;
+    }
+
+    .octane-wired__body {
+        padding: 0;
+        gap: 0;
+        max-height: none;
+        overflow: visible;
+        background: #e9e9e1;
+        font-family: inherit;
+        font-size: var(--wired-body-font-size) !important;
+    }
+
+    .octane-wired__body :is(p, span, label, li, td, th, input, textarea, select, button) {
+        font-size: var(--wired-body-font-size) !important;
+    }
+
+    .octane-wired__section {
+        gap: 5px;
+        font-size: inherit;
+    }
+
+    /* Ubuntu's summary is compatibility content; the v75 main header factory rejects that style. */
+    .octane-wired__summary {
+        padding: 5px;
+        background: #e9e9e1;
+        color: #222;
+    }
+
+    .octane-wired__divider {
+        flex: none;
+        height: var(--wired-section-spacing);
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .octane-wired__divider:has(+ .octane-wired__actions) {
+        height: calc(var(--wired-section-spacing) * 2 + 1px);
+        background: linear-gradient(
+            to bottom,
+            transparent var(--wired-section-spacing),
+            #b5b5b5 var(--wired-section-spacing),
+            #b5b5b5 calc(var(--wired-section-spacing) + 1px),
+            transparent calc(var(--wired-section-spacing) + 1px)
+        );
+    }
+
+    .octane-wired__actions {
+        flex-direction: row !important;
+        gap: 12px !important;
+        padding: 0 var(--wired-footer-inset);
+    }
+
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 17px !important;
+    }
+}
+
+.octane-wired--official .octane-wired__shell-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 100%;
+    height: 33px;
+    padding: 0;
+    touch-action: none;
+}
+
+.octane-wired--official .octane-wired__shell-caption {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    height: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.octane-wired--official :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 19px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/habbo-skin/slices/close-3-default.png') no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+
+.octane-wired--official .octane-wired__shell-close:hover {
+    background-image: url('../assets/images/habbo-skin/slices/close-3-hover.png');
+}
+
+.octane-wired--official .octane-wired__shell-close:active {
+    background-image: url('../assets/images/habbo-skin/slices/close-3-pressed.png');
+}
+
+.octane-wired.octane-wired--official.octane-wired--style-illumina {
+    --wired-section-spacing: 5px;
+    --wired-footer-inset: 5px;
+    --wired-body-font-size: 11px;
+    padding: 25px 6px 7px;
+    color: #333;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.349));
+
+    &::before {
+        border-width: 4px 4px 7px;
+        border-image: url('../assets/images/friends/swf/illumina_light_border_frame.png') 4 4 7 4 fill / 4px 4px 7px 4px stretch;
+    }
+
+    .octane-wired__body {
+        background: transparent;
+    }
+
+    .octane-wired__shell-header {
+        height: 30px;
+    }
+
+    .octane-wired__shell-caption {
+        top: 11px;
+        left: 8px;
+        right: 8px;
+        height: 20px;
+        color: #333;
+        font-size: 10px;
+        line-height: 13px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    }
+
+    .octane-wired__shell-close,
+    .octane-wired__shell-menu-toggle {
+        top: 9px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+        background-image: url('../assets/images/friends/swf/illumina_light_button_frame_close.png');
+        background-position: 0 0;
+    }
+
+    .octane-wired__shell-menu-toggle {
+        left: 8px;
+        right: auto;
+        background-image: url('../assets/images/wired/illumina_light_button_frame_menu.png');
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):hover {
+        background-position: -52px 0;
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):active {
+        background-position: -26px 0;
+    }
+
+    .octane-wired__summary {
+        min-height: 0;
+        padding: 5px;
+        background: transparent;
+        overflow: visible;
+    }
+
+    .octane-wired__summary-copy {
+        position: relative;
+        z-index: 1;
+        padding: 1px 0 0 3px;
+    }
+
+    .octane-wired__summary-kind {
+        display: block;
+        min-height: 14px;
+        font-size: 11px !important;
+        font-weight: 700;
+        line-height: 14px;
+    }
+
+    .octane-wired__summary-title {
+        display: block;
+        min-height: 15px;
+        margin-top: -2px;
+        color: #494949;
+        font-size: 12px !important;
+        font-weight: 700;
+        line-height: 15px;
+    }
+
+    .octane-wired__banner {
+        position: absolute;
+        top: -24px;
+        left: -5px;
+        right: -5px;
+        bottom: -6px;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .octane-wired__summary-bg {
+        width: auto;
+        height: 160px;
+        transform: none;
+    }
+
+    .octane-wired__summary-bg--left {
+        top: 0;
+        left: 0;
+        opacity: 0.1;
+    }
+
+    .octane-wired__summary-bg--right {
+        top: -19px;
+        left: auto;
+        right: 0;
+        opacity: 0.12;
+    }
+
+    .octane-wired__banner-darkening {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0.1;
+    }
+
+    .octane-wired__divider:has(+ .octane-wired__actions) {
+        background: linear-gradient(
+            to bottom,
+            transparent 5px,
+            #aaa 5px,
+            #aaa 6px,
+            transparent 6px
+        );
+    }
+
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        line-height: 13px !important;
+    }
+}
+
+.octane-wired__shell-menu {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    padding: 1px;
+    border: 1px solid #000;
+    border-radius: 0;
+    background: #f2f2f2;
+    color: #333;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+}
+
+.octane-wired__shell-menu-item {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding: 3px 12px 1px 28px;
+    border: 0;
+    border-radius: 0;
+    background: #d6d6d6;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+    background: #b2b2b2;
+}
+
+.octane-wired__shell-menu-item:disabled {
+    color: #888;
+    cursor: default;
+}
+
+/* Existing checkbox artwork is a compatibility skin; Illumina style101 remains pending. */
+.octane-wired__shell-menu-check {
+    position: absolute;
+    top: 1px;
+    left: 6px;
+    width: 19px;
+    height: 21px;
+    background: url('../assets/images/habbo-skin/slices/checkbox-default.png') 1px 2px no-repeat;
+    pointer-events: none;
+}
+
+.octane-wired__shell-menu-check.is-checked {
+    background-image: url('../assets/images/habbo-skin/slices/checkbox-checked.png');
+}
+
+.octane-wired__shell-menu-spacer {
+    position: relative;
+    height: 3px;
+    background: #d6d6d6;
+}
+
+.octane-wired__shell-menu-spacer::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 6px;
+    right: 6px;
+    height: 1px;
+    background: #aaa;
+}
+
+.octane-wired__shell-button {
+    --wired-button-offset-x: 0px;
+    --wired-button-right-offset-x: 0px;
+    --wired-button-offset-y: 0px;
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 24px;
+    padding: 0 5px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 17px;
+    cursor: pointer;
+}
+
+.octane-wired__shell-button:enabled:hover {
+    --wired-button-offset-x: -12px;
+    --wired-button-right-offset-x: -13px;
+}
+
+.octane-wired__shell-button:enabled:active {
+    --wired-button-offset-x: -25px;
+    --wired-button-right-offset-x: -25px;
+}
+
+.octane-wired__shell-button:disabled {
+    --wired-button-offset-x: -37px;
+    --wired-button-right-offset-x: -37px;
+    color: #888;
+    cursor: default;
+}
+
+.octane-wired__shell-button-skin,
+.octane-wired__shell-button-etching {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 5px minmax(0, 1fr) 5px;
+    grid-template-rows: 5px minmax(0, 1fr) 5px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+
+.octane-wired__shell-button-patch image {
+    transform: translate(var(--wired-button-offset-x), var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button-patch.is-right image {
+    transform: translate(var(--wired-button-right-offset-x), var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button-label {
+    position: relative;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button--illumina {
+    height: 22px;
+    color: #333;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 13px;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+}
+
+.octane-wired__shell-button--illumina:enabled:is(:hover, :active),
+.octane-wired__shell-button--illumina:disabled {
+    --wired-button-offset-x: 0px;
+    --wired-button-right-offset-x: 0px;
+}
+
+.octane-wired__shell-button--illumina:enabled:hover {
+    --wired-button-offset-y: -86px;
+}
+
+.octane-wired__shell-button--illumina:enabled:active {
+    --wired-button-offset-y: -50px;
+}
+
+.octane-wired__shell-button--illumina .octane-wired__shell-button-skin {
+    grid-template-columns: 6px minmax(0, 1fr) 4px;
+    grid-template-rows: 8px minmax(0, 1fr) 8px;
+}
+
+.octane-wired__shell-button--illumina .octane-wired__shell-button-etching {
+    top: auto;
+    height: 5px;
+    grid-template-columns: 6px minmax(0, 1fr) 4px;
+    grid-template-rows: 5px;
+}
+
+.octane-wired__shell-button .octane-wired__shell-button-curve {
+    position: absolute;
+    top: calc(50% - 1px);
+    width: 3px;
+    height: 5px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button-curve.is-left {
+    left: 1px;
+}
+
+.octane-wired__shell-button-curve.is-right {
+    right: 1px;
+}
+
+.octane-wired__shell-button-curve image {
+    transform: translateY(var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button:enabled:active .octane-wired__shell-button-curve {
+    display: none;
+}
+
+.octane-wired--official button:focus-visible,
+.octane-wired__shell-menu-item:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 1px;
+}
