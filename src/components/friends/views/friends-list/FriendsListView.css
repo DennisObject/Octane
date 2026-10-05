@@ -199,6 +199,7 @@
 }
 
 .hfl-content {
+    padding: 5px 5px 0;
     min-height: 0;
     margin: 0;
     overflow-x: hidden;
@@ -206,273 +207,211 @@
     background: #fff;
 }
 
-.hfl-section {
-    margin: 0 5px;
-}
+.hfl-section { margin: 0; }
 
 .hfl-section-header {
     position: relative;
-    display: flex;
-    align-items: center;
     width: 100%;
-    height: 17px;
-    padding: 1px 4px 0;
+    height: 20px;
+    background: #eee;
+}
+
+.hfl-section-header.alternate { background: #fff; }
+
+.hfl-section-toggle {
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding: 4px 0 0;
     border: 0;
-    background: #ededed;
+    background: transparent;
     font-weight: 700 !important;
+    line-height: 13px;
     text-align: left;
 }
 
-.hfl-section-header > span:first-child::after {
+.hfl-section-toggle > span::after {
     display: inline-block;
     width: 9px;
     height: 5px;
-    margin-left: 3px;
+    margin-left: 6px;
     content: "";
     background: url("@/assets/images/friends/swf/arrow_down_black.png") no-repeat;
     vertical-align: 1px;
 }
 
-.hfl-section-header.collapsed > span:first-child::after {
+.hfl-section-header.collapsed .hfl-section-toggle > span::after {
     width: 5px;
     height: 9px;
+    margin-left: 9px;
     background-image: url("@/assets/images/friends/swf/arrow_right_black.png");
 }
 
 .hfl-select-all {
     position: absolute;
-    top: 3px;
-    right: 4px;
-    max-width: 95px;
-    overflow: hidden;
+    top: 0;
+    right: 6px;
+    height: 16px;
+    padding: 2px 0 0;
+    border: 0;
+    background: transparent;
     font-weight: 400;
-    line-height: 11px;
+    line-height: 13px;
     text-decoration: underline;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.hfl-select-all::after {
-    display: none !important;
-}
-
-.hfl-list {
-    width: 100%;
-    background: #fff;
-}
+.hfl-list { width: 100%; }
 
 .hfl-friend {
     position: relative;
-    display: grid;
-    grid-template-columns: 20px 15px minmax(0, 1fr) auto;
-    align-items: center;
     width: 100%;
     height: 20px;
     min-height: 20px;
-    overflow: visible;
-    background: #fff;
+    background: #eee;
     cursor: pointer;
 }
 
-.hfl-friend:hover,
-.hfl-friend.selected {
-    background: #c9eafa;
-}
-
-.hfl-list .hfl-friend:nth-child(even) {
-    background: #ededed;
-}
-
-.hfl-list .hfl-friend:nth-child(even):hover,
-.hfl-list .hfl-friend:nth-child(even).selected {
-    background: #c9eafa;
-}
+.hfl-friend.alternate { background: #fff; }
+.hfl-friend.selected { background: #b8e2fc; }
 
 .hfl-friend-avatar,
-.hfl-search-avatar,
-.hfl-request-avatar {
-    position: relative;
+.hfl-search-avatar {
+    position: absolute;
+    top: 0;
+    left: -2px;
     width: 20px;
     height: 20px;
     overflow: hidden;
 }
 
-.hfl-friend-avatar {
-    overflow: visible;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-.hfl-friend-avatar .avatar-image,
-.hfl-search-avatar .avatar-image,
-.hfl-request-avatar .avatar-image {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 20px !important;
-    height: 20px !important;
-    margin: 0 !important;
-    transform: none !important;
-    background-position: 51% 40% !important;
-    background-size: 65px auto !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
-}
-
-.hfl-friend-avatar .avatar-image.compact-head {
-    inset: 0 !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 20px !important;
-    height: 20px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background-color: transparent !important;
-    background-position: center !important;
-    background-size: 20px 20px !important;
-    box-shadow: none !important;
-    image-rendering: auto !important;
-}
+.hfl-native-face { display: block; width: 20px; height: 20px; image-rendering: pixelated; }
+.hfl-friend-avatar > div,
+.hfl-search-avatar > div { transform-origin: top left !important; }
 
 .hfl-friend-profile,
 .hfl-search-profile,
 .hfl-request-profile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: 5px;
+    left: 20px;
     width: 15px;
     height: 11px;
-    overflow: hidden;
 }
 
-.hfl-friend-profile > *,
-.hfl-search-profile > *,
-.hfl-request-profile > * {
-    flex: 0 0 13px;
-    width: 13px !important;
-    min-width: 13px !important;
-    height: 11px !important;
-    min-height: 11px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+.hfl-native-profile {
+    display: block;
+    width: 15px;
+    height: 11px;
+    padding: 0;
+    border: 0;
+    background: url("@/assets/images/friends/native-list-atlas.png") -36px 0 no-repeat;
 }
+
+.hfl-native-profile:hover { background-position: -52px 0; }
 
 .hfl-friend-name,
 .hfl-search-name,
 .hfl-request-name {
-    min-width: 0;
-    padding: 1px 2px 0 3px;
+    position: absolute;
+    top: 3px;
+    left: 38px;
+    max-width: calc(100% - 103px);
+    height: 13px;
     overflow: hidden;
     line-height: 13px;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .hfl-friend-actions,
 .hfl-search-actions,
-.hfl-request-actions {
-    display: flex;
-    align-items: center;
-    height: 20px;
-}
-
-.hfl-friend-actions {
-    gap: 3px;
-}
+.hfl-request-actions { position: absolute; inset: 0; pointer-events: none; }
+.hfl-friend-actions > button,
+.hfl-search-actions > button,
+.hfl-request-actions > button { pointer-events: auto; }
 
 .hfl-action,
 .hfl-relationship {
-    flex: 0 0 auto;
+    position: absolute;
+    top: 2px;
     padding: 0;
     border: 0;
     background-color: transparent;
-    background-position: center;
     background-repeat: no-repeat;
 }
 
-.hfl-action.follow {
-    width: 16px;
-    height: 15px;
-    background-image: url("@/assets/images/friends/swf/follow_friend.png");
-}
+.hfl-action.follow { right: 20px; width: 16px; height: 15px; background-image: url("@/assets/images/friends/swf/follow_friend.png"); }
+.hfl-action.chat { right: 3px; width: 16px; height: 14px; background-image: url("@/assets/images/friends/swf/start_chat.png"); }
+.hfl-action.add { right: 6px; width: 17px; height: 16px; background-image: url("@/assets/images/friends/swf/ask_for_friend.png"); }
 
-.hfl-action.chat {
+.hfl-relationship { right: 39px; width: 26px; height: 16px; }
+.hfl-relationship::before,
+.habbo-friend-relationship-menu button::before {
+    position: absolute;
+    top: 1px;
+    left: 0;
     width: 16px;
     height: 14px;
-    background-image: url("@/assets/images/friends/swf/start_chat.png");
+    content: "";
+    background: url("@/assets/images/friends/native-list-atlas.png") no-repeat;
 }
-
-.hfl-action.add {
-    width: 16px;
-    height: 15px;
-    background-image: url("@/assets/images/friends/swf/ask_for_friend.png");
-}
-
-.hfl-relationship {
-    position: relative;
-    width: 26px;
-    height: 16px;
-    background-image: url("@/assets/images/friends/friends-spritesheet.png");
-    background-repeat: no-repeat;
-}
-
-.hfl-relationship.heart { background-position: -5px -67px; }
-.hfl-relationship.smile { background-position: -57px -67px; }
-.hfl-relationship.bobba { background-position: -96px -5px; }
-.hfl-relationship.none { background-image: none; }
-
-.hfl-relationship.none {
-    width: 12px;
-}
-
-.hfl-relationship.none::after {
-    right: 1px;
-}
-
+.hfl-relationship.none::before,
+.habbo-friend-relationship-menu button.none::before { background-position: -68px 0; }
+.hfl-relationship.heart::before,
+.habbo-friend-relationship-menu button.heart::before { background-position: -84px 0; }
+.hfl-relationship.smile::before,
+.habbo-friend-relationship-menu button.smile::before { background-position: -100px 0; }
+.hfl-relationship.bobba::before,
+.habbo-friend-relationship-menu button.bobba::before { background-position: -116px 0; }
 .hfl-relationship::after {
     position: absolute;
-    top: 6px;
-    right: 0;
-    width: 9px;
+    top: 5px;
+    left: 16px;
+    width: 10px;
     height: 5px;
     content: "";
-    background: url("@/assets/images/friends/swf/arrow_down_black.png") no-repeat;
+    background: url("@/assets/images/friends/native-list-atlas.png") -136px 0 no-repeat;
 }
 
-.hfl-relationship-menu {
-    position: absolute;
-    top: 18px;
-    right: 32px;
-    z-index: 70;
+.habbo-friend-relationship-menu {
+    position: fixed;
+    z-index: 9999;
     width: 30px;
-    height: 72px;
+    height: 68px;
     padding: 2px;
-    border: 1px solid #777;
+    box-sizing: border-box;
     background: #fff;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, .45);
+    image-rendering: pixelated;
 }
-
-.hfl-relationship-menu button {
+.habbo-friend-relationship-menu button {
+    position: relative;
     display: block;
     width: 25px;
     height: 15px;
+    margin: 0 0 1px;
     padding: 0;
     border: 0;
-    background-color: #ececec;
-    background-image: url("@/assets/images/friends/friends-spritesheet.png");
-    background-repeat: no-repeat;
+    background: #ececec;
+    cursor: pointer;
 }
+.habbo-friend-relationship-menu button:nth-of-type(even) { background: #fff; }
 
-.hfl-relationship-menu button:nth-child(even) { margin-top: 2px; background-color: #fff; }
-.hfl-relationship-menu button:nth-child(3),
-.hfl-relationship-menu button:nth-child(4) { margin-top: 2px; }
-.hfl-relationship-menu button:hover { background-color: #cdebf6; }
-.hfl-relationship-menu button.none { background-image: none; }
-.hfl-relationship-menu button.heart { background-position: -5px -67px; }
-.hfl-relationship-menu button.smile { background-position: -57px -67px; }
-.hfl-relationship-menu button.bobba { background-position: -96px -5px; }
+.hfl-native-button-skin,
+.hfl-native-border-skin {
+    position: absolute;
+    display: grid;
+    inset: 0;
+    grid-template-columns: 3px minmax(0, 1fr) 3px;
+    grid-template-rows: 3px minmax(0, 1fr) 3px;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+.hfl-native-border-skin { grid-template-columns: 6px minmax(0, 1fr) 6px; grid-template-rows: 6px minmax(0, 1fr) 6px; }
+.hfl-native-button-skin svg,
+.hfl-native-border-skin svg { display: block; min-width: 0; min-height: 0; overflow: hidden; }
+.hfl-native-button-skin image { transform: translateX(var(--hfl-button-state, 0px)); }
+button:hover:not(:disabled) > .hfl-native-button-skin { --hfl-button-state: -24px; }
+button:active:not(:disabled) > .hfl-native-button-skin { --hfl-button-state: -16px; }
+button:disabled > .hfl-native-button-skin { --hfl-button-state: -8px; }
 
 .hfl-footer {
     display: flex;
@@ -648,6 +587,7 @@
 }
 
 .search-mode .hfl-content {
+    padding: 0;
     grid-row: 4;
     background: #bdbdbd;
 }
@@ -680,6 +620,7 @@
 }
 
 .requests-mode .hfl-content {
+    padding: 0;
     display: flex;
     grid-row: 4;
     flex-direction: column;
@@ -694,7 +635,7 @@
 }
 
 .requests-mode .hfl-request-footer {
-    flex: 0 0 auto;
+    flex: 0 0 67px;
 }
 
 .requests-mode .hfl-footer {
@@ -729,152 +670,43 @@
 .collapsed-mode .hfl-resize-handle { cursor: ew-resize; }
 
 .hfl-search-results,
-.hfl-requests {
-    position: relative;
-    min-height: 100%;
-    background: #ccc;
-}
+.hfl-requests { position: relative; height: 100%; min-height: 0; }
+.hfl-requests { background: #fff; padding: 5px 5px 0; }
+.hfl-search-results { overflow: hidden; background: #b6b6b6; }
+.hfl-search-results-scroll { position: absolute; inset: 0 0 41px; padding: 5px 5px 0; overflow-x: hidden; overflow-y: auto; }
 
-.hfl-requests {
-    height: 100%;
-    background: #fff;
-}
+.hfl-search-heading,
+.hfl-search-result { position: relative; height: 20px; min-height: 20px; background: #9f9f9f; }
+.hfl-search-heading.alternate,
+.hfl-search-result.alternate { background: #b6b6b6; }
+.hfl-search-heading { margin: 0; padding: 3px 5px 0; font-size: 9px; font-weight: 700; line-height: 13px; }
+.hfl-search-profile { left: 21px; }
+.hfl-search-name { left: 37px; max-width: calc(100% - 59px); }
+.hfl-search-actions .chat { top: 3px; right: 4px; }
+.hfl-search-actions .add { top: 2px; right: 5px; }
 
-.hfl-search-results {
-    height: 100%;
-    overflow: hidden;
-    background: #bdbdbd;
-}
+.hfl-search-form { position: absolute; inset: auto 0 0; height: 41px; }
+.hfl-search-form > .hfl-native-border-skin { inset: 5px; filter: brightness(0.517647); }
+.hfl-search-form input { position: absolute; top: 10px; left: 11px; width: calc(100% - 98px); height: 20px; padding: 1px 2px; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; }
+.hfl-search-form button { position: absolute; top: 10px; right: 12px; width: 70px; height: 21px; padding: 0; border: 0; background: transparent; text-align: left; }
+.hfl-search-form button > i { position: absolute; top: 4px; left: 5px; width: 12px; height: 12px; background: url("@/assets/images/friends/swf/search.png") no-repeat; }
+.hfl-search-form button > span:not(.hfl-native-button-skin) { position: absolute; top: 3px; left: 20px; height: 20px; line-height: 13px; }
 
-.hfl-search-results-scroll {
-    position: absolute;
-    inset: 0 0 38px;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
+.hfl-request { position: relative; height: 20px; background: #eee; cursor: pointer; }
+.hfl-request:nth-child(even) { background: #fff; }
+.hfl-request-profile { left: 0; }
+.hfl-request-name { left: 17px; width: 101px; max-width: calc(100% - 89px); }
+.hfl-request-outcome { position: absolute; top: 3px; right: 13px; width: 67px; height: 13px; line-height: 13px; white-space: nowrap; }
+.hfl-request-actions button { position: absolute; top: 4px; width: 16px; height: 14px; padding: 0; border: 0; background: url("@/assets/images/friends/native-list-atlas.png") no-repeat; }
+.hfl-request-actions .accept { right: 25px; background-position: 0 -16px; }
+.hfl-request-actions .decline { right: 0; background-position: -18px -16px; }
 
-.hfl-search-form {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    left: 5px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 74px;
-    align-items: center;
-    height: 31px;
-    padding: 4px;
-    gap: 4px;
-    border: 1px solid #555;
-    border-radius: 6px;
-    background: #deded9;
-}
-
-.hfl-search-form input {
-    width: 100%;
-    height: 21px;
-    padding: 2px 4px;
-    border: 1px solid #111;
-    border-radius: 1px;
-    background: #fff;
-    color: #000;
-    outline: 0;
-}
-
-.hfl-search-form button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 21px;
-    padding: 0 4px;
-    gap: 3px;
-    border: 1px solid #111;
-    border-radius: 4px;
-    background: linear-gradient(#fff, #ddd);
-    box-shadow: inset 0 0 0 1px #fff;
-    font-weight: 700;
-}
-
-.hfl-search-form button span {
-    width: 12px;
-    height: 12px;
-    background: url("@/assets/images/friends/swf/search.png") center no-repeat;
-}
-
-.hfl-search-section h4 {
-    height: 17px;
-    margin: 0;
-    padding: 3px 5px 0;
-    background: #aaa;
-    font-size: 9px;
-}
-
-.hfl-search-result,
-.hfl-request {
-    display: grid;
-    grid-template-columns: 20px 15px minmax(0, 1fr) auto;
-    align-items: center;
-    height: 20px;
-    background: #fff;
-}
-
-.hfl-request {
-    grid-template-columns: 15px minmax(0, 1fr) auto;
-    padding: 0 5px;
-}
-
-.hfl-request-actions {
-    gap: 6px;
-}
-
-.hfl-request-actions button {
-    position: relative;
-    width: 16px;
-    height: 14px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-}
-
-.hfl-request-actions button::before,
-.hfl-request-actions button::after {
-    position: absolute;
-    content: "";
-}
-
-.hfl-request-actions .accept::before {
-    top: 5px;
-    left: 2px;
-    width: 10px;
-    height: 5px;
-    border-bottom: 3px solid #009a28;
-    border-left: 3px solid #009a28;
-    transform: rotate(-45deg);
-}
-
-.hfl-request-actions .decline::before,
-.hfl-request-actions .decline::after {
-    top: 1px;
-    left: 7px;
-    width: 3px;
-    height: 12px;
-    background: #d22;
-}
-
-.hfl-request-actions .decline::before { transform: rotate(45deg); }
-.hfl-request-actions .decline::after { transform: rotate(-45deg); }
-
-.hfl-request-footer {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    padding: 5px;
-}
-
-.hfl-request-footer button {
-    min-width: 80px;
-    height: 21px;
-    padding: 0 5px;
-    border: 1px solid #777;
-    border-radius: 4px;
-    background: linear-gradient(#fff, #ddd);
-}
+.hfl-request-footer { position: relative; height: 67px; padding: 0; background: #fff; }
+.hfl-request-footer > .hfl-native-border-skin { inset: 5px; filter: brightness(0.85098); }
+.hfl-request-footer button { position: absolute; top: 10px; left: 10px; width: calc(100% - 20px); height: 21px; padding: 0; border: 0; background: transparent; text-align: left; }
+.hfl-request-footer button[data-action="dismiss-all"] { top: 35px; }
+.hfl-request-footer button > i { position: absolute; top: 4px; left: 9px; width: 16px; height: 14px; background: url("@/assets/images/friends/native-list-atlas.png") no-repeat; }
+.hfl-request-accept-icon { background-position: 0 -16px !important; }
+.hfl-request-decline-icon { background-position: -18px -16px !important; }
+.hfl-request-footer button > span:not(.hfl-native-button-skin) { position: absolute; top: 3px; left: 32px; height: 20px; line-height: 13px; }
+.hfl-request-footer button[data-action="dismiss-all"] > span:not(.hfl-native-button-skin) { left: 30px; }

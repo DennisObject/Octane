@@ -1,17 +1,19 @@
-import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@octane/renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { FriendlyTime, GetConfigurationValue, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
+import { CreateLinkEvent, GetSessionDataManager, IUserCurrentBadgeData, RelationshipStatusInfoMessageParser, UserProfileParser } from '@octane/renderer';
+import { FC, MouseEvent, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FriendlyTime, GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, LocalizeText, localizeWithFallback, SanitizeHtml } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
 import hiddenIcon from '../../assets/images/user-profile/swf/hidden_icon.png';
 import offlineIcon from '../../assets/images/user-profile/swf/offline_icon.png';
 import onlineIcon from '../../assets/images/user-profile/swf/online_icon.png';
 import { LayoutAvatarImageView, LayoutBadgeImageView, UserIdentityView } from '../../common';
+import { useFriendsActions, useFriendsState } from '../../hooks';
 import { RelationshipsContainerView } from './RelationshipsContainerView';
 
 interface UserContainerViewProps {
     userProfile: UserProfileParser;
-    userBadges?: string[];
+    userBadges?: IUserCurrentBadgeData[];
     userRelationships?: RelationshipStatusInfoMessageParser;
     onOpenRooms?: () => void;
     /** Closes the profile window (the official find-friends link closes it). */
@@ -21,13 +23,27 @@ interface UserContainerViewProps {
     onToggleBlock?: () => void;
 }
 
+// v75 BadgeRarity's default preset (uncommon is presented as common).
+const BADGE_RARITY_LABELS = ['common', 'common', 'rare', 'epic', 'mythical', 'legendary', 'unique'];
+const BADGE_RARITY_TAG_COLORS = [0x777777, 0x777777, 0x56a152, 0x5194cc, 0xa564b5, 0xc02a20, 0xcc9200];
+
 export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const { userProfile = null, userBadges = [], userRelationships = null, onOpenRooms = null, onClose = null, isBlocked = false, onToggleBlock = null } = props;
 
     const [requestSent, setRequestSent] = useState(userProfile.requestSent);
+    const [badgePopup, setBadgePopup] = useState<{ userId: number; index: number; badgeCode: string; x: number; y: number; layer: number } | null>(null);
+    const { canRequestFriend } = useFriendsState();
+    const { requestFriend } = useFriendsActions();
     const isOwnProfile = userProfile.id === GetSessionDataManager().userId;
-    const canSendFriendRequest = !requestSent && !isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent;
-    const selectedBadges = useMemo(() => [...userBadges].slice(0, 5), [userBadges]);
+    const canSendFriendRequest = !requestSent && !isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent && canRequestFriend(userProfile.id);
+    const selectedBadges = useMemo(() => {
+        const slots: (IUserCurrentBadgeData | null)[] = Array(5).fill(null);
+        for (const badge of userBadges) {
+            const index = badge.slotId - 1;
+            if (index >= 0 && index < slots.length) slots[index] = badge;
+        }
+        return slots;
+    }, [userBadges]);
     const hasNativeProfileFields = userProfile.hasNativeProfileFields;
     const presenceStatus = userProfile.onlineStatus;
 
@@ -35,9 +51,28 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const showActivityPoints = GetConfigurationValue<boolean>('activity.point.display.enabled', false);
 
     const addFriend = () => {
+        if (!canSendFriendRequest || !canRequestFriend(userProfile.id)) return;
+
+        requestFriend(userProfile.id, userProfile.username);
         setRequestSent(true);
-        SendMessageComposer(new RequestFriendComposer(userProfile.username));
     };
+
+    const showBadgePopup = (event: MouseEvent<HTMLDivElement>, index: number) => {
+        const badgeCode = selectedBadges[index]?.badgeCode;
+        if (!badgeCode) return;
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const frame = event.currentTarget.closest('.draggable-window');
+        const layer = frame ? Number(window.getComputedStyle(frame).zIndex) || 0 : 0;
+        setBadgePopup({ userId: userProfile.id, index, badgeCode, x: rect.right, y: rect.top + rect.height / 2, layer: layer + 1 });
+    };
+
+    const visibleBadgePopup = badgePopup?.userId === userProfile.id && selectedBadges[badgePopup.index]?.badgeCode === badgePopup.badgeCode ? badgePopup : null;
+    const popupBadge = visibleBadgePopup ? selectedBadges[visibleBadgePopup.index] : null;
+    const badgeDescription = visibleBadgePopup ? LocalizeBadgeDescription(visibleBadgePopup.badgeCode) : '';
+    const rarityLabel = popupBadge ? BADGE_RARITY_LABELS[popupBadge.badgeRarityId] ?? (popupBadge.badgeRarityId < 2 ? 'common' : '') : '';
+    const rarityColor = popupBadge ? BADGE_RARITY_TAG_COLORS[popupBadge.badgeRarityId] ?? 0 : 0;
+    const raritySkinFilter = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg"><filter id="t"><feColorMatrix type="matrix" values="0 0 0 0 ${((rarityColor >> 16) & 255) / 255} 0 0 0 0 ${((rarityColor >> 8) & 255) / 255} 0 0 0 0 ${(rarityColor & 255) / 255} 0 0 0 1 0" color-interpolation-filters="sRGB"/></filter></svg>`)}#t")`;
 
     useEffect(() => {
         setRequestSent(userProfile.requestSent);
@@ -129,9 +164,10 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
 
                     <div className="octane-extended-profile__badges">
                         {[0, 1, 2, 3, 4].map((index) => (
-                            <button key={index} className="octane-extended-profile__badge-slot" type="button">
-                                {selectedBadges[index] && <LayoutBadgeImageView badgeCode={selectedBadges[index]} highlightRarity showInfo showRarityInfo />}
-                            </button>
+                            <div key={index} className="octane-extended-profile__badge-slot"
+                                onMouseEnter={(event) => showBadgePopup(event, index)} onMouseLeave={() => setBadgePopup(null)}>
+                                {selectedBadges[index] && <LayoutBadgeImageView badgeCode={selectedBadges[index].badgeCode} />}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -159,7 +195,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                 <button
                     className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center"
                     type="button"
-                    onClick={() => CreateLinkEvent('badge-leaderboard/show')}
+                    onClick={() => CreateLinkEvent('badge_leaderboard/0/-1/0')}
                 >
                     <img className="octane-extended-profile__summary-icon octane-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
                     <span className="octane-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
@@ -172,6 +208,22 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     <span className="octane-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.level : userProfile.achievementPoints}</span>
                 </div>
             </div>
+            {visibleBadgePopup && createPortal(
+                <div className="octane-profile-badge-details" role="tooltip"
+                    style={{ left: visibleBadgePopup.x, top: visibleBadgePopup.y, zIndex: visibleBadgePopup.layer }}>
+                    <div className="octane-profile-badge-details__name">{LocalizeBadgeName(visibleBadgePopup.badgeCode)}</div>
+                    {badgeDescription && <div className="octane-profile-badge-details__description">{badgeDescription}</div>}
+                    {popupBadge && <div className="octane-profile-badge-details__rarity">
+                        <span className="octane-profile-badge-details__rarity-skin" aria-hidden="true" style={{ filter: raritySkinFilter }} />
+                        <span className="octane-profile-badge-details__rarity-text">
+                            {LocalizeText('badge.rarity.badge', ['rarity'], [rarityLabel ? LocalizeText(`badge.rarity.${rarityLabel}`) : ''])}
+                        </span>
+                    </div>}
+                    {popupBadge?.ownerCount > 0 && popupBadge.ownerCount < 1000 && <div className="octane-profile-badge-details__owners">
+                        {LocalizeText('badge.owner_count', ['count'], [popupBadge.ownerCount.toString()])}
+                    </div>}
+                </div>, document.body
+            )}
         </div>
     );
 };

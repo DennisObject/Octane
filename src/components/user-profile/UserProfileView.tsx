@@ -1,6 +1,7 @@
 import {
     ExtendedProfileChangedMessageEvent,
     GetSessionDataManager,
+    IUserCurrentBadgeData,
     RelationshipStatusInfoEvent,
     RelationshipStatusInfoMessageParser,
     RoomEngineObjectEvent,
@@ -22,7 +23,7 @@ import { UserContainerView } from './UserContainerView';
 
 export const UserProfileView: FC<{}> = () => {
     const [userProfile, setUserProfile] = useState<UserProfileParser>(null);
-    const [userBadges, setUserBadges] = useState<string[]>([]);
+    const [userBadges, setUserBadges] = useState<IUserCurrentBadgeData[]>([]);
     const [userRelationships, setUserRelationships] = useState<RelationshipStatusInfoMessageParser>(null);
     const [windowPosition, setWindowPosition] = useState<{ x: number; y: number } | null>(null);
     // Official ExtendedProfileWindowCtrl: block_button / blocked_container run off the session
@@ -73,7 +74,7 @@ export const UserProfileView: FC<{}> = () => {
 
         if (!userProfile || parser.userId !== userProfile.id) return;
 
-        setUserBadges(parser.badges);
+        setUserBadges(parser.badgeDetails);
     });
 
     useMessageEvent<RelationshipStatusInfoEvent>(RelationshipStatusInfoEvent, (event) => {

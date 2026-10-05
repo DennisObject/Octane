@@ -1,12 +1,13 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveFriendComposer, RemoveLinkEventTracker, SendRoomInviteComposer } from '@octane/renderer';
 import { FC, PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CreateLinkEvent, filterFriendsByCategory, LocalizeText, MessengerFriend, SendMessageComposer } from '../../../../api';
+import { CreateLinkEvent, GetConfigurationValue, LocalizeText, MessengerFriend, MessengerRequest, SendMessageComposer } from '../../../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../../../common';
 import { useFriends } from '../../../../hooks';
 import './FriendsListView.css';
 import { FriendsRemoveConfirmationView } from './FriendsListRemoveConfirmationView';
 import { FriendsRoomInviteView } from './FriendsListRoomInviteView';
 import { FriendsSearchView } from './FriendsListSearchView';
+import { FriendsListSkinView } from './friends-list-group/FriendsListGroupItemView';
 import { FriendsListGroupView } from './friends-list-group/FriendsListGroupView';
 import { FriendsListRequestView } from './friends-list-request/FriendsListRequestView';
 
@@ -18,9 +19,18 @@ export const FriendsListView: FC<{}> = (props) => {
     const [activePanel, setActivePanel] = useState<'friends' | 'requests' | 'search' | null>('friends');
     const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
     const [friendSearchValue, setFriendSearchValue] = useState('');
-    const [isOnlineExpanded, setIsOnlineExpanded] = useState<boolean>(true);
-    const [isOfflineExpanded, setIsOfflineExpanded] = useState<boolean>(false);
-    const { onlineFriends = [], offlineFriends = [], requests = [], requestFriend = null, requestResponse = null } = useFriends();
+    const [closedCategories, setClosedCategories] = useState(() => new Set([-1]));
+    const { onlineFriends = [], offlineFriends = [], requestRows: requests = [], settings, requestFriend = null, requestResponse = null, clearRequestOutcomes } = useFriends();
+
+    const changeVisibility = useCallback((visible: boolean) => {
+        if (isVisible && !visible && activePanel === 'requests') clearRequestOutcomes();
+        setIsVisible(visible);
+    }, [isVisible, activePanel, clearRequestOutcomes]);
+
+    const changePanel = useCallback((panel: 'friends' | 'requests' | 'search' | null) => {
+        if (isVisible && activePanel === 'requests' && panel !== 'requests') clearRequestOutcomes();
+        setActivePanel(panel);
+    }, [isVisible, activePanel, clearRequestOutcomes]);
 
     const windowRef = useRef<HTMLDivElement>(null);
     const resizeStart = useRef<{ x: number; y: number; width: number; height: number; scaleX: number; scaleY: number } | null>(null);
@@ -44,12 +54,14 @@ export const FriendsListView: FC<{}> = (props) => {
     const stopResize = () => { resizeStart.current = null; };
 
     const friendSearch = friendSearchValue.trim().toLocaleLowerCase();
-    const filteredOnlineFriends = filterFriendsByCategory(onlineFriends, 0).filter(
-        (friend) => !friendSearch || friend.name.toLocaleLowerCase().includes(friendSearch)
-    );
-    const filteredOfflineFriends = filterFriendsByCategory(offlineFriends, 0).filter(
-        (friend) => !friendSearch || friend.name.toLocaleLowerCase().includes(friendSearch)
-    );
+    const filteredOnlineFriends = onlineFriends.filter((friend) => !friendSearch || friend.name.toLocaleLowerCase().includes(friendSearch));
+    const filteredOfflineFriends = offlineFriends.filter((friend) => !friendSearch || friend.name.toLocaleLowerCase().includes(friendSearch));
+    const categories = [
+        { id: 0, name: settings?.categories.find((category) => category.id === 0)?.name ?? LocalizeText('friendlist.friends'), friends: filteredOnlineFriends.filter((friend) => friend.categoryId === 0) },
+        { id: -1, name: settings?.categories.find((category) => category.id === -1)?.name ?? LocalizeText('friendlist.friends.offlinecaption'), friends: filteredOfflineFriends }
+    ];
+    const pendingRequestCount = requests.filter((request) => request.state === MessengerRequest.PENDING).length;
+    let rowIndex = 0;
 
     const removeFriendsText = useMemo(() => {
         if (!selectedFriendsIds || !selectedFriendsIds.length) return '';
@@ -119,11 +131,8 @@ export const FriendsListView: FC<{}> = (props) => {
     const removeSelectedFriends = () => {
         if (selectedFriendsIds.length === 0) return;
 
-        setSelectedFriendsIds((prevValue) => {
-            SendMessageComposer(new RemoveFriendComposer(...prevValue));
-
-            return [];
-        });
+        SendMessageComposer(new RemoveFriendComposer(...selectedFriendsIds));
+        setSelectedFriendsIds([]);
 
         setShowRemoveFriendsConfirmation(false);
     };
@@ -137,13 +146,13 @@ export const FriendsListView: FC<{}> = (props) => {
 
                 switch (parts[1]) {
                     case 'show':
-                        setIsVisible(true);
+                        changeVisibility(true);
                         return;
                     case 'hide':
-                        setIsVisible(false);
+                        changeVisibility(false);
                         return;
                     case 'toggle':
-                        setIsVisible((prevValue) => !prevValue);
+                        changeVisibility(!isVisible);
                         return;
                     case 'request':
                         if (parts.length < 4) return;
@@ -157,17 +166,15 @@ export const FriendsListView: FC<{}> = (props) => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [requestFriend]);
+    }, [requestFriend, changeVisibility, isVisible]);
 
     useEffect(() => {
-        if (activePanel === 'requests' && !requests.length) setActivePanel('friends');
-    }, [activePanel, requests.length]);
+        if (activePanel === 'requests' && !requests.length) changePanel('friends');
+    }, [activePanel, requests.length, changePanel]);
 
     if (!isVisible) return null;
 
-    const respondToAllRequests = (accept: boolean) => {
-        for (const request of requests) requestResponse(request.id, accept);
-    };
+    const respondToAllRequests = (accept: boolean) => requestResponse(-1, accept);
 
     return (
         <>
@@ -185,16 +192,16 @@ export const FriendsListView: FC<{}> = (props) => {
                     <div className="hfl-titlebar drag-handler">
                         <span className="hfl-titlebar-grip" />
                         <span className="hfl-title">{LocalizeText('friendlist.friends')}</span>
-                        <button type="button" className="hfl-close" onClick={() => setIsVisible(false)} />
+                        <button type="button" className="hfl-close" onClick={() => changeVisibility(false)} />
                     </div>
                     <div className="hfl-category">
                         <button
                             type="button"
                             className="hfl-category-current"
                             aria-expanded={activePanel === 'friends'}
-                            onClick={() => setActivePanel((value) => (value === 'friends' ? null : 'friends'))}
+                            onClick={() => changePanel(activePanel === 'friends' ? null : 'friends')}
                         >
-                            {LocalizeText('friendlist.friends')}
+                            {`${LocalizeText('friendlist.friends')} (${onlineFriends.filter((friend) => friend.categoryId === 0).length})`}
                         </button>
                     </div>
                     {activePanel !== null && (
@@ -204,67 +211,43 @@ export const FriendsListView: FC<{}> = (props) => {
                                 <>
                                     <FriendsListRequestView />
                                     <div className="hfl-request-footer" data-testid="requests-footer">
-                                        <button type="button" data-action="accept-all" disabled={!requests.length} onClick={() => respondToAllRequests(true)}>
-                                            {LocalizeText('friendlist.requests.acceptall')}
+                                        <FriendsListSkinView border />
+                                        <button type="button" data-action="accept-all" disabled={!pendingRequestCount} onClick={() => respondToAllRequests(true)}>
+                                            <FriendsListSkinView /><i className="hfl-request-accept-icon" /><span>{LocalizeText('friendlist.requests.acceptall')}</span>
                                         </button>
-                                        <button type="button" data-action="dismiss-all" disabled={!requests.length} onClick={() => respondToAllRequests(false)}>
-                                            {LocalizeText('friendlist.requests.dismissall')}
+                                        <button type="button" data-action="dismiss-all" disabled={!pendingRequestCount} onClick={() => respondToAllRequests(false)}>
+                                            <FriendsListSkinView /><i className="hfl-request-decline-icon" /><span>{LocalizeText('friendlist.requests.dismissall')}</span>
                                         </button>
                                     </div>
                                 </>
                             )}
-                            {activePanel === 'friends' && (
-                                <>
-                                    <section className="hfl-section">
-                                        <button
-                                            type="button"
-                                            className={`hfl-section-header${isOnlineExpanded ? '' : ' collapsed'}`}
-                                            onClick={() => setIsOnlineExpanded((value) => !value)}
-                                        >
-                                            <span>{LocalizeText('friendlist.friends') + ` (${filteredOnlineFriends.length})`}</span>
-                                            <span
-                                                className="hfl-select-all"
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    toggleSelectFriends(filteredOnlineFriends.map((friend) => friend.id));
-                                                }}
-                                            >
-                                                {filteredOnlineFriends.length &&
-                                                filteredOnlineFriends.every((friend) => selectedFriendsIds.indexOf(friend.id) >= 0)
-                                                    ? LocalizeText('friendlist.unselect_all')
-                                                    : LocalizeText('friendlist.select_all')}
-                                            </span>
+                            {activePanel === 'friends' && categories.map((category) => {
+                                const open = !closedCategories.has(category.id);
+                                const headerIndex = rowIndex++;
+                                const rowStartIndex = rowIndex;
+                                if (open) rowIndex += category.friends.length;
+                                const selectable = category.id === 0 && open && category.friends.length >= 5 && GetConfigurationValue<boolean>('friend_list.select_all.enabled', false);
+                                return <section key={category.id} className="hfl-section">
+                                    <div className={`hfl-section-header${headerIndex % 2 ? ' alternate' : ''}${open ? '' : ' collapsed'}`}>
+                                        <button type="button" className="hfl-section-toggle" aria-expanded={open} onClick={() => {
+                                            setClosedCategories((previous) => {
+                                                const next = new Set(previous);
+                                                if (next.has(category.id)) next.delete(category.id);
+                                                else next.add(category.id);
+                                                return next;
+                                            });
+                                            if (open) setSelectedFriendsIds((previous) => previous.filter((id) => !category.friends.some((friend) => friend.id === id)));
+                                        }}>
+                                            <span>{`${category.name} (${category.friends.length})`}</span>
                                         </button>
-                                        {isOnlineExpanded && (
-                                            <div className="hfl-list">
-                                                <FriendsListGroupView
-                                                    list={filteredOnlineFriends}
-                                                    selectedFriendsIds={selectedFriendsIds}
-                                                    selectFriend={selectFriend}
-                                                />
-                                            </div>
-                                        )}
-                                    </section>
-                                    <section className="hfl-section">
-                                        <button
-                                            type="button"
-                                            className={`hfl-section-header${isOfflineExpanded ? '' : ' collapsed'}`}
-                                            onClick={() => setIsOfflineExpanded((value) => !value)}
-                                        >
-                                            <span>{LocalizeText('friendlist.friends.offlinecaption') + ` (${filteredOfflineFriends.length})`}</span>
-                                        </button>
-                                        {isOfflineExpanded && (
-                                            <div className="hfl-list">
-                                                <FriendsListGroupView
-                                                    list={filteredOfflineFriends}
-                                                    selectedFriendsIds={selectedFriendsIds}
-                                                    selectFriend={selectFriend}
-                                                />
-                                            </div>
-                                        )}
-                                    </section>
-                                </>
-                            )}
+                                        {selectable && <button type="button" className="hfl-select-all" onClick={() => toggleSelectFriends(category.friends.map((friend) => friend.id))}>
+                                            {category.friends.every((friend) => selectedFriendsIds.includes(friend.id)) ? LocalizeText('friendlist.unselect_all') : LocalizeText('friendlist.select_all')}
+                                        </button>}
+                                    </div>
+                                    {open && <div className="hfl-list"><FriendsListGroupView list={category.friends} rowStartIndex={rowStartIndex}
+                                        selectedFriendsIds={selectedFriendsIds} selectFriend={selectFriend} /></div>}
+                                </section>;
+                            })}
                         </div>
                     )}
                     {activePanel === 'friends' && (
@@ -316,12 +299,12 @@ export const FriendsListView: FC<{}> = (props) => {
                         <button
                             type="button"
                             className="hfl-request-strip"
-                            onClick={() => setActivePanel((value) => (value === 'requests' ? null : 'requests'))}
+                            onClick={() => changePanel(activePanel === 'requests' ? null : 'requests')}
                         >
-                            {LocalizeText('friendlist.tab.friendrequests')}
+                            {`${LocalizeText('friendlist.tab.friendrequests')} (${pendingRequestCount})`}
                         </button>
                     )}
-                    <button type="button" className="hfl-search-strip" onClick={() => setActivePanel((value) => (value === 'search' ? null : 'search'))}>
+                    <button type="button" className="hfl-search-strip" onClick={() => changePanel(activePanel === 'search' ? null : 'search')}>
                         {LocalizeText('generic.search')}
                     </button>
                     <div className="hfl-bottom" />

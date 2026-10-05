@@ -43,6 +43,15 @@
 .octane-extended-profile__badge-slot:nth-child(3) { left: 107px; }
 .octane-extended-profile__badge-slot:nth-child(4) { left: 157px; }
 .octane-extended-profile__badge-slot:nth-child(5) { left: 207px; }
+.octane-profile-badge-details { position: fixed; box-sizing: border-box; width: 263px; padding: 6px 5px 6px 8px; transform: translateY(-50%); font-family: Volter, sans-serif; font-size: 9px; font-weight: 400; line-height: normal; color: #000; pointer-events: none; }
+.octane-profile-badge-details::before { content: ''; position: absolute; inset: 0; border: 6px solid transparent; border-image: url('../../assets/images/habbo-skin/slices/border-white.png') 6 fill / 6px stretch; }
+.octane-profile-badge-details__name, .octane-profile-badge-details__description { position: relative; box-sizing: border-box; width: 250px; padding: 2px; white-space: pre-wrap; overflow-wrap: break-word; }
+.octane-profile-badge-details__name { font-weight: 700; }
+.octane-profile-badge-details__description { margin-top: 3px; }
+.octane-profile-badge-details__rarity { position: relative; width: max-content; height: 17px; margin-top: 3px; padding: 2px 5px; color: #fff; font-weight: 700; line-height: 13px; }
+.octane-profile-badge-details__rarity-skin { position: absolute; inset: 0; border: 6px solid transparent; border-image: url('../../assets/images/habbo-skin/slices/border-colorless-d48612.png') 6 fill / 6px stretch; }
+.octane-profile-badge-details__rarity-text { position: relative; white-space: nowrap; }
+.octane-profile-badge-details__owners { position: relative; box-sizing: border-box; width: 250px; margin-top: 3px; padding: 2px; color: #555; }
 .octane-extended-profile__separator { position: absolute; left: 265px; top: 12px; width: 1px; height: 192px; background: #afafaf; }
 .octane-extended-profile__right { position: absolute; left: 274px; top: 13px; width: 226px; height: 192px; }
 .octane-extended-profile__friend-count { position: absolute; left: 0; top: 5px; height: 16px; line-height: 16px; }
