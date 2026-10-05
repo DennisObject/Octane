@@ -435,6 +435,66 @@
     border-image-repeat: stretch;
 }
 
+/* furni_view infostand_element_list: x=10 y=10 w=170, 1px #333333 spacers, 3px list spacing. */
+.octane-furni-infostand__list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    box-sizing: border-box;
+    width: 190px;
+    padding: 10px;
+    color: #ffffff;
+    font-family: Ubuntu, sans-serif;
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.octane-furni-infostand__name {
+    width: 159px;
+    min-height: 17px;
+    padding-bottom: 5px;
+    color: #ffffff;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 12px;
+    -webkit-font-smoothing: none;
+    overflow-wrap: anywhere;
+}
+
+.octane-furni-infostand__rule {
+    flex: 0 0 1px;
+    height: 1px;
+    background: #333333;
+}
+
+.octane-furni-infostand__image {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 170px;
+    height: 130px;
+    overflow: hidden;
+}
+
+.octane-furni-infostand__owner {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 17px;
+}
+
+.octane-furni-infostand__text {
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+.octane-furni-infostand__link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .octane-furni-infostand__close {
     position: absolute;
     top: 6px;
