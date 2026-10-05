@@ -1,230 +1,275 @@
 /*
- * WIN63 AIR sources:
- * - me_menu_settings_menu_xml: 180x140 menu, title/divider/buttons/Back
- * - me_menu_sound_settings_xml: 312x170
- * - toolbar_chat_settings_xml: 257px wide
- * - me_menu_other_settings_xml: 242x184, extended for Polaris catalog controls
- *
- * AIR uses border style 6 tinted #79756e, Ubuntu 12px text and fixed pixel
- * controls. Polaris-only controls follow the official widgets in each view.
+ * v75 settings windows (HabboToolbarCom): me_menu_sound_settings_xml 312x170, toolbar_chat_settings_xml 257x269,
+ * me_menu_other_settings_xml 242 wide with a content-driven height, custom_word_filter_settings_xml 242x248.
+ * Every window is a borderless style-6 border (#79756e, 8px corners) placed at (1,1) inside a clipping root; controls sit at the
+ * absolute XML coordinates (x/y include that 1px offset). Text is u_regular: Ubuntu 12px, white on the frame.
  */
 
-.user-settings-window.air-settings-window {
-    --air-settings-width: 180px;
-
+.us-window {
     position: relative;
     box-sizing: border-box;
-    /* The chrome is a 9-slice border-image, so the frame can take any size.
-       Every part sits in the normal flow: the window is as wide as its widest
-       row (the AIR width is only a floor) and as tall as its content, so a
-       new row or a longer translation grows it instead of running under the
-       Back button or out of the frame. */
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-    min-width: var(--air-settings-width);
-    height: auto;
-    max-width: 100vw;
-    max-height: calc(100vh - 8px);
-    margin: 0;
-    padding: 5px 10px 10px;
     overflow: hidden;
-    border: 0;
-    background: transparent;
     color: #ffffff;
-    filter: drop-shadow(3px 3px 3px rgba(0, 0, 0, 0.35));
-    font-family: UbuntuRegular, Ubuntu, sans-serif;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
     font-size: 12px;
     font-weight: 400;
     line-height: 17px;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.user-settings-window.air-settings-window--audio {
-    --air-settings-width: 312px;
+.us-window--audio {
+    width: 312px;
+    height: 170px;
 }
 
-.user-settings-window.air-settings-window--chat {
-    --air-settings-width: 257px;
+.us-window--chat {
+    width: 257px;
+    height: 269px;
 }
 
-.user-settings-window.air-settings-window--other {
-    --air-settings-width: 242px;
+.us-window--other {
+    width: 242px;
 }
 
-.user-settings-window.air-settings-window--privacy {
-    --air-settings-width: 270px;
+.us-window--wordfilter {
+    width: 242px;
+    height: 248px;
 }
 
-.air-settings-window__chrome {
+.us-chrome {
     position: absolute;
-    inset: 0;
-    z-index: 0;
-    box-sizing: border-box;
-    border: 8px solid transparent;
-    border-image-source: url('../../assets/images/user-settings/air/border-ubuntu-6-79756e.png');
-    border-image-slice: 16 fill;
+    top: 1px;
+    right: -1px;
+    bottom: -1px;
+    left: 1px;
+    border: 0 solid transparent;
+    border-image-source: url('../../assets/images/habbo-skin/slices/border-6-79756e.png');
+    border-image-slice: 8 fill;
     border-image-width: 8px;
     border-image-repeat: stretch;
     pointer-events: none;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.air-settings-window > :not(.air-settings-window__chrome) {
-    position: relative;
+.us-window > :not(.us-chrome) {
     z-index: 1;
 }
 
-.air-settings-window__title {
+.us-at {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.us-title {
+    position: absolute;
+    top: 6px;
     height: 17px;
     margin: 0;
-    padding: 0 10px;
+    padding: 0;
     color: #ffffff;
     cursor: move;
-    font: 400 12px/17px UbuntuRegular, Ubuntu, sans-serif;
-    text-align: left;
-    text-shadow: none;
+    font: 400 12px/17px HabboAirUbuntu, UbuntuRegular, sans-serif;
+    text-align: center;
     white-space: nowrap;
     user-select: none;
 }
 
-.air-settings-window--audio .air-settings-window__title {
-    text-align: center;
-}
-
-.air-settings-window--chat .air-settings-window__title {
-    text-align: center;
-}
-
-.air-settings-window--other .air-settings-window__title {
-    text-align: center;
-}
-
-.air-settings-window--privacy .air-settings-window__title {
-    text-align: center;
-}
-
-/* The divider spans the content column; the "other" and word filter windows
-   keep the official short, centred rule. */
-.air-settings-window__divider {
-    flex: 0 0 1px;
-    align-self: stretch;
+.us-line {
+    position: absolute;
+    top: 25px;
     height: 1px;
-    margin: 2px 0 8px;
     background: #2f2f2f;
 }
 
-.air-settings-window--other .air-settings-window__divider {
-    align-self: center;
-    width: 162px;
+.us-text {
+    color: #ffffff;
+    font: 400 12px/17px HabboAirUbuntu, UbuntuRegular, sans-serif;
 }
 
-.air-settings-button {
+.us-text--multi {
+    white-space: normal;
+}
+
+/* button style 3 is the shiny skin (habbo_skin_button_shiny_default_xml) */
+.us-button {
     box-sizing: border-box;
-    height: 22px;
-    min-height: 22px;
+    height: 28px;
     margin: 0;
-    padding: 0 5px;
+    padding: 0 8px;
     overflow: hidden;
-    border: 3px solid transparent;
+    cursor: pointer;
+    border: 5px solid transparent;
     border-radius: 0;
-    border-image-source: var(--habbo-skin-button);
-    border-image-slice: 3 fill;
-    border-image-width: 3px;
+    border-image-source: var(--habbo-skin-shiny);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
     border-image-repeat: stretch;
     background: transparent;
     box-shadow: none;
-    color: #111111;
-    cursor: pointer;
-    font: 400 12px/16px UbuntuRegular, Ubuntu, sans-serif;
+    color: #000000;
+    font: 400 12px/15px HabboAirUbuntu, UbuntuRegular, sans-serif;
     text-align: center;
     text-overflow: ellipsis;
-    text-shadow: none;
     white-space: nowrap;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.air-settings-button:hover {
-    border-image-source: var(--habbo-skin-button-hover);
-    filter: none;
+.us-button:hover {
+    border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.air-settings-button:active {
-    border-image-source: var(--habbo-skin-button-pressed);
-    filter: none;
+.us-button:active {
+    border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.air-settings-button:focus-visible,
-.air-settings-checkbox:focus-visible,
-.air-settings-radio:focus-visible,
-.air-settings-volume-row input:focus-visible,
-.air-settings-volume-row__speaker:focus-visible,
-.air-settings-select-row select:focus-visible {
+.us-button:disabled {
+    cursor: default;
+    border-image-source: var(--habbo-skin-shiny-disabled);
+}
+
+.us-button:focus-visible,
+.us-select:focus-visible,
+.us-check:focus-visible {
     outline: 1px solid #fff27a;
     outline-offset: 1px;
 }
 
-/* Back always follows the content, never on top of it. */
-.air-settings-window__back {
-    flex: 0 0 auto;
-    align-self: flex-start;
-    width: 60px;
-    height: 28px;
-    min-height: 28px;
-    margin-top: 10px;
+/* dropmenu: dropmenu skin with the 16x16 arrow; the select is native so the open list stays accessible */
+.us-drop {
+    position: absolute;
+    box-sizing: border-box;
+    height: 24px;
 }
 
-.air-settings-menu__items {
+.us-drop::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    background: url('../../assets/images/habbo-skin/slices/dropmenu-default-arrow.png') 0 0 / 16px 16px no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+    pointer-events: none;
+}
+
+.us-select {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 24px 0 10px;
+    border: 0 solid transparent;
+    border-image-source: url('../../assets/images/habbo-skin/slices/dropmenu-default.png');
+    border-image-slice: 3 fill;
+    border-image-width: 3px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #000000;
+    cursor: pointer;
+    font: 400 12px/24px HabboAirUbuntu, UbuntuRegular, sans-serif;
+    text-overflow: ellipsis;
+    appearance: none;
+    outline: 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* checkbox (style 3): habbo_skin_button_checkbox_xml, 15x15 states at (410,0) and (410,16) of habbo_blue_skin_png */
+.us-check {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../../assets/images/user-settings/native/checkbox-default.png') 0 0 no-repeat;
+    box-shadow: none;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.us-check:checked {
+    background-image: url('../../assets/images/user-settings/native/checkbox-checked.png');
+}
+
+.us-check-row {
     display: flex;
-    width: 160px;
-    flex-direction: column;
-    gap: 3px;
+    height: 16px;
+    align-items: flex-start;
+    gap: 5px;
+    cursor: pointer;
 }
 
-.air-settings-menu__items .air-settings-button {
-    width: 160px;
-    flex: 0 0 22px;
+.us-check-row .us-check {
+    margin-top: 1px;
 }
 
-.air-settings-audio__heading {
-    height: 17px;
-    color: #ffffff;
-    line-height: 17px;
-    text-align: center;
+.us-check-row > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.air-settings-audio__rows {
-    margin-left: 4px;
-    /* One shared grid rather than three independent rows: the label column is
-       sized by the longest translation, so every slider stays in the same
-       column instead of drifting row by row. */
-    display: grid;
-    width: max-content;
-    min-width: 285px;
-    grid-auto-rows: 28px;
-    grid-template-columns: max-content 29px 144px 29px;
-    align-items: start;
+/* other settings: itemlist at (11,36), spacing 7; Back sits 12px below it and the window ends 12px below Back */
+.us-other-list {
+    display: flex;
+    margin: 0 0 0 11px;
+    padding-top: 36px;
+    flex-direction: column;
+    gap: 7px;
+    width: 222px;
 }
 
+.us-other-list .us-label {
+    height: 17px;
+}
+
+.us-other-list .us-drop {
+    position: relative;
+    width: 222px;
+}
+
+.us-other-back {
+    margin: 12px 0 12px 11px;
+    display: block;
+    width: 60px;
+    height: 28px;
+}
+
+/* volume rows: 285x28 at (15, 49/77/105) */
 .air-settings-volume-row {
-    display: contents;
+    position: absolute;
+    left: 15px;
+    width: 285px;
+    height: 28px;
     color: #ffffff;
 }
 
 .air-settings-volume-row__label {
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 60px;
     height: 18px;
-    margin-top: 6px;
-    /* 60px keeps the English layout pixel-identical to the AIR client; a
-       longer translation grows the column instead of being clipped. */
-    min-width: 60px;
-    padding-right: 4px;
+    overflow: hidden;
     color: #ffffff;
-    font: 400 12px/18px UbuntuRegular, Ubuntu, sans-serif;
+    font: 400 12px/18px HabboAirUbuntu, UbuntuRegular, sans-serif;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .air-settings-volume-row__speaker {
+    position: absolute;
+    top: 0;
     width: 29px;
     height: 30px;
     margin: 0;
@@ -240,29 +285,30 @@
 }
 
 .air-settings-volume-row__speaker--off {
+    left: 60px;
     background-image: url('../../assets/images/user-settings/air/sounds-off-white.png');
 }
 
-.air-settings-volume-row__speaker--off:hover,
-.air-settings-volume-row__speaker--off:focus-visible {
-    background-image: url('../../assets/images/user-settings/air/sounds-off-color.png');
-}
-
 .air-settings-volume-row__speaker--on {
-    margin-left: 9px;
-    background-image: url('../../assets/images/user-settings/air/sounds-on-white.png');
-}
-
-.air-settings-volume-row__speaker--on:hover,
-.air-settings-volume-row__speaker--on:focus-visible {
+    left: 251px;
     background-image: url('../../assets/images/user-settings/air/sounds-on-color.png');
 }
 
+/* a muted row highlights the mute icon instead of the loud one */
+.air-settings-volume-row.is-muted .air-settings-volume-row__speaker--off {
+    background-image: url('../../assets/images/user-settings/air/sounds-off-color.png');
+}
+
+.air-settings-volume-row.is-muted .air-settings-volume-row__speaker--on {
+    background-image: url('../../assets/images/user-settings/air/sounds-on-white.png');
+}
+
 .air-settings-volume-row__slider {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 98px;
     width: 144px;
     height: 24px;
-    margin-left: 9px;
 }
 
 .air-settings-volume-row__slider::before {
@@ -294,6 +340,12 @@
     background: transparent;
     box-shadow: none;
     cursor: pointer;
+}
+
+.air-settings-volume-row input[type='range']:focus-visible,
+.air-settings-volume-row__speaker:focus-visible {
+    outline: 1px solid #fff27a;
+    outline-offset: 1px;
 }
 
 .air-settings-volume-row input[type='range']::-webkit-slider-runnable-track {
@@ -333,170 +385,59 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.air-settings-check-row,
-.air-settings-select-row {
-    position: relative;
-    display: flex;
+/* word filter: both boxes are `border` style 3 (border_slot, white). Input (3,4) 146x17 in a 152x24 box, add button 66x24, 222x100 list of 18px rows, remove 210x30 */
+.us-filter-input-box,
+.us-filter-list-box {
     box-sizing: border-box;
-    width: 100%;
-    margin: 0;
-    color: #ffffff;
-    font: 400 12px/17px UbuntuRegular, Ubuntu, sans-serif;
-}
-
-.air-settings-check-row {
-    height: 16px;
-    min-height: 16px;
-    align-items: flex-start;
-    gap: 5px;
-    cursor: pointer;
-}
-
-.air-settings-check-row > span {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.air-settings-checkbox {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    box-sizing: border-box !important;
-    width: 15px !important;
-    min-width: 15px !important;
-    height: 15px !important;
-    min-height: 15px !important;
-    margin: 1px 0 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background-color: transparent !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Crect x='0.5' y='0.5' width='14' height='14' fill='%23ffffff' stroke='%23000000' stroke-width='1'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    box-shadow: none !important;
-    cursor: pointer;
+    border: 0 solid transparent;
+    border-image-source: url('../../assets/images/user-settings/native/border-slot-white.png');
+    border-image-slice: 3 fill;
+    border-image-width: 3px;
+    border-image-repeat: stretch;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.air-settings-checkbox:checked {
-    /* One SVG per state. The skin sheet has no clean ticked box — its
-       (410,16) region is a dark slab that vanishes on this panel — and
-       layering a tick over the sprite left the box unpainted in the client. */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Crect x='0.5' y='0.5' width='14' height='14' fill='%23ffffff' stroke='%23000000' stroke-width='1'/%3E%3Cpath d='M3.5 8 L6 10.5 L11.5 4.5' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") !important;
+.us-filter-input {
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    box-sizing: border-box;
+    width: 146px;
+    height: 17px;
+    margin: 0;
+    padding: 0 3px;
+    border: 0;
+    background: transparent;
+    color: #000000;
+    font: 400 12px/17px HabboAirUbuntu, UbuntuRegular, sans-serif;
+    outline: 0;
 }
 
-.air-settings-other__list {
-    display: flex;
-    min-width: 222px;
-    flex-direction: column;
-    gap: 7px;
+.us-filter-list {
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    width: 215px;
+    height: 93px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
-.air-settings-select-row {
-    height: 24px;
-    min-height: 24px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 5px;
-}
-
-.air-settings-select-row > span {
-    min-width: 0;
+.us-filter-row {
+    appearance: none;
+    display: block;
+    box-sizing: border-box;
+    width: 222px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
+    cursor: pointer;
+    border: 0;
+    border-radius: 0;
+    color: #000000;
+    font: 400 12px/18px HabboAirUbuntu, UbuntuRegular, sans-serif;
+    text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.air-settings-select-row select {
-    appearance: auto;
-    box-sizing: border-box;
-    width: 96px;
-    height: 24px;
-    min-height: 24px;
-    flex: 0 0 96px;
-    margin: 0;
-    padding: 0 4px;
-    border: 1px solid #2f2f2f;
-    border-radius: 5px;
-    background: #ffffff;
-    color: #111111;
-    font: 400 12px/22px UbuntuRegular, Ubuntu, sans-serif;
-}
-
-/* Prose wraps to the width the controls give the window instead of
-   stretching it: inline-size containment keeps it out of max-content. */
-.air-settings-chat__info {
-    contain: inline-size;
-    margin: 0 0 5px;
-    color: #ffffff;
-    font: 400 12px/16px UbuntuRegular, Ubuntu, sans-serif;
-}
-
-.air-settings-chat__list {
-    display: flex;
-    min-width: 237px;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.air-settings-privacy__content {
-    display: flex;
-    min-width: 250px;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.air-settings-privacy__content p {
-    contain: inline-size;
-}
-
-.air-settings-privacy__content fieldset {
-    display: flex;
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.air-settings-privacy__content legend,
-.air-settings-privacy__content p {
-    margin: 0;
-    padding: 0;
-    color: #ffffff;
-    font: 400 12px/17px UbuntuRegular, Ubuntu, sans-serif;
-}
-
-.air-settings-privacy__content legend {
-    font-weight: 700;
-}
-
-.air-settings-radio {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    box-sizing: border-box !important;
-    width: 15px !important;
-    min-width: 15px !important;
-    height: 15px !important;
-    min-height: 15px !important;
-    margin: 1px 0 0 !important;
-    padding: 0 !important;
-    border: 1px solid #2f2f2f !important;
-    border-radius: 50% !important;
-    background: #ffffff !important;
-    box-shadow: none !important;
-    cursor: pointer;
-}
-
-.air-settings-radio:checked {
-    background: radial-gradient(circle, #2f2f2f 0 3px, #ffffff 4px) !important;
-}
-
-@media (max-height: 257px) {
-    .air-settings-window {
-        overflow-y: auto;
-    }
 }

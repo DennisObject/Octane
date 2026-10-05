@@ -152,6 +152,59 @@
     resize: none;
 }
 
+/* ros_room_settings idle inputs use the text field's 1px #959595 border. */
+.octane-room-settings .ros-input.ros-idle-timeout {
+    border: 1px solid #959595 !important;
+    border-image: none !important;
+    padding: 1px;
+}
+
+.octane-room-settings .ros-input.ros-idle-timeout.is-invalid {
+    background-color: #f18f9b !important;
+}
+
+/* Qd/nav_error_popup: textWidth + 20, centered above the input, 33px high. */
+.octane-room-settings .ros-input-error {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    z-index: 7;
+    width: max-content;
+    height: 33px;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.octane-room-settings .ros-input-error-border {
+    box-sizing: border-box;
+    height: 23px;
+    padding: 4px 7px 0 8px;
+    border: 0 solid transparent;
+    border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
+    white-space: nowrap;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-input-error-border > span {
+    display: block;
+    height: 20px;
+    padding: 2px 3px 0 2px;
+    color: #000;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 12px;
+    -webkit-font-smoothing: none;
+}
+
+.octane-room-settings .ros-input-error-arrow {
+    display: block;
+    width: 11px;
+    height: 11px;
+    margin: -1px auto 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
 /* dropmenu style 2 */
 .octane-room-settings .ros-drop {
     position: relative;
@@ -428,51 +481,4 @@
 
 .octane-room-settings .ros-user-arrow.is-friend {
     left: 1px;
-}
-
-/* custom Polaris rows follow the reference controls inside the same classic scroll area */
-.octane-room-settings .ros-extra {
-    margin: 0 0 8px 6px;
-    padding-top: 6px;
-}
-
-.octane-room-settings .ros-extra-row {
-    display: flex;
-    width: 300px;
-    height: 20px;
-    align-items: center;
-    gap: 4px;
-    margin: 0;
-    font-size: 12px;
-    line-height: 17px;
-    cursor: pointer;
-}
-
-.octane-room-settings .ros-extra-row input {
-    margin: 0;
-}
-
-.octane-room-settings .ros-extra-title {
-    margin: 6px 0 2px;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
-}
-
-.octane-room-settings .ros-extra-info {
-    width: 300px;
-    margin: 0 0 4px;
-    font-size: 12px;
-    line-height: 17px;
-}
-
-.octane-room-settings .ros-extra-select {
-    width: 276px;
-    height: 24px;
-    margin-bottom: 4px;
-}
-
-.octane-room-settings .ros-extra-input {
-    width: 80px;
-    height: 20px;
 }

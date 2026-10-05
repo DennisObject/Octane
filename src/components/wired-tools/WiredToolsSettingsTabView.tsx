@@ -248,22 +248,24 @@ export const WiredToolsSettingsTabView: FC<WiredToolsSettingsTabViewProps> = ({ 
                         />
                         <span>Show all system notifications</span>
                     </label>
-                    <label className="flex items-center gap-2 text-[12px] text-[#222]">
-                        <span>{localizeWithFallback('wiredmenu.settings.preferences.wired_style', 'Wired style:')}</span>
-                        <select
-                            className="form-select form-select-sm"
-                            value={accountPreferences.wiredStyle}
-                            onChange={(event) => updateAccountPreferences({ wiredStyle: normalizeWiredStyle(event.target.value) })}
-                        >
-                            {WIRED_STYLE_OPTIONS.map((style) => (
-                                <option key={style} value={style}>
-                                    {style === WIRED_STYLE_DEFAULT
-                                        ? localizeWithFallback('wiredmenu.settings.preferences.wired_style.default', 'Default (%name%)', ['name'], ['Octane'])
-                                        : wiredStyleTitle(style)}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
+                    {GetConfigurationValue<boolean>('wired.ui_picker_enabled', false) && (
+                        <label className="flex items-center gap-2 text-[12px] text-[#222]">
+                            <span>{localizeWithFallback('wiredmenu.settings.preferences.wired_style', 'Wired style:')}</span>
+                            <select
+                                className="form-select form-select-sm"
+                                value={normalizeWiredStyle(accountPreferences.wiredStyle)}
+                                onChange={(event) => updateAccountPreferences({ wiredStyle: normalizeWiredStyle(event.target.value) })}
+                            >
+                                {WIRED_STYLE_OPTIONS.map((style) => (
+                                    <option key={style} value={style}>
+                                        {style === WIRED_STYLE_DEFAULT
+                                            ? localizeWithFallback('wiredmenu.settings.preferences.wired_style.default', 'Default (Default)', ['name'], ['Default'])
+                                            : wiredStyleTitle(style)}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
                 </div>
             </div>
             {showSelfDonation && (

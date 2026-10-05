@@ -1,19 +1,17 @@
 import {
     RoomDeleteComposer,
     RoomSettingsSaveErrorEvent,
-    RoomSettingsSaveErrorParser,
-    YouTubeRoomSettingsComposer,
-    YouTubeRoomSettingsEvent
+    RoomSettingsSaveErrorParser
 } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     CreateLinkEvent,
+    GetClubMemberLevel,
     GetMaxVisitorsList,
-    getYoutubeRoomEnabled,
+    GetSelectedMaxVisitors,
     IRoomData,
     LocalizeText,
-    SendMessageComposer,
-    setYoutubeRoomEnabled
+    SendMessageComposer
 } from '../../../../api';
 import declineSrc from '../../../../assets/images/navigator/room-settings/decline.png';
 import { useMessageEvent, useNavigatorData, useNotification } from '../../../../hooks';
@@ -39,19 +37,10 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
     const [roomTag2, setRoomTag2] = useState<string>('');
     const [tagIndex, setTagIndex] = useState(0);
     const [typeError, setTypeError] = useState<string>('');
-    const [youtubeEnabled, setYoutubeEnabled] = useState(getYoutubeRoomEnabled());
     const { showConfirm = null } = useNotification();
     const { categories } = useNavigatorData();
-
-    useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, (event) => {
-        setYoutubeEnabled(event.getParser().youtubeEnabled);
-    });
-
-    const toggleYouTube = (enabled: boolean) => {
-        setYoutubeEnabled(enabled);
-        setYoutubeRoomEnabled(enabled);
-        SendMessageComposer(new YouTubeRoomSettingsComposer(enabled));
-    };
+    const visitorOptions = GetMaxVisitorsList(GetClubMemberLevel() > 0, roomData.userCount);
+    const selectedVisitors = GetSelectedMaxVisitors(visitorOptions, roomData.userCount);
 
     useMessageEvent<RoomSettingsSaveErrorEvent>(RoomSettingsSaveErrorEvent, (event) => {
         const parser = event.getParser();
@@ -181,13 +170,12 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                     {LocalizeText('navigator.maxvisitors')}
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={300} x={0} y={161}>
-                    <select className="ros-select" value={roomData.userCount} onChange={(event) => handleChange('max_visitors', event.target.value)}>
-                        {GetMaxVisitorsList &&
-                            GetMaxVisitorsList.map((value) => (
-                                <option key={value} value={value}>
-                                    {value}
-                                </option>
-                            ))}
+                    <select className="ros-select" value={selectedVisitors} onChange={(event) => handleChange('max_visitors', event.target.value)}>
+                        {visitorOptions.map((value, index) => (
+                            <option key={`${value}-${index}`} value={value}>
+                                {value}
+                            </option>
+                        ))}
                     </select>
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={138} x={0} y={190}>
@@ -248,22 +236,6 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                         </NavigatorRoomSettingsAtView>
                     </>
                 )}
-            </div>
-            <div className="ros-extra">
-                {/* Polaris-only. Keep when matching Habbo AIR chrome. */}
-                <label className="ros-extra-row">
-                    <input type="checkbox" checked={roomData.allowUnderpass} onChange={(event) => handleChange('allow_underpass', event.target.checked)} />
-                    <span>{LocalizeText('navigator.roomsettings.allow_underpass')}</span>
-                </label>
-                <label className="ros-extra-row">
-                    <input
-                        aria-label={LocalizeText('widget.room.youtube.shared')}
-                        type="checkbox"
-                        checked={youtubeEnabled}
-                        onChange={(event) => toggleYouTube(event.target.checked)}
-                    />
-                    <span>{LocalizeText('widget.room.youtube.shared')}</span>
-                </label>
             </div>
         </>
     );

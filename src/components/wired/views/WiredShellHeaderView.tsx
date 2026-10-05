@@ -1,10 +1,12 @@
-import { ButtonHTMLAttributes, FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { ButtonHTMLAttributes, FC, KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { localizeWithFallback } from '../../../api';
+import { isWiredVolterStyle, localizeWithFallback, WiredShellStyle } from '../../../api';
 import blueSkin from '../../../assets/images/habbo-skin/2249_habbo_skin_blue_png$87fbbf84559e7bad0222a9c697b1104d-1406111769.png';
 import plainButton from '../../../assets/images/wired/illumina_light_button_unetched.png';
+import volterAtlas from '../../../assets/images/wired/volter_shell_atlas.png';
+import { WiredVolterMenuFrameView } from './WiredVolterFrameView';
 
-export type WiredShellStyle = 'ubuntu' | 'illumina';
+const headerOffsets = { volter: 128, volter_blue: 136, volter_green: 144, volter_yellow: 152 };
 
 export interface WiredShellMenuItem {
     id: string;
@@ -22,6 +24,7 @@ interface WiredShellHeaderViewProps {
 }
 
 export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle, title, onClose, menuItems }) => {
+    const headerPatternId = useId();
     const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null);
     const toggleRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -80,8 +83,19 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
 
     return (
         <div className="octane-wired__shell-header drag-handler" onPointerDown={() => setMenuPosition(null)}>
+            {isWiredVolterStyle(shellStyle) && (
+                <svg className="octane-wired__volter-header-skin" aria-hidden="true">
+                    <defs>
+                        <pattern id={headerPatternId} width={6} height={15} patternUnits="userSpaceOnUse">
+                            <image href={volterAtlas} x={-headerOffsets[shellStyle]} y={-300} width={490} height={360} />
+                            <image href={volterAtlas} x={-401} y={-16} width={490} height={360} />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill={`url(#${headerPatternId})`} />
+                </svg>
+            )}
             <span className="octane-wired__shell-caption">{title}</span>
-            {shellStyle === 'illumina' && (
+            {(shellStyle === 'illumina' || shellStyle === 'volter') && (
                 <button
                     ref={toggleRef}
                     aria-expanded={!!menuPosition}
@@ -110,7 +124,7 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                 createPortal(
                     <div
                         ref={menuRef}
-                        className="octane-wired__shell-menu"
+                        className={`octane-wired__shell-menu octane-wired__shell-menu--${shellStyle}`}
                         role="menu"
                         aria-label={localizeWithFallback('wiredfurni.params.menu', 'Menu')}
                         style={menuPosition}
@@ -123,6 +137,7 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                             if (!event.currentTarget.contains(event.relatedTarget)) setMenuPosition(null);
                         }}
                     >
+                        {shellStyle === 'volter' && <WiredVolterMenuFrameView />}
                         {menuItems.map((item, index) =>
                             item ? (
                                 <button
@@ -185,9 +200,18 @@ const buttonRegions = {
 
 export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { shellStyle: WiredShellStyle }> = ({ shellStyle, children, ...props }) => {
     const isIllumina = shellStyle === 'illumina';
-    const bitmap = isIllumina ? plainButton : blueSkin;
+    const isVolter = isWiredVolterStyle(shellStyle);
+    const bitmap = isVolter ? volterAtlas : isIllumina ? plainButton : blueSkin;
     const bitmapWidth = isIllumina ? 11 : 490;
-    const bitmapHeight = isIllumina ? 150 : 300;
+    const bitmapHeight = isVolter ? 360 : isIllumina ? 150 : 300;
+    const buttonTop = shellStyle === 'volter' ? 100 : 200;
+    const regions = isVolter
+        ? [
+              [89, buttonTop, 3, 3], [92, buttonTop, 1, 3], [95, buttonTop, 3, 3],
+              [89, buttonTop + 3, 3, 1], [92, buttonTop + 3, 1, 1], [95, buttonTop + 3, 3, 1],
+              [89, buttonTop + 19, 3, 3], [92, buttonTop + 19, 1, 3], [95, buttonTop + 19, 3, 3]
+          ]
+        : buttonRegions[shellStyle];
 
     const region = (rect: number[], className: string, key: number) => (
         <svg key={key} className={className} viewBox={rect.join(' ')} preserveAspectRatio="none" aria-hidden="true">
@@ -198,7 +222,7 @@ export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { sh
     return (
         <button {...props} className={`octane-wired__shell-button octane-wired__shell-button--${shellStyle}`} type="button">
             <span className="octane-wired__shell-button-skin" aria-hidden="true">
-                {buttonRegions[shellStyle].map((rect, index) => region(rect, `octane-wired__shell-button-patch ${index % 3 === 2 ? 'is-right' : ''}`, index))}
+                {regions.map((rect, index) => region(rect, `octane-wired__shell-button-patch ${index % 3 === 2 ? 'is-right' : ''}`, index))}
             </span>
             {isIllumina && (
                 <>

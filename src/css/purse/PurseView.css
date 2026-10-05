@@ -358,46 +358,67 @@
     max-height: 19px;
 }
 
+/* settings_xml dropdown: 192 wide, style-6 border 0x55534e (border_6 x 0x55534e) with a style-3 panel 0x201e19 (border_slot x 0x201e19) at (3,3) 186 wide; entries are
+   setting_category_xml regions (120x17, label white u_regular) starting at y=7, 3px apart, 7px padding at the bottom */
 .octane-purse-menu {
+    position: relative;
     box-sizing: border-box;
-    width: 188px;
-    max-width: 188px;
-    margin-top: 1px;
+    width: 192px;
+    max-width: 192px;
     margin-left: auto;
+    padding: 7px 0 7px 7px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    border: 6px solid transparent;
-    border-image-source: url("../../assets/images/habbo-skin/slices/border-ubuntu-9.png");
-    border-image-slice: 28 28 32 28 fill;
-    border-image-width: 6px;
-    border-image-repeat: stretch;
-    background: transparent;
+    gap: 3px;
     pointer-events: all;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
+.octane-purse-menu::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 0 solid transparent;
+    border-image-source: url("../../assets/images/user-settings/native/border-6-55534e.png");
+    border-image-slice: 8 fill;
+    border-image-width: 8px;
+    border-image-repeat: stretch;
+    pointer-events: none;
+}
+
+.octane-purse-menu::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    bottom: 4px;
+    left: 3px;
+    border: 0 solid transparent;
+    border-image-source: url("../../assets/images/user-settings/native/border-slot-201e19.png");
+    border-image-slice: 3 fill;
+    border-image-width: 3px;
+    border-image-repeat: stretch;
+    pointer-events: none;
+}
+
 .octane-purse-menu__item {
-    padding: 4px 10px;
+    position: relative;
+    z-index: 1;
+    appearance: none;
+    width: 120px;
+    height: 17px;
+    margin: 0;
+    padding: 0;
     border: 0;
     background: transparent;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.3;
-    text-align: left;
+    color: #ffffff;
     cursor: pointer;
-}
-
-.octane-purse-menu__item:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.octane-purse-menu__item--disabled,
-.octane-purse-menu__item--disabled:hover {
-    color: rgba(255, 255, 255, 0.35);
-    background: transparent;
-    cursor: default;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 17px;
+    text-align: left;
+    white-space: nowrap;
 }
 
 /* purse_indicator_seasonal_xml: 192x29 style-9 border color 0x686661; name (5,6) 105x16, amount (90,6) 60x16 right-aligned,

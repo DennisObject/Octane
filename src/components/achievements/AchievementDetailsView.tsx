@@ -15,8 +15,7 @@ export const AchievementDetailsView: FC<AchievementDetailsViewProps> = (props) =
     if (!achievement) return null;
 
     const badgeCode = AchievementUtilities.getAchievementBadgeCode(achievement);
-    // Polaris also supports credit rewards with currency type -1.
-    const showReward = !achievement.finalLevel && achievement.levelRewardPointType >= -1 && achievement.levelRewardPoints > 0;
+    const showReward = !achievement.finalLevel && achievement.levelRewardPointType >= 0 && achievement.levelRewardPoints >= 1;
     const showProgress = achievement.displayMethod !== AchievementData.DISPLAY_METHOD_NEVER_SHOW_PROGRESS && !achievement.finalLevel;
 
     return (
@@ -46,7 +45,8 @@ export const AchievementDetailsView: FC<AchievementDetailsViewProps> = (props) =
                     width={180}
                     progress={achievement.currentPoints}
                     maxProgress={achievement.scoreLimit}
-                    key={`${achievement.achievementId}:${achievement.level}:${achievement.scoreLimit}`}
+                    identity={achievement.achievementId * 10000 + achievement.level}
+                    localizationKey="achievements.details.progress"
                     scoreAtStartOfLevel={achievement.scoreAtStartOfLevel}
                 />
             )}

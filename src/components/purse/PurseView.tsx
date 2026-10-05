@@ -59,7 +59,6 @@ export const PurseView: FC<{}> = (props) => {
     const settingsLabel = useMemo(() => localizeWithFallback('widget.memenu.settings', 'Settings'), []);
     const clubTitle = useMemo(() => localizeWithFallback('catalog.club.hc', 'Habbo Club'), []);
     const hasClubTime = !!purse?.hasClubLeft;
-    const translateLabel = useMemo(() => localizeWithFallback('purse.settings.translate', 'Translate'), []);
 
     const openClub = useCallback((event: React.MouseEvent) => {
         event.stopPropagation();
@@ -188,35 +187,20 @@ export const PurseView: FC<{}> = (props) => {
             </div>
             {settingsMenuOpen && (
                 <div className="octane-purse-menu">
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('')}>
-                        {localizeWithFallback('widget.memenu.settings.title', 'Settings')}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('audio')}>
+                        {localizeWithFallback('widget.memenu.settings.audio', 'Sound settings')}
                     </button>
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('privacy')}>
-                        {localizeWithFallback('purse.settings.game_privacy', 'Game Privacy')}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('chat')}>
+                        {localizeWithFallback('widget.memenu.settings.chat', 'Chat settings')}
                     </button>
-                    <button
-                        type="button"
-                        className="octane-purse-menu__item"
-                        onClick={() => {
-                            CreateLinkEvent('translation-settings/toggle');
-                            setSettingsMenuOpen(false);
-                        }}
-                    >
-                        {translateLabel}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('other')}>
+                        {localizeWithFallback('widget.memenu.settings.other', 'Other settings')}
                     </button>
-                    <button
-                        type="button"
-                        className="octane-purse-menu__item"
-                        onClick={() => {
-                            CreateLinkEvent('user-account-settings/show');
-                            setSettingsMenuOpen(false);
-                        }}
-                    >
-                        {localizeWithFallback('purse.settings.account', 'Account Management')}
-                    </button>
-                    <button type="button" className="octane-purse-menu__item octane-purse-menu__item--disabled" disabled>
-                        {localizeWithFallback('purse.settings.wordfilter', 'Word Filter')}
-                    </button>
+                    {GetConfigurationValue<boolean>('user.custom.filter.enabled', false) && (
+                        <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('wordfilter')}>
+                            {localizeWithFallback('word_filter.settings.title', 'Word filter')}
+                        </button>
+                    )}
                 </div>
             )}
             {otherCurrencies.length > 0 && (

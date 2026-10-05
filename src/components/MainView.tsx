@@ -52,7 +52,6 @@ import { TranslationBootstrap } from './translation/TranslationBootstrap';
 import { TranslationSettingsView } from './translation/TranslationSettingsView';
 import { TraxEditorView } from './trax-editor/TraxEditorView';
 import { UserProfileView } from './user-profile/UserProfileView';
-import { UserAccountSettingsView } from './user-settings/UserAccountSettingsView';
 import { UserSettingsView } from './user-settings/UserSettingsView';
 import { VariablesExplorerView } from './variables-explorer/VariablesExplorerView';
 import { VaultView } from './vault/VaultView';
@@ -171,7 +170,6 @@ export const MainView: FC<{}> = (props) =>
             <FriendsView />
             <RightSideView />
             <UserSettingsView />
-            <UserAccountSettingsView />
             <DiscordSettingsView />
             <VaultView />
             <QuestsView />

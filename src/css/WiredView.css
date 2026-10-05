@@ -1,5 +1,5 @@
 .octane-wired {
-    width: min(300px, calc(100vw - 16px));
+    width: 240px;
     min-width: 0;
     max-width: calc(100vw - 16px);
     background: #efefef;
@@ -9,73 +9,6 @@
     color: #000;
     outline: none !important;
     overflow: hidden;
-
-    .octane-wired__header {
-        min-height: 21px !important;
-        max-height: 21px !important;
-        position: absolute !important;
-        inset: 0 0 auto 0;
-        z-index: 3;
-        border: 0 !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        pointer-events: auto;
-
-        .octane-card-title {
-            display: block;
-            color: #000 !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-            line-height: 21px;
-            text-align: center;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
-            transform: translateY(7px);
-            pointer-events: none;
-        }
-
-        > .flex::before {
-            content: none;
-        }
-
-        > .flex::after {
-            content: none;
-        }
-
-        .octane-card-close-button {
-            right: 6px !important;
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
-            border: 1px solid #777;
-            border-radius: 5px;
-            background: linear-gradient(180deg, #f9f9f9 0%, #cacaca 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-
-        .octane-card-close-button::before,
-        .octane-card-close-button::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 10px;
-            height: 2px;
-            border-radius: 2px;
-            background: #6a6a6a;
-            margin: 0;
-            transform-origin: center;
-        }
-
-        .octane-card-close-button::before {
-            transform: translate(-50%, -50%) rotate(45deg);
-        }
-
-        .octane-card-close-button::after {
-            transform: translate(-50%, -50%) rotate(-45deg);
-        }
-    }
 
     .octane-wired__content {
         position: relative;
@@ -113,7 +46,7 @@
         align-items: center;
         gap: 10px;
         padding: 22px 10px 7px 12px;
-        background: linear-gradient(180deg, #e5e5e5 0%, #d7d7d7 100%);
+        background: transparent;
         overflow: hidden;
         color: #000;
     }
@@ -145,81 +78,6 @@
     .octane-wired__summary-copy {
         position: relative;
         z-index: 1;
-    }
-
-    /* The quick menu: a small toggle in the summary corner and a list under it. */
-    /* Lives in the header, on the close button's line and just before it. */
-    .octane-wired__menu {
-        position: absolute;
-        top: 50%;
-        right: 28px;
-        transform: translateY(-50%);
-        z-index: 3;
-        pointer-events: auto;
-    }
-
-    .octane-wired__menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        padding: 0;
-        border: 1px solid #777;
-        border-radius: 5px;
-        background: linear-gradient(180deg, #f9f9f9 0%, #cacaca 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        color: #222;
-        font-size: 13px;
-        line-height: 1;
-        cursor: pointer;
-    }
-
-    .octane-wired__menu-toggle:hover {
-        background: linear-gradient(180deg, #ffffff 0%, #dcdcdc 100%);
-    }
-
-    .octane-wired__menu-list {
-        position: absolute;
-        top: 20px;
-        right: 0;
-        min-width: 190px;
-        padding: 2px;
-        border: 1px solid #000;
-        border-radius: 3px;
-        background: #f4f0e8;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .octane-wired__menu-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        width: 100%;
-        padding: 3px 8px;
-        border: 0;
-        background: transparent;
-        color: #222;
-        font-size: 12px;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .octane-wired__menu-item:hover:not(:disabled) {
-        background: #dbeaf4;
-    }
-
-    .octane-wired__menu-item:disabled {
-        color: #9a9488;
-        cursor: default;
-    }
-
-    .octane-wired__menu-spacer {
-        height: 1px;
-        margin: 2px 6px;
-        background: #b8b2a4;
     }
 
     .octane-wired__summary-copy {
@@ -1150,236 +1008,6 @@
     box-shadow: none !important;
 }
 
-/*
- * Official wired window skins, colour for colour from the AIR client's wired_style_*.xml layouts:
- * volter (dark), ubuntu (light warm) and volter_blue (the yellow one; that is its name). "default"
- * carries no override and is the look above. Each block only restates what the layout defines:
- * window background, ruler (divider) colour, text colour, input background, the source-button box
- * and the menu items; the rest keeps the base rules.
- */
-.octane-wired.octane-wired--style-volter {
-    /* container colour 0x3d3d3d, ruler 0x232323, text white, source box 0x181818, mini button 0x333333, menu item 0x626262 */
-    background: #3d3d3d;
-    border-color: #232323 !important;
-    box-shadow: inset 0 0 0 1px #4a4a4a !important;
-    color: #fff;
-
-    .octane-wired__header .nitro-card-title {
-        color: #fff !important;
-        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
-    }
-
-    .octane-wired__header .nitro-card-close-button {
-        border-color: #181818;
-        background: linear-gradient(180deg, #626262 0%, #333333 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-
-    .octane-wired__header .nitro-card-close-button::before,
-    .octane-wired__header .nitro-card-close-button::after {
-        background: #e8e8e8;
-    }
-
-    .octane-wired__content {
-        background: #3d3d3d !important;
-    }
-
-    .octane-wired__summary {
-        background: linear-gradient(180deg, #333333 0%, #2a2a2a 100%);
-        color: #fff;
-    }
-
-    .octane-wired__summary-kind,
-    .octane-wired__summary-title,
-    .octane-wired__advanced-toggle,
-    .octane-wired__picker-label,
-    .form-check-label,
-    label,
-    .text-black,
-    .text-black\/60 {
-        color: #fff !important;
-        text-shadow: none;
-    }
-
-    .octane-wired__divider,
-    hr {
-        background: #232323;
-        box-shadow: 0 1px 0 #4a4a4a;
-    }
-
-    .form-check-input,
-    input[type='checkbox'],
-    input[type='radio'] {
-        border-color: #181818;
-        background: linear-gradient(180deg, #626262 0%, #4a4a4a 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-
-    .form-check-input[type='radio']:checked,
-    input[type='radio']:checked {
-        background:
-            radial-gradient(circle at center, #f4f4f4 0 34%, transparent 38%),
-            linear-gradient(180deg, #626262 0%, #4a4a4a 100%);
-        border-color: #181818;
-    }
-
-    .form-check-input[type='checkbox']:checked,
-    input[type='checkbox']:checked {
-        background: linear-gradient(180deg, #7a7a7a 0%, #5a5a5a 100%);
-        border-color: #181818;
-    }
-
-    .form-check-input[type='checkbox']:checked::before,
-    .form-check-input[type='checkbox']:checked::after,
-    input[type='checkbox']:checked::before,
-    input[type='checkbox']:checked::after {
-        background: #f4f4f4;
-    }
-
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #181818 !important;
-        background: #2b2b2b !important;
-        color: #fff !important;
-        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.4);
-    }
-
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-wired__selection-toggle,
-    .octane-slider-button {
-        border-color: #181818 !important;
-        background: linear-gradient(180deg, #6a6a6a 0%, #4f4f4f 46%, #3f3f3f 47%, #4a4a4a 100%) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-        color: #fff !important;
-    }
-}
-
-.octane-wired.octane-wired--style-ubuntu {
-    /* container colour 0xe9e9e1, ruler 0xb5b5b5, text 0x222222, menu item 0xb2b2b2, 10px il_regular text */
-    background: #e9e9e1;
-    border-color: #b5b5b5 !important;
-    box-shadow: inset 0 0 0 1px #f6f6f2 !important;
-    color: #222;
-
-    .octane-wired__header .nitro-card-title,
-    .octane-wired__summary-kind,
-    .octane-wired__summary-title,
-    .octane-wired__advanced-toggle {
-        color: #222 !important;
-    }
-
-    .octane-wired__content {
-        background: #e9e9e1 !important;
-    }
-
-    .octane-wired__summary {
-        background: linear-gradient(180deg, #e2e2da 0%, #d6d6cc 100%);
-        color: #222;
-    }
-
-    .octane-wired__divider,
-    hr {
-        background: #b5b5b5;
-        box-shadow: 0 1px 0 #f6f6f2;
-    }
-
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #b5b5b5 !important;
-        background: #ffffff !important;
-        color: #222 !important;
-    }
-
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-slider-button {
-        border-color: #b2b2b2 !important;
-        background: linear-gradient(180deg, #fbfbf8 0%, #e9e9e1 46%, #d9d9d1 47%, #ecece4 100%) !important;
-        color: #222 !important;
-    }
-}
-
-.octane-wired.octane-wired--style-volter_blue {
-    /* container colour 0xf4d763, ruler 0x222222, text 0x222222, input white, source box 0xffeda5, mini button 0xffeda5, menu item 0xdddddd */
-    background: #f4d763;
-    border-color: #222222 !important;
-    box-shadow: inset 0 0 0 1px #ffeda5 !important;
-    color: #222;
-
-    .octane-wired__header .nitro-card-title,
-    .octane-wired__summary-kind,
-    .octane-wired__summary-title,
-    .octane-wired__advanced-toggle {
-        color: #222 !important;
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-
-    .octane-wired__header .nitro-card-close-button {
-        border-color: #222222;
-        background: linear-gradient(180deg, #ffeda5 0%, #f4d763 100%);
-    }
-
-    .octane-wired__content {
-        background: #f4d763 !important;
-    }
-
-    .octane-wired__summary {
-        background: linear-gradient(180deg, #f8e28a 0%, #f0cf55 100%);
-        color: #222;
-    }
-
-    .octane-wired__divider,
-    hr {
-        background: #222222;
-        box-shadow: 0 1px 0 #ffeda5;
-    }
-
-    .form-check-input,
-    input[type='checkbox'],
-    input[type='radio'] {
-        border-color: #222222;
-        background: #ffffff;
-    }
-
-    .form-check-input[type='radio']:checked,
-    input[type='radio']:checked {
-        background: radial-gradient(circle at center, #222222 0 34%, transparent 38%), #ffffff;
-        border-color: #222222;
-    }
-
-    .form-check-input[type='checkbox']:checked,
-    input[type='checkbox']:checked {
-        background: #ffeda5;
-        border-color: #222222;
-    }
-
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #222222 !important;
-        background: #ffffff !important;
-        color: #222 !important;
-    }
-
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-wired__selection-toggle,
-    .octane-slider-button {
-        border-color: #222222 !important;
-        background: linear-gradient(180deg, #ffeda5 0%, #f8e28a 46%, #f0cf55 47%, #f4d763 100%) !important;
-        color: #222 !important;
-    }
-}
-
 /* Wired's frame margins override the WindowManager's generic frame defaults. */
 .octane-wired.octane-wired--official {
     --wired-section-spacing: 7px;
@@ -1872,4 +1500,322 @@
 .octane-wired__shell-menu-item:focus-visible {
     outline: 2px solid #005fcc;
     outline-offset: 1px;
+}
+
+/* wx/TY/RY/SY use native frame0, Volter typography and subtype template widths. */
+.octane-wired.octane-wired--official.octane-wired--volter {
+    --wired-frame-color: #3d3d3d;
+    --wired-body-color: #3d3d3d;
+    --wired-text-color: #fff;
+    --wired-section-spacing: 4px;
+    --wired-footer-inset: 5px;
+    --wired-body-font-size: 9px;
+    padding: 25px 6px 7px;
+    color: var(--wired-text-color);
+    font-family: Volter, sans-serif !important;
+    font-size: 9px;
+    line-height: 13px;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349));
+
+    * {
+        font-family: Volter, sans-serif !important;
+    }
+
+    &::before {
+        content: none;
+    }
+
+    .octane-wired__content {
+        color: var(--wired-text-color) !important;
+    }
+
+    .octane-wired__body {
+        background: transparent;
+        line-height: 13px;
+    }
+
+    .octane-wired__body :is(div, p, span, label, li, td, th) {
+        color: var(--wired-text-color) !important;
+        line-height: 13px !important;
+    }
+
+    .octane-wired__summary {
+        min-height: 0;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 5px;
+        background: transparent;
+        color: var(--wired-text-color) !important;
+    }
+
+    .octane-wired__summary-copy {
+        flex: 1;
+        padding: 0;
+    }
+
+    .octane-wired__summary-title,
+    .octane-wired__section .font-bold:not(.octane-wired__summary-title) {
+        font-size: 9px !important;
+        line-height: 13px;
+        color: var(--wired-text-color) !important;
+        text-shadow: none;
+    }
+
+    .octane-wired__type-icon {
+        flex: none;
+        width: 13px;
+        height: 14px;
+        overflow: hidden;
+        image-rendering: pixelated;
+    }
+
+    .octane-wired__shell-header {
+        height: 25px;
+    }
+
+    .octane-wired__shell-caption {
+        top: 6px;
+        left: 50%;
+        right: auto;
+        width: max-content;
+        max-width: calc(100% - 60px);
+        height: 15px;
+        padding: 1px 8px;
+        transform: translateX(-50%);
+        color: #fff;
+        background: var(--wired-frame-color);
+        font-size: 9px !important;
+        font-weight: 700;
+        line-height: 13px;
+        white-space: nowrap;
+    }
+
+    .octane-wired__volter-header-skin {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: calc(100% - 12px);
+        height: 15px;
+        overflow: hidden;
+        image-rendering: pixelated;
+        pointer-events: none;
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+        top: 6px;
+        right: 6px;
+        width: 15px;
+        height: 15px;
+        background-image: url('../assets/images/wired/volter_shell_atlas.png');
+        background-position: -377px 0;
+    }
+
+    .octane-wired__shell-menu-toggle {
+        left: 7px;
+        right: auto;
+        background-position: -470px 0;
+    }
+
+    .octane-wired__shell-close:hover {
+        background-position: -377px -16px;
+    }
+    .octane-wired__shell-close:active {
+        background-position: -377px -32px;
+    }
+    .octane-wired__shell-menu-toggle:hover {
+        background-position: -470px -16px;
+    }
+    .octane-wired__shell-menu-toggle:active {
+        background-position: -470px -32px;
+    }
+
+    .octane-wired__footer-divider {
+        position: relative;
+        height: 9px;
+        background: transparent;
+    }
+
+    .octane-wired__footer-divider::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #232323;
+    }
+
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 9px !important;
+        font-weight: 400 !important;
+        line-height: 13px !important;
+        color: var(--wired-text-color);
+    }
+
+    .octane-wired__shell-button {
+        height: 22px;
+        text-shadow: none;
+    }
+
+    .octane-wired__shell-button-skin {
+        grid-template-columns: 3px minmax(0, 1fr) 3px;
+        grid-template-rows: 3px minmax(0, 1fr) 3px;
+    }
+
+    .octane-wired__shell-button:enabled:hover {
+        --wired-button-offset-x: 0px;
+        --wired-button-right-offset-x: 0px;
+        --wired-button-offset-y: -46px;
+    }
+
+    .octane-wired__shell-button:enabled:active {
+        --wired-button-offset-x: -20px;
+        --wired-button-right-offset-x: -20px;
+        --wired-button-offset-y: 0px;
+    }
+
+    .octane-wired__shell-button:disabled {
+        --wired-button-offset-x: -10px;
+        --wired-button-right-offset-x: -10px;
+        --wired-button-offset-y: 0px;
+    }
+}
+
+.octane-wired.octane-wired--official.octane-wired--style-volter_blue {
+    --wired-frame-color: #7da9b5;
+    --wired-body-color: #c7d0d4;
+    --wired-text-color: #222;
+}
+.octane-wired.octane-wired--official.octane-wired--style-volter_green {
+    --wired-frame-color: #78b090;
+    --wired-body-color: #bfd6c9;
+    --wired-text-color: #222;
+}
+.octane-wired.octane-wired--official.octane-wired--style-volter_yellow {
+    --wired-frame-color: #fac200;
+    --wired-body-color: #faea7c;
+    --wired-text-color: #222;
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-close:hover, .octane-wired__shell-close:active) {
+        background-position: -377px -216px;
+    }
+}
+
+.octane-wired.octane-wired--official.octane-wired--volter-colour {
+    .octane-wired__content {
+        gap: 5px !important;
+    }
+    .octane-wired__body {
+        gap: 5px;
+    }
+    .octane-wired__volter-inner-skin + .octane-wired__divider,
+    .octane-wired__footer-divider {
+        display: none;
+    }
+}
+
+.octane-wired__volter-frame,
+.octane-wired__volter-frame-grid,
+.octane-wired__volter-frame-shine {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.octane-wired__volter-frame {
+    z-index: 0;
+}
+.octane-wired__volter-frame-grid {
+    display: grid;
+    grid-template-columns: 13px minmax(0, 1fr) 13px;
+    grid-template-rows: 13px minmax(0, 1fr) 13px;
+}
+.octane-wired__volter-frame svg,
+.octane-wired__volter-inner-skin svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+.octane-wired__volter-frame-shine svg {
+    position: absolute;
+    width: auto;
+    height: auto;
+}
+.octane-wired__volter-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 9px;
+    background: transparent;
+}
+.octane-wired__volter-inner > :not(.octane-wired__volter-inner-skin) {
+    position: relative;
+    z-index: 1;
+}
+.octane-wired__volter-inner-skin {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) 12px;
+    grid-template-rows: 11px minmax(0, 1fr) 11px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-menu--volter {
+    padding: 2px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-family: Volter, sans-serif;
+    font-size: 9px;
+    line-height: 13px;
+    box-shadow: none;
+
+    .octane-wired__shell-menu-item {
+        padding-bottom: 4px;
+        background: transparent;
+    }
+    .octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+        background: #626262;
+    }
+    .octane-wired__shell-menu-item:disabled {
+        color: inherit;
+        opacity: 0.5;
+    }
+    .octane-wired__shell-menu-check {
+        top: 3px;
+        width: 16px;
+        height: 16px;
+        background: url('../assets/images/wired/volter_shell_atlas.png') -410px -100px no-repeat;
+        image-rendering: pixelated;
+    }
+    .octane-wired__shell-menu-check.is-checked {
+        background-position: -410px -116px;
+    }
+    .octane-wired__shell-menu-spacer {
+        background: #424242;
+    }
+    .octane-wired__shell-menu-spacer::before {
+        background: #666;
+    }
+}
+
+.octane-wired__volter-menu-frame,
+.octane-wired__volter-menu-frame-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.octane-wired__volter-menu-frame-grid {
+    display: grid;
+    grid-template-columns: 3px minmax(0, 1fr) 3px;
+    grid-template-rows: 3px minmax(0, 1fr) 3px;
+}
+.octane-wired__volter-menu-frame-grid svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
 }
