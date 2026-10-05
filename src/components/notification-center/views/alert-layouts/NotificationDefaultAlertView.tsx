@@ -198,7 +198,16 @@ export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps>
                 <>
                     <Column center alignItems="center" gap={0}>
                         <hr className="my-2 w-full" />
-                        {!item.clickUrl && <Button onClick={onClose}>{LocalizeText('generic.close')}</Button>}
+                        {!item.clickUrl && (
+                            <button
+                                type="button"
+                                className="inline-flex items-center justify-center pointer-events-auto leading-tight text-center no-underline cursor-pointer select-none rounded-none habbo-btn-primary rounded-none!"
+                                style={{ fontFamily: 'HabboAirUbuntu, Ubuntu, sans-serif', lineHeight: '14px' }}
+                                onClick={onClose}
+                            >
+                                {LocalizeText('generic.close')}
+                            </button>
+                        )}
                         {item.clickUrl && item.clickUrl.length > 0 && <Button onClick={visitUrl}>{LocalizeText(item.clickUrlText)}</Button>}
                     </Column>
                 </>

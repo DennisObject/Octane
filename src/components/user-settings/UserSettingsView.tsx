@@ -4,7 +4,6 @@ import {
     OctaneSettingsEvent,
     RemoveLinkEventTracker,
     UserSettingsCameraFollowComposer,
-    UserSettingsChatPreferencesComposer,
     UserSettingsEvent,
     UserSettingsOnlineIndicatorComposer,
     UserSettingsRoomInvitesComposer,
@@ -13,19 +12,13 @@ import {
 import { FC, useEffect, useRef, useState } from 'react';
 import { DispatchMainEvent, DispatchUiEvent, GetConfigurationValue, localizeWithFallback, SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../../hooks';
+import { useChatPreferences } from '../../hooks/useChatPreferences';
 import { AirSettingsVolumeRow } from './AirSettingsVolumeRow';
 import { CustomWordFilterSettingsView } from './CustomWordFilterSettingsView';
 import { SettingsWindow } from './SettingsWindow';
 
 type SettingsSection = 'audio' | 'chat' | 'other' | 'wordfilter';
 type VolumeAction = 'system_volume' | 'furni_volume' | 'trax_volume';
-
-interface SettingsPreferences {
-    chatMode: number;
-    chatBubbleWidth: number;
-    chatScrollSpeed: number;
-    onlineIndicatorPreference: number;
-}
 
 const SECTIONS: SettingsSection[] = ['audio', 'chat', 'other', 'wordfilter'];
 const CLOSED: Record<SettingsSection, boolean> = { audio: false, chat: false, other: false, wordfilter: false };
@@ -51,7 +44,8 @@ const DropMenu: FC<{ label: string; left: number; top: number; width: number; va
 export const UserSettingsView: FC<{}> = () => {
     const [open, setOpen] = useState<Record<SettingsSection, boolean>>(CLOSED);
     const [userSettings, setUserSettings] = useState<OctaneSettingsEvent>(null);
-    const [preferences, setPreferences] = useState<SettingsPreferences>(null);
+    const [onlineIndicatorPreference, setOnlineIndicatorPreference] = useState<number>(null);
+    const { chatPreferences, updateChatPreferences } = useChatPreferences();
     const wasAudioOpenRef = useRef(false);
 
     const close = (section: SettingsSection) => setOpen((previous) => ({ ...previous, [section]: false }));
@@ -88,14 +82,8 @@ export const UserSettingsView: FC<{}> = () => {
     // One equivalent packet is sent here.
     const changeVolume = (type: VolumeAction, value: number) => processAction(type, value);
 
-    // The three chat preferences travel in one packet, so any change resends all of them.
-    const saveChatPreferences = (next: SettingsPreferences) => {
-        setPreferences(next);
-        SendMessageComposer(new UserSettingsChatPreferencesComposer(next.chatMode, next.chatBubbleWidth, next.chatScrollSpeed));
-    };
-
     const saveOnlineIndicator = (value: number) => {
-        setPreferences((previous) => ({ ...previous, onlineIndicatorPreference: value }));
+        setOnlineIndicatorPreference(value);
         SendMessageComposer(new UserSettingsOnlineIndicatorComposer(value));
     };
 
@@ -117,12 +105,7 @@ export const UserSettingsView: FC<{}> = () => {
         settingsEvent.profileVisible = parser.profileVisible;
 
         setUserSettings(settingsEvent);
-        setPreferences({
-            chatMode: parser.chatMode,
-            chatBubbleWidth: parser.chatBubbleWidth,
-            chatScrollSpeed: parser.chatScrollSpeed,
-            onlineIndicatorPreference: parser.onlineIndicatorPreference
-        });
+        setOnlineIndicatorPreference(parser.onlineIndicatorPreference);
         DispatchMainEvent(settingsEvent);
     });
 
@@ -170,7 +153,7 @@ export const UserSettingsView: FC<{}> = () => {
         wasAudioOpenRef.current = open.audio;
     }, [open.audio, userSettings]);
 
-    if (!userSettings || !preferences) return null;
+    if (!userSettings || !chatPreferences) return null;
 
     const backLabel = localizeWithFallback('widget.memenu.back', localizeWithFallback('generic.back', 'Back'));
     const muteLabel = localizeWithFallback('widget.memenu.settings.volume.mute', 'Mute');
@@ -249,9 +232,9 @@ export const UserSettingsView: FC<{}> = () => {
                             localizeWithFallback('navigator.roomsettings.chat.mode.line.by.line', 'Line by line')
                         ]}
                         top={92}
-                        value={preferences.chatMode}
+                        value={chatPreferences.chatMode}
                         width={237}
-                        onSelect={(value) => saveChatPreferences({ ...preferences, chatMode: value })}
+                        onSelect={(value) => updateChatPreferences({ ...chatPreferences, chatMode: value })}
                     />
                     <div className="us-at us-text" style={{ left: 11, top: 120, width: 237, height: 17 }}>
                         {localizeWithFallback('toolbar.chat.settings.bubble_width', 'Bubble width')}
@@ -265,9 +248,9 @@ export const UserSettingsView: FC<{}> = () => {
                             localizeWithFallback('navigator.roomsettings.chat.bubbles.width.thin', 'Thin')
                         ]}
                         top={141}
-                        value={preferences.chatBubbleWidth}
+                        value={chatPreferences.chatBubbleWidth}
                         width={237}
-                        onSelect={(value) => saveChatPreferences({ ...preferences, chatBubbleWidth: value })}
+                        onSelect={(value) => updateChatPreferences({ ...chatPreferences, chatBubbleWidth: value })}
                     />
                     <div className="us-at us-text" style={{ left: 11, top: 169, width: 237, height: 17 }}>
                         {localizeWithFallback('toolbar.chat.settings.scroll_speed', 'Scroll speed')}
@@ -281,9 +264,9 @@ export const UserSettingsView: FC<{}> = () => {
                             localizeWithFallback('navigator.roomsettings.chat.speed.slow', 'Slow')
                         ]}
                         top={190}
-                        value={preferences.chatScrollSpeed}
+                        value={chatPreferences.chatScrollSpeed}
                         width={237}
-                        onSelect={(value) => saveChatPreferences({ ...preferences, chatScrollSpeed: value })}
+                        onSelect={(value) => updateChatPreferences({ ...chatPreferences, chatScrollSpeed: value })}
                     />
                     <button className="us-button us-at" style={{ left: 11, top: 230, width: 60 }} type="button" onClick={() => close('chat')}>
                         {backLabel}
@@ -333,7 +316,7 @@ export const UserSettingsView: FC<{}> = () => {
                                 localizeWithFallback('memenu.settings.other.friend.online.notification.2', 'Nobody')
                             ]}
                             top={0}
-                            value={preferences.onlineIndicatorPreference}
+                            value={onlineIndicatorPreference}
                             width={222}
                             onSelect={saveOnlineIndicator}
                         />

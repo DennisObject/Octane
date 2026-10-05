@@ -1,82 +1,77 @@
 import { RoomObjectType } from '@octane/renderer';
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { ChatEntryType, IChatEntry, LocalizeText, ReportState, ReportType } from '../../../api';
-import { AutoGrid, Button, Column, Flex, LayoutGridItem, Text } from '../../../common';
-import { useChatHistory, useHelp } from '../../../hooks';
+import { useChatHistory, useHelp, useNotification } from '../../../hooks';
+import { HelpActionButton, HelpInputSkin } from './HelpIndexView';
 
-export const SelectReportedChatsView: FC<{}> = (props) => {
-    const [selectedChats, setSelectedChats] = useState<IChatEntry[]>([]);
-    const { activeReport = null, setActiveReport = null } = useHelp();
-    const { chatHistory = [], messengerHistory = [] } = useChatHistory();
-
-    const userChats = useMemo(() => {
-        switch (activeReport.reportType) {
-            case ReportType.BULLY:
-            case ReportType.EMERGENCY:
-                return chatHistory.filter(
-                    (chat) => chat.type === ChatEntryType.TYPE_CHAT && chat.webId === activeReport.reportedUserId && chat.entityType === RoomObjectType.USER
-                );
-            case ReportType.IM:
-                return messengerHistory.filter((chat) => chat.webId === activeReport.reportedUserId && chat.type === ChatEntryType.TYPE_IM);
-        }
-
-        return [];
-    }, [activeReport, chatHistory, messengerHistory]);
-
-    const selectChat = (chatEntry: IChatEntry) => {
-        setSelectedChats((prevValue) => {
-            const newValue = [...prevValue];
-            const index = newValue.indexOf(chatEntry);
-
-            if (index >= 0) newValue.splice(index, 1);
-            else newValue.push(chatEntry);
-
-            return newValue;
+export const SelectReportedChatsView: FC = () => {
+    const { activeReport, setActiveReport } = useHelp();
+    const { chatHistory, messengerHistory } = useChatHistory();
+    const { simpleAlert } = useNotification();
+    const isIm = activeReport.reportType === ReportType.IM;
+    const userChats = useMemo(
+        () =>
+            isIm
+                ? messengerHistory.filter((chat) => chat.webId === activeReport.reportedUserId && chat.type === ChatEntryType.TYPE_IM)
+                : chatHistory.filter(
+                      (chat) => chat.type === ChatEntryType.TYPE_CHAT && chat.webId === activeReport.reportedUserId && chat.entityType === RoomObjectType.USER
+                  ),
+        [isIm, activeReport.reportedUserId, chatHistory, messengerHistory]
+    );
+    const selectChat = (chat: IChatEntry) => {
+        setActiveReport((previous) => {
+            const selected = previous.reportedChats.some((entry) => entry.id === chat.id);
+            const selectedIds = new Set(previous.reportedChats.map((entry) => entry.id));
+            if (selected) selectedIds.delete(chat.id);
+            else selectedIds.add(chat.id);
+            return {
+                ...previous,
+                reportedChats: userChats.filter((entry) => selectedIds.has(entry.id)),
+                roomId: !selected && !isIm ? chat.roomId : previous.roomId
+            };
         });
     };
-
     const submitChats = () => {
-        if (!selectedChats || selectedChats.length <= 0) return;
-
-        setActiveReport((prevValue) => {
-            return { ...prevValue, reportedChats: selectedChats, currentStep: ReportState.SELECT_TOPICS };
-        });
+        if (!activeReport.reportedChats.length) {
+            simpleAlert(LocalizeText('help.cfh.error.chatmissing'), null, null, null, LocalizeText('generic.alert.title'));
+            return;
+        }
+        setActiveReport((previous) => ({ ...previous, cfhCategory: -1, currentStep: ReportState.SELECT_TOPICS }));
     };
-
-    const back = () => {
-        setActiveReport((prevValue) => {
-            return { ...prevValue, currentStep: prevValue.currentStep - 1 };
-        });
-    };
-
     return (
         <>
-            <div className="flex flex-col gap-1">
-                <Text fontSize={4}>{LocalizeText('help.emergency.chat_report.subtitle')}</Text>
-                <Text>{LocalizeText('help.emergency.chat_report.description')}</Text>
+            <div className="help-report-panel help-chat-panel">
+                <h2 className="help-report-title">{LocalizeText('help.emergency.chat_report.subtitle')}</h2>
+                <p className="help-chat-description">{LocalizeText('help.emergency.chat_report.description')}</p>
+                <div className="help-chat-border help-input-skin">
+                    <HelpInputSkin />
+                    <div className="help-chat-list help-scroll">
+                        {userChats.map((chat) => (
+                            <label className="help-chat-row" key={chat.id}>
+                                <input
+                                    type="checkbox"
+                                    className="help-chat-check"
+                                    checked={activeReport.reportedChats.some((entry) => entry.id === chat.id)}
+                                    onChange={() => selectChat(chat)}
+                                />
+                                <span className="help-chat-text">{chat.message}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
             </div>
-            <Column gap={1} overflow="hidden">
-                {!userChats || (!userChats.length && <Text>{LocalizeText('help.cfh.error.no_user_data')}</Text>)}
-                {userChats.length > 0 && (
-                    <AutoGrid columnCount={1} columnMinHeight={25} gap={1} overflow="auto">
-                        {userChats.map((chat, index) => {
-                            return (
-                                <LayoutGridItem key={chat.id} itemActive={selectedChats.indexOf(chat) >= 0} onClick={(event) => selectChat(chat)}>
-                                    <Text>{chat.message}</Text>
-                                </LayoutGridItem>
-                            );
-                        })}
-                    </AutoGrid>
-                )}
-            </Column>
-            <Flex gap={2} justifyContent="between">
-                <Button disabled={activeReport.reportType === ReportType.IM} variant="secondary" onClick={back}>
+            {!isIm && (
+                <HelpActionButton
+                    tone="gray"
+                    className="help-back"
+                    onClick={() => setActiveReport((previous) => ({ ...previous, currentStep: ReportState.SELECT_USER }))}
+                >
                     {LocalizeText('generic.back')}
-                </Button>
-                <Button disabled={selectedChats.length <= 0} onClick={submitChats}>
-                    {LocalizeText('help.emergency.main.submit.button')}
-                </Button>
-            </Flex>
+                </HelpActionButton>
+            )}
+            <HelpActionButton className="help-continue" onClick={submitChats}>
+                {LocalizeText('help.emergency.main.submit.button')}
+            </HelpActionButton>
         </>
     );
 };

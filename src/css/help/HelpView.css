@@ -42,3 +42,301 @@
     color: #46a01e;
     font-size: 0.95rem;
 }
+
+/* HabboHelpCom/topics_flow_help_xml. The backdrop matches static modal dimming;
+   the native frozen desktop snapshot remains outside this feature. */
+.octane-help-modal {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.octane-help-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.octane-help.octane-card-shell.octane-card-frame-3 {
+    position: absolute;
+    left: round(nearest, calc((100vw - 448px) / 2), 1px);
+    top: round(nearest, calc((100vh - 522px) / 2), 1px);
+    box-sizing: border-box;
+    width: 448px;
+    height: 522px;
+    min-width: 448px;
+    max-width: 448px;
+    min-height: 522px;
+    max-height: 522px;
+    padding: 33px 1px 3px;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349)) !important;
+    color: #000;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+}
+
+.octane-help :is(button, input, textarea) {
+    font-family: HabboAirUbuntu, sans-serif;
+}
+
+.octane-help-content {
+    position: relative;
+    width: 446px;
+    height: 486px;
+    overflow: hidden;
+}
+
+.octane-help-filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.octane-help :is(h1, h2, p) { margin: 0; }
+.octane-help button { cursor: pointer; }
+.octane-help button:disabled { cursor: default; }
+
+.octane-help .help-index {
+    position: relative;
+    width: 446px;
+    height: 480px;
+}
+
+.octane-help .help-index-title {
+    position: absolute;
+    left: 32px;
+    top: 22px;
+    width: 382px;
+    height: 33px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 33px;
+}
+
+.octane-help .help-index-duck {
+    position: absolute;
+    left: 32px;
+    top: 59px;
+    width: 124px;
+    height: 126px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-help .help-index-duck img {
+    width: 126px;
+    height: 105px;
+    max-width: none;
+    flex: none;
+    image-rendering: pixelated;
+}
+
+.octane-help .help-index-description {
+    position: absolute;
+    left: 170px;
+    top: 61px;
+    width: 250px;
+    height: 117px;
+    overflow: hidden;
+}
+
+.octane-help .help-action {
+    position: absolute;
+    width: 189px;
+    height: 41px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 21px;
+    text-align: center;
+    isolation: isolate;
+}
+
+.octane-help .help-action::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: solid transparent;
+    border-width: 6px 6px 7px;
+    border-image: var(--habbo-skin-shiny-large) 6 6 7 6 fill / 6px 6px 7px 6px stretch;
+    filter: url('#help-green');
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-help .help-action:hover::before { border-image-source: var(--habbo-skin-shiny-large-hover); }
+.octane-help .help-action:active::before { border-image-source: var(--habbo-skin-shiny-large-pressed); }
+.octane-help .help-action:disabled::before { border-image-source: var(--habbo-skin-shiny-large-disabled); }
+.octane-help .help-action--red::before { filter: url('#help-red'); }
+.octane-help .help-action--gray::before { filter: url('#help-gray'); }
+
+.octane-help .help-action > span {
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    width: 169px;
+    min-height: 21px;
+}
+
+.octane-help .help-action--thick {
+    left: 32px;
+    width: 380px;
+    height: 40px;
+}
+
+.octane-help .help-action--thick::before {
+    border-width: 5px;
+    border-image: var(--habbo-skin-shiny-thick-green) 5 fill / 5px stretch;
+    filter: none;
+}
+
+.octane-help .help-action--thick:hover::before { border-image-source: var(--habbo-skin-shiny-thick-green-hover); }
+.octane-help .help-action--thick:active::before { border-image-source: var(--habbo-skin-shiny-thick-green-pressed); }
+.octane-help .help-action--thick:disabled::before { border-image-source: var(--habbo-skin-shiny-thick-green-disabled); }
+.octane-help .help-action--thick > span { left: 0; top: 7px; width: 365px; }
+.octane-help .help-index-report { top: 230px; }
+.octane-help .help-index-account { top: 275px; }
+.octane-help .help-back { left: 30px; top: 435px; }
+.octane-help .help-continue { left: 229px; top: 435px; }
+
+.octane-help .help-index-icon {
+    position: absolute;
+    left: 32px;
+    width: 18px;
+    height: 19px;
+    image-rendering: pixelated;
+}
+.octane-help .help-index-icon--faq { top: 378px; }
+.octane-help .help-index-icon--sanction { top: 406px; }
+.octane-help .help-index-icon--reports { top: 434px; }
+
+.octane-help .help-index-link {
+    position: absolute;
+    left: 54px;
+    width: 354px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: left;
+    text-decoration: underline;
+}
+.octane-help .help-index-link--faq { top: 377px; }
+.octane-help .help-index-link--sanction { top: 404px; }
+.octane-help .help-index-link--reports { top: 432px; }
+
+.octane-help .help-reported-user {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 446px;
+    height: 90px;
+    background: #8899a2;
+    border-bottom: 1px solid #000;
+}
+.octane-help .help-reported-avatar { position: absolute; left: 50px; top: 23px; width: 33px; height: 34px; }
+.octane-help .help-reported-title { position: absolute; left: 110px; top: 10px; width: 160px; height: 17px; font-weight: 700; color: #efefef; }
+.octane-help .help-reported-name { position: absolute; left: 110px; top: 30px; height: 24px; font-size: 18px; line-height: 24px; font-weight: 700; color: #fff; }
+.octane-help .help-change-user { position: absolute; left: 110px; top: 60px; width: 256px; height: 16px; padding: 0; border: 0; background: transparent; color: #efefef; font-size: 11px; font-weight: 700; line-height: 16px; text-align: left; text-decoration: underline; }
+
+.octane-help .help-users-panel { position: absolute; left: 0; top: 0; width: 446px; height: 430px; }
+.octane-help .help-users-title { position: absolute; left: 30px; top: 30px; width: 278px; height: 21px; font-size: 16px; line-height: 21px; font-weight: 700; }
+.octane-help .help-user-list { position: absolute; left: 30px; top: 100px; width: 400px; height: 330px; }
+.octane-help .help-user-row { position: relative; display: block; margin-left: 3px; width: 367px; height: 57px; padding: 0; border: 0; background: transparent; text-align: left; }
+.octane-help .help-user-selection { position: absolute; left: 0; top: 0; image-rendering: pixelated; pointer-events: none; }
+.octane-help .help-user-avatar { position: absolute; left: -11px; top: -29px; width: 90px; height: 130px; overflow: hidden; }
+.octane-help .help-user-name { position: absolute; left: 61px; top: 11px; font-size: 10px; line-height: 15px; font-weight: 700; color: #000; text-shadow: 0 1px rgba(255, 255, 255, 0.698); }
+.octane-help .help-user-room { position: absolute; left: 61px; top: 24px; width: 218px; height: 16px; color: #444; font-size: 11px; line-height: 16px; }
+
+.octane-help .help-report-panel { position: absolute; left: 0; top: 100px; width: 444px; height: 330px; }
+.octane-help .help-message-panel { width: 445px; }
+.octane-help .help-summary-panel { height: 380px; }
+.octane-help .help-report-title { position: absolute; left: 30px; top: 20px; width: 278px; height: 21px; font-size: 16px; font-weight: 700; line-height: 21px; }
+.octane-help .help-chat-description { position: absolute; left: 30px; top: 40px; width: 380px; height: 57px; }
+.octane-help .help-message-description { position: absolute; left: 30px; top: 50px; width: 380px; height: 57px; }
+.octane-help .help-summary-description { position: absolute; left: 30px; top: 50px; width: 390px; height: 107px; }
+.octane-help .help-input-skin { position: absolute; left: 30px; top: 100px; width: 390px; height: 220px; }
+.octane-help .help-input-bitmap { position: absolute; inset: 0; image-rendering: pixelated; pointer-events: none; }
+.octane-help .help-chat-list { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; }
+.octane-help .help-chat-row { position: relative; display: block; width: 360px; min-height: 20px; margin-bottom: 2px; padding: 2px 4px 1px 20px; cursor: pointer; }
+.octane-help .help-chat-text { display: block; width: 336px; min-height: 17px; line-height: 17px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.octane-help .help-chat-check { appearance: none; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url("../../assets/images/floorplan-editor/air/checkbox-default.png") 0 0 / 15px 15px no-repeat; box-shadow: none; cursor: pointer; image-rendering: pixelated; }
+.octane-help .help-chat-check:checked { background-image: url("../../assets/images/floorplan-editor/air/checkbox-selected.png"); background-color: transparent; }
+.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #000; resize: none; outline: none; font-size: 11px; line-height: 16px; }
+.octane-help .help-message-placeholder { position: absolute; left: 6px; top: 5px; height: 16px; color: #888; font-size: 11px; line-height: 16px; pointer-events: none; }
+
+.octane-help .help-topics-panel { position: absolute; left: 0; top: 90px; width: 445px; height: 340px; }
+.octane-help .help-pick-topic { position: absolute; left: 30px; top: 12px; width: 405px; height: 59px; }
+.octane-help .help-topic-list { position: absolute; left: 30px; top: 70px; width: 385px; height: 270px; }
+.octane-help .help-topic { position: relative; display: block; width: 355px; height: auto; min-height: 40px; margin-bottom: 5px; padding: 8px 10px 11px; }
+.octane-help .help-topic > span { position: relative; display: block; left: auto; top: auto; width: 335px; overflow-wrap: anywhere; }
+.octane-help .help-scroll { overflow-x: hidden; overflow-y: auto; }
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:decrement {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_default_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:decrement:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_hover_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:decrement:active {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_pressed_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:decrement:disabled {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_up_passive_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:increment {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_default_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:increment:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_hover_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:increment:active {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_pressed_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-button:single-button:vertical:increment:disabled {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_button_down_passive_3_button.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-thumb:vertical {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_top.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_btm.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_default_3_grd.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-thumb:vertical:hover {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_top.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_btm.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_hover_3_grd.png") !important;
+}
+
+.octane-help.has-classic-scrollbar .help-scroll::-webkit-scrollbar-thumb:vertical:active {
+    background-image: url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_top.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_btm.png"),
+        url("../../assets/images/floorplan-editor/air/scroll/scrollbar3_lift_vertical_pressed_3_grd.png") !important;
+}
+
+.octane-help *, .octane-help *::before, .octane-help *::after { box-sizing: border-box; }

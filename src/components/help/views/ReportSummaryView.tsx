@@ -6,21 +6,31 @@ import {
     CallForHelpMessageComposer
 } from '@octane/renderer';
 import { FC } from 'react';
-import { LocalizeText, ReportType, SendMessageComposer } from '../../../api';
-import { Button, Text } from '../../../common';
-import { useHelp } from '../../../hooks';
+import { LocalizeText, ReportState, ReportType, SendMessageComposer } from '../../../api';
+import { useHelp, useNotification } from '../../../hooks';
+import { HelpActionButton } from './HelpIndexView';
 
-export const ReportSummaryView: FC<{}> = (props) => {
+export const ReportSummaryView: FC<{ onClose: () => void }> = ({ onClose }) => {
     const { activeReport = null, setActiveReport = null } = useHelp();
 
+    const { simpleAlert } = useNotification();
+
     const submitReport = () => {
+        if (activeReport.cfhTopic < 0) {
+            simpleAlert(LocalizeText('help.cfh.error.notopic'), null, null, null, LocalizeText('generic.alert.title'));
+            return;
+        }
         const chats: (string | number)[] = [];
 
         switch (activeReport.reportType) {
             case ReportType.BULLY:
             case ReportType.EMERGENCY:
             case ReportType.ROOM: {
-                const reportedRoomId = activeReport.roomId <= 0 ? activeReport.reportedChats[0].roomId : activeReport.roomId;
+                const reportedRoomId = activeReport.roomId > 0 ? activeReport.roomId : activeReport.reportedChats[0]?.roomId;
+                if (reportedRoomId === undefined) {
+                    simpleAlert(LocalizeText('help.cfh.error.chatmissing'), null, null, null, LocalizeText('generic.alert.title'));
+                    return;
+                }
 
                 activeReport.reportedChats.forEach((entry) => chats.push(entry.webId, entry.message));
 
@@ -63,18 +73,25 @@ export const ReportSummaryView: FC<{}> = (props) => {
                 break;
         }
 
-        setActiveReport(null);
+        onClose();
     };
 
     return (
         <>
-            <div className="flex flex-col gap-1">
-                <Text fontSize={4}>{LocalizeText('help.cfh.button.send')}</Text>
-                <Text>{LocalizeText('help.main.summary')}</Text>
+            <div className="help-report-panel help-summary-panel">
+                <h2 className="help-report-title">{LocalizeText('help.cfh.button.send')}</h2>
+                <p className="help-summary-description">{LocalizeText('help.main.summary')}</p>
             </div>
-            <Button variant="success" onClick={submitReport}>
-                {LocalizeText('guide.help.request.emergency.submit.button')}
-            </Button>
+            <HelpActionButton
+                tone="gray"
+                className="help-back"
+                onClick={() => setActiveReport((previous) => ({ ...previous, currentStep: ReportState.INPUT_REPORT_MESSAGE }))}
+            >
+                {LocalizeText('generic.back')}
+            </HelpActionButton>
+            <HelpActionButton tone="red" className="help-continue" onClick={submitReport}>
+                {LocalizeText('help.emergency.chat_report.submit.button')}
+            </HelpActionButton>
         </>
     );
 };
