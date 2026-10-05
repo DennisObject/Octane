@@ -133,7 +133,6 @@ describe('AIR own-avatar menu', () => {
             'widget.memenu.dance',
             'infostand.show.signs',
             'avatar.widget.drop_hand_item',
-            'widget.memenu.effects',
             'infostand.button.wired_inspect',
             'Badge leaderboard'
         ]);
@@ -146,13 +145,11 @@ describe('AIR own-avatar menu', () => {
         renderMenu(onClose);
 
         fireEvent.click(screen.getByText('widget.memenu.myclothes'));
-        fireEvent.click(screen.getByText('widget.memenu.effects'));
         fireEvent.click(screen.getByText('Badge leaderboard'));
 
         expect(mocks.createLinkEvent).toHaveBeenCalledWith('avatar-editor/show');
-        expect(mocks.createLinkEvent).toHaveBeenCalledWith('avatar-effects/show');
         expect(mocks.createLinkEvent).toHaveBeenCalledWith('badge-leaderboard/show');
-        expect(onClose).toHaveBeenCalledTimes(3);
+        expect(onClose).toHaveBeenCalledTimes(2);
     });
 
 });
