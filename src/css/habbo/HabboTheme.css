@@ -62,8 +62,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 24px;
-    padding: 0 8px;
+    min-height: 22px;
+    padding: 0 5px;
     border: 3px solid transparent !important;
     border-radius: 0 !important;
     border-image-source: var(--habbo-skin-button) !important;
@@ -72,9 +72,10 @@
     border-image-repeat: stretch !important;
     background: transparent !important;
     color: #111111 !important;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-family: Volter, Arial, sans-serif;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 14px;
     text-shadow: none !important;
     box-shadow: none !important;
     cursor: pointer;
@@ -114,7 +115,7 @@
     align-items: center;
     justify-content: center;
     min-height: 24px;
-    padding: 0 8px;
+    padding: 0 5px;
     border-width: 5px !important;
     border-style: solid !important;
     border-color: transparent !important;
@@ -125,9 +126,10 @@
     border-image-repeat: stretch !important;
     background: transparent !important;
     color: #ffffff !important;
-    font-size: 11px;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 14px;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35) !important;
     box-shadow: none !important;
     cursor: pointer;
@@ -171,7 +173,7 @@
     align-items: center;
     justify-content: center;
     min-height: 24px;
-    padding: 0 8px;
+    padding: 0 5px;
     border-width: 5px !important;
     border-style: solid !important;
     border-color: transparent !important;
@@ -182,9 +184,10 @@
     border-image-repeat: stretch !important;
     background: transparent !important;
     color: #ffffff !important;
-    font-size: 11px;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 14px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35) !important;
     box-shadow: none !important;
     cursor: pointer;
@@ -199,6 +202,14 @@
 .habbo-btn-danger:active {
     border-image-source: var(--habbo-skin-shiny-red-pressed) !important;
     box-shadow: none !important;
+}
+
+.habbo-btn-danger:disabled,
+.habbo-btn-danger.pointer-events-none {
+    border-image-source: var(--habbo-skin-shiny-red-disabled) !important;
+    opacity: 1;
+    cursor: not-allowed;
+    filter: none;
 }
 
 /* furni_view / pet_view: button style 1, habbo_skin_button_default_black, 3px slice.

@@ -24,10 +24,10 @@
     --habbo-stepper-minus-pressed: url("../../assets/images/catalog/buttons/minus_pressed.png");
     --habbo-stepper-minus-disabled: url("../../assets/images/catalog/buttons/minus_disabled.png");
 
-    width: var(--octane-catalog-window-width, 570px) !important;
-    height: var(--octane-catalog-window-height, 635px) !important;
-    min-width: var(--octane-catalog-window-width, 570px) !important;
-    max-width: var(--octane-catalog-window-width, 570px) !important;
+    width: 570px !important;
+    height: 635px;
+    min-width: 570px !important;
+    max-width: 570px !important;
     min-height: 570px !important;
     max-height: calc(100vh - 24px) !important;
     position: relative;
@@ -39,10 +39,9 @@
 }
 
 .draggable-window:has(> .octane-catalog-window) {
-    width: var(--octane-catalog-window-width, 570px) !important;
-    height: var(--octane-catalog-window-height, 635px) !important;
-    min-width: var(--octane-catalog-window-width, 570px) !important;
-    max-width: var(--octane-catalog-window-width, 570px) !important;
+    width: 570px !important;
+    min-width: 570px !important;
+    max-width: 570px !important;
 }
 
 .octane-catalog-window img,
@@ -222,6 +221,7 @@
     flex: 0 0 90px;
     height: 90px;
     margin: 0 1px;
+    width: 568px;
     border: 2px solid #376275;
     background: #0e3f52;
     overflow: hidden;
@@ -338,7 +338,9 @@
     min-height: 35px;
     max-height: 35px;
     gap: 0;
-    padding: 3px 6px 0 !important;
+    padding: 5px 0 0 !important;
+    width: 568px;
+    border: 0;
     align-items: flex-end;
     overflow: hidden;
     flex-wrap: nowrap;
@@ -346,40 +348,23 @@
     background: var(--catalog-standard-bg);
 }
 
-/*
- * A tab never shrinks on its own: the strip is measured to decide how wide the window should
- * be, so a tab whose width depended on that window would feed its own measurement. Past the
- * window's maximum width the strip used to run under the shell's `overflow: hidden` and the
- * last categories became unreachable - no scrolling, no wrapping, just gone. The hook adds
- * `is-condensed` in exactly that case, and only then are they allowed to shrink, the label
- * ellipsising down to its icon the way the original client's tab context does.
- */
 .octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
     min-width: 0;
-    flex: 0 0 auto;
+    flex: 1 1 0;
     max-width: none;
     /* 9px of the side padding is the tab's cap bitmap. */
-    padding: 4px 17px 8px !important;
+    padding: 4px 9px 6px !important;
     /* Tabs sit edge to edge: a gap would show the white shelf as a line. */
     margin: 0;
-    flex-shrink: 0;
     white-space: nowrap;
     overflow: hidden;
-}
-
-/* Only once the window has run out of room to widen. Until then the tabs keep their natural
-   width, which is what the strip is measured at. */
-.octane-catalog-window .octane-catalog-tabs-shell.is-condensed .octane-card-tab-item {
-    min-width: 34px;
-    flex: 0 1 auto;
-    flex-shrink: 1;
 }
 
 .octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item:last-of-type {
@@ -396,14 +381,6 @@
     line-height: 17px;
 }
 
-.octane-catalog-tab-icon {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    flex-shrink: 0;
-}
-
 .octane-catalog-tab-label {
     min-width: 0;
     overflow: hidden;
@@ -411,24 +388,18 @@
     white-space: nowrap;
 }
 
-.octane-catalog-tab-count {
-    flex: 0 0 auto;
-    font-size: 10px;
-    opacity: 0.85;
-}
-
 .octane-catalog-content-shell {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    padding: 6px 8px 8px !important;
+    padding: 6px 4px 4px 8px !important;
     background: var(--catalog-standard-bg) !important;
     overflow: hidden;
 }
 
 .octane-catalog-stage {
     display: grid;
-    grid-template-columns: 184px 1fr;
+    grid-template-columns: 184px 360px;
     gap: 8px;
     width: 100%;
     height: 100%;
@@ -669,9 +640,9 @@
     position: relative;
     display: block !important;
     width: 100%;
-    height: 460px;
-    min-height: 460px;
-    max-height: 460px;
+    height: calc(100% - 1px);
+    min-height: 0;
+    max-height: none;
 }
 
 .octane-catalog-grid-shell,
@@ -686,15 +657,6 @@
     background: var(--catalog-standard-panel);
 }
 
-/*
- * The original's `productViewWidget` is a fixed 360x240 because its window is a fixed 570. Ours
- * sizes itself from its tab strip, up to 1040, and pinning this box to 360 left the rest of that
- * width as dead grey beside the preview. It follows the page instead; 240 stays, since the room
- * canvas behind it is drawn taller than the box and cropped, exactly as the original does.
- *
- * Everything placed inside it is anchored to an edge rather than to an offset measured from the
- * old 360 - see `.octane-catalog-preview-limited` and `.octane-catalog-preview-controls`.
- */
 .octane-catalog-product-view {
     position: relative;
     top: 0;
@@ -1426,7 +1388,8 @@
     left: 0;
     top: 245px;
     width: 360px;
-    height: 155px;
+    bottom: 60px;
+    height: auto;
     min-height: 0;
     padding: 3px;
     overflow: auto;
@@ -1968,7 +1931,7 @@
 .octane-catalog-price-row {
     position: absolute;
     left: 0;
-    top: 405px;
+    bottom: 30px;
     width: 360px;
     height: 25px;
     padding: 0;
@@ -2023,7 +1986,7 @@
 .octane-catalog-purchase-row {
     position: absolute;
     left: 0;
-    top: 430px;
+    bottom: 0;
     width: 360px;
     height: 30px;
     padding: 0;

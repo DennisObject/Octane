@@ -1,7 +1,7 @@
 import type { NodeData } from '@octane/renderer';
 import { CatalogNode } from '../../api/catalog/CatalogNode';
 import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
-import { parseCatalogTabLabel } from '../../components/catalog/useCatalogWindowWidth';
+import { parseCatalogTabLabel } from '../../components/catalog/catalogTabLabel';
 import type { CatalogStudioCatalogType, CatalogStudioPageSnapshot } from './catalogStudio.types';
 
 /** Drag payload type for catalog pages, shared by the catalog navigation and the manager tree. */

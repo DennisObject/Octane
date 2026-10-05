@@ -1,5 +1,5 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
@@ -8,7 +8,7 @@ import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore'
 import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
 import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
 import { getCatalogHeaderDescription } from './catalogLocalization.helpers';
-import { parseCatalogTabLabel, useCatalogWindowWidth } from './useCatalogWindowWidth';
+import { parseCatalogTabLabel } from './catalogTabLabel';
 import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
 import { CatalogAdminOfferEditView } from './views/admin/CatalogAdminOfferEditView';
 import { CatalogAdminPageEditView } from './views/admin/CatalogAdminPageEditView';
@@ -20,6 +20,7 @@ import { CatalogBreadcrumbView } from './views/navigation/CatalogBreadcrumbView'
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
+import { getCatalogLayoutDefinition } from './views/page/layout/catalogLayoutRegistry';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
 
 const CatalogViewInner: FC<{}> = () => {
@@ -27,7 +28,6 @@ const CatalogViewInner: FC<{}> = () => {
     const {
         isVisible = false,
         setIsVisible = null,
-        navigationHidden = false,
         setNavigationHidden = null,
         activeNodes = [],
         setSearchResult = null,
@@ -50,33 +50,14 @@ const CatalogViewInner: FC<{}> = () => {
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
     const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
     const buildersClubEnabled = GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true));
-    // Strip technical suffixes like "(BC)" or "(Hot)" but keep the
-    // pageId hint the gameserver appends when the viewer has
-    // ACC_CATALOG_IDS - that's a pure-numeric "(6)" trailer.
+    // Keep technical suffixes and numeric page hints out of the tab captions.
     const stripSwfTabSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
     const getSwfTabLabel = (label: string) => stripSwfTabSuffix(parseCatalogTabLabel(label).name);
-    const tabsShellRef = useRef<HTMLDivElement>(null);
 
-    const visibleRootTabCount = useMemo(() => {
-        if (!rootNode?.children?.length) return 0;
+    const hideCatalogNavigation = useCallback(() => setNavigationHidden(true), [setNavigationHidden]);
 
-        return rootNode.children.filter((child) => {
-            if (!child.isVisible) return false;
-
-            return true;
-        }).length;
-    }, [rootNode]);
-
-    const catalogWindowStyle = useCatalogWindowWidth(
-        tabsShellRef,
-        isVisible,
-        visibleRootTabCount,
-        adminMode,
-        isMod,
-        currentType,
-        rootNode?.pageId,
-        activeCatalogNode?.pageId
-    );
+    const layoutRenderer = getCatalogLayoutDefinition(currentPage?.layoutCode)?.renderer;
+    const sidebarHidden = layoutRenderer === 'frontpage' || layoutRenderer === 'info';
 
     useEffect(() => {
         const getCatalogTypeFromLink = (type?: string) => {
@@ -153,9 +134,9 @@ const CatalogViewInner: FC<{}> = () => {
             {isVisible && (
                 <OctaneCardView
                     classNames={['octane-catalog-window']}
-                    dragStyle={catalogWindowStyle}
-                    isResizable={false}
-                    style={catalogWindowStyle}
+                    frameStyle={3}
+                    isResizable
+                    resizeAxis="vertical"
                     uniqueKey="catalog"
                 >
                     <OctaneCardHeaderView
@@ -182,7 +163,7 @@ const CatalogViewInner: FC<{}> = () => {
                             ))}
                         </div>
                     </div>
-                    <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} innerRef={tabsShellRef} justifyContent="start">
+                    <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} justifyContent="start">
                         {rootNode &&
                             rootNode.children.length > 0 &&
                             rootNode.children.map((child, index) => {
@@ -199,7 +180,6 @@ const CatalogViewInner: FC<{}> = () => {
                                         }}
                                     >
                                         <div className="flex items-center gap-1">
-                                            {child.iconId > 0 && <CatalogIconView icon={child.iconId} className="octane-catalog-tab-icon" />}
                                             <span className="octane-catalog-tab-label">{getSwfTabLabel(child.localization)}</span>
                                         </div>
                                     </OctaneCardTabsItemView>
@@ -248,8 +228,8 @@ const CatalogViewInner: FC<{}> = () => {
                         </div>
                     </div>
                     <OctaneCardContentView classNames={['octane-catalog-content-shell']}>
-                        <div className={`octane-catalog-stage ${navigationHidden ? 'is-navigation-hidden' : ''}`}>
-                            {!navigationHidden && (
+                        <div className={`octane-catalog-stage ${sidebarHidden ? 'is-navigation-hidden' : ''}`}>
+                            {!sidebarHidden && (
                                 <div className="octane-catalog-sidebar">
                                     <div className="octane-catalog-search-shell">
                                         <CatalogSearchView />
@@ -266,7 +246,7 @@ const CatalogViewInner: FC<{}> = () => {
                                         {!!currentPage?.localization?.getImage(0) && <img alt="" src={currentPage.localization.getImage(0)} />}
                                     </div>
                                 </div>
-                                <div className="octane-catalog-layout-container">{GetCatalogLayout(currentPage, () => setNavigationHidden(true))}</div>
+                                <div className="octane-catalog-layout-container">{GetCatalogLayout(currentPage, hideCatalogNavigation)}</div>
                             </div>
                         </div>
                     </OctaneCardContentView>
