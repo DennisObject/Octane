@@ -1285,3 +1285,45 @@
     width: auto;
     min-width: 50px;
 }
+
+/* motd_notification_xml: content origin (6,25); border (1,0) 420x160; list (5,6) 410x149; OK (200,168) 30x26 */
+.octane-native-motd .octane-native-motd-border {
+    position: absolute;
+    left: 1px;
+    top: 0;
+    width: 420px;
+    height: 160px;
+}
+
+.octane-native-motd-list {
+    position: absolute;
+    left: 5px;
+    top: 6px;
+    box-sizing: border-box;
+    width: 410px;
+    height: 149px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.octane-native-motd-item {
+    box-sizing: border-box;
+    width: 395px;
+    padding: 5px 0 15px 5px;
+    color: #000;
+    font: 9px/12px Volter, sans-serif;
+    overflow-wrap: break-word;
+}
+
+.octane-native-motd-ok {
+    position: absolute;
+    left: 200px;
+    top: 168px;
+    width: 30px;
+    height: 26px;
+}
+
+.octane-native-motd .octane-native-motd-ok .friends-dialog-button {
+    left: 0;
+}

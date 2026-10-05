@@ -9,6 +9,7 @@ import {
     SanitizeHtml
 } from '../../../../api';
 import { Button, Column, Flex, LayoutNotificationAlertView, LayoutNotificationAlertViewProps } from '../../../../common';
+import { NativeMotdView } from '../native/NativeMotdView';
 import { NativeNotificationPopupView } from '../native/NativeNotificationPopupView';
 import { NativeSimpleAlertView } from '../native/NativeSimpleAlertView';
 
@@ -225,12 +226,14 @@ const isCommandTemplate = (item: NotificationAlertItem) => {
 };
 
 // The v75 client shows broadcasts and moderator messages in the simple alert (simple_alert_xml) and every other notification
-// type, with its optional link and image, in the notification popup (layout_notification_popup_xml). The MOTD and the command
-// listing keep their own layouts.
+// type, with its optional link and image, in the notification popup (layout_notification_popup_xml). The MOTD has its own window
+// (motd_notification_xml); the command listing keeps its custom layout.
 export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
     const { item = null, onClose = null, title = (props.item && props.item.title) || '' } = props;
 
-    if (item.alertType === NotificationAlertType.MOTD || isCommandTemplate(item)) return <LegacyNotificationDefaultAlertView {...props} />;
+    if (isCommandTemplate(item)) return <LegacyNotificationDefaultAlertView {...props} />;
+
+    if (item.alertType === NotificationAlertType.MOTD) return <NativeMotdView messages={item.messages} title={title} onClose={onClose} />;
 
     const message = item.messages.join('\n');
     const linkTitle = item.clickUrlText ? LocalizeText(item.clickUrlText) : '';

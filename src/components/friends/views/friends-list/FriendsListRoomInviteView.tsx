@@ -42,26 +42,36 @@ export const FriendsDialogBorderView: FC<{ width: number; height: number }> = ({
     </svg>
 );
 
-export const FriendsDialogButtonView: FC<{ caption: string; thick?: boolean; onClick: () => void }> = ({ caption, thick = false, onClick }) => (
-    <button type="button" className={'friends-dialog-button' + (thick ? ' is-thick' : '')} onClick={onClick}>
+export const FriendsDialogButtonView: FC<{ caption: string; thick?: boolean; width?: number; height?: number; onClick: () => void }> = ({ caption, thick = false, width = 60, height = 21, onClick }) => (
+    <button type="button" className={'friends-dialog-button' + (thick ? ' is-thick' : '')} style={width !== 60 || height !== 21 ? { width, height } : undefined} onClick={onClick}>
         {['default', 'hover', 'pressed', 'disabled'].map((state, index) => {
             const x = thick ? [120, 120, 148, 134][index] : [89, 89, 109, 99][index];
             const y = state === 'hover' ? 46 : 0;
-            return <svg key={state} className={'friends-dialog-button-skin is-' + state} width="60" height="21" aria-hidden="true">
-                {nineSlice(60, 21, thick ? 4 : 3, x, y, x + (thick ? 8 : 6), y + (thick ? 20 : 19), thick ? 1 : 0)}
+            return <svg key={state} className={'friends-dialog-button-skin is-' + state} width={width} height={height} aria-hidden="true">
+                {nineSlice(width, height, thick ? 4 : 3, x, y, x + (thick ? 8 : 6), y + (thick ? 20 : 19), thick ? 1 : 0)}
             </svg>;
         })}
         <span>{caption}</span>
     </button>
 );
 
-export const FriendsDialogFrameView: FC<PropsWithChildren<{
-    kind: keyof typeof FRIENDS_DIALOG_SIZES;
+export interface FriendsDialogFrameTint {
+    frame: string;
+    header: string;
     title: string;
-    initialPosition: FriendsDialogSnapshot['initialPosition'];
+}
+
+// Frame with another size and colour (style 1 frames take a color attribute); the default is the blue friends frame.
+export const FriendsDialogFrameView: FC<PropsWithChildren<{
+    kind?: keyof typeof FRIENDS_DIALOG_SIZES;
+    size?: { width: number; height: number };
+    className?: string;
+    tint?: FriendsDialogFrameTint;
+    title: string;
+    initialPosition?: FriendsDialogSnapshot['initialPosition'];
     onCloseClick: () => void;
-}>> = ({ kind, title, initialPosition, onCloseClick, children }) => {
-    const { width, height } = FRIENDS_DIALOG_SIZES[kind];
+}>> = ({ kind, size, className, tint, title, initialPosition, onCloseClick, children }) => {
+    const { width, height } = size ?? FRIENDS_DIALOG_SIZES[kind];
     const titleId = useId();
     const shine: number[][] = [
         [59, 1, 7, 7, 1, 1, 7, 7],
@@ -75,14 +85,14 @@ export const FriendsDialogFrameView: FC<PropsWithChildren<{
     ];
     const style: CSSProperties = { width, height };
     return <DraggableWindow windowPosition={DraggableWindowPosition.NOTHING} initialPosition={initialPosition} unconstrainedPosition>
-        <div className={'friends-native-dialog octane-friends-' + (kind === 'invite' ? 'room-invite' : 'remove-confirmation')}
+        <div className={'friends-native-dialog ' + (className ?? 'octane-friends-' + (kind === 'invite' ? 'room-invite' : 'remove-confirmation'))}
             style={style} role="dialog" aria-labelledby={titleId}>
             <svg className="friends-dialog-frame" width={width} height={height} aria-hidden="true">
-                {nineSlice(width, height, 13, 0, 0, 14, 14, 0, blueFrame, 27, 27)}
+                {nineSlice(width, height, 13, 0, 0, 14, 14, 0, tint?.frame ?? blueFrame, 27, 27)}
                 {shine.map((region, index) => bitmap(region.slice(0, 4), region.slice(4), index + 9))}
             </svg>
-            <div className="friends-dialog-titlebar drag-handler">
-                <span id={titleId} className="friends-dialog-title">{title}</span>
+            <div className="friends-dialog-titlebar drag-handler" style={tint && { backgroundImage: `url("${tint.header}")` }}>
+                <span id={titleId} className="friends-dialog-title" style={tint && { background: tint.title }}>{title}</span>
                 <button type="button" className="friends-dialog-close" aria-label={LocalizeText('generic.close')} onClick={onCloseClick}>
                     {['default', 'hover', 'pressed'].map((state, index) => <svg key={state}
                         className={'friends-dialog-close-skin is-' + state} width="15" height="15" aria-hidden="true">
