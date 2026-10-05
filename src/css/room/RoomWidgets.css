@@ -422,9 +422,9 @@
 }
 
 .octane-chat-input-container.swf-chat-input {
-    /* chatinput_window_new: 471 wide, input_border 400x38 at x=11, styles 57x38 at x=0. */
+    /* chatinput_window_new: input_border 400x38 at x=11, styles 57x38 at x=0, extra button 41x38 at x=427. */
     width: 100% !important;
-    max-width: 466px;
+    max-width: 468px;
     height: 38px !important;
     min-height: 38px;
     gap: 0 !important;
@@ -622,11 +622,11 @@
     height: 38px !important;
     min-height: 38px !important;
     max-height: 38px !important;
-    flex: 1 1 auto !important;
-    width: auto !important;
+    flex: 0 0 400px !important;
+    width: 400px !important;
     min-width: 0;
     margin: 0 0 0 -46px;
-    padding: 7px 8px 7px 50px !important;
+    padding: 7px 24px 7px 50px !important;
     align-self: center;
     overflow: visible;
     border: 0;
@@ -685,11 +685,11 @@
     height: 38px;
     min-height: 38px;
     max-height: 38px;
-    flex: 1 1 auto !important;
-    width: auto !important;
+    flex: 0 0 400px !important;
+    width: 400px !important;
     min-width: 0;
     margin: 0 0 0 -46px;
-    padding: 7px 8px 7px 50px !important;
+    padding: 7px 24px 7px 50px !important;
     align-self: center;
     overflow: visible;
     border-radius: 0;
@@ -707,7 +707,7 @@
     width: 41px;
     min-width: 41px;
     height: 38px;
-    margin: 0;
+    margin: 0 0 0 16px;
     background: transparent url('@/assets/images/chat-input-swf/sticky_note.png') 0 0 / auto no-repeat;
 }
 

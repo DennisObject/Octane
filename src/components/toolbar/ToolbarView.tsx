@@ -395,7 +395,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 <div
                     data-chat-raised={dockLayout.chatRaised ? 'true' : 'false'}
                     style={chatFrameStyle}
-                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 -translate-x-1/2 z-[71] flex h-[38px] w-[466px] max-w-[95vw] items-center p-0 pointer-events-none`}
+                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 -translate-x-1/2 z-[71] flex h-[38px] w-[468px] max-w-[95vw] items-center p-0 pointer-events-none`}
                 >
                     <Flex
                         alignItems="center"
