@@ -1327,3 +1327,157 @@
 .octane-native-motd .octane-native-motd-ok .friends-dialog-button {
     left: 0;
 }
+
+/* layout_notification_xml: 190x66, config view height 70 per slot, 4 px apart, 5 px from the right edge */
+.octane-native-bubble-slot {
+    box-sizing: border-box;
+    width: 190px;
+    min-height: 70px;
+    margin-right: 5px;
+}
+
+.octane-native-bubble {
+    position: relative;
+    box-sizing: border-box;
+    width: 190px;
+    min-height: 66px;
+    cursor: pointer;
+    pointer-events: auto;
+    color: #fff;
+    font: 700 9px/12px Volter, sans-serif;
+    image-rendering: pixelated;
+    user-select: none;
+}
+
+.octane-native-bubble-chrome {
+    position: absolute;
+    inset: 0;
+    border: 6px solid transparent;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-black.png");
+    border-image-slice: 24;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    background-color: #3d3d3d;
+    background-clip: padding-box;
+    pointer-events: none;
+}
+
+.octane-native-bubble-icon {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.octane-native-bubble-icon img {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
+}
+
+.octane-native-bubble-text {
+    position: relative;
+    box-sizing: border-box;
+    width: 116px;
+    min-height: 22px;
+    margin: 0 0 0 66px;
+    padding: 8px 0;
+    overflow-wrap: break-word;
+}
+
+/* club_gift_notification_xml */
+.octane-native-club-gift {
+    position: relative;
+    box-sizing: border-box;
+    width: 192px;
+    height: 82px;
+    margin-left: auto;
+    color: #fff;
+    font-family: Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 14px;
+    image-rendering: pixelated;
+}
+
+.octane-native-club-gift-chrome {
+    position: absolute;
+    inset: 0;
+    border: 7px solid transparent;
+    border-bottom-width: 8px;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-ubuntu-9.png");
+    border-image-slice: 28 28 32 28 fill;
+    border-image-width: 7px 7px 8px 7px;
+    border-image-repeat: stretch;
+    pointer-events: none;
+}
+
+.octane-native-club-gift-icon {
+    position: absolute;
+    left: 6px;
+    top: 7px;
+    width: 16px;
+    height: 16px;
+}
+
+.octane-native-club-gift-text {
+    position: absolute;
+    left: 25px;
+    top: 7px;
+    width: 174px;
+    height: 36px;
+    padding-right: 8px;
+}
+
+.octane-native-club-gift-button {
+    position: absolute;
+    right: 8px;
+    top: 44px;
+    box-sizing: border-box;
+    min-width: 50px;
+    height: 28px;
+    margin: 0;
+    padding: 0 10px;
+    border: 5px solid transparent;
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-default.png");
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.octane-native-club-gift-button:hover {
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-hover.png");
+}
+
+.octane-native-club-gift-button:active {
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-pressed.png");
+}
+
+.octane-native-club-gift-later {
+    position: absolute;
+    left: 8px;
+    top: 49px;
+    width: 70px;
+    height: 17px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.octane-native-club-gift-later:hover {
+    color: #bae1f9;
+}
