@@ -1,20 +1,41 @@
 import { AddLinkEventTracker, FollowFriendMessageComposer, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { FC, KeyboardEvent, PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { GetUserProfile, LocalizeText, ReportType, SendMessageComposer, useHabbiconCatalog } from '../../../../api';
 import { HabbiconsDmIcon } from '../../../../assets/images/habbicons';
 import { DraggableWindow, DraggableWindowPosition, LayoutAvatarImageView } from '../../../../common';
 import { useFriends, useHelp, useMessenger, useTranslation } from '../../../../hooks';
-import { isStaffChatIdentity } from '../../staffChatIdentity';
 import { StaffChatFrankIconView } from '../../StaffChatFrankIconView';
+import { isStaffChatIdentity } from '../../staffChatIdentity';
 import { resolveAvatarFigure } from '../friends-list/resolveAvatarFigure';
 import './FriendsMessengerView.css';
 import { FriendsMessengerHabbiconPickerView } from './FriendsMessengerHabbiconPickerView';
 import { FriendsMessengerThreadView } from './messenger-thread/FriendsMessengerThreadView';
 
-const MESSENGER_VISIBLE_AVATARS = 7;
-
 export const FriendsMessengerView: FC<{}> = (props) => {
+    const windowRef = useRef<HTMLDivElement>(null);
+    const avatarBarRef = useRef<HTMLDivElement>(null);
+    const [visibleAvatarCount, setVisibleAvatarCount] = useState(7);
+    const resizeStart = useRef<{ x: number; y: number; width: number; height: number; scaleX: number; scaleY: number } | null>(null);
+    const startResize = (event: PointerEvent<HTMLDivElement>) => {
+        const element = windowRef.current;
+        if (!element) return;
+        event.stopPropagation();
+        event.preventDefault();
+        const bounds = element.getBoundingClientRect();
+        resizeStart.current = { x: event.clientX, y: event.clientY, width: element.offsetWidth, height: element.offsetHeight,
+            scaleX: bounds.width / element.offsetWidth, scaleY: bounds.height / element.offsetHeight };
+        event.currentTarget.setPointerCapture(event.pointerId);
+    };
+    const resizeWindow = (event: PointerEvent<HTMLDivElement>) => {
+        const start = resizeStart.current;
+        const element = windowRef.current;
+        if (!start || !element) return;
+        element.style.width = `${Math.max(282, start.width + (event.clientX - start.x) / start.scaleX)}px`;
+        element.style.height = `${Math.max(275, start.height + (event.clientY - start.y) / start.scaleY)}px`;
+    };
+    const stopResize = () => { resizeStart.current = null; };
+
     const [isVisible, setIsVisible] = useState(false);
     const [lastThreadId, setLastThreadId] = useState(-1);
     const [messageText, setMessageText] = useState('');
@@ -187,7 +208,7 @@ export const FriendsMessengerView: FC<{}> = (props) => {
     }, [isVisible, activeThread, lastThreadId, visibleThreads, setActiveThreadId]);
 
     useEffect(() => {
-        const maximumStart = Math.max(0, visibleThreads.length - MESSENGER_VISIBLE_AVATARS);
+        const maximumStart = Math.max(0, visibleThreads.length - visibleAvatarCount);
         const activeIndex = activeThread ? visibleThreads.findIndex((thread) => thread.threadId === activeThread.threadId) : -1;
 
         setAvatarStartIndex((current) => {
@@ -195,14 +216,24 @@ export const FriendsMessengerView: FC<{}> = (props) => {
 
             if (activeIndex < 0) return clamped;
             if (activeIndex < clamped) return activeIndex;
-            if (activeIndex >= clamped + MESSENGER_VISIBLE_AVATARS) return Math.min(activeIndex - MESSENGER_VISIBLE_AVATARS + 1, maximumStart);
+            if (activeIndex >= clamped + visibleAvatarCount) return Math.min(activeIndex - visibleAvatarCount + 1, maximumStart);
 
             return clamped;
         });
-    }, [activeThread, visibleThreads]);
+    }, [activeThread, visibleThreads, visibleAvatarCount]);
 
-    const maximumAvatarStart = Math.max(0, visibleThreads.length - MESSENGER_VISIBLE_AVATARS);
-    const displayedThreads = visibleThreads.slice(avatarStartIndex, avatarStartIndex + MESSENGER_VISIBLE_AVATARS);
+    useLayoutEffect(() => {
+        const bar = avatarBarRef.current;
+        if (!isVisible || !bar) return;
+        const measure = () => setVisibleAvatarCount(Math.max(1, Math.floor(bar.clientWidth / 35)));
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(bar);
+        return () => observer.disconnect();
+    }, [isVisible]);
+
+    const maximumAvatarStart = Math.max(0, visibleThreads.length - visibleAvatarCount);
+    const displayedThreads = visibleThreads.slice(avatarStartIndex, avatarStartIndex + visibleAvatarCount);
     const scrollAvatars = (direction: -1 | 1) => setAvatarStartIndex((current) => Math.max(0, Math.min(maximumAvatarStart, current + direction)));
 
     if (!isVisible) return null;
@@ -210,7 +241,7 @@ export const FriendsMessengerView: FC<{}> = (props) => {
     return (
         <>
         <DraggableWindow handleSelector=".messenger-drag" windowPosition={DraggableWindowPosition.TOP_CENTER} offsetTop={8}>
-            <div className="messenger-window">
+            <div ref={windowRef} className="messenger-window">
                 <div className="messenger-drag" />
                 <button className="messenger-minimize" onClick={() => setIsVisible(false)} />
                 <div className="messenger-open-title">{LocalizeText('messenger.window.title', ['OPEN_CHAT_COUNT'], [visibleThreads.length.toString()])}</div>
@@ -223,7 +254,7 @@ export const FriendsMessengerView: FC<{}> = (props) => {
                         disabled={avatarStartIndex === 0}
                         onClick={() => scrollAvatars(-1)}
                     />
-                    <div className="messenger-avatar-bar">
+                    <div ref={avatarBarRef} className="messenger-avatar-bar">
                         {displayedThreads.map((thread) => {
                             const isStaff = isStaffChatIdentity(thread.participant);
                             const liveFriend = thread.participant.id > 0 ? getFriend(thread.participant.id) : null;
@@ -344,6 +375,8 @@ export const FriendsMessengerView: FC<{}> = (props) => {
                         )}
                     </>
                 )}
+                <div className="messenger-resize-handle" aria-hidden="true" onPointerDown={startResize} onPointerMove={resizeWindow}
+                    onPointerUp={stopResize} onPointerCancel={stopResize} onLostPointerCapture={stopResize} />
             </div>
         </DraggableWindow>
         </>

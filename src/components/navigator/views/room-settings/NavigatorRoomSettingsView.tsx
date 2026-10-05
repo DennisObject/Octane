@@ -2,7 +2,7 @@ import { RoomBannedUsersComposer, RoomDataParser, RoomSettingsDataEvent, SaveRoo
 import { FC, useState } from 'react';
 import { CreateLinkEvent, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../../../common';
-import { useMessageEvent } from '../../../../hooks';
+import { useMessageEvent, useNavigatorData } from '../../../../hooks';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
@@ -17,9 +17,14 @@ const TABS: string[] = [
     'navigator.roomsettings.tab.5'
 ];
 
+// Access (2) and rights (3) only exist for the room the user is standing in.
+const OWN_ROOM_ONLY_TABS: string[] = [TABS[1], TABS[2]];
+const FRAME_WIDTH = 341;
+
 export const NavigatorRoomSettingsView: FC<{}> = (props) => {
     const [roomData, setRoomData] = useState<IRoomData>(null);
-    const [currentTab, setCurrentTab] = useState(TABS[0]);
+    const [selectedTab, setSelectedTab] = useState(TABS[0]);
+    const { navigatorData } = useNavigatorData();
 
     useMessageEvent<RoomSettingsDataEvent>(RoomSettingsDataEvent, (event) => {
         const parser = event.getParser();
@@ -70,7 +75,7 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
 
     const onClose = () => {
         setRoomData(null);
-        setCurrentTab(TABS[0]);
+        setSelectedTab(TABS[0]);
     };
 
     const handleChange = (field: string, value: string | number | boolean | string[]) => {
@@ -215,12 +220,15 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
 
     if (!roomData) return null;
 
+    // The current room comes from RoomEntryInfo; enteredGuestRoom can also hold a room that was only looked at.
+    const isEnteredRoom = navigatorData?.currentRoomId === roomData.roomId;
+    const enteredRoom = navigatorData?.enteredGuestRoom?.roomId === roomData.roomId ? navigatorData.enteredGuestRoom : null;
+    const visibleTabs = isEnteredRoom ? TABS : TABS.filter((tab) => !OWN_ROOM_ONLY_TABS.includes(tab));
+    const currentTab = visibleTabs.includes(selectedTab) ? selectedTab : TABS[0];
+    const tabWidth = Math.floor(FRAME_WIDTH / visibleTabs.length) - 1;
+
     return (
-        <OctaneCardView
-            className="octane-room-settings min-w-0 w-[min(341px,calc(100vw-16px))] h-[min(520px,calc(100vh-16px))] max-w-[calc(100vw-16px)]"
-            isResizable={false}
-            uniqueKey="octane-room-settings"
-        >
+        <OctaneCardView className="octane-room-settings" frameStyle={3} isResizable={false} uniqueKey="octane-room-settings">
             <OctaneCardHeaderView
                 headerText={LocalizeText('navigator.roomsettings')}
                 isInfoToHabboPages={currentTab === TABS[3]}
@@ -229,21 +237,32 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                 }}
                 onCloseClick={onClose}
             />
-            <OctaneCardTabsView>
-                {TABS.map((tab) => {
+            <OctaneCardTabsView classNames={['octane-room-settings-tabs']}>
+                {visibleTabs.map((tab) => {
                     return (
-                        <OctaneCardTabsItemView key={tab} isActive={currentTab === tab} onClick={(event) => setCurrentTab(tab)}>
+                        <OctaneCardTabsItemView
+                            key={tab}
+                            isActive={currentTab === tab}
+                            style={{ width: tabWidth, minWidth: tabWidth, maxWidth: tabWidth }}
+                            onClick={(event) => setSelectedTab(tab)}
+                        >
                             {LocalizeText(tab)}
                         </OctaneCardTabsItemView>
                     );
                 })}
             </OctaneCardTabsView>
-            <OctaneCardContentView overflow="auto">
-                {currentTab === TABS[0] && <NavigatorRoomSettingsBasicTabView handleChange={handleChange} roomData={roomData} onClose={onClose} />}
-                {currentTab === TABS[1] && <NavigatorRoomSettingsAccessTabView handleChange={handleChange} roomData={roomData} />}
-                {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
-                {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView handleChange={handleChange} roomData={roomData} />}
-                {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
+            <OctaneCardContentView className="octane-room-settings-content" gap={0}>
+                <div className="ros-viewport">
+                    {currentTab === TABS[0] && (
+                        <NavigatorRoomSettingsBasicTabView handleChange={handleChange} isEnteredRoom={isEnteredRoom} roomData={roomData} onClose={onClose} />
+                    )}
+                    {currentTab === TABS[1] && (
+                        <NavigatorRoomSettingsAccessTabView handleChange={handleChange} hasGroup={(enteredRoom?.habboGroupId ?? 0) > 0} roomData={roomData} />
+                    )}
+                    {currentTab === TABS[2] && <NavigatorRoomSettingsRightsTabView handleChange={handleChange} roomData={roomData} />}
+                    {currentTab === TABS[3] && <NavigatorRoomSettingsVipChatTabView handleChange={handleChange} roomData={roomData} />}
+                    {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
+                </div>
             </OctaneCardContentView>
         </OctaneCardView>
     );

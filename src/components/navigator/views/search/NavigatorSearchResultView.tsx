@@ -8,7 +8,7 @@ import navViewMini from '../../../../assets/images/navigator/air/nav-view-mini.p
 import navViewRow from '../../../../assets/images/navigator/air/nav-view-row.png';
 import navViewThumbs from '../../../../assets/images/navigator/air/nav-view-thumbs.png';
 import quicklinkAdd from '../../../../assets/images/navigator/air/quicklink-add.png';
-import { useNavigatorData, useNavigatorUiStore } from '../../../../hooks';
+import { useNavigatorUiStore } from '../../../../hooks';
 import { NavigatorSearchResultItemView } from './NavigatorSearchResultItemView';
 
 export interface NavigatorSearchResultViewProps {
@@ -22,7 +22,6 @@ const isEventView = (code: string) => code === 'roomads_view' || code === 'new_a
 
 export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (props) => {
     const { searchResult = null, parentCode = '', parentFilter = '', forceOpen = false } = props;
-    const { topLevelContext } = useNavigatorData();
     const isExtended = useNavigatorUiStore((state) => {
         if (forceOpen && !state.collapsedResultCodes.includes(searchResult.code)) return true;
 
@@ -53,7 +52,7 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
             useNavigatorUiStore.getState().setSearch(searchResult.code, parentFilter);
             return;
         }
-        if (searchResult.action == 2 && topLevelContext) useNavigatorUiStore.getState().setSearch(topLevelContext.code, '');
+        if (searchResult.action == 2) useNavigatorUiStore.getState().goBack();
     };
 
     const isTileMode = displayMode >= NavigatorSearchResultViewDisplayMode.THUMBNAILS;

@@ -1,6 +1,6 @@
-import { NavigatorSearchComposer, NavigatorSearchResultSet } from '@octane/renderer';
+import { NavigatorSearchResultSet } from '@octane/renderer';
 import { FC, FormEvent, useEffect, useRef, useState } from 'react';
-import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions, SendMessageComposer } from '../../../../api';
+import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import refreshIcon from '../../../../assets/images/navigator/air/refresh-search.png';
 import searchCloseIcon from '../../../../assets/images/navigator/air/search-close.png';
 import searchPenIcon from '../../../../assets/images/navigator/air/search-pen.png';
@@ -25,8 +25,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
     const [showRefresh, setShowRefresh] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const { topLevelContext } = useNavigatorData();
-    const tabCode = useNavigatorUiStore((state) => state.currentTabCode);
-    const currentFilter = useNavigatorUiStore((state) => state.currentFilter);
+    const searchResultVersion = useNavigatorUiStore((state) => state.searchResultVersion);
     const placeholder = LocalizeText('navigator.filter.input.placeholder');
     const hasQuery = inputText.length > 0;
 
@@ -40,7 +39,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
         setInputText(value);
         setShowClearIcon(value.length > 0);
         setShowRefresh(value.length > 0);
-    }, [searchResult]);
+    }, [searchResult, searchResultVersion]);
 
     const submitSearch = (value = inputText) => {
         if (!topLevelContext) return;
@@ -53,8 +52,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
     };
 
     const refreshSearch = () => {
-        if (!tabCode) return;
-        SendMessageComposer(new NavigatorSearchComposer(tabCode, currentFilter));
+        useNavigatorUiStore.getState().requestSearch();
     };
 
     const clearSearch = () => {

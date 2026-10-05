@@ -25,14 +25,13 @@
     min-width: 282px;
     height: 385px;
     min-height: 275px;
-    max-width: calc(100vw - 10px);
-    max-height: calc(100vh - 10px);
     overflow: hidden;
-    resize: both;
-    border: 1px solid #777771;
-    border-radius: 5px;
-    background: #e4e4e4;
-    box-shadow: inset 0 0 0 1px #fff, 0 2px 5px rgba(0, 0, 0, .42);
+    resize: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, .35));
     color: #000;
     font-family: MessengerUbuntu, Arial, sans-serif;
     font-kerning: normal;
@@ -40,6 +39,27 @@
     image-rendering: var(--octane-pixel-art, pixelated);
     text-rendering: geometricPrecision;
     text-shadow: none;
+}
+
+.messenger-window::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    border: solid transparent;
+    border-width: 4px 4px 7px;
+    border-image: url("@/assets/images/friends/swf/illumina_light_border_frame.png") 4 4 7 fill stretch;
+    pointer-events: none;
+}
+
+.messenger-resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    cursor: nwse-resize;
+    touch-action: none;
+    z-index: 5;
 }
 
 .messenger-window button,
@@ -55,14 +75,14 @@
     position: absolute;
     z-index: 1;
     inset: 0 0 auto;
-    height: 36px;
+    height: 30px;
     cursor: move;
 }
 
 .messenger-window .messenger-open-title {
     position: absolute;
     top: 11px;
-    left: 9px;
+    left: 8px;
     height: 15px;
     overflow: hidden;
     color: #000;
@@ -88,8 +108,8 @@
 .messenger-window .messenger-minimize {
     position: absolute;
     z-index: 3;
-    top: 8px;
-    right: 15px;
+    top: 9px;
+    right: 8px;
 }
 
 .messenger-window .messenger-minimize:hover,
@@ -99,16 +119,18 @@
 
 .messenger-window .messenger-avatar-navigation {
     position: absolute;
-    top: 36px;
+    top: 40px;
     right: 1px;
     left: 1px;
     display: flex;
-    height: 35px;
+    height: 40px;
     align-items: stretch;
 }
 
 .messenger-window .messenger-avatar-bar {
-    position: static;
+    position: absolute;
+    left: 16px;
+    right: 16px;
     display: flex;
     min-width: 0;
     height: 35px;
@@ -120,7 +142,8 @@
 }
 
 .messenger-window .messenger-avatar-scroll {
-    position: relative;
+    position: absolute;
+    top: 0;
     width: 15px;
     min-width: 15px;
     height: 35px;
@@ -132,11 +155,13 @@
 }
 
 .messenger-window .messenger-avatar-scroll.left {
+    left: 0;
     background-image: url("@/assets/images/friends/swf/arrow_right_black.png");
     transform: scaleX(-1);
 }
 
 .messenger-window .messenger-avatar-scroll.right {
+    right: 0;
     background-image: url("@/assets/images/friends/swf/arrow_right_black.png");
 }
 
@@ -189,10 +214,10 @@
 
 .messenger-window .messenger-thread-header {
     position: absolute;
-    top: 80px;
-    right: 9px;
+    top: 79px;
+    right: 8px;
     left: 8px;
-    height: 31px;
+    height: 39px;
     padding: 0;
     background: #e4e4e4;
 }
@@ -226,7 +251,7 @@
 
 .messenger-window .messenger-actions {
     position: absolute;
-    top: 13px;
+    top: 18px;
     right: 0;
     left: 0;
     display: flex;
@@ -302,10 +327,10 @@
 
 .messenger-window .chat-messages {
     position: absolute;
-    top: 122px;
-    right: 9px;
+    top: 124px;
+    right: 8px;
     bottom: 49px;
-    left: 7px;
+    left: 8px;
     padding: 4px 1px 4px 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -452,9 +477,9 @@
 
 .messenger-window .messenger-input-row {
     position: absolute;
-    right: 9px;
-    bottom: 7px;
-    left: 7px;
+    right: 8px;
+    bottom: 10px;
+    left: 8px;
     display: flex;
     height: 30px;
     align-items: center;

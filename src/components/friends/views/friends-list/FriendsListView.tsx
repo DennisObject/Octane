@@ -1,5 +1,5 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveFriendComposer, RemoveLinkEventTracker, SendRoomInviteComposer } from '@octane/renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, filterFriendsByCategory, LocalizeText, MessengerFriend, SendMessageComposer } from '../../../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../../../common';
 import { useFriends } from '../../../../hooks';
@@ -21,6 +21,27 @@ export const FriendsListView: FC<{}> = (props) => {
     const [isOnlineExpanded, setIsOnlineExpanded] = useState<boolean>(true);
     const [isOfflineExpanded, setIsOfflineExpanded] = useState<boolean>(false);
     const { onlineFriends = [], offlineFriends = [], requests = [], requestFriend = null, requestResponse = null } = useFriends();
+
+    const windowRef = useRef<HTMLDivElement>(null);
+    const resizeStart = useRef<{ x: number; y: number; width: number; height: number; scaleX: number; scaleY: number } | null>(null);
+    const startResize = (event: PointerEvent<HTMLDivElement>) => {
+        const element = windowRef.current;
+        if (!element) return;
+        event.stopPropagation();
+        event.preventDefault();
+        const bounds = element.getBoundingClientRect();
+        resizeStart.current = { x: event.clientX, y: event.clientY, width: element.offsetWidth, height: element.offsetHeight,
+            scaleX: bounds.width / element.offsetWidth, scaleY: bounds.height / element.offsetHeight };
+        event.currentTarget.setPointerCapture(event.pointerId);
+    };
+    const resizeWindow = (event: PointerEvent<HTMLDivElement>) => {
+        const start = resizeStart.current;
+        const element = windowRef.current;
+        if (!start || !element) return;
+        element.style.width = `${Math.max(220, start.width + (event.clientX - start.x) / start.scaleX)}px`;
+        if (activePanel !== null) element.style.height = `${Math.max(0, start.height + (event.clientY - start.y) / start.scaleY)}px`;
+    };
+    const stopResize = () => { resizeStart.current = null; };
 
     const friendSearch = friendSearchValue.trim().toLocaleLowerCase();
     const filteredOnlineFriends = filterFriendsByCategory(onlineFriends, 0).filter(
@@ -158,6 +179,7 @@ export const FriendsListView: FC<{}> = (props) => {
                 offsetTop={50}
             >
                 <div
+                    ref={windowRef}
                     className={`habbo-friend-list${requests.length ? ' has-requests' : ''}${activePanel === 'search' ? ' search-mode' : ''}${activePanel === 'requests' ? ' requests-mode' : ''}${activePanel === null ? ' collapsed-mode' : ''}`}
                 >
                     <div className="hfl-titlebar drag-handler">
@@ -303,6 +325,8 @@ export const FriendsListView: FC<{}> = (props) => {
                         {LocalizeText('generic.search')}
                     </button>
                     <div className="hfl-bottom" />
+                    <div className="hfl-resize-handle" aria-hidden="true" onPointerDown={startResize} onPointerMove={resizeWindow}
+                        onPointerUp={stopResize} onPointerCancel={stopResize} onLostPointerCapture={stopResize} />
                 </div>
             </DraggableWindow>
             {showRoomInvite && (

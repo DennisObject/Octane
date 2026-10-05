@@ -1,16 +1,18 @@
 import { RoomDataParser } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText } from '../../../../api';
-import { Column, Flex, Text } from '../../../../common';
-import { NavigatorRoomSettingsSectionView } from './NavigatorRoomSettingsSectionView';
+import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
+
+const PASSWORD_MAX_LENGTH = 30;
 
 interface NavigatorRoomSettingsTabViewProps {
     roomData: IRoomData;
+    hasGroup?: boolean;
     handleChange: (field: string, value: string | number | boolean) => void;
 }
 
 export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabViewProps> = (props) => {
-    const { roomData = null, handleChange = null } = props;
+    const { roomData = null, hasGroup = false, handleChange = null } = props;
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isTryingPassword, setIsTryingPassword] = useState(false);
@@ -27,118 +29,137 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
         setIsTryingPassword(false);
     }, [roomData]);
 
+    const showPassword = isTryingPassword || roomData.lockState === RoomDataParser.PASSWORD_STATE;
+    const petsY = 260 + (hasGroup ? 30 : 0);
+
     return (
-        <>
-            <Column gap={1}>
-                <Text bold>{LocalizeText('navigator.roomsettings.roomaccess.caption')}</Text>
-                <Text small>{LocalizeText('navigator.roomsettings.roomaccess.info')}</Text>
-            </Column>
-            <Column gap={2}>
-                <NavigatorRoomSettingsSectionView title={LocalizeText('navigator.roomsettings.doormode')} gap={1}>
-                    <Flex alignItems="center" gap={1}>
+        <div className="ros-tab" style={{ height: petsY + 82 }}>
+            <NavigatorRoomSettingsAtView className="ros-text ros-head" h={19} w={295} x={0} y={3}>
+                {LocalizeText('navigator.roomsettings.roomaccess.caption')}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={69} w={310} x={0} y={19}>
+                {LocalizeText('navigator.roomsettings.roomaccess.info')}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={193} x={0} y={87}>
+                {LocalizeText('navigator.roomsettings.doormode')}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView h={80} w={274} x={5} y={105}>
+                <label className="ros-radio-row" style={{ top: 0 }}>
+                    <input
+                        type="radio"
+                        name="lockState"
+                        checked={roomData.lockState === RoomDataParser.OPEN_STATE && !isTryingPassword}
+                        onChange={(event) => handleChange('lock_state', RoomDataParser.OPEN_STATE)}
+                    />
+                    <span>{LocalizeText('navigator.roomsettings.doormode.open')}</span>
+                </label>
+                <label className="ros-radio-row" style={{ top: 20 }}>
+                    <input
+                        type="radio"
+                        name="lockState"
+                        checked={roomData.lockState === RoomDataParser.DOORBELL_STATE && !isTryingPassword}
+                        onChange={(event) => handleChange('lock_state', RoomDataParser.DOORBELL_STATE)}
+                    />
+                    <span>{LocalizeText('navigator.roomsettings.doormode.doorbell')}</span>
+                </label>
+                <label className="ros-radio-row" style={{ top: 40 }}>
+                    <input
+                        type="radio"
+                        name="lockState"
+                        checked={roomData.lockState === RoomDataParser.INVISIBLE_STATE && !isTryingPassword}
+                        onChange={(event) => handleChange('lock_state', RoomDataParser.INVISIBLE_STATE)}
+                    />
+                    <span>{LocalizeText('navigator.roomsettings.doormode.invisible')}</span>
+                </label>
+                <label className="ros-radio-row" style={{ top: 60 }}>
+                    <input type="radio" name="lockState" checked={showPassword} onChange={(event) => setIsTryingPassword(event.target.checked)} />
+                    <span>{LocalizeText('navigator.roomsettings.doormode.password')}</span>
+                </label>
+            </NavigatorRoomSettingsAtView>
+            {showPassword && (
+                <>
+                    <NavigatorRoomSettingsAtView className="ros-text" h={17} w={189} x={41} y={188}>
+                        {LocalizeText('navigator.roomsettings.password')}
+                    </NavigatorRoomSettingsAtView>
+                    {isTryingPassword && password.length <= 0 && (
+                        <NavigatorRoomSettingsAtView className="ros-text ros-bold ros-error" h={17} w={120} x={180} y={188}>
+                            {LocalizeText('navigator.roomsettings.passwordismandatory')}
+                        </NavigatorRoomSettingsAtView>
+                    )}
+                    <NavigatorRoomSettingsAtView h={15} w={193} x={42} y={203}>
                         <input
-                            className="form-check-input"
-                            type="radio"
-                            name="lockState"
-                            checked={roomData.lockState === RoomDataParser.OPEN_STATE && !isTryingPassword}
-                            onChange={(event) => handleChange('lock_state', RoomDataParser.OPEN_STATE)}
+                            type="password"
+                            className="ros-input"
+                            maxLength={PASSWORD_MAX_LENGTH}
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            onFocus={(event) => setIsTryingPassword(true)}
                         />
-                        <Text>{LocalizeText('navigator.roomsettings.doormode.open')}</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={1}>
+                    </NavigatorRoomSettingsAtView>
+                    <NavigatorRoomSettingsAtView className="ros-text" h={17} w={234} x={41} y={220}>
+                        {LocalizeText('navigator.roomsettings.passwordconfirm')}
+                    </NavigatorRoomSettingsAtView>
+                    {isTryingPassword && password.length > 0 && password !== confirmPassword && (
+                        <NavigatorRoomSettingsAtView className="ros-text ros-bold ros-error" h={17} w={120} x={180} y={220}>
+                            {LocalizeText('navigator.roomsettings.invalidconfirm')}
+                        </NavigatorRoomSettingsAtView>
+                    )}
+                    <NavigatorRoomSettingsAtView h={15} w={193} x={42} y={236}>
                         <input
-                            className="form-check-input"
-                            type="radio"
-                            name="lockState"
-                            checked={roomData.lockState === RoomDataParser.DOORBELL_STATE && !isTryingPassword}
-                            onChange={(event) => handleChange('lock_state', RoomDataParser.DOORBELL_STATE)}
+                            type="password"
+                            className="ros-input"
+                            maxLength={PASSWORD_MAX_LENGTH}
+                            value={confirmPassword}
+                            onChange={(event) => setConfirmPassword(event.target.value)}
+                            onBlur={saveRoomPassword}
                         />
-                        <Text>{LocalizeText('navigator.roomsettings.doormode.doorbell')}</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={1}>
-                        <input
-                            className="form-check-input"
-                            type="radio"
-                            name="lockState"
-                            checked={roomData.lockState === RoomDataParser.INVISIBLE_STATE && !isTryingPassword}
-                            onChange={(event) => handleChange('lock_state', RoomDataParser.INVISIBLE_STATE)}
-                        />
-                        <Text>{LocalizeText('navigator.roomsettings.doormode.invisible')}</Text>
-                    </Flex>
-                    <Flex fullWidth gap={1}>
-                        <input
-                            className="form-check-input"
-                            type="radio"
-                            name="lockState"
-                            checked={roomData.lockState === RoomDataParser.PASSWORD_STATE || isTryingPassword}
-                            onChange={(event) => setIsTryingPassword(event.target.checked)}
-                        />
-                        {!isTryingPassword && roomData.lockState !== RoomDataParser.PASSWORD_STATE && (
-                            <Text>{LocalizeText('navigator.roomsettings.doormode.password')}</Text>
-                        )}
-                        {(isTryingPassword || roomData.lockState === RoomDataParser.PASSWORD_STATE) && (
-                            <Column gap={1}>
-                                <Text>{LocalizeText('navigator.roomsettings.doormode.password')}</Text>
-                                <input
-                                    type="password"
-                                    className="form-control form-control-sm"
-                                    value={password}
-                                    onChange={(event) => setPassword(event.target.value)}
-                                    placeholder={LocalizeText('navigator.roomsettings.password')}
-                                    onFocus={(event) => setIsTryingPassword(true)}
-                                />
-                                {isTryingPassword && password.length <= 0 && (
-                                    <Text bold small variant="danger">
-                                        {LocalizeText('navigator.roomsettings.passwordismandatory')}
-                                    </Text>
-                                )}
-                                <input
-                                    type="password"
-                                    className="form-control form-control-sm"
-                                    value={confirmPassword}
-                                    onChange={(event) => setConfirmPassword(event.target.value)}
-                                    onBlur={saveRoomPassword}
-                                    placeholder={LocalizeText('navigator.roomsettings.passwordconfirm')}
-                                />
-                                {isTryingPassword && password.length > 0 && password !== confirmPassword && (
-                                    <Text bold small variant="danger">
-                                        {LocalizeText('navigator.roomsettings.invalidconfirm')}
-                                    </Text>
-                                )}
-                            </Column>
-                        )}
-                    </Flex>
-                </NavigatorRoomSettingsSectionView>
-                <NavigatorRoomSettingsSectionView title={LocalizeText('navigator.roomsettings.pets')} gap={1}>
-                    <Flex alignItems="center" gap={1}>
-                        <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={roomData.muteAllPets}
-                            onChange={(event) => handleChange('mute_all_pets', event.target.checked)}
-                        />
-                        <Text>{LocalizeText('navigator.roomsettings.mute_all_pets')}</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={1}>
-                        <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={roomData.allowPets}
-                            onChange={(event) => handleChange('allow_pets', event.target.checked)}
-                        />
-                        <Text>{LocalizeText('navigator.roomsettings.allowpets')}</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={1}>
-                        <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={roomData.allowPetsEat}
-                            onChange={(event) => handleChange('allow_pets_eat', event.target.checked)}
-                        />
-                        <Text>{LocalizeText('navigator.roomsettings.allowfoodconsume')}</Text>
-                    </Flex>
-                </NavigatorRoomSettingsSectionView>
-            </Column>
-        </>
+                    </NavigatorRoomSettingsAtView>
+                </>
+            )}
+            {hasGroup && (
+                <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={30} w={277} x={0} y={260}>
+                    {LocalizeText('navigator.roomsettings.roomaccess.guild.disclaimer')}
+                </NavigatorRoomSettingsAtView>
+            )}
+            <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={162} x={0} y={petsY}>
+                {LocalizeText('navigator.roomsettings.pets')}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView h={20} w={20} x={3} y={petsY + 19}>
+                <input
+                    id="ros-allow-pets"
+                    className="ros-check"
+                    type="checkbox"
+                    checked={roomData.allowPets}
+                    onChange={(event) => handleChange('allow_pets', event.target.checked)}
+                />
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text" h={17} w={191} x={18} y={petsY + 18}>
+                <label htmlFor="ros-allow-pets">{LocalizeText('navigator.roomsettings.allowpets')}</label>
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView h={20} w={20} x={3} y={petsY + 39}>
+                <input
+                    id="ros-allow-food"
+                    className="ros-check"
+                    type="checkbox"
+                    checked={roomData.allowPetsEat}
+                    onChange={(event) => handleChange('allow_pets_eat', event.target.checked)}
+                />
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text" h={17} w={245} x={18} y={petsY + 38}>
+                <label htmlFor="ros-allow-food">{LocalizeText('navigator.roomsettings.allowfoodconsume')}</label>
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView h={20} w={20} x={3} y={petsY + 59}>
+                <input
+                    id="ros-mute-pets"
+                    className="ros-check"
+                    type="checkbox"
+                    checked={roomData.muteAllPets}
+                    onChange={(event) => handleChange('mute_all_pets', event.target.checked)}
+                />
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text" h={17} w={215} x={18} y={petsY + 58}>
+                <label htmlFor="ros-mute-pets">{LocalizeText('navigator.roomsettings.mute_all_pets')}</label>
+            </NavigatorRoomSettingsAtView>
+        </div>
     );
 };

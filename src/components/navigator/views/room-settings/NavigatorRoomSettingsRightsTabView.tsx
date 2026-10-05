@@ -8,10 +8,10 @@ import {
     RoomUsersWithRightsComposer
 } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, Grid, Text, UserProfileIconView } from '../../../../common';
+import { GetConfigurationValue, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
+import { UserProfileIconView } from '../../../../common';
 import { useFriends, useMessageEvent } from '../../../../hooks';
-import { NavigatorRoomSettingsSectionView } from './NavigatorRoomSettingsSectionView';
+import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 
 interface NavigatorRoomSettingsTabViewProps {
     roomData: IRoomData;
@@ -25,6 +25,7 @@ const STAFF_CHAT_NAME = 'Staff Chat';
 export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabViewProps> = (props) => {
     const { roomData = null } = props;
     const [usersWithRights, setUsersWithRights] = useState<Map<number, string>>(new Map());
+    const [filter, setFilter] = useState<string>('');
     const { onlineFriends = [], offlineFriends = [] } = useFriends();
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
@@ -37,6 +38,8 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
         setTimeout(() => pendingActionsRef.current.delete(key), 2000);
     };
 
+    // v75 loads arrow_move_left/right from ${image.library.url}Events/ (ros_flat_controller_xml / ros_friend_xml).
+    const imageLibraryUrl = GetConfigurationValue<string>('image.library.url', '');
     const allFriendsRaw = [...onlineFriends, ...offlineFriends];
 
     const allFriends = allFriendsRaw.filter((friend) => {
@@ -58,6 +61,11 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
     );
 
     const friendsWithoutRights = allFriends.filter((friend) => !filteredUsersWithRights.has(friend.id));
+
+    // The v75 filter box narrows both lists by name (`_r890bf3b741b447`).
+    const query = filter.trim().toLowerCase();
+    const shownUsersWithRights = Array.from(filteredUsersWithRights.entries()).filter(([id, name]) => !query || name.toLowerCase().includes(query));
+    const shownFriends = friendsWithoutRights.filter((friend) => !query || friend.name.toLowerCase().includes(query));
 
     useMessageEvent<FlatControllersEvent>(FlatControllersEvent, (event) => {
         const parser = event.getParser();
@@ -102,68 +110,63 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
     }, [roomData]);
 
     return (
-        <Grid>
-            <Column size={6}>
-                <NavigatorRoomSettingsSectionView
-                    gap={1}
-                    className="h-full"
-                    title={LocalizeText(
-                        'navigator.flatctrls.userswithrights',
-                        ['displayed', 'total'],
-                        [filteredUsersWithRights.size.toString(), filteredUsersWithRights.size.toString()]
-                    )}
+        <div className="ros-tab ros-tab-wide" style={{ height: 364 }}>
+            <NavigatorRoomSettingsAtView className="ros-search" h={42} w={322} x={0} y={1} />
+            <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={138} x={6} y={13}>
+                {LocalizeText('navigator.flatctrls.filter')}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView h={23} w={216} x={97} y={9}>
+                <input className="ros-input" value={filter} onChange={(event) => setFilter(event.target.value)} />
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={34} w={150} x={0} y={44}>
+                {LocalizeText(
+                    'navigator.flatctrls.userswithrights',
+                    ['displayed', 'total'],
+                    [shownUsersWithRights.length.toString(), filteredUsersWithRights.size.toString()]
+                )}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={34} w={150} x={175} y={44}>
+                {LocalizeText('navigator.flatctrls.friends', ['displayed', 'total'], [shownFriends.length.toString(), friendsWithoutRights.length.toString()])}
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={0} y={74}>
+                <div className="ros-list" style={{ height: 246 }}>
+                    {shownUsersWithRights.map(([id, name]) => (
+                        <div key={id} className="ros-user-row">
+                            <button type="button" className="ros-user-bg" onClick={() => guardedSend(`take_${id}`, new RoomTakeRightsComposer(id))}>
+                                <span className="ros-user-name">{name}</span>
+                                <img alt="" className="ros-user-arrow is-rights" draggable={false} src={`${imageLibraryUrl}Events/arrow_move_right.png`} />
+                            </button>
+                            <UserProfileIconView className="ros-user-eye" userId={id} />
+                        </div>
+                    ))}
+                </div>
+                <button
+                    type="button"
+                    className="ros-button ros-button-thick"
+                    disabled={!filteredUsersWithRights.size}
+                    style={{ left: 4, top: 256, width: 142, height: 29 }}
+                    onClick={() => roomData && guardedSend('removeAll', new RemoveAllRightsMessageComposer(roomData.roomId))}
                 >
-                    <Flex overflow="hidden" className="octane-card-panel p-2 list-container">
-                        <Column fullWidth overflow="auto" gap={1}>
-                            {Array.from(filteredUsersWithRights.entries()).map(([id, name], index) => {
-                                return (
-                                    <Flex key={`${id}-${index}`} shrink alignItems="center" gap={1} overflow="hidden">
-                                        <UserProfileIconView userId={id} />
-                                        <Text pointer grow onClick={() => guardedSend(`take_${id}`, new RoomTakeRightsComposer(id))}>
-                                            {name}
-                                        </Text>
-                                    </Flex>
-                                );
-                            })}
-                        </Column>
-                    </Flex>
-
-                    <Button
-                        variant="danger"
-                        disabled={!filteredUsersWithRights.size}
-                        onClick={() => roomData && guardedSend('removeAll', new RemoveAllRightsMessageComposer(roomData.roomId))}
-                    >
-                        {LocalizeText('navigator.flatctrls.clear')}
-                    </Button>
-                </NavigatorRoomSettingsSectionView>
-            </Column>
-
-            <Column size={6}>
-                <NavigatorRoomSettingsSectionView
-                    gap={1}
-                    className="h-full"
-                    title={LocalizeText(
-                        'navigator.flatctrls.friends',
-                        ['displayed', 'total'],
-                        [friendsWithoutRights.length.toString(), allFriends.length.toString()]
-                    )}
-                >
-                    <Flex overflow="hidden" className="octane-card-panel p-2 list-container">
-                        <Column fullWidth overflow="auto" gap={1}>
-                            {friendsWithoutRights.map((friend, index) => {
-                                return (
-                                    <Flex key={`${friend.id}-${index}`} shrink alignItems="center" gap={1} overflow="hidden">
-                                        <UserProfileIconView userId={friend.id} />
-                                        <Text pointer grow onClick={() => guardedSend(`give_${friend.id}`, new RoomGiveRightsComposer(friend.id))}>
-                                            {friend.name}
-                                        </Text>
-                                    </Flex>
-                                );
-                            })}
-                        </Column>
-                    </Flex>
-                </NavigatorRoomSettingsSectionView>
-            </Column>
-        </Grid>
+                    {LocalizeText('navigator.flatctrls.clear')}
+                </button>
+            </NavigatorRoomSettingsAtView>
+            <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={173} y={74}>
+                <div className="ros-list" style={{ height: 281 }}>
+                    {shownFriends.map((friend) => (
+                        <div key={friend.id} className="ros-user-row">
+                            <button
+                                type="button"
+                                className="ros-user-bg"
+                                onClick={() => guardedSend(`give_${friend.id}`, new RoomGiveRightsComposer(friend.id))}
+                            >
+                                <span className="ros-user-name">{friend.name}</span>
+                                <img alt="" className="ros-user-arrow is-friend" draggable={false} src={`${imageLibraryUrl}Events/arrow_move_left.png`} />
+                            </button>
+                            <UserProfileIconView className="ros-user-eye" userId={friend.id} />
+                        </div>
+                    ))}
+                </div>
+            </NavigatorRoomSettingsAtView>
+        </div>
     );
 };

@@ -48,8 +48,8 @@ export const FriendsSearchView: FC<{ className?: string }> = ({ className = '' }
 
     return <div className={`hfl-search-results ${className}`}>
         <div className="hfl-search-results-scroll">
-            {friendResults && <section className="hfl-search-section"><h4>{LocalizeText('friendlist.search.friendscaption', ['cnt'], [friendResults.length.toString()])}</h4>{friendResults.map((result) => renderResult(result, false))}</section>}
-            {otherResults && <section className="hfl-search-section"><h4>{LocalizeText('friendlist.search.otherscaption', ['cnt'], [otherResults.length.toString()])}</h4>{otherResults.map((result) => renderResult(result, true))}</section>}
+            {friendResults && <section className="hfl-search-section"><h4>{friendResults.length ? LocalizeText('friendlist.search.friendscaption', ['cnt'], [friendResults.length.toString()]) : LocalizeText('friendlist.search.nofriendsfound')}</h4>{friendResults.map((result) => renderResult(result, false))}</section>}
+            {otherResults && <section className="hfl-search-section"><h4>{otherResults.length ? LocalizeText('friendlist.search.otherscaption', ['cnt'], [otherResults.length.toString()]) : LocalizeText('friendlist.search.noothersfound')}</h4>{otherResults.map((result) => renderResult(result, true))}</section>}
         </div>
         <form className="hfl-search-form" onSubmit={submitSearch}>
             <input maxLength={50} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} />

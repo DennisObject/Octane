@@ -1,121 +1,478 @@
+/* v75 ros_room_settings: a fixed 341x477 frame (33px title + 441px client + 3px) whose controls sit at the
+   XML coordinates of their tab. Every .ros-at box is placed with the x/y/width/height of its XML control. */
 .octane-room-settings {
-    --room-settings-bg: #e9e9e1;
-    --room-settings-panel: #f7f7f2;
-    --room-settings-line: #959595;
-    --room-settings-text: #111111;
-    --room-settings-muted: #60605a;
-
-    width: min(341px, calc(100vw - 16px)) !important;
-    height: min(520px, calc(100vh - 16px));
-    min-width: 0;
-    max-width: calc(100vw - 16px);
-    max-height: none;
+    width: 341px;
+    min-width: 341px;
+    max-width: 341px;
+    height: 477px;
+    min-height: 477px;
+    max-height: 477px;
     resize: none !important;
-    overflow: hidden !important;
-    color: var(--room-settings-text);
-
-    .list-container {
-        height: 100px;
-        border: 1px solid var(--room-settings-line) !important;
-        background: #fbfbf9 !important;
-        box-shadow: none !important;
-
-        .list-item {
-            background-color: #ececec;
-        }
-    }
-
-    .octane-room-settings-section {
-        border: 1px solid var(--room-settings-line);
-        background: var(--room-settings-panel);
-        padding: 6px;
-    }
-
-    .octane-room-settings-section > :first-child {
-        color: #111;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    button {
-        min-height: 29px;
-        border-radius: 0 !important;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .octane-card-content-shell {
-        flex: 1 1 0;
-        min-height: 0;
-        overflow: auto !important;
-        background: var(--room-settings-bg);
-        color: var(--room-settings-text);
-        padding: 8px 10px !important;
-    }
-
-    :where(input, select, textarea, button, label) {
-        pointer-events: auto !important;
-    }
-
-    :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item) {
-        background: var(--room-settings-panel) !important;
-        color: var(--room-settings-text) !important;
-        box-shadow: none !important;
-    }
-
-    :where(.border, .border-muted, .border-card-grid-item-border, .border-white, .border-white\/10, .border-white\/20, .border-white\/30) {
-        border-color: var(--room-settings-line) !important;
-        box-shadow: none !important;
-    }
-
-    :where(.text-muted, .text-dark) {
-        color: var(--room-settings-muted) !important;
-    }
-
-    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
-        min-height: 20px;
-        border: 1px solid var(--room-settings-line) !important;
-        border-radius: 0 !important;
-        background: #fbfbf9 !important;
-        color: var(--room-settings-text) !important;
-        box-shadow: none !important;
-        font-family: UbuntuRegular, Ubuntu, sans-serif;
-        font-size: 11px !important;
-    }
-
-    :where(input:focus, select:focus, textarea:focus) {
-        border-color: #418db0 !important;
-        outline: none !important;
-    }
-
-    :where(input[type="checkbox"], input[type="radio"]) {
-        width: 13px;
-        height: 13px;
-        min-height: 13px;
-        min-width: 13px;
-        appearance: auto;
-        border: 1px solid #565650;
-        border-radius: 0;
-        background: #fbfbf9;
-        cursor: pointer;
-    }
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
 }
 
-@media (max-width: 520px), (max-height: 520px) {
-    .octane-room-settings {
-        width: calc(100vw - 16px);
-        height: calc(100vh - 16px);
+.octane-room-settings > .octane-card-header-shell {
+    min-height: 33px !important;
+    max-height: 33px !important;
+    flex: 0 0 33px;
+}
 
-        .octane-card-content-shell {
-            max-height: none;
-        }
+/* tab_context (-6,3) + tab_selector x=8: tabs start at x=2, y=3 of the client area; 32px tall. */
+.octane-room-settings .octane-room-settings-tabs.octane-card-tabs-shell {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    z-index: 3;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    width: 341px;
+    height: 33px;
+    min-height: 33px;
+    max-height: 33px;
+    gap: 0;
+    padding: 0 0 0 2px !important;
+    overflow: visible;
+    background: transparent;
+}
 
-        .col-span-6 {
-            grid-column: span 12 / span 12;
-        }
+.octane-room-settings .octane-room-settings-content.octane-card-content-shell {
+    position: absolute;
+    top: 33px;
+    left: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 444px;
+    min-height: 0;
+    max-height: 444px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent;
+}
 
-        .h-full {
-            height: auto;
-        }
-    }
+/* content_container (10,42): the scroll area starts 6px higher so XML y values (labels sit at -3) stay inside it. */
+.octane-room-settings .ros-viewport {
+    position: absolute;
+    top: 36px;
+    left: 10px;
+    width: 327px;
+    height: 405px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.octane-room-settings .ros-tab {
+    position: relative;
+    width: 321px;
+    margin: 6px 0 0 6px;
+}
+
+.octane-room-settings .ros-tab.ros-tab-wide {
+    width: 327px;
+    margin-left: 0;
+}
+
+.octane-room-settings .ros-at {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.octane-room-settings .ros-text {
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 17px;
+    color: #000;
+    white-space: nowrap;
+}
+
+.octane-room-settings .ros-text label {
+    cursor: pointer;
+}
+
+.octane-room-settings label,
+.octane-room-settings span {
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+}
+
+.octane-room-settings .ros-bold {
+    font-weight: 700;
+}
+
+.octane-room-settings .ros-head {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+}
+
+.octane-room-settings .ros-multi {
+    white-space: normal;
+}
+
+.octane-room-settings .ros-error {
+    overflow: hidden;
+    color: #bb2200;
+    text-overflow: ellipsis;
+}
+
+.octane-room-settings .ros-disabled {
+    opacity: 0.5;
+}
+
+/* input: style 0 control with the border_4 skin, colour 0xfbfbf9 */
+.octane-room-settings .ros-input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0 6px;
+    border: 0 solid transparent !important;
+    border-image-source: url('@/assets/images/habbo-skin/slices/border-4.png') !important;
+    border-image-slice: 6 fill !important;
+    border-image-width: 6px !important;
+    border-image-repeat: stretch !important;
+    border-radius: 0 !important;
+    background-color: #fbfbf9 !important;
+    box-shadow: none !important;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 15px;
+    outline: 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-input.ros-textarea {
+    padding: 3px 6px;
+    overflow-y: auto;
+    resize: none;
+}
+
+/* dropmenu style 2 */
+.octane-room-settings .ros-drop {
+    position: relative;
+}
+
+.octane-room-settings .ros-drop.ros-at {
+    position: absolute;
+}
+
+.octane-room-settings .ros-drop::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    background: url('@/assets/images/habbo-skin/slices/dropmenu-default-arrow.png') 0 0 / 16px 16px no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+    pointer-events: none;
+}
+
+.octane-room-settings .ros-select {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 24px 0 10px;
+    border: 0 solid transparent !important;
+    border-image-source: url('@/assets/images/habbo-skin/slices/dropmenu-default.png') !important;
+    border-image-slice: 3 fill !important;
+    border-image-width: 3px !important;
+    border-image-repeat: stretch !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 24px;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    appearance: none;
+    outline: 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-select:disabled {
+    cursor: default;
+}
+
+/* checkbox / radiobutton: the shared Habbo artwork (HabboTheme.css) at the XML size */
+.octane-room-settings .ros-check {
+    display: block;
+    margin: 0;
+}
+
+.octane-room-settings .ros-radio-row {
+    position: absolute;
+    left: 0;
+    display: flex;
+    width: 270px;
+    height: 20px;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 17px;
+    cursor: pointer;
+}
+
+.octane-room-settings .ros-radio-row input {
+    margin: 0 0 0 2px;
+}
+
+/* remove_link_region: bold underlined #bb2200 text with the icon_9 symbol (habbo_icons 82,0 13x13) */
+.octane-room-settings .ros-link {
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #bb2200;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: left;
+    text-decoration: underline;
+    text-indent: -1px;
+    white-space: nowrap;
+}
+
+.octane-room-settings .ros-decline {
+    display: block;
+    width: 13px;
+    height: 13px;
+    background: #bb2200;
+    mask-size: 13px 13px;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 13px 13px;
+    -webkit-mask-repeat: no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* shiny buttons */
+.octane-room-settings .ros-button {
+    appearance: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 5px solid transparent;
+    border-image-source: var(--habbo-skin-shiny);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #111;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-button.ros-button-fit {
+    position: relative;
+    width: max-content;
+    max-width: 137px;
+    height: 32px;
+    padding: 0 8px;
+    border-width: 0;
+    border-image-width: 5px;
+}
+
+.octane-room-settings .ros-button-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-room-settings .ros-button:hover {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-room-settings .ros-button:active {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-room-settings .ros-button:disabled {
+    cursor: default;
+    border-image-source: var(--habbo-skin-shiny-disabled);
+}
+
+.octane-room-settings .ros-button.ros-button-thick {
+    border-image-source: var(--habbo-skin-shiny-thick);
+}
+
+.octane-room-settings .ros-button.ros-button-thick:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.octane-room-settings .ros-button.ros-button-thick:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.octane-room-settings .ros-button.ros-button-thick:disabled {
+    border-image-source: var(--habbo-skin-shiny-thick-disabled);
+}
+
+.octane-room-settings .ros-button:focus-visible,
+.octane-room-settings .ros-link:focus-visible {
+    outline: 2px solid var(--octane-card-focus, #ffd95a);
+    outline-offset: 1px;
+}
+
+/* rights / moderation lists: border_white boxes with a 17px scrollbar and 111x20 rows */
+.octane-room-settings .ros-list-border {
+    border: 0 solid transparent;
+    border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-search {
+    background: #e9e9e1;
+}
+
+.octane-room-settings .ros-list {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 142px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.octane-room-settings .ros-user-row {
+    position: relative;
+    width: 111px;
+    height: 20px;
+}
+
+.octane-room-settings .ros-user-row.is-selected {
+    background: rgb(0 0 0 / 0.12);
+}
+
+/* bg_region 111x20: the whole row is the click target, the eye sits above it */
+.octane-room-settings .ros-user-bg {
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    display: block;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+}
+
+.octane-room-settings .ros-user-eye {
+    position: absolute;
+    top: 4px;
+    left: 9px;
+    z-index: 1;
+}
+
+.octane-room-settings .ros-user-name {
+    position: absolute;
+    top: 1px;
+    left: 24px;
+    width: 80px;
+    height: 17px;
+    overflow: hidden;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.octane-room-settings .ros-user-arrow {
+    position: absolute;
+    top: 4px;
+    width: 6px;
+    height: 11px;
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-settings .ros-user-arrow.is-rights {
+    left: 104px;
+}
+
+.octane-room-settings .ros-user-arrow.is-friend {
+    left: 1px;
+}
+
+/* custom Polaris rows follow the reference controls inside the same classic scroll area */
+.octane-room-settings .ros-extra {
+    margin: 0 0 8px 6px;
+    padding-top: 6px;
+}
+
+.octane-room-settings .ros-extra-row {
+    display: flex;
+    width: 300px;
+    height: 20px;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 17px;
+    cursor: pointer;
+}
+
+.octane-room-settings .ros-extra-row input {
+    margin: 0;
+}
+
+.octane-room-settings .ros-extra-title {
+    margin: 6px 0 2px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+}
+
+.octane-room-settings .ros-extra-info {
+    width: 300px;
+    margin: 0 0 4px;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+.octane-room-settings .ros-extra-select {
+    width: 276px;
+    height: 24px;
+    margin-bottom: 4px;
+}
+
+.octane-room-settings .ros-extra-input {
+    width: 80px;
+    height: 20px;
 }

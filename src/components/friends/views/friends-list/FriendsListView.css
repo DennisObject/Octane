@@ -18,50 +18,49 @@
 .habbo-friend-list {
     position: relative;
     display: grid;
-    grid-template-rows: 24px 17px minmax(0, 1fr) 41px 17px 33px;
+    grid-template-rows: 26px 17px minmax(0, 1fr) 41px 17px 33px;
     width: 230px;
-    min-width: 230px;
-    max-width: min(230px, calc(100vw - 16px));
+    min-width: 220px;
     height: 350px;
-    min-height: 220px;
-    max-height: calc(100vh - 16px);
+    min-height: 196px;
     overflow: hidden;
-    resize: vertical;
-    border: 1px solid #155a75;
-    border-radius: 6px;
-    background: #418db0;
+    resize: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
     color: #000;
     font: 400 9px/1 Volter, Arial, sans-serif;
     image-rendering: var(--octane-pixel-art, pixelated);
-    box-shadow: 0 3px 5px rgba(0, 0, 0, .35), inset 0 1px 0 #8adcf2;
+    box-shadow: none;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, .349));
     text-shadow: none;
 }
 
 .habbo-friend-list.search-mode {
-    grid-template-rows: 24px 17px 17px minmax(0, 1fr) 33px;
+    grid-template-rows: 26px 17px 17px minmax(0, 1fr) 33px;
 }
 
 .habbo-friend-list.has-requests:not(.search-mode):not(.requests-mode) {
-    grid-template-rows: 24px 17px minmax(0, 1fr) 41px 17px 17px 33px;
+    grid-template-rows: 26px 17px minmax(0, 1fr) 41px 17px 17px 33px;
 }
 
 .habbo-friend-list.requests-mode {
-    grid-template-rows: 24px 17px 17px minmax(0, 1fr) 17px 33px;
+    grid-template-rows: 26px 17px 17px minmax(0, 1fr) 17px 33px;
 }
 
 .habbo-friend-list.search-mode.has-requests {
-    grid-template-rows: 24px 17px 17px 17px minmax(0, 1fr) 33px;
+    grid-template-rows: 26px 17px 17px 17px minmax(0, 1fr) 33px;
 }
 
 .habbo-friend-list.collapsed-mode {
-    grid-template-rows: 24px 17px 17px 33px;
-    height: auto;
+    grid-template-rows: 26px 17px 17px 33px;
+    height: auto !important;
     min-height: 0;
     resize: none;
 }
 
 .habbo-friend-list.collapsed-mode.has-requests {
-    grid-template-rows: 24px 17px 17px 17px 33px;
+    grid-template-rows: 26px 17px 17px 17px 33px;
 }
 
 .habbo-friend-list button,
@@ -75,40 +74,58 @@
     cursor: pointer;
 }
 
+.habbo-friend-list::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    border: 13px solid transparent;
+    border-image: url("@/assets/images/friends/swf/friends-blue-frame-tinted.png") 13 fill stretch;
+    pointer-events: none;
+}
+
+.habbo-friend-list::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    border: 8px solid transparent;
+    border-image: url("@/assets/images/friends/swf/friends-blue-frame-shine.png") 8 stretch;
+    pointer-events: none;
+}
+
+.habbo-friend-list > :not(.hfl-titlebar):not(.hfl-bottom):not(.hfl-resize-handle) {
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+.habbo-friend-list.has-requests:not(.collapsed-mode) { min-height: 213px; }
+
 .hfl-titlebar {
     position: relative;
     cursor: move;
-    border-bottom: 1px solid #247b9c;
-    background: linear-gradient(#56bad8, #3298bf);
-}
-
-.hfl-titlebar::before,
-.hfl-titlebar::after,
-.hfl-titlebar-grip {
-    position: absolute;
-    top: 7px;
-    height: 8px;
-    content: "";
-    background: repeating-linear-gradient(0deg, rgba(230, 251, 255, .85) 0 1px, rgba(71, 157, 187, .6) 1px 2px);
+    background: transparent;
 }
 
 .hfl-titlebar::before {
-    left: 2px;
-    width: 88px;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    height: 15px;
+    content: "";
+    background: url("@/assets/images/friends/swf/friends-blue-header.png") repeat-x;
 }
 
-.hfl-titlebar::after {
-    right: 20px;
-    width: 72px;
-}
-
-.hfl-titlebar-grip {
-    display: none;
-}
+.hfl-titlebar-grip { display: none; }
 
 .hfl-title {
     position: absolute;
-    inset: 0;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    padding: 0 8px;
+    background: #418db0;
+    height: 15px;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -122,8 +139,8 @@
 .hfl-close {
     position: absolute;
     z-index: 2;
-    top: 4px;
-    right: 3px;
+    top: 6px;
+    right: 6px;
     width: 15px;
     height: 15px;
     padding: 0;
@@ -694,18 +711,22 @@
 
 .hfl-bottom {
     position: relative;
-    background: #418db0;
+    background: transparent;
 }
 
-.hfl-bottom::after {
+.hfl-resize-handle {
     position: absolute;
-    right: 2px;
-    bottom: 2px;
-    width: 12px;
-    height: 12px;
-    content: "";
-    background: repeating-linear-gradient(135deg, transparent 0 2px, rgba(255, 255, 255, .35) 2px 3px);
+    right: 0;
+    bottom: 0;
+    width: 15px;
+    height: 15px;
+    background: url("@/assets/images/friends/swf/friends-blue-resize.png") no-repeat;
+    cursor: nwse-resize;
+    touch-action: none;
+    z-index: 50;
 }
+
+.collapsed-mode .hfl-resize-handle { cursor: ew-resize; }
 
 .hfl-search-results,
 .hfl-requests {
