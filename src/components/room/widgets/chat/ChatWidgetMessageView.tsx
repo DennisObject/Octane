@@ -5,10 +5,12 @@ import { UserIdentityView } from '../../../../common';
 import { useOnClickChat } from '../../../../hooks';
 import { CHAT_TEXT_SIZE_EVENT, CHAT_TEXT_SIZE_PIXELS, ChatTextSize, getStoredChatTextSize } from '../chat-input/chatTextSize';
 import { measureBubbleVisualOffsets } from './chatBubbleMetrics';
+import { getNativeChatCreation } from './nativeChatScroller';
 
 interface ChatWidgetMessageViewProps {
     chat: ChatBubbleMessage;
-    makeRoom: (chat: ChatBubbleMessage) => void;
+    makeRoom: (chat: ChatBubbleMessage, creationMode: number) => void;
+    mode?: number;
     bubbleWidth?: number;
     showPointer?: boolean;
 }
@@ -16,9 +18,11 @@ interface ChatWidgetMessageViewProps {
 export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     chat = null,
     makeRoom = null,
+    mode = RoomChatSettings.CHAT_MODE_FREE_FLOW,
     bubbleWidth = RoomChatSettings.CHAT_BUBBLE_WIDTH_NORMAL,
     showPointer = true
 }) => {
+    const [creationMode] = useState(() => getNativeChatCreation(chat)?.mode ?? mode);
     const [isVisible, setIsVisible] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [chatTextSize, setChatTextSize] = useState<ChatTextSize>(() => chat?.textSize ?? getStoredChatTextSize());
@@ -52,8 +56,6 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         const element = elementRef.current;
         if (!element) return;
 
-        const previousWidth = chat.width;
-        const previousHeight = chat.height;
         const { offsetWidth: width, offsetHeight: height } = element;
         const visualOffsets = measureBubbleVisualOffsets(element);
 
@@ -63,21 +65,9 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         chat.visualOffsetBottom = visualOffsets.bottom;
         chat.elementRef = element;
 
-        let { left, top } = chat;
-
-        if (!left && !top) {
-            left = chat.location.x - width / 2;
-            top = element.parentElement.offsetHeight - height;
-
-            chat.left = left;
-            chat.top = top;
-        } else if (previousWidth && previousWidth !== width) {
-            chat.left += (previousWidth - width) / 2;
-        }
-
         setIsReady(true);
 
-        if (isVisible && (previousWidth !== width || previousHeight !== height)) makeRoomRef.current?.(chat);
+        makeRoomRef.current?.(chat, creationMode);
     }, [
         chat,
         chat.formattedText,
@@ -86,7 +76,8 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         chat.translatedFormattedText,
         chatTextSize,
         isVisible,
-        showPointer
+        showPointer,
+        creationMode
     ]);
 
     useEffect(() => {
@@ -118,8 +109,6 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
 
             if (width === chat.width && height === chat.height) return;
 
-            if (chat.width && chat.width !== width) chat.left += (chat.width - width) / 2;
-
             const visualOffsets = measureBubbleVisualOffsets(element);
 
             chat.width = width;
@@ -127,13 +116,13 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
             chat.visualOffsetTop = visualOffsets.top;
             chat.visualOffsetBottom = visualOffsets.bottom;
 
-            if (makeRoomRef.current) makeRoomRef.current(chat);
+            if (makeRoomRef.current) makeRoomRef.current(chat, creationMode);
         });
 
         observer.observe(element);
 
         return () => observer.disconnect();
-    }, [chat]);
+    }, [chat, creationMode]);
 
     useEffect(() => {
         return () => {
@@ -144,9 +133,9 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     useEffect(() => {
         if (!isReady || !chat || isVisible) return;
 
-        makeRoomRef.current?.(chat);
+        makeRoomRef.current?.(chat, creationMode);
         setIsVisible(true);
-    }, [chat, isReady, isVisible]);
+    }, [chat, isReady, isVisible, creationMode]);
 
     const messageClassName = `message [overflow-wrap:anywhere] break-words${chat.type === 1 ? ' italic text-[#595959]' : ''}${chat.type === 2 ? ' font-bold' : ''}`;
 
@@ -154,7 +143,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         <div
             ref={elementRef}
             className={`bubble-container newbubblehe chat-text-size ${isVisible ? 'visible' : 'invisible'} w-max absolute select-none pointer-events-auto`}
-            style={{ '--chat-text-size': `${CHAT_TEXT_SIZE_PIXELS[chatTextSize]}px` } as CSSProperties}
+            style={{ '--chat-text-size': `${CHAT_TEXT_SIZE_PIXELS[chatTextSize]}px`, transition: 'none' } as CSSProperties}
             onClick={() => GetRoomEngine().selectRoomObject(chat.roomId, chat.senderId, RoomObjectCategory.UNIT)}
         >
             {chat.styleId === 0 && (

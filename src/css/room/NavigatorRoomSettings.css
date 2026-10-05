@@ -214,48 +214,6 @@
     position: absolute;
 }
 
-.octane-room-settings .ros-drop::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    right: 5px;
-    width: 16px;
-    height: 16px;
-    background: url('@/assets/images/habbo-skin/slices/dropmenu-default-arrow.png') 0 0 / 16px 16px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    pointer-events: none;
-}
-
-.octane-room-settings .ros-select {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0 24px 0 10px;
-    border: 0 solid transparent !important;
-    border-image-source: url('@/assets/images/habbo-skin/slices/dropmenu-default.png') !important;
-    border-image-slice: 3 fill !important;
-    border-image-width: 3px !important;
-    border-image-repeat: stretch !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: #000;
-    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
-    font-size: 12px;
-    line-height: 24px;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    appearance: none;
-    outline: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-room-settings .ros-select:disabled {
-    cursor: default;
-}
-
 /* checkbox / radiobutton: the shared Habbo artwork (HabboTheme.css) at the XML size */
 .octane-room-settings .ros-check {
     display: block;

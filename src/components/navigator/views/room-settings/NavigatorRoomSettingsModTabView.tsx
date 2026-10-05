@@ -2,6 +2,7 @@ import { BannedUserData, BannedUsersFromRoomEvent, RoomBannedUsersComposer, Room
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { UserProfileIconView } from '../../../../common';
+import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
 import { useMessageEvent } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 
@@ -54,41 +55,44 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                 {LocalizeText('navigator.roomsettings.moderation.mute.header')}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={10} y={61}>
-                <select
-                    className="ros-select"
+                <HabboDropMenuView
+                    label={LocalizeText('navigator.roomsettings.moderation.mute.header')}
                     value={roomData.moderationSettings.allowMute}
-                    onChange={(event) => handleChange('moderation_mute', event.target.value)}
-                >
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_NONE}>{LocalizeText('navigator.roomsettings.moderation.none')}</option>
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS}>{LocalizeText('navigator.roomsettings.moderation.rights')}</option>
-                </select>
+                    options={[
+                        { value: RoomModerationSettings.MODERATION_LEVEL_NONE, label: LocalizeText('navigator.roomsettings.moderation.none') },
+                        { value: RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS, label: LocalizeText('navigator.roomsettings.moderation.rights') }
+                    ]}
+                    onSelect={(value) => handleChange('moderation_mute', value)}
+                />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={20} w={273} x={7} y={92}>
                 {LocalizeText('navigator.roomsettings.moderation.kick.header')}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={10} y={112}>
-                <select
-                    className="ros-select"
+                <HabboDropMenuView
+                    label={LocalizeText('navigator.roomsettings.moderation.kick.header')}
                     value={roomData.moderationSettings.allowKick}
-                    onChange={(event) => handleChange('moderation_kick', event.target.value)}
-                >
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_NONE}>{LocalizeText('navigator.roomsettings.moderation.none')}</option>
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS}>{LocalizeText('navigator.roomsettings.moderation.rights')}</option>
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_ALL}>{LocalizeText('navigator.roomsettings.moderation.all')}</option>
-                </select>
+                    options={[
+                        { value: RoomModerationSettings.MODERATION_LEVEL_NONE, label: LocalizeText('navigator.roomsettings.moderation.none') },
+                        { value: RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS, label: LocalizeText('navigator.roomsettings.moderation.rights') },
+                        { value: RoomModerationSettings.MODERATION_LEVEL_ALL, label: LocalizeText('navigator.roomsettings.moderation.all') }
+                    ]}
+                    onSelect={(value) => handleChange('moderation_kick', value)}
+                />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={21} w={292} x={7} y={142}>
                 {LocalizeText('navigator.roomsettings.moderation.ban.header')}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={10} y={161}>
-                <select
-                    className="ros-select"
+                <HabboDropMenuView
+                    label={LocalizeText('navigator.roomsettings.moderation.ban.header')}
                     value={roomData.moderationSettings.allowBan}
-                    onChange={(event) => handleChange('moderation_ban', event.target.value)}
-                >
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_NONE}>{LocalizeText('navigator.roomsettings.moderation.none')}</option>
-                    <option value={RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS}>{LocalizeText('navigator.roomsettings.moderation.rights')}</option>
-                </select>
+                    options={[
+                        { value: RoomModerationSettings.MODERATION_LEVEL_NONE, label: LocalizeText('navigator.roomsettings.moderation.none') },
+                        { value: RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS, label: LocalizeText('navigator.roomsettings.moderation.rights') }
+                    ]}
+                    onSelect={(value) => handleChange('moderation_ban', value)}
+                />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={156} w={172} x={8} y={200}>
                 <div className="ros-list" style={{ left: 3, top: 3, width: 146, height: 150 }}>

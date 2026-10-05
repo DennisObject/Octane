@@ -1,0 +1,148 @@
+/* HabboWindowManagerCom: dropmenu styles 0/2/4 resolve to the same style-0 skin. */
+.habbo-dropmenu.habbo-dropmenu,
+.habbo-dropmenu-popup {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid transparent !important;
+    border-image-source: url('../../assets/images/habbo-skin/slices/dropmenu-default.png') !important;
+    border-image-slice: 3 fill !important;
+    border-image-width: 3px !important;
+    border-image-repeat: stretch !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font: 400 9px/10px Volter, monospace !important;
+    font-kerning: none;
+    text-align: left;
+    image-rendering: pixelated;
+}
+
+.habbo-dropmenu.habbo-dropmenu {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 24px;
+    overflow: hidden;
+    appearance: none;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.habbo-dropmenu:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.habbo-dropmenu:focus-visible {
+    outline: 1px solid #fff27a;
+    outline-offset: 1px;
+}
+
+.habbo-dropmenu .habbo-dropmenu-caption {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    left: 10px;
+    box-sizing: border-box;
+    height: 14px;
+    padding: 2px;
+    overflow: hidden;
+    color: #000 !important;
+    font: 400 9px/10px Volter, monospace !important;
+    font-kerning: none;
+    white-space: nowrap;
+}
+
+.habbo-dropmenu .habbo-dropmenu-arrow {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.habbo-dropmenu-popup {
+    position: fixed;
+    z-index: 100000;
+    isolation: isolate;
+}
+
+.habbo-dropmenu-list {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    bottom: 2px;
+    left: 6px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+}
+
+.habbo-dropmenu-list::-webkit-scrollbar { display: none; }
+.habbo-dropmenu-list.has-scrollbar { right: 23px; }
+
+.habbo-dropmenu-item {
+    box-sizing: border-box;
+    height: 16px;
+    padding: 1px 4px 2px;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+}
+
+.habbo-dropmenu-item span {
+    display: block;
+    padding: 2px;
+    color: #000;
+    font: 400 9px/10px Volter, monospace;
+    font-kerning: none;
+    white-space: nowrap;
+}
+
+.habbo-dropmenu-item:hover,
+.habbo-dropmenu-item.is-active { background: #d9d9d9; }
+.habbo-dropmenu-item.is-selected,
+.habbo-dropmenu-item:active { background: #f2f2f2; }
+.habbo-dropmenu-padding { height: 3px; }
+
+.habbo-dropmenu-scrollbar {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    bottom: 2px;
+    display: grid;
+    grid-template-rows: 16px minmax(0, 1fr) 16px;
+    width: 17px;
+}
+
+.habbo-dropmenu-scrollbar button {
+    width: 17px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent center no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.habbo-dropmenu-scroll-up { background-image: url('../../assets/images/habbo-skin/slices/scroll-up.png') !important; }
+.habbo-dropmenu-scroll-up:active { background-image: url('../../assets/images/habbo-skin/slices/scroll-up-pressed.png') !important; }
+.habbo-dropmenu-scroll-up:disabled { background-image: url('../../assets/images/habbo-skin/slices/scroll-up-disabled.png') !important; }
+.habbo-dropmenu-scroll-down { background-image: url('../../assets/images/habbo-skin/slices/scroll-down.png') !important; }
+.habbo-dropmenu-scroll-down:active { background-image: url('../../assets/images/habbo-skin/slices/scroll-down-pressed.png') !important; }
+.habbo-dropmenu-scroll-down:disabled { background-image: url('../../assets/images/habbo-skin/slices/scroll-down-disabled.png') !important; }
+.habbo-dropmenu-scroll-track { position: relative; background: url('../../assets/images/habbo-skin/slices/scroll-track-v.png') repeat-y; }
+.habbo-dropmenu-scroll-thumb { position: absolute; width: 17px; touch-action: none; }
+.habbo-dropmenu-scroll-thumb svg { position: absolute; pointer-events: none; image-rendering: pixelated; }
+.habbo-dropmenu-thumb-middle { top: 0; left: 0; }
+.habbo-dropmenu-scroll-thumb .habbo-dropmenu-thumb-top { top: 0; width: 17px; height: 2px; }
+.habbo-dropmenu-scroll-thumb .habbo-dropmenu-thumb-bottom { bottom: 0; width: 17px; height: 2px; }
+.habbo-dropmenu-scroll-thumb .habbo-dropmenu-thumb-grip { top: calc(50% - 5px); left: 5px; width: 7px; height: 10px; }

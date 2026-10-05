@@ -1,6 +1,7 @@
 import { RoomChatSettings } from '@octane/renderer';
 import { FC } from 'react';
 import { GetClubMemberLevel, IRoomData, LocalizeText, localizeWithFallback } from '../../../../api';
+import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 import { RoomSettingsInputErrorView } from './RoomSettingsInputErrorView';
 
@@ -63,31 +64,33 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
                 <NavigatorRoomSettingsAtView className={`ros-text${dim}`} h={17} w={194} x={20} y={103}>
                     <label htmlFor="ros-hide-walls">{LocalizeText('navigator.roomsettings.hide_walls')}</label>
                 </NavigatorRoomSettingsAtView>
-                <NavigatorRoomSettingsAtView className={`ros-drop${dim}`} h={24} w={276} x={0} y={125}>
-                    <select
-                        className="ros-select"
-                        disabled={!isHC}
+                <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={0} y={125}>
+                    <HabboDropMenuView
+                        label={localizeWithFallback('navigator.roomsettings.wall_thickness', 'Wall thickness')}
                         value={roomData.wallThickness}
-                        onChange={(event) => handleChange('wall_thickness', event.target.value)}
-                    >
-                        <option value="-2">{LocalizeText('navigator.roomsettings.wall_thickness.thinnest')}</option>
-                        <option value="-1">{LocalizeText('navigator.roomsettings.wall_thickness.thin')}</option>
-                        <option value="0">{LocalizeText('navigator.roomsettings.wall_thickness.normal')}</option>
-                        <option value="1">{LocalizeText('navigator.roomsettings.wall_thickness.thick')}</option>
-                    </select>
-                </NavigatorRoomSettingsAtView>
-                <NavigatorRoomSettingsAtView className={`ros-drop${dim}`} h={24} w={276} x={0} y={156}>
-                    <select
-                        className="ros-select"
+                        options={[
+                            { value: -2, label: LocalizeText('navigator.roomsettings.wall_thickness.thinnest') },
+                            { value: -1, label: LocalizeText('navigator.roomsettings.wall_thickness.thin') },
+                            { value: 0, label: LocalizeText('navigator.roomsettings.wall_thickness.normal') },
+                            { value: 1, label: LocalizeText('navigator.roomsettings.wall_thickness.thick') }
+                        ]}
                         disabled={!isHC}
+                        onSelect={(value) => handleChange('wall_thickness', value)}
+                    />
+                </NavigatorRoomSettingsAtView>
+                <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={0} y={156}>
+                    <HabboDropMenuView
+                        label={localizeWithFallback('navigator.roomsettings.floor_thickness', 'Floor thickness')}
                         value={roomData.floorThickness}
-                        onChange={(event) => handleChange('floor_thickness', event.target.value)}
-                    >
-                        <option value="-2">{LocalizeText('navigator.roomsettings.floor_thickness.thinnest')}</option>
-                        <option value="-1">{LocalizeText('navigator.roomsettings.floor_thickness.thin')}</option>
-                        <option value="0">{LocalizeText('navigator.roomsettings.floor_thickness.normal')}</option>
-                        <option value="1">{LocalizeText('navigator.roomsettings.floor_thickness.thick')}</option>
-                    </select>
+                        options={[
+                            { value: -2, label: LocalizeText('navigator.roomsettings.floor_thickness.thinnest') },
+                            { value: -1, label: LocalizeText('navigator.roomsettings.floor_thickness.thin') },
+                            { value: 0, label: LocalizeText('navigator.roomsettings.floor_thickness.normal') },
+                            { value: 1, label: LocalizeText('navigator.roomsettings.floor_thickness.thick') }
+                        ]}
+                        disabled={!isHC}
+                        onSelect={(value) => handleChange('floor_thickness', value)}
+                    />
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={221} x={0} y={191}>
                     {vipCaption('navigator.roomsettings.room_behavior')}
@@ -168,17 +171,18 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={260} x={0} y={335}>
                     {vipCaption('navigator.roomsettings.chat.flood_sensitivity')}
                 </NavigatorRoomSettingsAtView>
-                <NavigatorRoomSettingsAtView className={`ros-drop${dim}`} h={24} w={276} x={0} y={358}>
-                    <select
-                        className="ros-select"
-                        disabled={!isHC}
+                <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={276} x={0} y={358}>
+                    <HabboDropMenuView
+                        label={vipCaption('navigator.roomsettings.chat.flood_sensitivity')}
                         value={roomData.chatSettings.protection}
-                        onChange={(event) => handleChange('flood_protection', event.target.value)}
-                    >
-                        <option value={RoomChatSettings.FLOOD_FILTER_STRICT}>{LocalizeText('navigator.roomsettings.chat.flood.strict')}</option>
-                        <option value={RoomChatSettings.FLOOD_FILTER_NORMAL}>{LocalizeText('navigator.roomsettings.chat.flood.normal')}</option>
-                        <option value={RoomChatSettings.FLOOD_FILTER_LOOSE}>{LocalizeText('navigator.roomsettings.chat.flood.loose')}</option>
-                    </select>
+                        options={[
+                            { value: RoomChatSettings.FLOOD_FILTER_STRICT, label: LocalizeText('navigator.roomsettings.chat.flood.strict') },
+                            { value: RoomChatSettings.FLOOD_FILTER_NORMAL, label: LocalizeText('navigator.roomsettings.chat.flood.normal') },
+                            { value: RoomChatSettings.FLOOD_FILTER_LOOSE, label: LocalizeText('navigator.roomsettings.chat.flood.loose') }
+                        ]}
+                        disabled={!isHC}
+                        onSelect={(value) => handleChange('flood_protection', value)}
+                    />
                 </NavigatorRoomSettingsAtView>
             </div>
         </>

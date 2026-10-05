@@ -27,6 +27,7 @@ import {
     RoomChatFormatter,
     resolveChatBubbleWidth
 } from '../../../api';
+import { captureNativeChatCreation } from '../../../components/room/widgets/chat/nativeChatScroller';
 import { getStoredChatTextSize } from '../../../components/room/widgets/chat-input/chatTextSize';
 import { useChatHistory } from './../../chat-history';
 import { useMessageEvent, useOctaneEvent } from '../../events';
@@ -50,6 +51,7 @@ const useChatWidgetState = () => {
     const { chatPreferences } = useChatPreferences();
     const chatSettings = useMemo<IRoomChatSettings>(() => ({
         ...roomChatSettings,
+        mode: chatPreferences?.chatMode ?? roomChatSettings.mode,
         weight: chatPreferences?.chatBubbleWidth ?? roomChatSettings.weight,
         speed: chatPreferences?.chatScrollSpeed ?? roomChatSettings.speed
     }), [roomChatSettings, chatPreferences]);
@@ -284,6 +286,7 @@ const useChatWidgetState = () => {
             imageUrl,
             color
         );
+        captureNativeChatCreation(chatMessage, chatSettings.mode);
         // The renderer adds bubbleWidthOverride to the chat event in Octane-Renderer#212; until that
         // lands the published event has no such field, so it is read as optional.
         chatMessage.textSize = getStoredChatTextSize();
@@ -448,7 +451,7 @@ const useChatWidgetState = () => {
         };
     }, []);
 
-    return { chatMessages, setChatMessages, chatSettings, getScrollSpeed };
+    return { chatMessages, setChatMessages, chatSettings, getScrollSpeed, roomId: roomSession?.roomId };
 };
 
 export const useChatWidget = useChatWidgetState;

@@ -11,6 +11,7 @@ import {
 } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { DispatchMainEvent, DispatchUiEvent, GetConfigurationValue, localizeWithFallback, SendMessageComposer } from '../../api';
+import { HabboDropMenuView } from '../../common/dropmenu/HabboDropMenuView';
 import { useMessageEvent } from '../../hooks';
 import { useChatPreferences } from '../../hooks/useChatPreferences';
 import { AirSettingsVolumeRow } from './AirSettingsVolumeRow';
@@ -29,15 +30,14 @@ const DropMenu: FC<{ label: string; left: number; top: number; width: number; va
     const { label, left, top, width, value, options, onSelect } = props;
 
     return (
-        <div className="us-drop" style={{ left, top, width }}>
-            <select aria-label={label} className="us-select" value={value} onChange={(event) => onSelect(Number(event.target.value))}>
-                {options.map((option, index) => (
-                    <option key={index} value={index}>
-                        {option}
-                    </option>
-                ))}
-            </select>
-        </div>
+        <HabboDropMenuView
+            className="us-drop"
+            label={label}
+            style={{ left, top, width }}
+            value={value}
+            options={options.map((option, index) => ({ value: index, label: option }))}
+            onSelect={onSelect}
+        />
     );
 };
 

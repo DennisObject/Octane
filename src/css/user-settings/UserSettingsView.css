@@ -128,53 +128,16 @@
 }
 
 .us-button:focus-visible,
-.us-select:focus-visible,
 .us-check:focus-visible {
     outline: 1px solid #fff27a;
     outline-offset: 1px;
 }
 
-/* dropmenu: dropmenu skin with the 16x16 arrow; the select is native so the open list stays accessible */
-.us-drop {
+/* Dropdown artwork and popup semantics are owned by HabboDropMenuView. */
+.us-window .us-drop.habbo-dropmenu {
     position: absolute;
     box-sizing: border-box;
     height: 24px;
-}
-
-.us-drop::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    right: 5px;
-    width: 16px;
-    height: 16px;
-    background: url('../../assets/images/habbo-skin/slices/dropmenu-default-arrow.png') 0 0 / 16px 16px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    pointer-events: none;
-}
-
-.us-select {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0 24px 0 10px;
-    border: 0 solid transparent;
-    border-image-source: url('../../assets/images/habbo-skin/slices/dropmenu-default.png');
-    border-image-slice: 3 fill;
-    border-image-width: 3px;
-    border-image-repeat: stretch;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    color: #000000;
-    cursor: pointer;
-    font: 400 12px/24px HabboAirUbuntu, UbuntuRegular, sans-serif;
-    text-overflow: ellipsis;
-    appearance: none;
-    outline: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 /* checkbox (style 3): habbo_skin_button_checkbox_xml, 15x15 states at (410,0) and (410,16) of habbo_blue_skin_png */
@@ -233,7 +196,7 @@
     height: 17px;
 }
 
-.us-other-list .us-drop {
+.us-window .us-other-list .us-drop.habbo-dropmenu {
     position: relative;
     width: 222px;
 }

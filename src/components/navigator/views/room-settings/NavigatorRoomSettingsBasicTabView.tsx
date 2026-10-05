@@ -14,6 +14,7 @@ import {
     SendMessageComposer
 } from '../../../../api';
 import declineSrc from '../../../../assets/images/navigator/room-settings/decline.png';
+import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
 import { useMessageEvent, useNavigatorData, useNotification } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 
@@ -41,6 +42,9 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
     const { categories } = useNavigatorData();
     const visitorOptions = GetMaxVisitorsList(GetClubMemberLevel() > 0, roomData.userCount);
     const selectedVisitors = GetSelectedMaxVisitors(visitorOptions, roomData.userCount);
+    const selectedVisitorIndex = roomData.userCount > visitorOptions[visitorOptions.length - 1]
+        ? visitorOptions.length - 1
+        : visitorOptions.indexOf(selectedVisitors);
 
     useMessageEvent<RoomSettingsSaveErrorEvent>(RoomSettingsSaveErrorEvent, (event) => {
         const parser = event.getParser();
@@ -157,36 +161,38 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                     {LocalizeText('navigator.category')}
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={300} x={0} y={116}>
-                    <select className="ros-select" value={roomData.categoryId} onChange={(event) => handleChange('category', event.target.value)}>
-                        {categories &&
-                            categories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {LocalizeText(category.name)}
-                                </option>
-                            ))}
-                    </select>
+                    <HabboDropMenuView
+                        label={LocalizeText('navigator.category')}
+                        value={roomData.categoryId}
+                        options={(categories ?? []).map((category) => ({ value: category.id, label: LocalizeText(category.name) }))}
+                        onSelect={(value) => handleChange('category', value)}
+                    />
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={125} x={0} y={145}>
                     {LocalizeText('navigator.maxvisitors')}
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={300} x={0} y={161}>
-                    <select className="ros-select" value={selectedVisitors} onChange={(event) => handleChange('max_visitors', event.target.value)}>
-                        {visitorOptions.map((value, index) => (
-                            <option key={`${value}-${index}`} value={value}>
-                                {value}
-                            </option>
-                        ))}
-                    </select>
+                    <HabboDropMenuView
+                        label={LocalizeText('navigator.maxvisitors')}
+                        value={selectedVisitorIndex}
+                        options={visitorOptions.map((value, index) => ({ value: index, label: String(value) }))}
+                        onSelect={(index) => handleChange('max_visitors', visitorOptions[index])}
+                    />
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={138} x={0} y={190}>
                     {LocalizeText('navigator.tradesettings')}
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-drop" h={24} w={300} x={0} y={206}>
-                    <select className="ros-select" value={roomData.tradeState} onChange={(event) => handleChange('trade_state', event.target.value)}>
-                        <option value="0">{LocalizeText('navigator.roomsettings.trade_not_allowed')}</option>
-                        <option value="1">{LocalizeText('navigator.roomsettings.trade_not_with_Controller')}</option>
-                        <option value="2">{LocalizeText('navigator.roomsettings.trade_allowed')}</option>
-                    </select>
+                    <HabboDropMenuView
+                        label={LocalizeText('navigator.tradesettings')}
+                        value={roomData.tradeState}
+                        options={[
+                            { value: 0, label: LocalizeText('navigator.roomsettings.trade_not_allowed') },
+                            { value: 1, label: LocalizeText('navigator.roomsettings.trade_not_with_Controller') },
+                            { value: 2, label: LocalizeText('navigator.roomsettings.trade_allowed') }
+                        ]}
+                        onSelect={(value) => handleChange('trade_state', value)}
+                    />
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-text ros-bold" h={17} w={86} x={0} y={238}>
                     {LocalizeText('navigator.tags')}
