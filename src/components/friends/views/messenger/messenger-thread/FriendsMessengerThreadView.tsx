@@ -1,18 +1,35 @@
-import { FC, useEffect } from 'react';
-import { MessengerThread } from '../../../../../api';
+import { MessengerMessageType } from '@octane/renderer';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { MessengerThread, MessengerThreadChat, MessengerThreadChatGroup } from '../../../../../api';
 import { FriendsMessengerThreadGroup } from './FriendsMessengerThreadGroup';
 
-export const FriendsMessengerThreadView: FC<{ thread: MessengerThread }> = (props) => {
-    const { thread = null } = props;
-
-    // Mark the thread read after commit, not during render — render must stay
-    // side-effect free. No dep array: faithfully re-marks on every re-render
-    // (e.g. a new message arriving in the active thread), same as before.
+export const FriendsMessengerThreadView: FC<{ thread: MessengerThread }> = ({ thread }) => {
+    const [now, setNow] = useState(() => Date.now());
     useEffect(() => {
-        if (thread) thread.setRead();
-    });
+        const timer = window.setInterval(() => setNow(Date.now()), 60000);
+        return () => window.clearInterval(timer);
+    }, []);
 
-    if (!thread) return null;
+    const groups = useMemo(() => {
+        const next: MessengerThreadChatGroup[] = [];
+        for (const original of thread?.groups ?? []) {
+            for (const chat of original.chats) {
+                const previous = next[next.length - 1];
+                const last = previous?.chats[previous.chats.length - 1];
+                const normal = chat.type === MessengerThreadChat.CHAT || chat.type === MessengerMessageType.Habbicon;
+                const lastNormal = last && (last.type === MessengerThreadChat.CHAT || last.type === MessengerMessageType.Habbicon);
+                const sentAt = chat.date.getTime() - chat.secondsSinceSent * 1000;
+                const lastSentAt = last && last.date.getTime() - last.secondsSinceSent * 1000;
+                if (normal && lastNormal && previous.userId === original.userId && previous.type === original.type && sentAt < lastSentAt + 600000) previous.addChat(chat);
+                else {
+                    const group = new MessengerThreadChatGroup(original.userId, original.type);
+                    group.addChat(chat);
+                    next.push(group);
+                }
+            }
+        }
+        return next;
+    }, [thread]);
 
-    return <>{thread.groups.length > 0 && thread.groups.map((group, index) => <FriendsMessengerThreadGroup key={index} group={group} thread={thread} />)}</>;
+    return <>{groups.map((group) => <FriendsMessengerThreadGroup key={group.chats[0].id} group={group} thread={thread} now={now} />)}</>;
 };
