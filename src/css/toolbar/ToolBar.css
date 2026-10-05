@@ -483,3 +483,45 @@
         transform: translateY(0);
     }
 }
+
+/* unseen_item_counter_xml: 29x18 style-7 0xee2924 border, count at (4,0) 21x16; added at the icon region's top-right. */
+.tb-unseen-count {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    z-index: 10;
+    box-sizing: border-box;
+    width: 29px;
+    height: 18px;
+    pointer-events: none;
+}
+
+.tb-unseen-count::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-bottom-width: 7px;
+    border-image-source: url("../../assets/images/reward-track/air/border-7-ee2924.png");
+    border-image-slice: 6 6 7 fill;
+    border-image-width: 6px 6px 7px;
+    border-image-repeat: stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-unseen-count__text {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    width: 21px;
+    height: 16px;
+    overflow: hidden;
+    color: #ffffff;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: left;
+    white-space: nowrap;
+}
