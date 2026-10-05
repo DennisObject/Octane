@@ -9,6 +9,8 @@ import {
     SanitizeHtml
 } from '../../../../api';
 import { Button, Column, Flex, LayoutNotificationAlertView, LayoutNotificationAlertViewProps } from '../../../../common';
+import { NativeNotificationPopupView } from '../native/NativeNotificationPopupView';
+import { NativeSimpleAlertView } from '../native/NativeSimpleAlertView';
 
 interface NotificationDefaultAlertViewProps extends LayoutNotificationAlertViewProps {
     item: NotificationAlertItem;
@@ -40,7 +42,7 @@ const CommandFilterInput: FC<CommandFilterInputProps> = ({ value, onChange }) =>
     />
 );
 
-export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
+const LegacyNotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
     const { item = null, title = (props.item && props.item.title) || '', onClose = null, classNames = [], ...rest } = props;
     const [imageFailed, setImageFailed] = useState<boolean>(false);
     const [commandFilter, setCommandFilter] = useState<string>('');
@@ -214,4 +216,40 @@ export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps>
             )}
         </LayoutNotificationAlertView>
     );
+};
+
+const isCommandTemplate = (item: NotificationAlertItem) => {
+    const lines = item.messages.flatMap((message) => message.split(/\r\n|\r|\n/g));
+
+    return lines.filter((line) => COMMAND_LINE_PATTERN.test(line)).length >= 4 || lines.some((line) => COMMAND_HEADING_PATTERN.test(line.trim()));
+};
+
+// The v75 client shows broadcasts and moderator messages in the simple alert (simple_alert_xml) and every other notification
+// type, with its optional link and image, in the notification popup (layout_notification_popup_xml). The MOTD and the command
+// listing keep their own layouts.
+export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
+    const { item = null, onClose = null, title = (props.item && props.item.title) || '' } = props;
+
+    if (item.alertType === NotificationAlertType.MOTD || isCommandTemplate(item)) return <LegacyNotificationDefaultAlertView {...props} />;
+
+    const message = item.messages.join('\n');
+    const linkTitle = item.clickUrlText ? LocalizeText(item.clickUrlText) : '';
+
+    if (item.alertType === NotificationAlertType.DEFAULT || item.alertType === NotificationAlertType.MODERATION) {
+        const isModeration = item.alertType === NotificationAlertType.MODERATION;
+
+        return (
+            <NativeSimpleAlertView
+                caption={isModeration ? '' : title}
+                imageUrl={item.imageUrl || undefined}
+                linkTitle={linkTitle}
+                linkUrl={item.clickUrl ?? ''}
+                message={message}
+                subtitle={isModeration ? title : ''}
+                onClose={onClose}
+            />
+        );
+    }
+
+    return <NativeNotificationPopupView imageUrl={item.imageUrl ?? ''} linkTitle={linkTitle} linkUrl={item.clickUrl ?? ''} message={message} title={title} onClose={onClose} />;
 };
