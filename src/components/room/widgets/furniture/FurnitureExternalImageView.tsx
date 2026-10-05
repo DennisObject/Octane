@@ -1,46 +1,82 @@
-import { GetSessionDataManager } from '@octane/renderer';
-import { FC } from 'react';
-import { GetConfigurationValue, isSafeExternalUrl, LocalizeText, ReportType } from '../../../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
-import { useFurnitureExternalImageWidget, useHelp } from '../../../../hooks';
-import { CameraWidgetShowPhotoView } from '../../../camera/views/CameraWidgetShowPhotoView';
+import { GetRoomEngine, GetSessionDataManager, RoomControllerLevel, RoomObjectCategory } from '@octane/renderer';
+import { FC, useEffect, useState } from 'react';
+import { GetUserProfile, getCameraMediaUrl, LocalizeText, ReportType } from '../../../../api';
+import { DraggableWindow } from '../../../../common';
+import { useFurnitureExternalImageWidget, useHelp, useNotification, useRoom } from '../../../../hooks';
+
+// AIR stories_image_widget (ExternalImageWidget.drawImage): a 322px outlined photo inside a
+// translucent black border, with the report/remove/close button strip on the top right.
+const formatCreationDate = (seconds: number): string => {
+    if (!Number.isFinite(seconds) || seconds <= 0) return '';
+
+    const date = new Date(seconds * 1000);
+
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+};
 
 export const FurnitureExternalImageView: FC<{}> = (props) => {
-    const { objectId = -1, currentPhotoIndex = -1, currentPhotos = null, onClose = null } = useFurnitureExternalImageWidget();
+    const { objectId = -1, currentPhotoIndex = -1, currentPhotos = null, currentObjectIds = [], onClose = null } = useFurnitureExternalImageWidget();
     const { report = null } = useHelp();
+    const { showConfirm = null } = useNotification();
+    const { roomSession = null } = useRoom();
+    const [index, setIndex] = useState(-1);
 
-    if (objectId === -1 || currentPhotoIndex === -1) return null;
+    useEffect(() => setIndex(currentPhotoIndex), [currentPhotoIndex]);
 
-    const handleOpenFullPhoto = () => {
-        const photoUrl = currentPhotos[currentPhotoIndex].w.replace('_small.png', '.png');
-        if (photoUrl && isSafeExternalUrl(photoUrl)) {
-            window.open(photoUrl, '_blank', 'noopener,noreferrer');
-        }
-    };
+    if (objectId === -1 || index === -1 || !currentPhotos?.[index]) return null;
+
+    const photo = currentPhotos[index];
+    const photoObjectId = currentObjectIds[index] ?? objectId;
+    const photoUrl = getCameraMediaUrl(photo.w?.replace('_small.png', '.png'));
+    const creator = photo.n || photo.o || '';
+    const canBrowse = currentPhotos.length > 1;
+    const canRemove = (roomSession?.controllerLevel ?? 0) >= RoomControllerLevel.ROOM_OWNER;
+
+    const browse = (step: number) => setIndex((current) => (current + step + currentPhotos.length) % currentPhotos.length);
+
+    const reportPhoto = () =>
+        report(ReportType.PHOTO, {
+            extraData: photo.w,
+            roomId: photo.s,
+            reportedUserId: GetSessionDataManager().userId,
+            roomObjectId: photoObjectId
+        });
+
+    const removePhoto = () =>
+        showConfirm(
+            LocalizeText('inventory.remove.external_image_wallitem_body'),
+            () => GetRoomEngine().deleteRoomObject(photoObjectId, RoomObjectCategory.WALL),
+            null,
+            LocalizeText('inventory.remove.external_image_wallitem_delete'),
+            null,
+            LocalizeText('inventory.remove.external_image_wallitem_header')
+        );
 
     return (
-        <OctaneCardView
-            isResizable={false}
-            className="octane-external-image-widget min-w-0 max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
-            uniqueKey="photo-viewer"
-            theme="primary-slim"
-        >
-            <OctaneCardHeaderView
-                headerText={LocalizeText('camera.interface.title')}
-                isGalleryPhoto={true}
-                onCloseClick={onClose}
-                onReportPhoto={() =>
-                    report(ReportType.PHOTO, {
-                        extraData: currentPhotos[currentPhotoIndex].w,
-                        roomId: currentPhotos[currentPhotoIndex].s,
-                        reportedUserId: GetSessionDataManager().userId,
-                        roomObjectId: Number(currentPhotos[currentPhotoIndex].u)
-                    })
-                }
-            />
-            <OctaneCardContentView>
-                <CameraWidgetShowPhotoView currentIndex={currentPhotoIndex} currentPhotos={currentPhotos} onClick={handleOpenFullPhoto} />
-            </OctaneCardContentView>
-        </OctaneCardView>
+        <DraggableWindow uniqueKey="photo-viewer" handleSelector=".octane-photo-viewer__panel">
+            <div className="octane-photo-viewer">
+                <div className="octane-photo-viewer__panel" />
+                <div className="octane-photo-viewer__photo">{photoUrl && <img alt="" src={photoUrl} draggable={false} />}</div>
+                {canBrowse && (
+                    <>
+                        <button type="button" className="octane-photo-viewer__browse octane-photo-viewer__browse--previous" onClick={() => browse(-1)} />
+                        <button type="button" className="octane-photo-viewer__browse octane-photo-viewer__browse--next" onClick={() => browse(1)} />
+                    </>
+                )}
+                {creator && (
+                    <>
+                        <span className="octane-photo-viewer__date">{formatCreationDate(photo.t)}</span>
+                        <button type="button" className="octane-photo-viewer__creator" onClick={() => photo.oi && GetUserProfile(photo.oi)}>
+                            {creator}
+                        </button>
+                    </>
+                )}
+                <div className="octane-photo-viewer__buttons">
+                    <button type="button" className="octane-photo-viewer__button octane-photo-viewer__button--report" onClick={reportPhoto} />
+                    {canRemove && <button type="button" className="octane-photo-viewer__button octane-photo-viewer__button--remove" onClick={removePhoto} />}
+                    <button type="button" className="octane-photo-viewer__close" onClick={onClose} />
+                </div>
+            </div>
+        </DraggableWindow>
     );
 };

@@ -10,6 +10,7 @@ const useFurnitureExternalImageWidgetState = () => {
     const [category, setCategory] = useState(-1);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(-1);
     const [currentPhotos, setCurrentPhotos] = useState<IPhotoData[]>([]);
+    const [currentObjectIds, setCurrentObjectIds] = useState<number[]>([]);
     const { roomSession = null } = useRoom();
 
     const onClose = () => {
@@ -17,6 +18,7 @@ const useFurnitureExternalImageWidgetState = () => {
         setCategory(-1);
         setCurrentPhotoIndex(-1);
         setCurrentPhotos([]);
+        setCurrentObjectIds([]);
     };
 
     useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_EXTERNAL_IMAGE, (event) => {
@@ -26,6 +28,7 @@ const useFurnitureExternalImageWidgetState = () => {
         if (!roomObject) return;
 
         const datas: IPhotoData[] = [];
+        const objectIds: number[] = [];
 
         roomTotalImages.forEach((object) => {
             if (object.type !== 'external_image_wallitem_poster_small') return null;
@@ -33,7 +36,10 @@ const useFurnitureExternalImageWidgetState = () => {
             const data = object.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA);
             try {
                 const jsonData: IPhotoData = JSON.parse(data);
-                if (getCameraMediaUrl(jsonData?.w)) datas.push(jsonData);
+                if (getCameraMediaUrl(jsonData?.w)) {
+                    datas.push(jsonData);
+                    objectIds.push(object.id);
+                }
             } catch {
                 // Legacy or malformed item data cannot supply camera media.
             }
@@ -42,6 +48,7 @@ const useFurnitureExternalImageWidgetState = () => {
         setObjectId(event.objectId);
         setCategory(event.category);
         setCurrentPhotos(datas);
+        setCurrentObjectIds(objectIds);
 
         let roomObjectPhotoData: IPhotoData;
         try {
@@ -75,7 +82,7 @@ const useFurnitureExternalImageWidgetState = () => {
         onClose();
     });
 
-    return { objectId, currentPhotoIndex, currentPhotos, onClose };
+    return { objectId, currentPhotoIndex, currentPhotos, currentObjectIds, onClose };
 };
 
 export const useFurnitureExternalImageWidget = useFurnitureExternalImageWidgetState;
