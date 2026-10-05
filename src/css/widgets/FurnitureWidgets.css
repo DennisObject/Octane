@@ -388,105 +388,95 @@
     }
 }
 
+/* v75 stickie: a 185x178 window. The grey stickie_blanco bitmap is multiplied by the note colour; themed notes use their
+   own bitmap. Delete (9,4), colours (26 + 12n, 5) 9x9, close (168,5) and the 175x135 text input at (5,24) are absolute. */
 .octane-stickie {
     position: relative;
+    box-sizing: border-box;
     width: 185px;
     height: 178px;
-    top: 25px;
-    left: 25px;
-    padding: 1px;
     pointer-events: all;
+    image-rendering: var(--octane-pixel-art, pixelated);
 
-    &.stickie-plain {
-        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)) drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.25));
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: url('@/assets/images/room-widgets/stickie-widget/stickie-blanco.png') 0 0 / 185px 178px no-repeat, var(--stickie-color, #ffff33);
+        background-blend-mode: multiply;
+        -webkit-mask: url('@/assets/images/room-widgets/stickie-widget/stickie-blanco.png') 0 0 / 185px 178px no-repeat;
+        mask: url('@/assets/images/room-widgets/stickie-widget/stickie-blanco.png') 0 0 / 185px 178px no-repeat;
+    }
 
-        &::before {
-            content: '';
-            position: absolute;
-            z-index: -1;
-            inset: 0;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            border-radius: 2px;
-            background-color: var(--stickie-color);
-            background-image:
-                linear-gradient(180deg, rgba(0, 0, 0, 0.07) 0, rgba(0, 0, 0, 0.07) 18px, rgba(255, 255, 255, 0.18) 19px, rgba(255, 255, 255, 0) 32px),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.05) 100%);
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
-        }
-
-        &::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 22px;
-            height: 22px;
-            background-color: var(--stickie-color);
-            background-image: linear-gradient(to top left, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.12) 45%, rgba(255, 255, 255, 0.2) 100%);
-            clip-path: polygon(0 0, 100% 0, 0 100%);
-        }
-
-        .stickie-context {
-            font-family: 'Segoe Print', 'Bradley Hand', 'Lucida Handwriting', 'Comic Sans MS', cursive;
-            line-height: 1.4;
-
-            textarea {
-                font-style: normal;
-            }
-        }
+    &.octane-stickie-image::before {
+        content: none;
     }
 
     .stickie-header {
-        width: 183px;
-        height: 18px;
-        padding: 0 7px;
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 24px;
+    }
 
-        .header-trash,
-        .header-close {
-            cursor: pointer;
-        }
+    .header-trash,
+    .header-close,
+    .stickie-color {
+        position: absolute;
+        cursor: pointer;
+    }
 
-        .stickie-color {
-            width: 10px;
-            height: 10px;
-            cursor: pointer;
-            border: 1px solid rgba(0, 0, 0, 0.4);
-        }
+    .header-trash {
+        top: 4px;
+        left: 9px;
+    }
+
+    .header-close {
+        top: 5px;
+        left: 168px;
+    }
+
+    .stickie-color {
+        top: 5px;
+        width: 9px;
+        height: 9px;
     }
 
     .stickie-context {
-        width: 183px;
-        height: 145px;
-        padding: 2px 7px;
-        font-size: 12px;
+        position: absolute;
+        top: 24px;
+        left: 5px;
+        width: 175px;
+        height: 135px;
         color: #000;
+        font-family: Ubuntu, sans-serif;
+        font-size: 12px;
+        line-height: 15px;
 
         .context-text {
+            display: block;
+            box-sizing: border-box;
             width: 100%;
             height: 100%;
+            margin: 0;
             padding: 0;
+            overflow: hidden;
             overflow-wrap: break-word;
-            white-space: break-spaces;
-            overflow-y: auto;
-        }
-
-        textarea {
-            background: transparent;
+            white-space: pre-wrap;
             border: 0;
-            outline: none;
+            outline: 0;
             box-shadow: none;
             resize: none;
-            font-family: inherit;
-            font-size: inherit;
-            font-style: italic;
-
-            &:active {
-                border: 0;
-                outline: none;
-                box-shadow: none;
-            }
+            background: transparent;
+            color: inherit;
+            font: inherit;
         }
     }
+}
+
+.octane-stickie.octane-stickie-image {
+    background-repeat: no-repeat;
+    background-position: 0 0;
 }
 
 .octane-stickie-image {
