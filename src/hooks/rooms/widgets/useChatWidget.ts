@@ -28,7 +28,6 @@ import {
     resolveChatBubbleWidth
 } from '../../../api';
 import { captureNativeChatCreation } from '../../../components/room/widgets/chat/nativeChatScroller';
-import { getStoredChatTextSize } from '../../../components/room/widgets/chat-input/chatTextSize';
 import { useChatHistory } from './../../chat-history';
 import { useMessageEvent, useOctaneEvent } from '../../events';
 import { useUserDataSnapshot } from '../../session/useSessionSnapshots';
@@ -289,7 +288,6 @@ const useChatWidgetState = () => {
         captureNativeChatCreation(chatMessage, chatSettings.mode);
         // The renderer adds bubbleWidthOverride to the chat event in Octane-Renderer#212; until that
         // lands the published event has no such field, so it is read as optional.
-        chatMessage.textSize = getStoredChatTextSize();
         // Native bubbles resolve their width at creation; later preference changes affect new bubbles only.
         chatMessage.bubbleWidthOverride = resolveChatBubbleWidth(
             (event as RoomSessionChatEvent & { bubbleWidthOverride?: number }).bubbleWidthOverride,

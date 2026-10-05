@@ -1,11 +1,12 @@
 import { GetRoomEngine, RoomChatSettings, RoomObjectCategory } from '@octane/renderer';
-import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleMessage } from '../../../../api';
-import { UserIdentityView } from '../../../../common';
 import { useOnClickChat } from '../../../../hooks';
-import { CHAT_TEXT_SIZE_EVENT, CHAT_TEXT_SIZE_PIXELS, ChatTextSize, getStoredChatTextSize } from '../chat-input/chatTextSize';
+import { useSessionInfo } from '../../../../hooks/session/useSessionInfo';
+import { ChatTextSize, getChatFontScale, getChatTextSize } from '../chat-input/chatTextSize';
 import { measureBubbleVisualOffsets } from './chatBubbleMetrics';
 import { getNativeChatCreation } from './nativeChatScroller';
+import { getNativeChatBaseFontSize, getNativeDefaultSkin, isNativeAnonymousStyle } from './nativeChatSkin';
 
 interface ChatWidgetMessageViewProps {
     chat: ChatBubbleMessage;
@@ -25,7 +26,15 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     const [creationMode] = useState(() => getNativeChatCreation(chat)?.mode ?? mode);
     const [isVisible, setIsVisible] = useState(false);
     const [isReady, setIsReady] = useState(false);
-    const [chatTextSize, setChatTextSize] = useState<ChatTextSize>(() => chat?.textSize ?? getStoredChatTextSize());
+    const { chatFontScale } = useSessionInfo();
+    const [chatTextSize] = useState<ChatTextSize>(() => chat.textSize ?? getChatTextSize(chatFontScale));
+    useLayoutEffect(() => {
+        chat.textSize ??= chatTextSize;
+    }, [chat, chatTextSize]);
+    const [faceSize, setFaceSize] = useState({ width: 50, height: 50 });
+    const [defaultSkin, setDefaultSkin] = useState<string>(null);
+    const fontScale = getChatFontScale(chatTextSize);
+    const anonymous = isNativeAnonymousStyle(chat.styleId);
     const elementRef = useRef<HTMLDivElement>(null);
     const makeRoomRef = useRef(makeRoom);
     const { onClickChat } = useOnClickChat();
@@ -81,19 +90,13 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     ]);
 
     useEffect(() => {
-        // A message that captured its own size keeps it for life, so changing the
-        // setting never resizes bubbles that are already on screen and the size
-        // survives an unmount/remount.
-        if (chat?.textSize) return;
-
-        const onChatTextSizeChange = (event: Event) => {
-            setChatTextSize((event as CustomEvent<ChatTextSize>).detail || getStoredChatTextSize());
-        };
-
-        window.addEventListener(CHAT_TEXT_SIZE_EVENT, onChatTextSizeChange);
-
-        return () => window.removeEventListener(CHAT_TEXT_SIZE_EVENT, onChatTextSizeChange);
-    }, [chat?.textSize]);
+        if (chat.styleId !== 0) return;
+        let disposed = false;
+        getNativeDefaultSkin(chat.color).then((skin) => {
+            if (!disposed) setDefaultSkin(skin);
+        });
+        return () => { disposed = true; };
+    }, [chat.styleId, chat.color]);
 
     useEffect(() => {
         makeRoomRef.current = makeRoom;
@@ -137,38 +140,40 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         setIsVisible(true);
     }, [chat, isReady, isVisible, creationMode]);
 
-    const messageClassName = `message [overflow-wrap:anywhere] break-words${chat.type === 1 ? ' italic text-[#595959]' : ''}${chat.type === 2 ? ' font-bold' : ''}`;
+    const messageClassName = `message [overflow-wrap:anywhere] break-words${chat.type === 2 ? ' font-bold' : ''}`;
 
     return (
         <div
             ref={elementRef}
-            className={`bubble-container newbubblehe chat-text-size ${isVisible ? 'visible' : 'invisible'} w-max absolute select-none pointer-events-auto`}
-            style={{ '--chat-text-size': `${CHAT_TEXT_SIZE_PIXELS[chatTextSize]}px`, transition: 'none' } as CSSProperties}
-            onClick={() => GetRoomEngine().selectRoomObject(chat.roomId, chat.senderId, RoomObjectCategory.UNIT)}
+            className={`bubble-container newbubblehe native-room-bubble chat-text-size ${isVisible ? 'visible' : 'invisible'} w-max absolute select-none pointer-events-auto`}
+            style={{ '--chat-text-size': `${getNativeChatBaseFontSize(chat.styleId) * fontScale}px`, transition: 'none' } as CSSProperties}
+            onClick={() => {
+                if (!anonymous) GetRoomEngine().selectRoomObject(chat.roomId, chat.senderId, RoomObjectCategory.UNIT);
+            }}
         >
-            {chat.styleId === 0 && (
-                <div className="absolute -top-px left-px w-[30px] h-[calc(100%-0.5px)] rounded-[7px] z-1" style={{ backgroundColor: chat.color }} />
-            )}
             <div
-                className={`chat-bubble bubble-${chat.styleId} type-${chat.type} ${getBubbleWidth} relative z-1 wrap-break-word min-h-[26px]`}
+                className={`chat-bubble bubble-${chat.styleId} type-${chat.type} ${getBubbleWidth}${chat.type === 1 && !anonymous ? ' native-whisper' : ''} relative z-1 wrap-break-word`}
+                style={chat.styleId === 0 && defaultSkin ? { borderImageSource: `url(${defaultSkin})` } : undefined}
             >
-                <div className="user-container flex items-center justify-center h-full max-h-[24px] overflow-hidden">
-                    {chat.imageUrl && chat.imageUrl.length > 0 && (
-                        <div
-                            className="user-image absolute top-[-15px] left-[-9.25px] w-[45px] h-[65px] bg-no-repeat bg-center"
-                            style={{ backgroundImage: `url(${chat.imageUrl})` }}
+                <div className="user-container absolute overflow-hidden" style={{
+                    left: 13 - faceSize.width / 2,
+                    width: faceSize.width,
+                    height: `min(${faceSize.height}px, 100%)`,
+                    top: `max(1px, calc(12px - min(${faceSize.height}px, 100%) / 2))`
+                }}>
+                    {!anonymous && chat.imageUrl && chat.imageUrl.length > 0 && (
+                        <img
+                            alt=""
+                            src={chat.imageUrl}
+                            className="user-image absolute bottom-0 left-0 max-w-none"
+                            onLoad={(event) => setFaceSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
                         />
                     )}
                 </div>
-                <div className="chat-content py-[5px] px-[6px] ml-[27px] leading-none min-h-[25px]">
-                    <UserIdentityView
-                        className="mr-1 align-middle"
-                        nameClassName="username font-bold"
-                        showColon={true}
-                        username={chat.username}
-                    />
+                <div className="chat-content">
+                    {!anonymous && <b className="username">{chat.username}: </b>}
                     {!chat.showTranslation && (
-                        <span className={`${messageClassName} align-middle`} dangerouslySetInnerHTML={{ __html: formattedText }} onClick={onClickChat} />
+                        <span className={messageClassName} dangerouslySetInnerHTML={{ __html: formattedText }} onClick={onClickChat} />
                     )}
                     {chat.showTranslation && (
                         <div className="mt-[2px] flex flex-col gap-[2px]" onClick={onClickChat}>
@@ -187,10 +192,10 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                         </div>
                     )}
                 </div>
-                {showPointer && (
+                {showPointer && !anonymous && (
                     <div
-                        className="pointer absolute translate-x-[-50%] w-[9px] h-[6px] bottom-[-5px]"
-                        style={{ left: 'var(--chat-pointer-x, 50%)' }}
+                        className="pointer absolute w-[9px] h-[6px] bottom-[-5px]"
+                        style={{ left: chat.styleId === 0 ? 'var(--chat-pointer-x, 28px)' : '50%' }}
                     />
                 )}
             </div>

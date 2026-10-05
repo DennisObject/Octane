@@ -8,6 +8,7 @@ import {
     TextureUtils,
     Vector3d
 } from '@octane/renderer';
+import { GetConfigurationValue } from '../../octane/GetConfigurationValue';
 
 export class ChatBubbleUtilities {
     private static MAX_CACHE_SIZE: number = 200;
@@ -31,7 +32,8 @@ export class ChatBubbleUtilities {
     }
 
     public static async setFigureImage(figure: string): Promise<string> {
-        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, null, {
+        const zoom = GetConfigurationValue<boolean>('zoom.enabled', false);
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, zoom ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
             resetFigure: (figure) => this.setFigureImage(figure),
             dispose: () => {},
             disposed: false
@@ -41,22 +43,48 @@ export class ChatBubbleUtilities {
 
         const isPlaceholder = avatarImage.isPlaceholder();
 
-        if (isPlaceholder && this.placeHolderImageUrl?.length) return this.placeHolderImageUrl;
+        if (isPlaceholder && this.placeHolderImageUrl?.length) {
+            avatarImage.dispose();
+            return this.placeHolderImageUrl;
+        }
 
         figure = avatarImage.getFigure().getFigureString();
 
-        const imageUrl = avatarImage.processAsImageUrl(AvatarSetType.HEAD);
+        avatarImage.setDirection(AvatarSetType.HEAD, 2);
+        const sourceUrl = avatarImage.processAsImageUrl(AvatarSetType.HEAD);
         const color = avatarImage.getPartColor(AvatarFigurePartType.CHEST);
-
+        this.AVATAR_COLOR_CACHE.set(figure, (color && color.rgb) || 16777215);
+        this.pruneCache(this.AVATAR_COLOR_CACHE);
+        avatarImage.dispose();
+        const source = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = sourceUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = 50;
+        canvas.height = 50;
+        const context = canvas.getContext('2d');
+        context.imageSmoothingEnabled = false;
+        if (zoom) {
+            const scaled = document.createElement('canvas');
+            scaled.width = Math.round(source.width / 2);
+            scaled.height = Math.round(source.height / 2);
+            const scaledContext = scaled.getContext('2d');
+            scaledContext.imageSmoothingEnabled = true;
+            scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
+            canvas.width = 25;
+            canvas.height = 25;
+            context.imageSmoothingEnabled = false;
+            context.drawImage(scaled, 10, 14, 25, 25, 0, 0, 25, 25);
+        } else context.drawImage(source, 21, 28, 50, 50, 0, 0, 50, 50);
+        const imageUrl = canvas.toDataURL('image/png');
         if (isPlaceholder) this.placeHolderImageUrl = imageUrl;
 
-        this.AVATAR_COLOR_CACHE.set(figure, (color && color.rgb) || 16777215);
         this.AVATAR_IMAGE_CACHE.set(figure, imageUrl);
 
-        this.pruneCache(this.AVATAR_COLOR_CACHE);
         this.pruneCache(this.AVATAR_IMAGE_CACHE);
-
-        avatarImage.dispose();
 
         return imageUrl;
     }

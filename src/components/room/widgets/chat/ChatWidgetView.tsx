@@ -1,6 +1,8 @@
 import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChatBubbleMessage, GetConfigurationValue, resolveChatBubbleWidth } from '../../../../api';
 import { useChatWidget, useChatWindow } from '../../../../hooks';
+import { useSessionInfo } from '../../../../hooks/session/useSessionInfo';
+import { CHAT_FONT_SCALES } from '../chat-input/chatTextSize';
 import { ChatWidgetMessageView } from './ChatWidgetMessageView';
 import { ChatWidgetWindowView } from './ChatWidgetWindowView';
 import { getChatViewerHeight } from './freeFlowChatLayout';
@@ -8,6 +10,8 @@ import { NativeChatScroller } from './nativeChatScroller';
 
 export const ChatWidgetView: FC<{}> = (props) => {
     const { chatMessages = [], setChatMessages = null, chatSettings = null, getScrollSpeed = 6000, roomId = null } = useChatWidget();
+    const { chatFontScale } = useSessionInfo();
+    const fontScale = CHAT_FONT_SCALES[chatFontScale];
     const [chatWindowEnabled] = useChatWindow();
     const elementRef = useRef<HTMLDivElement>(null);
     const chatMessagesRef = useRef(chatMessages);
@@ -16,13 +20,13 @@ export const ChatWidgetView: FC<{}> = (props) => {
     chatMessagesRef.current = chatMessages;
 
     const makeRoom = useCallback((chat: ChatBubbleMessage, creationMode: number) => {
-        scroller.configure(chatSettings.mode, getScrollSpeed);
+        scroller.configure(chatSettings.mode, getScrollSpeed, fontScale);
         scroller.register(chat, creationMode);
-    }, [scroller, chatSettings.mode, getScrollSpeed]);
+    }, [scroller, chatSettings.mode, getScrollSpeed, fontScale]);
 
     useEffect(() => {
-        scroller.configure(chatSettings.mode, getScrollSpeed);
-    }, [scroller, chatSettings.mode, getScrollSpeed]);
+        scroller.configure(chatSettings.mode, getScrollSpeed, fontScale);
+    }, [scroller, chatSettings.mode, getScrollSpeed, fontScale]);
 
     useLayoutEffect(() => {
         scroller.clear();
@@ -76,7 +80,6 @@ export const ChatWidgetView: FC<{}> = (props) => {
                         chat={chat}
                         mode={chatSettings.mode}
                         makeRoom={makeRoom}
-                        showPointer={false}
                     />
                 ))}
             {chatWindowEnabled && <ChatWidgetWindowView />}

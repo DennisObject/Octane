@@ -149,9 +149,19 @@ export class NativeChatScroller {
     private height = 0;
     private viewportWidth = 0;
 
-    configure(mode: number, speed: number) {
+    private fontScale = 1;
+
+    configure(mode: number, speed: number, fontScale = 1) {
         this.line = mode === 1;
         this.speed = speed;
+        if (this.fontScale !== fontScale) {
+            this.fontScale = fontScale;
+            for (const bubble of this.bubbles) {
+                if (!bubble.chat) continue;
+                const geometry = getNativeChatGeometry(bubble.chat.styleId);
+                bubble.body.height = (geometry.unlimitedHeight ? bubble.chat.height : Math.min(Math.trunc(108 * fontScale), bubble.chat.height)) - 10 - bubble.overlap.y - bubble.overlap.height;
+            }
+        }
     }
 
     resize(height: number, viewportWidth: number) {
@@ -169,7 +179,7 @@ export class NativeChatScroller {
         const geometry = getNativeChatGeometry(chat.styleId);
         const overlap = geometry.overlap;
         const width = chat.width - overlap.x - overlap.width;
-        const height = (geometry.unlimitedHeight ? chat.height : Math.min(108, chat.height)) - 10 - overlap.y - overlap.height;
+        const height = (geometry.unlimitedHeight ? chat.height : Math.min(Math.trunc(108 * this.fontScale), chat.height)) - 10 - overlap.y - overlap.height;
         if (existing) {
             // Translation is custom: preserve its existing centered reflow without changing collider mode.
             existing.body.x += (existing.body.width - width) / 2;
@@ -346,6 +356,12 @@ export class NativeChatScroller {
         }
         if (bubble.chat.left !== left) bubble.chat.left = left;
         if (bubble.chat.top !== y) bubble.chat.top = y;
+        // Default style regpoints use native fallback margins 28/15; other skins retain their CSS.
+        if (bubble.chat.styleId === 0 && bubble.chat.elementRef) {
+            const pointerX = `${Math.max(28, Math.min(bubble.chat.width - 15, bubble.chat.location.x - left))}px`;
+            const style = bubble.chat.elementRef.style;
+            if (style.getPropertyValue('--chat-pointer-x') !== pointerX) style.setProperty('--chat-pointer-x', pointerX);
+        }
         bubble.writtenLeft = left;
         bubble.writtenTop = y;
     }

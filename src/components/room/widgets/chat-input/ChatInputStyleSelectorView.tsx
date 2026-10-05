@@ -1,7 +1,8 @@
 import * as Popover from '@radix-ui/react-popover';
 import { FC, useState } from 'react';
 import { LocalizeText } from '../../../../api';
-import { CHAT_TEXT_SIZES, ChatTextSize, getChatTextSizeLabel, getStoredChatTextSize, setStoredChatTextSize } from './chatTextSize';
+import { useSessionInfo } from '../../../../hooks/session/useSessionInfo';
+import { CHAT_TEXT_SIZES, ChatTextSize, getChatTextSize, getChatTextSizeLabel } from './chatTextSize';
 
 interface ChatInputStyleSelectorViewProps {
     chatStyleId: number;
@@ -12,7 +13,8 @@ interface ChatInputStyleSelectorViewProps {
 export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = (props) => {
     const { chatStyleId = 0, chatStyleIds = null, selectChatStyleId = null } = props;
     const [selectorVisible, setSelectorVisible] = useState(false);
-    const [chatTextSize, setChatTextSize] = useState<ChatTextSize>(() => getStoredChatTextSize());
+    const { chatFontScale, updateChatFontScale } = useSessionInfo();
+    const chatTextSize = getChatTextSize(chatFontScale);
 
     const selectStyle = (styleId: number) => {
         selectChatStyleId(styleId);
@@ -20,8 +22,7 @@ export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = (
     };
 
     const selectTextSize = (size: ChatTextSize) => {
-        setChatTextSize(size);
-        setStoredChatTextSize(size);
+        updateChatFontScale(CHAT_TEXT_SIZES.indexOf(size));
     };
 
     return (

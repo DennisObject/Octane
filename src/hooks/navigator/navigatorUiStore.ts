@@ -72,6 +72,7 @@ export type NavigatorUiState = {
     isReady: boolean;
     isCreatorOpen: boolean;
     isRoomInfoOpen: boolean;
+    roomInfoEmbedExpanded: boolean;
     isRoomLinkOpen: boolean;
     isOpenSavesSearches: boolean;
     isLoading: boolean;
@@ -99,6 +100,7 @@ export type NavigatorUiActions = {
     openCreator(): void;
     closeCreator(): void;
     setRoomInfoOpen(open: boolean): void;
+    setRoomInfoEmbedExpanded(expanded: boolean): void;
     toggleRoomInfo(): void;
     setRoomLinkOpen(open: boolean): void;
     toggleRoomLink(): void;
@@ -126,6 +128,7 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     isReady: false,
     isCreatorOpen: false,
     isRoomInfoOpen: false,
+    roomInfoEmbedExpanded: false,
     isRoomLinkOpen: false,
     isOpenSavesSearches: false,
     isLoading: false,
@@ -156,6 +159,7 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     openCreator: () => set({ isVisible: true, isCreatorOpen: true }),
     closeCreator: () => set({ isCreatorOpen: false }),
     setRoomInfoOpen: (open) => set({ isRoomInfoOpen: open }),
+    setRoomInfoEmbedExpanded: (expanded) => set({ roomInfoEmbedExpanded: expanded }),
     toggleRoomInfo: () => set((s) => ({ isRoomInfoOpen: !s.isRoomInfoOpen })),
     setRoomLinkOpen: (open) => set({ isRoomLinkOpen: open }),
     toggleRoomLink: () => set((s) => ({ isRoomLinkOpen: !s.isRoomLinkOpen })),

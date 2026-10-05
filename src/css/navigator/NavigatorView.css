@@ -1100,270 +1100,122 @@
 .octane-navigator-air__room-bubble {
     position: fixed;
     z-index: 1070;
+    isolation: isolate;
     box-sizing: border-box;
     width: 374px;
-    min-height: 220px;
-    max-width: calc(100vw - 16px);
-    padding: 8px 8px 8px 11px;
-    border-style: solid;
-    border-width: 7px;
-    border-image-source: url("@/assets/images/habbo-skin/slices/bubble-7.png");
-    border-image-slice: 7 fill;
-    border-image-width: 7px;
-    border-image-repeat: stretch;
+    padding: 15px 15px 3px 14px;
+    border: 0;
     background: transparent;
-    color: #111;
-    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
-    font-size: 12px;
-    filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.349));
-    image-rendering: var(--octane-pixel-art, pixelated);
+    color: #000;
+    font: 400 12px/14px HabboAirUbuntu, Ubuntu, sans-serif;
+    font-kerning: normal;
+    image-rendering: pixelated;
 }
+
+.octane-navigator-air__room-bubble-skin {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+.octane-navigator-air__room-bubble-skin svg { position: absolute; }
 
 .octane-navigator-air__room-bubble::before {
     content: "";
     position: absolute;
     top: 50%;
-    left: -11px;
+    left: -2px;
     width: 11px;
     height: 18px;
     margin-top: -9px;
-    background: url("@/assets/images/habbo-skin/slices/bubble-pointer-left.png") center / 11px 18px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    background: url("@/assets/images/habbo-skin/slices/bubble-pointer-left.png") no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
 }
 
-.octane-navigator-air__room-bubble-content {
-    display: flex;
-    width: 345px;
-    max-width: 100%;
-    flex-direction: column;
-    gap: 3px;
-}
+.octane-navigator-air__room-bubble :where(div, span, button) { font: inherit; color: inherit; }
+.octane-navigator-air__room-bubble button { margin: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; cursor: pointer; }
+.octane-navigator-air__room-bubble button:focus-visible { outline: 1px solid #fff27a; outline-offset: 1px; }
+.octane-navigator-air__room-bubble svg { image-rendering: pixelated; pointer-events: none; }
+.octane-navigator-air__room-bubble-content { display: flex; width: 345px; flex-direction: column; gap: 3px; }
 
 .octane-navigator-air__room-popover-header {
+    position: relative;
+    isolation: isolate;
     display: grid;
     box-sizing: border-box;
-    grid-template-columns: 112px minmax(0, 219px);
+    grid-template-columns: 112px 219px;
     width: 345px;
-    max-width: 100%;
     height: 125px;
-    padding: 6px 7px 7px;
-    background: #fff;
+    padding: 6px 6px 7px 8px;
 }
-
+.octane-navigator-air__room-popover-header-skin { position: absolute; inset: 0; z-index: -1; }
 .octane-navigator-air__room-popover-thumbnail {
     position: relative;
-    width: 110px !important;
-    height: 110px !important;
-    border: 1px solid #111 !important;
+    box-sizing: border-box;
+    width: 112px !important;
+    height: 112px !important;
+    overflow: hidden;
+    border: 1px solid #000 !important;
     border-radius: 0 !important;
-    background-color: #000;
-    background-image: url("@/assets/images/navigator/air/default-room.png") !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
+    background: #000 url("@/assets/images/navigator/air/default-room.png") center no-repeat !important;
 }
-
-.octane-navigator-air__room-badge {
-    position: absolute !important;
-    top: 1px;
-    left: 1px;
-    z-index: 2;
-    width: 48px;
-    height: 48px;
-}
-
-.octane-navigator-air__room-popover-copy {
-    min-width: 0;
-    height: 112px;
-    padding: 0 0 0 6px;
-}
-
+.octane-navigator-air__room-badge { position: absolute !important; top: 1px; left: 1px; z-index: 2; width: 48px !important; height: 48px !important; }
+.octane-navigator-air__room-popover-copy { position: relative; width: 219px; height: 112px; }
 .octane-navigator-air__room-popover-title {
-    min-height: 16px;
-    max-height: 33px;
-    overflow: hidden;
-    font-family: HabboAirUbuntu, UbuntuBold, Ubuntu, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 16px;
-}
-
-.octane-navigator-air__room-popover-description {
-    max-height: 80px;
-    overflow: hidden;
-    color: #333;
-    font-size: 11px;
-    line-height: 13px;
-}
-
-.octane-navigator-air__room-popover-owner-row {
-    display: flex;
+    position: absolute;
+    top: 0;
+    left: 6px;
     box-sizing: border-box;
-    width: 344px;
-    max-width: 100%;
-    height: 30px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3px 5px 0;
+    width: 214px;
+    height: 33px;
+    padding: 2px;
+    overflow: hidden;
+    font-weight: 700 !important;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
+.octane-navigator-air__room-popover-description { position: absolute; top: 33px; left: 5px; box-sizing: border-box; width: 214px; height: 80px; padding: 2px; overflow: hidden; white-space: pre-wrap; overflow-wrap: break-word; }
 
+.octane-navigator-air__room-popover-owner-row { position: relative; width: 344px; height: 30px; }
 .octane-navigator-air__room-owner,
-.octane-navigator-air__room-group {
-    display: inline-flex;
-    max-width: 170px;
-    align-items: center;
-    padding: 0;
-    overflow: hidden;
-    border: 0;
-    background: transparent;
-    color: #111;
-    cursor: pointer;
-    font-family: HabboAirUbuntu, UbuntuBold, Ubuntu, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    text-decoration: underline;
-}
+.octane-navigator-air__room-group { position: absolute; top: 3px; height: 30px; padding: 0; text-align: left; }
+.octane-navigator-air__room-owner { left: 5px; width: 150px; }
+.octane-navigator-air__room-group { left: 175px; width: 170px; }
+.octane-navigator-air__room-owner-eye { position: absolute; top: 0; left: 0; }
+.octane-navigator-air__room-group > .octane-navigator-air__group { position: absolute; top: 0; left: 0; width: 15px; height: 13px; background-size: 15px 13px; }
+.octane-navigator-air__room-owner > span,
+.octane-navigator-air__room-group > span { position: absolute; left: 20px; box-sizing: border-box; height: 33px; padding: 2px; overflow: hidden; font-weight: 700 !important; text-decoration: underline; text-align: left; white-space: pre-wrap; overflow-wrap: break-word; }
+.octane-navigator-air__room-owner > span { top: -2px; width: 130px; }
+.octane-navigator-air__room-group > span { top: 0; width: 170px; }
 
-.octane-navigator-air__room-popover-details {
-    display: grid;
-    grid-template-columns: 166px 170px;
-    width: 344px;
-    max-width: 100%;
-    min-height: 80px;
-}
+.octane-navigator-air__room-popover-details { position: relative; width: 344px; height: 80px; }
+.octane-navigator-air__room-popover-properties { display: grid; grid-template-columns: 70px max-content; grid-auto-rows: 20px; width: 263px; }
+.octane-navigator-air__room-popover-properties > span { box-sizing: border-box; height: 20px; padding: 2px; white-space: nowrap; }
+.octane-navigator-air__room-popover-properties .is-label { font-weight: 700; }
+.octane-navigator-air__room-popover-actions { position: absolute; top: 0; left: 178px; display: flex; width: 170px; flex-direction: column; }
+.octane-navigator-air__room-popover-actions button { position: relative; width: 170px; height: 20px; padding: 0; text-align: left; pointer-events: none; }
+.octane-navigator-air__room-popover-actions button > span { position: absolute; top: 0; left: 20px; height: 17px; padding: 2px; white-space: nowrap; }
+.octane-navigator-air__room-popover-actions button > i { pointer-events: auto; position: absolute; top: 0; left: 0; width: 20px; height: 20px; background-position: center; background-repeat: no-repeat; image-rendering: pixelated; }
+.octane-navigator-air__room-popover-actions .icon-navigator-favorite-room { background-image: url("@/assets/images/navigator/air/icon-fav-no.png"); }
+.octane-navigator-air__room-popover-actions .icon-navigator-favorite-room.active { background-image: url("@/assets/images/navigator/air/icon-fav-yes.png"); }
+.octane-navigator-air__room-popover-actions .icon-navigator-my-room { background-image: url("@/assets/images/navigator/air/icon-home-no.png"); }
+.octane-navigator-air__room-popover-actions .icon-navigator-my-room.active { background-image: url("@/assets/images/navigator/air/icon-home-yes.png"); }
+.octane-navigator-air__room-popover-actions .icon-navigator-room-settings { background-image: url("@/assets/images/navigator/air/room-settings.png"); }
+.octane-navigator-air__room-popover-actions .icon-navigator-room-report { background-image: url("@/assets/images/navigator/air/report-room.png"); }
 
-.octane-navigator-air__room-popover-properties {
-    display: grid;
-    grid-template-columns: 70px 85px;
-    grid-auto-rows: 20px;
-    align-content: start;
-    font-size: 11px;
-}
-
-.octane-navigator-air__room-popover-properties .is-label {
-    font-weight: 700;
-}
-
-.octane-navigator-air__room-popover-actions {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    padding-left: 12px;
-}
-
-.octane-navigator-air__room-popover-actions button {
-    display: flex;
-    width: 170px;
-    height: 20px;
-    align-items: center;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #111;
-    cursor: pointer;
-    font-size: 11px;
-    text-align: left;
-}
-
-.octane-navigator-air__room-popover-actions button > i {
-    display: block;
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-    background-position: center;
-    background-repeat: no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-favorite-room {
-    background-image: url("@/assets/images/navigator/air/icon-fav-no.png");
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-favorite-room.active {
-    background-image: url("@/assets/images/navigator/air/icon-fav-yes.png");
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-my-room {
-    background-image: url("@/assets/images/navigator/air/icon-home-no.png");
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-my-room.active {
-    background-image: url("@/assets/images/navigator/air/icon-home-yes.png");
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-room-settings {
-    background-image: url("@/assets/images/navigator/air/room-settings.png");
-}
-
-.octane-navigator-air__room-popover-actions .icon-navigator-room-report {
-    background-image: url("@/assets/images/navigator/air/report-room.png");
-}
-
-.octane-navigator-air__room-popover-actions button:hover span,
-.octane-navigator-air__room-popover-actions button:focus-visible span {
-    text-decoration: underline;
-}
-
-.octane-navigator-air__room-popover-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.octane-navigator-air__tag {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #0f557b;
-    cursor: pointer;
-    font-size: 11px;
-    text-decoration: underline;
-}
-
-.octane-navigator-air__room-popover-event {
-    display: grid;
-    box-sizing: border-box;
-    grid-template-columns: 48px minmax(0, 1fr);
-    width: 331px;
-    max-width: 100%;
-    min-height: 55px;
-    overflow: hidden;
-    border: 1px solid #123f53;
-    background: rgba(15, 26, 112, 0.7);
-    color: #fff;
-}
-
-.octane-navigator-air__room-popover-event-icon {
-    width: 38px;
-    height: 38px;
-    align-self: center;
-    justify-self: center;
-    background: url("@/assets/images/navigator/air/event-icon.png") center / contain no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-navigator-air__room-popover-event-copy {
-    min-width: 0;
-    padding: 3px 2px 2px 0;
-}
-
+.octane-navigator-air__room-popover-bottom { display: flex; width: 345px; flex-direction: column; }
+.octane-navigator-air__room-popover-tag-group { position: relative; width: 345px; height: 23px; }
+.octane-navigator-air__room-popover-tags { display: flex; width: 200px; height: 20px; gap: 2px; overflow: hidden; }
+.octane-navigator-air__room-bubble .octane-navigator-air__tag { flex: none; box-sizing: border-box; height: 19px; padding: 4px 4px 0 5px; background: #f1a700; color: #fff; font: 400 10px/12px HabboAirUbuntu, Ubuntu, sans-serif; white-space: nowrap; }
+.octane-navigator-air__room-popover-event { position: relative; width: 331px; height: 55px; margin-left: 7px; opacity: 0.7; }
+.octane-navigator-air__room-popover-event-skin { position: absolute; inset: 0; }
+.octane-navigator-air__room-popover-event-icon { position: absolute; top: 9px; left: 6px; width: 42px; height: 40px; background: url("@/assets/images/navigator/air/event-icon.png") center no-repeat; image-rendering: pixelated; }
+.octane-navigator-air__room-popover-event-copy { position: absolute; inset: 0; }
 .octane-navigator-air__room-popover-event-name,
-.octane-navigator-air__room-popover-event-description {
-    display: block;
-    overflow: hidden;
-    color: #fff;
-    font-size: 11px;
-    line-height: 16px;
-}
-
-.octane-navigator-air__room-popover-event-name {
-    height: 16px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.octane-navigator-air__room-popover-event-description {
-    max-height: 36px;
-}
+.octane-navigator-air__room-popover-event-description { position: absolute; left: 54px; box-sizing: border-box; width: 275px; padding: 2px; overflow: hidden; color: #fff !important; }
+.octane-navigator-air__room-popover-event-name { top: 3px; height: 16px; font-weight: 700 !important; white-space: nowrap; }
+.octane-navigator-air__room-popover-event-description { top: 19px; height: 36px; white-space: pre-wrap; overflow-wrap: break-word; }
 
 .octane-navigator-air__actions {
     position: relative;

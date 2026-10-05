@@ -66,7 +66,6 @@ export const useNavigatorRoomInfoPopupStore = createOctaneStore<NavigatorRoomInf
 
     setHovered: (hovered) => {
         set({ hovered });
-        if (hovered) hideTimer.hideAt = Date.now() + POPUP_HIDE_DELAY_MS;
     },
 
     toggleFromInfo: (room, rect) => {
