@@ -1,5 +1,6 @@
 import { NavigatorCategoryListModeComposer, NavigatorSearchCloseComposer, NavigatorSearchOpenComposer, NavigatorSettingsSaveComposer } from '@octane/renderer';
 import { SendMessageComposer } from '../../api';
+import { useRoomCreatorStore } from '../../components/navigator/views/navigatorRoomCreatorStore';
 import { createOctaneStore } from '../../state/createOctaneStore';
 
 const QUICK_LINKS_STORAGE_KEY = 'nitro.navigator.air.quickLinksOpen';
@@ -156,7 +157,10 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
                 ? { isVisible: false }
                 : { isVisible: true, ...(state.currentTabCode ? queueSearch(state.currentTabCode, state.currentFilter, true) : {}) }
         ),
-    openCreator: () => set({ isVisible: true, isCreatorOpen: true }),
+    openCreator: () => {
+        useRoomCreatorStore.getState().prepareForShow();
+        set({ isCreatorOpen: true });
+    },
     closeCreator: () => set({ isCreatorOpen: false }),
     setRoomInfoOpen: (open) => set({ isRoomInfoOpen: open }),
     setRoomInfoEmbedExpanded: (expanded) => set({ roomInfoEmbedExpanded: expanded }),

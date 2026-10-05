@@ -1337,22 +1337,22 @@
     outline-offset: 1px;
 }
 
-.octane-room-creator-air {
+.octane-room-creator-air.octane-card-shell.octane-card-frame-3 {
     position: relative;
     box-sizing: border-box;
-    width: 585px;
-    min-width: 585px;
-    max-width: 585px;
-    height: 367px;
-    min-height: 367px;
-    max-height: 367px;
+    padding: 25px 6px 7px !important;
+    width: 585px !important;
+    min-width: 585px !important;
+    max-width: 585px !important;
+    height: 367px !important;
+    min-height: 367px !important;
+    max-height: 367px !important;
     overflow: visible;
-    zoom: min(1, calc((100vw - 16px) / 585px), calc((100dvh - 70px - env(safe-area-inset-bottom, 0px)) / 367px));
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    filter: drop-shadow(2.828px 2.828px 4px rgba(0, 0, 0, 0.349));
+    filter: none;
     font-family: Volter, monospace;
     font-size: 9px;
     line-height: 12px;
@@ -1372,109 +1372,6 @@
 .octane-room-creator-air button::after {
     content: none !important;
     display: none !important;
-}
-
-.octane-room-creator-air__skin {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    border-style: solid !important;
-    border-color: transparent !important;
-    border-width: 33px 10px 10px !important;
-    border-radius: 0 !important;
-    border-image-source: url("@/assets/images/habbo-skin/slices/frame-ubuntu-3.png") !important;
-    border-image-slice: 33 10 10 10 fill !important;
-    border-image-width: 33px 10px 10px 10px !important;
-    border-image-repeat: stretch !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    image-rendering: pixelated;
-}
-
-.octane-room-creator-air__skin::before {
-    content: "";
-    position: absolute;
-    inset: -27px -7px auto;
-    height: 27px;
-    background:
-        linear-gradient(#367997, #367997) 0 0 / 100% 26px no-repeat,
-        linear-gradient(#030f18, #030f18) 0 26px / 100% 1px no-repeat;
-}
-
-.octane-room-creator-air__skin::after {
-    content: "";
-    position: absolute;
-    inset: -1px -7px -6px;
-    background:
-        linear-gradient(#030f18, #030f18) 0 0 / 100% 1px no-repeat,
-        linear-gradient(var(--navigator-air-surface, #e9e9e1), var(--navigator-air-surface, #e9e9e1)) 0 1px / 100% calc(100% - 1px) no-repeat;
-    clip-path: polygon(
-        0 0,
-        100% 0,
-        100% calc(100% - 3px),
-        calc(100% - 1px) calc(100% - 3px),
-        calc(100% - 1px) calc(100% - 1px),
-        calc(100% - 3px) calc(100% - 1px),
-        calc(100% - 3px) 100%,
-        3px 100%,
-        3px calc(100% - 1px),
-        1px calc(100% - 1px),
-        1px calc(100% - 3px),
-        0 calc(100% - 3px)
-    );
-}
-
-.octane-room-creator-air__caption {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    left: 6px;
-    z-index: 4;
-    height: 27px;
-}
-
-.octane-room-creator-air__title {
-    display: block;
-    overflow: hidden;
-    color: #ffffff;
-    font-family: HabboAirUbuntu, UbuntuBold, Ubuntu, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 15px;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    pointer-events: none;
-    padding: 3px 28px 0 8px;
-    -webkit-font-smoothing: antialiased;
-}
-
-.octane-room-creator-air__close {
-    position: absolute;
-    top: 2px;
-    right: 0;
-    z-index: 5;
-    width: 19px !important;
-    height: 20px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: url("@/assets/images/habbo-skin/slices/close-3-default.png") 0 0 / 19px 20px no-repeat !important;
-    box-shadow: none !important;
-    filter: none !important;
-    transform: none !important;
-    cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-room-creator-air__close:hover {
-    background-image: url("@/assets/images/habbo-skin/slices/close-3-hover.png") !important;
-}
-
-.octane-room-creator-air__close:active {
-    background-image: url("@/assets/images/habbo-skin/slices/close-3-pressed.png") !important;
 }
 
 .octane-room-creator-air__label {
@@ -1519,6 +1416,15 @@
     left: 276px;
 }
 
+.octane-room-creator-air.octane-card-shell.octane-card-frame-3 > * {
+    z-index: 2;
+}
+
+.octane-room-creator-air.octane-card-shell > .octane-room-creator-air__error {
+    z-index: 7;
+}
+
+/* Native input TextField draws its own one-pixel border. */
 .octane-room-creator-air__field {
     position: absolute;
     z-index: 2;
@@ -1526,17 +1432,6 @@
     left: 16px;
     width: 240px;
     overflow: hidden;
-    border-style: solid !important;
-    border-color: transparent !important;
-    border-width: 0 !important;
-    border-radius: 0 !important;
-    border-image-source: url("@/assets/images/habbo-skin/slices/border-4.png") !important;
-    border-image-slice: 6 fill !important;
-    border-image-width: 6px !important;
-    border-image-repeat: stretch !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 .octane-room-creator-air__field--name {
@@ -1559,15 +1454,15 @@
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: 3px 5px;
-    border: 0 !important;
+    padding: 2px;
+    border: 1px solid #000000 !important;
     border-radius: 0 !important;
-    background: transparent !important;
+    background: #ffffff !important;
     box-shadow: none !important;
     color: #000000;
     font-family: Volter, monospace;
     font-size: 9px;
-    line-height: 12px;
+    line-height: 14px;
     outline: 0;
     resize: none;
     -webkit-font-smoothing: none;
@@ -1591,10 +1486,10 @@
 .octane-room-creator-air__error-border {
     box-sizing: border-box;
     height: 23px;
-    padding: 4px 8px 0;
+    padding: 4px 12px 0 8px;
     border-style: solid;
     border-color: transparent;
-    border-width: 6px;
+    border-width: 0;
     border-image-source: url("@/assets/images/habbo-skin/slices/border-white.png");
     border-image-slice: 6 fill;
     border-image-width: 6px;
@@ -1615,7 +1510,7 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-room-creator-air__dropmenu {
+.octane-room-creator-air .habbo-dropmenu.octane-room-creator-air__dropmenu {
     position: absolute;
     z-index: 3;
     left: 16px;
@@ -1623,117 +1518,9 @@
     height: 21px;
 }
 
-.octane-room-creator-air__dropmenu.is-open {
-    z-index: 8;
-}
-
-.octane-room-creator-air__dropmenu--category {
-    top: 200px;
-}
-
-.octane-room-creator-air__dropmenu--visitors {
-    top: 250px;
-}
-
-.octane-room-creator-air__dropmenu--trade {
-    top: 300px;
-}
-
-.octane-room-creator-air__dropmenu-button {
-    position: relative;
-    display: flex;
-    box-sizing: border-box;
-    width: 240px;
-    height: 21px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px 0 10px;
-    overflow: hidden;
-    border-style: solid !important;
-    border-color: transparent !important;
-    border-width: 0 !important;
-    border-radius: 0 !important;
-    border-image-source: url("@/assets/images/habbo-skin/slices/dropmenu-default.png") !important;
-    border-image-slice: 3 fill !important;
-    border-image-width: 3px !important;
-    border-image-repeat: stretch !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: #000000;
-    font-family: Volter, monospace;
-    font-size: 9px;
-    line-height: 12px;
-    text-align: left;
-    white-space: nowrap;
-    appearance: none;
-    cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-room-creator-air__dropmenu-button span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.octane-room-creator-air__dropmenu-button img {
-    position: absolute;
-    top: 2px;
-    right: 5px;
-    flex: none;
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    pointer-events: none;
-}
-
-.octane-room-creator-air__dropmenu-list {
-    position: absolute;
-    top: 20px;
-    left: 0;
-    z-index: 9;
-    box-sizing: border-box;
-    width: 240px;
-    max-height: 160px;
-    margin: 0;
-    padding: 2px 0;
-    overflow-y: auto;
-    list-style: none;
-    border-style: solid !important;
-    border-color: transparent !important;
-    border-width: 6px !important;
-    border-image-source: url("@/assets/images/habbo-skin/slices/dropmenu-3.png") !important;
-    border-image-slice: 6 fill !important;
-    border-image-width: 6px !important;
-    border-image-repeat: stretch !important;
-    background: transparent;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-room-creator-air__dropmenu-list button {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: 16px;
-    padding: 0 6px;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: #000000;
-    font-family: Volter, monospace;
-    font-size: 9px;
-    line-height: 16px;
-    text-align: left;
-    cursor: pointer;
-}
-
-.octane-room-creator-air__dropmenu-list button:hover,
-.octane-room-creator-air__dropmenu-list button.is-selected {
-    background: #d6eeff !important;
-}
+.octane-room-creator-air__dropmenu--category { top: 200px; }
+.octane-room-creator-air__dropmenu--visitors { top: 250px; }
+.octane-room-creator-air__dropmenu--trade { top: 300px; }
 
 .octane-room-creator-air__button {
     position: absolute;
@@ -1803,22 +1590,129 @@
     box-sizing: border-box;
     width: 295px;
     height: 295px;
+    background: #ffffff;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-creator-air.octane-card-shell .octane-room-creator-air__layout-viewport {
+    width: 290px;
+    height: 295px;
     overflow-x: hidden;
     overflow-y: scroll;
-    border-style: solid;
-    border-color: transparent;
-    border-width: 0;
-    border-image-source: url("@/assets/images/habbo-skin/slices/border-white.png");
-    border-image-slice: 6 fill;
-    border-image-width: 6px;
-    border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    scrollbar-width: none !important;
+    scroll-behavior: auto;
+}
+
+.octane-room-creator-air.octane-card-shell .octane-room-creator-air__layout-viewport::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .octane-room-creator-air__layout-rows {
     display: flex;
     width: 274px;
     flex-wrap: wrap;
+}
+
+.octane-room-creator-air__scrollbar {
+    position: absolute;
+    top: 0;
+    left: 278px;
+    width: 17px;
+    height: 295px;
+}
+
+.octane-room-creator-air__scrollbar button {
+    position: absolute;
+    left: 0;
+    box-sizing: border-box;
+    width: 17px;
+    height: 16px;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    background-repeat: no-repeat;
+    box-shadow: none !important;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.octane-room-creator-air__scroll-up {
+    top: 0;
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-up.png");
+}
+
+.octane-room-creator-air__scroll-up:active {
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-up-pressed.png");
+}
+
+.octane-room-creator-air__scroll-up:disabled {
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-up-disabled.png");
+}
+
+.octane-room-creator-air__scroll-down {
+    bottom: 0;
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-down.png");
+}
+
+.octane-room-creator-air__scroll-down:active {
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-down-pressed.png");
+}
+
+.octane-room-creator-air__scroll-down:disabled {
+    background-image: url("@/assets/images/habbo-skin/slices/scroll-down-disabled.png");
+}
+
+.octane-room-creator-air__scroll-track {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    width: 17px;
+    height: 263px;
+    background: url("@/assets/images/habbo-skin/slices/scroll-track-v.png") repeat-y;
+    touch-action: none;
+}
+
+.octane-room-creator-air__scroll-thumb {
+    position: absolute;
+    left: 0;
+    width: 17px;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.octane-room-creator-air__scroll-thumb svg {
+    position: absolute;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.octane-room-creator-air__thumb-middle {
+    top: 2px;
+    left: 0;
+    height: calc(100% - 4px);
+}
+
+.octane-room-creator-air__thumb-top {
+    top: 0;
+    width: 17px;
+    height: 2px;
+}
+
+.octane-room-creator-air__thumb-bottom {
+    bottom: 0;
+    width: 17px;
+    height: 2px;
+}
+
+.octane-room-creator-air__thumb-grip {
+    top: 7px;
+    left: 5px;
+    height: max(0px, calc(100% - 14px));
 }
 
 .octane-room-creator-air__thumbnail {
@@ -1866,6 +1760,22 @@
     object-position: center;
     pointer-events: none;
     image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-room-creator-air__select-arrow {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    z-index: 3;
+    width: 18px;
+    height: 20px;
+    visibility: hidden;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.octane-room-creator-air__thumbnail.is-selected .octane-room-creator-air__select-arrow {
+    visibility: visible;
 }
 
 .octane-room-creator-air__thumbnail-tile-icon {
@@ -1973,7 +1883,7 @@
 .octane-room-creator-air__button:focus-visible,
 .octane-room-creator-air__close:focus-visible,
 .octane-room-creator-air__thumbnail:focus-visible,
-.octane-room-creator-air__dropmenu-button:focus-visible {
+.octane-room-creator-air__dropmenu:focus-visible {
     outline: 2px solid #ffd95a;
     outline-offset: 1px;
 }

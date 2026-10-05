@@ -9,7 +9,7 @@ export const getClassicScrollbarMetrics = (scrollHeight: number, clientHeight: n
         return { overflow: false, thumbSize: Math.max(0, trackHeight), thumbOffset: 0 };
     }
 
-    const thumbSize = Math.max(12, Math.min(trackHeight, Math.round((trackHeight * clientHeight) / scrollHeight)));
+    const thumbSize = Math.max(12, Math.min(trackHeight, Math.trunc((trackHeight * clientHeight) / scrollHeight)));
     const maxScroll = scrollHeight - clientHeight;
     const maxThumbOffset = trackHeight - thumbSize;
     const normalizedScrollTop = Math.max(0, Math.min(maxScroll, scrollTop));
