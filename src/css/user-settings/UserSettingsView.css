@@ -184,6 +184,7 @@
 
 /* other settings: itemlist at (11,36), spacing 7; Back sits 12px below it and the window ends 12px below Back */
 .us-other-list {
+    position: relative;
     display: flex;
     margin: 0 0 0 11px;
     padding-top: 36px;
@@ -202,6 +203,7 @@
 }
 
 .us-other-back {
+    position: relative;
     margin: 12px 0 12px 11px;
     display: block;
     width: 60px;
