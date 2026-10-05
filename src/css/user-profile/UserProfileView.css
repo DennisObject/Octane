@@ -74,6 +74,8 @@
 .octane-extended-profile__summary-rank { margin-left: -4px; }
 .octane-extended-profile__summary-button--level { cursor: default; }
 .octane-extended-profile-window__body { position: absolute; left: 6px; top: 259px; width: 500px; height: 236px; }
+.octane-extended-profile__hidden-profile { position: absolute; left: 0; top: 5px; width: 498px; height: 226px; background: #ccc; clip-path: polygon(5px 0,calc(100% - 5px) 0,calc(100% - 5px) 1px,calc(100% - 3px) 1px,calc(100% - 3px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 3px,calc(100% - 1px) 3px,calc(100% - 1px) 5px,100% 5px,100% calc(100% - 5px),calc(100% - 1px) calc(100% - 5px),calc(100% - 1px) calc(100% - 3px),calc(100% - 2px) calc(100% - 3px),calc(100% - 2px) calc(100% - 2px),calc(100% - 3px) calc(100% - 2px),calc(100% - 3px) calc(100% - 1px),calc(100% - 5px) calc(100% - 1px),calc(100% - 5px) 100%,5px 100%,5px calc(100% - 1px),3px calc(100% - 1px),3px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 3px),1px calc(100% - 3px),1px calc(100% - 5px),0 calc(100% - 5px),0 5px,1px 5px,1px 3px,2px 3px,2px 2px,3px 2px,3px 1px,5px 1px); }
+.octane-extended-profile__hidden-profile p { position: absolute; left: 131px; top: 104px; width: max-content; height: 17px; transform: translateX(round(to-zero, calc(107.5px - 50%), 1px)); color: #555; font-weight: 700; line-height: 17px; white-space: nowrap; }
 .octane-extended-profile-groups { position: relative; width: 500px; height: 236px; }
 .octane-extended-profile-groups__count { position: absolute; left: 0; top: 5px; height: 16px; line-height: 16px; }
 .octane-extended-profile-groups__list { position: absolute; left: 3px; top: 32px; width: 74px; height: 195px; overflow-x: hidden; overflow-y: auto; }

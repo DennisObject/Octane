@@ -201,11 +201,14 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         if (!dragHandler) return;
 
         const onPointerDown = (event: PointerEvent) => {
-            if ((event.target as HTMLElement)?.closest?.('button, input, select, textarea, a')) return;
+            if ((event.target as HTMLElement)?.closest?.('button, input, select, textarea, a, [role="button"], .octane-card-close-button, .octane-card-header-report-camera, .octane-card-header-info-habbopages, .header-trash, .stickie-color, .header-close')) return;
             if (event.pointerType === 'mouse' && event.button !== 0) return;
 
             dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false };
             deltaRef.current = { x: 0, y: 0 };
+            try {
+                dragHandler.setPointerCapture(event.pointerId);
+            } catch {}
         };
 
         const onPointerMove = (event: PointerEvent) => {
@@ -216,10 +219,6 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
                 if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) < DRAG_START_THRESHOLD_PX) return;
 
                 drag.active = true;
-
-                try {
-                    dragHandler.setPointerCapture(event.pointerId);
-                } catch {}
 
                 setIsDragging(true);
             }
@@ -237,11 +236,11 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
 
             dragRef.current = null;
 
-            if (!drag.active) return;
-
             try {
                 dragHandler.releasePointerCapture(event.pointerId);
             } catch {}
+
+            if (!drag.active) return;
 
             const clampedPos = clampPosition(offsetRef.current.x + deltaRef.current.x, offsetRef.current.y + deltaRef.current.y);
 

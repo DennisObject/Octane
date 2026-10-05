@@ -1,8 +1,9 @@
 import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { ensureBadgeLeaderboardLoaded, FriendlyTime, GetConfigurationValue, getBadgesRank, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
+import { FriendlyTime, GetConfigurationValue, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
+import hiddenIcon from '../../assets/images/user-profile/swf/hidden_icon.png';
 import offlineIcon from '../../assets/images/user-profile/swf/offline_icon.png';
 import onlineIcon from '../../assets/images/user-profile/swf/online_icon.png';
 import { LayoutAvatarImageView, LayoutBadgeImageView, UserIdentityView } from '../../common';
@@ -27,27 +28,8 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     const isOwnProfile = userProfile.id === GetSessionDataManager().userId;
     const canSendFriendRequest = !requestSent && !isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent;
     const selectedBadges = useMemo(() => [...userBadges].slice(0, 5), [userBadges]);
-
-    // Retain the legacy badge leaderboard rank until the native profile fields are parsed.
-    const [badgesRank, setBadgesRank] = useState(-1);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        setBadgesRank(-1);
-
-        ensureBadgeLeaderboardLoaded()
-            .then((leaderboard) => {
-                if (!cancelled) setBadgesRank(getBadgesRank(leaderboard, userProfile.id));
-            })
-            .catch(() => {
-                if (!cancelled) setBadgesRank(-1);
-            });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [userProfile.id]);
+    const hasNativeProfileFields = userProfile.hasNativeProfileFields;
+    const presenceStatus = userProfile.onlineStatus;
 
     // Official user_activity_points is hidden unless activity.point.display.enabled.
     const showActivityPoints = GetConfigurationValue<boolean>('activity.point.display.enabled', false);
@@ -62,7 +44,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     }, [userProfile]);
 
     return (
-        <div className={`octane-extended-profile${isBlocked ? ' is-blocked' : ''}`}>
+        <div className={`octane-extended-profile${hasNativeProfileFields ? ' has-native-fields' : ''}${isBlocked ? ' is-blocked' : ''}`}>
             {!isOwnProfile && onToggleBlock && (
                 <button
                     type="button"
@@ -109,7 +91,8 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             )}
                             <div className="octane-extended-profile__status">
                                 <div className="octane-extended-profile__presence">
-                                    <img className={userProfile.isOnline ? 'is-online' : ''} src={userProfile.isOnline ? onlineIcon : offlineIcon} alt="" />
+                                    <img className={presenceStatus === 1 ? 'is-online' : ''}
+                                        src={presenceStatus === 2 ? hiddenIcon : presenceStatus === 1 ? onlineIcon : offlineIcon} alt="" />
                                 </div>
                                 <div className="octane-extended-profile__status-copy">
                                     {canSendFriendRequest && (
@@ -180,14 +163,13 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                 >
                     <img className="octane-extended-profile__summary-icon octane-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
                     <span className="octane-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
-                    <span className="octane-extended-profile__summary-value">{userBadges.length}</span>
-                    {badgesRank > 0 && <span className="octane-extended-profile__summary-rank">(#{badgesRank})</span>}
+                    <span className="octane-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.totalBadges : userBadges.length}</span>
+                    {hasNativeProfileFields && userProfile.badgeRank >= 0 && <span className="octane-extended-profile__summary-rank">(#{userProfile.badgeRank})</span>}
                 </button>
-                {/* Retain the legacy achievement metric until the native level field is parsed. */}
                 <div className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center octane-extended-profile__summary-button--level">
                     <img className="octane-extended-profile__summary-icon" src={profileLevelIcon} alt="" />
-                    <span className="octane-extended-profile__summary-label">{LocalizeText('extendedprofile.achievementscore')}</span>
-                    <span className="octane-extended-profile__summary-value">{userProfile.achievementPoints}</span>
+                    <span className="octane-extended-profile__summary-label">{LocalizeText(hasNativeProfileFields ? 'generic.level' : 'extendedprofile.achievementscore')}</span>
+                    <span className="octane-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.level : userProfile.achievementPoints}</span>
                 </div>
             </div>
         </div>

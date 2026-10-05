@@ -121,6 +121,7 @@ export const UserProfileView: FC<{}> = () => {
     });
 
     if (!userProfile) return null;
+    const isProfileHidden = userProfile.hasNativeProfileFields && userProfile.isHidden && userProfile.id !== GetSessionDataManager().userId;
 
     return (
         <OctaneCardView className="octane-extended-profile-window" uniqueKey="octane-user-profile" frameStyle={3} isResizable={false}
@@ -162,11 +163,15 @@ export const UserProfileView: FC<{}> = () => {
                     onClose={onClose}
                 />
                 <div className="octane-extended-profile-window__body">
-                    <GroupsContainerView
+                    {isProfileHidden ? (
+                        <div className="octane-extended-profile__hidden-profile">
+                            <p>{localizeWithFallback('profile.full_profile_hidden', 'The full profile of this user is hidden')}</p>
+                        </div>
+                    ) : <GroupsContainerView
                         groups={userProfile.groups}
                         itsMe={userProfile.id === GetSessionDataManager().userId}
                         onLeaveGroup={onLeaveGroup}
-                    />
+                    />}
                 </div>
             </div>
         </OctaneCardView>
