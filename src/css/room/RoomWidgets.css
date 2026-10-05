@@ -1,220 +1,305 @@
+/* room_tools_toolbar_xml: window at x=-5, bottom 55px above the screen edge, as tall as its visible items.
+   window_bg (1,0) 164px style-2 0x24231e blend 0.8; list at (24,6); side bar 19px style-2 0x3b3933. */
 .octane-room-tools-container {
+    --room-tools-height: 148px;
     position: absolute;
-    bottom: 69px;
-    left: 0;
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
+    bottom: 55px;
+    left: -5px;
     z-index: 71;
+    width: 165px;
+    height: var(--room-tools-height);
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+
+    > * {
+        pointer-events: auto;
+    }
 
     .octane-room-tools {
-        position: relative;
-        width: 158px;
-        min-height: 177px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding: 8px 10px 7px 22px;
-        border-radius: 0 6px 6px 0;
-        background: rgba(34, 34, 30, 0.86);
-        box-shadow: inset -1px 0 rgba(255, 255, 255, 0.05), 0 2px 0 rgba(0, 0, 0, 0.45);
-        color: #c9c9c9;
+        position: absolute;
+        left: 1px;
+        top: 0;
+        box-sizing: border-box;
+        width: 164px;
+        height: var(--room-tools-height);
+        transition: transform 140ms cubic-bezier(0.215, 0.61, 0.355, 1);
+        color: #cccccc;
+    }
+
+    .octane-room-tools::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        box-sizing: border-box;
+        border: 6px solid transparent;
+        border-image-source: url("../../assets/images/habbo-skin/slices/border-colorless-24231e.png");
+        border-image-slice: 24 fill;
+        border-image-width: 6px;
+        border-image-repeat: stretch;
         image-rendering: var(--octane-pixel-art, pixelated);
     }
 
-    .room-tools-collapse-toggle {
+    &.is-collapsed .octane-room-tools {
+        transform: translateX(-146px);
+        pointer-events: none;
+    }
+
+    .room-tools-list {
         position: absolute;
-        left: 0;
-        top: 50%;
-        width: 13px;
-        height: 31px;
+        left: 24px;
+        top: 6px;
+        width: 140px;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        transform: translateY(-50%);
-        border-radius: 0 4px 4px 0;
-        background: rgba(42, 42, 38, 0.9);
-        color: rgba(255, 255, 255, 0.65);
-        font-size: 20px;
-        line-height: 1;
-        text-shadow: 0 1px #000000;
-        padding: 0;
-        border: 0;
-        cursor: pointer;
-        z-index: 2;
-    }
-
-    &.is-collapsed {
-        bottom: 69px;
-        width: 158px;
-        height: 177px;
-    }
-
-    &.is-collapsed .room-tools-collapse-toggle {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .room-tools-zoom-row {
-        height: 23px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding-bottom: 4px;
-        margin-bottom: 3px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-        color: #d7d7d7;
+        flex-direction: column;
         font-family: Ubuntu, sans-serif;
         font-size: 11px;
-        line-height: 18px;
+        line-height: 14px;
     }
 
-    .room-tools-zoom-row span {
-        flex: 1 1 auto;
+    /* 130x30: text (6,4), 125x1 line (3,26) 0x707070 at 0.5, 18x18 buttons at (87,3) and (107,3). */
+    .room-tools-zoom-row {
+        position: relative;
+        flex: 0 0 30px;
+        width: 130px;
+        height: 30px;
+        color: #cccccc;
+    }
+
+    .room-tools-zoom-row::after {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 26px;
+        width: 125px;
+        height: 1px;
+        background: rgba(112, 112, 112, 0.5);
+    }
+
+    .room-tools-zoom-text {
+        position: absolute;
+        left: 6px;
+        top: 4px;
+        width: 90px;
+        height: 14px;
+        overflow: hidden;
         white-space: nowrap;
     }
 
     .room-tools-zoom-button {
+        position: absolute;
+        top: 3px;
         width: 18px;
         height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         padding: 0;
-        border: 1px solid #0f0f0f;
-        border-radius: 50%;
-        background: linear-gradient(#8b8b8b, #575757);
-        box-shadow: inset 0 1px rgba(255, 255, 255, 0.45);
-        color: #ffffff;
-        font-family: Arial, sans-serif;
-        font-size: 15px;
-        font-weight: 700;
-        line-height: 16px;
-        text-shadow: 0 1px #000000;
+        border: 0;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.28));
         cursor: pointer;
     }
 
-    .room-tools-zoom-button:hover {
-        filter: brightness(1.12);
+    .room-tools-zoom-in {
+        left: 87px;
+        background-image: url("../../assets/images/room-tools-swf/roomtools_zoom_in.png");
+    }
+
+    .room-tools-zoom-out {
+        left: 107px;
+        background-image: url("../../assets/images/room-tools-swf/roomtools_zoom_out.png");
+    }
+
+    .room-tools-zoom-button:hover:not(:disabled) {
+        filter: brightness(1.2) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.28));
     }
 
     .room-tools-zoom-button:disabled {
-        opacity: 0.45;
-        filter: grayscale(1);
+        opacity: 0.5;
         cursor: default;
     }
 
-    .room-tools-zoom-button:disabled:hover {
-        filter: grayscale(1);
+    /* region 130x25: 25x25 icon box at (3,0), underlined 11px label at (36,3|4). */
+    .room-tool-row {
+        position: relative;
+        flex: 0 0 25px;
+        width: 130px;
+        height: 25px;
+        cursor: pointer;
+        color: #bbbbbb;
     }
 
-    .room-tool-row {
-        height: 20px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #c7c7c7;
-        cursor: pointer;
-        font-family: Ubuntu, sans-serif;
-        font-size: 11px;
-        line-height: 20px;
+    .room-tool-row--achievements,
+    .room-tool-row--settings {
+        color: #cccccc;
+    }
+
+    .room-tool-row:hover {
+        filter: brightness(1.2);
     }
 
     .room-tool-row.is-disabled {
-        opacity: 0.45;
+        opacity: 0.5;
         cursor: default;
     }
 
-    .room-tool-row.is-disabled .room-tool-label {
-        color: #9a9a9a;
+    .room-tool-row.is-disabled:hover {
+        filter: none;
     }
 
-    .room-tool-row.is-disabled:hover .room-tool-label {
-        color: #9a9a9a;
+    .room-tool-icon {
+        position: absolute;
+        left: 3px;
+        top: 0;
+        display: flex;
+        width: 25px;
+        height: 25px;
+        align-items: center;
+        justify-content: center;
     }
 
-    .room-tool-row .octane-icon {
-        flex: 0 0 22px;
+    .room-tool-icon .octane-icon {
+        flex: 0 0 auto;
         background-repeat: no-repeat !important;
         background-position: center center !important;
         background-size: auto !important;
-        filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.65));
+        filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.28));
     }
 
     .room-tool-label {
-        color: #bfbfbf;
+        position: absolute;
+        left: 36px;
+        top: 3px;
+        width: 90px;
+        height: 14px;
+        overflow: hidden;
         text-decoration: underline;
-        text-shadow: 0 1px #000000;
         white-space: nowrap;
     }
 
-    .room-tool-row:hover .room-tool-label {
-        color: #ffffff;
+    .room-tool-row--settings .room-tool-label {
+        top: 4px;
     }
 
+    /* cnt_history 115x43 at list y=180: back (0,3) 37x34, open (38,0) 35x38, forward (74,5) 34x32. */
     .room-history-controls {
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        margin-top: 3px;
+        position: relative;
+        flex: 0 0 43px;
+        width: 130px;
+        height: 43px;
     }
 
     .room-history-controls .octane-icon {
+        position: absolute;
         background-repeat: no-repeat !important;
-        background-position: center center !important;
+        background-position: 0 0 !important;
         background-size: auto !important;
     }
 
-    .octane-room-tools-side-container {
+    .room-history-back {
+        left: 6px;
+        top: 5px;
+    }
+
+    .room-history-open {
+        left: 42px;
+        top: 1px;
+    }
+
+    .room-history-forward {
+        left: 77px;
+        top: 5px;
+    }
+
+    .room-history-controls .cursor-pointer:hover {
+        filter: brightness(1.2);
+    }
+
+    /* side_bar_collapse / side_bar_expand: 19px strip, arrow 6x8 centred on the window height. */
+    .room-tools-collapse-toggle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        box-sizing: border-box;
+        width: 19px;
+        height: var(--room-tools-height);
+        padding: 0;
+        border: 6px solid transparent;
+        border-image-source: url("../../assets/images/habbo-skin/slices/border-colorless-3b3933-opaque.png");
+        border-image-slice: 24 fill;
+        border-image-width: 6px;
+        border-image-repeat: stretch;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .room-tools-collapse-arrow {
+        position: absolute;
+        left: 3px;
+        top: calc(var(--room-tools-height) / 2 - 10px);
+        width: 6px;
+        height: 8px;
+        background: url("../../assets/images/room-tools-swf/roomtools_minimizebutton.png") no-repeat 0 0;
+    }
+
+    &.is-collapsed .room-tools-collapse-arrow {
+        left: 5px;
+        transform: scaleX(-1);
+    }
+
+    /* room_tools_history_xml: 152px style-2 0x24231e panel, items 24px with 2px spacing at (5,5),
+       right edge on the tools window's right edge (x=160), bottom on its top. */
+    .octane-room-tools-history {
+        position: absolute;
+        left: 13px;
+        bottom: 100%;
         display: flex;
         flex-direction: column;
-        margin-left: 0;
-        margin-bottom: 0;
-        gap: 8px;
+        gap: 2px;
+        box-sizing: border-box;
+        width: 152px;
+        padding: 5px 5px 10px;
+        pointer-events: auto;
     }
 
-    .octane-room-history {
-        width: 160px;
-        max-height: calc(100vh - 140px);
-        overflow-y: auto;
-        overflow-x: hidden;
-        z-index: 3;
-        padding: 8px;
-        border-radius: 6px;
-        background: rgba(34, 34, 30, 0.9);
-        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+    .octane-room-tools-history::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        box-sizing: border-box;
+        border: 6px solid transparent;
+        border-image-source: url("../../assets/images/habbo-skin/slices/border-colorless-24231e.png");
+        border-image-slice: 24 fill;
+        border-image-width: 6px;
+        border-image-repeat: stretch;
+        image-rendering: var(--octane-pixel-art, pixelated);
+    }
+
+    .room-history-item {
+        position: relative;
+        flex: 0 0 24px;
+        width: 169px;
+        height: 24px;
+        cursor: pointer;
         color: #ffffff;
+        font-family: Ubuntu, sans-serif;
+        font-size: 12px;
+        line-height: 17px;
     }
 
-    .octane-room-history .room-history-item {
-        color: rgba(255, 255, 255, 0.76);
+    .room-history-item:hover {
+        filter: brightness(1.2);
     }
 
-    .octane-room-history .room-history-item:hover,
-    .octane-room-history .room-history-item--current {
-        color: #ffffff;
-        text-decoration: underline;
+    .room-history-item-name {
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        width: 145px;
+        overflow: hidden;
+        white-space: nowrap;
     }
-
-    .octane-room-tools-info {
-        max-width: 250px;
-        padding: 8px 10px;
-        border-radius: 6px;
-        background: rgba(34, 34, 30, 0.9);
-        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
-    }
-}
-
-.octane-room-tools-history {
-    position: absolute;
-    bottom: 0;
-    top: auto;
-    left: calc(100% + 4px);
-    margin-left: 0;
-    height: auto;
 }
 
 .wordquiz-question {
