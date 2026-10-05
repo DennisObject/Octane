@@ -1,3 +1,4 @@
+import { GetSessionDataManager } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     GetClubMemberLevel,
@@ -34,6 +35,8 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
     const [roomTag1, setRoomTag1] = useState<string>('');
     const [roomTag2, setRoomTag2] = useState<string>('');
     const { categories } = useNavigatorData();
+    // _r2ec56e547f022d: a safety-locked account keeps the delete link but it is dimmed and dead.
+    const isSafetyLocked = GetSessionDataManager().isSafetyLocked;
     const visitorOptions = GetMaxVisitorsList(GetClubMemberLevel() > 0, roomData.userCount);
     const selectedVisitors = GetSelectedMaxVisitors(visitorOptions, roomData.userCount);
     const selectedVisitorIndex = roomData.userCount > visitorOptions[visitorOptions.length - 1]
@@ -187,11 +190,11 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                 </NavigatorRoomSettingsAtView>
                 {isEnteredRoom && (
                     <>
-                        <NavigatorRoomSettingsAtView h={13} w={13} x={44} y={341}>
+                        <NavigatorRoomSettingsAtView className={isSafetyLocked ? 'ros-disabled' : ''} h={13} w={13} x={44} y={341}>
                             <span className="ros-decline" style={{ maskImage: `url(${declineSrc})`, WebkitMaskImage: `url(${declineSrc})` }} />
                         </NavigatorRoomSettingsAtView>
-                        <NavigatorRoomSettingsAtView h={18} w={180} x={60} y={339}>
-                            <button type="button" className="ros-link" onClick={onDelete}>
+                        <NavigatorRoomSettingsAtView className={isSafetyLocked ? 'ros-disabled' : ''} h={18} w={180} x={60} y={339}>
+                            <button type="button" className="ros-link" disabled={isSafetyLocked} onClick={onDelete}>
                                 {LocalizeText('navigator.roomsettings.delete')}
                             </button>
                         </NavigatorRoomSettingsAtView>
