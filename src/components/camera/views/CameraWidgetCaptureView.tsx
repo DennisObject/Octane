@@ -9,7 +9,8 @@ import {
     getViewfinderRoomFrame,
     LocalizeText,
     PlaySound,
-    SoundNames
+    SoundNames,
+    snapshotViewfinder
 } from '../../../api';
 import { Button, Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
@@ -30,6 +31,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
     const { onClose = null, onEdit = null, onDelete = null } = props;
     const {
         cameraRoll = Array(CAMERA_ROLL_LIMIT).fill(null),
+        cameraRollRef = null,
         setCameraRoll = null,
         selectedPictureIndex = -1,
         setSelectedPictureIndex = null,
@@ -174,6 +176,22 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         const targetSlot = activePictureSlotIndex >= 0 && activePictureSlotIndex < CAMERA_ROLL_LIMIT ? activePictureSlotIndex : 0;
         let texture: OctaneTexture = null;
         let capturedDraftId: string = null;
+        let preview: CameraPicture = null;
+        let isSettled = false;
+
+        const setSlot = (picture: CameraPicture | null) => {
+            const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => (index === targetSlot ? picture : (cameraRollRef.current[index] ?? null)));
+
+            cameraRollRef.current = nextRoll;
+            setCameraRoll(nextRoll);
+        };
+
+        // Fills the empty slot and lets the roll move on to the next one, as AIR does.
+        const fillSlot = (picture: CameraPicture) => {
+            pendingCapturedSlotRef.current = targetSlot;
+            pendingShouldShowFullAlertRef.current = !hasShownFullRollAlert && willFillLastCameraSlot(cameraRollRef.current, targetSlot);
+            setSlot(picture);
+        };
 
         try {
             PlaySound(SoundNames.CAMERA_SHUTTER);
@@ -182,19 +200,33 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
             void flashRef.current?.offsetWidth;
             flashRef.current?.classList.add('octane-camera-capture__flash--active');
 
-            // Only this server-issued capture can enter the roll or checkout.
-            const previousDraft = cameraRoll[targetSlot]?.draftId;
-            if (previousDraft) {
-                deleteTrustedCamera(previousDraft);
-                setCameraRoll((previous) => previous.map((picture, index) => (index === targetSlot ? null : picture)));
-            }
-            const capture = await captureTrustedCamera(getTrustedCameraViewport(frame));
-            capturedDraftId = capture.draftId;
+            const viewport = getTrustedCameraViewport(frame);
+            const previousPicture = cameraRollRef.current[targetSlot];
 
-            if (!isMountedRef.current) {
-                deleteTrustedCamera(capture.draftId);
-                return;
+            // Free the replaced draft first so a full roll stays within the server's draft limit.
+            if (previousPicture) {
+                deleteTrustedCamera(previousPicture.draftId);
+                previousPicture.texture?.destroy?.(true);
+                setSlot(null);
             }
+
+            const pendingCapture = captureTrustedCamera(viewport);
+
+            pendingCapture.catch(() => {});
+
+            // The trusted capture is still the only photograph that can be edited or
+            // bought. Until it arrives the slot shows the user's own view of the frame.
+            const streamIsReady = videoRef.current?.classList.contains('octane-camera-viewfinder__stream--ready');
+
+            void snapshotViewfinder(elementRef.current, streamIsReady ? videoRef.current : null, 320, 320).then((previewUrl) => {
+                if (!previewUrl || isSettled || cameraRollRef.current[targetSlot]) return;
+
+                preview = new CameraPicture(null, previewUrl);
+                fillSlot(preview);
+            });
+
+            const capture = await pendingCapture;
+            capturedDraftId = capture.draftId;
 
             const image = new Image();
             image.crossOrigin = 'anonymous';
@@ -210,26 +242,34 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                 };
                 image.src = capture.url;
             });
-            if (!isMountedRef.current) {
+
+            isSettled = true;
+
+            // The slot was deleted, reused or cleared with the room session meanwhile.
+            if (cameraRollRef.current[targetSlot] !== preview || (!preview && !isMountedRef.current)) {
                 deleteTrustedCamera(capture.draftId);
                 return;
             }
+
             texture = OctaneTexture.from(image);
-            const imageUrl = capture.url;
 
-            cameraRoll[targetSlot]?.texture?.destroy?.(true);
+            const picture = new CameraPicture(texture, capture.url, capture.draftId);
 
-            const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => cameraRoll[index] ?? null);
-
-            nextRoll[targetSlot] = new CameraPicture(texture, imageUrl, capture.draftId);
-            pendingCapturedSlotRef.current = targetSlot;
-            pendingShouldShowFullAlertRef.current = !hasShownFullRollAlert && willFillLastCameraSlot(cameraRoll, targetSlot);
             texture = null;
-            setCameraRoll(nextRoll);
             capturedDraftId = null;
+
+            if (preview) setSlot(picture);
+            else fillSlot(picture);
         } catch {
+            isSettled = true;
+
             if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
             texture?.destroy?.(true);
+
+            if (preview && cameraRollRef.current[targetSlot] === preview) {
+                setSlot(null);
+                setActivePictureSlotIndex(targetSlot);
+            }
 
             if (isMountedRef.current) {
                 simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
@@ -259,7 +299,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     </div>
                     {!selectedPicture && <div className="octane-camera-capture__crosshair" aria-hidden="true" />}
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
-                    {selectedPicture && (
+                    {selectedPicture?.draftId && (
                         <div className="octane-camera-capture__preview-actions">
                             <Button
                                 className="octane-camera-capture__editor-button"
