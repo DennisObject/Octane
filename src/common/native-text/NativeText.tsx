@@ -19,6 +19,7 @@ interface NativeTextProps {
     background: number;
     maxWidth?: number;
     leading?: number;
+    align?: 'left' | 'center' | 'right';
     overrides?: Partial<NativeFontStyle>;
     className?: string;
     style?: CSSProperties;
@@ -74,7 +75,7 @@ function wrapNativeParagraph(text: string, width: number, measure: (text: string
 }
 
 /** A v75 TextField raster, retaining its 2px gutter and accessible DOM text. */
-export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, overrides, className, style, nativeResolution = false, onRaster }) => {
+export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, align, overrides, className, style, nativeResolution = false, onRaster }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [size, setSize] = useState<{ width: number; height: number }>(null);
     const fontStyle = { ...nativeTextStyles[textStyle], ...overrides, background };
@@ -176,7 +177,12 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
                     target: {
                         pixels: pixels.subarray(Math.round(index * lineHeight) * scale * pixelWidth * 4),
                         width: pixelWidth,
-                        height: pixelHeight - Math.round(index * lineHeight) * scale
+                        height: pixelHeight - Math.round(index * lineHeight) * scale,
+                        offsetX: align === 'center'
+                            ? Math.round((pixelWidth - 4 * scale - measureNativeText(loaded.font, line, scaledStyle)) / 2)
+                            : align === 'right'
+                              ? Math.round(pixelWidth - 4 * scale - measureNativeText(loaded.font, line, scaledStyle))
+                              : 0
                     }
                 })
             );
@@ -195,13 +201,13 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
         return () => {
             disposed = true;
         };
-    }, [text, textStyle, styleKey, maxWidth, leading, scale]);
+    }, [text, textStyle, styleKey, maxWidth, leading, align, scale]);
 
     return (
         <span
             className={className}
             data-native-text={size ? textStyle : 'fallback'}
-            style={{ display: 'inline-block', verticalAlign: 'top', position: 'relative', ...size, ...style }}
+            style={{ display: 'inline-block', verticalAlign: 'top', position: 'relative', ...size, ...(align ? { textAlign: align } : {}), ...style }}
         >
             <canvas
                 ref={canvasRef}
