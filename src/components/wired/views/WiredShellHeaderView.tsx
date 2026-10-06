@@ -198,7 +198,7 @@ const buttonRegions = {
     ]
 };
 
-export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { shellStyle: WiredShellStyle }> = ({ shellStyle, children, ...props }) => {
+export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { shellStyle: WiredShellStyle }> = ({ shellStyle, children, className = '', ...props }) => {
     const isIllumina = shellStyle === 'illumina';
     const isVolter = isWiredVolterStyle(shellStyle);
     const bitmap = isVolter ? volterAtlas : isIllumina ? plainButton : blueSkin;
@@ -220,7 +220,7 @@ export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { sh
     );
 
     return (
-        <button {...props} className={`octane-wired__shell-button octane-wired__shell-button--${shellStyle}`} type="button">
+        <button {...props} className={`octane-wired__shell-button octane-wired__shell-button--${shellStyle} ${className}`} type="button">
             <span className="octane-wired__shell-button-skin" aria-hidden="true">
                 {regions.map((rect, index) => region(rect, `octane-wired__shell-button-patch ${index % 3 === 2 ? 'is-right' : ''}`, index))}
             </span>

@@ -9,6 +9,7 @@ export * from './WiredProjectile';
 export * from './WiredDateToString';
 export * from './WiredFurniType';
 export * from './WiredSelectionVisualizer';
+export * from './WiredSliderConverters';
 export * from './WiredStringDelimeter';
 export * from './WiredStyle';
 export * from './WiredTriggerLayoutCode';
