@@ -75,6 +75,7 @@ export const OctanepediaView: FC<{}> = () => {
     }, [openPage]);
 
     const markup = useMemo(() => (page ? sanitizePageMarkup(page.markup) : ''), [page]);
+    const fieldWidth = Math.max(1, (page?.dimensions?.width ?? 418) - 34);
 
     const handleContentClick = (event: MouseEvent<HTMLDivElement>) => {
         const link = (event.target as HTMLElement).closest('a');
@@ -115,7 +116,7 @@ export const OctanepediaView: FC<{}> = () => {
             <OctaneCardHeaderView headerText={page.header} onCloseClick={closePage} />
             <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" scrollStep={42}>
                 <div className="octanepedia__native-container" onClick={handleContentClick}>
-                    <NativeHabbopageContent markup={markup} onLinkClick={openMarkupLink} />
+                    <NativeHabbopageContent fieldWidth={fieldWidth} markup={markup} onLinkClick={openMarkupLink} />
                 </div>
             </ClassicScrollAreaView>
         </OctaneCardView>

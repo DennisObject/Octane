@@ -2,10 +2,13 @@ import { CSSProperties, FC, MouseEvent, useEffect, useMemo, useRef, useState } f
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from '../../common/native-text/Air32NativeTextRenderer';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from '../../common/native-text/NativeFont';
 import { nativeTextStyles } from '../../common/native-text/NativeTextStyles';
+import { SwfFont } from '../../common/native-text/NativeTextTypes';
 
-const FIELD_WIDTH = 384;
 const FIELD_GUTTER = 2;
-const TEXT_WIDTH = FIELD_WIDTH - FIELD_GUTTER * 2;
+const resolvePtLineMetrics = (font: SwfFont, size: number) => ({
+    ascent: (font.metrics.ascent * size) / font.emSquare,
+    descent: (font.metrics.descent * size) / font.emSquare
+});
 type TextRun = {
     text: string;
     style: NativeFontStyle;
@@ -28,6 +31,7 @@ type NativeLayout = {
 };
 
 interface NativeHabbopageContentProps {
+    fieldWidth: number;
     markup: string;
     onLinkClick: (href: string) => void;
 }
@@ -93,6 +97,7 @@ const parseRuns = (element: Element, base: NativeFontStyle) => {
 const isNativeBlock = (element: Element) =>
     element.matches('H1, H2, H3, P') &&
     !element.querySelector('img, div, span') &&
+    ![element, ...Array.from(element.querySelectorAll('*'))].some((child) => child.getAttribute('style')?.trim()) &&
     Array.from(element.querySelectorAll('*')).every((child) => child.matches('A, B, BR, EM, FONT, I, STRONG, U'));
 
 const loadImageSize = (src: string) =>
@@ -103,7 +108,7 @@ const loadImageSize = (src: string) =>
         image.src = src;
     });
 
-const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
+const layoutMarkup = async (markup: string, fieldWidth: number): Promise<NativeLayout | null> => {
     const document = new DOMParser().parseFromString(`<div>${markup}</div>`, 'text/html');
     const root = document.body.firstElementChild;
     if (!root) return null;
@@ -111,6 +116,12 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
     const drawRuns: DrawRun[] = [];
     const images: NativeLayout['images'] = [];
     const links: NativeLayout['links'] = [];
+    const regularStyle = blockStyle('P');
+    const regularLoaded = await loadNativeFont(regularStyle);
+    const regularMetrics = resolvePtLineMetrics(regularLoaded.font.swfFont, regularStyle.size);
+    const spacerMetrics = resolvePtLineMetrics(regularLoaded.font.swfFont, 1);
+    const regularLineHeight = regularMetrics.ascent + regularMetrics.descent;
+    const spacerLineHeight = spacerMetrics.ascent + spacerMetrics.descent;
     let y = 0;
     let float: { side: 'left' | 'right'; width: number; bottom: number } | null = null;
 
@@ -120,11 +131,11 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
             continue;
         }
         if (node.matches('SPAN.padding-top, SPAN.padding-bottom')) {
-            y += node.classList.contains('padding-top') ? 11 : 6;
+            y += spacerLineHeight + (node.classList.contains('padding-top') ? 10 : 5);
             continue;
         }
         if (node.tagName === 'BR') {
-            y += 14;
+            y += regularLineHeight;
             continue;
         }
         if (node.tagName === 'FONT' && !node.textContent?.trim()) continue;
@@ -139,7 +150,7 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
             const hspace = Number.parseInt(node.getAttribute('hspace') ?? '0', 10) || 0;
             const vspace = Number.parseInt(node.getAttribute('vspace') ?? '0', 10) || 0;
             const align = node.getAttribute('align');
-            const x = align === 'right' ? FIELD_WIDTH - width - hspace : hspace;
+            const x = align === 'right' ? fieldWidth - width - hspace : hspace;
             const imageY = y + vspace;
             images.push({ src, alt: node.getAttribute('alt') ?? '', x, y: imageY, width, height });
             if (align === 'left' || align === 'right') float = { side: align, width: width + hspace * 2, bottom: imageY + height + vspace };
@@ -152,13 +163,14 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
         const runs = parseRuns(node, base);
         const loadedRuns = await Promise.all(runs.map(async (run) => ({ ...run, loaded: await loadNativeFont(run.style) })));
         if (loadedRuns.some((run) => !supportsNativeText(run.loaded.font, run.text.replace(/[\r\n]/g, '')))) return null;
+        const baseLoaded = loadedRuns[0]?.loaded ?? (await loadNativeFont(base));
 
         if (float && y >= float.bottom) float = null;
         const floatLeft = float?.side === 'left' ? float.width : 0;
         const floatRight = float?.side === 'right' ? float.width : 0;
         const indent = (node.classList.contains('bullet-item') ? 7 : 0) + floatLeft;
         const firstIndent = node.classList.contains('bullet-item') ? floatLeft : indent;
-        const lineLimit = TEXT_WIDTH - floatRight;
+        const lineLimit = fieldWidth - FIELD_GUTTER * 2 - floatRight;
         const lines: (typeof loadedRuns)[] = [[]];
         const widths = [firstIndent];
         const push = (run: (typeof loadedRuns)[number], text: string) => {
@@ -206,14 +218,25 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
             }
         }
 
-        const metrics = loadedRuns.map((run) => resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false));
-        const lineHeight = Math.max(...metrics.map((value) => value.textHeight));
+        const metrics = loadedRuns.length
+            ? loadedRuns.map((run) => resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false))
+            : [resolveLineMetrics(baseLoaded.font.swfFont, base.size, false)];
+        const lineAscent = Math.max(...metrics.map((value) => value.ascent));
+        const lineDescent = Math.max(...metrics.map((value) => value.descent));
+        const lineHeight = lineAscent + lineDescent;
         lines.forEach((line, lineIndex) => {
             let runX = lineIndex === 0 ? firstIndent : indent;
             for (const run of line) {
                 const width = measureNativeText(run.loaded.font, run.text, run.style);
-                const runMetrics = resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false);
-                const drawRun = { ...run, x: FIELD_GUTTER + runX, y: y + lineIndex * lineHeight, width, height: runMetrics.textHeight };
+                const renderMetrics = resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false);
+                const lineTop = y + lineIndex * lineHeight;
+                const drawRun = {
+                    ...run,
+                    x: FIELD_GUTTER + runX,
+                    y: Math.round(lineTop + lineAscent + 2) - renderMetrics.baseline,
+                    width,
+                    height: renderMetrics.textHeight
+                };
                 drawRuns.push(drawRun);
                 if (run.href && run.text.trim()) links.push({ href: run.href, label: run.text.trim(), x: drawRun.x, y: drawRun.y, width, height: lineHeight });
                 runX += width;
@@ -225,17 +248,17 @@ const layoutMarkup = async (markup: string): Promise<NativeLayout | null> => {
     return { drawRuns, images, height: Math.ceil(Math.max(y, float?.bottom ?? 0)) + FIELD_GUTTER * 2, links };
 };
 
-export const NativeHabbopageContent: FC<NativeHabbopageContentProps> = ({ markup, onLinkClick }) => {
+export const NativeHabbopageContent: FC<NativeHabbopageContentProps> = ({ fieldWidth, markup, onLinkClick }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [layout, setLayout] = useState<NativeLayout>(null);
 
     useEffect(() => {
         let disposed = false;
         setLayout(null);
-        layoutMarkup(markup)
+        layoutMarkup(markup, fieldWidth)
             .then((next) => {
                 if (disposed || !next || !canvasRef.current) return;
-                const pixels = new Uint8ClampedArray(FIELD_WIDTH * next.height * 4);
+                const pixels = new Uint8ClampedArray(fieldWidth * next.height * 4);
                 next.drawRuns.forEach((run) => {
                     run.loaded.renderer.render(run.text, {
                         size: run.style.size,
@@ -251,7 +274,7 @@ export const NativeHabbopageContent: FC<NativeHabbopageContentProps> = ({ markup
                         textDecoration: run.style.underline ? 'underline' : null,
                         target: {
                             pixels,
-                            width: FIELD_WIDTH,
+                            width: fieldWidth,
                             height: next.height,
                             offsetX: Math.round(run.x),
                             offsetY: Math.round(run.y)
@@ -259,17 +282,19 @@ export const NativeHabbopageContent: FC<NativeHabbopageContentProps> = ({ markup
                     });
                 });
                 const canvas = canvasRef.current;
-                canvas.width = FIELD_WIDTH;
+                canvas.width = fieldWidth;
                 canvas.height = next.height;
                 const composited = compositeAir32RetainedToOpaque(pixels, [255, 255, 255, 255]);
-                canvas.getContext('2d').putImageData(new ImageData(composited, FIELD_WIDTH, next.height), 0, 0);
+                canvas.getContext('2d').putImageData(new ImageData(composited, fieldWidth, next.height), 0, 0);
                 setLayout(next);
             })
-            .catch(() => setLayout(null));
+            .catch(() => {
+                if (!disposed) setLayout(null);
+            });
         return () => {
             disposed = true;
         };
-    }, [markup]);
+    }, [fieldWidth, markup]);
 
     const activateLink = (href: string, event: MouseEvent<HTMLAnchorElement>) => {
         event.preventDefault();
@@ -279,7 +304,7 @@ export const NativeHabbopageContent: FC<NativeHabbopageContentProps> = ({ markup
     const accessibleText = useMemo(() => new DOMParser().parseFromString(markup, 'text/html').body.textContent ?? '', [markup]);
 
     return (
-        <div className="octanepedia__native-page" data-native-habbopage={layout ? 'rendered' : 'fallback'}>
+        <div className="octanepedia__native-page" data-native-habbopage={layout ? 'rendered' : 'fallback'} style={{ width: fieldWidth }}>
             <canvas ref={canvasRef} aria-hidden="true" style={{ display: layout ? 'block' : 'none' }} />
             {layout?.images.map((image, index) => (
                 <img

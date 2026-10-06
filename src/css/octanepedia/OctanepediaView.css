@@ -95,7 +95,7 @@
 
 .octanepedia__content > .octanepedia__native-container { padding: 0; }
 
-.octanepedia__native-page { position: relative; width: 384px; min-height: 100%; }
+.octanepedia__native-page { position: relative; min-height: 100%; }
 .octanepedia__native-page > canvas { image-rendering: pixelated; }
 .octanepedia__native-link { position: absolute; display: block; background: transparent; }
 .octanepedia__native-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
