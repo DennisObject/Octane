@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomAreaSelectionManager, RoomObjectCategory } from '@octane/renderer';
+import { GetRoomEngine, RoomAreaSelectionManager } from '@octane/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { Button, Text } from '../../../../common';
@@ -68,38 +68,11 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
         GetRoomEngine().areaSelectionManager.setHighlightType(invert ? RoomAreaSelectionManager.HIGHLIGHT_GREEN : RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
     }, [invert, trigger]);
 
-    const hasArea = areaWidth > 0 && areaHeight > 0;
-
-    const pickedLimit = trigger?.maximumItemSelectionCount ?? 20;
-    const pickedCount = hasArea
-        ? GetRoomEngine()
-              .getRoomObjects(GetRoomEngine().activeRoomId, RoomObjectCategory.FLOOR)
-              .filter((obj) => {
-                  const loc = obj.location;
-                  const inArea = loc.x >= rootX && loc.x < rootX + areaWidth && loc.y >= rootY && loc.y < rootY + areaHeight;
-                  return invert ? !inArea : inArea;
-              }).length
-        : 0;
-
     return (
         <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: '385px' }}>
             <div className="flex flex-col gap-2">
                 <Text bold>{LocalizeText('wiredfurni.params.area_selection')}</Text>
                 <Text small>{LocalizeText('wiredfurni.params.area_selection.info')}</Text>
-
-                {hasArea && (
-                    <Text small>
-                        {LocalizeText(
-                            'wiredfurni.params.area_selection.selected',
-                            ['x', 'y', 'w', 'h'],
-                            [rootX.toString(), rootY.toString(), areaWidth.toString(), areaHeight.toString()]
-                        )}
-                    </Text>
-                )}
-
-                {hasArea && (
-                    <Text small>{LocalizeText('wiredfurni.pickfurnis.caption', ['count', 'limit'], [pickedCount.toString(), pickedLimit.toString()])}</Text>
-                )}
 
                 <div className="flex gap-1">
                     <Button fullWidth variant="primary" onClick={() => GetRoomEngine().areaSelectionManager.startSelecting()}>
