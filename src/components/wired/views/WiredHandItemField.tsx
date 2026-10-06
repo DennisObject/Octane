@@ -3,6 +3,7 @@ import { FC, useMemo } from 'react';
 import { GetOwnRoomObject, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
 import { WiredDropdown } from './WiredDropdown';
+import { useWiredNative } from './WiredNativeContext';
 import { WiredSection } from './WiredSection';
 import { WiredShellButton } from './WiredShellHeaderView';
 
@@ -22,6 +23,7 @@ interface WiredHandItemFieldProps {
 }
 
 export const WiredHandItemField: FC<WiredHandItemFieldProps> = (props) => {
+    const isNative = useWiredNative();
     const {
         handItemId = 0,
         onChange = null,
@@ -57,7 +59,7 @@ export const WiredHandItemField: FC<WiredHandItemFieldProps> = (props) => {
         onChange && onChange(copiedHandItem);
     };
 
-    if (nativeSection)
+    if (nativeSection && isNative)
         return (
             <WiredSection title={LocalizeText(labelKey)}>
                 <WiredDropdown options={[0, ...options].map((id) => ({ id, label: getLabel(id) }))} value={handItemId} onChange={onChange} />
