@@ -1463,6 +1463,15 @@
     overflow-wrap: break-word;
 }
 
+.octane-native-bubble-text.uses-native-text {
+    top: 8px;
+    height: 50px;
+    margin: 0 0 0 66px;
+    padding: 0;
+    line-height: 0;
+    overflow: hidden;
+}
+
 /* club_gift_notification_xml */
 .octane-native-club-gift {
     position: relative;

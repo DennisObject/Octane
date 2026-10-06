@@ -1,5 +1,6 @@
-import { FC } from 'react';
-import { SanitizeHtml } from '../../../../api';
+import { FC, useMemo } from 'react';
+import { NativeText } from '../../../../common/native-text/NativeText';
+import { getPlainNotificationText } from './getPlainNotificationText';
 import { BUBBLE_FADE_IN_MS, useNativeBubbleLife } from './useNativeBubbleLife';
 
 export interface NativeNotificationBubbleViewProps {
@@ -14,6 +15,7 @@ export interface NativeNotificationBubbleViewProps {
 // the item's link and fades the bubble out; it fades in and out over a second each and stays 15 s.
 export const NativeNotificationBubbleView: FC<NativeNotificationBubbleViewProps> = ({ message, iconUrl, onActivate, onClose }) => {
     const { shown, dismiss, hoverProps } = useNativeBubbleLife(onClose);
+    const { markup: messageMarkup, text: plainMessage } = useMemo(() => getPlainNotificationText(message), [message]);
 
     return (
         <div className="octane-native-bubble-slot">
@@ -28,7 +30,19 @@ export const NativeNotificationBubbleView: FC<NativeNotificationBubbleViewProps>
             >
                 <div aria-hidden="true" className="octane-native-bubble-chrome" />
                 <div className="octane-native-bubble-icon">{!!iconUrl && <img alt="" draggable={false} src={iconUrl} />}</div>
-                <div className="octane-native-bubble-text" dangerouslySetInnerHTML={{ __html: SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')) }} />
+                {plainMessage !== null ? (
+                    <div className="octane-native-bubble-text uses-native-text">
+                        <NativeText
+                            text={plainMessage}
+                            textStyle="bold"
+                            background={0x3d3d3d}
+                            maxWidth={116}
+                            overrides={{ color: 0xffffff, antiAliasType: 'advanced', sharpness: 0, thickness: 0, kerning: false }}
+                        />
+                    </div>
+                ) : (
+                    <div className="octane-native-bubble-text" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
+                )}
             </div>
         </div>
     );
