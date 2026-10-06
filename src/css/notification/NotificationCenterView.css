@@ -1309,8 +1309,13 @@
     position: relative;
     box-sizing: border-box;
     width: 288px;
-    height: 133px;
     padding: 14px 0 0;
+}
+
+.octane-native-confirm-body::after {
+    content: "";
+    display: block;
+    height: 47px;
 }
 
 .octane-native-confirm-text {
@@ -1318,16 +1323,17 @@
     width: 253px;
     min-height: 72px;
     margin-left: 16px;
-    padding-top: 2px;
+    padding: 2px 0;
     font-size: 12px;
     line-height: 13.4px;
+    letter-spacing: 0.1px;
     white-space: pre-line;
     overflow-wrap: break-word;
 }
 
 .octane-native-confirm-cancel {
     position: absolute;
-    top: 102px;
+    bottom: 14px;
     left: 20px;
     width: 100px;
     height: 17px;
@@ -1335,7 +1341,7 @@
 
 .octane-native-confirm-ok {
     position: absolute;
-    top: 98px;
+    bottom: 7px;
     left: 195px;
     width: auto;
     min-width: 50px;
