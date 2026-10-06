@@ -1,4 +1,4 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
@@ -8,6 +8,7 @@ import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
+import { usePerkAllowed } from '../../state/perkAllowancesStore';
 import { AIR_RAISED_CHAT_BOTTOM } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
@@ -60,8 +61,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ leftCollapsed, setLeftCollapsed ] = useState(() => readCollapsedPreference(LEFT_COLLAPSED_STORAGE_KEY));
     const [ rightCollapsed, setRightCollapsed ] = useState(() => !((GetSessionDataManager()?.uiFlags ?? 0) & FRIEND_BAR_UI_FLAG));
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
-    const [ useGuideTool, setUseGuideTool ] = useState(false);
-    const [ cameraAllowed, setCameraAllowed ] = useState(false);
+    const useGuideTool = usePerkAllowed(PerkEnum.USE_GUIDE_TOOL);
+    const cameraAllowed = usePerkAllowed(PerkEnum.CAMERA);
     const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
@@ -245,12 +246,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     }, [ isMeExpanded, isProgressionExpanded, leftCollapsed, touchLayout ]);
 
     const openYouTubePlayer = () => window.dispatchEvent(new CustomEvent('youtube:toggle'));
-
-    useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
-    {
-        setUseGuideTool(event.getParser().isAllowed(PerkEnum.USE_GUIDE_TOOL));
-        setCameraAllowed(event.getParser().isAllowed(PerkEnum.CAMERA));
-    });
 
     useOctaneEvent<OctaneToolbarAnimateIconEvent>(OctaneToolbarAnimateIconEvent.ANIMATE_ICON, event =>
     {

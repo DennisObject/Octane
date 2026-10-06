@@ -28,6 +28,7 @@ import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
 import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
+import { clearPerkAllowances, listenForPerkAllowances } from './state/perkAllowancesStore';
 import { SharedHookRegistry } from './state/useSharedHook';
 
 OctaneVersion.UI_VERSION = GetUIVersion();
@@ -121,6 +122,7 @@ export const App: FC<{}> = (props) => {
         endAuthSession();
         forgetAccessToken();
         ClearStoredChatHistory();
+        clearPerkAllowances();
         void revokeSession(accessToken, ssoTicket);
         try {
             delete (window as any).OctaneConfig?.['sso.ticket'];
@@ -483,6 +485,7 @@ export const App: FC<{}> = (props) => {
                         bumpProgress(85);
                         await GetRoomEngine().init();
                         bumpProgress(92);
+                        listenForPerkAllowances();
                         await GetCommunication().init();
                         bumpProgress(98);
                     })();
