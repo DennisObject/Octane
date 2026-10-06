@@ -9,7 +9,7 @@ import {
     UserRelationshipsComposer
 } from '@octane/renderer';
 import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { AvatarInfoUser, CloneObject, ensureBadgeLeaderboardLoaded, GetConfigurationValue, GetGroupInformation, getBadgesRank, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
 import { Column, Flex, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
@@ -30,7 +30,6 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
     const [motto, setMotto] = useState<string>(null);
     const [isEditingMotto, setIsEditingMotto] = useState(false);
     const [relationships, setRelationships] = useState<RelationshipStatusInfoMessageParser>(null);
-    const [badgesRank, setBadgesRank] = useState(0);
     const { roomSession = null } = useRoom();
 
     const handleProfileClick = useCallback(() => {
@@ -129,20 +128,10 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
         };
     }, [avatarInfo]);
 
-    useEffect(() => {
-        let isCurrent = true;
-
-        ensureBadgeLeaderboardLoaded()
-            .then((leaderboard) => isCurrent && setBadgesRank(Math.max(0, getBadgesRank(leaderboard, avatarInfo.webID))))
-            .catch(() => isCurrent && setBadgesRank(0));
-
-        return () => {
-            isCurrent = false;
-        };
-    }, [avatarInfo.webID]);
-
     if (!avatarInfo) return null;
 
+    // The room unit packet of this hotel carries no badge rank, which the official infostand then shows as 0.
+    const badgesRank = 0;
     const isOwnUser = avatarInfo.type === AvatarInfoUser.OWN_USER;
     const mottoMaxLength = GetConfigurationValue<number>('motto.max.length', 38);
     const showAchievementScore = GetConfigurationValue<boolean>('activity.point.display.enabled', true);
