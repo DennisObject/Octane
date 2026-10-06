@@ -486,3 +486,40 @@
         transform: translateY(0);
     }
 }
+
+.tb-unseen-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    height: 18px;
+    padding: 0 4px 0 5px;
+    color: #ffffff;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tb-unseen-count::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-bottom-width: 7px;
+    border-image-source: url("../../assets/images/toolbar/air/unseen-counter-border-ee2924.png");
+    border-image-slice: 6 6 7 fill;
+    border-image-width: 6px 6px 7px;
+    border-image-repeat: stretch;
+    content: "";
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-unseen-count.tb-unseen-count--friends {
+    right: 5px;
+}

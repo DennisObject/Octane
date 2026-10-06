@@ -12,6 +12,7 @@ import { BottomDockLayout, resolveBottomDockLayout } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
 import { ToolbarProgressionView } from './ToolbarProgressionView';
+import { ToolbarUnseenCountView } from './ToolbarUnseenCountView';
 import { YouTubePlayerView } from './YouTubePlayerView';
 
 const containerVariants: Variants = {
@@ -454,6 +455,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                         }}
                                         className="tb-icon"
                                     />
+                                    <ToolbarUnseenCountView count={unseenProgMenuCount} />
                                 </motion.div>
                             )}
                             {GetConfigurationValue('game.center.enabled') && (
@@ -479,7 +481,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     {isInRoom && (
                         <motion.div variants={itemVariants} className="relative tb-slot tb-slot-inventory">
                             <ToolbarItemView icon="inventory" onClick={() => CreateLinkEvent('inventory/toggle')} className="tb-icon" />
-                            {getFullCount > 0 && <LayoutItemCountView count={getFullCount} className="absolute -right-1 top-0" />}
+                            <ToolbarUnseenCountView count={getFullCount} />
                         </motion.div>
                     )}
                     <motion.div
@@ -502,9 +504,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <LayoutAvatarImageView airMeMenu={true} direction={3} figure={userFigure} />
                         </motion.div>
                         <img src={memenuCircleImg} alt="" className="tb-memenu-circle" />
-                        {unseenProgMenuCount > 0 && (
-                            <LayoutItemCountView count={unseenProgMenuCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
-                        )}
                     </motion.div>
                     {isInRoom && showToolbarButton && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
@@ -560,7 +559,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     {!rightCollapsed && <img src={dividerImg} alt="" className="tb-friendtools-line" />}
                     <motion.div variants={itemVariants} className="relative tb-slot tb-right-friends">
                         <ToolbarItemView icon="friendall" onClick={() => CreateLinkEvent('friends/toggle')} className="tb-icon" />
-                        {requests.length > 0 && <LayoutItemCountView count={requests.length} className="absolute -right-2 -top-1" />}
+                        <ToolbarUnseenCountView count={requests.length} className="tb-unseen-count--friends" />
                     </motion.div>
                     <motion.div variants={itemVariants} className="tb-slot tb-right-search">
                         <ToolbarItemView icon="friendsearch" onClick={() => CreateLinkEvent('friends/search')} className="tb-icon" />
