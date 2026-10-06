@@ -1,5 +1,5 @@
 import { InfiniteGrid } from '@layout/InfiniteGrid';
-import { GetRoomEngine, GetSessionDataManager, IRoomSession, RoomPreviewer, Vector3d } from '@octane/renderer';
+import { GetSessionDataManager, IRoomSession, RoomPreviewer, Vector3d } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 import {
@@ -14,10 +14,11 @@ import {
 } from '../../../../api';
 import { LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, LayoutRoomPreviewerView } from '../../../../common';
 import { CatalogPostMarketplaceOfferEvent, DeleteItemConfirmEvent } from '../../../../events';
-import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
+import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useNotification } from '../../../../hooks';
 import { OctaneButton } from '../../../../layout';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryFurnitureItemView } from './InventoryFurnitureItemView';
+import { offerGroupItemsToTrade } from './inventoryTradeOffer';
 
 const attemptPlaceMarketplaceOffer = (groupItem: GroupItem) => {
     const item = groupItem.getLastItem();
@@ -41,6 +42,9 @@ export const InventoryFurnitureView: FC<{
     const [isVisible, setIsVisible] = useState(false);
     const { groupItems = [], selectedItem = null, setSelectedItem = null, activate = null, deactivate = null } = useInventoryFurni();
     const { resetItems = null } = useInventoryUnseenTracker();
+    const { isTrading = false, ownUser = null } = useInventoryTrade();
+    const { simpleAlert = null } = useNotification();
+    const [offerCount, setOfferCount] = useState('1');
 
     const [page, setPage] = useState(0);
     const pageCount = Math.floor(filteredGroupItems.length / 200) + 1;
@@ -60,6 +64,20 @@ export const InventoryFurnitureView: FC<{
         return selectedItem.items.filter((item) => item.recyclable && !item.locked).length;
     }, [selectedItem]);
 
+    // v75 offertotrade_cnt: the amount stays within 1..tradable count of the selection.
+    useEffect(() => {
+        setOfferCount((prevValue) => String(Math.min(Math.max(1, Number.parseInt(prevValue, 10) || 1), Math.max(1, tradeableCount))));
+    }, [tradeableCount]);
+
+    const attemptOffer = () => {
+        if (!selectedItem) return;
+
+        const count = Math.max(1, Number.parseInt(offerCount, 10) || 1);
+        const offered = offerGroupItemsToTrade(ownUser, selectedItem, count, simpleAlert);
+
+        setOfferCount(String(offered || 1));
+    };
+
     useEffect(() => {
         if (!selectedItem || !roomPreviewer) return;
         const furnitureItem = selectedItem.getLastItem();
@@ -72,10 +90,10 @@ export const InventoryFurnitureView: FC<{
             furnitureItem.category === FurniCategory.FLOOR ||
             furnitureItem.category === FurniCategory.LANDSCAPE;
 
-        const engine = GetRoomEngine();
-        let floorType = engine.getRoomInstanceVariable<string>(engine.activeRoomId, 'room_floor_type') || '101';
-        let wallType = engine.getRoomInstanceVariable<string>(engine.activeRoomId, 'room_wall_type') || '101';
-        let landscapeType = engine.getRoomInstanceVariable<string>(engine.activeRoomId, 'room_landscape_type') || '1.1';
+        // v75 previews furniture in its own neutral room, not the room the user is standing in.
+        let floorType = '101';
+        let wallType = '101';
+        let landscapeType = '1.1';
 
         if (isRoomDecoration) {
             floorType = furnitureItem.category === FurniCategory.FLOOR ? selectedItem.stuffData.getLegacyString() : floorType;
@@ -133,7 +151,14 @@ export const InventoryFurnitureView: FC<{
                     columnGap={2}
                     rowGap={2}
                     itemKey={getGroupItemKey}
-                    itemRender={(item) => <InventoryFurnitureItemView groupItem={item} isActive={item === selectedItem} onSelect={setSelectedItem} />}
+                    itemRender={(item) => (
+                        <InventoryFurnitureItemView
+                            groupItem={item}
+                            isActive={item === selectedItem}
+                            onOffer={isTrading ? (groupItem) => offerGroupItemsToTrade(ownUser, groupItem, 1, simpleAlert) : null}
+                            onSelect={setSelectedItem}
+                        />
+                    )}
                     items={filteredGroupItems.slice(currentPage * 200, (currentPage + 1) * 200)}
                 />
                 {pageCount > 1 && (
@@ -186,21 +211,6 @@ export const InventoryFurnitureView: FC<{
                             </div>
                         </div>
                     )}
-                    {selectedItem && (
-                        <button
-                            type="button"
-                            className="octane-inventory-preview-delete"
-                            aria-label={LocalizeText('generic.delete')}
-                            title={LocalizeText('generic.delete')}
-                            onPointerDown={(event) => event.stopPropagation()}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                attemptDeleteItem(selectedItem);
-                            }}
-                        >
-                            <FaTrashAlt aria-hidden="true" />
-                        </button>
-                    )}
                     {selectedItem && selectedItem.stuffData.isUnique && (
                         <LayoutLimitedEditionCompactPlateView
                             className="top-2 inset-e-2"
@@ -219,7 +229,7 @@ export const InventoryFurnitureView: FC<{
                         {selectedItem.description && <div className="octane-inventory-furni-desc">{selectedItem.description}</div>}
                         <div className="octane-inventory-furni-actions">
                             <OctaneButton
-                                disabled={!roomSession || !selectedItem.getUnlockedCount()}
+                                disabled={!roomSession || isTrading || !selectedItem.getUnlockedCount()}
                                 className="octane-inventory-btn-place"
                                 onClick={() => attemptItemPlacement(selectedItem)}
                             >
@@ -233,7 +243,25 @@ export const InventoryFurnitureView: FC<{
                                     {localizeWithFallback('widget.furniture.button.use', 'Use')}
                                 </button>
                             </div>
-                            {selectedItem.isSellable && (
+                            {isTrading && (
+                                <div className="octane-inventory-offer">
+                                    <input
+                                        className="octane-inventory-offer-count"
+                                        aria-label={LocalizeText('inventory.trading.offer')}
+                                        inputMode="numeric"
+                                        value={offerCount}
+                                        onChange={(event) => setOfferCount(event.target.value)}
+                                    />
+                                    <OctaneButton
+                                        disabled={!tradeableCount || !ownUser || ownUser.accepts}
+                                        className="octane-inventory-btn-offer"
+                                        onClick={attemptOffer}
+                                    >
+                                        {LocalizeText('inventory.trading.offer')}
+                                    </OctaneButton>
+                                </div>
+                            )}
+                            {selectedItem.isSellable && !isTrading && (
                                 <OctaneButton className="octane-inventory-btn-sell" onClick={() => attemptPlaceMarketplaceOffer(selectedItem)}>
                                     {LocalizeText('inventory.marketplace.sell')}
                                 </OctaneButton>

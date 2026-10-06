@@ -7,8 +7,10 @@ export const InventoryFurnitureItemView: FC<{
     groupItem: GroupItem;
     isActive: boolean;
     onSelect: (groupItem: GroupItem) => void;
+    // Set while a trade is open: v75 offers the item on double click and never drags it into the room.
+    onOffer?: (groupItem: GroupItem) => void;
 }> = (props) => {
-    const { groupItem = null, isActive = false, onSelect = null } = props;
+    const { groupItem = null, isActive = false, onSelect = null, onOffer = null } = props;
     const [isMouseDown, setMouseDown] = useState(false);
 
     const onMouseEvent = (event: MouseEvent) => {
@@ -21,12 +23,13 @@ export const InventoryFurnitureItemView: FC<{
                 setMouseDown(false);
                 return;
             case MouseEventType.ROLL_OUT:
-                if (!isMouseDown || !isActive) return;
+                if (onOffer || !isMouseDown || !isActive) return;
 
                 attemptItemPlacement(groupItem);
                 return;
             case 'dblclick':
-                attemptItemPlacement(groupItem);
+                if (onOffer) onOffer(groupItem);
+                else attemptItemPlacement(groupItem);
                 return;
         }
     };

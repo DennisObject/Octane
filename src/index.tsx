@@ -53,6 +53,7 @@ import './css/loading/LoadingView.css';
 import './css/icons/icons.css';
 
 import './css/inventory/InventoryView.css';
+import './css/inventory/InventoryTrade.css';
 import './css/inventory/InventoryAnimals.css';
 import './css/inventory/InventoryBadges.css';
 import './css/inventory/InventoryFilters.css';

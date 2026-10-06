@@ -52,14 +52,12 @@ const TABS = [TAB_FURNITURE, TAB_PETS, TAB_BADGES, TAB_BOTS];
 const TAB_LABEL_FALLBACK: Record<string, string> = {
     [TAB_FURNITURE]: 'Furniture',
     [TAB_PETS]: 'Pets',
-    [TAB_BADGES]: 'Badges',
+    [TAB_BADGES]: 'Achieved badges',
     [TAB_BOTS]: 'Bots'
 };
 
 const tabLabel = (name: string) => {
     const value = LocalizeText(name);
-
-    if (name === TAB_BADGES && value === 'Achieved badges') return 'Badges';
 
     return value && value !== name ? value : TAB_LABEL_FALLBACK[name] || name;
 };
@@ -241,20 +239,28 @@ export const InventoryView: FC<{}> = () => {
         if (!isVisible && (isTrading || isWiredTrading)) setIsVisible(true);
     }, [isVisible, isTrading, isWiredTrading]);
 
+    // The v75 trade table sits under the furni list items are offered from.
+    useEffect(() => {
+        if (isTrading) setCurrentTab(TAB_FURNITURE);
+    }, [isTrading]);
+
     if (!isVisible) return null;
 
-    const showFilter = !isTrading && !isWiredTrading && ((currentTab === TAB_FURNITURE && groupItems.length > 0) || currentTab === TAB_BADGES);
+    const showWiredTrade = !isTrading && isWiredTrading;
+    // v75 shrinks the trade table to a "Trade in progress" box while another tab is open.
+    const isTradeMinimized = isTrading && currentTab !== TAB_FURNITURE;
+    const showFilter = (currentTab === TAB_FURNITURE && groupItems.length > 0) || currentTab === TAB_BADGES;
 
     return (
         <>
             <OctaneCardView
-                className={`octane-inventory-window max-w-[calc(100vw-16px)] ${currentTab === TAB_BADGES ? 'has-badge-controls' : currentTab === TAB_PETS ? 'has-pet-controls' : ''}`}
+                className={`octane-inventory-window max-w-[calc(100vw-16px)] ${currentTab === TAB_BADGES ? 'has-badge-controls' : currentTab === TAB_PETS ? 'has-pet-controls' : ''} ${isTrading ? (isTradeMinimized ? 'is-trading is-minimized' : 'is-trading') : ''}`}
                 frameStyle={3}
                 resizeAxis="vertical"
                 uniqueKey="inventory"
             >
                 <OctaneCardHeaderView headerText={LocalizeText('inventory.title')} onCloseClick={onClose} />
-                {!isTrading && !isWiredTrading && (
+                {!showWiredTrade && (
                     <>
                         <OctaneCardTabsView classNames={['octane-inventory-tabs-shell']}>
                             {TABS.map((name) => (
@@ -299,11 +305,11 @@ export const InventoryView: FC<{}> = () => {
                     </>
                 )}
                 {isTrading && (
-                    <div className="octane-inventory-body is-trade">
-                        <InventoryTradeView cancelTrade={onClose} />
+                    <div className="octane-inventory-subcontent">
+                        <InventoryTradeView isMinimized={isTradeMinimized} cancelTrade={stopTrading} continueTrade={() => setCurrentTab(TAB_FURNITURE)} />
                     </div>
                 )}
-                {!isTrading && isWiredTrading && (
+                {showWiredTrade && (
                     <div className="octane-inventory-body is-trade">
                         <InventoryWiredTradeView />
                     </div>
