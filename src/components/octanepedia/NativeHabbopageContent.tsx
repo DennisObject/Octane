@@ -218,18 +218,18 @@ const layoutMarkup = async (markup: string, fieldWidth: number): Promise<NativeL
             }
         }
 
-        const metrics = loadedRuns.length
-            ? loadedRuns.map((run) => resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false))
-            : [resolveLineMetrics(baseLoaded.font.swfFont, base.size, false)];
-        const lineAscent = Math.max(...metrics.map((value) => value.ascent));
-        const lineDescent = Math.max(...metrics.map((value) => value.descent));
-        const lineHeight = lineAscent + lineDescent;
+        let lineTop = y;
         lines.forEach((line, lineIndex) => {
+            const lineMetrics = line.length
+                ? line.map((run) => resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false))
+                : [resolveLineMetrics(baseLoaded.font.swfFont, base.size, false)];
+            const lineAscent = Math.max(...lineMetrics.map((value) => value.ascent));
+            const lineDescent = Math.max(...lineMetrics.map((value) => value.descent));
+            const lineHeight = lineAscent + lineDescent;
             let runX = lineIndex === 0 ? firstIndent : indent;
             for (const run of line) {
                 const width = measureNativeText(run.loaded.font, run.text, run.style);
                 const renderMetrics = resolveLineMetrics(run.loaded.font.swfFont, run.style.size, false);
-                const lineTop = y + lineIndex * lineHeight;
                 const drawRun = {
                     ...run,
                     x: FIELD_GUTTER + runX,
@@ -241,8 +241,9 @@ const layoutMarkup = async (markup: string, fieldWidth: number): Promise<NativeL
                 if (run.href && run.text.trim()) links.push({ href: run.href, label: run.text.trim(), x: drawRun.x, y: drawRun.y, width, height: lineHeight });
                 runX += width;
             }
+            lineTop += lineHeight;
         });
-        y += Math.max(1, lines.length) * lineHeight;
+        y = lineTop;
     }
 
     return { drawRuns, images, height: Math.ceil(Math.max(y, float?.bottom ?? 0)) + FIELD_GUTTER * 2, links };
