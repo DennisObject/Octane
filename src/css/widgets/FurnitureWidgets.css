@@ -14,134 +14,112 @@
     width: 190px;
 }
 
-.octane-room-widget-background-color {
-    width: 314px;
+/* background_color_ui: 292x255 style 3 frame, positions from the layout with its (6,25) content origin. */
+.octane-toner.octane-card-shell.octane-card-frame-3 {
+    --octane-card-frame-3: url('@/assets/images/room-widgets/dimmer-widget/frame-toner.png');
+}
 
-    .bgcolor-widget-content {
-        gap: 10px;
-        padding: 8px;
-    }
+.octane-toner.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
 
-    .bgcolor-widget-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        min-height: 154px;
-        padding: 10px;
-        border: 1px solid #9c9c9c;
-        border-radius: 2px;
-        background: #f3f3f1;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    }
+.octane-toner {
+    width: 292px;
+    height: 255px;
+    font-family: Ubuntu, sans-serif;
+    font-size: 10px;
+    line-height: 12px;
+    color: #000;
 
-    .bgcolor-widget-top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-    }
-
-    .bgcolor-widget-info {
-        color: #111;
-        font-size: 12px;
-        line-height: 1.2;
-    }
-
-    .bgcolor-widget-preview {
-        flex-shrink: 0;
-        width: 32px;
-        height: 32px;
-        border: 1px solid #b4b4a3;
-        background: #c8ce8c;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    }
-
-    .bgcolor-widget-slider-group {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
-
-    .bgcolor-widget-label {
-        color: #000;
-        font-size: 12px;
-        line-height: 1;
-    }
-
-    .bgcolor-widget-slider-shell {
-        position: relative;
-        width: 100%;
-        padding: 2px 0;
-    }
-
-    .bgcolor-widget-slider-shell::before {
-        content: '';
+    > * {
         position: absolute;
-        left: 4px;
-        right: 4px;
-        top: 50%;
-        height: 8px;
-        transform: translateY(-50%);
-        background:
-            repeating-linear-gradient(
-                to right,
-                transparent 0 9px,
-                #1a1a1a 9px 10px
-            );
-        opacity: 0.75;
-        pointer-events: none;
     }
 
-    .bgcolor-widget-slider-shell .octane-slider-wrapper {
-        position: relative;
-        z-index: 1;
-        gap: 0;
+    > .octane-card-header-shell {
+        position: absolute !important;
     }
 
-    .bgcolor-widget-slider-shell .octane-slider {
-        height: 16px;
+    .octane-toner__panel {
+        top: 41px;
+        left: 9px;
+        box-sizing: border-box;
+        width: 275px;
+        height: 171px;
+        border: solid transparent;
+        border-width: 4px;
+        border-image: url('@/assets/images/room-widgets/dimmer-widget/toner-panel.png') 4 fill / 4px stretch;
+        image-rendering: pixelated;
     }
 
-    .bgcolor-widget-slider-track {
-        height: 2px !important;
-        border: 0 !important;
-        border-radius: 999px;
-        box-shadow: none !important;
+    .octane-toner__info {
+        top: 44px;
+        left: 17px;
+        width: 218px;
+    }
 
-        &.track-0,
-        &.track-1 {
-            background: #000 !important;
+    .octane-toner__preview {
+        top: 45px;
+        left: 250px;
+        box-sizing: border-box;
+        width: 29px;
+        height: 27px;
+        border-top: 1px solid #999;
+        border-left: 1px solid #999;
+    }
+
+    .octane-toner__label {
+        left: 17px;
+        font-weight: bold;
+    }
+
+    .octane-toner__slider {
+        left: 15px;
+        width: 206px;
+        height: 18px;
+        touch-action: none;
+        cursor: pointer;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 2px;
+            width: 201px;
+            height: 12px;
+            background: url('@/assets/images/room-widgets/dimmer-widget/slider-base.png') 0 0 no-repeat;
         }
     }
 
-    .bgcolor-widget-slider-thumb {
-        width: 11px !important;
-        height: 18px !important;
-        margin-top: -1px;
-        border-radius: 4px !important;
-        border: 1px solid #345b72 !important;
-        background: linear-gradient(180deg, #6ba7c7 0%, #4a87a9 100%) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 0 rgba(0, 0, 0, 0.25);
+    .octane-toner__thumb {
+        position: absolute;
+        top: 1px;
+        width: 12px;
+        height: 17px;
+        background: url('@/assets/images/room-widgets/dimmer-widget/slider-button.png') 0 0 no-repeat;
+    }
+
+    .octane-toner__button {
+        padding: 2px 0 0 2px !important;
+        background: none;
+        font: 9px/10px Volter, monospace;
         cursor: pointer;
+        -webkit-font-smoothing: none;
     }
 
-    .bgcolor-widget-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
+    .octane-card-title {
+        transform: translateY(2px);
     }
 
-    .bgcolor-widget-button {
-        min-width: 74px;
-        color: #000 !important;
-        border-color: #7f7f7f !important;
-        background: linear-gradient(180deg, #f7f7f7 0%, #d9d9d9 100%) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 0 rgba(0, 0, 0, 0.15) !important;
+    .octane-toner__apply {
+        top: 218px;
+        left: 10px;
+        width: 46px;
     }
 
-    .bgcolor-widget-button:hover {
-        background: linear-gradient(180deg, #ffffff 0%, #e6e6e6 100%) !important;
-        border-color: #767676 !important;
+    .octane-toner__toggle {
+        top: 218px;
+        left: 225px;
+        width: 60px;
     }
 }
 
@@ -386,7 +364,8 @@
     white-space: nowrap;
 }
 
-.octane-dimmer__button {
+.octane-dimmer__button,
+.octane-toner__button {
     box-sizing: border-box;
     height: 24px;
     padding: 2px 8px 0 !important;
