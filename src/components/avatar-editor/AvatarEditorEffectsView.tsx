@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, LocalizeText } from '../../api';
 import clearSrc from '../../assets/images/avatareditor/clear-icon.png';
 import fxSrc from '../../assets/images/avatareditor/air/effects-fx.png';
@@ -16,6 +16,11 @@ export const AvatarEditorEffectsView: FC = () => {
     const { effects, selectedEffect, selectEditorEffect } = useAvatarEditor();
     const [, setTick] = useState(0);
     const selected = effects.find(effect => effect.type === selectedEffect);
+    // Native WJ paints grid progress when R3e rebuilds the inventory;
+    // b3e's timer updates only the selected effect's details panel.
+    const gridProgress = useMemo(() => new Map(effects.map(effect => [effect.type,
+        Math.floor(40 * (effect.permanent ? 1 : getEditorEffectSeconds(effect) / effect.duration))
+    ])), [effects]);
 
     useEffect(() => {
         if (!selected?.active || selected.permanent) return;
@@ -55,7 +60,7 @@ export const AvatarEditorEffectsView: FC = () => {
                     return <button type="button" key={type} className={`octane-avatar-editor-effect-item avatar-parts${selectedEffect === type ? ' part-selected' : ''}`} aria-pressed={selectedEffect === type} aria-label={effect ? LocalizeText(`fx_${type}`) : LocalizeText('avatareditor.clear')} onMouseDown={() => selectEditorEffect(type)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') selectEditorEffect(type); }}>
                         {icon && <img src={icon} alt="" draggable={false} />}
                         {effect?.amount > 1 && <div className="octane-avatar-editor-effect-amount"><NativeText text={String(effect.amount)} textStyle="regular" background={0x666666} overrides={{ color: 0xeeeeee, antiAliasType: 'advanced', sharpness: 0, thickness: 0, kerning: false }} /></div>}
-                        {effect && (effect.active || effect.permanent) && <div className="octane-avatar-editor-effect-duration"><div style={{ width: Math.floor(40 * (effect.permanent ? 1 : getEditorEffectSeconds(effect) / effect.duration)) }} /></div>}
+                        {effect && (effect.active || effect.permanent) && <div className="octane-avatar-editor-effect-duration"><div style={{ width: gridProgress.get(type) }} /></div>}
                     </button>;
                 })}
             </ClassicScrollAreaView>

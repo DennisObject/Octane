@@ -31,7 +31,11 @@ export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: stri
 
             const image = new Image();
             image.src = source;
-            await image.decode();
+            try {
+                await image.decode();
+            } catch {
+                return;
+            }
             if (disposed || currentRevision !== revision) return;
 
             // Native rz/eh scale the full h bitmap by 0.5 with smoothing;
