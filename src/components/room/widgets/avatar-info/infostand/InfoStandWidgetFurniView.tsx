@@ -651,7 +651,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
 
     return (
         <Column alignItems="end" className="octane-furni-infostand-stack">
-            <Column className="octane-furni-infostand relative z-30 min-w-[190px] max-w-[190px] pointer-events-auto">
+            <Column className={'octane-furni-infostand relative z-30 min-w-[190px] max-w-[190px] pointer-events-auto' + (isCrackable ? ' octane-furni-infostand--crackable' : '')}>
                 <button type="button" className="octane-furni-infostand__close" aria-label={localizeWithFallback('generic.close', 'Close')} onClick={onClose} />
                 <div className="octane-furni-infostand__list">
                     <div className="octane-furni-infostand__name">{avatarInfo.name}</div>
@@ -737,13 +737,13 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                         {isCrackable && (
                             <>
                                 <div className="octane-furni-infostand__rule" />
-                                <Text small wrap variant="white">
+                                <div className="octane-furni-infostand__text">
                                     {LocalizeText(
                                         'infostand.crackable_furni.hits_remaining',
                                         ['hits', 'target'],
                                         [(crackableHits ?? 0).toString(), (crackableTarget ?? 0).toString()]
                                     )}
-                                </Text>
+                                </div>
                             </>
                         )}
                         {isPlant && (

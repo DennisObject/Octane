@@ -613,6 +613,19 @@
     overflow: hidden;
 }
 
+/* crackable_furni_view: the image box is 140 wide at x=0 and the container hugs the bitmap. */
+.octane-furni-infostand--crackable .octane-furni-infostand__image {
+    min-height: 0;
+    padding: 0 30px 0 0;
+}
+
+/* hits_remaining: x=0 y=182 h=14 text field. */
+.octane-furni-infostand--crackable .octane-furni-infostand__text {
+    box-sizing: border-box;
+    height: 14px;
+    padding: 1px 0 1px 3px;
+}
+
 /* Flash centres the item bitmap with a floored offset; a half pixel would otherwise round up. */
 .octane-furni-infostand__image > :last-child {
     position: relative;
