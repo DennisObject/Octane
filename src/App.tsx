@@ -330,6 +330,9 @@ export const App: FC<{}> = (props) => {
 
             warmupPromiseRef.current = (async () => {
                 await GetConfiguration().init();
+                const externalTextUrls = asStringArray(GetConfiguration().getValue<unknown>('external.texts.url'));
+                const marketplaceTextsUrl = new URL('configuration/marketplace-texts.json', document.baseURI).toString();
+                GetConfiguration().setValue('external.texts.url', [...externalTextUrls, marketplaceTextsUrl]);
                 bumpProgress(25);
 
                 // 0 = the display's refresh rate. A cap (the old 24 default) makes

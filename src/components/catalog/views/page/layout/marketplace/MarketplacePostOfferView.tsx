@@ -20,6 +20,11 @@ interface V75MarketplaceItemStats {
     suggestedPrice: number;
 }
 
+interface V75MarketplaceCommission {
+    commissionPercentage: number;
+    commissionDivisor: number;
+}
+
 export const MarketplacePostOfferView: FC<{}> = () => {
     const [item, setItem] = useState<FurnitureItem>(null);
     const [itemIds, setItemIds] = useState<number[]>([]);
@@ -74,7 +79,11 @@ export const MarketplacePostOfferView: FC<{}> = () => {
     const isAmountValid = !isNaN(amount) && amount >= 1 && amount <= maxAmount;
 
     const furniTitle = LocalizeText(item.isWallItem ? 'wallItem.name.' + item.type : 'roomItem.name.' + item.type);
-    const commission = Math.max(Math.ceil(marketplaceConfiguration.commission * 0.01 * askingPrice), 1);
+    const v75Configuration = marketplaceConfiguration as typeof marketplaceConfiguration & Partial<V75MarketplaceCommission>;
+    const commissionPercentage = v75Configuration.commissionPercentage ?? marketplaceConfiguration.commission;
+    const commissionDivisor = v75Configuration.commissionDivisor ?? 0;
+    const commissionRate = commissionPercentage / 100 + (commissionDivisor > 0 ? (0.5 * askingPrice) / commissionDivisor : 0);
+    const commission = Math.ceil(Math.round(1000 * askingPrice * commissionRate) / 1000);
     const revenue = askingPrice - commission;
     const suggestedPrice = itemStats?.suggestedPrice ?? 0;
 
@@ -85,6 +94,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
 
         const ids = itemIds.slice(0, amount);
 
+        let submitted = false;
+
         showConfirm(
             amount > 1
                 ? LocalizeText(
@@ -94,6 +105,9 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                   )
                 : LocalizeText('inventory.marketplace.confirm_offer.info', ['furniname', 'price'], [furniTitle, revenue.toString()]),
             () => {
+                if (submitted) return;
+
+                submitted = true;
                 SendMessageComposer(new MakeMultipleOffersMessageComposer(askingPrice, item.isWallItem ? 2 : 1, ids));
             },
             null,
