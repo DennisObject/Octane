@@ -40,12 +40,18 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
     const [wasPicturePublished, setWasPicturePublished] = useState(false);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
     const [hasRenderingFailed, setHasRenderingFailed] = useState(false);
-    const [isWaiting, setIsWaiting] = useState(false);
+    const [isWaiting, setIsWaitingState] = useState(false);
+    // Set in the same task as the send, so a second click handled before React re-renders cannot send again.
+    const pendingRef = useRef(false);
     // disableButtons(true) renames Cancel to Close and the caption is never restored.
     const [cancelIsClose, setCancelIsClose] = useState(false);
     const [publishCooldown, setPublishCooldown] = useState(0);
     const [statusLocalization, setStatusLocalization] = useState('camera.purchase.pleasewait');
     const [competitionState, setCompetitionState] = useState<'idle' | 'submitted' | 'limit' | 'email' | 'error'>('idle');
+    const setIsWaiting = useCallback((value: boolean) => {
+        pendingRef.current = value;
+        setIsWaitingState(value);
+    }, []);
     const productImageContainerRef = useRef<HTMLDivElement>(null);
     const productImageRef = useRef<HTMLImageElement>(null);
     // setPrices runs once when the dialog opens; later price updates only reach the purchase checks.
@@ -203,7 +209,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                 onCloseClick();
                 return;
             case 'buy':
-                if (isWaiting || !isImageLoaded || !disclaimerAccepted) return;
+                if (pendingRef.current || isWaiting || !isImageLoaded || !disclaimerAccepted) return;
 
                 if (price.credits > getCurrencyAmount(-1)) {
                     showNotEnoughCreditsAlert();
@@ -224,7 +230,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                 SendMessageComposer(new PurchasePhotoMessageComposer(checkoutId));
                 return;
             case 'publish':
-                if (isWaiting || !isImageLoaded || publishCooldown > 0) return;
+                if (pendingRef.current || isWaiting || !isImageLoaded || publishCooldown > 0) return;
 
                 if (price.publishDucketPrice > getCurrencyAmount(CAMERA_POINT_CURRENCY_TYPE)) {
                     showNotEnoughDucketsAlert();
@@ -237,7 +243,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                 SendMessageComposer(new PublishPhotoMessageComposer(checkoutId));
                 return;
             case 'competition':
-                if (isWaiting || !isImageLoaded || ['submitted', 'limit', 'error'].includes(competitionState)) return;
+                if (pendingRef.current || isWaiting || !isImageLoaded || ['submitted', 'limit', 'error'].includes(competitionState)) return;
 
                 setIsWaiting(true);
                 setCancelIsClose(true);
