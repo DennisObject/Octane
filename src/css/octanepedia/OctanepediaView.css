@@ -1,8 +1,4 @@
 .octanepedia.octane-card-shell.octane-card-frame-3 {
-    --octane-card-close-3: url("../../assets/images/octanepedia/native/close-default.png");
-    --octane-card-close-3-hover: url("../../assets/images/octanepedia/native/close-hover.png");
-    --octane-card-close-3-pressed: url("../../assets/images/octanepedia/native/close-pressed.png");
-
     box-sizing: border-box;
     width: 418px;
     height: 398px;
@@ -11,22 +7,6 @@
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     font-size: 12px;
     line-height: 14px;
-}
-
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
-    top: 0 !important;
-    right: 0 !important;
-    width: 15px !important;
-    height: 15px !important;
-    background: #d2392b var(--octane-card-close-3) 0 0 / 15px 15px no-repeat !important;
-}
-
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:hover {
-    background-image: var(--octane-card-close-3-hover) !important;
-}
-
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:active {
-    background-image: var(--octane-card-close-3-pressed) !important;
 }
 
 .octanepedia.octane-card-shell.octane-card-frame-3::after {
@@ -38,19 +18,21 @@
     height: 32px;
     border-radius: 6px 6px 0 0;
     background: #578ca5;
-    box-shadow: inset 0 2px #67a3bf, inset 0 -1px #05121a;
+    box-shadow: inset 0 2px #67a3bf;
     content: '';
     pointer-events: none;
 }
 
 .octanepedia > .octane-card-header-shell { cursor: move; }
+.octanepedia__native-title { position: absolute !important; top: 1px; left: 50%; transform: translateX(-50%); }
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button { right: 2px !important; }
 
 .octanepedia__viewport {
     position: relative;
     box-sizing: border-box;
     width: calc(100% - 1px);
-    height: calc(100% - 22px);
-    margin: 2px 0 0 1px;
+    height: calc(100% - 23px);
+    margin: 3px 0 0 1px;
     overflow: hidden;
     border: 0;
     background: #fff;
@@ -93,7 +75,7 @@
     background: #fff;
 }
 
-.octanepedia__content > .octanepedia__native-container { padding: 0; }
+.octanepedia__content > .octanepedia__native-container { margin-left: 1px; padding: 0; }
 
 .octanepedia__native-page { position: relative; min-height: 100%; }
 .octanepedia__native-page > canvas { image-rendering: pixelated; }
