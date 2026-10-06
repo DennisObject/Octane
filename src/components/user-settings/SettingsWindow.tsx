@@ -13,10 +13,10 @@ interface SettingsWindowProps {
     children: ReactNode;
 }
 
-// v75 opens each settings window at x = desktop width - window width - 200 and leaves y at the window origin (0).
+// v75 opens each settings window at x = desktop width - window width - 200 and leaves y at the window origin (0); the layout border itself starts at x=1, so the drawn frame lands one pixel further left (measured against the native client).
 export const SettingsWindow: FC<SettingsWindowProps> = (props) => {
     const { name, title, width, titleX, titleWidth, lineX, lineWidth, className = '', children } = props;
-    const [position] = useState(() => ({ x: window.innerWidth - width - 200, y: 0 }));
+    const [position] = useState(() => ({ x: window.innerWidth - width - 201, y: 0 }));
 
     return (
         <DraggableWindow handleSelector=".us-title" initialPosition={position} uniqueKey={`user-settings-${name}`} unconstrainedPosition>

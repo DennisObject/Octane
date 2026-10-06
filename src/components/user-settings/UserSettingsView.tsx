@@ -219,7 +219,7 @@ export const UserSettingsView: FC<{}> = () => {
                     width={257}
                 >
                     <div className="us-at us-text us-text--multi" style={{ left: 11, top: 34, width: 237, height: 32 }}>
-                        {localizeWithFallback('toolbar.chat.settings.info', 'Choose how chat appears for you.')}
+                        {localizeWithFallback('toolbar.chat.settings.info', 'Choose how chat appears for you')}
                     </div>
                     <div className="us-at us-text" style={{ left: 11, top: 71, width: 237, height: 17 }}>
                         {localizeWithFallback('toolbar.chat.settings.mode', 'Chat mode')}
@@ -291,7 +291,7 @@ export const UserSettingsView: FC<{}> = () => {
                                 type="checkbox"
                                 onChange={(event) => processAction('room_invites', event.target.checked)}
                             />
-                            <span>{localizeWithFallback('memenu.settings.other.ignore.room.invites', 'Ignore room invites')}</span>
+                            <span>{localizeWithFallback('memenu.settings.other.ignore.room.invites', 'Ignore Room Invites')}</span>
                         </label>
                         {showCameraFollow && (
                             <label className="us-check-row">
@@ -305,10 +305,10 @@ export const UserSettingsView: FC<{}> = () => {
                             </label>
                         )}
                         <div className="us-text us-label">
-                            {localizeWithFallback('memenu.settings.other.friend.online.notification.title', 'Friend online notification')}
+                            {localizeWithFallback('memenu.settings.other.friend.online.notification.title', 'Show "friend online" notification for:')}
                         </div>
                         <DropMenu
-                            label={localizeWithFallback('memenu.settings.other.friend.online.notification.title', 'Friend online notification')}
+                            label={localizeWithFallback('memenu.settings.other.friend.online.notification.title', 'Show "friend online" notification for:')}
                             left={0}
                             options={[
                                 localizeWithFallback('memenu.settings.other.friend.online.notification.0', 'Everyone'),
