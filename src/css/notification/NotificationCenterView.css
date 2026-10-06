@@ -1309,6 +1309,7 @@
     position: relative;
     box-sizing: border-box;
     width: 288px;
+    height: 133px;
     padding: 14px 0 0;
 }
 
@@ -1317,28 +1318,25 @@
     width: 253px;
     min-height: 72px;
     margin-left: 16px;
+    padding-top: 2px;
+    font-size: 12px;
+    line-height: 13.4px;
     white-space: pre-line;
     overflow-wrap: break-word;
 }
 
 .octane-native-confirm-cancel {
     position: absolute;
-    bottom: 11px;
+    top: 102px;
     left: 20px;
     width: 100px;
     height: 17px;
 }
 
-.octane-native-confirm-body::after {
-    content: "";
-    display: block;
-    height: 40px;
-}
-
 .octane-native-confirm-ok {
     position: absolute;
-    bottom: 7px;
-    left: 196px;
+    top: 98px;
+    left: 195px;
     width: auto;
     min-width: 50px;
 }
@@ -1564,4 +1562,8 @@
 
 .octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-title {
     letter-spacing: 0;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+    letter-spacing: 0.2px;
 }
