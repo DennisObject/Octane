@@ -241,7 +241,7 @@ export const HelpView: FC = () => {
                                         )}
                                         {!isForum && (
                                             <span className="help-reported-name">
-                                                <HelpText text={(isRoom ? activeReport.roomName : selectedUser?.name) ?? ''} textStyle="u_headline_big" color={0xffffff} background={HELP_USER_HEADER_COLOR} />
+                                                <HelpText plain text={(isRoom ? activeReport.roomName : selectedUser?.name) ?? ''} textStyle="u_headline_big" color={0xffffff} background={HELP_USER_HEADER_COLOR} />
                                             </span>
                                         )}
                                         {(activeReport.reportType === ReportType.BULLY || activeReport.reportType === ReportType.EMERGENCY) && (

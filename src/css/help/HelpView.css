@@ -280,7 +280,8 @@
 .octane-help .help-chat-text { display: block; width: 336px; min-height: 17px; line-height: 17px; overflow-wrap: anywhere; white-space: pre-wrap; }
 .octane-help .help-chat-check { appearance: none; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url("../../assets/images/floorplan-editor/air/checkbox-default.png") 0 0 / 15px 15px no-repeat; box-shadow: none; cursor: pointer; image-rendering: pixelated; }
 .octane-help .help-chat-check:checked { background-image: url("../../assets/images/floorplan-editor/air/checkbox-selected.png"); background-color: transparent; }
-.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; outline: none; font-size: 11px; line-height: 16px; color: transparent; caret-color: #000; }
+.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; outline: none; font-size: 11px; line-height: 16px; color: #000; }
+.octane-help .help-message-input.is-native-text textarea { color: transparent; }
 .octane-help .help-message-text { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; overflow: hidden; color: #000; pointer-events: none; }
 .octane-help .help-message-placeholder { position: absolute; left: 6px; top: 5px; height: 16px; color: #888; font-size: 11px; line-height: 16px; pointer-events: none; }
 

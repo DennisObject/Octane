@@ -15,6 +15,8 @@ interface HelpTextProps {
     color?: number;
     size?: number;
     underline?: boolean;
+    /** Player-derived text (chat lines, names, the typed report): always literal, never markup or <br>. Only localized copy may carry markup. */
+    plain?: boolean;
     /** Label drawn over a button skin. Light: white glyphs on black with screen blend; dark: black glyphs on white with multiply blend. Both equal source-over. */
     onButton?: 'light' | 'dark';
 }
@@ -23,8 +25,8 @@ const hasMarkup = (value: string) => /<(?!br\s*\/?>)[a-z/]/i.test(value);
 const toPlainText = (value: string) => value.replace(/<br\s*\/?>/gi, '\n');
 
 // v75 TextField raster (HabboWindowManagerCom text_styles_css); markup the native text cannot express keeps the DOM text.
-export const HelpText: FC<HelpTextProps> = ({ text, textStyle = 'u_regular', maxWidth, background = HELP_PANEL_COLOR, color, size, underline, onButton }) => {
-    if (hasMarkup(text)) return <span dangerouslySetInnerHTML={{ __html: SanitizeHtml(text) }} />;
+export const HelpText: FC<HelpTextProps> = ({ text, textStyle = 'u_regular', maxWidth, background = HELP_PANEL_COLOR, color, size, underline, onButton, plain }) => {
+    if (!plain && !onButton && hasMarkup(text)) return <span dangerouslySetInnerHTML={{ __html: SanitizeHtml(text) }} />;
 
     if (onButton) {
         const light = onButton === 'light';
@@ -43,7 +45,7 @@ export const HelpText: FC<HelpTextProps> = ({ text, textStyle = 'u_regular', max
 
     const overrides = { ...(color === undefined ? {} : { color }), ...(size === undefined ? {} : { size }), ...(underline === undefined ? {} : { underline }) };
 
-    return <NativeText text={toPlainText(text)} textStyle={textStyle} background={background} maxWidth={maxWidth} overrides={overrides} />;
+    return <NativeText text={plain ? text : toPlainText(text)} textStyle={textStyle} background={background} maxWidth={maxWidth} overrides={overrides} />;
 };
 
 // auto_size="center": the TextField is placed at floor((width - fieldWidth) / 2) inside its window, never on a half pixel.

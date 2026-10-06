@@ -98,11 +98,12 @@ export const SelectReportedUserView: FC<{ onBack: () => void }> = ({ onBack }) =
                                 />
                             )}
                             <span className="help-user-name">
-                                <HelpText text={user.username} textStyle="il_border" background={activeReport.reportedUserId === user.id ? HELP_WHITE_COLOR : HELP_PANEL_COLOR} />
+                                <HelpText plain text={user.username} textStyle="il_border" background={activeReport.reportedUserId === user.id ? HELP_WHITE_COLOR : HELP_PANEL_COLOR} />
                             </span>
                             <span className="help-user-room">
                                 {user.roomName && (
                                     <HelpText
+                                        plain
                                         text={LocalizeText('help.emergency.main.step.two.room.name', ['ROOM_NAME'], [user.roomName])}
                                         textStyle="il_regular"
                                         color={0x444444}

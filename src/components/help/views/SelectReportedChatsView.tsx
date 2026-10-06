@@ -61,7 +61,7 @@ export const SelectReportedChatsView: FC = () => {
                                     onChange={() => selectChat(chat)}
                                 />
                                 <span className="help-chat-text">
-                                    <HelpText text={chat.message} background={HELP_WHITE_COLOR} maxWidth={336} />
+                                    <HelpText plain text={chat.message} background={HELP_WHITE_COLOR} maxWidth={336} />
                                 </span>
                             </label>
                         ))}
