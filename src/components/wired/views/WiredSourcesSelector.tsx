@@ -7,7 +7,7 @@ import {
     RoomObjectVariable,
     Triggerable
 } from '@octane/renderer';
-import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetRoomSession, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
@@ -17,6 +17,7 @@ import arrowRight from '../../../assets/images/wired/native/arrow-right.png';
 import { useWiredNative } from './WiredNativeContext';
 import { WiredSection } from './WiredSection';
 import { WiredShellButton } from './WiredShellHeaderView';
+import { WiredText } from './WiredText';
 
 export const FURNI_SOURCES = [
     { value: 100, label: 'wiredfurni.params.sources.furni.100' },
@@ -273,17 +274,7 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     if (!showFurni && !showUsers) return null;
 
     if (native) {
-        const row = (label: string, onPrevious: () => void, onNext: () => void) => (
-            <div className="octane-wired__slider-row octane-wired__source-row">
-                <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" onClick={onPrevious}>
-                    <img alt="" draggable={false} src={arrowLeft} />
-                </WiredShellButton>
-                <span className="octane-wired__text octane-wired__source-label">{LocalizeText(label)}</span>
-                <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" onClick={onNext}>
-                    <img alt="" draggable={false} src={arrowRight} />
-                </WiredShellButton>
-            </div>
-        );
+        const row = (label: string, onPrevious: () => void, onNext: () => void) => <WiredSourceRow label={LocalizeText(label)} onNext={onNext} onPrevious={onPrevious} />;
 
         return (
             <>
@@ -346,6 +337,50 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
                     {userDetail && <div className="octane-wired__source-detail">{userDetail}</div>}
                 </>
             )}
+        </div>
+    );
+};
+
+/** Native height of the LR list (inputSourceListMinHeight) and of the arrow buttons. */
+const SOURCE_LIST_MIN_HEIGHT = 23;
+const SOURCE_BUTTON_HEIGHT = 20;
+
+/**
+ * InputSourceSection's LR row: the centred list puts every item at int((height - itemHeight) / 2), the label wraps
+ * in its centre column (TextParam wrap, align centre) and a two-line label makes the row taller than 23px.
+ */
+const WiredSourceRow: FC<{ label: string; onPrevious: () => void; onNext: () => void }> = ({ label, onPrevious, onNext }) => {
+    const labelRef = useRef<HTMLSpanElement>(null);
+    const [labelHeight, setLabelHeight] = useState(16);
+
+    useLayoutEffect(() => {
+        const element = labelRef.current;
+
+        if (!element) return;
+
+        const observer = new ResizeObserver(() => setLabelHeight(Math.round(element.getBoundingClientRect().height)));
+
+        observer.observe(element);
+
+        return () => observer.disconnect();
+    }, []);
+
+    const rowHeight = Math.max(SOURCE_LIST_MIN_HEIGHT, labelHeight);
+    const buttonTop = Math.trunc((rowHeight - SOURCE_BUTTON_HEIGHT) / 2);
+
+    return (
+        <div className="octane-wired__slider-row octane-wired__source-row" style={{ height: rowHeight + 8 }}>
+            <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onPrevious}>
+                <img alt="" draggable={false} src={arrowLeft} />
+            </WiredShellButton>
+            <span className="octane-wired__source-label" style={{ marginTop: Math.trunc((rowHeight - labelHeight) / 2) }}>
+                <span ref={labelRef} className="octane-wired__source-label-text">
+                    <WiredText text={label} wrap={true} />
+                </span>
+            </span>
+            <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onNext}>
+                <img alt="" draggable={false} src={arrowRight} />
+            </WiredShellButton>
         </div>
     );
 };

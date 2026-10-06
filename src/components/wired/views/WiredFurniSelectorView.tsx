@@ -3,6 +3,7 @@ import { LocalizeText } from '../../../api';
 import { Text } from '../../../common';
 import { useWired } from '../../../hooks';
 import { WiredSection } from './WiredSection';
+import { WiredText } from './WiredText';
 
 export const WiredFurniSelectorView: FC<{}> = () => {
     const { trigger = null, furniIds = [] } = useWired();
@@ -39,7 +40,7 @@ export const WiredFurniSelectorSection: FC<{}> = () => {
 
     return (
         <WiredSection className="octane-wired__section--selector" title={caption}>
-            <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">{LocalizeText('wiredfurni.pickfurnis.desc')}</span>
+            <WiredText soft={true} wrap={true} text={LocalizeText('wiredfurni.pickfurnis.desc')} />
         </WiredSection>
     );
 };

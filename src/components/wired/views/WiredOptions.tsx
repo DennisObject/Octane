@@ -1,4 +1,9 @@
 import { FC, ReactNode } from 'react';
+import { LocalizeText } from '../../../api';
+import { WiredSection } from './WiredSection';
+import { WiredText } from './WiredText';
+
+const optionLabel = (label: ReactNode) => (typeof label === 'string' ? <WiredText wrap={true} text={label} /> : <span className="octane-wired__text">{label}</span>);
 
 export interface WiredRadioOption {
     id: number;
@@ -6,6 +11,8 @@ export interface WiredRadioOption {
     disabled?: boolean;
     /** Forces the option onto its own row, spanning the remaining columns. */
     newLine?: boolean;
+    /** RadioButtonParam's attached preset, drawn under the option (optionExtraUnderSpacing/LeftMargin). */
+    extra?: ReactNode;
 }
 
 export interface WiredRadioGroupProps {
@@ -20,10 +27,13 @@ export interface WiredRadioGroupProps {
 export const WiredRadioGroup: FC<WiredRadioGroupProps> = ({ name, options, value, onChange, columns = 1 }) => (
     <div className="octane-wired__options octane-wired__options--radio" style={{ gridTemplateColumns: `repeat(${columns}, round(down, calc((100% - ${(columns - 1) * 5}px) / ${columns}), 1px))` }}>
         {options.map((option, index) => (
-            <label key={option.id} className={`octane-wired__option ${index === options.length - 1 ? 'is-last' : ''} ${option.disabled ? 'is-disabled' : ''}`} style={option.newLine ? { gridColumn: '1 / -1' } : undefined}>
-                <input checked={value === option.id} disabled={option.disabled} name={name} type="radio" onChange={() => onChange(option.id)} />
-                <span className="octane-wired__text">{option.label}</span>
-            </label>
+            <div key={option.id} className="octane-wired__option-cell" style={option.newLine ? { gridColumn: '1 / -1' } : undefined}>
+                <label className={`octane-wired__option ${index === options.length - 1 ? 'is-last' : ''} ${option.disabled ? 'is-disabled' : ''}`}>
+                    <input checked={value === option.id} disabled={option.disabled} name={name} type="radio" onChange={() => onChange(option.id)} />
+                    {optionLabel(option.label)}
+                </label>
+                {option.extra && <div className="octane-wired__option-extra">{option.extra}</div>}
+            </div>
         ))}
     </div>
 );
@@ -40,8 +50,29 @@ export interface WiredCheckboxOptionProps {
 export const WiredCheckboxOption: FC<WiredCheckboxOptionProps> = ({ label, checked, onChange, disabled = false, last = false }) => (
     <label className={`octane-wired__option octane-wired__option--checkbox ${last ? 'is-last' : ''} ${disabled ? 'is-disabled' : ''}`}>
         <input checked={checked} disabled={disabled} type="checkbox" onChange={(event) => onChange(event.target.checked)} />
-        <span className="octane-wired__text">{label}</span>
+        {optionLabel(label)}
     </label>
 );
 
 export const WiredCheckboxGroup: FC<{ children: ReactNode }> = ({ children }) => <div className="octane-wired__options octane-wired__options--checkbox">{children}</div>;
+
+export interface WiredQuantifierSectionProps {
+    name: string;
+    /** class_2908 quantifier type: users for the actor conditions, furni for the furni conditions. */
+    kind: 'users' | 'furni';
+    negative?: boolean;
+    value: number;
+    onChange: (id: number) => void;
+}
+
+/** The advanced quantifier section (createAdvancedSections): "wiredfurni.params.quantifier.<kind>[.neg].<id>" options. */
+export const WiredQuantifierSection: FC<WiredQuantifierSectionProps> = ({ name, kind, negative = false, value, onChange }) => (
+    <WiredSection title={LocalizeText('wiredfurni.params.quantifier_selection')}>
+        <WiredRadioGroup
+            name={name}
+            options={[0, 1].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.quantifier.${kind}${negative ? '.neg' : ''}.${id}`) }))}
+            value={value}
+            onChange={onChange}
+        />
+    </WiredSection>
+);

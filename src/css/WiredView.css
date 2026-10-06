@@ -2726,3 +2726,120 @@
 .octane-wired-menu__discord img {
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.28));
 }
+
+/* Native glyph text (il_regular) inside the Illumina section kit. NativeText keeps the 2px TextField gutter but
+   sizes the field ceil(lines x 12.3) + 4; an auto-sized TextField is floor(lines x 12.3 + 4), one pixel less. */
+.octane-wired__native-text {
+    display: block;
+    flex: none;
+    margin-bottom: -1px;
+}
+
+.octane-wired__native-text--wrap {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.octane-wired__native-text--offset {
+    margin-top: 2px;
+}
+
+/* RadioButtonPreset: radio + 3px + text; 4px under every option but the last, never under 20px; extra2 3px lower at 25px. */
+.octane-wired__option-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    min-height: 20px;
+    padding-bottom: 4px;
+}
+
+.octane-wired__option-cell:has(> .octane-wired__option.is-last) {
+    min-height: 0;
+    padding-bottom: 0;
+}
+
+.octane-wired__options--radio .octane-wired__option,
+.octane-wired__options--radio .octane-wired__option.is-last {
+    height: auto;
+    min-height: 16px;
+}
+
+.octane-wired__option-extra {
+    margin-left: 25px;
+}
+
+/* DropdownPreset on the Illumina dropmenu bitmaps; the select stays on top for input. */
+.octane-wired__dropdown {
+    position: relative;
+    height: 22px;
+    background: url('../assets/images/wired/native/dropdown_left.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid.png') 0 0 repeat-x;
+    image-rendering: pixelated;
+}
+
+.octane-wired__dropdown:not(.is-disabled):hover {
+    background: url('../assets/images/wired/native/dropdown_left_hover.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right_hover.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid_hover.png') 0 0 repeat-x;
+}
+
+.octane-wired__dropdown.is-disabled {
+    opacity: 0.5;
+}
+
+.octane-wired__dropdown-label {
+    position: absolute;
+    left: 10px;
+    top: 3px;
+    pointer-events: none;
+}
+
+.octane-wired .octane-wired__dropdown select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.octane-wired__wide-button.octane-wired__shell-button {
+    flex: none;
+    width: 100%;
+}
+
+/* InputSourceSection: arrow, label, arrow in a centred list (min height 23, spacing 6) padded 9/4. The row sets the
+   item offsets itself (WiredSourceRow); the legacy .octane-wired__source-row column rule above must not stack it. */
+.octane-wired .octane-wired__slider-row.octane-wired__source-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 0;
+}
+
+.octane-wired__slider-row.octane-wired__source-row .octane-wired__source-label-text {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+/* AdvancedSettingsWrapperPreset blends the spacing under an expanded wrapper with advancedBackgroundColor. */
+.octane-wired--native-layout .octane-wired__native-advanced-body {
+    margin-bottom: -5px;
+    padding-bottom: 5px;
+}
+
+.octane-wired__slider-row.octane-wired__source-row .octane-wired__source-label {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.octane-wired--native-layout .octane-wired__native-advanced > .octane-wired__advanced-toggle {
+    display: flex;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* CheckboxOptionPreset: the label sits checkboxYOffset (2px) lower than the 19x20 box. */
+.octane-wired__option--checkbox > .octane-wired__native-text {
+    margin-top: 2px;
+}

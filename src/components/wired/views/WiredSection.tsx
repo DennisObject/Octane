@@ -1,4 +1,5 @@
 import { FC, PropsWithChildren, ReactNode } from 'react';
+import { WiredText } from './WiredText';
 
 export interface WiredSectionProps {
     title?: ReactNode;
@@ -21,11 +22,14 @@ export const WiredSection: FC<PropsWithChildren<WiredSectionProps>> = ({ title =
         <div className="octane-wired__native-section-inner">
             {(title !== null || headerOption !== null || headerOptionsRight !== null) && (
                 <div className="octane-wired__native-section-header">
-                    {title !== null && (
-                        <span className="octane-wired__text octane-wired__text--bold" style={titleOffset ? { marginTop: titleOffset } : undefined}>
-                            {title}
-                        </span>
-                    )}
+                    {title !== null &&
+                        (typeof title === 'string' ? (
+                            <WiredText bold className={titleOffset ? 'octane-wired__native-text--offset' : ''} text={title} />
+                        ) : (
+                            <span className="octane-wired__text octane-wired__text--bold" style={titleOffset ? { marginTop: titleOffset } : undefined}>
+                                {title}
+                            </span>
+                        ))}
                     {headerOption}
                     {headerOptionsRight !== null && <div className="octane-wired__native-section-header-right">{headerOptionsRight}</div>}
                 </div>

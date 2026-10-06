@@ -19,6 +19,7 @@ import { WiredNativeContext } from './WiredNativeContext';
 import { WiredFurniSelectorSection, WiredFurniSelectorView } from './WiredFurniSelectorView';
 import { WiredSection, WiredSplitter } from './WiredSection';
 import { WiredShellButton, WiredShellHeaderView } from './WiredShellHeaderView';
+import { WIRED_ADVANCED_SURFACE_COLOR, WiredSurfaceContext, WiredText } from './WiredText';
 import { WiredVolterBorderView, WiredVolterFrameView } from './WiredVolterFrameView';
 
 // The official frame is centred while it is still its 108px minimum height and then grows downwards.
@@ -211,9 +212,10 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
     resolvedCardStyle.maxWidth = cardWidth;
     resolvedCardStyle.resize = 'none';
 
+    const advancedLabel = LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand');
     const advancedToggle = (
         <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
-            {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
+            {isNative ? <WiredText text={advancedLabel} underline={true} /> : advancedLabel}
         </button>
     );
 
@@ -226,7 +228,11 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                 (footerCollapsible ? (
                     <div className="octane-wired__native-advanced">
                         {advancedToggle}
-                        {showFooter && <div className="octane-wired__native-advanced-body">{footer}</div>}
+                        {showFooter && (
+                            <WiredSurfaceContext.Provider value={WIRED_ADVANCED_SURFACE_COLOR}>
+                                <div className="octane-wired__native-advanced-body">{footer}</div>
+                            </WiredSurfaceContext.Provider>
+                        )}
                     </div>
                 ) : (
                     <WiredSection className="octane-wired__section--footer">{footer}</WiredSection>
