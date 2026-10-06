@@ -9,8 +9,7 @@ import {
     UserFigureComposer
 } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { FaDice, FaRedo, FaTrash } from 'react-icons/fa';
-import { AvatarEditorAction, LocalizeText, SendMessageComposer } from '../../api';
+import { LocalizeText, SendMessageComposer } from '../../api';
 import mainGenericSrc from '../../assets/images/avatareditor/air/main-generic.png';
 import mainHeadSrc from '../../assets/images/avatareditor/air/main-head.png';
 import mainLegsSrc from '../../assets/images/avatareditor/air/main-legs.png';
@@ -20,6 +19,7 @@ import wardrobeHangerSrc from '../../assets/images/avatareditor/wardrobe-hanger.
 import mainNftSrc from '../../assets/images/wardrobe/nft.png';
 import mainPetsSrc from '../../assets/images/wardrobe/pets.png';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorFigurePreviewView } from './AvatarEditorFigurePreviewView';
 import { AvatarEditorModelView } from './AvatarEditorModelView';
@@ -54,6 +54,7 @@ const INITIAL_EDITOR_POSITION = { x: 100, y: 30 };
 
 export const AvatarEditorView: FC<{}> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [editorPosition, setEditorPosition] = useState(INITIAL_EDITOR_POSITION);
     const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
     const {
@@ -63,10 +64,7 @@ export const AvatarEditorView: FC<{}> = (props) => {
         avatarModels,
         activeModelKey,
         setActiveModelKey,
-        loadAvatarData,
-        getFigureStringWithFace,
         gender,
-        randomizeCurrentFigure = null,
         getFigureString = null
     } = useAvatarEditor();
 
@@ -86,27 +84,26 @@ export const AvatarEditorView: FC<{}> = (props) => {
             return leftIndex - rightIndex;
         });
 
-    const processAction = (action: string) => {
-        switch (action) {
-            case AvatarEditorAction.ACTION_RESET:
-                loadAvatarData(GetSessionDataManager().figure, GetSessionDataManager().gender);
-                return;
-            case AvatarEditorAction.ACTION_CLEAR:
-                loadAvatarData(getFigureStringWithFace(0, false), gender);
-                return;
-            case AvatarEditorAction.ACTION_RANDOMIZE:
-                randomizeCurrentFigure();
-                return;
-            case AvatarEditorAction.ACTION_SAVE:
-                if (clothingChangeData) {
-                    SendMessageComposer(new SetClothingChangeDataMessageComposer(clothingChangeData.objectId, gender, getFigureString));
-                } else {
-                    SendMessageComposer(new UserFigureComposer(gender, getFigureString));
-                }
-                setIsVisible(false);
-                return;
+    const saveAvatar = () => {
+        if (isSaving) return;
+
+        setIsSaving(true);
+        if (clothingChangeData) {
+            SendMessageComposer(new SetClothingChangeDataMessageComposer(clothingChangeData.objectId, gender, getFigureString));
+        } else {
+            SendMessageComposer(new UserFigureComposer(gender, getFigureString));
         }
+
+        setIsVisible(false);
     };
+
+    useEffect(() => {
+        if (!isSaving) return;
+
+        const timer = window.setTimeout(() => setIsSaving(false), 1500);
+
+        return () => window.clearTimeout(timer);
+    }, [isSaving]);
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
@@ -143,9 +140,24 @@ export const AvatarEditorView: FC<{}> = (props) => {
             eventUrlPrefix: 'avatar-editor/'
         };
 
-        AddLinkEventTracker(linkTracker);
+        const classicLinkTracker: ILinkEventTracker = {
+            eventUrlPrefix: 'avatareditor/',
+            linkReceived: (url) => {
+                if (url.split('/')[1] !== 'open') return;
 
-        return () => RemoveLinkEventTracker(linkTracker);
+                setClothingChangeData(null);
+                setIsWardrobeOpen(true);
+                setIsVisible((visible) => !visible);
+            }
+        };
+
+        AddLinkEventTracker(linkTracker);
+        AddLinkEventTracker(classicLinkTracker);
+
+        return () => {
+            RemoveLinkEventTracker(linkTracker);
+            RemoveLinkEventTracker(classicLinkTracker);
+        };
     }, [setClothingChangeData]);
 
     useEffect(() => {
@@ -173,13 +185,15 @@ export const AvatarEditorView: FC<{}> = (props) => {
             uniqueKey="avatar-editor"
         >
             <OctaneCardHeaderView
-                headerText={LocalizeText(clothingChangeData ? 'widget.furni.clothingchange.editor.title' : 'avatareditor.title')}
+                headerText=""
                 onCloseClick={(event) => setIsVisible(false)}
-            />
+            >
+                <NativeText className="octane-avatar-editor-title" text={LocalizeText(clothingChangeData ? 'widget.furni.clothingchange.editor.title' : 'avatareditor.title')} textStyle="u_frame_title" background={0x377998} overrides={{ color: 0xffffff }} />
+            </OctaneCardHeaderView>
             <OctaneCardContentView className="octane-avatar-editor-content" gap={0}>
                 <div className="octane-avatar-editor-stage">
                     <div className="octane-avatar-editor-nameplate">
-                        <span>{GetSessionDataManager().userName}</span>
+                        <div className="octane-avatar-editor-name-text"><NativeText text={GetSessionDataManager().userName} textStyle="u_headline_big" background={0x0e3f52} overrides={{ size: 12, color: 0xffffff }} /></div>
                     </div>
                     <div className="octane-avatar-editor-tab-row">
                         <OctaneCardTabsView classNames={['avatar-editor-tabs']}>
@@ -214,36 +228,9 @@ export const AvatarEditorView: FC<{}> = (props) => {
                         {isPetsOpen && <AvatarEditorPetView categories={avatarModels[activeModelKey]} />}
                         {isNftOpen && <AvatarEditorNftView categories={avatarModels[activeModelKey]} />}
                         <AvatarEditorFigurePreviewView />
-                        {!clothingChangeData && (
-                            <div className="octane-avatar-editor-secondary-actions">
-                                <button
-                                    type="button"
-                                    aria-label="Reset avatar"
-                                    title="Reset avatar"
-                                    onClick={() => processAction(AvatarEditorAction.ACTION_RESET)}
-                                >
-                                    <FaRedo className="fa-icon" />
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label="Clear avatar"
-                                    title="Clear avatar"
-                                    onClick={() => processAction(AvatarEditorAction.ACTION_CLEAR)}
-                                >
-                                    <FaTrash className="fa-icon" />
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label="Randomize avatar"
-                                    title="Randomize avatar"
-                                    onClick={() => processAction(AvatarEditorAction.ACTION_RANDOMIZE)}
-                                >
-                                    <FaDice className="fa-icon" />
-                                </button>
-                            </div>
-                        )}
-                        <button type="button" className="octane-avatar-editor-save" onClick={() => processAction(AvatarEditorAction.ACTION_SAVE)}>
-                            {LocalizeText('avatareditor.save')}
+                        <button type="button" className="octane-avatar-editor-save" disabled={isSaving} onClick={saveAvatar}>
+                            <NativeText className="octane-avatar-editor-save-label" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xffffff} />
+                            <NativeText className="octane-avatar-editor-save-label-disabled" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xc3c3c1} />
                         </button>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { IAvatarEditorCategory, IAvatarEditorCategoryPartItem } from '../../../api';
+import { CreateLinkEvent, GetConfigurationValue, IAvatarEditorCategory, IAvatarEditorCategoryPartItem } from '../../../api';
 import { useAvatarEditor } from '../../../hooks';
 import { InfiniteGrid } from '../../../layout';
 import { AvatarEditorFigureSetItemView } from './AvatarEditorFigureSetItemView';
@@ -41,7 +41,17 @@ export const AvatarEditorFigureSetView: FC<{
                         isSelected={isPartItemSelected(item)}
                         partItem={item}
                         setType={category.setType}
-                        onClick={(event) => selectEditorPart(category.setType, item.partSet?.id ?? -1)}
+                        onClick={() => {
+                            if (item.isGetMore) {
+                                const page = GetConfigurationValue<string>('catalog.clothes.page', 'clothing');
+
+                                CreateLinkEvent(`catalog/open/${page}`);
+
+                                return;
+                            }
+
+                            selectEditorPart(category.setType, item.partSet?.id ?? -1);
+                        }}
                     />
                 );
             }}

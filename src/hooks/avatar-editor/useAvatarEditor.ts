@@ -4,7 +4,6 @@ import {
     AvatarFigurePartType,
     FigureSetIdsMessageEvent,
     GetAvatarRenderManager,
-    GetSessionDataManager,
     GetWardrobeMessageComposer,
     IAvatarFigureContainer,
     IFigurePartSet,
@@ -13,7 +12,7 @@ import {
     SetType,
     UserWardrobePageEvent
 } from '@octane/renderer';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {
     AvatarEditorColorSorter,
@@ -28,9 +27,12 @@ import {
     SendMessageComposer
 } from '../../api';
 import { useMessageEvent } from '../events';
+import { useUserDataSnapshot } from '../session';
 import { useFigureData } from './useFigureData';
 
 const MAX_PALETTES: number = 2;
+const DEFAULT_MALE_FIGURE = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
+const DEFAULT_FEMALE_FIGURE = 'hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68';
 
 const FOOTBALL_GATE_PART_IDS: { [setType: string]: number[] } = {
     [AvatarFigurePartType.CHEST]: [3111, 3110, 3109, 3030, 3114, 266, 265, 262, 3113, 3112, 691, 690, 667],
@@ -56,8 +58,20 @@ const useAvatarEditorState = () => {
     const [boundFurnitureNames, setBoundFurnitureNames] = useState<string[]>([]);
     const [figureSetNames, setFigureSetNames] = useState<Record<number, string>>({});
     const [savedFigures, setSavedFigures] = useState<[IAvatarFigureContainer, string][]>(null);
-    const { selectedColors, gender, setGender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
+    const userData = useUserDataSnapshot();
+    const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
+    const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
+
+    const setGender = useCallback((nextGender: string) => {
+        if (nextGender === gender) return;
+
+        genderFigures.current.figures[gender] = getFigureString;
+        const figure = genderFigures.current.figures[nextGender] ??
+            (nextGender === AvatarFigurePartType.MALE ? DEFAULT_MALE_FIGURE : DEFAULT_FEMALE_FIGURE);
+
+        loadAvatarData(figure, nextGender);
+    }, [gender, getFigureString, loadAvatarData]);
 
     const activeModel = useMemo(() => avatarModels[activeModelKey] ?? null, [activeModelKey, avatarModels]);
 
@@ -135,7 +149,11 @@ const useAvatarEditorState = () => {
 
             if (!partColor) return;
 
-            if (GetClubMemberLevel() < partColor.clubLevel) return;
+            if (GetClubMemberLevel() < partColor.clubLevel) {
+                CreateLinkEvent('habboUI/open/hccenter');
+
+                return;
+            }
 
             selectColor(setType, paletteId, colorId);
         },
@@ -358,7 +376,9 @@ const useAvatarEditorState = () => {
                 partItems.push({ id: partSet.id, partSet, usesColor, maxPaletteCount, isSellableNotOwned });
             }
 
-            partItems.sort(AvatarEditorPartSorter(false));
+            partItems.sort(AvatarEditorPartSorter(GetConfigurationValue<boolean>('avatareditor.show.clubitems.first', true)));
+
+            if (GetConfigurationValue<boolean>('avatareditor.support.sellablefurni', true)) partItems.push({ id: -1, isGetMore: true });
 
             for (let i = 0; i < MAX_PALETTES; i++) colorItems[i].sort(AvatarEditorColorSorter);
 
@@ -422,9 +442,9 @@ const useAvatarEditorState = () => {
     }, [isVisible, gender, figureSetIds, nftFigureSetIds, clothingChangeData]);
 
     useEffect(() => {
-        if (!isVisible) return;
-
         if (clothingChangeData) {
+            if (!isVisible) return;
+
             loadAvatarData(
                 clothingChangeData.gender === AvatarFigurePartType.MALE ? DEFAULT_MALE_FOOTBALL_GATE : DEFAULT_FEMALE_FOOTBALL_GATE,
                 clothingChangeData.gender
@@ -433,8 +453,15 @@ const useAvatarEditorState = () => {
             return;
         }
 
-        loadAvatarData(GetSessionDataManager().figure, GetSessionDataManager().gender);
-    }, [isVisible, loadAvatarData, clothingChangeData]);
+        if (!isVisible) return;
+
+        if (genderFigures.current.userId !== userData.userId) {
+            genderFigures.current = { userId: userData.userId, figures: {} };
+        }
+
+        genderFigures.current.figures[userData.gender] = userData.figure;
+        loadAvatarData(userData.figure, userData.gender);
+    }, [isVisible, loadAvatarData, clothingChangeData, userData.userId, userData.figure, userData.gender]);
 
     useEffect(() => {
         if (!isVisible || savedFigures) return;

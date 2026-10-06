@@ -2,6 +2,7 @@ import { OctaneEventType } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { AvatarEditorThumbnailsHelper, GetClubMemberLevel, GetConfigurationValue, IAvatarEditorCategoryPartItem } from '../../../api';
 import hcSmallSrc from '../../../assets/images/avatareditor/air/hc-small.png';
+import getMoreSrc from '../../../assets/images/avatareditor/air/get-more.png';
 import { LayoutCurrencyIcon, LayoutGridItemProps } from '../../../common';
 import { useAvatarEditor } from '../../../hooks';
 import { useOctaneEvent } from '../../../hooks/events';
@@ -59,7 +60,7 @@ export const AvatarEditorFigureSetItemView: FC<
     useEffect(() => {
         const requestId = ++requestIdRef.current;
 
-        if (!setType || !setType.length || !partItem || partItem.isClear) {
+        if (!setType || !setType.length || !partItem || partItem.isClear || partItem.isGetMore) {
             setLoadingState({ partKey, isLoading: false });
 
             return;
@@ -121,9 +122,10 @@ export const AvatarEditorFigureSetItemView: FC<
                     draggable={false}
                 />
             )}
+            {partItem.isGetMore && <img className="avatar-editor-get-more" src={getMoreSrc} alt="" draggable={false} />}
             {!partItem.isClear && isHC && <img className="avatar-editor-part-hc" src={hcSmallSrc} alt="" draggable={false} />}
             {partItem.isClear && <AvatarEditorIcon icon="clear" />}
-            {!partItem.isClear && partItem.partSet.isSellable && !isSellableNotOwned && (
+            {!partItem.isClear && !partItem.isGetMore && partItem.partSet?.isSellable && !isSellableNotOwned && (
                 <AvatarEditorIcon className="avatar-editor-sellable-icon absolute" icon="sellable" />
             )}
             {!partItem.isClear && isSellableNotOwned && (
