@@ -265,52 +265,56 @@
 }
 
 .octane-achievements-air .air-achievements-scroll-area > .octane-classic-scroll-area-viewport {
-    box-sizing: border-box;
     width: 367px;
     height: 245px;
+}
+
+/* The style 3 scroll area shared by the achievements list and the quests list. */
+.air-style3-scroll-area > .octane-classic-scroll-area-viewport {
+    box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: scroll;
     scrollbar-width: none !important;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scroll-area-viewport::-webkit-scrollbar {
+.air-style3-scroll-area > .octane-classic-scroll-area-viewport::-webkit-scrollbar {
     display: none !important;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar {
+.air-style3-scroll-area > .octane-classic-scrollbar {
     top: 0;
     right: 0;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-default.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-hover.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-pressed.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-default.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-hover.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-pressed.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-track {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-track {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-track-3.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
     --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png');
     --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-default.png');
     position: relative;
@@ -324,8 +328,8 @@
     background-origin: content-box;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before,
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before,
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
     position: absolute;
     left: 0;
     width: 17px;
@@ -334,24 +338,24 @@
     background-repeat: no-repeat;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before {
     top: 0;
     height: 4px;
     background-position: 0 0;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
     bottom: 0;
     height: 5px;
     background-position: 0 -6px;
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:hover {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:hover {
     --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-hover.png');
     --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-hover.png');
 }
 
-.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:active {
+.air-style3-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:active {
     --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-pressed.png');
     --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-pressed.png');
 }

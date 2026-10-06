@@ -8,19 +8,42 @@ import {
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { localizeWithFallback } from '../../api';
-import { Button, DraggableWindowPosition, Text } from '../../common';
+import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useQuests } from '../../hooks';
-import { OctaneCard } from '../../layout';
+import { AchievementText } from '../achievements/AchievementText';
+import { useAirScrollInput } from '../achievements/useAirScrollInput';
+import { QuestButton } from './QuestButton';
 import { QuestEntryView } from './QuestEntryView';
+import '../../css/quests/QuestsList.css';
+
+const WINDOW_WIDTH = 512;
+const WINDOW_HEIGHT = 448;
+const DETAILS_WIDTH = 493;
+const DETAILS_HEIGHT = 253;
+const LIST_WHEEL_STEP = 75;
+const LIST_ARROW_STEP = 15;
+
+const centered = (width: number, height: number) => ({ x: Math.round((window.innerWidth - width) / 2), y: Math.round((window.innerHeight - height) / 2) });
+
+const FrameTitle: FC<{ text: string }> = ({ text }) => (
+    <NativeText background={0x377998} className="air-quests-native-title" overrides={{ color: 0xffffff }} text={text} textStyle="u_frame_title" />
+);
 
 /**
- * The official Quests window (512x448): one row per campaign with the current quest, plus the HC
- * double-duckets footer. `quests/show|hide|toggle|details` and `questengine/quests` open it.
+ * The official Quests window (512x448): one row per campaign with the current quest, plus the HC info footer.
+ * `quests/show|hide|toggle|details` and `questengine/quests` open it; the QuestDetails window is the same entry
+ * with the quest hint, opened from the tracker.
  */
 export const QuestsView: FC<{}> = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const [position, setPosition] = useState<{ x: number; y: number }>(null);
     const [detailsQuest, setDetailsQuest] = useState<QuestMessageData>(null);
+    const [detailsPosition, setDetailsPosition] = useState<{ x: number; y: number }>(null);
+    const [listViewport, setListViewport] = useState<HTMLDivElement>(null);
     const { quests = [], openRequests = 0, trackedQuest = null, requestQuests = null, acceptQuest = null, rejectQuest = null } = useQuests();
+
+    useAirScrollInput(listViewport, { wheelStep: LIST_WHEEL_STEP, arrowStep: LIST_ARROW_STEP });
 
     const hasClub = GetSessionDataManager().clubLevel > 0;
 
@@ -81,6 +104,14 @@ export const QuestsView: FC<{}> = () => {
     }, [openRequests]);
 
     useEffect(() => {
+        if (isVisible && !position) setPosition(centered(WINDOW_WIDTH, WINDOW_HEIGHT));
+    }, [isVisible, position]);
+
+    useEffect(() => {
+        if (detailsQuest && !detailsPosition) setDetailsPosition(centered(DETAILS_WIDTH, DETAILS_HEIGHT));
+    }, [detailsQuest, detailsPosition]);
+
+    useEffect(() => {
         if (!detailsQuest) return;
 
         const current = quests.find((quest) => quest.id === detailsQuest.id);
@@ -104,50 +135,70 @@ export const QuestsView: FC<{}> = () => {
         [rejectQuest]
     );
 
+    const sorted = [...quests].sort((a, b) => a.sortOrder - b.sortOrder);
+
     return (
         <>
-            {isVisible && (
-                <OctaneCard className="octane-quests" uniqueKey="quests" windowPosition={DraggableWindowPosition.TOP_CENTER} offsetTop={-30}>
-                    <OctaneCard.Header headerText={localizeWithFallback('quests.list.caption', 'Quests')} onCloseClick={() => setIsVisible(false)} />
-                    <OctaneCard.Content className="octane-quests-content">
-                        <div className="octane-quests-list">
-                            {quests.map((quest) => (
-                                <QuestEntryView
-                                    key={`${quest.campaignCode}-${quest.id}`}
-                                    quest={quest}
-                                    onAccept={onAccept}
-                                    onReject={onReject}
-                                    onDetails={setDetailsQuest}
-                                />
-                            ))}
-                        </div>
-                        <div className="octane-quests-hc-info">
-                            <Text small>
-                                {hasClub
-                                    ? localizeWithFallback('hc.has.double_duckets.info', 'You get double duckets as you are an HC member!')
-                                    : localizeWithFallback('hc.get.double_duckets.info', 'Get HC membership to gain double duckets!')}
-                            </Text>
+            {isVisible && position && (
+                <OctaneCardView
+                    className="octane-quests-air"
+                    uniqueKey="quests"
+                    frameStyle={3}
+                    isResizable={false}
+                    initialPosition={position}
+                    onPositionChange={setPosition}
+                    unconstrainedPosition
+                    dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
+                >
+                    <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
+                        <FrameTitle text={localizeWithFallback('quests.list.caption', 'Quests')} />
+                    </OctaneCardHeaderView>
+                    <div className="air-quests-content octane-card-content-shell">
+                        <ClassicScrollAreaView className="air-quests-list air-style0-scroll-area" scrollStep={LIST_ARROW_STEP} thumbSizeAdjustment={1} viewportRef={setListViewport}>
+                            <div className="air-quests-entries" style={{ height: Math.max(0, sorted.length * 124 - 8) }}>
+                                {sorted.map((quest) => (
+                                    <QuestEntryView key={`${quest.campaignCode}-${quest.id}`} quest={quest} onAccept={onAccept} onReject={onReject} />
+                                ))}
+                            </div>
+                        </ClassicScrollAreaView>
+                        <div className="air-quests-hc-info">
+                            <AchievementText
+                                background={0xe9e9e1}
+                                maxWidth={349}
+                                text={
+                                    hasClub
+                                        ? localizeWithFallback('hc.has.double_duckets.info', 'You get double duckets as you are an HC member!')
+                                        : localizeWithFallback('hc.get.double_duckets.info', 'Get HC membership to gain double duckets!')
+                                }
+                                textStyle="u_regular"
+                                x={17}
+                                y={385}
+                            />
                             {!hasClub && (
-                                <Button variant="success" onClick={() => CreateLinkEvent('catalog/open/hc_membership')}>
-                                    {localizeWithFallback('generic.get_hc', 'Get HC')}
-                                </Button>
+                                <QuestButton className="air-quest-get-hc" label={localizeWithFallback('generic.get_hc', 'Get HC')} width={107} onClick={() => CreateLinkEvent('catalog/open/hc_membership')} />
                             )}
                         </div>
-                    </OctaneCard.Content>
-                </OctaneCard>
+                    </div>
+                </OctaneCardView>
             )}
-            {detailsQuest && (
-                <OctaneCard className="octane-quest-details" uniqueKey="quest-details" windowPosition={DraggableWindowPosition.CENTER}>
-                    <OctaneCard.Header headerText={localizeWithFallback('quests.details.caption', 'Quest details')} onCloseClick={() => setDetailsQuest(null)} />
-                    <OctaneCard.Content className="octane-quest-details-content">
+            {detailsQuest && detailsPosition && (
+                <OctaneCardView
+                    className="octane-quest-details-air"
+                    uniqueKey="quest-details"
+                    frameStyle={3}
+                    isResizable={false}
+                    initialPosition={detailsPosition}
+                    onPositionChange={setDetailsPosition}
+                    unconstrainedPosition
+                    dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
+                >
+                    <OctaneCardHeaderView headerText="" onCloseClick={() => setDetailsQuest(null)}>
+                        <FrameTitle text={localizeWithFallback('quests.details.caption', 'Quest')} />
+                    </OctaneCardHeaderView>
+                    <div className="air-quest-details-content octane-card-content-shell">
                         <QuestEntryView quest={detailsQuest} showHint onAccept={onAccept} onReject={onReject} />
-                        {detailsQuest.catalogPageName && detailsQuest.catalogPageName.length > 0 && (
-                            <span className="octane-quest-link" onClick={() => CreateLinkEvent(`catalog/open/${detailsQuest.catalogPageName}`)}>
-                                {localizeWithFallback('quests.list.opencatalog', 'Open the catalogue')}
-                            </span>
-                        )}
-                    </OctaneCard.Content>
-                </OctaneCard>
+                    </div>
+                </OctaneCardView>
             )}
         </>
     );

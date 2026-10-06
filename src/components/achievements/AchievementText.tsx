@@ -9,6 +9,7 @@ interface AchievementTextProps {
     background?: number;
     size?: number;
     bold?: boolean;
+    underline?: boolean;
     color?: number;
     /** TextField rect (x, y, width) from the quest engine layout XML; the field's own 2px gutter is part of the raster. */
     x: number;
@@ -32,7 +33,7 @@ interface AchievementTextProps {
 // backdrop when no ancestor between the text and that backdrop is isolated (no transform, opacity, filter or z-index).
 // Quest engine text fields set font_face Ubuntu, sharpness 0, thickness 0 and kerning false
 // instead of a text_styles_css entry, so the style is spelled out here.
-export const AchievementText: FC<AchievementTextProps> = ({ text, background, size = 12, bold = false, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, className = '', style }) => {
+export const AchievementText: FC<AchievementTextProps> = ({ text, background, size = 12, bold = false, underline = false, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, className = '', style }) => {
     const bitmap = background === undefined;
     const onBlack = color === 0xffffff;
 
@@ -44,7 +45,7 @@ export const AchievementText: FC<AchievementTextProps> = ({ text, background, si
             <NativeText
                 background={bitmap ? (onBlack ? 0x000000 : 0xffffff) : background}
                 maxWidth={maxWidth}
-                overrides={textStyle ? { color } : { family: 'Ubuntu', size, bold, color, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' }}
+                overrides={textStyle ? { color } : { family: 'Ubuntu', size, bold, underline, color, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' }}
                 style={bitmap ? { mixBlendMode: onBlack ? 'screen' : 'multiply' } : undefined}
                 text={text}
                 textStyle={textStyle ?? 'u_regular'}

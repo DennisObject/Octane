@@ -1,18 +1,16 @@
 import { AchievementData } from '@octane/renderer';
-import { CSSProperties, FC, useEffect, useState } from 'react';
+import { CSSProperties, FC, useState } from 'react';
 import { ClassicScrollAreaView } from '../../../common';
 import { useAchievementListScrollStore } from '../achievementListScrollStore';
+import { useAirScrollInput } from '../useAirScrollInput';
 import { AchievementListItemView } from './AchievementListItemView';
 
-// The AIR scroll area moves a fixed distance per wheel event, whatever the wheel delta is.
 const WHEEL_STEP = 75;
-// The arrow buttons scroll on press, not on release. The same step serves keyboard activation of the buttons
-// and the thumb's ArrowUp/ArrowDown, which ClassicScrollAreaView handles with its scrollStep.
+// The same step serves keyboard activation of the arrow buttons and the thumb's ArrowUp/ArrowDown,
+// which ClassicScrollAreaView handles with its scrollStep.
 const ARROW_STEP = 15;
 
-const restoreScroll = (viewport: HTMLElement) => {
-    viewport.scrollTop = useAchievementListScrollStore.getState().scrollTop;
-};
+const rememberScroll = (scrollTop: number) => useAchievementListScrollStore.setState({ scrollTop });
 
 interface AchievementListViewProps {
     achievements: AchievementData[];
@@ -22,47 +20,15 @@ interface AchievementListViewProps {
 export const AchievementListView: FC<AchievementListViewProps> = (props) => {
     const { achievements = [], isScrollable } = props;
     const [viewport, setViewport] = useState<HTMLDivElement>(null);
+    const [initialScrollTop] = useState(() => useAchievementListScrollStore.getState().scrollTop);
     const itemCount = Math.max(isScrollable ? 10 : 12, achievements.length);
 
-    useEffect(() => {
-        if (!viewport) return;
-
-        const onWheel = (event: WheelEvent) => {
-            if (!event.deltaY) return;
-
-            event.preventDefault();
-            viewport.scrollBy({ top: Math.sign(event.deltaY) * WHEEL_STEP, behavior: 'auto' });
-        };
-
-        const arrows = [...viewport.parentElement.querySelectorAll<HTMLButtonElement>('.octane-classic-scrollbar-button')];
-        const onArrowDown = (event: PointerEvent) => {
-            const isUp = (event.currentTarget as HTMLElement).classList.contains('is-up');
-
-            viewport.scrollBy({ top: isUp ? -ARROW_STEP : ARROW_STEP, behavior: 'auto' });
-        };
-        // A pointer click already scrolled on press; only a keyboard-activated click (detail 0) reaches the component's own step.
-        const onArrowClick = (event: MouseEvent) => {
-            if (event.detail > 0) event.stopPropagation();
-        };
-        const onScroll = () => useAchievementListScrollStore.setState({ scrollTop: viewport.scrollTop });
-
-        restoreScroll(viewport);
-        viewport.addEventListener('wheel', onWheel, { passive: false });
-        viewport.addEventListener('scroll', onScroll);
-        arrows.forEach((arrow) => {
-            arrow.addEventListener('pointerdown', onArrowDown);
-            arrow.addEventListener('click', onArrowClick);
-        });
-
-        return () => {
-            arrows.forEach((arrow) => {
-                arrow.removeEventListener('pointerdown', onArrowDown);
-                arrow.removeEventListener('click', onArrowClick);
-            });
-            viewport.removeEventListener('wheel', onWheel);
-            viewport.removeEventListener('scroll', onScroll);
-        };
-    }, [viewport]);
+    useAirScrollInput(viewport, {
+        wheelStep: WHEEL_STEP,
+        arrowStep: ARROW_STEP,
+        onScroll: rememberScroll,
+        initialScrollTop
+    });
 
     const grid = (
         <div className="air-achievements-list-grid" style={{ '--air-achievement-columns': isScrollable ? 5 : 6 } as CSSProperties}>
@@ -82,7 +48,7 @@ export const AchievementListView: FC<AchievementListViewProps> = (props) => {
                 </filter>
             </svg>
             {isScrollable ? (
-                <ClassicScrollAreaView className="air-achievements-scroll-area" scrollStep={ARROW_STEP} viewportRef={setViewport}>
+                <ClassicScrollAreaView className="air-achievements-scroll-area air-style3-scroll-area" scrollStep={ARROW_STEP} viewportRef={setViewport}>
                     {grid}
                 </ClassicScrollAreaView>
             ) : (
