@@ -113,6 +113,7 @@ export const App: FC<{}> = (props) => {
     const rememberRotateIntervalRef = useRef<number>(null);
     const releaseRememberLockRef = useRef<() => void>(null);
     const previousConnectionPhaseRef = useRef(connectionState.phase);
+    const externalDisconnectNotifiedRef = useRef(false);
 
     const clearStoredCredentials = useCallback(() => {
         // Forget everything locally, then let the server revoke it (best effort).
@@ -143,11 +144,19 @@ export const App: FC<{}> = (props) => {
         console.warn('[App] showSessionExpired — diagnostic shown (mid-game close)');
         clearStoredCredentials();
 
-        setErrorMessage('Your session has expired.\nPlease log in again to enter the hotel.');
+        if (!authEnabled && !externalDisconnectNotifiedRef.current)
+        {
+            externalDisconnectNotifiedRef.current = true;
+            HabboWebTools.send(0, 'session_expired');
+        }
+
+        setErrorMessage(authEnabled
+            ? 'Your session has expired.\nPlease log in again to enter the hotel.'
+            : 'Your game session could not be resumed.\nReconnect through the hotel website.');
         setIsReady(false);
         setShowLogin(false);
         setIsEnteringHotel(false);
-    }, [clearStoredCredentials]);
+    }, [authEnabled, clearStoredCredentials]);
 
     const fallbackToLogin = useCallback(() => {
         if (!authEnabled)
@@ -563,7 +572,12 @@ export const App: FC<{}> = (props) => {
     return (
         <Base fit overflow="hidden" className={`octane-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>
             {!isReady && !showLogin && (
-                <LoadingView isError={errorMessage.length > 0} message={errorMessage} progress={loadingProgress} />
+                <LoadingView
+                    isError={errorMessage.length > 0}
+                    message={errorMessage}
+                    progress={loadingProgress}
+                    backToHotelUrl={!authEnabled && errorMessage.length > 0 ? `${window.location.origin}/` : undefined}
+                />
             )}
             {authEnabled && !isReady && showLogin && <LoginView onAuthenticated={handleAuthenticated} isEntering={isEnteringHotel} />}
             {isReady && (
