@@ -4,6 +4,7 @@ import { useInventoryTrade } from '../../../../hooks';
 import { OctaneButton, OctaneItemCountBadge } from '../../../../layout';
 import { MAX_ITEMS_TO_TRADE } from './inventoryTradeOffer';
 import { InventoryThumbIconView } from '../InventoryThumbIconView';
+import creditsIcon from '@/assets/images/inventory/trading/credits-icon.png';
 
 interface InventoryTradeViewProps {
     isMinimized?: boolean;
@@ -12,6 +13,9 @@ interface InventoryTradeViewProps {
 }
 
 const COUNTDOWN_SECONDS = 3;
+
+// v75 lights the accept button once either grid shows anything, credit pile included.
+const hasOffers = (user: TradeUserData) => user.itemCount > 0 || user.creditsCount > 0 || user.userItems.length > 0;
 
 const TradeOfferView: FC<{
     side: 'own' | 'other';
@@ -32,11 +36,21 @@ const TradeOfferView: FC<{
             </div>
             {!!disabledText && <div className="octane-trade-offer-info">{disabledText}</div>}
             <div className="octane-trade-offer-grid" hidden={disabledText !== null}>
-                {Array.from(Array(MAX_ITEMS_TO_TRADE), (_, index) => {
-                    const groupItem = user.userItems.getWithIndex(index) || null;
+                {Array.from(Array(MAX_ITEMS_TO_TRADE), (_, slotIndex) => {
+                    // v75 builds a CreditTradingItem out of the credit total and lists it before the furni.
+                    const hasCredits = user.creditsCount > 0;
+                    const isCreditSlot = hasCredits && slotIndex === 0;
+                    const groupItem = isCreditSlot ? null : user.userItems.getWithIndex(hasCredits ? slotIndex - 1 : slotIndex) || null;
+                    const index = slotIndex;
 
                     return (
                         <div key={index} className="octane-trade-slot">
+                            {isCreditSlot && (
+                                <div className="octane-inventory-thumb octane-trade-item is-credit" title={LocalizeText('purse.coins')}>
+                                    <img className="octane-trade-credit-icon" src={creditsIcon} alt="" draggable={false} />
+                                    <span className="octane-trade-credit-count">{user.creditsCount}</span>
+                                </div>
+                            )}
                             {groupItem && (
                                 <div
                                     className={`octane-inventory-thumb octane-trade-item ${isOwn && !user.accepts ? 'is-removable' : ''}`}
@@ -122,7 +136,7 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
 
     switch (tradeState) {
         case TradeState.TRADING_STATE_RUNNING:
-            buttonEnabled = ownUser.itemCount > 0 || otherUser.itemCount > 0;
+            buttonEnabled = hasOffers(ownUser) || hasOffers(otherUser);
             buttonCaption = LocalizeText(ownUser.accepts ? 'inventory.trading.modify' : 'inventory.trading.accept');
             break;
         case TradeState.TRADING_STATE_COUNTDOWN:
@@ -161,6 +175,9 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
                     disabledText={otherUser.canTrade ? null : ownUser.canTrade ? LocalizeText('inventory.trading.warning.others_account_disabled') : ''}
                 />
             </div>
+            {(ownUser.creditsCount > 0 || otherUser.creditsCount > 0) && (
+                <div className="octane-trade-note">{LocalizeText('inventory.trading.warning.credits')}</div>
+            )}
             <div className="octane-trade-buttons">
                 <OctaneButton className="octane-trade-accept" disabled={!buttonEnabled} onClick={progressTrade}>
                     {buttonCaption}

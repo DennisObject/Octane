@@ -13,11 +13,9 @@ import {
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import {
-    ensureBadgeLeaderboardLoaded,
     filterFurnitureGroupItems,
     FURNI_MAIN_FILTER,
     FurniMainFilter,
-    getCachedBadgeRarityStat,
     isObjectMoverRequested,
     LocalizeBadgeName,
     LocalizeText,
@@ -111,16 +109,6 @@ const getTabUnseenCount = (name: string, getCount: (category: number) => number)
     return category === UnseenItemCategory.FURNI ? count + getCount(UnseenItemCategory.RENTABLE) : count;
 };
 
-const RARITY_TO_ID: Record<string, number> = {
-    common: 0,
-    uncommon: 1,
-    rare: 2,
-    epic: 3,
-    mythical: 4,
-    legendary: 5,
-    unique: 6
-};
-
 export const InventoryView: FC<{}> = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [currentTab, setCurrentTab] = useState<string>(TABS[0]);
@@ -128,11 +116,10 @@ export const InventoryView: FC<{}> = () => {
     const [roomPreviewer, setRoomPreviewer] = useState<RoomPreviewer>(null);
     const [searchValue, setSearchValue] = useState('');
     const [appliedSearch, setAppliedSearch] = useState('');
-    const [badgeMetadata, setBadgeMetadata] = useState<Awaited<ReturnType<typeof ensureBadgeLeaderboardLoaded>>>(null);
     const [mainFilter, setMainFilter] = useState<string>(FURNI_MAIN_FILTER.ALL);
     const [typeFilter, setTypeFilter] = useState<string>('any');
     const [, setTabFontLoaded] = useState(false);
-    const { isTrading = false, stopTrading = null } = useInventoryTrade();
+    const { isTrading = false, stopTrading = null, ownUser = null, otherUser = null } = useInventoryTrade();
     const { isOpen: isWiredTrading = false } = useWiredTrading();
     const { getCount = null } = useInventoryUnseenTracker();
     const { groupItems = [] } = useInventoryFurni();
@@ -148,9 +135,6 @@ export const InventoryView: FC<{}> = () => {
         if (currentTab === TAB_BADGES) {
             setMainFilter(BADGE_MAIN_ALL);
             setTypeFilter(String(BADGE_RARITY_ALL));
-            ensureBadgeLeaderboardLoaded()
-                .then(setBadgeMetadata)
-                .catch(() => setBadgeMetadata(null));
         } else {
             setMainFilter(FURNI_MAIN_FILTER.ALL);
             setTypeFilter('any');
@@ -170,35 +154,29 @@ export const InventoryView: FC<{}> = () => {
 
     const filteredBadgeCodes = useMemo(() => {
         const comparison = appliedSearch.toLocaleLowerCase().trim();
-        const rarityFilter = Number(typeFilter);
 
-        const achievementBadges = badgeCodes.filter((badge) => badge.startsWith('ACH_'));
-        const numberMap: { [key: string]: number } = {};
+        // Only the highest level of an achievement shows up; v75 keeps the order the badges arrived in.
+        const highest: { [key: string]: number } = {};
 
-        achievementBadges.forEach((badge) => {
+        for (const badge of badgeCodes) {
+            if (!badge.startsWith('ACH_')) continue;
+
             const name = badge.split(/[\d]+/)[0];
             const number = Number(badge.replace(name, ''));
 
-            if (numberMap[name] === undefined || number > numberMap[name]) numberMap[name] = number;
+            if (highest[name] === undefined || number > highest[name]) highest[name] = number;
+        }
+
+        return badgeCodes.filter((badge) => {
+            if (badge.startsWith('ACH_')) {
+                const name = badge.split(/[\d]+/)[0];
+
+                if (Number(badge.replace(name, '')) !== highest[name] || mainFilter === BADGE_MAIN_NORMAL) return false;
+            } else if (mainFilter === BADGE_MAIN_ACHIEVEMENTS) return false;
+
+            return LocalizeBadgeName(badge).toLocaleLowerCase().includes(comparison);
         });
-
-        let deduped = Object.keys(numberMap)
-            .map((name) => `${name}${numberMap[name]}`)
-            .concat(badgeCodes.filter((badge) => !badge.startsWith('ACH_')));
-
-        if (mainFilter === BADGE_MAIN_NORMAL) deduped = deduped.filter((code) => !code.startsWith('ACH_'));
-        if (mainFilter === BADGE_MAIN_ACHIEVEMENTS) deduped = deduped.filter((code) => code.startsWith('ACH_'));
-
-        return deduped.filter((badgeCode) => {
-            if (!LocalizeBadgeName(badgeCode).toLocaleLowerCase().includes(comparison)) return false;
-            if (rarityFilter === BADGE_RARITY_ALL) return true;
-
-            const stat = badgeMetadata ? getCachedBadgeRarityStat(badgeCode) : null;
-            if (!stat) return rarityFilter === 0;
-
-            return (RARITY_TO_ID[stat.rarity] ?? -99) === rarityFilter;
-        });
-    }, [badgeCodes, appliedSearch, mainFilter, typeFilter, badgeMetadata]);
+    }, [badgeCodes, appliedSearch, mainFilter]);
 
     const onClose = () => {
         if (isTrading) stopTrading();
@@ -258,6 +236,7 @@ export const InventoryView: FC<{}> = () => {
     useEffect(() => {
         const previewer = new RoomPreviewer(GetRoomEngine(), ++RoomPreviewer.PREVIEW_COUNTER);
         previewer.backgroundColor = null;
+        previewer.centerWallItems = true;
         setRoomPreviewer(previewer);
         return () => {
             setRoomPreviewer((prevValue) => {
@@ -282,12 +261,13 @@ export const InventoryView: FC<{}> = () => {
     const showWiredTrade = !isTrading && isWiredTrading;
     // v75 shrinks the trade table to a "Trade in progress" box while another tab is open.
     const isTradeMinimized = isTrading && currentTab !== TAB_FURNITURE;
+    const hasCreditNote = !!ownUser?.creditsCount || !!otherUser?.creditsCount;
     const showFilter = (currentTab === TAB_FURNITURE && groupItems.length > 0) || currentTab === TAB_BADGES;
 
     return (
         <>
             <OctaneCardView
-                className={`octane-inventory-window max-w-[calc(100vw-16px)] ${currentTab === TAB_BADGES ? 'has-badge-controls' : currentTab === TAB_PETS ? 'has-pet-controls' : ''} ${isTrading ? (isTradeMinimized ? 'is-trading is-minimized' : 'is-trading') : ''}`}
+                className={`octane-inventory-window max-w-[calc(100vw-16px)] ${isTrading ? (isTradeMinimized ? 'is-trading is-minimized' : `is-trading${hasCreditNote ? ' has-credit-note' : ''}`) : ''}`}
                 frameStyle={3}
                 resizeAxis="vertical"
                 uniqueKey="inventory"

@@ -29,7 +29,7 @@ export const FURNI_TYPE_OPTIONS: Record<FurniMainFilter, string[]> = {
         'non_tradable',
         'recyclable'
     ],
-    wall_items: ['any', 'windows', 'dimmers', 'stickies', 'paintings', 'tradable', 'non_tradable', 'recyclable'],
+    wall_items: ['any', 'windows', 'dimmers', 'stickies', 'paintings', 'collectibles', 'tradable', 'non_tradable', 'recyclable'],
     room_layout: ['any', 'floors', 'wallpapers', 'landscape']
 };
 

@@ -1,8 +1,13 @@
 /* v75 inventory_trading_xml: 478x272 trade table under the inventory tabs (subContentArea). */
 .octane-inventory-window.is-trading {
-    height: 619px !important;
-    min-height: 619px !important;
+    height: 577px !important;
+    min-height: 577px !important;
     max-height: none !important;
+}
+
+.octane-inventory-window.is-trading.has-credit-note {
+    height: 612px !important;
+    min-height: 612px !important;
 }
 
 .octane-inventory-window.is-trading.is-minimized {
@@ -43,8 +48,11 @@
     position: absolute;
     left: 8px;
     top: 7px;
+    display: flex;
+    justify-content: center;
     width: 461px;
-    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
     opacity: 0.6;
 }
 
@@ -68,6 +76,7 @@
     left: 0;
     top: 2px;
     display: flex;
+    justify-content: center;
     gap: 4px;
     width: 200px;
     height: 17px;
@@ -273,7 +282,8 @@
 
 .octane-trade-buttons > .octane-trade-accept {
     left: 5px;
-    width: 157px;
+    width: auto;
+    padding: 0 5.8px 1px !important;
 }
 
 .octane-trade-buttons > .octane-trade-cancel {
@@ -308,10 +318,11 @@
 
 .octane-inventory-window .octane-inventory-btn-offer {
     box-sizing: border-box !important;
-    width: 148px !important;
+    width: auto !important;
+    min-width: 60px !important;
     height: 22px !important;
     min-height: 22px !important;
-    padding: 0 5px 1px !important;
+    padding: 0 5.8px 1px !important;
     border: 5px solid transparent !important;
     border-radius: 0 !important;
     border-image-source: var(--habbo-skin-shiny) !important;
@@ -339,4 +350,61 @@
 
 .octane-inventory-window .octane-inventory-btn-offer:disabled {
     border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important;
+}
+
+/* info_border_highlighted: 466x28 orange plate under the table while credit furni is offered; the buttons drop 35px. */
+.octane-trade-note {
+    position: absolute;
+    left: 5px;
+    top: 240px;
+    box-sizing: border-box;
+    width: 466px;
+    height: 28px;
+    padding: 5px 0 0 7px;
+    border-style: solid;
+    border-width: 0 6px;
+    border-image: url('@/assets/images/inventory/trading/note-orange.png') 0 6 fill / 0 6px stretch;
+    color: #000;
+    white-space: nowrap;
+    image-rendering: pixelated;
+}
+
+.octane-trade-note ~ .octane-trade-buttons {
+    top: 275px;
+}
+
+.octane-trade:has(.octane-trade-note) {
+    height: 307px;
+}
+
+/* inventory_thumb_credits: the coin pile sits at (1,18) top centred and the amount runs across the top. */
+.octane-trade-item.is-credit .octane-trade-credit-icon {
+    position: absolute;
+    left: 7px;
+    top: 17px;
+    width: 25px;
+    height: 18px;
+    image-rendering: pixelated;
+}
+
+.octane-trade-credit-count {
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 38px;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+    color: #000;
+}
+
+/* The trade grid shows the thumb clipped to 40x40: frame and icon start at the cell corner, not 1px in. */
+.octane-trade-item::before {
+    inset: 0;
+}
+
+.octane-trade-item .octane-inventory-thumb-image {
+    inset: 0;
 }
