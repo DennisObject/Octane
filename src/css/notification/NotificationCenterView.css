@@ -1268,14 +1268,14 @@
 .octane-native-popup-column .octane-native-link {
     box-sizing: border-box;
     min-height: 26px;
-    padding-top: 1px;
+    padding-bottom: 1px;
 }
 
 .octane-native-popup-column .octane-native-button {
     height: 30px;
     margin-top: 4px;
     margin-bottom: 5px;
-    padding: 0 6px;
+    padding: 0 6px 2px;
     font-size: 12px;
 }
 
