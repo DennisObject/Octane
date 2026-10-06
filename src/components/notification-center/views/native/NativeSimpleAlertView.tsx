@@ -20,6 +20,7 @@ export interface NativeSimpleAlertViewProps {
 export const NativeSimpleAlertView: FC<NativeSimpleAlertViewProps> = (props) => {
     const { caption, subtitle = '', message, linkTitle = '', linkUrl = '', imageUrl = frankNeutral, onClose } = props;
     const [imageFailed, setImageFailed] = useState(false);
+    const [imageWidth, setImageWidth] = useState(32);
     const closeRef = useRef<HTMLButtonElement>(null);
     const hasImage = !!imageUrl && !imageFailed;
     const hasLink = !!linkTitle && !!linkUrl;
@@ -40,13 +41,14 @@ export const NativeSimpleAlertView: FC<NativeSimpleAlertViewProps> = (props) => 
                 aria-modal="true"
                 className={`octane-alert octane-card-shell octane-card-frame-3 octane-native-alert is-simple${hasImage ? ' has-image' : ''}`}
                 role="alertdialog"
+                style={{ width: hasImage ? imageWidth + 320 : 310 }}
             >
                 <div className="octane-card-header-shell">
                     <span className="octane-card-title">{caption}</span>
                 </div>
                 <div className="octane-native-alert-list">
                     <div className="octane-native-alert-row">
-                        {hasImage && <img alt="" className="octane-native-alert-illustration" src={imageUrl} onError={() => setImageFailed(true)} />}
+                        {hasImage && <img alt="" className="octane-native-alert-illustration" src={imageUrl} onError={() => setImageFailed(true)} onLoad={(event) => setImageWidth(event.currentTarget.naturalWidth)} />}
                         <div className="octane-native-alert-top">
                             {!!subtitle && <div className="octane-native-alert-subtitle">{subtitle}</div>}
                             <div className="octane-native-alert-message" dangerouslySetInnerHTML={{ __html: SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')) }} />

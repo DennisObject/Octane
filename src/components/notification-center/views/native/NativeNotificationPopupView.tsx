@@ -22,13 +22,14 @@ export const NativeNotificationPopupView: FC<NativeNotificationPopupViewProps> =
     const linkCaption = linkTitle || linkUrl;
 
     return (
-        <NativeModalView>
+        <NativeModalView baseHeight={87} offsetY={14}>
             <section
                 aria-label={title}
                 aria-modal="true"
                 className={`octane-alert octane-card-shell octane-card-frame-3 octane-native-alert is-popup`}
                 role="dialog"
             >
+                <div aria-hidden="true" className="octane-native-popup-tint" />
                 <div className="octane-card-header-shell">
                     <span className="octane-card-title">{title}</span>
                     <button aria-label={title} className="octane-card-close-button" type="button" onClick={onClose} />

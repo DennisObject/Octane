@@ -1035,10 +1035,12 @@
     inset: 0;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     pointer-events: auto;
+}
+
+.octane-native-modal-slot {
+    position: absolute;
+    width: max-content;
 }
 
 .octane-native-modal-dim {
@@ -1058,9 +1060,9 @@
     filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349)) !important;
     color: #000;
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
-    line-height: 16px;
+    line-height: 13px;
     text-align: left;
 }
 
@@ -1070,8 +1072,10 @@
     cursor: pointer;
 }
 
-.octane-native-alert .octane-card-header-shell .octane-card-title,
-.octane-native-confirm .octane-card-header-shell .octane-card-title {
+.octane-card-shell.octane-card-frame-3.octane-native-alert > .octane-card-header-shell .octane-card-title,
+.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+    top: 4px !important;
+    letter-spacing: -0.2px;
     white-space: nowrap;
 }
 
@@ -1081,9 +1085,6 @@
     padding: 38px 9px 2px 11px;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-alert.is-simple.has-image {
-    width: max-content;
-}
 
 .octane-native-alert-list {
     position: relative;
@@ -1122,10 +1123,15 @@
     font-size: 14px;
     font-weight: 700;
     line-height: 19px;
+    padding: 1px 0 0 2px;
+    letter-spacing: 0.12px;
 }
 
 .octane-native-alert-message {
-    padding-bottom: 8px;
+    letter-spacing: 0.05px;
+    position: relative;
+    top: 2px;
+    padding: 0 2px 8px;
     overflow-wrap: break-word;
 }
 
@@ -1174,18 +1180,21 @@
 }
 
 .octane-native-button.is-thick {
-    width: 126px;
-    border-image-source: var(--habbo-skin-shiny-thick-green);
-    color: #fff;
-    font-weight: 700;
+    margin-left: 1px;
+    padding: 0 7px 2px;
+    border-image-source: var(--habbo-skin-shiny-thick);
+    filter: brightness(0.9373);
+    -webkit-text-stroke: 0.3px #000;
+    color: #000;
+    font-weight: 400;
 }
 
 .octane-native-button.is-thick:hover {
-    border-image-source: var(--habbo-skin-shiny-thick-green-hover);
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
 }
 
 .octane-native-button.is-thick:active {
-    border-image-source: var(--habbo-skin-shiny-thick-green-pressed);
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
 }
 
 .octane-native-link {
@@ -1202,29 +1211,43 @@
 }
 
 .octane-native-alert-bottom .octane-native-link {
+    font-size: 11px;
+    line-height: 13px;
     width: 262px;
     min-height: 21px;
     padding-bottom: 5px;
 }
 
-/* layout_notification_popup_xml: content origin (3,36); list at (3,2), 294 wide; message column 293 wide */
+/* layout_notification_popup_xml: content origin (3,36); list at (3,2) min 46 high; message column at x=1, 293 wide; frame colour 0x67a3bf */
 .octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup {
     width: max-content;
     min-width: 306px;
-    padding: 38px 6px 8px 6px;
+    padding: 38px 6px 3px 6px;
+    font-size: 12px;
+    line-height: 13px;
+}
+
+.octane-native-popup-tint {
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    left: 2px;
+    height: 31px;
+    background: linear-gradient(#67a3bf 0 2px, #578ca5 2px);
+    pointer-events: none;
 }
 
 .octane-native-popup-list {
     position: relative;
     display: flex;
     align-items: flex-start;
+    min-height: 46px;
 }
 
 .octane-native-popup-illustration {
     flex: 0 0 auto;
     width: auto;
     height: auto;
-    margin-right: 1px;
     image-rendering: pixelated;
 }
 
@@ -1234,11 +1257,33 @@
     flex-direction: column;
     align-items: center;
     width: 293px;
+    margin-left: 1px;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-native-popup-column .octane-native-link {
+    box-sizing: border-box;
+    min-height: 26px;
+    padding-top: 1px;
+}
+
+.octane-native-popup-column .octane-native-button {
+    height: 30px;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    padding: 0 6px;
+    font-size: 12px;
 }
 
 .octane-native-popup-message {
+    position: relative;
+    top: 2px;
+    letter-spacing: 0.1px;
     align-self: stretch;
-    padding-bottom: 8px;
+    padding: 0 2px 8px;
     overflow-wrap: break-word;
 }
 
@@ -1310,10 +1355,22 @@
 .octane-native-motd-item {
     box-sizing: border-box;
     width: 395px;
-    padding: 5px 0 15px 5px;
+    padding: 8px 0 12px 9px;
     color: #000;
-    font: 9px/12px Volter, sans-serif;
+    font: 9px/9px Volter, sans-serif;
     overflow-wrap: break-word;
+}
+
+.octane-native-motd .friends-dialog-close {
+    top: 1px;
+    right: 1px;
+    width: 13px;
+    height: 13px;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'><rect width='13' height='13' fill='%23fff'/><rect x='1' y='1' width='11' height='11' fill='%23000'/><rect x='3' y='3' width='1' height='1' fill='%23fff'/><rect x='9' y='3' width='1' height='1' fill='%23fff'/><rect x='4' y='4' width='1' height='1' fill='%23fff'/><rect x='8' y='4' width='1' height='1' fill='%23fff'/><rect x='5' y='5' width='1' height='1' fill='%23fff'/><rect x='7' y='5' width='1' height='1' fill='%23fff'/><rect x='6' y='6' width='1' height='1' fill='%23fff'/><rect x='5' y='7' width='1' height='1' fill='%23fff'/><rect x='7' y='7' width='1' height='1' fill='%23fff'/><rect x='4' y='8' width='1' height='1' fill='%23fff'/><rect x='8' y='8' width='1' height='1' fill='%23fff'/><rect x='3' y='9' width='1' height='1' fill='%23fff'/><rect x='9' y='9' width='1' height='1' fill='%23fff'/></svg>") no-repeat;
+}
+
+.octane-native-motd .friends-dialog-close-skin {
+    display: none !important;
 }
 
 .octane-native-motd-ok {
@@ -1480,4 +1537,19 @@
 
 .octane-native-club-gift-later:hover {
     color: #bae1f9;
+}
+
+.octane-native-motd .octane-native-motd-ok .friends-dialog-button span {
+    position: relative;
+    top: 1px;
+    left: 1.5px;
+}
+
+.octane-native-motd .friends-dialog-title {
+    padding-top: 2px;
+    letter-spacing: 0.2px;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-title {
+    letter-spacing: 0;
 }

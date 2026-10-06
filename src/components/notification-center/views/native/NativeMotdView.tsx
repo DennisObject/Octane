@@ -23,7 +23,7 @@ export const NativeMotdView: FC<{ title: string; messages: string[]; onClose: ()
                 ))}
             </div>
             <div className="octane-native-motd-ok">
-                <FriendsDialogButtonView caption={localizeWithFallback('generic.ok', 'OK')} height={26} width={30} onClick={onClose} />
+                <FriendsDialogButtonView caption={localizeWithFallback('generic.ok', 'OK')} height={26} width={31} onClick={onClose} />
             </div>
         </FriendsDialogFrameView>
     );
