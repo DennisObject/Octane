@@ -1828,9 +1828,35 @@
     line-height: normal;
 }
 
+.bubble-container.native-room-bubble .native-chat-text {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+}
+
+.bubble-container.native-room-bubble .native-chat-text canvas {
+    display: none;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] canvas {
+    display: block;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] .native-chat-text-accessible {
+    inset: 0;
+    color: transparent;
+    position: absolute;
+    user-select: text;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] .native-chat-text-accessible * {
+    color: transparent !important;
+}
+
 .bubble-container.native-room-bubble .native-whisper .chat-content {
     font-style: italic;
-    opacity: 0.6;
 }
 
 .bubble-container.native-room-bubble .type-1 .message {

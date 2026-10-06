@@ -7,6 +7,7 @@ import { ChatTextSize, getChatFontScale, getChatTextSize } from '../chat-input/c
 import { measureBubbleVisualOffsets } from './chatBubbleMetrics';
 import { getNativeChatCreation } from './nativeChatScroller';
 import { getNativeChatBaseFontSize, getNativeDefaultSkin, isNativeAnonymousStyle } from './nativeChatSkin';
+import { NativeChatText } from './NativeChatText';
 
 interface ChatWidgetMessageViewProps {
     chat: ChatBubbleMessage;
@@ -141,6 +142,9 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     }, [chat, isReady, isVisible, creationMode]);
 
     const messageClassName = `message [overflow-wrap:anywhere] break-words${chat.type === 2 ? ' font-bold' : ''}`;
+    const nativeTextWidth = bubbleWidth === RoomChatSettings.CHAT_BUBBLE_WIDTH_THIN ? 196 : bubbleWidth === RoomChatSettings.CHAT_BUBBLE_WIDTH_WIDE ? 1956 : 306;
+    // style_normal's tint mask ends before the 2px TextField gutter; shirt colour cannot alter the text surface.
+    const nativeTextEnabled = chat.styleId === 0 && fontScale === 1;
 
     return (
         <div
@@ -171,25 +175,41 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                     )}
                 </div>
                 <div className="chat-content">
-                    {!anonymous && <b className="username">{chat.username}: </b>}
-                    {!chat.showTranslation && (
-                        <span className={messageClassName} dangerouslySetInnerHTML={{ __html: formattedText }} onClick={onClickChat} />
+                    {!chat.showTranslation && nativeTextEnabled && (
+                        <NativeChatText
+                            username={chat.username}
+                            html={formattedText}
+                            type={chat.type}
+                            anonymous={anonymous}
+                            maxWidth={nativeTextWidth}
+                            className={messageClassName}
+                            onClick={onClickChat}
+                        />
+                    )}
+                    {!chat.showTranslation && !nativeTextEnabled && (
+                        <>
+                            {!anonymous && <b className="username">{chat.username}: </b>}
+                            <span className={messageClassName} dangerouslySetInnerHTML={{ __html: formattedText }} onClick={onClickChat} />
+                        </>
                     )}
                     {chat.showTranslation && (
-                        <div className="mt-[2px] flex flex-col gap-[2px]" onClick={onClickChat}>
-                            <div className="flex items-start gap-1 leading-[1.1]">
-                                <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                    original:
-                                </span>
-                                <span className={messageClassName} dangerouslySetInnerHTML={{ __html: originalFormattedText }} />
+                        <>
+                            {!anonymous && <b className="username">{chat.username}: </b>}
+                            <div className="mt-[2px] flex flex-col gap-[2px]" onClick={onClickChat}>
+                                <div className="flex items-start gap-1 leading-[1.1]">
+                                    <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
+                                        original:
+                                    </span>
+                                    <span className={messageClassName} dangerouslySetInnerHTML={{ __html: originalFormattedText }} />
+                                </div>
+                                <div className="flex items-start gap-1 leading-[1.1]">
+                                    <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
+                                        translate:
+                                    </span>
+                                    <span className={messageClassName} dangerouslySetInnerHTML={{ __html: translatedFormattedText }} />
+                                </div>
                             </div>
-                            <div className="flex items-start gap-1 leading-[1.1]">
-                                <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                    translate:
-                                </span>
-                                <span className={messageClassName} dangerouslySetInnerHTML={{ __html: translatedFormattedText }} />
-                            </div>
-                        </div>
+                        </>
                     )}
                 </div>
                 {showPointer && !anonymous && (
