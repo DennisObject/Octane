@@ -11,6 +11,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, IsTouchDevice } from '../api';
+import { NativeTextHaloFilter } from '../common';
 import { useOctaneEventReducer } from '../hooks';
 import { AchievementsView } from './achievements/AchievementsView';
 import { GoogleAdsView } from './ads/GoogleAdsView';
@@ -138,6 +139,7 @@ export const MainView: FC<{}> = (props) =>
     return (
         <>
             <div className="hidden" data-localization-version={localizationVersion} />
+            <NativeTextHaloFilter />
             <AnimatePresence>
                 {landingViewVisible && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

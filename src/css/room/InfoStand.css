@@ -1,3 +1,7 @@
+:root {
+  --octane-native-text-halo: url('#octane-native-text-halo');
+}
+
 .octane-use-product-confirmation {
   width: min(350px, calc(100vw - 16px));
   min-width: 0;
@@ -47,22 +51,25 @@
   pointer-events: auto;
   padding: 4px;
   border: 6px solid transparent;
-  border-radius: 6px;
-  border-image-source: url('../../assets/images/habbo-skin/slices/border-black.png');
-  border-image-slice: 24;
-  border-image-width: 6px;
-  border-image-repeat: stretch;
-  background-color: #3d3d3d;
-  background-clip: padding-box;
+  isolation: isolate;
   box-shadow: none;
   color: #fefefe;
-  /* The native Flash text rasteriser leaves a ~1px halo around bitmap glyphs. */
-  text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15);
   font-family: Volter, monospace;
   font-size: 9px;
   line-height: 12px;
   -webkit-font-smoothing: none;
   image-rendering: var(--octane-pixel-art, pixelated);
+
+  /* Painted on a layer of its own so the glyphs get greyscale antialiasing like the native bitmap text. */
+  &::before {
+    position: absolute;
+    inset: -6px;
+    z-index: -1;
+    content: '';
+    border: 6px solid transparent;
+    border-image: url('@/assets/images/infostand/panel-bg.png') 6 fill / 6px stretch;
+    pointer-events: none;
+  }
 
   @media (max-width: 576px) {
     top: 0;
@@ -110,8 +117,8 @@
 
   .octane-infostand__home {
     position: absolute;
-    top: 1px;
-    left: -2px;
+    top: -2px;
+    left: -5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,8 +139,8 @@
 
   .octane-infostand__profile-link {
     position: absolute;
-    top: 0;
-    left: 18px;
+    top: 1px;
+    left: 21px;
     display: flex;
     align-items: center;
     width: 135px;
@@ -153,7 +160,6 @@
   }
 
   .octane-infostand__identity {
-    background: #3d3d3d;
     color: #ffffff;
     font-family: Volter, monospace;
     font-size: 9px;
@@ -170,6 +176,14 @@
 
   .octane-infostand__rule--footer {
     margin-bottom: 0;
+  }
+
+  /* relationship_status_container: 170x55, kept even when it holds no rows. */
+  .octane-infostand__relationships {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 55px;
   }
 
   .octane-infostand__figure-row {
@@ -190,9 +204,14 @@
     height: 130px;
     overflow: hidden;
     border-radius: 0;
-    background: url('@/assets/images/infostand/avatar-background.png') no-repeat center;
+    background: url('@/assets/images/infostand/avatar-well.png') no-repeat center;
     cursor: pointer;
     z-index: 1;
+
+    /* avatar_image widget (16,21) 34x84 inside the 67x130 grey_bg. */
+    > :first-child {
+      margin: 0 0 5px;
+    }
   }
 
   .octane-infostand__badges {
@@ -210,13 +229,9 @@
     box-sizing: border-box;
     transition: opacity 150ms ease, background-color 150ms ease;
 
+    /* The official infostand draws nothing for an empty slot; it only stays a drop target. */
     &.is-empty {
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      opacity: 0.4;
-
-      &:hover {
-        opacity: 0.7;
-      }
+      opacity: 0;
     }
 
     &.is-drag-over {
@@ -251,7 +266,7 @@
   /* rentable_bot_view: infostand_bot_info_bg circuit over grey_bg, badge widget at list (100,21),
      description_text 170x31, owner_text 126x13, all in the list's 3px spacing. */
   .octane-infostand__avatar-well--bot {
-    background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat center, url('@/assets/images/infostand/avatar-background.png') no-repeat center;
+    background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat center, url('@/assets/images/infostand/avatar-well.png') no-repeat center;
   }
 
   .octane-infostand__rentable-badge {
@@ -286,6 +301,34 @@
     font-size: 11px;
     line-height: 13px;
     white-space: nowrap;
+  }
+
+  /* user_view motto_container: grey_bg border style, Volter regular line at x=20+3, y=2. */
+  .octane-infostand__motto--box {
+    isolation: isolate;
+    min-height: 26px;
+    padding: 3px 6px 1px 23px;
+    margin: 0;
+  }
+
+  .octane-infostand__motto--box::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    box-sizing: border-box;
+    content: '';
+    border: 6px solid transparent;
+    border-image: url('@/assets/images/infostand/grey-box.png') 6 fill / 6px stretch;
+    pointer-events: none;
+  }
+
+  .octane-infostand__motto--box .octane-infostand__motto-text {
+    padding-top: 0;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 12px;
+    -webkit-font-smoothing: none;
   }
 
   /* bot_view motto_text x=5 w=160 (no pen). */
@@ -330,7 +373,9 @@
   /* Achievement score: one Volter line, label and value. */
   .octane-infostand__score {
     display: block;
+    box-sizing: border-box;
     min-width: 170px;
+    padding-left: 3px;
     height: 15px;
     color: #ffffff;
     font-family: Volter, monospace;
@@ -345,7 +390,7 @@
   }
 
   .octane-infostand__score-link {
-    padding: 0;
+    padding: 0 0 0 3px;
     border: 0;
     background: transparent;
     text-align: left;
@@ -507,7 +552,6 @@
     width: 190px;
     padding: 10px;
     color: #fefefe;
-    text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15);
     font-family: Volter, monospace;
     font-size: 9px;
     line-height: 12px;
@@ -722,4 +766,18 @@
 .octane-infostand-actions {
     display: flex;
     justify-content: flex-end;
+}
+
+/* Native Flash text halo on the dark infostand panels. */
+.octane-infostand__identity,
+.octane-infostand__score,
+.octane-infostand__motto-text,
+.octane-infostand__carry,
+.octane-infostand__description,
+.octane-infostand__owner-line,
+.octane-furni-infostand__name,
+.octane-furni-infostand__owner-name,
+.octane-furni-infostand__group-name,
+.octane-furni-infostand__text {
+    filter: var(--octane-native-text-halo);
 }

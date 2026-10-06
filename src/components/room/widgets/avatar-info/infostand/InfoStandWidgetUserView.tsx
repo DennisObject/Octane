@@ -9,7 +9,7 @@ import {
     UserRelationshipsComposer
 } from '@octane/renderer';
 import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoUser, CloneObject, ensureBadgeLeaderboardLoaded, GetConfigurationValue, GetGroupInformation, getBadgesRank, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
 import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
@@ -29,6 +29,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
     const [motto, setMotto] = useState<string>(null);
     const [isEditingMotto, setIsEditingMotto] = useState(false);
     const [relationships, setRelationships] = useState<RelationshipStatusInfoMessageParser>(null);
+    const [badgesRank, setBadgesRank] = useState(0);
     const { roomSession = null } = useRoom();
 
     const handleProfileClick = useCallback(() => {
@@ -127,12 +128,23 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
         };
     }, [avatarInfo]);
 
+    useEffect(() => {
+        let isCurrent = true;
+
+        ensureBadgeLeaderboardLoaded()
+            .then((leaderboard) => isCurrent && setBadgesRank(Math.max(0, getBadgesRank(leaderboard, avatarInfo.webID))))
+            .catch(() => isCurrent && setBadgesRank(0));
+
+        return () => {
+            isCurrent = false;
+        };
+    }, [avatarInfo.webID]);
+
     if (!avatarInfo) return null;
 
     const isOwnUser = avatarInfo.type === AvatarInfoUser.OWN_USER;
     const mottoMaxLength = GetConfigurationValue<number>('motto.max.length', 38);
     const showAchievementScore = GetConfigurationValue<boolean>('activity.point.display.enabled', true);
-    const hasRelationships = !!relationships?.relationshipStatusMap.length;
 
     return (
         <>
@@ -158,7 +170,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                 <div className="octane-infostand__rule" />
                 <div className="octane-infostand__figure-row">
                     <div className="octane-infostand__avatar-well" onClick={handleProfileClick}>
-                        <LayoutAvatarImageView direction={2} figure={avatarInfo.figure} />
+                        <LayoutAvatarImageView direction={4} figure={avatarInfo.figure} />
                     </div>
                     <div className="octane-infostand__badges">
                         {(() => {
@@ -197,7 +209,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                     </div>
                 </div>
                 <div className="octane-infostand__rule" />
-                <div className="octane-infostand__motto">
+                <div className="octane-infostand__motto octane-infostand__motto--box">
                     {isOwnUser && <img src={pencilIcon} alt="" className="octane-infostand__pen" />}
                     {!isOwnUser && (
                         <Text fullWidth pointer textBreak wrap className="octane-infostand__motto-text" variant="white">
@@ -235,6 +247,8 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                         </>
                     )}
                 </div>
+                <div className="octane-infostand__rule" />
+                <div className="octane-infostand__score">{localizeWithFallback('infostand.text.badges_rank', `Badge rank: #${badgesRank}`, ['rank'], [`#${badgesRank}`])}</div>
                 {showAchievementScore && (
                     <>
                         <div className="octane-infostand__rule" />
@@ -261,8 +275,10 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                         </div>
                     </>
                 )}
-                <div className={`octane-infostand__rule ${hasRelationships ? '' : 'octane-infostand__rule--footer'}`} />
-                <InfoStandWidgetUserRelationshipsView relationships={relationships} />
+                <div className="octane-infostand__rule" />
+                <div className="octane-infostand__relationships">
+                    <InfoStandWidgetUserRelationshipsView relationships={relationships} />
+                </div>
                 {GetConfigurationValue('user.tags.enabled') && (
                     <Column className="mt-1" gap={1}>
                         <InfoStandWidgetUserTagsView tags={GetSessionDataManager().tags} />

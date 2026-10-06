@@ -944,7 +944,7 @@
     box-shadow: none;
     color: #ffffff;
     font-family: AirAvatarMenuUbuntu, UbuntuRegular, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 16px;
     text-shadow: none;
     image-rendering: var(--octane-pixel-art, pixelated);
@@ -994,7 +994,7 @@
     background: transparent;
     color: #ffffff;
     font-family: AirAvatarMenuUbuntu, UbuntuRegular, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 16px;
     text-align: center;
@@ -1036,7 +1036,7 @@
     height: 26px;
     min-height: 26px;
     margin: 0 0 0 1px;
-    padding: 0 3px;
+    padding: 1px 3px 0;
     overflow: hidden;
     flex: 0 0 26px;
     border: 0;
@@ -1044,7 +1044,7 @@
     background: transparent;
     color: #ffffff;
     font-family: AirAvatarMenuUbuntu, UbuntuRegular, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     line-height: 16px;
     text-align: center;
@@ -1337,6 +1337,45 @@
 
 :is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own).menu-hidden .octane-context-menu-footer:hover::before {
     background-image: url('../../assets/images/avatar-menu/air/arrow-up-hover.png');
+}
+
+/* avatar_menu_widget of other users: the bubble is 34px wider than the own-avatar menu. */
+.octane-avatar-action-menu--wide {
+    width: 149px;
+    min-width: 149px;
+    max-width: 149px;
+}
+
+.octane-avatar-action-menu--wide .octane-context-menu-header {
+    width: 141px;
+    min-width: 141px;
+}
+
+.octane-avatar-action-menu--wide .octane-context-menu-header::after {
+    width: 137px;
+}
+
+.octane-avatar-action-menu--wide .air-avatar-menu-buttons {
+    width: 139px;
+}
+
+.octane-avatar-action-menu--wide .air-avatar-menu-buttons > .octane-context-menu-item {
+    width: 137px;
+    min-width: 137px;
+    max-width: 137px;
+}
+
+.octane-avatar-action-menu--wide .air-avatar-menu-buttons > .octane-context-menu-item::before {
+    width: 143px;
+}
+
+.octane-avatar-action-menu--wide .octane-context-menu-footer {
+    width: 134px;
+    min-width: 134px;
+}
+
+.octane-avatar-action-menu--wide .octane-context-menu-footer::before {
+    left: 62px;
 }
 
 .octane-context-menu.name-only {
