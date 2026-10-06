@@ -130,8 +130,8 @@ export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, 
             };
 
             for (const run of loadedRuns) {
-                for (const token of run.text.split(/(\n|\s+)/).filter(Boolean)) {
-                    if (token === '\n') {
+                for (const token of run.text.split(/(\r\n|[\r\n]|[^\S\r\n]+)/).filter(Boolean)) {
+                    if (/^(?:\r\n|[\r\n])$/.test(token)) {
                         newLine();
                         continue;
                     }
