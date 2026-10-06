@@ -1242,7 +1242,6 @@
     position: relative;
     display: flex;
     align-items: flex-start;
-    min-height: 46px;
 }
 
 .octane-native-popup-illustration {
@@ -1280,12 +1279,18 @@
 }
 
 .octane-native-popup-message {
+    line-height: 13.4px;
     position: relative;
     top: 2px;
     letter-spacing: 0.1px;
     align-self: stretch;
     padding: 0 2px 8px;
     overflow-wrap: break-word;
+}
+
+/* the hidden link row still reserves its 13px in the native itemlist */
+.octane-native-popup-message:last-child {
+    margin-bottom: 12.5px;
 }
 
 /* habbo_window_confirm_xml: content origin (6,25); text (16,14) 253x72; cancel (20,102) 100x17; OK (196,98) 28 high */
