@@ -12,7 +12,7 @@ export const DescribeReportView: FC = () => {
     const { activeReport, setActiveReport } = useHelp();
     const showAlert = useHelpAlert();
     const [isEditing, setIsEditing] = useState(false);
-    const [fitsOverlay, setFitsOverlay] = useState(true);
+    const [fitsOverlay, setFitsOverlay] = useState(false);
     // The real textarea stays visible while editing (caret, selection, IME, scrolling are the browser's). Once it blurs and the text
     // is short enough to sit well inside the field, the v75 TextField raster is drawn over it.
     const showNativeText = !isEditing && fitsOverlay && activeReport.message.length > 0;
