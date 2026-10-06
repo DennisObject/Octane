@@ -22,7 +22,7 @@ export const NativeNotificationPopupView: FC<NativeNotificationPopupViewProps> =
     const linkCaption = linkTitle || linkUrl;
 
     return (
-        <NativeModalView baseHeight={87} offsetY={14}>
+        <NativeModalView baseHeight={87} baseWidth={306} offsetY={14}>
             <section
                 aria-label={title}
                 aria-modal="true"

@@ -1248,6 +1248,7 @@
     flex: 0 0 auto;
     width: auto;
     height: auto;
+    margin-bottom: 5px;
     image-rendering: pixelated;
 }
 
@@ -1258,6 +1259,11 @@
     align-items: center;
     width: 293px;
     margin-left: 1px;
+}
+
+/* the illustration replaces the 1px placeholder bitmap, so the list is one pixel narrower than image + column */
+.octane-native-popup-illustration + .octane-native-popup-column {
+    margin-right: -1px;
 }
 
 .octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-close-button {
