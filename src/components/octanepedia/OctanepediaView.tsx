@@ -3,6 +3,7 @@ import DOMPurify from 'dompurify';
 import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, OpenUrl } from '../../api';
 import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { NativeHabbopageContent } from './NativeHabbopageContent';
 
 const NEW_LINE_REGEX = /\n\r|\n|\r/gm;
 const INTERNAL_LINK_PREFIX = '#habbopages/';
@@ -88,6 +89,11 @@ export const OctanepediaView: FC<{}> = () => {
         else if (href) OpenUrl(link.href);
     };
 
+    const openMarkupLink = (href: string) => {
+        if (href.startsWith(INTERNAL_LINK_PREFIX)) CreateLinkEvent(href.slice(1));
+        else if (href) OpenUrl(new URL(href, window.location.href).href);
+    };
+
     const closePage = () => {
         requestRef.current?.abort();
         requestRef.current = null;
@@ -104,10 +110,13 @@ export const OctanepediaView: FC<{}> = () => {
             isResizable={false}
             style={{ height: page.dimensions?.height ?? 398, width: page.dimensions?.width ?? 418 }}
             uniqueKey="octanepedia"
-            unconstrainedPosition>
+            unconstrainedPosition
+        >
             <OctaneCardHeaderView headerText={page.header} onCloseClick={closePage} />
             <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" scrollStep={42}>
-                <div dangerouslySetInnerHTML={{ __html: markup }} onClick={handleContentClick} />
+                <div className="octanepedia__native-container" onClick={handleContentClick}>
+                    <NativeHabbopageContent markup={markup} onLinkClick={openMarkupLink} />
+                </div>
             </ClassicScrollAreaView>
         </OctaneCardView>
     );

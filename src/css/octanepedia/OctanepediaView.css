@@ -1,4 +1,8 @@
 .octanepedia.octane-card-shell.octane-card-frame-3 {
+    --octane-card-close-3: url("../../assets/images/octanepedia/native/close-default.png");
+    --octane-card-close-3-hover: url("../../assets/images/octanepedia/native/close-hover.png");
+    --octane-card-close-3-pressed: url("../../assets/images/octanepedia/native/close-pressed.png");
+
     box-sizing: border-box;
     width: 418px;
     height: 398px;
@@ -7,6 +11,22 @@
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     font-size: 12px;
     line-height: 14px;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    top: 0 !important;
+    right: 0 !important;
+    width: 15px !important;
+    height: 15px !important;
+    background: #d2392b var(--octane-card-close-3) 0 0 / 15px 15px no-repeat !important;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:hover {
+    background-image: var(--octane-card-close-3-hover) !important;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:active {
+    background-image: var(--octane-card-close-3-pressed) !important;
 }
 
 .octanepedia.octane-card-shell.octane-card-frame-3::after {
@@ -73,23 +93,39 @@
     background: #fff;
 }
 
+.octanepedia__content > .octanepedia__native-container { padding: 0; }
+
+.octanepedia__native-page { position: relative; width: 384px; min-height: 100%; }
+.octanepedia__native-page > canvas { image-rendering: pixelated; }
+.octanepedia__native-link { position: absolute; display: block; background: transparent; }
+.octanepedia__native-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+.octanepedia__accessible-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: pre-wrap;
+}
+
 .octanepedia__content :is(h1, h2, h3, p) { margin: 0; padding: 0; }
 
 .octanepedia__content h1 {
-    color: #ff5c00;
+    color: #fc6204;
     font-size: 23px;
     font-weight: 700;
     line-height: 28px;
 }
 
 .octanepedia__content :is(h2, h3) {
-    color: #ff5c00;
-    font-size: 16px;
+    color: #fc6204;
     font-weight: 700;
-    line-height: 20px;
 }
 
-.octanepedia__content a { color: #e74613; text-decoration: underline; }
+.octanepedia__content h2 { font-size: 19px; }
+.octanepedia__content h3 { font-size: 15px; }
+
+.octanepedia__content a { color: #fc6204; font-weight: 700; text-decoration: underline; }
 .octanepedia__content img { max-width: none; }
 .octanepedia__content img[height] { height: attr(height px); }
 .octanepedia__content img[width] { width: attr(width px); }
