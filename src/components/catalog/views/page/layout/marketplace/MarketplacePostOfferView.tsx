@@ -152,7 +152,7 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                     />
                 </div>
                 <div className="octane-market-offer-list">
-                    {!!itemStats?.averagePrice && (
+                    {!!itemStats?.averagePrice && itemStats.historyLength > 0 && (
                         <div>{LocalizeText('inventory.marketplace.make_offer.average_price', ['days', 'price'], [itemStats.historyLength.toString(), itemStats.averagePrice.toString()])}</div>
                     )}
                     {!!itemStats?.lowestPrice && (
