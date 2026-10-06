@@ -7,7 +7,7 @@ import {
     RoomCameraWidgetManagerEvent,
     RoomSessionEvent
 } from '@octane/renderer';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { CameraPicture, cancelTrustedCameraRequests, completeTrustedCameraRequest, SendMessageComposer } from '../../api';
 import { useMessageEvent, useOctaneEvent } from '../events';
@@ -18,6 +18,8 @@ const useCameraState = () => {
     // must remain addressable so a deleted photograph does not shift the
     // photographs to its right and the user can choose where the next shot goes.
     const [cameraRoll, setCameraRoll] = useState<Array<CameraPicture | null>>(() => Array(5).fill(null));
+    // A capture that finishes after the camera window closed still needs the current roll.
+    const cameraRollRef = useRef(cameraRoll);
     const [selectedPictureIndex, setSelectedPictureIndex] = useState(-1);
     const [activePictureSlotIndex, setActivePictureSlotIndex] = useState(0);
     const [price, setPrice] = useState<{ credits: number; duckets: number; publishDucketPrice: number }>(null);
@@ -47,6 +49,10 @@ const useCameraState = () => {
     });
 
     useEffect(() => {
+        cameraRollRef.current = cameraRoll;
+    }, [cameraRoll]);
+
+    useEffect(() => {
         const manager = GetRoomCameraWidgetManager();
 
         if (!manager.isLoaded) manager.init();
@@ -59,6 +65,7 @@ const useCameraState = () => {
     return {
         availableEffects,
         cameraRoll,
+        cameraRollRef,
         setCameraRoll,
         selectedPictureIndex,
         setSelectedPictureIndex,

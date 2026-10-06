@@ -100,6 +100,60 @@ export const getViewfinderRoomFrame = (target: HTMLCanvasElement | null, width?:
     }
 };
 
+/**
+ * Copies what the viewfinder shows right now as a PNG data URL: the live room
+ * stream while it plays, otherwise the fallback canvas it already blits into.
+ * Only CPU canvases are encoded, synchronously, because toBlob waits for idle
+ * time that a busy room may not give. It is only a display placeholder until
+ * the server's trusted capture arrives.
+ */
+export const snapshotViewfinder = async (target: HTMLCanvasElement | null, stream: HTMLVideoElement | null, width: number, height: number): Promise<string | null> =>
+{
+    if(!target) return null;
+
+    try
+    {
+        const sourceBounds = GetRenderer()?.canvas?.getBoundingClientRect();
+        const targetBounds = target.getBoundingClientRect();
+        // The fallback canvas already holds the viewfinder image on the CPU.
+        let canvas = target;
+
+        if(stream?.videoWidth && sourceBounds?.width > 0 && sourceBounds.height > 0)
+        {
+            const scaleX = stream.videoWidth / sourceBounds.width;
+            const scaleY = stream.videoHeight / sourceBounds.height;
+            const bitmap = await createImageBitmap(stream,
+                Math.round((targetBounds.left - sourceBounds.left) * scaleX), Math.round((targetBounds.top - sourceBounds.top) * scaleY),
+                Math.round(targetBounds.width * scaleX), Math.round(targetBounds.height * scaleY));
+
+            canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+
+            if(!context)
+            {
+                bitmap.close();
+
+                return null;
+            }
+
+            context.imageSmoothingEnabled = false;
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, width, height);
+            context.drawImage(bitmap, 0, 0, width, height);
+            bitmap.close();
+        }
+
+        return canvas.toDataURL('image/png');
+    }
+    catch
+    {
+        return null;
+    }
+};
+
 export const blitRoomCanvasToViewfinder = (target: HTMLCanvasElement | null, width?: number, height?: number, minIntervalMs: number = 0, now: number = performance.now()): boolean =>
 {
     if(!target) return false;
@@ -143,7 +197,9 @@ export const blitRoomCanvasToViewfinder = (target: HTMLCanvasElement | null, wid
 
         snapshot.destroy?.(true);
 
-        const context = target.getContext('2d');
+        // The pixels already come from the CPU; keeping the canvas there lets the
+        // shutter copy it without waiting on the GPU.
+        const context = target.getContext('2d', { willReadFrequently: true });
 
         if(!context || !extracted) return false;
 

@@ -73,7 +73,8 @@ export const CameraWidgetView: FC<{}> = (props) => {
                 setMode(MODE_NONE);
                 return;
             case 'edit':
-                if (selectedPictureIndex < 0 || !cameraRoll[selectedPictureIndex]) return;
+                // A local preview has no server draft to edit or buy yet.
+                if (selectedPictureIndex < 0 || !cameraRoll[selectedPictureIndex]?.draftId) return;
 
                 if (!GetConfigurationValue<boolean>('camera.effects.enabled', true)) {
                     checkoutPictureUrl(cameraRoll[selectedPictureIndex].imageUrl);
