@@ -536,54 +536,34 @@
     height: 34px;
     padding: 0;
     border: 0;
-    border-radius: 3px;
     background: transparent;
     cursor: pointer;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-/* Only the selected cell shows its background_color (white; 0xd0d0d0 while hovered). */
+/* background_color: a style-2 border, shown only on the clicked cell (white; 0xd0d0d0 while hovered). */
 .swf-chat-style-option.is-active {
-    background: #ffffff;
+    border-image: url("../../assets/images/habbo-skin/slices/border-2-white.png") 5 fill / 5px stretch;
 }
 
 .swf-chat-style-option.is-active:hover {
-    background: #d0d0d0;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-2-d0d0d0.png");
 }
 
 .swf-chat-style-preview {
     position: absolute;
     left: 0;
     top: 5px;
-    width: 55px;
-    height: 24px;
-    overflow: hidden;
-    transform: none;
-    transition: none;
+    visibility: hidden;
     pointer-events: none;
-    z-index: 1;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.swf-chat-style-preview .chat-bubble {
-    display: block;
-    width: 38px;
-    min-width: 38px;
-    max-width: 38px;
-    min-height: 17px;
-    margin: 3px auto 0;
-    border-image-width: 12px 5px 5px 20px;
-    border-image-slice: 17 6 6 29 fill;
-    border-image-outset: 1px 0 0 0;
-    border-image-repeat: repeat repeat;
-}
-
-/* border 56x26 style-2 black blend 0.3, flush with the bottom edge. */
+/* border 56x26 style-2 black blend 0.3 stretched over the band, flush with the bottom edge. */
 .swf-chat-font-row {
     position: relative;
     height: 26px;
     margin: 0 -1px 0 0;
-    border-radius: 3px;
-    background: rgba(0, 0, 0, 0.3);
     color: #999999;
     font-family: Ubuntu, sans-serif;
     font-size: 11px;
@@ -591,49 +571,54 @@
     line-height: 16px;
 }
 
+.swf-chat-font-row::before {
+    position: absolute;
+    inset: 0;
+    border-image: url("../../assets/images/habbo-skin/slices/border-2-black.png") 5 fill / 5px stretch;
+    opacity: 0.3;
+    content: "";
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* font_size_title (15,49): glyphs 3px right of the band-relative origin on v75 */
 .swf-chat-font-label {
     position: absolute;
-    left: 9px;
+    left: 12px;
     top: 5px;
     width: 51px;
     white-space: nowrap;
 }
 
-/* itemlist_horizontal 85x18, spacing 2, scale_to_fit_items: five cells share the 85px. */
 .swf-chat-font-list {
     position: absolute;
-    top: 4px;
-    right: 26px;
-    display: flex;
-    gap: 2px;
-    width: 85px;
-    height: 18px;
+    inset: 0;
 }
 
 .swf-chat-font-option {
-    flex: 1 1 0;
-    min-width: 0;
+    position: absolute;
+    top: 4px;
+    box-sizing: border-box;
     height: 18px;
-    padding: 0;
+    padding: 1px 0 0 4px;
     border: 0;
-    border-radius: 3px;
     background: transparent;
     color: #999999;
     font-family: Ubuntu, sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    line-height: 16px;
-    text-align: center;
+    line-height: 15px;
+    text-align: left;
+    white-space: nowrap;
     cursor: pointer;
 }
 
 .swf-chat-font-option.is-active {
-    background: #ffffff;
+    border-image: url("../../assets/images/habbo-skin/slices/border-2-white.png") 5 fill / 5px stretch;
     color: #333333;
 }
 
 .swf-chat-font-option.is-active:hover {
-    background: #d0d0d0;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-2-d0d0d0.png");
 }
 
 /* input_border: style-8 ubuntu 9-slice color 0xe5e5e5, 400x38 at x=11.

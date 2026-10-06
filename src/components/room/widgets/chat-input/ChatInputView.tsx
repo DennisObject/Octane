@@ -2,10 +2,11 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChatMessageTypeEnum, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
-import { useChatCommandSelector, useChatInputWidget, useClientAccessLists, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
+import { useChatCommandSelector, useChatInputWidget, useClientAccessLists, useRoom, useSessionInfo, useUiEvent, useUserDataSnapshot } from '../../../../hooks';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
 import { ChatInputHabbiconSelectorView } from './ChatInputHabbiconSelectorView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
+import { ChatStyleDefinition, getSelectableChatStyleIds } from './chatStyles';
 
 export const ChatInputView: FC<{}> = (props) => {
     const [chatValue, setChatValue] = useState<string>('');
@@ -21,6 +22,13 @@ export const ChatInputView: FC<{}> = (props) => {
     } = useChatInputWidget();
     const { roomSession = null } = useRoom();
     const { chatStyleIds } = useClientAccessLists();
+    const { clubLevel = 0, isAmbassador = false, securityLevel = 0 } = useUserDataSnapshot();
+    const selectableChatStyleIds = useMemo(() => getSelectableChatStyleIds(
+        GetConfigurationValue<ChatStyleDefinition[]>('chat.styles', []),
+        chatStyleIds,
+        GetConfigurationValue<string>('disabled.custom.chat.styles', ''),
+        { hasClub: clubLevel > 0, isAmbassador, hasSecurity: securityLevel >= 4 }
+    ), [ chatStyleIds, clubLevel, isAmbassador, securityLevel ]);
     const inputRef = useRef<HTMLInputElement>(null);
     const {
         isVisible: commandSelectorVisible,
@@ -276,7 +284,7 @@ export const ChatInputView: FC<{}> = (props) => {
                     onHover={setSelectedIndex}
                 />
             )}
-            <ChatInputStyleSelectorView chatStyleId={chatStyleId} chatStyleIds={chatStyleIds} selectChatStyleId={updateChatStyleId} />
+            <ChatInputStyleSelectorView chatStyleId={chatStyleId} chatStyleIds={selectableChatStyleIds} selectChatStyleId={updateChatStyleId} />
             {!floodBlocked && (
                 <div className="flex-1 items-center input-sizer swf-chat-input-sizer">
                     <input
