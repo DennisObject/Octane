@@ -18,6 +18,7 @@ interface ClassicScrollAreaViewProps extends Omit<HTMLAttributes<HTMLDivElement>
     contentClassName?: string;
     contentStyle?: HTMLAttributes<HTMLDivElement>['style'];
     scrollStep?: number;
+    thumbSizeAdjustment?: number;
     viewportClassName?: string;
     viewportRef?: Ref<HTMLDivElement>;
 }
@@ -40,6 +41,7 @@ export const ClassicScrollAreaView: FC<ClassicScrollAreaViewProps> = ({
     contentClassName = '',
     contentStyle,
     scrollStep = 24,
+    thumbSizeAdjustment = 0,
     viewportClassName = '',
     viewportRef: forwardedViewportRef,
     ...rest
@@ -65,8 +67,8 @@ export const ClassicScrollAreaView: FC<ClassicScrollAreaViewProps> = ({
         const track = trackRef.current;
         if (!viewport || !track) return;
 
-        setMetrics(getClassicScrollbarMetrics(viewport.scrollHeight, viewport.clientHeight, track.clientHeight, viewport.scrollTop));
-    }, []);
+        setMetrics(getClassicScrollbarMetrics(viewport.scrollHeight, viewport.clientHeight, track.clientHeight, viewport.scrollTop, thumbSizeAdjustment));
+    }, [thumbSizeAdjustment]);
 
     useLayoutEffect(() => {
         updateMetrics();
