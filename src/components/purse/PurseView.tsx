@@ -1,6 +1,6 @@
 import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@octane/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { endAuthSession, FriendlyTime, forgetAccessToken, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
+import { endAuthSession, FriendlyTime, forgetAccessToken, isOctaneAuthEnabled, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
 import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
@@ -13,6 +13,7 @@ import { SeasonalView } from './views/SeasonalView';
 export const PurseView: FC<{}> = (props) => {
     const { purse = null, hcDisabled = false } = usePurse();
     const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+    const authEnabled = isOctaneAuthEnabled();
 
     const openSettingsSection = useCallback((section: string) => {
         CreateLinkEvent('user-settings/show/' + section);
@@ -103,7 +104,7 @@ export const PurseView: FC<{}> = (props) => {
         }
 
         // Best effort: the server revokes the access token; local logout proceeds regardless.
-        await logoutSession({ accessToken, ssoTicket, rememberToken });
+        if (authEnabled) await logoutSession({ accessToken, ssoTicket, rememberToken });
 
         try {
             GetCommunication().connection.dispose();
@@ -131,7 +132,7 @@ export const PurseView: FC<{}> = (props) => {
         }
 
         window.location.reload();
-    }, []);
+    }, [authEnabled]);
 
     if (!purse) return null;
 
@@ -180,14 +181,14 @@ export const PurseView: FC<{}> = (props) => {
                         >
                             <span>{helpLabel}</span>
                         </button>
-                        <button
+                        {authEnabled && <button
                             type="button"
                             className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--logout octane-purse-right-button disconnect"
                             onClick={handleLogout}
                             aria-label={logoutLabel}
                         >
                             <img src={logoutIcon} alt="" className="octane-purse__btn-img" />
-                        </button>
+                        </button>}
                         <button
                             type="button"
                             className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--settings octane-purse-right-button settings"

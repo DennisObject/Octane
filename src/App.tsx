@@ -21,7 +21,7 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -93,12 +93,13 @@ const asStringArray = (value: unknown): string[] => {
 
 
 export const App: FC<{}> = (props) => {
+    const authEnabled = isOctaneAuthEnabled();
     const connectionState = useConnectionState();
     const devicePixelRatio = useDevicePixelRatio();
     const [isReady, setIsReady] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [showLogin, setShowLogin] = useState(false);
-    const [isEnteringHotel, setIsEnteringHotel] = useState(() => !!window.OctaneConfig?.['sso.ticket'] || hasRememberGrant());
+    const [isEnteringHotel, setIsEnteringHotel] = useState(() => !!window.OctaneConfig?.['sso.ticket'] || (authEnabled && hasRememberGrant()));
     const [prepareTrigger, setPrepareTrigger] = useState(0);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const bumpProgress = useCallback((value: number) => {
@@ -125,7 +126,7 @@ export const App: FC<{}> = (props) => {
         ClearStoredChatHistory();
         clearPerkAllowances();
         clearRoomToolsHistory();
-        void revokeSession(accessToken, ssoTicket);
+        if (authEnabled) void revokeSession(accessToken, ssoTicket);
         try {
             delete (window as any).OctaneConfig?.['sso.ticket'];
         } catch {}
@@ -140,7 +141,7 @@ export const App: FC<{}> = (props) => {
                 window.history.replaceState({}, '', url.toString());
             }
         } catch {}
-    }, []);
+    }, [authEnabled]);
 
     const showSessionExpired = useCallback(() => {
         console.warn('[App] showSessionExpired — diagnostic shown (mid-game close)');
@@ -153,6 +154,12 @@ export const App: FC<{}> = (props) => {
     }, [clearStoredCredentials]);
 
     const fallbackToLogin = useCallback(() => {
+        if (!authEnabled)
+        {
+            showSessionExpired();
+            return;
+        }
+
         const rawLoginEnabled = GetConfiguration().getValue<unknown>('login.screen.enabled', false);
         const loginScreenEnabled = rawLoginEnabled === true || rawLoginEnabled === 'true' || rawLoginEnabled === 1;
 
@@ -194,7 +201,7 @@ export const App: FC<{}> = (props) => {
         console.warn('[App] fallbackToLogin — surfacing login form, credentials cleared');
         clearStoredCredentials();
         showSignIn();
-    }, [clearStoredCredentials, showSessionExpired]);
+    }, [authEnabled, clearStoredCredentials, showSessionExpired]);
 
     const applySsoTicket = useCallback((ssoTicket: string) => {
         if (!ssoTicket) return;
@@ -203,14 +210,14 @@ export const App: FC<{}> = (props) => {
         clearRoomToolsHistory();
         window.OctaneConfig['sso.ticket'] = ssoTicket;
         GetConfiguration().setValue('sso.ticket', ssoTicket);
-        void exchangeSsoTicketForAccessToken(ssoTicket);
-    }, []);
+        if (authEnabled) void exchangeSsoTicketForAccessToken(ssoTicket);
+    }, [authEnabled]);
 
     useEffect(() => {
         const ssoTicket = window.OctaneConfig?.['sso.ticket'];
 
-        if (typeof ssoTicket === 'string' && ssoTicket.length) void exchangeSsoTicketForAccessToken(ssoTicket);
-    }, []);
+        if (authEnabled && typeof ssoTicket === 'string' && ssoTicket.length) void exchangeSsoTicketForAccessToken(ssoTicket);
+    }, [authEnabled]);
 
     const handleAuthenticated = useCallback(
         (ssoTicket: string, owner: HabboOwner) =>
@@ -407,15 +414,18 @@ export const App: FC<{}> = (props) => {
                 // token is used once, and only when it comes alone: next to an SSO ticket it is
                 // ignored. An SSO hand-off is a new session for a Habbo this client cannot
                 // verify, so a remember grant stored earlier is revoked and forgotten.
-                const launchRemember = takeLaunchRememberToken();
+                const launchRemember = authEnabled ? takeLaunchRememberToken() : null;
 
                 if (typeof ssoTicket === 'string' && ssoTicket && getAuthSession().ssoTicket !== ssoTicket)
                 {
                     beginAuthSession(ssoTicket, 'handoff');
 
-                    const tokens = await forgetRememberGrant();
+                    if (authEnabled)
+                    {
+                        const tokens = await forgetRememberGrant();
 
-                    if (tokens.length) void Promise.all(tokens.map((rememberToken) => logoutSession({ accessToken: '', ssoTicket: '', rememberToken })));
+                        if (tokens.length) void Promise.all(tokens.map((rememberToken) => logoutSession({ accessToken: '', ssoTicket: '', rememberToken })));
+                    }
                 }
                 else if (launchRemember)
                 {
@@ -424,7 +434,14 @@ export const App: FC<{}> = (props) => {
 
                 bumpProgress(10);
 
-                if (!ssoTicket || ssoTicket === '') {
+                if (!ssoTicket || ssoTicket === '')
+                {
+                    if (!authEnabled)
+                    {
+                        onSessionExpired();
+                        return;
+                    }
+
                     let configInitError: unknown = null;
                     try {
                         await GetConfiguration().init();
@@ -515,7 +532,7 @@ export const App: FC<{}> = (props) => {
                 if (rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
 
                 const rotateMinutes = Math.max(1, Number(GetConfiguration().getValue<unknown>('login.remember.rotate.interval.minutes', 15)) || 15);
-                if (hasRememberGrant())
+                if (authEnabled && hasRememberGrant())
                     rememberRotateIntervalRef.current = window.setInterval(() => void rotateRememberGrant(), rotateMinutes * 60 * 1000);
 
                 if (!tickersStartedRef.current) {
@@ -548,14 +565,14 @@ export const App: FC<{}> = (props) => {
             if (heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
             if (rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
         };
-    }, [prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress]);
+    }, [authEnabled, prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress]);
 
     return (
         <Base fit overflow="hidden" className={`octane-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>
             {!isReady && !showLogin && (
                 <LoadingView isError={errorMessage.length > 0} message={errorMessage} progress={loadingProgress} />
             )}
-            {!isReady && showLogin && <LoginView onAuthenticated={handleAuthenticated} isEntering={isEnteringHotel} />}
+            {authEnabled && !isReady && showLogin && <LoginView onAuthenticated={handleAuthenticated} isEntering={isEnteringHotel} />}
             {isReady && (
                 <SharedHookRegistry fallback={<LoadingView progress={100} />}>
                     <MainView />
