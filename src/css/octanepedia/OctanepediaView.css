@@ -79,7 +79,7 @@
 }
 
 .octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
-    min-height: 26px;
+    min-height: 0;
     box-sizing: border-box;
     border: 0 solid transparent;
     border-image: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png") 5 0 / 5px 0 stretch;

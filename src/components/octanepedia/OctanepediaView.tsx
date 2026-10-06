@@ -123,7 +123,7 @@ export const OctanepediaView: FC<{}> = () => {
                     textStyle="u_frame_title"
                 />
             </OctaneCardHeaderView>
-            <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" scrollStep={42} thumbSizeAdjustment={2}>
+            <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" minThumbSize={26} scrollStep={42} thumbSizeAdjustment={2}>
                 <div className="octanepedia__native-container" onClick={handleContentClick}>
                     <NativeHabbopageContent fieldWidth={fieldWidth} markup={markup} onLinkClick={openMarkupLink} />
                 </div>
