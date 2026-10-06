@@ -132,7 +132,13 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             style={{ display: 'inline-block', verticalAlign: 'top', position: 'relative', ...size, ...style }}
         >
             <canvas ref={canvasRef} aria-hidden="true" style={{ display: size ? 'block' : 'none', imageRendering: 'pixelated' }} />
-            <span style={size ? { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)', whiteSpace: 'pre' } : undefined}>
+            <span
+                style={
+                    size
+                        ? { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)', whiteSpace: 'pre' }
+                        : { lineHeight: 'normal', whiteSpace: 'pre-wrap' }
+                }
+            >
                 {text}
             </span>
         </span>
