@@ -2,13 +2,8 @@ import { CSSProperties, FC, MouseEvent, useEffect, useMemo, useRef, useState } f
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from '../../common/native-text/Air32NativeTextRenderer';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from '../../common/native-text/NativeFont';
 import { nativeTextStyles } from '../../common/native-text/NativeTextStyles';
-import { SwfFont } from '../../common/native-text/NativeTextTypes';
 
 const FIELD_GUTTER = 2;
-const resolvePtLineMetrics = (font: SwfFont, size: number) => ({
-    ascent: (font.metrics.ascent * size) / font.emSquare,
-    descent: (font.metrics.descent * size) / font.emSquare
-});
 type TextRun = {
     text: string;
     style: NativeFontStyle;
@@ -118,8 +113,8 @@ const layoutMarkup = async (markup: string, fieldWidth: number): Promise<NativeL
     const links: NativeLayout['links'] = [];
     const regularStyle = blockStyle('P');
     const regularLoaded = await loadNativeFont(regularStyle);
-    const regularMetrics = resolvePtLineMetrics(regularLoaded.font.swfFont, regularStyle.size);
-    const spacerMetrics = resolvePtLineMetrics(regularLoaded.font.swfFont, 1);
+    const regularMetrics = resolveLineMetrics(regularLoaded.font.swfFont, regularStyle.size, false);
+    const spacerMetrics = resolveLineMetrics(regularLoaded.font.swfFont, 1, false);
     const regularLineHeight = regularMetrics.ascent + regularMetrics.descent;
     const spacerLineHeight = spacerMetrics.ascent + spacerMetrics.descent;
     let y = 0;
