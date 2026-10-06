@@ -156,9 +156,9 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = (
                 {mode === MODE_SADDLED_UP && (
                     <>
                         <ContextMenuListItemView onClick={(event) => processAction('mount')}>{LocalizeText('infostand.button.mount')}</ContextMenuListItemView>
-                        <ContextMenuListItemView gap={1} onClick={(event) => processAction('toggle_riding_permission')}>
-                            <input checked={!!avatarInfo.publiclyRideable} readOnly={true} type="checkbox" />
-                            {LocalizeText('infostand.button.toggle_riding_permission')}
+                        <ContextMenuListItemView classNames={['air-avatar-menu-item--toggle']} onClick={(event) => processAction('toggle_riding_permission')}>
+                            <i className={'air-avatar-menu-checkbox' + (avatarInfo.publiclyRideable ? ' is-checked' : '')} aria-hidden="true" />
+                            <span className="air-avatar-menu-toggle-label">{LocalizeText('infostand.button.toggle_riding_permission')}</span>
                         </ContextMenuListItemView>
                         {petRespectRemaining > 0 && (
                             <ContextMenuListItemView onClick={(event) => processAction('respect')}>
@@ -204,9 +204,9 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = (
                         )}
                         {!avatarInfo.dead && avatarInfo.level === avatarInfo.maximumLevel && avatarInfo.breedable && (
                             <>
-                                <ContextMenuListItemView gap={1} onClick={(event) => processAction('toggle_breeding_permission')}>
-                                    <input checked={avatarInfo.publiclyBreedable} readOnly={true} type="checkbox" />
-                                    {LocalizeText('infostand.button.toggle_breeding_permission')}
+                                <ContextMenuListItemView classNames={['air-avatar-menu-item--toggle']} onClick={(event) => processAction('toggle_breeding_permission')}>
+                                    <i className={'air-avatar-menu-checkbox' + (avatarInfo.publiclyBreedable ? ' is-checked' : '')} aria-hidden="true" />
+                                    <span className="air-avatar-menu-toggle-label">{LocalizeText('infostand.button.toggle_breeding_permission')}</span>
                                 </ContextMenuListItemView>
                                 <ContextMenuListItemView onClick={(event) => processAction('breed')}>
                                     {LocalizeText('infostand.button.breed')}

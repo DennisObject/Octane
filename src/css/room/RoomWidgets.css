@@ -1114,6 +1114,44 @@
     color: #91c2ff;
 }
 
+/* own_pet_menu toggle rows: 101x40 with a 107x46 button skin, checkbox at (9,17), label at (26,3) 78 wide. */
+.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--toggle {
+    height: 40px;
+    min-height: 40px;
+    flex: 0 0 40px;
+    padding: 0;
+    overflow: visible;
+}
+
+.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--toggle::before {
+    height: 46px;
+}
+
+.air-avatar-menu-checkbox {
+    position: absolute;
+    top: 17px;
+    left: 9px;
+    width: 19px;
+    height: 20px;
+    background: url('../../assets/images/habbo-skin/slices/checkbox-default.png') 0 0 no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.air-avatar-menu-checkbox.is-checked {
+    background-image: url('../../assets/images/habbo-skin/slices/checkbox-checked.png');
+}
+
+.air-avatar-menu-toggle-label {
+    position: absolute;
+    top: 3px;
+    left: 26px;
+    width: 78px;
+    height: 40px;
+    line-height: 16px;
+    text-align: center;
+    white-space: normal;
+}
+
 .air-avatar-menu-extra-label {
     display: block;
     max-width: 97px;

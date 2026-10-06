@@ -208,7 +208,24 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
         [avatarInfo, petRespectRemaining, respectPet, roomSession, onClose]
     );
 
+    // button_list: regions are laid out from the right edge in layout order, so left to right the row reads
+    // kick, treat, respect, buy food, train, compost, pick up.
     const buttons = [
+        {
+            action: 'pick_up',
+            label: LocalizeText('infostand.button.petkick'),
+            condition: !avatarInfo.isOwner && !!roomSession?.isRoomOwner && avatarInfo.petType !== PetType.MONSTERPLANT
+        },
+        {
+            action: 'treat',
+            label: LocalizeText('infostand.button.pettreat'),
+            condition: !avatarInfo.dead && avatarInfo.petType === PetType.MONSTERPLANT && avatarInfo.energy / avatarInfo.maximumEnergy < 0.98
+        },
+        {
+            action: 'respect',
+            label: LocalizeText('infostand.button.petrespect', ['count'], [petRespectRemaining.toString()]),
+            condition: petRespectRemaining > 0 && avatarInfo.petType !== PetType.MONSTERPLANT
+        },
         {
             action: 'buyfood',
             label: LocalizeText('infostand.button.buyfood'),
@@ -220,11 +237,6 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
             condition: avatarInfo.isOwner && avatarInfo.petType !== PetType.MONSTERPLANT
         },
         {
-            action: 'treat',
-            label: LocalizeText('infostand.button.pettreat'),
-            condition: !avatarInfo.dead && avatarInfo.petType === PetType.MONSTERPLANT && avatarInfo.energy / avatarInfo.maximumEnergy < 0.98
-        },
-        {
             action: 'compost',
             label: LocalizeText('infostand.button.compost'),
             condition: roomSession?.isRoomOwner && avatarInfo.petType === PetType.MONSTERPLANT
@@ -233,22 +245,15 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
             action: 'pick_up',
             label: LocalizeText('inventory.pets.pickup'),
             condition: avatarInfo.isOwner
-        },
-        {
-            action: 'respect',
-            label: LocalizeText('infostand.button.petrespect', ['count'], [petRespectRemaining.toString()]),
-            condition: petRespectRemaining > 0 && avatarInfo.petType !== PetType.MONSTERPLANT
         }
     ];
-
-    if (!avatarInfo) return <Text variant="white">{LocalizeText('generic.loading')}</Text>;
 
     const actions = (
         <Flex className="octane-infostand-actions octane-infostand-actions--tight" justifyContent="end">
             {buttons.map(
                 (button) =>
                     button.condition && (
-                        <Button key={button.action} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
+                        <Button key={button.action + button.label} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
                             {button.label}
                         </Button>
                     )
