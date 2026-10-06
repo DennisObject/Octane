@@ -1,7 +1,8 @@
 import { BotRemoveComposer } from '@octane/renderer';
 import { FC, useMemo } from 'react';
 import { AvatarInfoRentableBot, BotSkillsEnum, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button, LayoutAvatarImageView, LayoutBadgeImageView } from '../../../../../common';
+import { Button, LayoutBadgeImageView } from '../../../../../common';
+import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandHeaderView } from './InfoStandHeaderView';
 
 interface InfoStandWidgetRentableBotViewProps {
@@ -34,7 +35,7 @@ export const InfoStandWidgetRentableBotView: FC<InfoStandWidgetRentableBotViewPr
                 <div className="octane-infostand__rule" />
                 <div className="octane-infostand__figure-row">
                     <div className="octane-infostand__avatar-well octane-infostand__avatar-well--bot">
-                        <LayoutAvatarImageView direction={2} figure={avatarInfo.figure} />
+                        <InfoStandAvatarView direction={4} figure={avatarInfo.figure} top={24} left={17} />
                     </div>
                     <div className="octane-infostand__rentable-badge">
                         {avatarInfo.badges.length > 0 && <LayoutBadgeImageView badgeCode={avatarInfo.badges[0]} showInfo={true} />}

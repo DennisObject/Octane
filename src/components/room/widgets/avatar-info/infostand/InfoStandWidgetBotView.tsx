@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { AvatarInfoUser, LocalizeText } from '../../../../../api';
-import { LayoutAvatarImageView, LayoutBadgeImageView, Text } from '../../../../../common';
+import { LayoutBadgeImageView, Text } from '../../../../../common';
+import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandHeaderView } from './InfoStandHeaderView';
 
 interface InfoStandWidgetBotViewProps {
@@ -8,7 +9,7 @@ interface InfoStandWidgetBotViewProps {
     onClose: () => void;
 }
 
-// v75 bot_view: the user_view list without home icon, group badge slot, pen or score; the motto is plain text.
+// v75 bot_view: the user_view list without home icon, group badge slot, pen or score; the motto sits in the grey_bg box without the pen.
 export const InfoStandWidgetBotView: FC<InfoStandWidgetBotViewProps> = (props) => {
     const { avatarInfo = null, onClose = null } = props;
 
@@ -20,7 +21,7 @@ export const InfoStandWidgetBotView: FC<InfoStandWidgetBotViewProps> = (props) =
             <div className="octane-infostand__rule" />
             <div className="octane-infostand__figure-row">
                 <div className="octane-infostand__avatar-well">
-                    <LayoutAvatarImageView direction={2} figure={avatarInfo.figure} />
+                    <InfoStandAvatarView direction={4} figure={avatarInfo.figure} top={24} />
                 </div>
                 <div className="octane-infostand__badges">
                     {[0, 'group', 1, 2, 3, 4].map((slot) => (
@@ -31,7 +32,7 @@ export const InfoStandWidgetBotView: FC<InfoStandWidgetBotViewProps> = (props) =
                 </div>
             </div>
             <div className="octane-infostand__rule" />
-            <div className="octane-infostand__motto octane-infostand__motto--plain">
+            <div className="octane-infostand__motto octane-infostand__motto--box octane-infostand__motto--plain">
                 <Text fullWidth textBreak wrap className="octane-infostand__motto-text" variant="white">
                     {avatarInfo.motto}
                 </Text>

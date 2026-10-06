@@ -21,7 +21,7 @@ export const InfoStandHeaderView: FC<InfoStandHeaderViewProps> = ({ name, onClos
             onClick={onClose}
         />
         <div className="octane-infostand__header">
-            <span className="octane-infostand__identity">{name}</span>
+            <span className="octane-infostand__identity octane-infostand__identity--plain">{name}</span>
         </div>
     </>
 );

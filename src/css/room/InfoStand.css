@@ -168,6 +168,14 @@
     -webkit-font-smoothing: none;
   }
 
+  /* name_text of the pet and bot infostands: the Flash text field carries a 3px inset. */
+  .octane-infostand__identity--plain {
+    display: block;
+    padding-left: 3px;
+    margin-top: 1px;
+  }
+
+
   .octane-infostand__rule {
     height: 1px;
     margin: 3px 0;
@@ -208,10 +216,16 @@
     cursor: pointer;
     z-index: 1;
 
-    /* avatar_image widget (16,21) 34x84 inside the 67x130 grey_bg. */
-    > :first-child {
-      margin: 0 0 5px;
-    }
+  }
+
+  /* avatar_image widget (16,21) 34x84 inside the 67x130 grey_bg. */
+  .octane-infostand__avatar {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    width: 34px;
+    height: 84px;
+    pointer-events: none;
   }
 
   .octane-infostand__badges {
@@ -222,7 +236,7 @@
     grid-auto-rows: 42px;
     gap: 1px 1px;
     width: 85px;
-    margin-top: 1px;
+    margin: 0 0 0 -1px;
   }
 
   .octane-infostand__badge-slot {
@@ -266,13 +280,13 @@
   /* rentable_bot_view: infostand_bot_info_bg circuit over grey_bg, badge widget at list (100,21),
      description_text 170x31, owner_text 126x13, all in the list's 3px spacing. */
   .octane-infostand__avatar-well--bot {
-    background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat center, url('@/assets/images/infostand/avatar-well.png') no-repeat center;
+    background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat 1px 1px, url('@/assets/images/infostand/avatar-well.png') no-repeat center;
   }
 
   .octane-infostand__rentable-badge {
     position: absolute;
-    top: 21px;
-    left: 100px;
+    top: 20px;
+    left: 99px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -284,22 +298,29 @@
     box-sizing: border-box;
     width: 170px;
     height: 31px;
+    position: relative;
+    top: 1px;
     margin-top: 3px;
+    padding-left: 3px;
     overflow: hidden;
     color: #ffffff;
-    font-size: 11px;
-    line-height: 15px;
+    font-size: 9px;
+    line-height: 12px;
     overflow-wrap: anywhere;
   }
 
   .octane-infostand__owner-line {
+    position: relative;
+    top: 1px;
+    box-sizing: border-box;
     width: 126px;
     height: 13px;
     margin-top: 3px;
+    padding-left: 3px;
     overflow: hidden;
     color: #ffffff;
-    font-size: 11px;
-    line-height: 13px;
+    font-size: 9px;
+    line-height: 12px;
     white-space: nowrap;
   }
 
@@ -333,7 +354,7 @@
 
   /* bot_view motto_text x=5 w=160 (no pen). */
   .octane-infostand__motto--plain {
-    padding: 2px 5px;
+    padding: 3px 5px 1px 8px;
   }
 
   /* handitem_txt: 170 wide, height = textHeight + 5. */
@@ -342,8 +363,8 @@
     width: 170px;
     padding-bottom: 5px;
     color: #ffffff;
-    font-size: 11px;
-    line-height: 15px;
+    font-size: 9px;
+    line-height: 12px;
     overflow-wrap: anywhere;
   }
 

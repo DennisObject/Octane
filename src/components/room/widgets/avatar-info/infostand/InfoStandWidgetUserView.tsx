@@ -12,8 +12,9 @@ import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCall
 import { AvatarInfoUser, CloneObject, ensureBadgeLeaderboardLoaded, GetConfigurationValue, GetGroupInformation, getBadgesRank, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
-import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
+import { Column, Flex, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
 import { useMessageEvent, useOctaneEvent, useRoom } from '../../../../../hooks';
+import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandBadgeSlotView } from './InfoStandBadgeSlotView';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
 import { InfoStandWidgetUserTagsView } from './InfoStandWidgetUserTagsView';
@@ -170,7 +171,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                 <div className="octane-infostand__rule" />
                 <div className="octane-infostand__figure-row">
                     <div className="octane-infostand__avatar-well" onClick={handleProfileClick}>
-                        <LayoutAvatarImageView direction={4} figure={avatarInfo.figure} />
+                        <InfoStandAvatarView direction={4} figure={avatarInfo.figure} top={24} left={17} />
                     </div>
                     <div className="octane-infostand__badges">
                         {(() => {
