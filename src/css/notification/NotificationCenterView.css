@@ -1578,3 +1578,11 @@
 .octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
     letter-spacing: 0.2px;
 }
+
+/* NativeText already includes TextField's two-pixel glyph gutter. */
+.octane-native-alert-message.uses-native-text {
+    letter-spacing: normal;
+    line-height: 0;
+    top: 0;
+    padding: 0 0 4px;
+}

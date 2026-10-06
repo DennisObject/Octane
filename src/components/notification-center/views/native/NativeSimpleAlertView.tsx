@@ -1,6 +1,7 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { localizeWithFallback, SanitizeHtml } from '../../../../api';
 import frankNeutral from '../../../../assets/images/notifications/frank-neutral.png';
+import { NativeText } from '../../../../common/native-text/NativeText';
 import { NativeModalView } from './NativeModalView';
 import { openNativeNotificationLink } from './openNativeNotificationLink';
 
@@ -24,6 +25,19 @@ export const NativeSimpleAlertView: FC<NativeSimpleAlertViewProps> = (props) => 
     const closeRef = useRef<HTMLButtonElement>(null);
     const hasImage = !!imageUrl && !imageFailed;
     const hasLink = !!linkTitle && !!linkUrl;
+    const messageMarkup = useMemo(() => SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')), [message]);
+    const plainMessage = useMemo(() => {
+        if (typeof document === 'undefined') return null;
+        const template = document.createElement('template');
+        template.innerHTML = messageMarkup;
+        let text = '';
+        for (const node of template.content.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
+            else if (node.nodeName === 'BR') text += '\n';
+            else return null;
+        }
+        return text;
+    }, [messageMarkup]);
 
     useEffect(() => {
         closeRef.current?.focus({ preventScroll: true });
@@ -48,10 +62,24 @@ export const NativeSimpleAlertView: FC<NativeSimpleAlertViewProps> = (props) => 
                 </div>
                 <div className="octane-native-alert-list">
                     <div className="octane-native-alert-row">
-                        {hasImage && <img alt="" className="octane-native-alert-illustration" src={imageUrl} onError={() => setImageFailed(true)} onLoad={(event) => setImageWidth(event.currentTarget.naturalWidth)} />}
+                        {hasImage && (
+                            <img
+                                alt=""
+                                className="octane-native-alert-illustration"
+                                src={imageUrl}
+                                onError={() => setImageFailed(true)}
+                                onLoad={(event) => setImageWidth(event.currentTarget.naturalWidth)}
+                            />
+                        )}
                         <div className="octane-native-alert-top">
                             {!!subtitle && <div className="octane-native-alert-subtitle">{subtitle}</div>}
-                            <div className="octane-native-alert-message" dangerouslySetInnerHTML={{ __html: SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')) }} />
+                            {plainMessage !== null ? (
+                                <div className="octane-native-alert-message uses-native-text">
+                                    <NativeText text={plainMessage} textStyle="il_regular" background={0xe9e9e1} maxWidth={291} />
+                                </div>
+                            ) : (
+                                <div className="octane-native-alert-message" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
+                            )}
                         </div>
                     </div>
                     <div className="octane-native-alert-bottom">
