@@ -1128,10 +1128,11 @@
 }
 
 .octane-native-alert-message {
-    letter-spacing: 0.05px;
+    letter-spacing: 0.1px;
+    line-height: 12px;
     position: relative;
     top: 2px;
-    padding: 0 2px 8px;
+    padding: 0 2px 8px 3px;
     overflow-wrap: break-word;
 }
 
