@@ -245,21 +245,20 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                                 title={localizeWithFallback('achievements.title', 'Achievements')}
                                 onClick={() => CreateLinkEvent('achievements/show')}
                             >
-                                {LocalizeText('infostand.text.achievement_score')} {avatarInfo.achievementScore}
+                                {LocalizeText('infostand.text.achievement_score')}
                             </button>
                         ) : (
-                            <div className="octane-infostand__score">
-                                {LocalizeText('infostand.text.achievement_score')} {avatarInfo.achievementScore}
-                            </div>
+                            <div className="octane-infostand__score">{LocalizeText('infostand.text.achievement_score')}</div>
                         )}
+                        <div className="octane-infostand__score">{avatarInfo.achievementScore}</div>
                     </>
                 )}
                 {avatarInfo.carryItem > 0 && (
                     <>
                         <div className="octane-infostand__rule" />
-                        <Text small wrap variant="white">
+                        <div className="octane-infostand__carry">
                             {LocalizeText('infostand.text.handitem', ['item'], [LocalizeText('handitem' + avatarInfo.carryItem)])}
-                        </Text>
+                        </div>
                     </>
                 )}
                 <div className={`octane-infostand__rule ${hasRelationships ? '' : 'octane-infostand__rule--footer'}`} />

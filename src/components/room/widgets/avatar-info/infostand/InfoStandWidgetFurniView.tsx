@@ -77,6 +77,13 @@ function formatPlantDuration(totalSeconds: number): string {
     return `${secs}s`;
 }
 
+// v75 renders the info stand picture with the placed object's own direction.
+function getObjectImageDirection(roomId: number, objectId: number, category: number) {
+    const roomObject = GetRoomEngine().getRoomObject(roomId, objectId, category);
+
+    return roomObject ? (roomObject.getDirection().x / 45 + 2) % 8 : 2;
+}
+
 function getValidRoomObjectDirection(roomObject: any, isPositive: boolean) {
     if (!roomObject || !roomObject.model) return 0;
 
@@ -678,12 +685,14 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                     <LayoutRoomObjectImageView
                                         category={avatarInfo.category}
                                         objectId={avatarInfo.id}
+                                        direction={getObjectImageDirection(roomSession.roomId, avatarInfo.id, avatarInfo.category)}
                                         roomId={roomSession.roomId}
                                         style={{
+                                            width: 140,
                                             maxWidth: 140,
                                             maxHeight: 200,
                                             backgroundSize: 'auto',
-                                            backgroundPosition: 'center',
+                                            backgroundPosition: 'calc(50% - 0.5px) center',
                                             backgroundRepeat: 'no-repeat'
                                         }}
                                     />

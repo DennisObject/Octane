@@ -251,7 +251,7 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
             )}
             {getMenuView()}
             {avatarInfo && (
-                <Column alignItems="end" className="absolute right-[10px] bottom-[65px] pointer-events-none z-30 text-white">
+                <Column alignItems="end" className="absolute right-[5px] bottom-[57px] pointer-events-none z-30 text-white">
                     {getInfostandView()}
                 </Column>
             )}
