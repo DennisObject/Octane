@@ -4,7 +4,12 @@ import { ConvertSeconds, GetConfigurationValue, LocalizeText, SendMessageCompose
 import { Button, Column, Flex, LayoutCounterTimeView, LayoutPetImageView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
 import { useRoom, useSessionInfo } from '../../../../../hooks';
 import { InfoStandHeaderView } from './InfoStandHeaderView';
+import { InfoStandCenteredText } from './InfoStandCenteredText';
 import { InfoStandUnitIdView } from './InfoStandUnitIdView';
+import energyIcon from '../../../../../assets/images/infostand/pet/icon_pet_energy.png';
+import experienceIcon from '../../../../../assets/images/infostand/pet/icon_pet_experience.png';
+import happinessIcon from '../../../../../assets/images/infostand/pet/icon_pet_happiness.png';
+import respectIcon from '../../../../../assets/images/infostand/pet/icon_petrespect.png';
 
 // TypeScript interface for AvatarInfoPet
 interface AvatarInfoPet {
@@ -116,71 +121,34 @@ const MonsterplantStats: FC<{
     </>
 );
 
-// Sub-component: Regular Pet Stats
-const RegularPetStats: FC<{ avatarInfo: AvatarInfoPet }> = ({ avatarInfo }) => (
-    <>
-        <div className="flex flex-col gap-1">
-            <div className="flex gap-1">
-                <Column fullWidth className="body-image pet p-1" overflow="hidden">
-                    <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
-                </Column>
-                <Column grow gap={1}>
-                    <Text center small wrap variant="white">
-                        {LocalizeText('pet.level', ['level', 'maxlevel'], [avatarInfo.level.toString(), avatarInfo.maximumLevel.toString()])}
-                    </Text>
-                    <Column alignItems="center" gap={1}>
-                        <Text small truncate variant="white">
-                            {LocalizeText('infostand.pet.text.happiness')}
-                        </Text>
-                        <div className="bg-light-dark rounded relative overflow-hidden w-full">
-                            <div className="flex justify-center items-center size-full absolute">
-                                <Text small variant="white">
-                                    {avatarInfo.happyness + '/' + avatarInfo.maximumHappyness}
-                                </Text>
-                            </div>
-                            <div className="bg-info rounded pet-stats" style={{ width: (avatarInfo.happyness / avatarInfo.maximumHappyness) * 100 + '%' }} />
-                        </div>
-                    </Column>
-                    <Column alignItems="center" gap={1}>
-                        <Text small truncate variant="white">
-                            {LocalizeText('infostand.pet.text.experience')}
-                        </Text>
-                        <div className="bg-light-dark rounded relative overflow-hidden w-full">
-                            <div className="flex justify-center items-center size-full absolute">
-                                <Text small variant="white">
-                                    {avatarInfo.experience + '/' + avatarInfo.levelExperienceGoal}
-                                </Text>
-                            </div>
-                            <div
-                                className="bg-purple rounded pet-stats"
-                                style={{ width: (avatarInfo.experience / avatarInfo.levelExperienceGoal) * 100 + '%' }}
-                            />
-                        </div>
-                    </Column>
-                    <Column alignItems="center" gap={1}>
-                        <Text small truncate variant="white">
-                            {LocalizeText('infostand.pet.text.energy')}
-                        </Text>
-                        <div className="bg-light-dark rounded relative overflow-hidden w-full">
-                            <div className="flex justify-center items-center size-full absolute">
-                                <Text small variant="white">
-                                    {avatarInfo.energy + '/' + avatarInfo.maximumEnergy}
-                                </Text>
-                            </div>
-                            <div className="bg-success rounded pet-stats" style={{ width: (avatarInfo.energy / avatarInfo.maximumEnergy) * 100 + '%' }} />
-                        </div>
-                    </Column>
-                </Column>
+// pet_view status bars: 162x16 bitmaps drawn by the controller (1px #dadada frame, #3a3a3a track, 4px highlight).
+const PetStatusBar: FC<{ top: number; label: string; icon: string; value: number; maximum: number; color: string; highlight: string }> = ({
+    top,
+    label,
+    icon,
+    value,
+    maximum,
+    color,
+    highlight
+}) => {
+    const fill = Math.max(0, Math.min(Math.max(maximum, 1), value)) / Math.max(maximum, 1);
+
+    return (
+        <>
+            <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top }} width={169}>
+                {label}
+            </InfoStandCenteredText>
+            <img alt="" className="octane-pet-infostand__status-icon" draggable={false} src={icon} style={{ top: top + 14 }} />
+            <div className="octane-pet-infostand__bar" style={{ top: top + 15 }}>
+                <div className="octane-pet-infostand__bar-fill" style={{ width: fill * 160, background: color }} />
+                <div className="octane-pet-infostand__bar-highlight" style={{ width: fill * 160, background: highlight }} />
+                <InfoStandCenteredText className="octane-pet-infostand__bar-value" width={160}>
+                    {value + '/' + maximum}
+                </InfoStandCenteredText>
             </div>
-            <div className="octane-infostand__rule" />
-        </div>
-        <div className="flex flex-col gap-1">
-            <div className="octane-infostand__score">{LocalizeText('infostand.text.petrespect', ['count'], [avatarInfo.respect.toString()])}</div>
-            <div className="octane-infostand__score">{LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}</div>
-            <div className="octane-infostand__rule" />
-        </div>
-    </>
-);
+        </>
+    );
+};
 
 export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatarInfo, onClose }) => {
     const [remainingGrowTime, setRemainingGrowTime] = useState(0);
@@ -275,16 +243,84 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
 
     if (!avatarInfo) return <Text variant="white">{LocalizeText('generic.loading')}</Text>;
 
+    const actions = (
+        <Flex className="octane-infostand-actions octane-infostand-actions--tight" justifyContent="end">
+            {buttons.map(
+                (button) =>
+                    button.condition && (
+                        <Button key={button.action} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
+                            {button.label}
+                        </Button>
+                    )
+            )}
+        </Flex>
+    );
+
+    if (avatarInfo.petType !== PetType.MONSTERPLANT)
+        return (
+            <Column alignItems="end" className="octane-pet-infostand-stack">
+                <div className="octane-infostand octane-pet-infostand">
+                    <button type="button" className="octane-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
+                    <InfoStandCenteredText className="octane-pet-infostand__name" width={173}>
+                        {avatarInfo.name}
+                    </InfoStandCenteredText>
+                    <InfoStandCenteredText className="octane-pet-infostand__breed" width={173}>
+                        {LocalizeText(`pet.breed.${avatarInfo.petType}.${avatarInfo.petBreed}`)}
+                    </InfoStandCenteredText>
+                    <div className="octane-pet-infostand__image">
+                        <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
+                    </div>
+                    <div className="octane-pet-infostand__level">
+                        {LocalizeText('pet.level', ['level', 'maxlevel'], [avatarInfo.level.toString(), avatarInfo.maximumLevel.toString()])}
+                    </div>
+                    <PetStatusBar
+                        color="#009ac0"
+                        highlight="#1fd1f2"
+                        icon={happinessIcon}
+                        label={LocalizeText('infostand.pet.text.happiness')}
+                        maximum={avatarInfo.maximumHappyness}
+                        top={121}
+                        value={avatarInfo.happyness}
+                    />
+                    <PetStatusBar
+                        color="#8553be"
+                        highlight="#a06ad2"
+                        icon={experienceIcon}
+                        label={LocalizeText('infostand.pet.text.experience')}
+                        maximum={avatarInfo.levelExperienceGoal}
+                        top={155}
+                        value={avatarInfo.experience}
+                    />
+                    <PetStatusBar
+                        color="#5ea000"
+                        highlight="#8ac51e"
+                        icon={energyIcon}
+                        label={LocalizeText('infostand.pet.text.energy')}
+                        maximum={avatarInfo.maximumEnergy}
+                        top={189}
+                        value={avatarInfo.energy}
+                    />
+                    <InfoStandCenteredText className="octane-pet-infostand__respect" width={173}>
+                        {LocalizeText('infostand.text.petrespect', ['count'], [avatarInfo.respect.toString()])}
+                        <img alt="" draggable={false} src={respectIcon} />
+                    </InfoStandCenteredText>
+                    <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 281 }} width={173}>
+                        {LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}
+                    </InfoStandCenteredText>
+                    <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 294 }} width={173}>
+                        {LocalizeText('infostand.text.petowner', ['name'], [avatarInfo.ownerName])}
+                    </InfoStandCenteredText>
+                </div>
+                {actions}
+            </Column>
+        );
+
     return (
         <Column alignItems="end" gap={1}>
             <Column className="octane-infostand rounded">
                 <Column className="container-fluid content-area" gap={1} overflow="visible">
                     <PetHeader name={avatarInfo.name} petType={avatarInfo.petType} petBreed={avatarInfo.petBreed} onClose={onClose} />
-                    {avatarInfo.petType === PetType.MONSTERPLANT ? (
-                        <MonsterplantStats avatarInfo={avatarInfo} remainingGrowTime={remainingGrowTime} remainingTimeToLive={remainingTimeToLive} />
-                    ) : (
-                        <RegularPetStats avatarInfo={avatarInfo} />
-                    )}
+                    <MonsterplantStats avatarInfo={avatarInfo} remainingGrowTime={remainingGrowTime} remainingTimeToLive={remainingTimeToLive} />
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1">
                             <UserProfileIconView userId={avatarInfo.ownerId} />
@@ -296,16 +332,7 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                     </div>
                 </Column>
             </Column>
-            <Flex className="octane-infostand-actions" justifyContent="end">
-                {buttons.map(
-                    (button) =>
-                        button.condition && (
-                            <Button key={button.action} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
-                                {button.label}
-                            </Button>
-                        )
-                )}
-            </Flex>
+            {actions}
         </Column>
     );
 };

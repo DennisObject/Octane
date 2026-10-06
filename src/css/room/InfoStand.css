@@ -789,6 +789,139 @@
     justify-content: flex-end;
 }
 
+.octane-pet-infostand-stack {
+  gap: 10px;
+}
+
+/* pet_view (default pets): fixed 190x316 box, every element positioned from the layout rects and the controller. */
+.octane-infostand.octane-pet-infostand {
+  box-sizing: border-box;
+  height: 316px;
+  padding: 0;
+  border: 0;
+}
+
+.octane-pet-infostand::before {
+  inset: 0;
+}
+
+.octane-pet-infostand .octane-infostand__close {
+  top: 6px;
+  right: auto;
+  left: 170px;
+}
+
+.octane-pet-infostand__name,
+.octane-pet-infostand__breed,
+.octane-pet-infostand__label,
+.octane-pet-infostand__line,
+.octane-pet-infostand__level,
+.octane-pet-infostand__bar-value,
+.octane-pet-infostand__respect {
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__name,
+.octane-pet-infostand__breed,
+.octane-pet-infostand__label,
+.octane-pet-infostand__line {
+  position: absolute;
+  left: 10px;
+  height: 12px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__name {
+  top: 11px;
+  font-weight: bold;
+}
+
+.octane-pet-infostand__breed {
+  top: 24px;
+}
+
+.octane-pet-infostand__level {
+  position: absolute;
+  top: 47px;
+  left: 99px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__image {
+  position: absolute;
+  top: 37px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 83px;
+}
+
+.octane-pet-infostand__status-icon {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  width: 18px;
+  height: 18px;
+  image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-pet-infostand__bar {
+  position: absolute;
+  left: 16px;
+  width: 162px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid #dadada;
+  background: #3a3a3a;
+}
+
+.octane-pet-infostand__bar-fill,
+.octane-pet-infostand__bar-highlight {
+  position: absolute;
+  left: 0;
+}
+
+.octane-pet-infostand__bar-fill {
+  top: 4px;
+  height: 10px;
+}
+
+.octane-pet-infostand__bar-highlight {
+  top: 0;
+  height: 4px;
+}
+
+.octane-pet-infostand__bar-value {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  height: 12px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__respect {
+  position: absolute;
+  top: 260px;
+  left: 20px;
+  height: 21px;
+  line-height: 21px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__respect img {
+  width: 13px;
+  height: 21px;
+  display: inline-block;
+  margin-left: 2px;
+  vertical-align: top;
+  image-rendering: var(--octane-pixel-art, pixelated);
+}
+
 /* Native Flash text halo on the dark infostand panels. */
 .octane-infostand__identity,
 .octane-infostand__score,
