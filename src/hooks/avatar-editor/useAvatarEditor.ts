@@ -1,10 +1,15 @@
 import {
     AvatarEditorFigureCategory,
+    AvatarEffectActivatedComposer,
+    AvatarEffectSelectedComposer,
     AvatarFigureContainer,
     AvatarFigurePartType,
     FigureSetIdsMessageEvent,
     GetAvatarRenderManager,
+    GetHotLooksComposer,
     GetWardrobeMessageComposer,
+    HotLooksEvent,
+    IHotLookInfo,
     IAvatarFigureContainer,
     IFigurePartSet,
     IPalette,
@@ -29,6 +34,7 @@ import {
 import { useMessageEvent } from '../events';
 import { useUserDataSnapshot } from '../session';
 import { useFigureData } from './useFigureData';
+import { useAvatarEditorEffects } from './useAvatarEditorEffects';
 
 const MAX_PALETTES: number = 2;
 const DEFAULT_MALE_FIGURE = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
@@ -58,7 +64,13 @@ const useAvatarEditorState = () => {
     const [boundFurnitureNames, setBoundFurnitureNames] = useState<string[]>([]);
     const [figureSetNames, setFigureSetNames] = useState<Record<number, string>>({});
     const [savedFigures, setSavedFigures] = useState<[IAvatarFigureContainer, string][]>(null);
+    const [hotLooks, setHotLooks] = useState<IHotLookInfo[]>([]);
+    const hotLooksUser = useRef(0);
     const userData = useUserDataSnapshot();
+    const { effects, wornEffect, setWornEffect } = useAvatarEditorEffects(userData.userId);
+    const [genderEffects, setGenderEffects] = useState<Record<string, number>>({});
+    const [previewDirection, setPreviewDirection] = useState(4);
+    const effectChanged = useRef(false);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
@@ -73,7 +85,30 @@ const useAvatarEditorState = () => {
         loadAvatarData(figure, nextGender);
     }, [gender, getFigureString, loadAvatarData]);
 
-    const activeModel = useMemo(() => avatarModels[activeModelKey] ?? null, [activeModelKey, avatarModels]);
+    const activeModel = useMemo(() => avatarModels[activeModelKey] ?? [], [activeModelKey, avatarModels]);
+    const selectedEffect = genderEffects[gender] ?? -1;
+    const selectEditorEffect = (type: number) => {
+        effectChanged.current = true;
+        setGenderEffects(current => ({ ...current, [gender]: type }));
+    };
+    const saveEditorEffect = () => {
+        if (!effectChanged.current) return;
+
+        if (selectedEffect !== -1) {
+            const effect = effects.find(effect => effect.type === selectedEffect);
+
+            if (effect) {
+                if (!effect.active) SendMessageComposer(new AvatarEffectActivatedComposer(selectedEffect));
+                SendMessageComposer(new AvatarEffectSelectedComposer(selectedEffect));
+                setWornEffect(selectedEffect);
+            }
+        } else {
+            SendMessageComposer(new AvatarEffectSelectedComposer(-1));
+            setWornEffect(-1);
+        }
+
+        effectChanged.current = false;
+    };
 
     const selectedColorParts = useMemo(() => {
         const colorSets: { [index: string]: IPartColor[] } = {};
@@ -303,6 +338,21 @@ const useAvatarEditorState = () => {
         setSavedFigures(savedFigures);
     });
 
+    useMessageEvent<HotLooksEvent>(HotLooksEvent, (event) => setHotLooks(event.getParser().hotLooks));
+
+    useEffect(() => {
+        if (!userData.userId) {
+            hotLooksUser.current = 0;
+            setHotLooks([]);
+            return;
+        }
+
+        if (!isVisible || hotLooksUser.current === userData.userId) return;
+
+        hotLooksUser.current = userData.userId;
+        SendMessageComposer(new GetHotLooksComposer(20));
+    }, [isVisible, userData.userId]);
+
     useEffect(() => {
         if (!isVisible) return;
 
@@ -416,8 +466,11 @@ const useAvatarEditorState = () => {
         newAvatarModels[AvatarEditorFigureCategory.LEGS] = [AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY].map(
             (setType) => buildCategory(setType, buildModeDefault)
         );
-        newAvatarModels[AvatarEditorFigureCategory.PETS] = [AvatarFigurePartType.PET].map((setType) => buildCategory(setType)).filter(Boolean);
-        newAvatarModels[AvatarEditorFigureCategory.MISC] = [AvatarFigurePartType.MISC].map((setType) => buildCategory(setType)).filter(Boolean);
+        newAvatarModels[AvatarEditorFigureCategory.HOTLOOKS] = [];
+        if (GetConfigurationValue<boolean>('effects.in.avatar.editor', true)) newAvatarModels[AvatarEditorFigureCategory.EFFECTS] = [];
+        if (GetConfigurationValue<boolean>('clothing.misc.tab.enabled', false)) {
+            newAvatarModels[AvatarEditorFigureCategory.MISC] = [AvatarFigurePartType.MISC].map((setType) => buildCategory(setType)).filter(Boolean);
+        }
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
             AvatarFigurePartType.HEAD,
             AvatarFigurePartType.HAIR,
@@ -443,6 +496,9 @@ const useAvatarEditorState = () => {
 
     useEffect(() => {
         genderFigures.current = { userId: 0, figures: {} };
+        setGenderEffects({});
+        setPreviewDirection(4);
+        effectChanged.current = false;
     }, [userData.userId]);
 
     useEffect(() => {
@@ -458,6 +514,7 @@ const useAvatarEditorState = () => {
         }
 
         if (!isVisible) {
+            setGenderEffects(current => ({ ...current, [gender]: wornEffect }));
             if (userData.userId && genderFigures.current.userId === userData.userId) {
                 genderFigures.current.figures[gender] = getFigureString;
             }
@@ -500,6 +557,13 @@ const useAvatarEditorState = () => {
         randomizeCurrentFigure,
         savedFigures,
         setSavedFigures,
+        hotLooks,
+        effects,
+        selectedEffect,
+        selectEditorEffect,
+        saveEditorEffect,
+        previewDirection,
+        setPreviewDirection,
         getFirstSelectableColor
     };
 };

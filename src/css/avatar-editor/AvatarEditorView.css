@@ -1026,3 +1026,149 @@
     display: inline-block !important;
     opacity: 0.5;
 }
+
+.octane-avatar-editor-hotlooks,
+.octane-avatar-editor-effects {
+    position: absolute;
+    inset: 0;
+}
+
+.octane-avatar-editor-hotlooks-title,
+.octane-avatar-editor-hotlooks-choose {
+    position: absolute !important;
+    left: 23px;
+    top: 120px;
+}
+
+.octane-avatar-editor-hotlooks-choose { top: 148px; }
+
+.octane-avatar-editor-hotlooks-grid {
+    position: absolute;
+    left: 27px;
+    top: 185px;
+    display: grid;
+    width: 299px;
+    height: 220px;
+    grid-template-columns: repeat(7, 35px);
+    grid-auto-rows: 60px;
+    align-content: start;
+    gap: 7px;
+    overflow: hidden;
+}
+
+.octane-avatar-editor-hotlook {
+    position: relative;
+    width: 35px;
+    height: 60px;
+    padding: 0;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-image: var(--habbo-skin-button) 2 fill / 2px stretch;
+    background: transparent;
+}
+
+.octane-avatar-editor-hotlook:hover { border-image-source: var(--habbo-skin-button-hover); }
+.octane-avatar-editor-hotlook:active { border-image-source: var(--habbo-skin-button-pressed); }
+
+.octane-avatar-editor-hotlook-bitmap {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 35px;
+    max-width: none;
+    height: 60px;
+    pointer-events: none;
+}
+
+.octane-avatar-editor-effects-heading {
+    position: absolute;
+    left: 23px;
+    top: 120px;
+    width: 140px;
+    height: 35px;
+}
+
+.octane-avatar-editor-effects-heading > img {
+    position: absolute;
+    left: 5px;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    image-rendering: pixelated;
+}
+
+.octane-avatar-editor-effects-heading > span { position: absolute !important; left: 40px; top: 4px; }
+
+.octane-avatar-editor-effects-shop {
+    position: absolute;
+    left: 399px;
+    top: 122px;
+    display: flex;
+    width: 75px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    border: 0;
+    background: url('../../assets/images/avatareditor/effects-shop/default.png');
+}
+
+.octane-avatar-editor-effects-shop:hover { background-image: url('../../assets/images/avatareditor/effects-shop/hover.png'); }
+.octane-avatar-editor-effects-shop:active { background-image: url('../../assets/images/avatareditor/effects-shop/pressed.png'); }
+.octane-avatar-editor-effects-shop:disabled { background-image: url('../../assets/images/avatareditor/effects-shop/disabled.png'); }
+.octane-avatar-editor-effects-shop > span { flex: none; filter: invert(1); mix-blend-mode: screen; }
+
+.octane-avatar-editor-effects-empty { position: absolute; left: 21px; top: 168px; }
+.octane-avatar-editor-effects-notification { position: absolute !important; left: 0; top: 30px; }
+
+.octane-avatar-editor-effect-items { display: grid; grid-template-columns: repeat(6, 50px); gap: 0; }
+.octane-avatar-editor-effects-grid > .octane-classic-scroll-area { height: 100%; }
+.octane-avatar-editor-effect-item { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.octane-avatar-editor-effect-item > img { pointer-events: none; }
+
+.octane-avatar-editor .octane-avatar-editor-effect-item > .octane-avatar-editor-effect-amount {
+    position: absolute;
+    left: 30px;
+    top: 2px;
+    width: 18px;
+    height: 14px;
+    border: 1px solid #ddd;
+    background: #666;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.octane-avatar-editor-effect-amount > span { margin-left: 2px; }
+
+.octane-avatar-editor .octane-avatar-editor-effect-item > .octane-avatar-editor-effect-duration {
+    position: absolute;
+    left: 4px;
+    top: 41px;
+    width: 42px;
+    height: 5px;
+    border: 1px solid #ddd;
+    background: #000;
+}
+
+.octane-avatar-editor-effect-duration > div { height: 3px; background: #20bf20; }
+.octane-avatar-editor-effect-name { position: absolute; left: 351px; top: 400px; width: 120px; display: flex; justify-content: center; }
+.octane-avatar-editor-effect-activate { position: absolute; left: 21px; top: 443px; width: 300px; display: flex; justify-content: center; }
+.octane-avatar-editor-effect-time { position: absolute; left: 357px; top: 417px; width: 120px; height: 17px; display: flex; justify-content: center; }
+.octane-avatar-editor-effect-time-bar { position: absolute; left: 1px; top: 1px; width: 120px; height: 16px; background: #000; }
+.octane-avatar-editor-effect-time-bar > div { height: 16px; background: #20bf20; }
+.octane-avatar-editor-effect-time > span { mix-blend-mode: multiply; }
+.octane-avatar-editor-effect-time > .octane-avatar-editor-effect-time-ink { position: absolute !important; filter: invert(1) brightness(0.4); mix-blend-mode: plus-lighter; }
+
+.octane-avatar-editor-effect-preview { position: relative; width: 125px; height: 210px; }
+.octane-avatar-editor-effect-preview > div {
+    position: absolute !important;
+    left: -65px;
+    top: -30px;
+    width: 125px;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transform: scale(2);
+    transform-origin: top left;
+}
