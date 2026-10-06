@@ -9,6 +9,7 @@ export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number;
     useEffect(() => {
         const instance = new RoomPreviewer(GetRoomEngine(), ++RoomPreviewer.PREVIEW_COUNTER);
         instance.backgroundColor = null;
+        instance.disableUpdate = true;
         instance.addViewOffset = new Point(-65, -30);
         instance.updateRoomWallsAndFloorVisibility(false, false);
         setPreviewer(instance);
@@ -22,6 +23,7 @@ export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number;
         previewer.addAvatarIntoRoom(figure, effect);
         previewer.updateAvatarDirection(direction, direction);
         previewer.setAutomaticStateChange(false);
+        previewer.updatePreviewRoomView(true);
     }, [previewer, figure, effect, direction]);
 
     return <div className="octane-avatar-editor-effect-preview">{previewer && <LayoutRoomPreviewerView roomPreviewer={previewer} height={210} onPreviewClick={() => {}} />}</div>;
