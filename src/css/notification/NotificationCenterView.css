@@ -1470,6 +1470,7 @@
     width: 192px;
     height: 82px;
     margin-left: auto;
+    margin-right: -1px;
     color: #fff;
     font-family: Ubuntu, sans-serif;
     font-size: 12px;
@@ -1499,11 +1500,13 @@
 
 .octane-native-club-gift-text {
     position: absolute;
-    left: 25px;
-    top: 7px;
+    left: 26px;
+    top: 9px;
     width: 174px;
     height: 36px;
     padding-right: 8px;
+    line-height: 13.4px;
+    letter-spacing: 0.2px;
 }
 
 .octane-native-club-gift-button {
@@ -1514,7 +1517,7 @@
     min-width: 50px;
     height: 28px;
     margin: 0;
-    padding: 0 10px;
+    padding: 0 8px;
     border: 5px solid transparent;
     border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-default.png");
     border-image-slice: 5 fill;
@@ -1537,7 +1540,8 @@
 
 .octane-native-club-gift-later {
     position: absolute;
-    left: 8px;
+    letter-spacing: 0.2px;
+    left: 11px;
     top: 49px;
     width: 70px;
     height: 17px;
