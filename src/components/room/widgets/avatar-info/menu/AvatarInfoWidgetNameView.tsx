@@ -38,6 +38,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = (prop
             classNames={getClassNames}
             fades={nameInfo.id !== GetSessionDataManager().userId}
             objectId={nameInfo.roomIndex}
+            tallAvatarOffset={20}
             userType={nameInfo.userType}
             onClose={onClose}
         >
