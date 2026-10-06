@@ -248,7 +248,9 @@
     height: auto;
     margin-left: 10px;
     flex: 0 0 auto;
-    overflow: visible;
+    /* the selection halo of a tile in the last column is cut at the list's right edge */
+    overflow-x: clip;
+    overflow-y: visible;
 }
 
 .octane-achievements-air .air-achievements-list.is-scrollable {

@@ -59,8 +59,8 @@ export const AchievementDetailsView: FC<AchievementDetailsViewProps> = (props) =
                     }
                 />
             </div>
-            <AchievementText background={0xcccccc} bold height={17} text={LocalizeBadgeName(badgeCode)} x={114} y={18} />
-            <AchievementText background={0xcccccc} height={47} maxWidth={238} text={LocalizeBadgeDescription(badgeCode)} x={114} y={34} />
+            <AchievementText background={0xcccccc} bold height={15} text={LocalizeBadgeName(badgeCode)} x={114} y={18} />
+            <AchievementText background={0xcccccc} height={45} maxWidth={238} text={LocalizeBadgeDescription(badgeCode)} x={114} y={34} />
             {showReward && (
                 <div className="air-achievement-details-reward">
                     <AchievementText background={0xcccccc} text={LocalizeText('achievements.details.reward')} x={0} y={0} style={{ position: 'relative', width: rewardCaptionWidth }} />
