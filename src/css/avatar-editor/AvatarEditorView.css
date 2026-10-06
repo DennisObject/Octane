@@ -1,7 +1,7 @@
 .octane-avatar-editor {
-    width: 490px;
-    min-width: 490px;
-    max-width: 490px;
+    width: 488px;
+    min-width: 488px;
+    max-width: 488px;
     height: 525px;
     min-height: 525px;
     max-height: 525px;
@@ -81,6 +81,8 @@
     justify-content: center;
     overflow: hidden;
 }
+
+.octane-avatar-editor-name-text > span { flex: none; }
 
 .octane-avatar-editor-title {
     position: absolute !important;
@@ -1009,7 +1011,7 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.octane-avatar-editor.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
     right: 3px !important;
 }
 

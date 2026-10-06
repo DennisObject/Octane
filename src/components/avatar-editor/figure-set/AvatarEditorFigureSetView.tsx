@@ -43,7 +43,7 @@ export const AvatarEditorFigureSetView: FC<{
                         setType={category.setType}
                         onClick={() => {
                             if (item.isGetMore) {
-                                const page = GetConfigurationValue<string>('catalog.clothes.page', 'clothing');
+                                const page = GetConfigurationValue<string>('catalog.clothes.page', '');
 
                                 CreateLinkEvent(`catalog/open/${page}`);
 

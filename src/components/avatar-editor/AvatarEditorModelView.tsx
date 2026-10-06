@@ -1,17 +1,19 @@
 import { AvatarEditorFigureCategory, AvatarFigurePartType, FigureDataContainer } from '@octane/renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IAvatarEditorCategory, LocalizeText } from '../../api';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorIcon } from './AvatarEditorIcon';
 import { AvatarEditorFigureSetView } from './figure-set';
 import { AvatarEditorPaletteSetView } from './palette-set';
+import { useAvatarEditorGridWheel } from '../../hooks/avatar-editor/useAvatarEditorGridWheel';
 
 export const AvatarEditorModelView: FC<{
     name: string;
     categories: IAvatarEditorCategory[];
 }> = (props) => {
     const { name = '', categories = [] } = props;
+    const container = useRef<HTMLDivElement>(null);
     const [activeSetType, setActiveSetType] = useState<string>(() => categories[0]?.setType ?? '');
     const {
         maxPaletteCount = 1,
@@ -31,6 +33,8 @@ export const AvatarEditorModelView: FC<{
     const activeCategory = useMemo(() => {
         return categories.find((category) => category.setType === resolvedSetType) ?? null;
     }, [categories, resolvedSetType]);
+
+    useAvatarEditorGridWheel(container, !!activeCategory);
 
     const selectSet = useCallback(
         (setType: string) => {
@@ -56,7 +60,7 @@ export const AvatarEditorModelView: FC<{
     if (!activeCategory) return null;
 
     return (
-        <div className="octane-avatar-editor-model">
+        <div ref={container} className="octane-avatar-editor-model">
             <div className={`octane-avatar-editor-subcategories${name === AvatarEditorFigureCategory.GENERIC ? ' is-gender' : ''}`}>
                 {name === AvatarEditorFigureCategory.GENERIC && (
                     <>
