@@ -3,6 +3,7 @@ import { GetConfigurationValue, GroupItem, LocalizeText, TradeState, TradeUserDa
 import { useInventoryTrade } from '../../../../hooks';
 import { OctaneButton, OctaneItemCountBadge } from '../../../../layout';
 import { MAX_ITEMS_TO_TRADE } from './inventoryTradeOffer';
+import { InventoryThumbIconView } from '../InventoryThumbIconView';
 
 interface InventoryTradeViewProps {
     isMinimized?: boolean;
@@ -42,9 +43,7 @@ const TradeOfferView: FC<{
                                     title={groupItem.name}
                                     onClick={isOwn ? () => onRemove?.(groupItem) : undefined}
                                 >
-                                    <div className="octane-inventory-thumb-image">
-                                        <img src={groupItem.iconUrl} alt="" draggable={false} />
-                                    </div>
+                                    <InventoryThumbIconView iconUrl={groupItem.iconUrl} />
                                     {groupItem.getTotalCount() > 1 && <OctaneItemCountBadge count={groupItem.getTotalCount()} />}
                                 </div>
                             )}

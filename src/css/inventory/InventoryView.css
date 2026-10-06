@@ -648,9 +648,9 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 31px;
-    height: 1px;
-    background: #000;
+    top: 30px;
+    height: 2px;
+    background: linear-gradient(#000 0 1px, #fff 1px 2px);
     pointer-events: none;
 }
 
@@ -813,3 +813,48 @@
     .octane-inventory-window .octane-inventory-preview-state {
         right: 6px;
     }
+
+/* Grayscale text antialiasing like the v75 canvas text; a composited layer drops the LCD subpixel fringes. */
+.octane-inventory-window {
+    will-change: transform;
+    /* v75 text fields set kerning=false. */
+    font-kerning: none;
+}
+
+/* frame_3 titlebar of the v75 inventory: caption 2px lower, close button 3px inside the title bar. */
+.octane-inventory-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 4px !important;
+}
+
+.octane-inventory-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-inventory-window .octane-inventory-tab-label {
+    overflow: visible;
+    text-overflow: clip;
+    text-align: left;
+    text-indent: 1px;
+    width: auto;
+}
+
+.octane-inventory-window .octane-inventory-tabs-shell .octane-card-tab-item {
+    box-sizing: border-box !important;
+    flex: 0 0 auto;
+}
+
+/* v75 client area: #ECEAE0 under the tab line, from x=6 to x=484 and down to 7px above the frame bottom. */
+.octane-inventory-window .octane-inventory-body {
+    margin-top: -3px;
+    margin-bottom: 2px;
+    padding-top: 3px;
+    background: #eceae0;
+}
+
+.octane-inventory-thumb-image {
+    display: block;
+}
+
+.octane-inventory-thumb-image img {
+    position: absolute;
+}

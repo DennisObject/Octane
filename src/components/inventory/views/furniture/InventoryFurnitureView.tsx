@@ -91,9 +91,9 @@ export const InventoryFurnitureView: FC<{
             furnitureItem.category === FurniCategory.LANDSCAPE;
 
         // v75 previews furniture in its own neutral room, not the room the user is standing in.
-        let floorType = '101';
-        let wallType = '101';
-        let landscapeType = '1.1';
+        let floorType = '110';
+        let wallType = 'default';
+        let landscapeType = 'default';
 
         if (isRoomDecoration) {
             floorType = furnitureItem.category === FurniCategory.FLOOR ? selectedItem.stuffData.getLegacyString() : floorType;

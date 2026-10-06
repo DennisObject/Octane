@@ -95,7 +95,7 @@
     width: 119px;
     height: 21px;
     border: 0 !important;
-    padding: 4px 21px 3px 10px;
+    padding: 4px 21px 3px 13px;
     background: url('@/assets/images/habbo-skin/slices/inventory-filter-dropdown-arrow.png') right 5px top 2px / 16px 16px no-repeat transparent !important;
     line-height: 14px;
     image-rendering: var(--octane-pixel-art, pixelated);

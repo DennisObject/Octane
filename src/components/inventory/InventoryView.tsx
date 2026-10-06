@@ -62,6 +62,33 @@ const tabLabel = (name: string) => {
     return value && value !== name ? value : TAB_LABEL_FALLBACK[name] || name;
 };
 
+const TAB_FONT = '12px HabboAirUbuntu, Ubuntu, sans-serif';
+const TAB_PADDING = 24;
+
+let tabMeasureContext: CanvasRenderingContext2D | null = null;
+
+const measureTabLabel = (label: string) => {
+    tabMeasureContext ??= document.createElement('canvas').getContext('2d');
+    tabMeasureContext.font = TAB_FONT;
+    tabMeasureContext.fontKerning = 'none';
+
+    return tabMeasureContext.measureText(label).width;
+};
+
+// v75 lays the tabs out at fractional x: each tab starts on the floor of its position and the last one ends on the ceiling.
+const getTabBoxes = (labels: string[]) => {
+    const edges = [0];
+
+    labels.forEach((label, index) => edges.push(edges[index] + measureTabLabel(label) + TAB_PADDING));
+
+    return labels.map((_, index) => {
+        const left = Math.floor(edges[index]);
+        const right = index === labels.length - 1 ? Math.ceil(edges[index + 1]) : Math.floor(edges[index + 1]);
+
+        return { width: right - left };
+    });
+};
+
 const TAB_BY_CODE: Record<string, string> = {
     furni: TAB_FURNITURE,
     furniture: TAB_FURNITURE,
@@ -104,11 +131,16 @@ export const InventoryView: FC<{}> = () => {
     const [badgeMetadata, setBadgeMetadata] = useState<Awaited<ReturnType<typeof ensureBadgeLeaderboardLoaded>>>(null);
     const [mainFilter, setMainFilter] = useState<string>(FURNI_MAIN_FILTER.ALL);
     const [typeFilter, setTypeFilter] = useState<string>('any');
+    const [, setTabFontLoaded] = useState(false);
     const { isTrading = false, stopTrading = null } = useInventoryTrade();
     const { isOpen: isWiredTrading = false } = useWiredTrading();
     const { getCount = null } = useInventoryUnseenTracker();
     const { groupItems = [] } = useInventoryFurni();
     const { badgeCodes = [] } = useInventoryBadges();
+
+    useEffect(() => {
+        document.fonts.load(TAB_FONT).then(() => setTabFontLoaded(true));
+    }, []);
 
     useEffect(() => {
         setSearchValue('');
@@ -246,6 +278,7 @@ export const InventoryView: FC<{}> = () => {
 
     if (!isVisible) return null;
 
+    const tabBoxes = getTabBoxes(TABS.map(tabLabel));
     const showWiredTrade = !isTrading && isWiredTrading;
     // v75 shrinks the trade table to a "Trade in progress" box while another tab is open.
     const isTradeMinimized = isTrading && currentTab !== TAB_FURNITURE;
@@ -263,9 +296,10 @@ export const InventoryView: FC<{}> = () => {
                 {!showWiredTrade && (
                     <>
                         <OctaneCardTabsView classNames={['octane-inventory-tabs-shell']}>
-                            {TABS.map((name) => (
+                            {TABS.map((name, index) => (
                                 <OctaneCardTabsItemView
                                     key={name}
+                                    style={tabBoxes[index]}
                                     count={getTabUnseenCount(name, getCount)}
                                     isActive={currentTab === name}
                                     onClick={() => setCurrentTab(name)}

@@ -2,6 +2,7 @@ import { MouseEventType } from '@octane/renderer';
 import { FC, MouseEvent, useState } from 'react';
 import { attemptItemPlacement, GroupItem } from '../../../../api';
 import { classNames, InfiniteGrid } from '../../../../layout';
+import { InventoryThumbIconView } from '../InventoryThumbIconView';
 
 export const InventoryFurnitureItemView: FC<{
     groupItem: GroupItem;
@@ -50,9 +51,7 @@ export const InventoryFurnitureItemView: FC<{
             onMouseUp={onMouseEvent}
         >
             {groupItem.stuffData.uniqueNumber <= 0 && (
-                <div className="octane-inventory-thumb-image">
-                    <img src={groupItem.iconUrl} alt="" draggable={false} />
-                </div>
+                <InventoryThumbIconView iconUrl={groupItem.iconUrl} />
             )}
         </InfiniteGrid.Item>
     );
