@@ -395,7 +395,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                     <ToolbarUnseenCountView count={unseenProgMenuCount} />
                                 </motion.div>
                             )}
-                            {GetConfigurationValue('game.center.enabled') && (
+                            {/* GAMES: visible in room and hotel view when games_icon_enabled (game.center.enabled kept as a fallback key) */}
+                            {GetConfigurationValue<boolean>('games_icon_enabled', GetConfigurationValue<boolean>('game.center.enabled', false)) && (
                                 <motion.div variants={itemVariants} className="tb-slot">
                                     <ToolbarItemView icon="game" onClick={() => CreateLinkEvent('games/toggle')} className="tb-icon" />
                                 </motion.div>
