@@ -145,28 +145,284 @@
     }
 }
 
-.octane-room-widget-dimmer {
-    width: min(275px, calc(100vw - 16px));
-    min-width: 0;
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
+/* dimmer_ui: fixed 274x222 frame, every element placed from measurements of the v75 window (origin = frame top-left). */
+.octane-dimmer {
+    position: relative;
+    box-sizing: border-box;
+    width: 274px;
+    height: 222px;
+    color: #000;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    line-height: 10px;
+    filter: drop-shadow(2.828px 2.828px 4px rgba(0, 0, 0, 0.349));
+    image-rendering: var(--octane-pixel-art, pixelated);
+    -webkit-font-smoothing: none;
 
-    .dimmer-banner {
-        width: 56px;
-        height: 79px;
-        background: url('@/assets/images/room-widgets/dimmer-widget/dimmer_banner.png')
-            center no-repeat;
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: solid transparent;
+        border-width: 13px;
+        border-image: url('@/assets/images/room-widgets/dimmer-widget/frame.png') 13 fill / 13px stretch;
+        pointer-events: none;
     }
 
-    .color-swatch {
-        height: 30px;
-        border: 2px solid #FFF;
-        box-shadow: inset 3px 3px rgba(0, 0, 0, 0.2);
-
-        &.active {
-            box-shadow: none;
-        }
+    > * {
+        position: absolute;
     }
+
+    button {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+    }
+}
+
+.octane-dimmer__header {
+    top: 5px;
+    left: 5px;
+    width: 265px;
+    height: 15px;
+    background: url('@/assets/images/room-widgets/dimmer-widget/strip.png') 0 0 repeat;
+    cursor: move;
+}
+
+.octane-dimmer__title {
+    position: absolute;
+    top: 0;
+    left: 1px;
+    height: 15px;
+    font-weight: bold;
+    line-height: 15px;
+    white-space: nowrap;
+
+    > span {
+        display: inline-block;
+        box-sizing: border-box;
+        height: 15px;
+        padding-top: 1px;
+        background: #418db0;
+        box-shadow: -11px 0 0 #418db0, 9px 0 0 #418db0;
+    }
+}
+
+.octane-dimmer__title-text {
+    color: #fff;
+    filter: var(--octane-native-text-halo);
+}
+
+.octane-dimmer__close {
+    position: absolute;
+    top: 0;
+    left: 250px;
+    width: 15px;
+    height: 15px;
+    background: #418db0 url('@/assets/images/room-widgets/dimmer-widget/close.png') 1px 0 no-repeat !important;
+}
+
+.octane-dimmer__panel,
+.octane-dimmer__box {
+    box-sizing: border-box;
+    border: solid transparent;
+    border-width: 8px;
+    image-rendering: pixelated;
+}
+
+.octane-dimmer__panel {
+    top: 44px;
+    left: 9px;
+    width: 258px;
+    height: 143px;
+    border-image: url('@/assets/images/room-widgets/dimmer-widget/panel.png') 8 fill / 8px stretch;
+}
+
+.octane-dimmer__box {
+    top: 51px;
+    left: 11px;
+    width: 254px;
+    height: 133px;
+    border-image: url('@/assets/images/room-widgets/dimmer-widget/box.png') 8 fill / 8px stretch;
+}
+
+.octane-dimmer__info-image {
+    top: 62px;
+    left: 107px;
+    width: 56px;
+    height: 79px;
+}
+
+.octane-dimmer__off-text,
+.octane-dimmer__info {
+    left: 32px;
+    width: 208px;
+    text-indent: 1px;
+}
+
+.octane-dimmer__off-text {
+    top: 146px;
+}
+
+.octane-dimmer__info {
+    left: 30px;
+    width: 212px;
+    top: 139px;
+    color: #999;
+}
+
+.octane-dimmer__tabs {
+    top: 22px;
+    left: 9px;
+    width: 258px;
+    height: 30px;
+    background-repeat: no-repeat;
+    pointer-events: none;
+
+    &.is-tab-1 {
+        background-image: url('@/assets/images/room-widgets/dimmer-widget/tabs-1.png');
+    }
+
+    &.is-tab-2 {
+        background-image: url('@/assets/images/room-widgets/dimmer-widget/tabs-2.png');
+    }
+
+    &.is-tab-3 {
+        background-image: url('@/assets/images/room-widgets/dimmer-widget/tabs-3.png');
+    }
+}
+
+.octane-dimmer__tab {
+    top: 24px;
+    height: 21px;
+    width: 60px;
+    text-align: left;
+
+    > div {
+        margin-left: 1px;
+    }
+
+    &:nth-of-type(n + 2) {
+        width: 63px;
+    }
+}
+
+.octane-dimmer__cell {
+    top: 58px;
+    width: 27px;
+    height: 22px;
+    background: url('@/assets/images/room-widgets/dimmer-widget/color-frame.png') 0 0 no-repeat !important;
+}
+
+.octane-dimmer__cell-color,
+.octane-dimmer__cell-selected {
+    position: absolute;
+    inset: 0;
+}
+
+.octane-dimmer__cell-color {
+    background-image: url('@/assets/images/room-widgets/dimmer-widget/color-button.png');
+    background-blend-mode: multiply;
+    -webkit-mask: url('@/assets/images/room-widgets/dimmer-widget/color-button.png') 0 0 no-repeat;
+    mask: url('@/assets/images/room-widgets/dimmer-widget/color-button.png') 0 0 no-repeat;
+}
+
+.octane-dimmer__cell-selected {
+    background: url('@/assets/images/room-widgets/dimmer-widget/color-selected.png') 0 0 no-repeat;
+}
+
+.octane-dimmer__color-input {
+    top: 58px;
+    left: 26px;
+    width: 203px;
+    height: 22px;
+}
+
+.octane-dimmer__slider {
+    top: 92px;
+    left: 28px;
+    width: 206px;
+    height: 18px;
+    touch-action: none;
+    cursor: pointer;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 2px;
+        width: 201px;
+        height: 12px;
+        background: url('@/assets/images/room-widgets/dimmer-widget/slider-base.png') 0 0 no-repeat;
+    }
+}
+
+.octane-dimmer__thumb {
+    position: absolute;
+    top: 1px;
+    width: 12px;
+    height: 17px;
+    background: url('@/assets/images/room-widgets/dimmer-widget/slider-button.png') 0 0 no-repeat;
+}
+
+.octane-dimmer__checkbox {
+    top: 117px;
+    left: 27px;
+    width: 15px;
+    height: 15px;
+    background: url('@/assets/images/room-widgets/dimmer-widget/checkbox.png') 0 0 no-repeat !important;
+
+    &.is-checked {
+        background-image: url('@/assets/images/room-widgets/dimmer-widget/checkbox-checked.png') !important;
+    }
+}
+
+.octane-dimmer__checkbox-text {
+    top: 120px;
+    left: 49px;
+    white-space: nowrap;
+}
+
+.octane-dimmer__button {
+    box-sizing: border-box;
+    height: 24px;
+    padding: 2px 8px 0 !important;
+    border: 3px solid transparent !important;
+    border-image: var(--habbo-skin-button) 3 fill / 3px stretch !important;
+    color: #000 !important;
+    line-height: 20px;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+        border-image-source: var(--habbo-skin-button-hover) !important;
+    }
+
+    &:active:not(:disabled) {
+        border-image-source: var(--habbo-skin-button-pressed) !important;
+    }
+
+    &:disabled {
+        border-image-source: var(--habbo-skin-button-disabled) !important;
+        color: #50636c !important;
+        cursor: default;
+    }
+}
+
+.octane-dimmer__apply {
+    top: 190px;
+    left: 9px;
+    width: 90px;
+}
+
+.octane-dimmer__toggle {
+    top: 191px;
+    right: 8px;
+    height: 22px;
+    padding-right: 6px !important;
+    padding-left: 8px !important;
 }
 
 .octane-widget-crafting {
