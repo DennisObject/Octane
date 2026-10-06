@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
@@ -28,28 +29,20 @@ export const WiredConditionFurniHasNotFurniOnView: FC<{}> = (props) => {
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={requiresFurni}
             save={save}
             footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.not_requireall')}</Text>
-                {[0, 1].map((value) => {
-                    return (
-                        <div key={value} className="flex items-center gap-1">
-                            <input
-                                checked={requireAll === value}
-                                className="form-check-input"
-                                id={`requireAll${value}`}
-                                name="requireAll"
-                                type="radio"
-                                onChange={(event) => setRequireAll(value)}
-                            />
-                            <Text>{LocalizeText(`wiredfurni.params.not_requireall.${value}`)}</Text>
-                        </div>
-                    );
-                })}
-            </div>
+            {/* DontHaveStackedFurnis titles its section with requireall too. */}
+            <WiredSection title={LocalizeText('wiredfurni.params.requireall')}>
+                <WiredRadioGroup
+                    name="requireAll"
+                    options={[0, 1].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.not_requireall.${id}`) }))}
+                    value={requireAll}
+                    onChange={setRequireAll}
+                />
+            </WiredSection>
         </WiredConditionBaseView>
     );
 };

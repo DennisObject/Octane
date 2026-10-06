@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { WiredNumberInput } from '../WiredNumberInput';
+import { WiredQuantifierSection } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
@@ -37,30 +38,21 @@ export const WiredConditionActorIsWearingEffectView: FC<WiredConditionActorIsWea
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
-            footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
+            footer={
+                <>
+                    <WiredQuantifierSection kind="users" name="effectQuantifier" negative={negative} value={quantifier} onChange={setQuantifier} />
+                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
+                </>
+            }
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.quantifier_selection')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={quantifier === value}
-                            className="form-check-input"
-                            name="effectQuantifier"
-                            type="radio"
-                            onChange={() => setQuantifier(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.quantifier.users${negative ? '.neg' : ''}.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
             {showEffect && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{localizeWithFallback('wiredfurni.params.effectid', LocalizeText('wiredfurni.tooltip.effectid'))}</Text>
-                    <OctaneInput type="number" value={effect} onChange={(event) => setEffect(parseInt(event.target.value))} />
-                </div>
+                // class_4188: NumberInputParam(0, int min, int max, 200).
+                <WiredSection title={localizeWithFallback('wiredfurni.params.effectid', LocalizeText('wiredfurni.tooltip.effectid'))}>
+                    <WiredNumberInput max={2147483647} min={-2147483648} value={effect} width={200} onChange={setEffect} />
+                </WiredSection>
             )}
         </WiredConditionBaseView>
     );

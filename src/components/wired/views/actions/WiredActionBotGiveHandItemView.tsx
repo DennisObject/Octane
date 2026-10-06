@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { WiredCheckboxGroup, WiredCheckboxOption } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
+import { WiredTextInput } from '../WiredTextInput';
 import { WiredHandItemField } from '../WiredHandItemField';
 import { CLICKED_USER_SOURCE_VALUE, WiredSourceOption, WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
@@ -47,15 +48,16 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
         );
     }, [trigger]);
 
+    // class_3977: "Bot Name" holds the "use bot" checkbox and the name field it reveals, then the hand item section.
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
+            // class_3976: user selection 0 is the bot, 1 the user.
             footer={
-                <div className="flex flex-col gap-2">
-                    <WiredSourcesSelector showUsers={true} userSource={userSource} userSources={USER_SOURCE_OPTIONS} onChangeUsers={setUserSource} />
-                    <hr className="m-0 bg-dark" />
+                <>
                     <WiredSourcesSelector
                         showUsers={true}
                         userSource={botSource}
@@ -64,35 +66,19 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
                         allowClickedUserSource={false}
                         onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
                     />
-                </div>
+                    <WiredSourcesSelector showUsers={true} userSource={userSource} userSources={USER_SOURCE_OPTIONS} onChangeUsers={setUserSource} />
+                </>
             }
         >
-            <div className="form-check">
-                <input
-                    checked={botSource === 100}
-                    className="form-check-input"
-                    id="botGiveHandItemUseNamedBot"
-                    type="checkbox"
-                    onChange={(event) => setBotSource(event.target.checked ? 100 : 0)}
-                />
-                <label className="form-check-label" htmlFor="botGiveHandItemUseNamedBot">
-                    {LocalizeText('wiredfurni.params.bot.usage')}
-                </label>
-            </div>
-            {botSource === 100 && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{LocalizeText('wiredfurni.params.bot.name')}</Text>
-                    <OctaneInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />
-                </div>
-            )}
+            <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
+                <WiredCheckboxGroup>
+                    <WiredCheckboxOption checked={botSource === 100} label={LocalizeText('wiredfurni.params.bot.usage')} last={true} onChange={(checked) => setBotSource(checked ? 100 : 0)} />
+                </WiredCheckboxGroup>
+                {botSource === 100 && <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />}
+            </WiredSection>
             {/* Official BOT_GIVE_HAND_ITEM code list includes 1126/1127/1128 (§_-32b§.as DEFAULT_CODES);
                 the condition/selector variants intentionally do NOT, so pass them per-view. */}
-            <WiredHandItemField
-                handItemId={handItemId}
-                extraItemIds={[1126, 1127, 1128]}
-                onChange={setHandItemId}
-                showCopyButton={true}
-            />
+            <WiredHandItemField handItemId={handItemId} extraItemIds={[1126, 1127, 1128]} nativeSection={true} showCopyButton={true} onChange={setHandItemId} />
         </WiredActionBaseView>
     );
 };
