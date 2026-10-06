@@ -1,5 +1,6 @@
 import { CSSProperties, FC, useLayoutEffect, useRef, useState } from 'react';
 import { AchievementUtilities, LocalizeText } from '../../api';
+import { AchievementText } from './AchievementText';
 
 interface AirAchievementProgressBarProps {
     progress: number;
@@ -84,15 +85,24 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
             <span className="air-achievement-progress__fill-background" style={{ width: animation.width + 1 }} aria-hidden="true" />
             <span className="air-achievement-progress__fill" style={{ width: animation.width, opacity: animation.opacity }} aria-hidden="true" />
             <span className="air-achievement-progress__fill-cap" style={{ left: animation.width + 4 }} aria-hidden="true" />
-            <span className="air-achievement-progress__text" style={{ width }}>
-                {localizationKey
-                    ? LocalizeText(
-                          localizationKey,
-                          ['progress', 'limit'],
-                          [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
-                      )
-                    : `${animation.progress + scoreAtStartOfLevel}/${maxProgress + scoreAtStartOfLevel}`}
-            </span>
+            <AchievementText
+                bold
+                color={0xffffff}
+                text={
+                    localizationKey
+                        ? LocalizeText(
+                              localizationKey,
+                              ['progress', 'limit'],
+                              [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
+                          )
+                        : `${animation.progress + scoreAtStartOfLevel}/${maxProgress + scoreAtStartOfLevel}`
+                }
+                height={17}
+                width={width}
+                x={7}
+                y={3}
+                align="center"
+            />
         </div>
     );
 };

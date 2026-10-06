@@ -22,6 +22,9 @@
     height: auto;
 }
 
+.octane-achievements-air .air-achievements-native-title { position: absolute !important; top: 3px; left: 50%; margin-left: -1px; transform: translateX(-50%); }
+.octane-card-shell.octane-achievements-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button { top: 2px !important; right: 3px !important; }
+
 .octane-achievements-air,
 .octane-achievements-air * {
     box-sizing: border-box;
@@ -62,7 +65,6 @@
 .octane-achievements-air .air-achievements-category-tile {
     appearance: none;
     position: relative;
-    isolation: isolate;
     display: block;
     width: 112px;
     min-width: 112px;
@@ -82,84 +84,48 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-achievements-air .air-achievements-category-tile::before {
+.octane-achievements-air .air-achievements-category-bg {
     position: absolute;
     inset: 0;
-    z-index: -1;
     width: 112px;
     height: 105px;
-    content: '';
     background-image: var(--air-achievement-category-background);
     background-position: 0 0;
     background-repeat: no-repeat;
 }
 
-.octane-achievements-air .air-achievements-category-tile:hover::before,
-.octane-achievements-air .air-achievements-category-tile:focus-visible::before,
-.octane-achievements-air .air-achievements-category-tile.is-active::before {
+.octane-achievements-air .air-achievements-category-tile:hover .air-achievements-category-bg,
+.octane-achievements-air .air-achievements-category-tile:focus-visible .air-achievements-category-bg,
+.octane-achievements-air .air-achievements-category-tile.is-active .air-achievements-category-bg {
     background-image: var(--air-achievement-category-background-hover);
 }
 
-.octane-achievements-air .air-achievements-category-title,
-.octane-achievements-air .air-achievements-category-art,
-.octane-achievements-air .air-achievements-category-completion {
-    transform: translate(1px, 1px);
-}
-
-.octane-achievements-air .air-achievements-category-tile:hover .air-achievements-category-title,
-.octane-achievements-air .air-achievements-category-tile:hover .air-achievements-category-art,
-.octane-achievements-air .air-achievements-category-tile:hover .air-achievements-category-completion,
-.octane-achievements-air .air-achievements-category-tile:focus-visible .air-achievements-category-title,
-.octane-achievements-air .air-achievements-category-tile:focus-visible .air-achievements-category-art,
-.octane-achievements-air .air-achievements-category-tile:focus-visible .air-achievements-category-completion,
-.octane-achievements-air .air-achievements-category-tile.is-active .air-achievements-category-title,
-.octane-achievements-air .air-achievements-category-tile.is-active .air-achievements-category-art,
-.octane-achievements-air .air-achievements-category-tile.is-active .air-achievements-category-completion {
-    transform: none;
-}
-
-.octane-achievements-air .air-achievements-category-title {
+.octane-achievements-air .air-achievements-category-content {
     position: absolute;
-    top: 7px;
-    left: 0;
-    z-index: 1;
-    width: 110px;
-    height: 17px;
+    top: 1px;
+    left: 1px;
+    width: 115px;
+    height: 104px;
     overflow: hidden;
-    color: #000000;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
-    text-align: center;
-    white-space: nowrap;
+    pointer-events: none;
+}
+
+.octane-achievements-air .air-achievements-category-tile:hover .air-achievements-category-content,
+.octane-achievements-air .air-achievements-category-tile:focus-visible .air-achievements-category-content,
+.octane-achievements-air .air-achievements-category-tile.is-active .air-achievements-category-content {
+    top: 0;
+    left: 0;
 }
 
 .octane-achievements-air .air-achievements-category-art {
     position: absolute;
-    top: 27px;
+    top: 26px;
     left: 12px;
-    z-index: 1;
     width: 86px;
     height: 72px;
     object-fit: none;
     image-rendering: var(--octane-pixel-art, pixelated);
     pointer-events: none;
-}
-
-.octane-achievements-air .air-achievements-category-completion {
-    position: absolute;
-    top: 70px;
-    left: 12px;
-    z-index: 2;
-    width: 86px;
-    height: 14px;
-    overflow: visible;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 14px;
-    text-align: center;
-    white-space: nowrap;
 }
 
 .octane-achievements-air .air-achievements-unseen-count {
@@ -170,14 +136,9 @@
     display: flex;
     min-width: 18px;
     height: 20px;
-    padding: 1px 5px 2px 3px;
-    align-items: center;
-    justify-content: center;
+    padding: 1px 4px 2px 3px;
+    align-items: flex-start;
     isolation: isolate;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
 }
 
 .octane-achievements-air .air-achievements-unseen-count::before {
@@ -199,9 +160,6 @@
     cursor: default;
 }
 
-.octane-achievements-air .air-achievements-category-tile--empty::before {
-    display: none;
-}
 
 .octane-achievements-air .air-achievements-category-footer {
     position: relative;
@@ -214,21 +172,6 @@
     position: absolute !important;
     top: 1px;
     left: 72px;
-}
-
-.octane-achievements-air .air-achievements-score {
-    position: absolute;
-    top: 23px;
-    left: 5px;
-    width: 379px;
-    height: 18px;
-    overflow: hidden;
-    color: #444444;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 18px;
-    text-align: center;
-    white-space: nowrap;
 }
 
 .octane-achievements-air .air-achievements-category-header {
@@ -279,36 +222,6 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-achievements-air .air-achievements-category-name {
-    position: absolute;
-    top: 13px;
-    left: 78px;
-    z-index: 1;
-    width: 286px;
-    height: 24px;
-    overflow: hidden;
-    color: #ffffff;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 24px;
-    white-space: nowrap;
-}
-
-.octane-achievements-air .air-achievements-category-progress {
-    position: absolute;
-    top: 40px;
-    left: 78px;
-    z-index: 1;
-    width: 245px;
-    height: 24px;
-    overflow: hidden;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 24px;
-    white-space: nowrap;
-}
-
 .octane-achievements-air .air-achievements-category-icon {
     position: absolute;
     top: 3px;
@@ -341,8 +254,104 @@
 .octane-achievements-air .air-achievements-list.is-scrollable {
     height: 245px;
     max-height: 245px;
+    overflow: hidden;
+}
+
+.octane-achievements-air .air-achievements-scroll-area {
+    width: 367px;
+    height: 245px;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scroll-area-viewport {
+    box-sizing: border-box;
+    width: 367px;
+    height: 245px;
     overflow-x: hidden;
     overflow-y: scroll;
+    scrollbar-width: none !important;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scroll-area-viewport::-webkit-scrollbar {
+    display: none !important;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar {
+    top: 0;
+    right: 0;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-default.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-hover.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-pressed.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-default.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-hover.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-pressed.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-track {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-track-3.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
+    --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png');
+    --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-default.png');
+    position: relative;
+    min-height: 0;
+    box-sizing: border-box;
+    /* thumb art rows 0-3 are the cap and rows 6-10 the foot; the grip bitmap repeats between them */
+    padding: 4px 0 5px;
+    border: 0;
+    background: var(--air-scroll-grip) 0 1px repeat-y;
+    background-clip: content-box;
+    background-origin: content-box;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before,
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+    position: absolute;
+    left: 0;
+    width: 17px;
+    content: '';
+    background-image: var(--air-scroll-thumb);
+    background-repeat: no-repeat;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before {
+    top: 0;
+    height: 4px;
+    background-position: 0 0;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+    bottom: 0;
+    height: 5px;
+    background-position: 0 -6px;
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:hover {
+    --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-hover.png');
+    --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-hover.png');
+}
+
+.octane-achievements-air .air-achievements-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:active {
+    --air-scroll-thumb: url('../../assets/images/habbo-skin/slices/scroll-thumb-3-pressed.png');
+    --air-scroll-grip: url('../../assets/images/habbo-skin/slices/scroll-grip-3-pressed.png');
 }
 
 .octane-achievements-air .air-achievements-list-grid {
@@ -366,6 +375,7 @@
 
 .octane-achievements-air .air-achievements-list.is-scrollable .air-achievements-list-grid {
     min-height: 0;
+    padding-bottom: 0;
     column-gap: 5px;
 }
 
@@ -419,7 +429,8 @@
     left: 11px !important;
     width: 40px !important;
     height: 40px !important;
-    background-position: center !important;
+    /* The badge widget centres its bitmap on whole pixels (floor); CSS rounds an odd leftover up. */
+    background-position: calc(50% - 0.01px) calc(50% - 0.01px) !important;
     background-repeat: no-repeat !important;
     transform: none !important;
     image-rendering: var(--octane-pixel-art, pixelated);
@@ -462,40 +473,11 @@
 
 .octane-achievements-air .air-achievement-details-badge-image {
     position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    transform: translate(-50%, -50%) scale(2) !important;
-    transform-origin: center !important;
+    transform: scale(2) !important;
+    transform-origin: 0 0 !important;
     image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-achievements-air .air-achievement-details-name {
-    position: absolute;
-    top: 18px;
-    left: 114px;
-    width: 238px;
-    height: 17px;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
-    text-overflow: clip;
-    white-space: nowrap;
-}
-
-.octane-achievements-air .air-achievement-details-description {
-    position: absolute;
-    top: 34px;
-    left: 114px;
-    width: 238px;
-    height: 47px;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 15px;
-    overflow-wrap: break-word;
 }
 
 .octane-achievements-air .air-achievement-details-reward {
@@ -506,7 +488,7 @@
     width: 239px;
     height: 26px;
     align-items: flex-start;
-    gap: 3px;
+    gap: 2px;
     overflow: hidden;
     font-size: 12px;
     font-weight: 400;
@@ -514,19 +496,13 @@
     white-space: nowrap;
 }
 
-.octane-achievements-air .air-achievement-details-reward > span,
-.octane-achievements-air .air-achievement-details-reward > strong {
+.octane-achievements-air .air-achievement-details-reward > .air-achievement-text {
     margin-top: 4px;
-    height: 17px;
     flex: 0 0 auto;
 }
 
-.octane-achievements-air .air-achievement-details-reward strong {
-    font-size: 12px;
-    font-weight: 700;
-}
-
 .octane-achievements-air .air-achievement-details-currency {
+    flex: 0 0 auto;
     width: 23px !important;
     min-width: 23px;
     height: 26px !important;
@@ -534,18 +510,19 @@
     background-repeat: no-repeat !important;
 }
 
-.octane-achievements-air .air-achievement-details-level {
-    position: absolute;
-    top: 97px;
-    left: 4px;
-    width: 95px;
-    height: 17px;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
-    text-align: center;
-    white-space: nowrap;
+.octane-achievements-air .air-achievement-details-currency--credit {
+    background-image: url('../../assets/images/catalog/air/currency-credit-big.png') !important;
+    background-position: 0 0 !important;
+}
+
+.octane-achievements-air .air-achievement-details-currency--ducket {
+    background-image: url('../../assets/images/catalog/air/currency-ducket-big.png') !important;
+    background-position: 0 0 !important;
+}
+
+.octane-achievements-air .air-achievement-details-currency--diamond {
+    background-image: url('../../assets/images/catalog/air/currency-diamond-big.png') !important;
+    background-position: 0 0 !important;
 }
 
 .octane-achievements-air .air-achievement-details-progress {
@@ -618,21 +595,6 @@
     width: 1px;
     height: 17px;
     background-image: var(--air-achievement-progress-fill-cap);
-}
-
-.octane-achievements-air .air-achievement-progress__text {
-    position: absolute;
-    top: 3px;
-    left: 7px;
-    z-index: 2;
-    height: 17px;
-    overflow: hidden;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
-    text-align: center;
-    white-space: nowrap;
 }
 
 .octane-room-tools .room-tool-row .icon-room-achievements {
