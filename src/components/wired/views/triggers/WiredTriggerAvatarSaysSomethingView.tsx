@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { WiredCheckboxGroup, WiredCheckboxOption, WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
+import { WiredTextInput } from '../WiredTextInput';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
 const MATCH_CONTAINS = 0;
@@ -37,77 +38,39 @@ export const WiredTriggerAvatarSaysSomethingView: FC<WiredTriggerAvatarSaysSomet
     }, [trigger]);
 
     return (
-        <WiredTriggerBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+        <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
             {usernameOnly && (
-                <Text small className="text-black/60">
-                    {localizeWithFallback('wiredfurni.params.username_as_trigger.info', 'Fires when a user says their own username.')}
-                </Text>
+                <WiredSection>
+                    <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">
+                        {localizeWithFallback('wiredfurni.params.username_as_trigger.info', 'Fires when a user says their own username.')}
+                    </span>
+                </WiredSection>
             )}
             {!usernameOnly && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{LocalizeText('wiredfurni.params.whatissaid')}</Text>
-                    <OctaneInput type="text" value={message} onChange={(event) => setMessage(event.target.value)} />
-                </div>
+                <WiredSection title={LocalizeText('wiredfurni.params.whatissaid')}>
+                    <WiredTextInput value={message} onChange={setMessage} />
+                </WiredSection>
             )}
             {!usernameOnly && (
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1">
-                        <input
-                            checked={matchMode === MATCH_CONTAINS}
-                            className="form-check-input"
-                            id="sayMatchContains"
-                            name="sayMatchMode"
-                            type="radio"
-                            onChange={() => setMatchMode(MATCH_CONTAINS)}
-                        />
-                        <Text>{LocalizeText('wiredfurni.params.chatcontains')}</Text>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <input
-                            checked={matchMode === MATCH_EXACT}
-                            className="form-check-input"
-                            id="sayMatchExact"
-                            name="sayMatchMode"
-                            type="radio"
-                            onChange={() => setMatchMode(MATCH_EXACT)}
-                        />
-                        <Text>{LocalizeText('wiredfurni.params.exactmatch')}</Text>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <input
-                            checked={matchMode === MATCH_ALL}
-                            className="form-check-input"
-                            id="sayMatchAll"
-                            name="sayMatchMode"
-                            type="radio"
-                            onChange={() => setMatchMode(MATCH_ALL)}
-                        />
-                        <Text>{LocalizeText('wiredfurni.params.allmatch')}</Text>
-                    </div>
-                </div>
+                <WiredSection title={LocalizeText('wiredfurni.params.choose_type')}>
+                    <WiredRadioGroup
+                        name="sayMatchMode"
+                        options={[
+                            { id: MATCH_CONTAINS, label: LocalizeText('wiredfurni.params.chatcontains') },
+                            { id: MATCH_EXACT, label: LocalizeText('wiredfurni.params.exactmatch') },
+                            { id: MATCH_ALL, label: LocalizeText('wiredfurni.params.allmatch') }
+                        ]}
+                        value={matchMode}
+                        onChange={setMatchMode}
+                    />
+                </WiredSection>
             )}
-            <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
-                    <input
-                        checked={hideMessage}
-                        className="form-check-input"
-                        id="sayHideMessage"
-                        type="checkbox"
-                        onChange={(event) => setHideMessage(event.target.checked)}
-                    />
-                    <Text>{LocalizeText('wiredfurni.params.chat.hide')}</Text>
-                </div>
-                <div className="flex items-center gap-1">
-                    <input
-                        checked={ownerOnly}
-                        className="form-check-input"
-                        id="sayOwnerOnly"
-                        type="checkbox"
-                        onChange={(event) => setOwnerOnly(event.target.checked)}
-                    />
-                    <Text>{LocalizeText('wiredfurni.params.chat.onlyowner')}</Text>
-                </div>
-            </div>
+            <WiredSection title={LocalizeText('wiredfurni.params.select_options')}>
+                <WiredCheckboxGroup>
+                    <WiredCheckboxOption checked={hideMessage} label={LocalizeText('wiredfurni.params.chat.hide')} onChange={setHideMessage} />
+                    <WiredCheckboxOption checked={ownerOnly} label={LocalizeText('wiredfurni.params.chat.onlyowner')} last={true} onChange={setOwnerOnly} />
+                </WiredCheckboxGroup>
+            </WiredSection>
         </WiredTriggerBaseView>
     );
 };

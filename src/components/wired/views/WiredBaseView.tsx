@@ -15,7 +15,7 @@ import volterAtlas from '../../../assets/images/wired/volter_shell_atlas.png';
 import { OctaneCardContentView, OctaneCardView, Text } from '../../../common';
 import { useWired, useWiredTools } from '../../../hooks';
 import { WiredBannerCanvas } from './WiredBannerCanvas';
-import { WiredFurniSelectorView } from './WiredFurniSelectorView';
+import { WiredFurniSelectorSection, WiredFurniSelectorView } from './WiredFurniSelectorView';
 import { WiredSection, WiredSplitter } from './WiredSection';
 import { WiredShellButton, WiredShellHeaderView } from './WiredShellHeaderView';
 import { WiredVolterBorderView, WiredVolterFrameView } from './WiredVolterFrameView';
@@ -37,6 +37,9 @@ export interface WiredBaseViewProps {
     showSelection?: boolean;
     /** Children are native sections (WiredSection) that bring their own splitters instead of one padded body. */
     nativeLayout?: boolean;
+    /** The action delay section: native frames put it after the furni picks, legacy ones keep it with the body. */
+    delay?: ReactNode;
+    legacyDelay?: ReactNode;
 }
 
 export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) => {
@@ -52,7 +55,9 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         footerCollapsible = true,
         selectionPreview = null,
         showSelection = true,
-        nativeLayout = false
+        nativeLayout = false,
+        delay = null,
+        legacyDelay = null
     } = props;
     const [needsSave, setNeedsSave] = useState<boolean>(false);
     const [keepOpenOnSave, setKeepOpenOnSave] = useState<boolean>(false);
@@ -79,6 +84,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
     const wiredName = furniData?.name || `NAME: ${trigger?.spriteId ?? -1}`;
     const shellStyle = resolveWiredStyle(activeWiredStyle, furniData?.className);
     const isVolter = isWiredVolterStyle(shellStyle);
+    const isNative = shellStyle === 'illumina';
     const iconOffset = { action: 0, trigger: 16, condition: 32, selector: 48, extra: 64, variable: 80 }[wiredType];
     const [summaryKind = '', summaryName = ''] = (wiredName || '').split(':', 2);
 
@@ -204,26 +210,26 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
     resolvedCardStyle.maxWidth = cardWidth;
     resolvedCardStyle.resize = 'none';
 
-    const bodySections = nativeLayout ? (
+    const advancedToggle = (
+        <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
+            {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
+        </button>
+    );
+
+    const bodySections = isNative ? (
         <>
-            {children}
-            {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
-                <WiredSection className="octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</WiredSection>
-            )}
-            {footer && (
-                <WiredSection className="octane-wired__section--footer">
-                    {footerCollapsible ? (
-                        <>
-                            <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
-                                {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
-                            </button>
-                            {showFooter && <div className="octane-wired__advanced-body">{footer}</div>}
-                        </>
-                    ) : (
-                        footer
-                    )}
-                </WiredSection>
-            )}
+            {nativeLayout ? children : !!children && <WiredSection className="octane-wired__section--body">{children}</WiredSection>}
+            {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (selectionPreview || <WiredFurniSelectorSection />)}
+            {delay}
+            {footer &&
+                (footerCollapsible ? (
+                    <div className="octane-wired__native-advanced">
+                        {advancedToggle}
+                        {showFooter && <div className="octane-wired__native-advanced-body">{footer}</div>}
+                    </div>
+                ) : (
+                    <WiredSection className="octane-wired__section--footer">{footer}</WiredSection>
+                ))}
         </>
     ) : (
         <>
@@ -235,15 +241,14 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                     <div className="octane-wired__section octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>
                 </>
             )}
+            {legacyDelay}
             {footer && (
                 <>
                     <div className="octane-wired__divider" />
                     <div className="octane-wired__section octane-wired__section--footer">
                         {footerCollapsible ? (
                             <>
-                                <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
-                                    {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
-                                </button>
+                                {advancedToggle}
                                 {showFooter && <div className="octane-wired__advanced-body">{footer}</div>}
                             </>
                         ) : (
@@ -257,7 +262,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
 
     return (
         <OctaneCardView
-            className={`octane-wired octane-wired--official ${nativeLayout ? 'octane-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'octane-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'octane-wired--volter-colour' : ''}`}
+            className={`octane-wired octane-wired--official ${isNative ? 'octane-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'octane-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'octane-wired--volter-colour' : ''}`}
             theme="primary-slim"
             uniqueKey="octane-wired"
             isResizable={false}
@@ -301,9 +306,9 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                     {isWiredVolterStyle(shellStyle) && shellStyle !== 'volter' ? (
                         <WiredVolterBorderView shellStyle={shellStyle}>{bodySections}</WiredVolterBorderView>
                     ) : bodySections}
-                    {!nativeLayout && <div className="octane-wired__divider octane-wired__footer-divider" />}
-                    <div className={nativeLayout ? 'octane-wired__native-footer' : 'contents'}>
-                        {nativeLayout && <WiredSplitter />}
+                    {!isNative && <div className="octane-wired__divider octane-wired__footer-divider" />}
+                    <div className={isNative ? 'octane-wired__native-footer' : 'contents'}>
+                        {isNative && <WiredSplitter />}
                         <div className="flex items-center gap-1 octane-wired__actions">
                             <WiredShellButton shellStyle={shellStyle} disabled={!roomSettings.canModify} onClick={() => onSave(false)}>
                                 {LocalizeText('wiredfurni.ready')}

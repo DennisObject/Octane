@@ -1232,7 +1232,7 @@
         min-height: 16px;
         font-size: 11px !important;
         font-weight: 700;
-        letter-spacing: 0;
+        letter-spacing: -0.1px;
         line-height: 16px;
         text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
@@ -1244,6 +1244,7 @@
         color: #494949;
         font-size: 12px !important;
         font-weight: 700;
+        letter-spacing: -0.2px;
         line-height: 17px;
         text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
@@ -1886,15 +1887,15 @@
     font-weight: 700;
 }
 
-.octane-wired__number-input {
+.octane-wired__input-box {
     position: relative;
     flex: none;
     height: 21px;
     isolation: isolate;
 }
 
-.octane-wired__number-input::before,
-.octane-wired__number-input::after {
+.octane-wired__input-box::before,
+.octane-wired__input-box::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -1903,20 +1904,20 @@
     image-rendering: pixelated;
 }
 
-.octane-wired__number-input::before {
+.octane-wired__input-box::before {
     border-image: url('../assets/images/wired/native/input_background.png') 8 5 4 5 fill / 8px 5px 4px 5px stretch;
 }
 
 /* The straight edges are single AIR pixel rows, so the bitmap keeps only those inside the 4px edge bands. */
-.octane-wired__number-input::after {
+.octane-wired__input-box::after {
     border-image: url('../assets/images/wired/native/input_border.png') 4 4 5 4 / 4px 4px 5px 4px stretch;
 }
 
-.octane-wired__number-input.is-invalid::before {
+.octane-wired__input-box.is-invalid::before {
     filter: sepia(1) saturate(4) hue-rotate(-30deg);
 }
 
-.octane-wired .octane-wired__number-input .octane-wired__number-input-field {
+.octane-wired .octane-wired__input-box .octane-wired__input-field {
     position: absolute;
     left: 4px;
     top: 2px;
@@ -1989,4 +1990,136 @@
     width: 100%;
     height: 100%;
     image-rendering: pixelated;
+}
+
+.octane-wired--native-layout {
+    .octane-wired__native-advanced {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .octane-wired__native-advanced-body {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: #ccc;
+    }
+
+    .octane-wired__text--soft {
+        color: #444;
+    }
+
+    .octane-wired__text--wrap {
+        white-space: normal;
+        line-height: 13px;
+    }
+}
+
+.octane-wired .octane-wired__input-box .octane-wired__input-field.octane-wired__input-field--stretch {
+    width: calc(100% - 8px);
+}
+
+.octane-wired__input-limit {
+    position: absolute;
+    right: 0;
+    bottom: 24px;
+    padding: 1px 5px;
+    background: rgba(34, 34, 34, 0.7);
+    color: #fff;
+    font-size: 11px;
+    line-height: 14px;
+}
+
+/* Option rows (RadioButtonPreset / CheckboxOptionPreset). */
+.octane-wired__options {
+    display: grid;
+    column-gap: 5px;
+}
+
+.octane-wired__options--checkbox {
+    display: flex;
+    flex-direction: column;
+}
+
+.octane-wired__option {
+    display: flex;
+    align-items: flex-start;
+    gap: 3px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.octane-wired__option.is-last {
+    height: 16px;
+}
+
+.octane-wired__option.is-disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.octane-wired__option--checkbox {
+    height: 25px;
+}
+
+.octane-wired__option--checkbox.is-last {
+    height: 21px;
+}
+
+.octane-wired__option--checkbox .octane-wired__text {
+    margin-top: 2px;
+}
+
+.octane-wired .octane-wired__option input[type='radio'] {
+    flex: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 2px 0 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/radio.png') 0 0 / 11px 24px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired .octane-wired__option input[type='radio']:checked {
+    background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 19px;
+    height: 20px;
+    min-width: 19px;
+    margin: 0 0 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/checkbox.png') 0 -23px / 19px 43px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox']:checked {
+    background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox']::before,
+.octane-wired .octane-wired__option input[type='checkbox']::after {
+    content: none;
+}
+
+.octane-wired--native-layout .octane-wired__native-advanced > .octane-wired__advanced-toggle {
+    height: 16px;
+    padding: 0 2px !important;
+    color: #000;
+    font-size: 11px !important;
+    line-height: 16px;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.698);
 }
