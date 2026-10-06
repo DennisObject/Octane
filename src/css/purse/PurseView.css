@@ -365,6 +365,7 @@
     box-sizing: border-box;
     width: 192px;
     max-width: 192px;
+    margin-top: -1px;
     margin-left: auto;
     padding: 7px 0 7px 7px;
     display: flex;
@@ -405,10 +406,11 @@
     position: relative;
     z-index: 1;
     appearance: none;
+    box-sizing: border-box;
     width: 120px;
     height: 17px;
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 3px;
     border: 0;
     background: transparent;
     color: #ffffff;
