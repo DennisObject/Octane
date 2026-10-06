@@ -7,6 +7,7 @@ import {
 import { FC, useEffect, useState } from 'react';
 import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } from '../../../../../../api';
 import { LayoutFurniImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../../../common';
+import { NativeText } from '../../../../../../common/native-text/NativeText';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../../../events';
 import { useMarketplaceConfiguration, useMessageEvent, useNotification, useUiEvent } from '../../../../../../hooks';
 import { OctaneButton } from '../../../../../../layout';
@@ -119,66 +120,70 @@ export const MarketplacePostOfferView: FC<{}> = () => {
         close();
     };
 
-    const infoText = isNaN(askingPrice)
+    const infoText = !isPriceValid
         ? LocalizeText('shop.marketplace.invalid.price', ['minPrice', 'maxPrice'], [minimumPrice.toString(), maximumPrice.toString()])
         : `${LocalizeText('sell.in.marketplace.revenue.label')}: ${revenue}`;
 
     return (
-        <OctaneCardView className="octane-market-offer" frameStyle={3} isResizable={false} offsetTop={-36} uniqueKey="marketplace-offer">
+        <OctaneCardView className="octane-market-offer" frameStyle={3} isResizable={false} initialPosition={{ x: Math.round((window.innerWidth - 300) / 2), y: Math.round((window.innerHeight - 429) / 2) }} uniqueKey="marketplace-offer">
             <OctaneCardHeaderView headerText={LocalizeText('inventory.marketplace.make_offer.title')} onCloseClick={close} />
             <div className="octane-market-offer-body">
                 <div className="octane-market-offer-image">
                     <LayoutFurniImageView
+                        direction={90}
+                        style={{ backgroundColor: '#eeeeee' }}
                         extraData={item.extra.toString()}
                         productClassId={item.type}
                         productType={item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR}
                     />
                 </div>
-                <div className="octane-market-offer-name">{furniTitle}</div>
+                <div className="octane-market-offer-name"><NativeText text={furniTitle} textStyle="u_headline_medium" background={0xe9e9e1} maxWidth={190} /></div>
                 <div className="octane-market-offer-expiration">
-                    {LocalizeText('inventory.marketplace.make_offer.expiration_info_days', ['days'], [String(Math.round((marketplaceConfiguration?.offerTime ?? 48) / 24))])}
+                    <NativeText text={LocalizeText('inventory.marketplace.make_offer.expiration_info_days', ['days'], [String(marketplaceConfiguration.offerTime / 24)])} textStyle="u_regular" background={0xe9e9e1} maxWidth={268} />
                 </div>
-                <div className="octane-market-offer-label is-price">{LocalizeText('inventory.marketplace.make_offer.price_request')}</div>
+                <div className="octane-market-offer-label is-price"><NativeText text={LocalizeText('inventory.marketplace.make_offer.price_request')} textStyle="u_headline_small" background={0xe9e9e1} /></div>
                 <div className="octane-market-offer-field is-price">
-                    <input inputMode="numeric" value={priceText} onChange={(event) => setPriceText(event.target.value.replace(/\D/g, '').slice(0, 8))} />
+                    <input inputMode="numeric" value={priceText} onChange={(event) => {
+                        const value = event.target.value.replace(/\D/g, '');
+                        setPriceText(parseInt(value, 10) > maximumPrice ? String(maximumPrice) : value);
+                    }} />
                 </div>
-                <div className="octane-market-offer-label is-amount">{LocalizeText('sellinmarketplace.amount', ['max_amount'], [maxAmount.toString()])}</div>
+                <div className="octane-market-offer-label is-amount"><NativeText text={LocalizeText('sellinmarketplace.amount', ['max_amount'], [maxAmount.toString()])} textStyle="u_headline_small" background={0xe9e9e1} /></div>
                 <div className="octane-market-offer-field is-amount">
                     <input
                         inputMode="numeric"
                         value={amountText}
-                        onChange={(event) => setAmountText(event.target.value.replace(/\D/g, ''))}
-                        onBlur={() => setAmountText(String(isNaN(amount) ? 1 : Math.max(1, Math.min(amount, maxAmount))))}
+                        onChange={(event) => setAmountText(String(Math.max(1, Math.min(parseInt(event.target.value.replace(/\D/g, ''), 10) || 1, maxAmount))))}
                     />
                 </div>
                 <div className="octane-market-offer-list">
-                    {!!itemStats?.averagePrice && itemStats.historyLength > 0 && (
-                        <div>{LocalizeText('inventory.marketplace.make_offer.average_price', ['days', 'price'], [itemStats.historyLength.toString(), itemStats.averagePrice.toString()])}</div>
+                    {itemStats?.averagePrice > 0 && (
+                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.average_price', ['days', 'price'], [marketplaceConfiguration.displayTime.toString(), itemStats.averagePrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
                     )}
-                    {!!itemStats?.lowestPrice && (
-                        <div>{LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestPrice.toString()])}</div>
+                    {itemStats?.lowestPrice > 0 && (
+                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestPrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
                     )}
-                    {!!suggestedPrice && (
+                    {suggestedPrice > 0 && (
                         <>
-                            <div>{LocalizeText('inventory.marketplace.make_offer.suggested_price', ['price'], [suggestedPrice.toString()])}</div>
+                            <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.suggested_price', ['price'], [suggestedPrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
                             <OctaneButton
                                 className="octane-market-offer-copy"
                                 onClick={() => {
-                                    setPriceText(suggestedPrice.toString());
+                                    setPriceText(String(Math.min(suggestedPrice, maximumPrice)));
                                     navigator.clipboard?.writeText(suggestedPrice.toString()).catch(() => undefined);
                                 }}
                             >
-                                {LocalizeText('inventory.marketplace.make_offer.copy_suggested_price')}
+                                <NativeText text={LocalizeText('inventory.marketplace.make_offer.copy_suggested_price')} textStyle="button_shiny_regular" background={0xffffff} />
                             </OctaneButton>
                         </>
                     )}
-                    <div className="octane-market-offer-final">{infoText}</div>
+                    <div className="octane-market-offer-final"><div className="octane-market-offer-final-text"><NativeText text={infoText} textStyle="u_regular" background={0xffffff} maxWidth={257} align="center" /></div></div>
                     <div className="octane-market-offer-buttons">
                         <OctaneButton className="octane-market-offer-post" disabled={!isPriceValid || !isAmountValid} onClick={postItem}>
-                            {LocalizeText('inventory.marketplace.make_offer.post')}
+                            <NativeText text={LocalizeText('inventory.marketplace.make_offer.post')} textStyle="button_shiny_regular" background={isPriceValid && isAmountValid ? 0xffffff : 0xc3c3c1} />
                         </OctaneButton>
                         <OctaneButton className="octane-market-offer-cancel" onClick={close}>
-                            {LocalizeText('inventory.marketplace.make_offer.cancel')}
+                            <NativeText text={LocalizeText('inventory.marketplace.make_offer.cancel')} textStyle="button_shiny_regular" background={0xffffff} />
                         </OctaneButton>
                     </div>
                 </div>

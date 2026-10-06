@@ -1,9 +1,9 @@
-/* v75 make_marketplace_offer: 300px frame, controls at their XML rect inside the client area that starts at (6,29). */
+/* v75 make_marketplace_offer: 300px frame, controls at their XML rect inside the client area that starts at (6,30). */
 .octane-market-offer {
     box-sizing: border-box !important;
     width: 300px !important;
     min-width: 300px !important;
-    padding: 29px 6px 14px !important;
+    padding: 30px 6px 12px !important;
     background: transparent !important;
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
     font-size: 12px;
@@ -16,7 +16,7 @@
 .octane-market-offer-body {
     position: relative;
     width: 288px;
-    height: 310px;
+    padding-top: 190px;
 }
 
 .octane-market-offer-image {
@@ -26,6 +26,13 @@
     width: 70px;
     height: 70px;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-market-offer-image > .furni-image {
+    flex: none;
 }
 
 .octane-market-offer-name {
@@ -34,7 +41,6 @@
     top: 13px;
     width: 190px;
     max-height: 56px;
-    padding-left: 2px;
     overflow: hidden;
     font-size: 14px;
     font-weight: 700;
@@ -46,7 +52,6 @@
     left: 10px;
     top: 87px;
     width: 268px;
-    padding-left: 2px;
 }
 
 .octane-market-offer-label {
@@ -101,9 +106,8 @@
 
 /* itemlist (10,190) 268 wide, spacing 7. */
 .octane-market-offer-list {
-    position: absolute;
+    position: relative;
     left: 10px;
-    top: 190px;
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -113,8 +117,8 @@
 .octane-market-offer-list button {
     box-sizing: border-box;
     padding: 0;
-    border: 5px solid transparent;
-    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch;
+    border: 5px solid transparent !important;
+    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch !important;
     background: transparent;
     color: #111;
     font: inherit;
@@ -124,9 +128,9 @@
     image-rendering: pixelated;
 }
 
-.octane-market-offer-list button:hover:not(:disabled) { border-image-source: var(--habbo-skin-shiny-hover); }
-.octane-market-offer-list button:active:not(:disabled) { border-image-source: var(--habbo-skin-shiny-pressed); }
-.octane-market-offer-list button:disabled { border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png'); opacity: 1; }
+.octane-market-offer-list button:hover:not(:disabled) { border-image-source: var(--habbo-skin-shiny-hover) !important; }
+.octane-market-offer-list button:active:not(:disabled) { border-image-source: var(--habbo-skin-shiny-pressed) !important; }
+.octane-market-offer-list button:disabled { border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important; opacity: 1; }
 
 .octane-market-offer-copy {
     align-self: flex-end;
@@ -135,13 +139,11 @@
 }
 
 .octane-market-offer-final {
+    position: relative;
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 268px;
     height: 54px;
-    padding: 0 6px;
+    padding: 0;
     border: 6px solid transparent;
     border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
     text-align: center;
@@ -155,9 +157,42 @@
 .octane-market-offer-buttons button {
     position: absolute;
     top: 0;
-    width: 130px;
+    width: max-content;
+    max-width: 130px;
+    padding: 0 2px 0 3px;
     height: 28px;
 }
 
 .octane-market-offer-post { left: 0; }
-.octane-market-offer-cancel { left: 138px; }
+.octane-market-offer-cancel { right: 0; }
+
+.octane-market-offer-list button > [data-native-text] {
+    mix-blend-mode: multiply;
+}
+
+/* final_price: center autosize around the native (6,11) 257x30 text field. */
+.octane-market-offer-final-text {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 257px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-market-offer-final-text > [data-native-text] {
+    flex: none;
+}
+
+.octane-market-offer-list button:disabled > [data-native-text] {
+    mix-blend-mode: normal;
+    opacity: 0.5;
+}
+
+.octane-market-offer-stat {
+    height: 18px;
+    flex: none;
+    overflow: hidden;
+}

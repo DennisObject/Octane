@@ -1,6 +1,6 @@
 {
     "inventory.marketplace.confirm_offer.info.multiple": "You are listing %amount% %furniname% at %price% Credit(s) each. If all are sold, you will receive %total% Credit(s).",
-    "inventory.marketplace.make_offer.average_price": "Average price (%days% days): %price%",
+    "inventory.marketplace.make_offer.average_price": "Average price in last %days% days: %price% credits (%price_no_commission% without the commission).",
     "inventory.marketplace.make_offer.copy_suggested_price": "Copy suggested price",
     "inventory.marketplace.make_offer.expiration_info_days": "Your offer will be visible to other users for %days% days",
     "inventory.marketplace.make_offer.lowest_price": "Current lowest competing price: %price%",
