@@ -25,7 +25,7 @@ export const normalizeGlobalPlaceholderName = (value: string): string => {
 
     if (WRAPPED_PLACEHOLDER.test(normalized)) normalized = normalized.substring(2, normalized.length - 1).trim();
 
-    return normalized.slice(0, GLOBAL_PLACEHOLDER_NAME_MAX_LENGTH);
+    return normalized.split(' ').join('_').toLowerCase().slice(0, GLOBAL_PLACEHOLDER_NAME_MAX_LENGTH);
 };
 
 export const normalizeGlobalPlaceholderValue = (value: string): string => (value ?? '').replace(/[\t\r\n]/g, '').slice(0, GLOBAL_PLACEHOLDER_VALUE_MAX_LENGTH);
