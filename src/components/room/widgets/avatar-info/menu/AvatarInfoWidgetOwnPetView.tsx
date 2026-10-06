@@ -192,7 +192,7 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = (
                                 {LocalizeText('infostand.button.revive')}
                             </ContextMenuListItemView>
                         )}
-                        {roomSession.isRoomOwner && (
+                        {avatarInfo.dead && roomSession.isRoomOwner && GetConfigurationValue<boolean>('monsterplants.composting.enabled', false) && (
                             <ContextMenuListItemView onClick={(event) => processAction('compost')}>
                                 {LocalizeText('infostand.button.compost')}
                             </ContextMenuListItemView>

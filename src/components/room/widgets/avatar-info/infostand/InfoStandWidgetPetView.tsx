@@ -1,20 +1,21 @@
-import { CreateLinkEvent, PetRespectComposer, PetType, RoomControllerLevel } from '@octane/renderer';
+import { CreateLinkEvent, PetRespectComposer, PetType, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType } from '@octane/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { ConvertSeconds, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button, Column, Flex, LayoutCounterTimeView, LayoutPetImageView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
+import { GetConfigurationValue, LocalizeText, ProcessRoomObjectOperation, SendMessageComposer } from '../../../../../api';
+import { Button, Column, Flex, LayoutPetImageView } from '../../../../../common';
 import { useRoom, useSessionInfo } from '../../../../../hooks';
-import { InfoStandHeaderView } from './InfoStandHeaderView';
 import { HasPermission, Permission } from '../../../../../api/permissions';
 import { InfoStandCenteredText } from './InfoStandCenteredText';
-import { InfoStandUnitIdView } from './InfoStandUnitIdView';
 import energyIcon from '../../../../../assets/images/infostand/pet/icon_pet_energy.png';
 import experienceIcon from '../../../../../assets/images/infostand/pet/icon_pet_experience.png';
 import happinessIcon from '../../../../../assets/images/infostand/pet/icon_pet_happiness.png';
 import respectIcon from '../../../../../assets/images/infostand/pet/icon_petrespect.png';
+import wellbeingIcon from '../../../../../assets/images/infostand/pet/icon_pet_wellbeing.png';
+import clockBackground from '../../../../../assets/images/infostand/pet/clock-background.png';
 
 // TypeScript interface for AvatarInfoPet
 interface AvatarInfoPet {
     id: number;
+    roomIndex?: number;
     name: string;
     petType: number;
     petBreed: number;
@@ -45,92 +46,16 @@ interface InfoStandWidgetPetViewProps {
     onClose: () => void;
 }
 
-const PetHeader: FC<{ name: string; petType: number; petBreed: number; onClose: () => void }> = ({ name, petType, petBreed, onClose }) => (
-    <div className="flex flex-col gap-1">
-        <InfoStandHeaderView name={name} onClose={onClose} />
-        <Text small wrap variant="white">
-            {LocalizeText(`pet.breed.${petType}.${petBreed}`)}
-        </Text>
-        <div className="octane-infostand__rule" />
-    </div>
-);
-
-const MonsterplantStats: FC<{
-    avatarInfo: AvatarInfoPet;
-    remainingGrowTime: number;
-    remainingTimeToLive: number;
-}> = ({ avatarInfo, remainingGrowTime, remainingTimeToLive }) => (
-    <>
-        <Column center gap={1}>
-            <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
-            <div className="octane-infostand__rule" />
-        </Column>
-        <div className="flex flex-col gap-2">
-            {!avatarInfo.dead && (
-                <Column alignItems="center" gap={1}>
-                    <Text center small wrap variant="white">
-                        {LocalizeText('pet.level', ['level', 'maxlevel'], [avatarInfo.level.toString(), avatarInfo.maximumLevel.toString()])}
-                    </Text>
-                </Column>
-            )}
-            <Column alignItems="center" gap={1}>
-                <Text small truncate variant="white">
-                    {LocalizeText('infostand.pet.text.wellbeing')}
-                </Text>
-                <div className="bg-light-dark rounded relative overflow-hidden w-full">
-                    <div className="flex justify-center items-center size-full absolute">
-                        <Text small variant="white">
-                            {avatarInfo.dead || remainingTimeToLive <= 0
-                                ? '00:00:00'
-                                : `${ConvertSeconds(remainingTimeToLive).split(':')[1]}:${ConvertSeconds(remainingTimeToLive).split(':')[2]}:${ConvertSeconds(remainingTimeToLive).split(':')[3]}`}
-                        </Text>
-                    </div>
-                    <div
-                        className="bg-success rounded pet-stats"
-                        style={{
-                            width: avatarInfo.dead || remainingTimeToLive <= 0 ? '0' : `${(remainingTimeToLive / avatarInfo.maximumTimeToLive) * 100}%`
-                        }}
-                    />
-                </div>
-            </Column>
-            {remainingGrowTime > 0 && (
-                <Column alignItems="center" gap={1}>
-                    <Text small truncate variant="white">
-                        {LocalizeText('infostand.pet.text.growth')}
-                    </Text>
-                    <LayoutCounterTimeView
-                        className="top-2 inset-e-2"
-                        day={ConvertSeconds(remainingGrowTime).split(':')[0]}
-                        hour={ConvertSeconds(remainingGrowTime).split(':')[1]}
-                        minutes={ConvertSeconds(remainingGrowTime).split(':')[2]}
-                        seconds={ConvertSeconds(remainingGrowTime).split(':')[3]}
-                    />
-                </Column>
-            )}
-            <Column alignItems="center" gap={1}>
-                <Text small truncate variant="white">
-                    {LocalizeText('infostand.pet.text.raritylevel', ['level'], [LocalizeText(`infostand.pet.raritylevel.${avatarInfo.rarityLevel}`)])}
-                </Text>
-                <LayoutRarityLevelView className="top-2 inset-e-2" level={avatarInfo.rarityLevel} />
-            </Column>
-            <div className="octane-infostand__rule" />
-        </div>
-        <div className="flex flex-col gap-1">
-            <div className="octane-infostand__score">{LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}</div>
-            <div className="octane-infostand__rule" />
-        </div>
-    </>
-);
-
 // pet_view status bars: 162x16 bitmaps drawn by the controller (1px #dadada frame, #3a3a3a track, 4px highlight).
-const PetStatusBar: FC<{ top: number; label: string; icon: string; value: number; maximum: number; color: string; highlight: string }> = ({
+const PetStatusBar: FC<{ top: number; label: string; icon: string; value: number; maximum: number; color: string; highlight: string; text?: string }> = ({
     top,
     label,
     icon,
     value,
     maximum,
     color,
-    highlight
+    highlight,
+    text
 }) => {
     const fill = Math.max(0, Math.min(Math.max(maximum, 1), value)) / Math.max(maximum, 1);
 
@@ -144,11 +69,19 @@ const PetStatusBar: FC<{ top: number; label: string; icon: string; value: number
                 <div className="octane-pet-infostand__bar-fill" style={{ width: fill * 160, background: color }} />
                 <div className="octane-pet-infostand__bar-highlight" style={{ width: fill * 160, background: highlight }} />
                 <InfoStandCenteredText className="octane-pet-infostand__bar-value" width={160}>
-                    {value + '/' + maximum}
+                    {text ?? value + '/' + maximum}
                 </InfoStandCenteredText>
             </div>
         </>
     );
+};
+
+const pad = (value: number) => value.toString().padStart(2, '0');
+
+const formatWellbeing = (seconds: number) => {
+    const total = Math.max(0, Math.floor(seconds));
+
+    return Math.floor(total / 3600) + ':' + pad(Math.floor((total % 3600) / 60)) + ':' + pad(total % 60);
 };
 
 export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatarInfo, onClose }) => {
@@ -193,8 +126,11 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                     case 'treat':
                         SendMessageComposer(new PetRespectComposer(avatarInfo.id));
                         break;
-                    case 'compost':
-                        roomSession?.compostPlant(avatarInfo.id);
+                    case 'move':
+                        ProcessRoomObjectOperation(avatarInfo.roomIndex, RoomObjectCategory.UNIT, RoomObjectOperationType.OBJECT_MOVE);
+                        break;
+                    case 'rotate':
+                        ProcessRoomObjectOperation(avatarInfo.roomIndex, RoomObjectCategory.UNIT, RoomObjectOperationType.OBJECT_ROTATE_POSITIVE);
                         break;
                     case 'pick_up':
                         roomSession?.pickupPet(avatarInfo.id);
@@ -211,14 +147,25 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
 
     // button_list: a 250px list whose regions are placed from the right edge in layout order (pick up, train, buy food,
     // respect, treat, kick) and wrap onto a new 25px row, 5px below, when the next one no longer fits.
+    // The pet widget enables kick (and, for plants, move and rotate) for the pet's owner, the room owner, anyone with rooms rights or any room controller.
+    const canManage = avatarInfo.isOwner || !!roomSession?.isRoomOwner || roomSession?.controllerLevel >= RoomControllerLevel.GUEST || HasPermission(Permission.RoomOwnerAny);
+    const isPlant = avatarInfo.petType === PetType.MONSTERPLANT;
+
     const buttons = [
         {
-            // The pet widget enables kick for the pet's owner, the room owner, anyone with rooms rights or any room controller.
+            action: 'move',
+            label: LocalizeText('infostand.button.move'),
+            condition: isPlant && canManage
+        },
+        {
+            action: 'rotate',
+            label: LocalizeText('infostand.button.rotate'),
+            condition: isPlant && canManage
+        },
+        {
             action: 'pick_up',
             label: LocalizeText('infostand.button.petkick'),
-            condition:
-                avatarInfo.petType !== PetType.MONSTERPLANT &&
-                (avatarInfo.isOwner || !!roomSession?.isRoomOwner || roomSession?.controllerLevel >= RoomControllerLevel.GUEST || HasPermission(Permission.RoomOwnerAny))
+            condition: !isPlant && canManage
         },
         {
             action: 'treat',
@@ -239,11 +186,6 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
             action: 'train',
             label: LocalizeText('infostand.button.train'),
             condition: avatarInfo.isOwner && avatarInfo.petType !== PetType.MONSTERPLANT
-        },
-        {
-            action: 'compost',
-            label: LocalizeText('infostand.button.compost'),
-            condition: roomSession?.isRoomOwner && avatarInfo.petType === PetType.MONSTERPLANT
         },
         {
             action: 'pick_up',
@@ -324,23 +266,58 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
             </Column>
         );
 
+    const total = Math.max(0, Math.floor(remainingGrowTime));
+    const clock = [pad(Math.floor(total / 3600)), pad(Math.floor((total % 3600) / 60)), pad(total % 60)];
+    const clockUnits = [LocalizeText('countdown_clock_unit_hours'), LocalizeText('countdown_clock_unit_minutes'), LocalizeText('countdown_clock_unit_seconds')];
+    const wellbeing = avatarInfo.dead ? 0 : Math.max(0, remainingTimeToLive);
+
     return (
-        <Column alignItems="end" gap={1}>
-            <Column className="octane-infostand rounded">
-                <Column className="container-fluid content-area" gap={1} overflow="visible">
-                    <PetHeader name={avatarInfo.name} petType={avatarInfo.petType} petBreed={avatarInfo.petBreed} onClose={onClose} />
-                    <MonsterplantStats avatarInfo={avatarInfo} remainingGrowTime={remainingGrowTime} remainingTimeToLive={remainingTimeToLive} />
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                            <UserProfileIconView userId={avatarInfo.ownerId} />
-                            <Text small wrap variant="white">
-                                {LocalizeText('infostand.text.petowner', ['name'], [avatarInfo.ownerName])}
-                            </Text>
-                        </div>
-                        <InfoStandUnitIdView id={avatarInfo.id} ownerId={avatarInfo.ownerId} />
-                    </div>
-                </Column>
-            </Column>
+        <Column alignItems="end" className="octane-pet-infostand-stack">
+            <div className="octane-infostand octane-pet-infostand octane-pet-infostand--plant">
+                <button type="button" className="octane-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
+                <InfoStandCenteredText className="octane-pet-infostand__name" width={173}>
+                    {avatarInfo.name}
+                </InfoStandCenteredText>
+                <div className="octane-pet-infostand__image">
+                    <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
+                </div>
+                <PetStatusBar
+                    color="#5e9d00"
+                    highlight="#8ac51e"
+                    icon={wellbeingIcon}
+                    label={LocalizeText('infostand.pet.text.wellbeing')}
+                    maximum={avatarInfo.maximumTimeToLive}
+                    text={formatWellbeing(wellbeing)}
+                    top={112}
+                    value={wellbeing}
+                />
+                {remainingGrowTime > 0 && (
+                    <>
+                        <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top: 147 }} width={169}>
+                            {LocalizeText('infostand.pet.text.growth')}
+                        </InfoStandCenteredText>
+                        {clock.map((value, index) => (
+                            <div key={index} className="octane-pet-infostand__clock" style={{ left: 46 + index * 36, backgroundImage: `url(${clockBackground})` }}>
+                                <span>{value}</span>
+                                <em>{clockUnits[index]}</em>
+                                {index < 2 && <i>:</i>}
+                            </div>
+                        ))}
+                    </>
+                )}
+                <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top: 201 }} width={169}>
+                    {LocalizeText('infostand.pet.text.raritylevel', ['level'], [LocalizeText(`infostand.pet.raritylevel.${avatarInfo.rarityLevel}`)])}
+                </InfoStandCenteredText>
+                <div className="octane-pet-infostand__rarity">
+                    <div>{avatarInfo.rarityLevel}</div>
+                </div>
+                <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 272 }} width={173}>
+                    {LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}
+                </InfoStandCenteredText>
+                <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 285 }} width={173}>
+                    {LocalizeText('infostand.text.petowner', ['name'], [avatarInfo.ownerName])}
+                </InfoStandCenteredText>
+            </div>
             {actions}
         </Column>
     );

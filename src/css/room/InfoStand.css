@@ -795,6 +795,7 @@
 
 .octane-pet-actions {
   flex-flow: row-reverse wrap;
+  justify-content: flex-start !important;
   width: 250px;
   gap: 5px;
 }
@@ -928,6 +929,81 @@
   margin-left: 3px;
   vertical-align: top;
   image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* Monsterplant variant of pet_view: 190x307, no breed line. */
+.octane-infostand.octane-pet-infostand--plant {
+  height: 307px;
+}
+
+.octane-pet-infostand--plant .octane-pet-infostand__image {
+  top: 27px;
+}
+
+.octane-pet-infostand__clock {
+  position: absolute;
+  top: 163px;
+  width: 27px;
+  height: 23px;
+  background-repeat: no-repeat;
+}
+
+.octane-pet-infostand__clock span {
+  position: absolute;
+  inset: 0;
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 23px;
+  color: #fff;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__clock em {
+  position: absolute;
+  top: 27px;
+  left: 0;
+  width: 27px;
+  font-size: 9px;
+  font-style: normal;
+  line-height: 12px;
+  color: #121212;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__clock i {
+  position: absolute;
+  top: 5px;
+  left: 29px;
+  width: 6px;
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 13px;
+  color: #121212;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__rarity {
+  position: absolute;
+  top: 219px;
+  left: 77px;
+  width: 36px;
+  height: 28px;
+  background: url('@/assets/images/infostand/rarity-level.png') no-repeat;
+}
+
+.octane-pet-infostand__rarity div {
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 26px;
+  color: #333301;
+  text-align: center;
 }
 
 /* Native Flash text halo on the dark infostand panels. */
