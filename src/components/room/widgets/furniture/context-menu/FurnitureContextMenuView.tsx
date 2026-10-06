@@ -78,6 +78,35 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
 
     const isOwner = GetSessionDataManager().userId === objectOwnerId;
 
+    // Title and single action of each context menu, straight from the *_menu layouts.
+    const menus: Record<string, { title: string; action: { name: string; label: string } }> = {
+        [ContextMenuEnum.FRIEND_FURNITURE]: {
+            title: LocalizeText('friendfurni.context.title'),
+            action: { name: 'use_friend_furni', label: LocalizeText('friendfurni.context.use') }
+        },
+        [ContextMenuEnum.MONSTERPLANT_SEED]: {
+            title: LocalizeText('furni.mnstr_seed.name'),
+            action: { name: 'use_monsterplant_seed', label: LocalizeText('widget.monsterplant_seed.button.use') }
+        },
+        [ContextMenuEnum.RANDOM_TELEPORT]: {
+            title: LocalizeText('furni.random_teleport.name'),
+            action: { name: 'use_random_teleport', label: LocalizeText('widget.random_teleport.button.use') }
+        },
+        [ContextMenuEnum.PURCHASABLE_CLOTHING]: {
+            title: LocalizeText('furni.generic_usable.name'),
+            action: { name: 'use_purchaseable_clothing', label: LocalizeText('widget.generic_usable.button.use') }
+        },
+        [ContextMenuEnum.MYSTERY_BOX]: {
+            title: LocalizeText('mysterybox.context.title'),
+            action: { name: 'use_mystery_box', label: LocalizeText('mysterybox.context.' + (isOwner ? 'owner' : 'other') + '.use') }
+        },
+        [ContextMenuEnum.MYSTERY_TROPHY]: {
+            title: LocalizeText('mysterytrophy.header.title'),
+            action: { name: 'use_mystery_trophy', label: LocalizeText('friendfurni.context.use') }
+        }
+    };
+    const { title = '', action = null } = menus[mode] ?? {};
+
     return (
         <>
             {confirmMode === MONSTERPLANT_SEED_CONFIRMATION && <MonsterPlantSeedConfirmView objectId={confirmingObjectId} onClose={closeConfirm} />}
@@ -86,75 +115,44 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
             {confirmMode === MYSTERYTROPHY_OPEN_DIALOG && <FurnitureMysteryTrophyOpenDialogView objectId={confirmingObjectId} onClose={closeConfirm} />}
             <FurnitureMysteryBoxOpenDialogView ownerId={objectOwnerId} />
             {objectId >= 0 && mode && (
-                <ContextMenuView category={RoomObjectCategory.FLOOR} fades={true} objectId={objectId} onClose={onClose}>
-                    {mode === ContextMenuEnum.FRIEND_FURNITURE && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('friendfurni.context.title')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_friend_furni')}>
-                                {LocalizeText('friendfurni.context.use')}
-                            </ContextMenuListItemView>
-                        </>
+                <ContextMenuView
+                    category={RoomObjectCategory.FLOOR}
+                    classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--furni']}
+                    collapsable={true}
+                    fades={true}
+                    objectId={objectId}
+                    showCaretIcon={false}
+                    onClose={onClose}
+                >
+                    {mode === GROUP_FURNITURE && groupData ? (
+                        <ContextMenuHeaderView className="cursor-pointer text-truncate" onClick={() => GetGroupInformation(groupData.guildId)}>
+                            {groupData.guildName}
+                        </ContextMenuHeaderView>
+                    ) : (
+                        <ContextMenuHeaderView>{title}</ContextMenuHeaderView>
                     )}
-                    {mode === ContextMenuEnum.MONSTERPLANT_SEED && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('furni.mnstr_seed.name')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_monsterplant_seed')}>
-                                {LocalizeText('widget.monsterplant_seed.button.use')}
-                            </ContextMenuListItemView>
-                        </>
-                    )}
-                    {mode === ContextMenuEnum.RANDOM_TELEPORT && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('furni.random_teleport.name')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_random_teleport')}>
-                                {LocalizeText('widget.random_teleport.button.use')}
-                            </ContextMenuListItemView>
-                        </>
-                    )}
-                    {mode === ContextMenuEnum.PURCHASABLE_CLOTHING && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('furni.generic_usable.name')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_purchaseable_clothing')}>
-                                {LocalizeText('widget.generic_usable.button.use')}
-                            </ContextMenuListItemView>
-                        </>
-                    )}
-                    {mode === ContextMenuEnum.MYSTERY_BOX && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('mysterybox.context.title')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_mystery_box')}>
-                                {LocalizeText('mysterybox.context.' + (isOwner ? 'owner' : 'other') + '.use')}
-                            </ContextMenuListItemView>
-                        </>
-                    )}
-                    {mode === ContextMenuEnum.MYSTERY_TROPHY && (
-                        <>
-                            <ContextMenuHeaderView>{LocalizeText('mysterytrophy.header.title')}</ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={(event) => processAction('use_mystery_trophy')}>
-                                {LocalizeText('friendfurni.context.use')}
-                            </ContextMenuListItemView>
-                        </>
-                    )}
-                    {mode === GROUP_FURNITURE && groupData && (
-                        <>
-                            <ContextMenuHeaderView className="cursor-pointer text-truncate" onClick={() => GetGroupInformation(groupData.guildId)}>
-                                {groupData.guildName}
-                            </ContextMenuHeaderView>
-                            {!isGroupMember && (
-                                <ContextMenuListItemView onClick={(event) => processAction('join_group')}>
-                                    {LocalizeText('widget.furniture.button.join.group')}
+                    <div className="air-avatar-menu-buttons">
+                        {mode === GROUP_FURNITURE && groupData && (
+                            <>
+                                {!isGroupMember && (
+                                    <ContextMenuListItemView onClick={(event) => processAction('join_group')}>
+                                        {LocalizeText('widget.furniture.button.join.group')}
+                                    </ContextMenuListItemView>
+                                )}
+                                <ContextMenuListItemView onClick={(event) => processAction('go_to_group_homeroom')}>
+                                    {LocalizeText('widget.furniture.button.go.to.group.home.room')}
                                 </ContextMenuListItemView>
-                            )}
-                            <ContextMenuListItemView onClick={(event) => processAction('go_to_group_homeroom')}>
-                                {LocalizeText('widget.furniture.button.go.to.group.home.room')}
-                            </ContextMenuListItemView>
-                            {groupData.guildHasReadableForum && (
-                                <ContextMenuListItemView onClick={(event) => processAction('open_forum')}>
-                                    {LocalizeText('widget.furniture.button.open_group_forum')}
-                                </ContextMenuListItemView>
-                            )}
-                        </>
-                    )}
+                                {groupData.guildHasReadableForum && (
+                                    <ContextMenuListItemView onClick={(event) => processAction('open_forum')}>
+                                        {LocalizeText('widget.furniture.button.open_group_forum')}
+                                    </ContextMenuListItemView>
+                                )}
+                            </>
+                        )}
+                        {action && mode !== GROUP_FURNITURE && (
+                            <ContextMenuListItemView onClick={(event) => processAction(action.name)}>{action.label}</ContextMenuListItemView>
+                        )}
+                    </div>
                 </ContextMenuView>
             )}
         </>

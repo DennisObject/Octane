@@ -1701,3 +1701,23 @@ textarea.octane-room-promote-edit__input {
     background: transparent !important;
     caret-color: #000;
 }
+
+/* Furniture context menus (mystery box, seed, clothing...): the compact bubble with the native header offset. */
+.octane-avatar-action-menu--furni .octane-context-menu-header {
+    padding-left: 15px;
+    font-size: 11px;
+}
+
+/* The classic furniture menus close every item with a 1px black rule on both sides. */
+.octane-avatar-action-menu--furni .air-avatar-menu-buttons > .octane-context-menu-item::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    border: solid #000;
+    border-width: 0 1px;
+    pointer-events: none;
+}
+
+.octane-avatar-action-menu--furni .octane-context-menu-footer::before {
+    top: 8px;
+}
