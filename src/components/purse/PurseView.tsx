@@ -39,26 +39,43 @@ export const PurseView: FC<{}> = (props) => {
 
     const hasDiamonds = currencyTypes.indexOf(5) >= 0;
     const hasDuckets = currencyTypes.indexOf(0) >= 0;
-    const otherCurrencies = currencyTypes.filter((type) => type !== 0 && type !== 5);
+    // Seasonal indicators follow seasonalcurrencyindicator.enabled/.active, one per listed type even at a zero balance.
+    const seasonalCurrencies = useMemo(() => {
+        if (!GetConfigurationValue<boolean>('seasonalcurrencyindicator.enabled', false)) return [];
+
+        const types: number[] = [];
+
+        for (const part of String(GetConfigurationValue<string>('seasonalcurrencyindicator.active', '') ?? '').split(',')) {
+            const value = part.trim();
+
+            if (value === '' || Number.isNaN(Number(value))) continue;
+
+            const type = Math.trunc(Number(value));
+
+            if (!types.includes(type)) types.push(type);
+        }
+
+        return types;
+    }, []);
 
     const joinLabel = useMemo(() => localizeWithFallback('purse.clubdays.zero.amount.text', 'Get'), []);
 
-    // Complimentary HC has no purchased expiry to count down.
+    // Purse club indicator (DMe): "Join" while periods * 31 + days is below one, else the minutes left under a day or the days.
+    const clubDaysLeft = purse ? (purse.clubPeriods * 31) + purse.clubDays : 0;
     const clubLabel = useMemo(() => {
-        if (!purse?.hasClubLeft) return joinLabel;
-        if (purse.isComplimentaryClub) return localizeWithFallback('purse.club.permanent', 'HC ∞');
+        if (!purse || clubDaysLeft < 1) return joinLabel;
         if (purse.minutesUntilExpiration > -1 && purse.minutesUntilExpiration < 60 * 24) {
             return FriendlyTime.shortFormat(purse.minutesUntilExpiration * 60);
         }
-        return FriendlyTime.shortFormat((purse.clubPeriods * 31 + purse.clubDays) * 86400);
-    }, [purse, joinLabel]);
+        return FriendlyTime.shortFormat(clubDaysLeft * 86400);
+    }, [purse, clubDaysLeft, joinLabel]);
 
     const earningsLabel = useMemo(() => localizeWithFallback('earnings.title', 'Earnings'), []);
     const helpLabel = useMemo(() => localizeWithFallback('toolbar.help', 'Help'), []);
     const logoutLabel = useMemo(() => localizeWithFallback('toolbar.logout', 'Log out'), []);
     const settingsLabel = useMemo(() => localizeWithFallback('widget.memenu.settings', 'Settings'), []);
     const clubTitle = useMemo(() => localizeWithFallback('catalog.club.hc', 'Habbo Club'), []);
-    const hasClubTime = !!purse?.hasClubLeft;
+    const hasClubTime = clubDaysLeft >= 1;
 
     const openClub = useCallback((event: React.MouseEvent) => {
         event.stopPropagation();
@@ -134,7 +151,7 @@ export const PurseView: FC<{}> = (props) => {
                                 type="button"
                                 className="octane-purse__btn octane-purse__btn--join octane-purse-subscription club-text"
                                 onClick={openClub}
-                                title={purse.isComplimentaryClub ? localizeWithFallback('purse.club.complimentary', 'Complimentary HC') : clubTitle}
+                                aria-label={clubTitle}
                             >
                                 <img src={hcIcon} alt="" className="octane-purse__btn-img" />
                                 <span className={hasClubTime ? 'octane-purse__btn-days' : 'octane-purse__btn-join'}>{clubLabel}</span>
@@ -144,7 +161,7 @@ export const PurseView: FC<{}> = (props) => {
                             type="button"
                             className="octane-purse__btn octane-purse__btn--earnings octane-purse-subscription club-text"
                             onClick={openEarnings}
-                            title={earningsLabel}
+                            aria-label={earningsLabel}
                         >
                             <img src={earningsIcon} alt="" className="octane-purse__btn-img" />
                             <span className="octane-purse__btn-earnings">{earningsLabel}</span>
@@ -159,7 +176,7 @@ export const PurseView: FC<{}> = (props) => {
                                 event.stopPropagation();
                                 CreateLinkEvent('help/show');
                             }}
-                            title={helpLabel}
+                            aria-label={helpLabel}
                         >
                             <span>{helpLabel}</span>
                         </button>
@@ -167,7 +184,7 @@ export const PurseView: FC<{}> = (props) => {
                             type="button"
                             className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--logout octane-purse-right-button disconnect"
                             onClick={handleLogout}
-                            title={logoutLabel}
+                            aria-label={logoutLabel}
                         >
                             <img src={logoutIcon} alt="" className="octane-purse__btn-img" />
                         </button>
@@ -178,7 +195,7 @@ export const PurseView: FC<{}> = (props) => {
                                 event.stopPropagation();
                                 setSettingsMenuOpen((value) => !value);
                             }}
-                            title={settingsLabel}
+                            aria-label={settingsLabel}
                         >
                             <img src={settingsIcon} alt="" className="octane-purse__btn-img" />
                         </button>
@@ -203,9 +220,9 @@ export const PurseView: FC<{}> = (props) => {
                     )}
                 </div>
             )}
-            {otherCurrencies.length > 0 && (
+            {seasonalCurrencies.length > 0 && (
                 <div className="octane-purse__other">
-                    {otherCurrencies.map((type) => (
+                    {seasonalCurrencies.map((type) => (
                         <SeasonalView key={type} type={type} amount={purse.activityPoints.get(type) || 0} />
                     ))}
                 </div>

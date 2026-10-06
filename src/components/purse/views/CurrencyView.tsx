@@ -53,7 +53,7 @@ export const CurrencyView: FC<CurrencyViewProps> = (props) => {
 
     return (
         <div className={`octane-purse-currency group relative octane-purse-currency--${type}`}>
-            <button type="button" title={tooltip} className={`octane-purse-button allcurrencypurse currency-info currency-${type}`} onClick={onClick}>
+            <button type="button" aria-label={tooltip} className={`octane-purse-button allcurrencypurse currency-info currency-${type}`} onClick={onClick}>
                 <span className="octane-purse-button__amount currency-text">{displayAmount}</span>
                 {airIcon ? <img src={airIcon} alt="" className="octane-purse-air-currency" /> : <LayoutCurrencyIcon type={type} />}
             </button>

@@ -1482,3 +1482,100 @@
     background: linear-gradient(180deg, #aee0f2 0%, #cfeef8 48%, #eaf8fc 100%);
     box-shadow: inset 0 0 0 2px #ffffff, inset 0 3px 5px rgba(0, 0, 0, 0.12);
 }
+
+/* iro_event_info_xml: 195px wide, placed at x=0 of the 192px extension grid (desktop width - 195). */
+.octane-event-info {
+    position: relative;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    width: 195px;
+    height: 25px;
+    margin-left: 39px;
+    pointer-events: all;
+    color: #fff;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+.octane-event-info.is-expanded {
+    height: 135px;
+}
+
+.octane-event-info > * {
+    position: absolute;
+}
+
+.octane-event-info__bg {
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-event-info__region {
+    inset: 0;
+    cursor: pointer;
+}
+
+.octane-event-info__header {
+    top: 2px;
+    left: 61px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.octane-event-info__get-event {
+    /* (31,3); offset 3,1 to the native glyph origin measured on the v75 client */
+    top: 4px;
+    left: 34px;
+    max-width: 126px;
+    text-decoration: underline;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-event-info__desc {
+    top: 27px;
+    left: 10px;
+    width: 175px;
+    height: 90px;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+.octane-event-info__in-progress {
+    top: 107px;
+    left: 17px;
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.octane-event-info__modify,
+.octane-event-info__extend {
+    top: 110px;
+    width: 88px;
+    text-decoration: underline;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-event-info__modify {
+    left: 5px;
+}
+
+.octane-event-info__extend {
+    left: 88px;
+    text-align: right;
+}
+
+.octane-event-info__icon {
+    top: 2px;
+    left: 5px;
+    pointer-events: none;
+}

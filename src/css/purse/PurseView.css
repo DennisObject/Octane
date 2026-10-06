@@ -219,6 +219,8 @@
     max-width: 20px;
     max-height: 18px;
     object-fit: none;
+    /* pivot_point center inside 20x18, truncated to whole pixels like the native bitmap window */
+    object-position: 2px 1px;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
@@ -226,6 +228,9 @@
 .octane-purse__btn--join .octane-purse__btn-join,
 .octane-purse__btn--earnings .octane-purse__btn-earnings {
     top: 5px;
+    /* the text field's 2px left margin */
+    padding-left: 2px;
+    box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -238,10 +243,10 @@
     white-space: normal;
 }
 
-/* join label: (38,4) 25x17 */
+/* "Join" is written into the days field at (25,4); the 'join' label stays hidden in v75. */
 .octane-purse__btn--join .octane-purse__btn-join {
-    left: 38px;
-    width: 25px;
+    left: 25px;
+    width: 50px;
     height: 17px;
 }
 
@@ -340,6 +345,7 @@
 .octane-purse__btn--help span {
     position: relative;
     top: 0;
+    left: 1px;
 }
 
 .octane-purse__btn-img {

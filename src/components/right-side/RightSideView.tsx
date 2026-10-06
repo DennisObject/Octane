@@ -10,8 +10,9 @@ import { RoomPromotesWidgetView } from '../room/widgets/room-promotes/RoomPromot
 export const RightSideView: FC<{}> = (props) => {
     return (
         <div className="absolute top-0 right-1 z-10 w-[min(230px,calc(100vw-16px))] sm:w-[min(230px,calc(100vw-20px))] h-[calc(100%-55px)] pointer-events-none">
-            <Column gap={1} position="relative" alignItems="end" className="w-full">
-                <div className="relative left-1 w-[230px] shrink-0">
+            {/* extension_grid_xml: 2px item spacing; the grid sits at y = 3 - 8 while the purse is in it. */}
+            <Column gap={0} position="relative" alignItems="end" className="-mt-[5px] w-full gap-[2px]">
+                <div className="relative left-px w-[230px] shrink-0">
                     <PurseView />
                 </div>
                 <GroupRoomInformationView />
