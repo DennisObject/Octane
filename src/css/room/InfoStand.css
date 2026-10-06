@@ -906,18 +906,20 @@
 
 .octane-pet-infostand__respect {
   position: absolute;
-  top: 260px;
-  left: 20px;
-  height: 21px;
-  line-height: 21px;
+  top: 265px;
+  left: 14px;
+  height: 12px;
+  line-height: 12px;
   white-space: nowrap;
 }
 
 .octane-pet-infostand__respect img {
+  position: relative;
+  top: -3px;
+  display: inline-block;
   width: 13px;
   height: 21px;
-  display: inline-block;
-  margin-left: 2px;
+  margin-left: 3px;
   vertical-align: top;
   image-rendering: var(--octane-pixel-art, pixelated);
 }
