@@ -1,12 +1,13 @@
-import wiredMonitorImage from '../../assets/images/wiredtools/wired_monitor.png';
-import { Button, Text } from '../../common';
+import monitorElementOne from '../../assets/images/wired/native/menu_monitor_1.png';
+import monitorElementTwo from '../../assets/images/wired/native/menu_monitor_2.png';
 import { MonitorLog, MonitorStat } from './WiredCreatorTools.types';
+import { WiredMenuButton, WiredMenuItem, WiredMenuPanel, WiredMenuTable, WiredMenuTitle } from './WiredMenuParts';
 
 export interface WiredMonitorTabViewProps {
     monitorStats: MonitorStat[];
     monitorLogs: MonitorLog[];
     /**
-     * Used only as a disabled-state predicate for the "Clear all" button:
+     * Used only as a disabled-state predicate for the "View full logs" button:
      * if both this is empty and every log has amount '0', there is nothing
      * to clear. The view does not render the history itself.
      */
@@ -20,87 +21,50 @@ export interface WiredMonitorTabViewProps {
     onOpenMonitorErrorInfo: (type: string, category: string) => void;
 }
 
-/**
- * The "Monitor" tab body of WiredCreatorToolsView, extracted from the
- * parent's inline JSX. The three modal overlays that used to live
- * inside this block were dead code (`{ false && ... }`) and have been
- * dropped; the live versions of those modals (Monitor History, Monitor
- * Info, Error Info) are mounted outside the OctaneCardView by the parent.
- */
+/** The "Monitor" tab (monitor_container of wired_menu_view): statistics, the monitor picture and the error log table. */
 export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
-    const { monitorStats, monitorLogs, monitorHistoryRows, onOpenMonitorInfo, onOpenMonitorHistory, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorErrorInfo } = props;
+    const { monitorStats, monitorLogs, monitorHistoryRows, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorErrorInfo } = props;
 
     return (
-        <div className="p-3 flex flex-col gap-3 relative">
-            <div className="grid grid-cols-[190px_1fr] gap-3">
-                <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                        <Text bold>Statistics:</Text>
-                        <button
-                            className="rounded border border-[#7f7f7f] bg-[#ece9e1] px-2 py-[2px] text-[11px] text-[#333] hover:bg-[#e3ded2]"
-                            type="button"
-                            onClick={onOpenMonitorInfo}
-                        >
-                            Info
-                        </button>
-                    </div>
+        <>
+            <WiredMenuTitle h={19} w={106} x={14} y={18}>
+                Statistics:
+            </WiredMenuTitle>
+            <WiredMenuPanel h={99} w={204} x={14} y={38}>
+                <WiredMenuItem className="octane-wired-menu__list has-classic-scrollbar" h={89} w={197} x={5} y={5}>
                     {monitorStats.map((stat) => (
-                        <div key={stat.label} className="flex justify-between gap-2 text-[12px]">
-                            <span>{stat.label}:</span>
-                            <span>{stat.value}</span>
+                        <div key={stat.label} className="octane-wired-menu__text octane-wired-menu__stat">
+                            {`${stat.label}: ${stat.value}`}
                         </div>
                     ))}
-                </div>
-                <div className="min-h-[140px] flex items-center justify-center px-4">
-                    <img alt="Monitor preview" className="max-w-full max-h-[180px] object-contain" src={wiredMonitorImage} />
-                </div>
-            </div>
-            <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
-                <Text bold>Logs:</Text>
-                <div className="max-h-[180px] overflow-y-auto border border-[#d1ccbf] rounded">
-                    <table className="w-full text-[12px]">
-                        <thead className="bg-[#efede5] sticky top-0">
-                            <tr>
-                                <th className="text-left px-2 py-1">Type</th>
-                                <th className="text-left px-2 py-1">Severity</th>
-                                <th className="text-left px-2 py-1">Amount</th>
-                                <th className="text-left px-2 py-1">Latest occurrence</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {monitorLogs.map((log, index) => (
-                                <tr
-                                    key={log.type}
-                                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f8f6f0]'} cursor-pointer hover:bg-[#e8eefc]`}
-                                    onClick={() => onOpenMonitorErrorInfo(log.type, log.category)}
-                                >
-                                    <td className="px-2 py-1 text-[#1b57b2] underline-offset-2 hover:underline">{log.type}</td>
-                                    <td className="px-2 py-1">{log.category}</td>
-                                    <td className="px-2 py-1">{log.amount}</td>
-                                    <td className="px-2 py-1">{log.latest}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="flex justify-between gap-2">
-                    <Button
-                        disabled={!monitorHistoryRows.length && !monitorLogs.some((log) => log.amount !== '0')}
-                        variant="danger"
-                        onClick={onClearMonitorLogs}
-                    >
-                        Clear all
-                    </Button>
-                    <div className="flex gap-2">
-                        <Button variant="secondary" onClick={onOpenRoomLogs}>
-                            Room logs
-                        </Button>
-                        <Button disabled={!monitorHistoryRows.length} variant="secondary" onClick={onOpenMonitorHistory}>
-                            View full logs
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </WiredMenuItem>
+            </WiredMenuPanel>
+            <WiredMenuItem className="octane-wired-menu__monitor-image" h={145} w={256} x={230} y={4}>
+                <img alt="" draggable={false} src={monitorElementOne} />
+                <img alt="" draggable={false} src={monitorElementTwo} />
+            </WiredMenuItem>
+            <WiredMenuTitle h={19} w={106} x={14} y={152}>
+                Logs:
+            </WiredMenuTitle>
+            <WiredMenuTable
+                columns={[
+                    { key: 'type', title: 'Type', factor: 0.33 },
+                    { key: 'category', title: 'Category', factor: 0.22 },
+                    { key: 'amount', title: 'Amount', factor: 0.15 },
+                    { key: 'latest', title: 'Latest occurrence', factor: 0.3 }
+                ]}
+                h={156}
+                rows={monitorLogs.map((log) => ({ key: log.type, cells: { type: log.type, category: log.category, amount: log.amount, latest: log.latest }, linkColumn: 'type', onLink: () => onOpenMonitorErrorInfo(log.type, log.category) }))}
+                w={472}
+                x={14}
+                y={172}
+            />
+            <WiredMenuButton danger={true} disabled={!monitorHistoryRows.length && !monitorLogs.some((log) => log.amount !== '0')} h={30} w={110} x={14} y={337} onClick={onClearMonitorLogs}>
+                Clear all
+            </WiredMenuButton>
+            <WiredMenuButton h={30} w={110} x={375} y={337} onClick={onOpenRoomLogs}>
+                View full logs
+            </WiredMenuButton>
+        </>
     );
 };

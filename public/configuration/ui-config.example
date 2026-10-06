@@ -1,4 +1,5 @@
 {
+    "auth.enabled": true,
     "image.library.notifications.url": "${image.library.url}notifications/%image%.png",
     "achievements.images.url": "${image.library.url}Quests/%image%.png",
     "camera.url": "http://localhost:3000/camera/photo/",

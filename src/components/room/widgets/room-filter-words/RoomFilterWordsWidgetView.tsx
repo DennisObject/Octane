@@ -1,87 +1,81 @@
-import { UpdateRoomFilterMessageComposer } from '@octane/renderer';
+import { GetCustomRoomFilterMessageComposer, UpdateRoomFilterMessageComposer } from '@octane/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, Grid, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useFilterWordsWidget, useNavigatorData } from '../../../../hooks';
-import { classNames, OctaneInput } from '../../../../layout';
+import { NavigatorRoomSettingsAtView } from '../../../navigator/views/room-settings/NavigatorRoomSettingsAtView';
 
+const DEFAULT_WORD = 'bobba';
+
+// v75 iro_room_filter_framed (the ros_filter controller): a 250x230 frame with the add field, the word list and the
+// add / remove buttons. Rows are ros_badword items; the list only changes through the server's filter packet.
 export const RoomFilterWordsWidgetView: FC<{}> = (props) => {
-    const [word, setWord] = useState<string>('bobba');
-    const [selectedWord, setSelectedWord] = useState<string>('');
-    const [isSelectingWord, setIsSelectingWord] = useState<boolean>(false);
+    const [word, setWord] = useState<string>(DEFAULT_WORD);
+    const [selectedIndex, setSelectedIndex] = useState<number>(-1);
     const { wordsFilter = [], isVisible = null, setWordsFilter, onClose = null } = useFilterWordsWidget();
     const { navigatorData } = useNavigatorData();
 
-    const processAction = (isAddingWord: boolean) => {
-        if (isSelectingWord ? !selectedWord : !word) return;
+    // Add: send the word, ask for the refreshed list and reset the field to its default.
+    const addWord = () => {
+        if (!word.length || !navigatorData?.enteredGuestRoom) return;
 
-        SendMessageComposer(new UpdateRoomFilterMessageComposer(navigatorData.enteredGuestRoom.roomId, isAddingWord, isSelectingWord ? selectedWord : word));
-        setSelectedWord('');
-        setWord('bobba');
-        setIsSelectingWord(false);
+        const roomId = navigatorData.enteredGuestRoom.roomId;
 
-        if (isAddingWord && wordsFilter.includes(isSelectingWord ? selectedWord : word)) return;
-
-        setWordsFilter((prevValue) => {
-            const newWords = [...prevValue];
-
-            isAddingWord ? newWords.push(isSelectingWord ? selectedWord : word) : newWords.splice(newWords.indexOf(isSelectingWord ? selectedWord : word), 1);
-
-            return newWords;
-        });
+        SendMessageComposer(new UpdateRoomFilterMessageComposer(roomId, true, word));
+        SendMessageComposer(new GetCustomRoomFilterMessageComposer(roomId));
+        setWord(DEFAULT_WORD);
     };
 
-    const onTyping = (word: string) => {
-        setWord(word);
-        setIsSelectingWord(false);
-    };
+    // Remove: only the selected row; it disappears at once and the removal is sent without a refresh.
+    const removeWord = () => {
+        const selectedWord = wordsFilter?.[selectedIndex];
 
-    const onSelectedWord = (word: string) => {
-        setSelectedWord(word);
-        setIsSelectingWord(true);
+        if (selectedWord === undefined || !navigatorData?.enteredGuestRoom) return;
+
+        SendMessageComposer(new UpdateRoomFilterMessageComposer(navigatorData.enteredGuestRoom.roomId, false, selectedWord));
+        setWordsFilter((previous) => previous.filter((existing) => existing !== selectedWord));
+        setSelectedIndex(-1);
     };
 
     if (!isVisible) return null;
 
     return (
-        <OctaneCardView
-            isResizable={false}
-            className="octane-guide-tool octane-room-filter-words min-w-0 w-[min(340px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
-            theme="primary-slim"
-        >
+        <OctaneCardView className="octane-ros-filter" frameStyle={3} isResizable={false} uniqueKey="octane-room-filter">
             <OctaneCardHeaderView headerText={LocalizeText('navigator.roomsettings.roomfilter')} onCloseClick={() => onClose()} />
-            <OctaneCardContentView className="text-black">
-                <Grid className="flex items-center gap-2 justify-end">
-                    <OctaneInput maxLength={255} type="text" value={word} onChange={(event) => onTyping(event.target.value)} />
-                    <Button onClick={() => processAction(true)}>{LocalizeText('navigator.roomsettings.roomfilter.addword')}</Button>
-                </Grid>
-                <Column
-                    className="min-h-[calc(1.5em+ .5rem+2px)] px-[.5rem] py-[.25rem] rounded-[.2rem] form-control-sm"
-                    gap={0}
-                    overflow="auto"
-                    style={{ height: '100px' }}
-                >
-                    {wordsFilter &&
-                        wordsFilter.length > 0 &&
-                        wordsFilter.map((word, index) => {
-                            return (
-                                <Flex
-                                    key={index}
-                                    pointer
-                                    alignItems="center"
-                                    className={classNames('rounded p-1', selectedWord === word && 'bg-muted')}
-                                    onClick={(event) => onSelectedWord(word)}
-                                >
-                                    <Text truncate>{word}</Text>
-                                </Flex>
-                            );
-                        })}
-                </Column>
-                <Grid className="flex items-center gap-2 justify-end">
-                    <Button disabled={wordsFilter.length === 0 || !isSelectingWord} variant="danger" onClick={() => processAction(false)}>
-                        {LocalizeText('navigator.roomsettings.roomfilter.removeword')}
-                    </Button>
-                </Grid>
+            <OctaneCardContentView className="octane-ros-filter-content" gap={0}>
+                <NavigatorRoomSettingsAtView className="ros-list-border" h={30} w={130} x={5} y={8}>
+                    <input
+                        className="ros-filter-word"
+                        type="text"
+                        value={word}
+                        maxLength={255}
+                        onChange={(event) => setWord(event.target.value)}
+                    />
+                </NavigatorRoomSettingsAtView>
+                <NavigatorRoomSettingsAtView h={30} w={137} x={140} y={8}>
+                    <button type="button" className="ros-button ros-button-fit" onClick={addWord}>
+                        <span className="ros-button-label">{LocalizeText('navigator.roomsettings.roomfilter.addword')}</span>
+                    </button>
+                </NavigatorRoomSettingsAtView>
+                <NavigatorRoomSettingsAtView className="ros-list-border" h={100} w={235} x={5} y={50}>
+                    <div className="ros-filter-list">
+                        {(wordsFilter ?? []).map((badWord, index) => (
+                            <button
+                                key={index}
+                                type="button"
+                                className={`ros-filter-row${index % 2 !== 0 ? ' is-odd' : ''}${index === selectedIndex ? ' is-selected' : ''}`}
+                                onClick={() => setSelectedIndex(index)}
+                            >
+                                {badWord}
+                            </button>
+                        ))}
+                    </div>
+                </NavigatorRoomSettingsAtView>
+                <NavigatorRoomSettingsAtView h={30} w={137} x={140} y={155}>
+                    <button type="button" className="ros-button ros-button-fit" onClick={removeWord}>
+                        <span className="ros-button-label">{LocalizeText('navigator.roomsettings.roomfilter.removeword')}</span>
+                    </button>
+                </NavigatorRoomSettingsAtView>
             </OctaneCardContentView>
         </OctaneCardView>
     );

@@ -124,6 +124,7 @@ import {
     WiredToolsTab
 } from './WiredCreatorTools.types';
 import { WiredInspectionTabView } from './WiredInspectionTabView';
+import { WiredMenuFrame } from './WiredMenuParts';
 import { WiredMonitorTabView } from './WiredMonitorTabView';
 import { WiredRoomLogsView } from './WiredRoomLogsView';
 import { WiredSelfDonationView } from './WiredSelfDonationView';
@@ -139,6 +140,14 @@ const WIRED_FURNI_GRAVITY_MODEL_KEY = 'wired_furni_gravity';
 
 /** icon_wired_<category>_png, as the official error view picks it. */
 const MONITOR_ERROR_ICONS: Record<string, string> = { ERROR: wiredErrorIcon, WARNING: wiredWarningIcon };
+
+const MENU_HEADER_TITLES: Record<WiredToolsTab, string> = {
+    monitor: 'Monitor',
+    variables: 'Variable Overview',
+    inspection: 'Inspection',
+    chests: 'Chests and Transactions',
+    settings: 'Settings'
+};
 
 export const WiredCreatorToolsView: FC<{}> = () => {
     const openVariablesExplorer = useVariablesExplorerStore((s) => s.open);
@@ -3103,23 +3112,16 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 </div>
             )}
             {/* Official wired_menu_view: frame 3, 500x500. The tab bodies are this hotel's, so taller ones may grow it. */}
-            <OctaneCardView
-                className="min-h-[500px] w-[500px]"
-                frameStyle={3}
-                isResizable={false}
-                theme="primary-slim"
-                uniqueKey="wired-creator-tools"
-                windowPosition={DraggableWindowPosition.TOP_LEFT}
+            <WiredMenuFrame
+                activeTab={activeTab}
+                headerTitle={MENU_HEADER_TITLES[activeTab]}
+                tabs={TABS}
+                title={localizeWithFallback('wiredmenu.title', 'Wired Creator Tools - Loading')}
+                onClose={() => setIsVisible(false)}
+                onTabChange={(tab) => setActiveTab(tab as WiredToolsTab)}
             >
-                <OctaneCardHeaderView headerText="Wired Creator Tools (:wired)" onCloseClick={() => setIsVisible(false)} />
-                <OctaneCardTabsView justifyContent="start">
-                    {TABS.map((tab) => (
-                        <OctaneCardTabsItemView key={tab.key} isActive={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
-                            <Text>{tab.label}</Text>
-                        </OctaneCardTabsItemView>
-                    ))}
-                </OctaneCardTabsView>
-                <OctaneCardContentView className="text-black bg-[#e9e6d9]" gap={3}>
+                {(
+                    <>
                     {activeTab === 'monitor' && (
                         <WiredMonitorTabView
                             monitorStats={monitorStats}
@@ -3186,8 +3188,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     )}
                     {activeTab === 'settings' && <WiredToolsSettingsTabView onOpenSelfDonation={() => setIsSelfDonationOpen(true)} />}
                     {activeTab === 'chests' && <WiredChestsTabView />}
-                </OctaneCardContentView>
-            </OctaneCardView>
+                    </>
+                )}
+            </WiredMenuFrame>
             {isMonitorHistoryOpen && (
                 <OctaneCardView
                     className="min-w-[760px] max-w-[760px] max-h-[520px]"

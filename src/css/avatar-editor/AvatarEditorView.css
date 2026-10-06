@@ -229,6 +229,11 @@
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
+.octane-avatar-editor-wardrobe-toggle:disabled {
+    cursor: default;
+    border-image-source: var(--habbo-skin-shiny-disabled);
+}
+
 .octane-avatar-editor-wardrobe-toggle:focus-visible,
 .octane-avatar-editor .category-item:focus-visible,
 .octane-avatar-editor-rotate:focus-visible,
@@ -1058,32 +1063,4 @@
     margin: 2px auto 0;
     image-rendering: var(--octane-pixel-art, pixelated);
     pointer-events: none;
-}
-
-.octane-avatar-editor-wardrobe-slot.is-locked {
-    opacity: 0.85;
-}
-
-@media (max-width: 700px), (max-height: 540px) {
-    .octane-avatar-editor {
-        width: min(490px, calc(100vw - 16px)) !important;
-        min-width: 0;
-        max-width: calc(100vw - 16px) !important;
-        height: min(523px, calc(100vh - 16px)) !important;
-        min-height: 0;
-        max-height: calc(100vh - 16px) !important;
-    }
-
-    .octane-avatar-editor.is-wardrobe-open {
-        width: min(669px, calc(100vw - 16px)) !important;
-        min-width: 0;
-        max-width: calc(100vw - 16px) !important;
-    }
-
-    .octane-avatar-editor .octane-avatar-editor-content.octane-card-content-shell {
-        height: calc(100% - 33px) !important;
-        max-height: calc(100% - 33px) !important;
-        flex: none;
-        overflow: auto !important;
-    }
 }

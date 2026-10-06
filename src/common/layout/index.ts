@@ -25,3 +25,4 @@ export * from './LayoutTrophyView';
 export * from './limited-edition';
 export * from './UserProfileIconView';
 export * from './PixelArtRendering';
+export * from './NativeTextHaloFilter';

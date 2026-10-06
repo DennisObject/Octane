@@ -13,6 +13,7 @@ import { useWiredToolsStore } from './useWiredToolsStore';
 export const useWiredToolsState = () => {
     const {
         accountPreferences,
+        activeWiredStyle,
         roomSettings,
         showInspectButton,
         showToolbarButton,
@@ -28,6 +29,7 @@ export const useWiredToolsState = () => {
 
     return {
         accountPreferences,
+        activeWiredStyle,
         roomSettings,
         showInspectButton,
         showToolbarButton,

@@ -1,10 +1,10 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect, useState } from 'react';
-import { LocalizeText, ReportState } from '../../api';
-import { Column, Grid, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
-import { useHelp } from '../../hooks';
+import { AddLinkEventTracker, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker, RoomObjectType } from '@octane/renderer';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChatEntryType, LocalizeText, ReportState, ReportType } from '../../api';
+import { DraggableWindow, LayoutAvatarImageView } from '../../common';
+import { useChatHistory, useFriendsState, useHelp, useMessenger, useNotification } from '../../hooks';
 import { DescribeReportView } from './views/DescribeReportView';
-import { HelpIndexView } from './views/HelpIndexView';
+import { createHelpReportDraft, HELP_INDEX_STEP, HelpIndexView } from './views/HelpIndexView';
 import { NameChangeView } from './views/name-change/NameChangeView';
 import { ReportSummaryView } from './views/ReportSummaryView';
 import { SanctionSatusView } from './views/SanctionStatusView';
@@ -12,100 +12,240 @@ import { SelectReportedChatsView } from './views/SelectReportedChatsView';
 import { SelectReportedUserView } from './views/SelectReportedUserView';
 import { SelectTopicView } from './views/SelectTopicView';
 
-export const HelpView: FC<{}> = (props) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const { activeReport = null, setActiveReport = null, report = null } = useHelp();
+const MODAL_ORIGIN = { x: 0, y: 0 };
+const FOCUSABLE_CONTROLS = 'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])';
 
-    const onClose = () => {
+const getFocusableControls = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_CONTROLS)).filter(
+        (element) => element.tabIndex >= 0 && element.getClientRects().length > 0 && getComputedStyle(element).visibility === 'visible'
+    );
+
+export const HelpView: FC = () => {
+    const [isVisible, setIsVisible] = useState(false);
+    const { activeReport, setActiveReport } = useHelp();
+    const { chatHistory } = useChatHistory();
+    const { friends } = useFriendsState();
+    const { messageThreads } = useMessenger();
+    const { simpleAlert } = useNotification();
+    const modalRef = useRef<HTMLElement>(null);
+    const hasActiveReport = activeReport !== null;
+    const isOpen = isVisible || hasActiveReport;
+    const onClose = useCallback(() => {
         setActiveReport(null);
         setIsVisible(false);
-    };
+    }, [setActiveReport]);
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
                 const parts = url.split('/');
-
-                if (parts.length < 2) return;
-
                 switch (parts[1]) {
                     case 'show':
                         setIsVisible(true);
-                        return;
+                        break;
                     case 'hide':
-                        setIsVisible(false);
-                        return;
+                        onClose();
+                        break;
                     case 'toggle':
-                        setIsVisible((prevValue) => !prevValue);
-                        return;
-                    case 'tour':
-                        // todo: launch tour
-                        return;
+                        if (hasActiveReport) onClose();
+                        else setIsVisible((value) => !value);
+                        break;
                     case 'report':
                         if (parts.length >= 5 && parts[2] === 'room') {
-                            const roomId = parseInt(parts[3]);
-                            const unknown = unescape(parts.splice(4).join('/'));
-                            //this.reportRoom(roomId, unknown, "");
+                            const roomId = Number.parseInt(parts[3], 10);
+                            if (Number.isFinite(roomId))
+                                setActiveReport(
+                                    createHelpReportDraft(ReportType.ROOM, ReportState.SELECT_TOPICS, { roomId, roomName: unescape(parts.slice(4).join('/')) })
+                                );
                         }
-                        return;
+                        break;
                 }
             },
             eventUrlPrefix: 'help/'
         };
-
         AddLinkEventTracker(linkTracker);
-
         return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+    }, [hasActiveReport, onClose, setActiveReport]);
 
     useEffect(() => {
-        if (!activeReport) return;
-
-        setIsVisible(true);
-    }, [activeReport]);
-
-    const CurrentStepView = () => {
-        if (activeReport) {
-            switch (activeReport.currentStep) {
-                case ReportState.SELECT_USER:
-                    return <SelectReportedUserView />;
-                case ReportState.SELECT_CHATS:
-                    return <SelectReportedChatsView />;
-                case ReportState.SELECT_TOPICS:
-                    return <SelectTopicView />;
-                case ReportState.INPUT_REPORT_MESSAGE:
-                    return <DescribeReportView />;
-                case ReportState.REPORT_SUMMARY:
-                    return <ReportSummaryView />;
+        if (!isOpen) return;
+        const modal = modalRef.current;
+        if (!modal) return;
+        const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const modalWindow = modal.closest<HTMLElement>('.draggable-window');
+        let lastFocused: HTMLElement = null;
+        const getHigherWindow = () => {
+            const ownLayer = Number(modalWindow?.style.zIndex) || 0;
+            return Array.from(document.querySelectorAll<HTMLElement>('.draggable-window'))
+                .filter(
+                    (element) =>
+                        element !== modalWindow &&
+                        element.getClientRects().length > 0 &&
+                        getComputedStyle(element).visibility === 'visible' &&
+                        Number(getComputedStyle(element).zIndex) > ownLayer
+                )
+                .sort((left, right) => Number(getComputedStyle(right).zIndex) - Number(getComputedStyle(left).zIndex))[0];
+        };
+        const focusModal = () => {
+            const controls = getFocusableControls(modal);
+            (controls.includes(lastFocused) ? lastFocused : controls[0] || modal).focus({ preventScroll: true });
+        };
+        const onFocus = (event: FocusEvent) => {
+            if (!(event.target instanceof HTMLElement)) return;
+            const higherWindow = getHigherWindow();
+            if (higherWindow) {
+                if ((higherWindow.matches('.octane-alert') || higherWindow.querySelector('.octane-alert')) && !higherWindow.contains(event.target))
+                    getFocusableControls(higherWindow)[0]?.focus({ preventScroll: true });
+                return;
             }
-        }
+            if (modal.contains(event.target)) lastFocused = event.target;
+            else focusModal();
+        };
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Tab') return;
+            const higherWindow = getHigherWindow();
+            // A notification above Help owns focus until it closes. Other higher windows manage their own focus.
+            if (higherWindow && !higherWindow.matches('.octane-alert') && !higherWindow.querySelector('.octane-alert')) return;
+            const focusOwner = higherWindow || modal;
+            const controls = getFocusableControls(focusOwner);
+            if (!controls.length) {
+                if (!higherWindow) {
+                    event.preventDefault();
+                    modal.focus({ preventScroll: true });
+                }
+                return;
+            }
+            const currentIndex = controls.indexOf(document.activeElement as HTMLElement);
+            if (currentIndex === -1 || (event.shiftKey ? currentIndex === 0 : currentIndex === controls.length - 1)) {
+                event.preventDefault();
+                (event.shiftKey ? controls.at(-1) : controls[0]).focus({ preventScroll: true });
+            }
+        };
+        document.addEventListener('focusin', onFocus);
+        document.addEventListener('keydown', onKeyDown, true);
+        const initialFocus = requestAnimationFrame(() => {
+            if (modal.isConnected && !getHigherWindow()) focusModal();
+        });
+        return () => {
+            cancelAnimationFrame(initialFocus);
+            document.removeEventListener('focusin', onFocus);
+            document.removeEventListener('keydown', onKeyDown, true);
+            if (opener?.isConnected && !getHigherWindow() && (modal.contains(document.activeElement) || document.activeElement === document.body))
+                opener.focus({ preventScroll: true });
+        };
+    }, [isOpen]);
 
-        return <HelpIndexView />;
+    const reportedUserId = activeReport?.reportedUserId;
+    const isIm = activeReport?.reportType === ReportType.IM;
+    const selectedUser = useMemo(() => {
+        const chatUser = chatHistory.findLast((entry) => entry.webId === reportedUserId);
+        if (!isIm) return chatUser;
+        const friend = friends.find((entry) => entry.id === reportedUserId);
+        const participant = messageThreads.find((thread) => thread.participant?.id === reportedUserId)?.participant;
+        return { name: friend?.name || participant?.name || chatUser?.name, look: friend?.figure || participant?.figure || chatUser?.look };
+    }, [chatHistory, friends, isIm, messageThreads, reportedUserId]);
+    const returnToIndex = () => {
+        setActiveReport((previous) => ({ ...previous, currentStep: HELP_INDEX_STEP }));
+        setIsVisible(true);
     };
+    const changeUser = () => {
+        if (
+            !chatHistory.some(
+                (entry) => entry.type === ChatEntryType.TYPE_CHAT && entry.entityType === RoomObjectType.USER && entry.webId !== GetSessionDataManager().userId
+            )
+        ) {
+            simpleAlert(LocalizeText('help.cfh.error.nochathistory'), null, null, null, LocalizeText('generic.alert.title'));
+            return;
+        }
+        setActiveReport((previous) => ({ ...previous, currentStep: ReportState.SELECT_USER }));
+    };
+    const showUser = activeReport && activeReport.currentStep >= ReportState.SELECT_CHATS;
+    const isRoom = activeReport?.reportType === ReportType.ROOM;
+    const isForum = activeReport?.reportType === ReportType.THREAD || activeReport?.reportType === ReportType.MESSAGE;
+    let step = <HelpIndexView onClose={onClose} />;
+    if (activeReport) {
+        switch (activeReport.currentStep) {
+            case ReportState.SELECT_USER:
+                step = <SelectReportedUserView onBack={returnToIndex} />;
+                break;
+            case ReportState.SELECT_CHATS:
+                step = <SelectReportedChatsView />;
+                break;
+            case ReportState.SELECT_TOPICS:
+                step = <SelectTopicView />;
+                break;
+            case ReportState.INPUT_REPORT_MESSAGE:
+                step = <DescribeReportView />;
+                break;
+            case ReportState.REPORT_SUMMARY:
+                step = <ReportSummaryView onClose={onClose} />;
+                break;
+        }
+    }
 
     return (
         <>
-            {isVisible && (
-                <OctaneCardView
-                    className="octane-help min-w-0 w-[min(560px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
-                    theme="primary-slim"
-                >
-                    <OctaneCardHeaderView headerText={LocalizeText('help.button.cfh')} onCloseClick={onClose} />
-                    <OctaneCardContentView className="text-black">
-                        {activeReport ? (
-                            <Grid>
-                                <Column center overflow="hidden" size={5}>
-                                    <div className="index-image" />
-                                </Column>
-                                <Column justifyContent="between" overflow="hidden" size={7}>
-                                    <CurrentStepView />
-                                </Column>
-                            </Grid>
-                        ) : (
-                            <CurrentStepView />
-                        )}
-                    </OctaneCardContentView>
-                </OctaneCardView>
+            {isOpen && (
+                <DraggableWindow disableDrag initialPosition={MODAL_ORIGIN} unconstrainedPosition>
+                    <div className="octane-help-modal">
+                        <div className="octane-help-backdrop" aria-hidden="true" />
+                        <section
+                            ref={modalRef}
+                            className="octane-help octane-card-shell octane-card-frame-3 has-classic-scrollbar"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="octane-help-title"
+                            tabIndex={-1}
+                        >
+                            <div className="octane-card-header-shell">
+                                <span id="octane-help-title" className="octane-card-title">
+                                    {LocalizeText('help.button.cfh')}
+                                </span>
+                                <button type="button" className="octane-card-close-button" aria-label={LocalizeText('generic.close')} onClick={onClose} />
+                            </div>
+                            <svg className="octane-help-filters" aria-hidden="true">
+                                <defs>
+                                    <filter id="help-green" colorInterpolationFilters="sRGB">
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0  0 .6666667 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+                                    </filter>
+                                    <filter id="help-red" colorInterpolationFilters="sRGB">
+                                        <feColorMatrix type="matrix" values=".6666667 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+                                    </filter>
+                                    <filter id="help-gray" colorInterpolationFilters="sRGB">
+                                        <feColorMatrix type="matrix" values=".6666667 0 0 0 0  0 .6666667 0 0 0  0 0 .6666667 0 0  0 0 0 1 0" />
+                                    </filter>
+                                </defs>
+                            </svg>
+                            <div className="octane-help-content">
+                                {showUser && (
+                                    <div className="help-reported-user">
+                                        {!isRoom && !isForum && (
+                                            <>
+                                                {selectedUser?.look && (
+                                                    <LayoutAvatarImageView
+                                                        className="help-reported-avatar"
+                                                        figure={selectedUser.look}
+                                                        headOnly
+                                                        nativeCroppedHead
+                                                        direction={2}
+                                                    />
+                                                )}
+                                                <span className="help-reported-title">{LocalizeText('help.cfh.selected_user.title')}</span>
+                                            </>
+                                        )}
+                                        {!isForum && <span className="help-reported-name">{isRoom ? activeReport.roomName : selectedUser?.name}</span>}
+                                        {(activeReport.reportType === ReportType.BULLY || activeReport.reportType === ReportType.EMERGENCY) && (
+                                            <button type="button" className="help-change-user" onClick={changeUser}>
+                                                {LocalizeText('help.cfh.selected_user.change')}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                                {step}
+                            </div>
+                        </section>
+                    </div>
+                </DraggableWindow>
             )}
             <SanctionSatusView />
             <NameChangeView />

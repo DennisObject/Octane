@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { WiredFurniType, WIRED_SLIDER_MILLISECONDS_50 } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
 export const WiredTriggeExecutePeriodicallyShortView: FC<{}> = () => {
@@ -15,12 +15,8 @@ export const WiredTriggeExecutePeriodicallyShortView: FC<{}> = () => {
     }, [trigger]);
 
     return (
-        <WiredTriggerBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.setshorttime', LocalizeText('wiredfurni.params.settime', ['seconds'], [((time * 50) / 1000).toFixed(2)]))}</Text>
-                <Text small>{`${time * 50} ms`}</Text>
-                <Slider max={10} min={1} value={time} onChange={(event) => setTime(event)} />
-            </div>
+        <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSliderSection converter={WIRED_SLIDER_MILLISECONDS_50} max={10} min={1} titleKey="wiredfurni.params.setshorttime" unit="ms" value={time} withInput={false} onChange={setTime} />
         </WiredTriggerBaseView>
     );
 };

@@ -1,23 +1,20 @@
 import { RoomEngineTriggerWidgetEvent } from '@octane/renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, FC, PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import { ColorUtils, FurnitureDimmerUtilities, GetConfigurationValue, LocalizeText } from '../../../../api';
-import {
-    Button,
-    Column,
-    Grid,
-    OctaneCardContentView,
-    OctaneCardHeaderView,
-    OctaneCardTabsItemView,
-    OctaneCardTabsView,
-    OctaneCardView,
-    Slider,
-    Text
-} from '../../../../common';
+import { DraggableWindow } from '../../../../common';
 import { useFurnitureDimmerWidget, useOctaneEvent } from '../../../../hooks';
-import { classNames } from '../../../../layout';
+import { InfoStandCenteredText } from '../avatar-info/infostand/InfoStandCenteredText';
+import dimmerInfoImage from '../../../../assets/images/room-widgets/dimmer-widget/info.png';
 
-export const FurnitureDimmerView: FC<{}> = (props) => {
+// dimmer_ui (HabboRoomUICom): a 274x222 frame, tab buttons over a panel, 7 colour cells, a 194px slider,
+// a checkbox and a 90x24 apply button; the off state shows dimmer_info in a plain box.
+const SLIDER_TRAVEL = 194;
+
+const cellStyle = (index: number): CSSProperties => ({ left: 26 + index * 29 });
+
+export const FurnitureDimmerView: FC<{}> = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const sliderRef = useRef<HTMLDivElement>(null);
     const {
         presets = [],
         dimmerState = 0,
@@ -41,7 +38,7 @@ export const FurnitureDimmerView: FC<{}> = (props) => {
         setIsVisible(false);
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REMOVE_DIMMER, (event) => setIsVisible(false));
+    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REMOVE_DIMMER, () => setIsVisible(false));
 
     useEffect(() => {
         if (!presets || !presets.length) return;
@@ -49,94 +46,93 @@ export const FurnitureDimmerView: FC<{}> = (props) => {
         setIsVisible(true);
     }, [presets]);
 
-    const isFreeColorMode = useMemo(() => GetConfigurationValue<boolean>('widget.dimmer.colorwheel', false), []);
-
     if (!isVisible) return null;
 
+    const isFreeColorMode = GetConfigurationValue<boolean>('widget.dimmer.colorwheel', false);
+    const isOn = dimmerState === 1;
+    const range = FurnitureDimmerUtilities.MAX_BRIGHTNESS - FurnitureDimmerUtilities.MIN_BRIGHTNESS;
+    const thumbLeft = Math.round(((Math.min(Math.max(selectedBrightness, FurnitureDimmerUtilities.MIN_BRIGHTNESS), FurnitureDimmerUtilities.MAX_BRIGHTNESS) - FurnitureDimmerUtilities.MIN_BRIGHTNESS) / range) * SLIDER_TRAVEL);
+
+    const moveThumb = (event: ReactPointerEvent<HTMLDivElement>) => {
+        const bounds = sliderRef.current?.getBoundingClientRect();
+
+        if (!bounds) return;
+
+        const ratio = Math.min(1, Math.max(0, (event.clientX - bounds.left - 6) / SLIDER_TRAVEL));
+
+        setSelectedBrightness(Math.round(FurnitureDimmerUtilities.MIN_BRIGHTNESS + ratio * range));
+    };
+
+    const onSliderDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        moveThumb(event);
+    };
+
+    const onSliderMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) moveThumb(event);
+    };
+
     return (
-        <OctaneCardView className="octane-room-widget-dimmer">
-            <OctaneCardHeaderView headerText={LocalizeText('widget.dimmer.title')} onCloseClick={onClose} />
-            {dimmerState === 1 && (
-                <OctaneCardTabsView>
-                    {presets.map((preset) => (
-                        <OctaneCardTabsItemView key={preset.id} isActive={selectedPresetId === preset.id} onClick={(event) => selectPresetId(preset.id)}>
-                            {LocalizeText(`widget.dimmer.tab.${preset.id}`)}
-                        </OctaneCardTabsItemView>
-                    ))}
-                </OctaneCardTabsView>
-            )}
-            <OctaneCardContentView>
-                {dimmerState === 0 && (
-                    <Column alignItems="center">
-                        <div className="dimmer-banner" />
-                        <Text center className="p-1 rounded bg-muted">
-                            {LocalizeText('widget.dimmer.info.off')}
-                        </Text>
-                        <Button fullWidth variant="success" onClick={() => FurnitureDimmerUtilities.changeState()}>
-                            {LocalizeText('widget.dimmer.button.on')}
-                        </Button>
-                    </Column>
-                )}
-                {dimmerState === 1 && (
+        <DraggableWindow handleSelector=".octane-dimmer__header" uniqueKey="octane-room-dimmer">
+            <section aria-label={LocalizeText('widget.dimmer.title')} className="octane-dimmer" role="dialog">
+                <div className="octane-dimmer__header">
+                    <InfoStandCenteredText className="octane-dimmer__title" width={265}>
+                        <span className="octane-dimmer__title-text">{LocalizeText('widget.dimmer.title')}</span>
+                    </InfoStandCenteredText>
+                    <button aria-label={LocalizeText('generic.close')} className="octane-dimmer__close" type="button" onClick={onClose} />
+                </div>
+                {!isOn && (
                     <>
-                        <div className="flex flex-col gap-1">
-                            <Text fontWeight="bold">{LocalizeText('widget.backgroundcolor.hue')}</Text>
-                            {isFreeColorMode && (
-                                <input
-                                    className="min-h-[calc(1.5em+ .5rem+2px)] px-[.5rem] py-[.25rem]  rounded-[.2rem]"
-                                    type="color"
-                                    value={ColorUtils.makeColorNumberHex(selectedColor)}
-                                    onChange={(event) => setSelectedColor(ColorUtils.convertFromHex(event.target.value))}
-                                />
-                            )}
-                            {!isFreeColorMode && (
-                                <Grid columnCount={7} gap={1}>
-                                    {FurnitureDimmerUtilities.AVAILABLE_COLORS.map((color, index) => {
-                                        return (
-                                            <Column
-                                                key={index}
-                                                fullWidth
-                                                pointer
-                                                className={classNames('color-swatch rounded', color === selectedColor && 'active')}
-                                                style={{ backgroundColor: FurnitureDimmerUtilities.HTML_COLORS[index] }}
-                                                onClick={() => setSelectedColor(color)}
-                                            />
-                                        );
-                                    })}
-                                </Grid>
-                            )}
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <Text fontWeight="bold">{LocalizeText('widget.backgroundcolor.lightness')}</Text>
-                            <Slider
-                                max={FurnitureDimmerUtilities.MAX_BRIGHTNESS}
-                                min={FurnitureDimmerUtilities.MIN_BRIGHTNESS}
-                                renderThumb={(props, state) => <div {...props}>{FurnitureDimmerUtilities.scaleBrightness(state.valueNow)}</div>}
-                                thumbClassName={'thumb percent'}
-                                value={selectedBrightness}
-                                onChange={(value) => setSelectedBrightness(value)}
-                            />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <input
-                                checked={selectedEffectId === 2}
-                                className="form-check-input"
-                                type="checkbox"
-                                onChange={(event) => setSelectedEffectId(event.target.checked ? 2 : 1)}
-                            />
-                            <Text>{LocalizeText('widget.dimmer.type.checkbox')}</Text>
-                        </div>
-                        <div className="flex gap-1">
-                            <Button fullWidth variant="danger" onClick={() => FurnitureDimmerUtilities.changeState()}>
-                                {LocalizeText('widget.dimmer.button.off')}
-                            </Button>
-                            <Button fullWidth variant="success" onClick={applyChanges}>
-                                {LocalizeText('widget.dimmer.button.apply')}
-                            </Button>
-                        </div>
+                        <div className="octane-dimmer__box" />
+                        <img alt="" className="octane-dimmer__info-image" draggable={false} src={dimmerInfoImage} />
+                        <div className="octane-dimmer__off-text">{LocalizeText('widget.dimmer.info.off')}</div>
                     </>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+                {isOn && (
+                    <>
+                        <div className="octane-dimmer__panel" />
+                        <div className={`octane-dimmer__tabs is-tab-${Math.min(3, Math.max(1, selectedPresetId))}`} />
+                        {presets.map((preset, index) => (
+                            <button key={preset.id} className="octane-dimmer__tab" style={{ left: [15, 75, 138][index] }} type="button" onClick={() => selectPresetId(preset.id)}>
+                                <InfoStandCenteredText width={index === 0 ? 60 : 63}>{LocalizeText(`widget.dimmer.tab.${preset.id}`)}</InfoStandCenteredText>
+                            </button>
+                        ))}
+                        {isFreeColorMode && (
+                            <input
+                                className="octane-dimmer__color-input"
+                                type="color"
+                                value={ColorUtils.makeColorNumberHex(selectedColor)}
+                                onChange={(event) => setSelectedColor(ColorUtils.convertFromHex(event.target.value))}
+                            />
+                        )}
+                        {!isFreeColorMode &&
+                            FurnitureDimmerUtilities.AVAILABLE_COLORS.map((available, index) => (
+                                <button key={index} className="octane-dimmer__cell" style={cellStyle(index)} type="button" onClick={() => setSelectedColor(available)}>
+                                    <span className="octane-dimmer__cell-color" style={{ backgroundColor: FurnitureDimmerUtilities.HTML_COLORS[index] }} />
+                                    {available === selectedColor && <span className="octane-dimmer__cell-selected" />}
+                                </button>
+                            ))}
+                        <div ref={sliderRef} className="octane-dimmer__slider" onPointerDown={onSliderDown} onPointerMove={onSliderMove}>
+                            <span className="octane-dimmer__thumb" style={{ left: thumbLeft }} />
+                        </div>
+                        <button
+                            aria-checked={selectedEffectId === 2}
+                            className={'octane-dimmer__checkbox' + (selectedEffectId === 2 ? ' is-checked' : '')}
+                            role="checkbox"
+                            type="button"
+                            onClick={() => setSelectedEffectId(selectedEffectId === 2 ? 1 : 2)}
+                        />
+                        <span className="octane-dimmer__checkbox-text">{LocalizeText('widget.dimmer.type.checkbox')}</span>
+                        <div className="octane-dimmer__info">{LocalizeText('widget.dimmer.info')}</div>
+                    </>
+                )}
+                <button className="octane-dimmer__button octane-dimmer__apply" disabled={!isOn} type="button" onClick={applyChanges}>
+                    {LocalizeText('widget.dimmer.button.apply')}
+                </button>
+                <button className="octane-dimmer__button octane-dimmer__toggle" type="button" onClick={() => FurnitureDimmerUtilities.changeState()}>
+                    {LocalizeText(isOn ? 'widget.dimmer.button.off' : 'widget.dimmer.button.on')}
+                </button>
+            </section>
+        </DraggableWindow>
     );
 };

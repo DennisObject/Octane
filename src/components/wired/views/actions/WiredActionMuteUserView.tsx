@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, LocalizeText, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { GetConfigurationValue, LocalizeText, WiredFurniType, WIRED_SLIDER_ECHO } from '../../../../api';
+import { WiredSection } from '../WiredSection';
+import { WiredSliderSection } from '../WiredSlider';
+import { WiredTextInput } from '../WiredTextInput';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -29,23 +30,15 @@ export const WiredActionMuteUserView: FC<{}> = (props) => {
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.length.minutes', ['minutes'], [time.toString()])}</Text>
-                <Slider max={10} min={0} value={time} onChange={(event) => setTime(event)} />
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.message')}</Text>
-                <OctaneInput
-                    maxLength={GetConfigurationValue<number>('wired.action.mute.user.max.length', 100)}
-                    type="text"
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                />
-            </div>
+            <WiredSection title={LocalizeText('wiredfurni.params.message')}>
+                <WiredTextInput maxLength={GetConfigurationValue<number>('wired.action.mute.user.max.length', 100)} value={message} onChange={setMessage} />
+            </WiredSection>
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={10} min={0} titleKey="wiredfurni.params.length.minutes" unit="minutes" value={time} onChange={setTime} />
         </WiredActionBaseView>
     );
 };

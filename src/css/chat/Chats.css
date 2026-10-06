@@ -1815,3 +1815,110 @@
 .octane-bubbles-hidden .newbubblehe {
     visibility: hidden !important;
 }
+
+/* Native room text; selector previews retain their separate bitmap skin. */
+.bubble-container.native-room-bubble .chat-bubble {
+    font-family: Ubuntu, sans-serif;
+    font-size: var(--chat-text-size);
+    line-height: normal;
+}
+
+.bubble-container.native-room-bubble .chat-content {
+    font-size: inherit;
+    line-height: normal;
+}
+
+.bubble-container.native-room-bubble .native-chat-text {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+}
+
+.bubble-container.native-room-bubble .native-chat-text canvas {
+    display: none;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] canvas {
+    display: block;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] .native-chat-text-accessible {
+    inset: 0;
+    color: transparent;
+    position: absolute;
+    user-select: text;
+}
+
+.bubble-container.native-room-bubble .native-chat-text[data-native-chat-text='rendered'] .native-chat-text-accessible * {
+    color: transparent !important;
+}
+
+.bubble-container.native-room-bubble .native-whisper .chat-content {
+    font-style: italic;
+}
+
+.bubble-container.native-room-bubble .type-1 .message {
+    color: inherit;
+}
+
+.bubble-container.native-room-bubble .bubble-0 {
+    border-image-source: url('@/assets/images/chat/chatbubbles/native-default-base.png');
+    border-image-slice: 17 21 6 29 fill;
+    border-image-width: 17px 21px 6px 29px;
+    border-image-outset: 0;
+    border-image-repeat: stretch;
+    min-width: 51px;
+    min-height: 24px;
+}
+
+.bubble-container.native-room-bubble .bubble-1 {
+    border-image-slice: 18 22 5 28 fill;
+    border-image-width: 18px 22px 5px 28px;
+    border-image-outset: 0;
+    border-image-repeat: stretch;
+    min-width: 51px;
+    min-height: 24px;
+}
+
+.bubble-container.native-room-bubble .bubble-0 .chat-content,
+.bubble-container.native-room-bubble .bubble-1 .chat-content {
+    padding: 4px 12px 7px 28px;
+    margin: 0;
+    min-height: 0;
+    color: #000;
+}
+
+.bubble-container.native-room-bubble .bubble-1 .chat-content {
+    padding-top: 5px;
+}
+
+.bubble-container.native-room-bubble .bubble-0 .username,
+.bubble-container.native-room-bubble .bubble-0 .message {
+    color: #000;
+}
+
+.bubble-container.native-room-bubble .bubble-0 .pointer {
+    transform: none;
+}
+
+.bubble-container.native-room-bubble .type-1 .message {
+    font-style: inherit;
+}
+
+/* HEAD bitmaps already have native dimensions; legacy backgrounds were scaled. */
+.bubble-container.native-room-bubble .chat-bubble .user-container {
+    max-height: none;
+}
+
+.bubble-container.native-room-bubble .chat-bubble .user-container .user-image {
+    top: auto;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    transform: none;
+}

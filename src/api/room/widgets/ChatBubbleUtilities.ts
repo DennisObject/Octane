@@ -8,6 +8,7 @@ import {
     TextureUtils,
     Vector3d
 } from '@octane/renderer';
+import { GetConfigurationValue } from '../../octane/GetConfigurationValue';
 
 export class ChatBubbleUtilities {
     private static MAX_CACHE_SIZE: number = 200;
@@ -17,7 +18,7 @@ export class ChatBubbleUtilities {
     public static PET_IMAGE_CACHE: Map<string, string> = new Map();
     private static PET_IMAGE_PENDING_CACHE: Map<string, Promise<string>> = new Map();
 
-    private static placeHolderImageUrl: string = '';
+    private static PLACEHOLDER_IMAGE_CACHE: Map<boolean, string> = new Map();
 
     private static pruneCache<T>(cache: Map<string, T>, maxSize: number = ChatBubbleUtilities.MAX_CACHE_SIZE): void {
         if (cache.size <= maxSize) return;
@@ -30,9 +31,9 @@ export class ChatBubbleUtilities {
         }
     }
 
-    public static async setFigureImage(figure: string): Promise<string> {
-        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, null, {
-            resetFigure: (figure) => this.setFigureImage(figure),
+    public static async setFigureImage(figure: string, zoom: boolean = GetConfigurationValue<boolean>('zoom.enabled', false)): Promise<string> {
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, zoom ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
+            resetFigure: (figure) => this.setFigureImage(figure, zoom),
             dispose: () => {},
             disposed: false
         });
@@ -41,30 +42,59 @@ export class ChatBubbleUtilities {
 
         const isPlaceholder = avatarImage.isPlaceholder();
 
-        if (isPlaceholder && this.placeHolderImageUrl?.length) return this.placeHolderImageUrl;
+        const placeholderImageUrl = this.PLACEHOLDER_IMAGE_CACHE.get(zoom);
+
+        if (isPlaceholder && placeholderImageUrl?.length) {
+            avatarImage.dispose();
+            return placeholderImageUrl;
+        }
 
         figure = avatarImage.getFigure().getFigureString();
 
-        const imageUrl = avatarImage.processAsImageUrl(AvatarSetType.HEAD);
+        avatarImage.setDirection(AvatarSetType.HEAD, 2);
+        const sourceUrl = avatarImage.processAsImageUrl(AvatarSetType.HEAD);
         const color = avatarImage.getPartColor(AvatarFigurePartType.CHEST);
-
-        if (isPlaceholder) this.placeHolderImageUrl = imageUrl;
-
         this.AVATAR_COLOR_CACHE.set(figure, (color && color.rgb) || 16777215);
-        this.AVATAR_IMAGE_CACHE.set(figure, imageUrl);
-
         this.pruneCache(this.AVATAR_COLOR_CACHE);
-        this.pruneCache(this.AVATAR_IMAGE_CACHE);
-
         avatarImage.dispose();
+        const source = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = sourceUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = 50;
+        canvas.height = 50;
+        const context = canvas.getContext('2d');
+        context.imageSmoothingEnabled = false;
+        if (zoom) {
+            const scaled = document.createElement('canvas');
+            scaled.width = Math.round(source.width / 2);
+            scaled.height = Math.round(source.height / 2);
+            const scaledContext = scaled.getContext('2d');
+            scaledContext.imageSmoothingEnabled = true;
+            scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
+            canvas.width = 25;
+            canvas.height = 25;
+            context.imageSmoothingEnabled = false;
+            context.drawImage(scaled, 10, 14, 25, 25, 0, 0, 25, 25);
+        } else context.drawImage(source, 21, 28, 50, 50, 0, 0, 50, 50);
+        const imageUrl = canvas.toDataURL('image/png');
+        if (isPlaceholder) this.PLACEHOLDER_IMAGE_CACHE.set(zoom, imageUrl);
+
+        this.AVATAR_IMAGE_CACHE.set(this.getAvatarImageCacheKey(figure, zoom), imageUrl);
+
+        this.pruneCache(this.AVATAR_IMAGE_CACHE);
 
         return imageUrl;
     }
 
     public static async getUserImage(figure: string): Promise<string> {
-        let existing = this.AVATAR_IMAGE_CACHE.get(figure);
+        const zoom = GetConfigurationValue<boolean>('zoom.enabled', false);
+        let existing = this.AVATAR_IMAGE_CACHE.get(this.getAvatarImageCacheKey(figure, zoom));
 
-        if (!existing) existing = await this.setFigureImage(figure);
+        if (!existing) existing = await this.setFigureImage(figure, zoom);
 
         return existing;
     }
@@ -141,5 +171,9 @@ export class ChatBubbleUtilities {
         }
 
         return existing;
+    }
+
+    private static getAvatarImageCacheKey(figure: string, zoom: boolean): string {
+        return `${zoom ? 'zoom' : 'normal'}:${figure}`;
     }
 }

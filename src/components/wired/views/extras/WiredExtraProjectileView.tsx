@@ -40,7 +40,8 @@ import {
     toggleProjectileVariable,
     WiredFurniType
 } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { WiredFurniSelectorView } from '../WiredFurniSelectorView';
 import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';

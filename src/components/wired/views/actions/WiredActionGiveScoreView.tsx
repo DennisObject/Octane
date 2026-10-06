@@ -1,6 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { LocalizeText, localizeWithFallback, WiredFurniType, WIRED_SLIDER_ECHO } from '../../../../api';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
+import { WiredSliderSection } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
@@ -31,29 +33,20 @@ export const WiredActionGiveScoreView: FC<{}> = (props) => {
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.setpoints2', LocalizeText('wiredfurni.params.setpoints', ['points'], [points.toString()]), ['points'], [points.toString()])}</Text>
-                <Slider max={1000} min={1} value={points} onChange={(event) => setPoints(event)} />
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.choose_type')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={operation === value}
-                            className="form-check-input"
-                            name="pointsOperation"
-                            type="radio"
-                            onChange={() => setOperation(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.points_operation.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={1000} min={1} titleKey="wiredfurni.params.setpoints2" value={points} onChange={setPoints} />
+            <WiredSection title={localizeWithFallback('wiredfurni.params.points_operation', 'Type of effect:')}>
+                <WiredRadioGroup
+                    name="pointsOperation"
+                    options={[0, 1].map((value) => ({ id: value, label: LocalizeText(`wiredfurni.params.points_operation.${value}`) }))}
+                    value={operation}
+                    onChange={setOperation}
+                />
+            </WiredSection>
         </WiredActionBaseView>
     );
 };

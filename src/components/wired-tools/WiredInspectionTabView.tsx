@@ -1,9 +1,16 @@
 import { KeyboardEvent } from 'react';
 import wiredGlobalPlaceholderImage from '../../assets/images/wiredtools/wired_global_placeholder.png';
-import { Button, LayoutAvatarImageView, LayoutPetImageView, LayoutRoomObjectImageView, Text } from '../../common';
+import contextIcon from '../../assets/images/wired/native/menu_variable_context.png';
+import furniIcon from '../../assets/images/wired/native/menu_variable_furni.png';
+import globalIcon from '../../assets/images/wired/native/menu_variable_global.png';
+import userIcon from '../../assets/images/wired/native/menu_variable_user.png';
+import { LayoutAvatarImageView, LayoutPetImageView, LayoutRoomObjectImageView } from '../../common';
 import { INSPECTION_ELEMENTS } from './WiredCreatorTools.constants';
 import { InspectionFurniSelection, InspectionUserSelection, InspectionVariable } from './WiredCreatorTools.types';
+import { WiredMenuButton, WiredMenuCheckbox, WiredMenuItem, WiredMenuPanel, WiredMenuTable, WiredMenuTitle } from './WiredMenuParts';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
+
+const TYPE_ICONS: Record<string, string> = { furni: furniIcon, user: userIcon, global: globalIcon, context: contextIcon };
 
 /**
  * Structural shape we need from the renderer's variable-definition
@@ -93,164 +100,145 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
     const setEditingValue = useWiredCreatorToolsUiStore((s) => s.setEditingValue);
 
     return (
-        <div className="p-3 min-h-[360px] flex gap-4">
-            <div className="w-[145px] shrink-0 flex flex-col gap-2">
-                <div className="flex flex-col gap-1">
-                    <Text bold>Element type:</Text>
-                    <div className="flex gap-1">
-                        {INSPECTION_ELEMENTS.map((element) => (
-                            <button
-                                key={element.key}
-                                type="button"
-                                className={`w-[42px] h-[38px] rounded border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,.7)] ${inspectionType === element.key ? 'border-[#222] bg-[#d9d6cf]' : 'border-[#7f7f7f] bg-[#ece9e1]'}`}
-                                onClick={() => setInspectionType(element.key)}
-                                title={element.label}
-                            >
-                                <img alt={element.label} className="w-auto h-auto max-w-[22px] max-h-[22px] object-contain" src={element.icon} />
-                            </button>
-                        ))}
+        <>
+            <WiredMenuTitle h={19} w={165} x={14} y={18}>
+                Element type:
+            </WiredMenuTitle>
+            <WiredMenuPanel h={47} w={141} x={14} y={38}>
+                {INSPECTION_ELEMENTS.map((element, index) => (
+                    <WiredMenuButton
+                        key={element.key}
+                        className={inspectionType === element.key ? 'is-selected' : ''}
+                        h={36}
+                        title={element.label}
+                        w={37}
+                        x={5 + index * 47}
+                        y={5}
+                        onClick={() => setInspectionType(element.key)}
+                    >
+                        <img alt={element.label} className="octane-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
+                    </WiredMenuButton>
+                ))}
+            </WiredMenuPanel>
+            <WiredMenuTitle h={19} w={165} x={14} y={94}>
+                Preview:
+            </WiredMenuTitle>
+            <WiredMenuPanel className="octane-wired-menu__preview" h={225} w={141} x={14} y={114}>
+                {inspectionType === 'furni' && selectedFurni && roomId !== null && (
+                    <div className="octane-wired-menu__preview-image">
+                        <LayoutRoomObjectImageView category={selectedFurni.category} objectId={selectedFurni.objectId} roomId={roomId} />
                     </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <Text bold>Preview:</Text>
-                    <div className="relative h-[224px] rounded border border-[#c0bdb4] bg-[#d7d7d7] overflow-hidden">
-                        {inspectionType === 'furni' && selectedFurni && roomId !== null && (
-                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                <LayoutRoomObjectImageView category={selectedFurni.category} objectId={selectedFurni.objectId} roomId={roomId} />
-                            </div>
-                        )}
-                        {inspectionType === 'user' && selectedUser && (
-                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                {selectedUser.kind === 'pet' ? (
-                                    <LayoutPetImageView direction={2} figure={selectedUser.figure} posture={selectedUser.posture} />
-                                ) : (
-                                    <LayoutAvatarImageView direction={2} figure={selectedUser.figure} />
-                                )}
-                            </div>
-                        )}
-                        {inspectionType === 'global' && (
-                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                <img alt="Global placeholder" className="max-w-full max-h-full object-contain" src={wiredGlobalPlaceholderImage} />
-                            </div>
-                        )}
-                        {((inspectionType === 'furni' && !selectedFurni) || (inspectionType === 'user' && !selectedUser) || inspectionType === 'global') && (
-                            <div
-                                className={`absolute inset-0 flex items-center justify-center px-3 text-center text-[#666] text-[12px] ${inspectionType === 'global' ? 'hidden' : ''}`}
-                            >
-                                {previewPlaceholder}
-                            </div>
+                )}
+                {inspectionType === 'user' && selectedUser && (
+                    <div className="octane-wired-menu__preview-image">
+                        {selectedUser.kind === 'pet' ? (
+                            <LayoutPetImageView direction={2} figure={selectedUser.figure} posture={selectedUser.posture} />
+                        ) : (
+                            <LayoutAvatarImageView direction={2} figure={selectedUser.figure} />
                         )}
                     </div>
-                </div>
-                <label className="flex items-center gap-2 text-[12px] text-[#111]">
-                    <input
-                        checked={keepSelected}
-                        className="form-check-input mt-0"
-                        type="checkbox"
-                        onChange={(event) => onKeepSelectedChange(event.target.checked)}
-                    />
-                    <span>Keep selected</span>
-                </label>
-            </div>
-            <div className="min-w-0 grow flex flex-col gap-2">
-                <div className="flex flex-col gap-1 grow min-h-0">
-                    <Text bold>Variables:</Text>
-                    <div className="grow rounded border border-[#bdb8ab] bg-white overflow-hidden">
-                        <div className="grid grid-cols-[1fr_120px] border-b border-[#d8d4c8] bg-[#f5f2ea] px-3 py-2 text-[12px] text-[#666]">
-                            <span>Variable</span>
-                            <span>Value</span>
-                        </div>
-                        {!displayedVariables.length && (
-                            <div className="h-[calc(100%-37px)] flex items-center justify-center text-[#b1aca2] text-[20px]">
-                                <Text>Nothing to display</Text>
-                            </div>
-                        )}
-                        {!!displayedVariables.length && (
-                            <div className="max-h-[290px] overflow-y-auto">
-                                <table className="w-full text-[12px]">
-                                    <tbody>
-                                        {displayedVariables.map((variable, index) => (
-                                            <tr
-                                                key={variable.key}
-                                                className={`${selectedInspectionVariableKey === variable.key ? 'bg-[#d7dfea]' : index % 2 === 0 ? 'bg-white' : 'bg-[#f3f3f3]'} ${variable.editable ? 'cursor-pointer hover:bg-[#e8eefc]' : 'cursor-pointer'}`}
-                                                onClick={() => onSelectInspectionVariable(variable)}
-                                            >
-                                                <td className="px-3 py-1 text-[#444]">{variable.key}</td>
-                                                <td className="px-3 py-1 text-right text-[#222]">
-                                                    {editingVariable === variable.key && (
-                                                        <input
-                                                            autoFocus
-                                                            className="w-[170px] rounded border border-[#8d8d8d] px-2 py-1 text-right text-[12px]"
-                                                            spellCheck={false}
-                                                            type="text"
-                                                            value={editingValue}
-                                                            onClick={(event) => event.stopPropagation()}
-                                                            onBlur={onCancelVariableEdit}
-                                                            onChange={(event) => setEditingValue(event.target.value)}
-                                                            onKeyDownCapture={onVariableInputKeyDown}
-                                                        />
-                                                    )}
-                                                    {editingVariable !== variable.key && !variable.editable && (
-                                                        <span className={variable.valueClassName}>{variable.value}</span>
-                                                    )}
-                                                    {editingVariable !== variable.key && variable.editable && (
-                                                        <button
-                                                            className={`w-full cursor-pointer rounded px-1 text-right text-[#1b57b2] hover:underline ${variable.valueClassName ?? ''}`}
-                                                            type="button"
-                                                            onClick={(event) => {
-                                                                event.stopPropagation();
-                                                                onBeginVariableEdit(variable);
-                                                            }}
-                                                        >
-                                                            {variable.value}
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                )}
+                {inspectionType === 'global' && (
+                    <div className="octane-wired-menu__preview-image">
+                        <img alt="" draggable={false} src={wiredGlobalPlaceholderImage} />
                     </div>
-                </div>
-                <div className="relative flex justify-between gap-2">
-                    {isInspectionGiveOpen && (
-                        <div className="absolute right-0 bottom-full mb-2 w-[210px] rounded border border-[#8d887a] bg-[#efede5] p-3 shadow-[0_2px_8px_rgba(0,0,0,.25)] z-10 flex flex-col gap-2">
-                            <Text bold>Variable:</Text>
-                            <select
-                                className="rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px]"
-                                value={selectedInspectionGiveDefinition?.itemId ?? 0}
-                                onChange={(event) => onSelectGiveVariable(Number(event.target.value))}
-                            >
-                                {!availableInspectionDefinitions.length && <option value={0}>No variables available</option>}
-                                {availableInspectionDefinitions.map((definition) => (
-                                    <option key={definition.itemId} value={definition.itemId}>
-                                        {definition.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <Text bold>Value:</Text>
-                            <input
-                                className="w-[96px] rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px] disabled:opacity-60"
-                                disabled={!selectedInspectionGiveDefinition?.hasValue}
-                                type="number"
-                                value={inspectionGiveValue}
-                                onChange={(event) => onInspectionGiveValueChange(event.target.value)}
-                            />
-                            <Button disabled={!canGiveInspectionVariable} variant="secondary" onClick={onGiveInspectionVariable}>
-                                Create
-                            </Button>
-                        </div>
-                    )}
-                    <Button disabled={!canRemoveInspectionVariable} variant="secondary" onClick={onRemoveInspectionVariable}>
-                        Remove variable
-                    </Button>
-                    <Button disabled={!canGiveInspectionVariable} variant="secondary" onClick={() => setIsInspectionGiveOpen((value) => !value)}>
-                        Give variable
-                    </Button>
-                </div>
-            </div>
-        </div>
+                )}
+                {((inspectionType === 'furni' && !selectedFurni) || (inspectionType === 'user' && !selectedUser)) && (
+                    <div className="octane-wired-menu__text octane-wired-menu__preview-instruction">{previewPlaceholder}</div>
+                )}
+            </WiredMenuPanel>
+            <WiredMenuCheckbox checked={keepSelected} h={18} label="Keep selected" w={197} x={14} y={348} onChange={onKeepSelectedChange} />
+            <WiredMenuTitle h={19} w={188} x={183} y={17}>
+                Variables:
+            </WiredMenuTitle>
+            <WiredMenuTable
+                columns={[
+                    { key: 'variable', title: 'Variable', factor: 0.65, align: 'left' },
+                    { key: 'value', title: 'Value', factor: 0.35, align: 'right' }
+                ]}
+                h={297}
+                rows={displayedVariables.map((variable) => ({
+                    key: variable.key,
+                    selected: selectedInspectionVariableKey === variable.key,
+                    onSelect: () => onSelectInspectionVariable(variable),
+                    cells: {
+                        variable: variable.key,
+                        value:
+                            editingVariable === variable.key ? (
+                                <input
+                                    autoFocus
+                                    className="octane-wired-menu__cell-input"
+                                    spellCheck={false}
+                                    type="text"
+                                    value={editingValue}
+                                    onBlur={onCancelVariableEdit}
+                                    onChange={(event) => setEditingValue(event.target.value)}
+                                    onClick={(event) => event.stopPropagation()}
+                                    onKeyDownCapture={onVariableInputKeyDown}
+                                />
+                            ) : variable.editable ? (
+                                <button
+                                    className={`octane-wired-menu__link ${variable.valueClassName ?? ''}`}
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onBeginVariableEdit(variable);
+                                    }}
+                                >
+                                    {variable.value}
+                                </button>
+                            ) : (
+                                <span className={variable.valueClassName}>{variable.value}</span>
+                            )
+                    }
+                }))}
+                w={303}
+                x={183}
+                y={37}
+            />
+            <WiredMenuButton disabled={!canRemoveInspectionVariable} h={25} w={145} x={183} y={343} onClick={onRemoveInspectionVariable}>
+                Remove variable
+            </WiredMenuButton>
+            <WiredMenuButton disabled={!canGiveInspectionVariable} h={25} w={145} x={341} y={343} onClick={() => setIsInspectionGiveOpen((value) => !value)}>
+                Give variable
+            </WiredMenuButton>
+            {isInspectionGiveOpen && (
+                <WiredMenuItem className="octane-wired-menu__bubble" h={145} w={186} x={299} y={181}>
+                    <WiredMenuTitle h={17} w={158} x={6} y={6}>
+                        Variable:
+                    </WiredMenuTitle>
+                    <WiredMenuItem h={22} w={158} x={6} y={26}>
+                        <div className="octane-wired-menu__dropdown-wrap">
+<select
+                            className="octane-wired-menu__dropdown"
+                            value={selectedInspectionGiveDefinition?.itemId ?? 0}
+                            onChange={(event) => onSelectGiveVariable(Number(event.target.value))}
+                        >
+                            {!availableInspectionDefinitions.length && <option value={0}>No variables available</option>}
+                            {availableInspectionDefinitions.map((definition) => (
+                                <option key={definition.itemId} value={definition.itemId}>
+                                    {definition.name}
+                                </option>
+                            ))}
+                        </select>
+</div>
+                    </WiredMenuItem>
+                    <WiredMenuTitle h={17} w={158} x={6} y={52}>
+                        Value:
+                    </WiredMenuTitle>
+                    <WiredMenuItem className="octane-wired-menu__value-box" h={22} w={80} x={6} y={72}>
+                        <input
+                            disabled={!selectedInspectionGiveDefinition?.hasValue}
+                            type="number"
+                            value={inspectionGiveValue}
+                            onChange={(event) => onInspectionGiveValueChange(event.target.value)}
+                        />
+                    </WiredMenuItem>
+                    <WiredMenuButton disabled={!canGiveInspectionVariable} h={25} w={158} x={6} y={100} onClick={onGiveInspectionVariable}>
+                        Create
+                    </WiredMenuButton>
+                </WiredMenuItem>
+            )}
+        </>
     );
 };

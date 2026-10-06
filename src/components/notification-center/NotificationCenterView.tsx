@@ -28,7 +28,8 @@ export const NotificationCenterView: FC<{}> = (props) => {
 
         const elements: ReactNode[] = [];
 
-        for (const alert of bubbleAlerts) {
+        // v75 puts a new bubble in the first free slot below the others, so the oldest stays on top.
+        for (const alert of [...bubbleAlerts].reverse()) {
             const element = GetBubbleLayout(alert, () => closeBubbleAlert(alert));
 
             if (alert.notificationType === NotificationBubbleType.CLUBGIFT) {

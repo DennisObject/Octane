@@ -1,10 +1,41 @@
 import { ColorConverter } from '@octane/renderer';
-import { FC, useMemo } from 'react';
+import { FC, PointerEvent as ReactPointerEvent, useMemo } from 'react';
 import { ColorUtils, LocalizeText } from '../../../../api';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Slider, Text } from '../../../../common';
+import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useFurnitureBackgroundColorWidget } from '../../../../hooks';
 
-export const FurnitureBackgroundColorView: FC<{}> = (props) => {
+// background_color_ui (HabboRoomUICom): a 292x255 style 3 frame; the white panel, three dimmer-style sliders and two buttons are placed
+// from the layout (content origin 6,25). The native thumbs sit 15px left of their track and 7px above it, which is kept.
+const SLIDER_TRAVEL = 194;
+
+const ToneSlider: FC<{ top: number; label: string; value: number; onChange: (value: number) => void }> = ({ top, label, value, onChange }) => {
+    const move = (event: ReactPointerEvent<HTMLDivElement>) => {
+        const bounds = event.currentTarget.getBoundingClientRect();
+
+        onChange(Math.round(Math.min(1, Math.max(0, (event.clientX - bounds.left - 6) / SLIDER_TRAVEL)) * 255));
+    };
+
+    return (
+        <>
+            <span className="octane-toner__label" style={{ top: top + 2 }}>
+                {label}
+            </span>
+            <div
+                className="octane-toner__slider"
+                style={{ top: top + 12 }}
+                onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    move(event);
+                }}
+                onPointerMove={(event) => event.currentTarget.hasPointerCapture(event.pointerId) && move(event)}
+            >
+                <span className="octane-toner__thumb" style={{ left: Math.round((value / 255) * SLIDER_TRAVEL) - 15 }} />
+            </div>
+        </>
+    );
+};
+
+export const FurnitureBackgroundColorView: FC<{}> = () => {
     const {
         objectId = -1,
         hue = 0,
@@ -18,87 +49,25 @@ export const FurnitureBackgroundColorView: FC<{}> = (props) => {
         onClose = null
     } = useFurnitureBackgroundColorWidget();
 
-    const previewColor = useMemo(() => {
-        const hsl = ColorUtils.eight_bitVals_to_int(0, hue, saturation, lightness);
-
-        return ColorConverter.hslToRGB(hsl);
-    }, [hue, saturation, lightness]);
+    const previewColor = useMemo(() => ColorConverter.hslToRGB(ColorUtils.eight_bitVals_to_int(0, hue, saturation, lightness)), [hue, saturation, lightness]);
 
     if (objectId === -1) return null;
 
     return (
-        <OctaneCardView className="octane-room-widget-background-color" theme="primary-slim">
+        <OctaneCardView className="octane-toner" frameStyle={3} isResizable={false} uniqueKey="octane-room-toner">
             <OctaneCardHeaderView headerText={LocalizeText('widget.backgroundcolour.title')} onCloseClick={onClose} />
-            <OctaneCardContentView classNames={['bgcolor-widget-content']} overflow="hidden">
-                <div className="bgcolor-widget-panel">
-                    <div className="bgcolor-widget-top">
-                        <Text className="bgcolor-widget-info">{LocalizeText('widget.backgroundcolor.info')}</Text>
-                        <div className="bgcolor-widget-preview" style={{ backgroundColor: ColorUtils.makeColorNumberHex(previewColor) }} />
-                    </div>
-                    <div className="bgcolor-widget-slider-group">
-                        <Text fontWeight="bold" className="bgcolor-widget-label">
-                            {LocalizeText('widget.backgroundcolor.hue')}
-                        </Text>
-                        <div className="bgcolor-widget-slider-shell">
-                            <Slider
-                                disabledButton
-                                max={255}
-                                min={0}
-                                step={1}
-                                thumbClassName="bgcolor-widget-slider-thumb"
-                                trackClassName="bgcolor-widget-slider-track"
-                                value={hue}
-                                renderThumb={(props) => <div {...props} />}
-                                onChange={(value) => setHue(value as number)}
-                            />
-                        </div>
-                    </div>
-                    <div className="bgcolor-widget-slider-group">
-                        <Text fontWeight="bold" className="bgcolor-widget-label">
-                            {LocalizeText('widget.backgroundcolor.saturation')}
-                        </Text>
-                        <div className="bgcolor-widget-slider-shell">
-                            <Slider
-                                disabledButton
-                                max={255}
-                                min={0}
-                                step={1}
-                                thumbClassName="bgcolor-widget-slider-thumb"
-                                trackClassName="bgcolor-widget-slider-track"
-                                value={saturation}
-                                renderThumb={(props) => <div {...props} />}
-                                onChange={(value) => setSaturation(value as number)}
-                            />
-                        </div>
-                    </div>
-                    <div className="bgcolor-widget-slider-group">
-                        <Text fontWeight="bold" className="bgcolor-widget-label">
-                            {LocalizeText('widget.backgroundcolor.lightness')}
-                        </Text>
-                        <div className="bgcolor-widget-slider-shell">
-                            <Slider
-                                disabledButton
-                                max={255}
-                                min={0}
-                                step={1}
-                                thumbClassName="bgcolor-widget-slider-thumb"
-                                trackClassName="bgcolor-widget-slider-track"
-                                value={lightness}
-                                renderThumb={(props) => <div {...props} />}
-                                onChange={(value) => setLightness(value as number)}
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="bgcolor-widget-actions">
-                    <Button classNames={['bgcolor-widget-button']} onClick={applyToner}>
-                        {LocalizeText('widget.backgroundcolor.button.apply')}
-                    </Button>
-                    <Button classNames={['bgcolor-widget-button']} onClick={toggleToner}>
-                        {LocalizeText('widget.backgroundcolor.button.on')}
-                    </Button>
-                </div>
-            </OctaneCardContentView>
+            <div className="octane-toner__panel" />
+            <span className="octane-toner__info">{LocalizeText('widget.backgroundcolor.info')}</span>
+            <div className="octane-toner__preview" style={{ backgroundColor: ColorUtils.makeColorNumberHex(previewColor) }} />
+            <ToneSlider label={LocalizeText('widget.backgroundcolor.hue')} top={77} value={hue} onChange={setHue} />
+            <ToneSlider label={LocalizeText('widget.backgroundcolor.saturation')} top={119} value={saturation} onChange={setSaturation} />
+            <ToneSlider label={LocalizeText('widget.backgroundcolor.lightness')} top={161} value={lightness} onChange={setLightness} />
+            <button className="octane-toner__button octane-toner__apply" type="button" onClick={applyToner}>
+                {LocalizeText('widget.backgroundcolor.button.apply')}
+            </button>
+            <button className="octane-toner__button octane-toner__toggle" type="button" onClick={toggleToner}>
+                {LocalizeText('widget.backgroundcolor.button.on')}
+            </button>
         </OctaneCardView>
     );
 };

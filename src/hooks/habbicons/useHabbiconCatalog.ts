@@ -293,7 +293,7 @@ const useHabbiconCatalogState = () => {
             sets.map((set) => ({ ...set, entries: ownedEntries.filter((item) => item.collectionId === set.collectionId) })).filter((set) => set.entries.length),
         [sets, ownedEntries]
     );
-    const lastUsedCollectionId = entries.find((entry) => entry.id === recentIds[0])?.collectionId ?? sets[0]?.collectionId ?? 0;
+    const lastUsedCollectionId = entries.find((entry) => entry.id === recentIds[0])?.collectionId ?? 0;
 
     const act = (action: HabbiconAction, id: number) => {
         if (pendingRef.current) return;

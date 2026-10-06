@@ -1,0 +1,149 @@
+.octanepedia.octane-card-shell.octane-card-frame-3 {
+    --octane-card-close-3: url("../../assets/images/octanepedia/native/close-default.png");
+    --octane-card-close-3-hover: url("../../assets/images/octanepedia/native/close-hover.png");
+    --octane-card-close-3-pressed: url("../../assets/images/octanepedia/native/close-pressed.png");
+
+    box-sizing: border-box;
+    width: 418px;
+    height: 398px;
+    padding: 33px 3px 3px;
+    color: #111;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    top: 0 !important;
+    right: 0 !important;
+    width: 15px !important;
+    height: 15px !important;
+    background: #d2392b var(--octane-card-close-3) 0 0 / 15px 15px no-repeat !important;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:hover {
+    background-image: var(--octane-card-close-3-hover) !important;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:active {
+    background-image: var(--octane-card-close-3-pressed) !important;
+}
+
+.octanepedia.octane-card-shell.octane-card-frame-3::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: 32px;
+    border-radius: 6px 6px 0 0;
+    background: #578ca5;
+    box-shadow: inset 0 2px #67a3bf, inset 0 -1px #05121a;
+    content: '';
+    pointer-events: none;
+}
+
+.octanepedia > .octane-card-header-shell { cursor: move; }
+
+.octanepedia__viewport {
+    position: relative;
+    box-sizing: border-box;
+    width: calc(100% - 1px);
+    height: calc(100% - 22px);
+    margin: 2px 0 0 1px;
+    overflow: hidden;
+    border: 0;
+    background: #fff;
+}
+
+.octanepedia__viewport > .octane-classic-scroll-area-viewport {
+    box-sizing: border-box;
+    padding-right: 17px;
+    scrollbar-width: none !important;
+}
+
+.octanepedia__viewport > .octane-classic-scroll-area-viewport::-webkit-scrollbar { display: none !important; }
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-default.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-default.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-track {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-track-3.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
+    min-height: 26px;
+    border: 0 solid transparent;
+    border-image: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png") 5 0 / 5px 0 stretch;
+    background: url("../../assets/images/habbo-skin/slices/scroll-grip-3-default.png") center no-repeat,
+        url("../../assets/images/habbo-skin/slices/scroll-mid-3-default.png") repeat-y;
+}
+
+.octanepedia__content > div {
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: 3px 5px 8px;
+    overflow-wrap: break-word;
+    color: #111;
+    background: #fff;
+}
+
+.octanepedia__content > .octanepedia__native-container { padding: 0; }
+
+.octanepedia__native-page { position: relative; min-height: 100%; }
+.octanepedia__native-page > canvas { image-rendering: pixelated; }
+.octanepedia__native-link { position: absolute; display: block; background: transparent; }
+.octanepedia__native-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+.octanepedia__accessible-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: pre-wrap;
+}
+
+.octanepedia__content :is(h1, h2, h3, p) { margin: 0; padding: 0; }
+
+.octanepedia__content h1 {
+    color: #fc6204;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 28px;
+}
+
+.octanepedia__content :is(h2, h3) {
+    color: #fc6204;
+    font-weight: 700;
+}
+
+.octanepedia__content h2 { font-size: 19px; }
+.octanepedia__content h3 { font-size: 15px; }
+
+.octanepedia__content a { color: #fc6204; font-weight: 700; text-decoration: underline; }
+.octanepedia__content img { max-width: none; }
+.octanepedia__content img[height] { height: attr(height px); }
+.octanepedia__content img[width] { width: attr(width px); }
+
+.octanepedia__content .padding-top,
+.octanepedia__content .padding-bottom {
+    display: block;
+    height: 9px;
+    line-height: 9px;
+}
+
+.octanepedia__content .padding-top br,
+.octanepedia__content .padding-bottom br { display: none; }
+.octanepedia__content .bullet-item { line-height: 14px; }
+
+.octanepedia__content font[size='12px'] { font-size: 12px; }
+.octanepedia__content font[size='-1'] { font-size: 10px; }
+
+/* Legacy Flash HTML inserted empty FONT/P rows to reserve bitmap height.
+   Browser images already participate in flow, so retaining both doubles it. */
+.octanepedia__content img + font { display: none; }

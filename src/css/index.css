@@ -32,7 +32,106 @@
 
 @font-face {
     font-family: Ubuntu;
-    src: url("@/assets/webfonts/Ubuntu-C.ttf");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Ubuntu;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Ubuntu;
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-i.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Ubuntu;
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-ib.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuRegular;
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuRegular;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuRegular;
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-i.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuRegular;
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-ib.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuBold;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-i.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: HabboAirUbuntu;
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-ib.ttf") format("truetype");
 }
 
 @font-face {
@@ -49,14 +148,29 @@
     src: url("@/assets/webfonts/Volter-b.ttf") format("truetype");
 }
 
-@font-face {
-    font-family: UbuntuRegular;
-    src: url("@/assets/webfonts/Ubuntu.ttf");
-}
 
 @font-face {
     font-family: UbuntuCondensed;
-    src: local("Ubuntu Condensed"), local("Ubuntu");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-C.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuMedium;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-m.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: UbuntuThick;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("@/assets/webfonts/Ubuntu-bt.ttf") format("truetype");
 }
 
 :root {

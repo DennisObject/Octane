@@ -4,7 +4,8 @@ import { GetWiredTimeLocale, LocalizeText, localizeWithFallback, WiredFurniType 
 import contextVariableIcon from '../../../../assets/images/wired/var/icon_source_context_clean.png';
 import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_furni.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
-import { Button, Slider, Text } from '../../../../common';
+import { Button, Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';

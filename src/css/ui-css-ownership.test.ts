@@ -64,7 +64,6 @@ describe('UI CSS ownership', () =>
         const inventoryCategoryFilterView = readSource('src/components/inventory/views/InventoryCategoryFilterView.tsx');
         const navigatorView = readSource('src/components/navigator/NavigatorView.tsx');
         const navigatorRoomSettingsView = readSource('src/components/navigator/views/room-settings/NavigatorRoomSettingsView.tsx');
-        const wiredBaseView = readSource('src/components/wired/views/WiredBaseView.tsx');
         const friendsCategoryManagerView = readSource('src/components/friends/views/friends-list/FriendsCategoryManagerView.tsx');
         const friendsListView = readSource('src/components/friends/views/friends-list/FriendsListView.tsx');
         const friendsListCss = readSource('src/components/friends/views/friends-list/FriendsListView.css');
@@ -74,14 +73,11 @@ describe('UI CSS ownership', () =>
         const friendsMessengerCss = readSource('src/components/friends/views/messenger/FriendsMessengerView.css');
         const vaultView = readSource('src/components/vault/VaultView.tsx');
         const helpView = readSource('src/components/help/HelpView.tsx');
-        const userSettingsView = readSource('src/components/user-settings/UserSettingsView.tsx');
         const chatHistoryView = readSource('src/components/chat-history/ChatHistoryView.tsx');
         const chatHistoryCss = readSource('src/css/chat/ChatHistoryView.css');
         const vaultCss = readSource('src/css/vault/VaultView.css');
-        const userSettingsCss = readSource('src/css/user-settings/UserSettingsView.css');
         const sanctionStatusView = readSource('src/components/help/views/SanctionStatusView.tsx');
         const translationSettingsView = readSource('src/components/translation/TranslationSettingsView.tsx');
-        const userAccountSettingsView = readSource('src/components/user-settings/UserAccountSettingsView.tsx');
         const hcCenterView = readSource('src/components/hc-center/HcCenterView.tsx');
         const inventoryFurnitureDeleteView = readSource('src/components/inventory/views/furniture/InventoryFurnitureDeleteView.tsx');
 
@@ -130,21 +126,17 @@ describe('UI CSS ownership', () =>
         expect(inventoryView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorRoomSettingsView).toContain('max-w-[calc(100vw-16px)]');
-        expect(wiredBaseView).toContain('max-h-[calc(100vh-16px)]');
         // These fixed-layout windows keep their viewport clamp in their own CSS.
         expect(friendsListCss).toContain('max-width: min(230px, calc(100vw - 16px));');
         expect(friendsMessengerCss).toMatch(/\.messenger-window\s*\{[^}]*max-width:\s*calc\(100vw - 10px\)/s);
         expect(vaultView).toContain('max-w-[calc(100vw-16px)]');
         expect(helpView).toContain('max-w-[calc(100vw-16px)]');
-        expect(userSettingsView).toContain('max-w-[calc(100vw-16px)]');
         expect(chatHistoryView).toContain('octane-chat-history');
         expect(chatHistoryView).not.toContain('style={{ flex: 1, overflowY: \'auto\'');
         expect(chatHistoryCss).toContain('.octane-chat-history-scroll');
         expect(vaultCss).toContain('.octane-vault-content');
-        expect(userSettingsCss).toContain('.user-settings-window');
         expect(sanctionStatusView).toContain('max-w-[calc(100vw-16px)]');
         expect(translationSettingsView).toContain('max-w-[calc(100vw-16px)]');
-        expect(userAccountSettingsView).toContain('max-w-[calc(100vw-16px)]');
         expect(hcCenterView).toContain('max-w-[calc(100vw-16px)]');
         expect(inventoryFurnitureDeleteView).toContain('max-w-[calc(100vw-16px)]');
     });

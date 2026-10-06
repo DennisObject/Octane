@@ -151,8 +151,10 @@
 
 .octane-inventory-empty {
     position: relative;
-    height: 100%;
-    min-height: 278px;
+    /* The v75 empty container starts 15px above the content and stretches
+       with it; its 278px initial height includes the 2px footer inset. */
+    height: calc(100% + 17px);
+    min-height: 0;
     margin-left: -5px;
     margin-top: -15px;
     width: 478px;
@@ -190,10 +192,11 @@
     line-height: 14px;
 }
 
-.octane-inventory-empty-shop {
+.octane-inventory-window .octane-inventory-empty-shop {
     position: absolute !important;
     left: 241px;
-    top: 225px;
+    /* params 918545 moves this control with the bottom of the container. */
+    bottom: 2px;
     box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -201,21 +204,31 @@
     width: 149px !important;
     height: 51px !important;
     min-height: 51px !important;
-    /* Ubuntu metrics sit low in the em-box; bias caption up inside shiny chrome. */
-    padding: 0 8px 3px !important;
+    /* v75 button style 3: shiny skin and regular caption, even at 51px high. */
+    padding: 0 3px 1px !important;
     border: 5px solid transparent !important;
     border-radius: 0 !important;
-    border-image-source: var(--habbo-skin-shiny-large) !important;
+    border-image-source: var(--habbo-skin-shiny) !important;
     border-image-slice: 5 fill !important;
     border-image-width: 5px !important;
     border-image-repeat: stretch !important;
     background: transparent !important;
     color: #111 !important;
-    font-weight: 700 !important;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
     line-height: 14px !important;
     text-align: center !important;
     box-shadow: none !important;
     image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-inventory-window .octane-inventory-empty-shop:hover {
+    border-image-source: var(--habbo-skin-shiny-hover) !important;
+}
+
+.octane-inventory-window .octane-inventory-empty-shop:active {
+    border-image-source: var(--habbo-skin-shiny-pressed) !important;
 }
 
 .octane-inventory-furni {

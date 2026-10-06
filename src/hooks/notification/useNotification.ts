@@ -224,7 +224,7 @@ const useNotificationStore = () => {
     );
 
     const showModeratorMessage = (message: string, url: string = null, showHabboWay: boolean = true) => {
-        simpleAlert(message, NotificationAlertType.DEFAULT, url, LocalizeText('mod.alert.link'), LocalizeText('mod.alert.title'));
+        simpleAlert(message, NotificationAlertType.MODERATION, url, LocalizeText('mod.alert.link'), LocalizeText('mod.alert.title'));
     };
 
     const showTradeAlert = useCallback(
@@ -348,7 +348,7 @@ const useNotificationStore = () => {
 
         const notification = new AchievementNotificationBubbleItem(
             parser.data,
-            localizeWithFallback('notification.new.achievement', `Achievement unlocked: ${badgeName}`, ['achievement_name'], [badgeName]),
+            localizeWithFallback('notification.new.achievement', `You advanced to ${badgeName}!`, ['achievement_name'], [badgeName]),
             badgeImage
         );
 

@@ -1,6 +1,6 @@
 import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@octane/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { endAuthSession, forgetAccessToken, forgetRememberGrant, FriendlyTime, GetConfigurationValue, getAccessToken, LocalizeText, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
+import { endAuthSession, FriendlyTime, forgetAccessToken, isOctaneAuthEnabled, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
 import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
@@ -13,6 +13,7 @@ import { SeasonalView } from './views/SeasonalView';
 export const PurseView: FC<{}> = (props) => {
     const { purse = null, hcDisabled = false } = usePurse();
     const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+    const authEnabled = isOctaneAuthEnabled();
 
     const openSettingsSection = useCallback((section: string) => {
         CreateLinkEvent('user-settings/show/' + section);
@@ -39,23 +40,43 @@ export const PurseView: FC<{}> = (props) => {
 
     const hasDiamonds = currencyTypes.indexOf(5) >= 0;
     const hasDuckets = currencyTypes.indexOf(0) >= 0;
-    const otherCurrencies = currencyTypes.filter((type) => type !== 0 && type !== 5);
+    // Seasonal indicators follow seasonalcurrencyindicator.enabled/.active, one per listed type even at a zero balance.
+    const seasonalCurrencies = useMemo(() => {
+        if (!GetConfigurationValue<boolean>('seasonalcurrencyindicator.enabled', false)) return [];
 
-    const joinLabel = useMemo(() => localizeWithFallback('purse.join', 'Join'), []);
+        const types: number[] = [];
 
-    // Complimentary HC has no purchased expiry to count down.
+        for (const part of String(GetConfigurationValue<string>('seasonalcurrencyindicator.active', '') ?? '').split(',')) {
+            const value = part.trim();
+
+            if (value === '' || Number.isNaN(Number(value))) continue;
+
+            const type = Math.trunc(Number(value));
+
+            if (!types.includes(type)) types.push(type);
+        }
+
+        return types;
+    }, []);
+
+    const joinLabel = useMemo(() => localizeWithFallback('purse.clubdays.zero.amount.text', 'Get'), []);
+
+    // Purse club indicator (DMe): "Join" while periods * 31 + days is below one, else the minutes left under a day or the days.
+    const clubDaysLeft = purse ? (purse.clubPeriods * 31) + purse.clubDays : 0;
     const clubLabel = useMemo(() => {
-        if (!purse?.hasClubLeft) return joinLabel;
-        if (purse.isComplimentaryClub) return localizeWithFallback('purse.club.permanent', 'HC ∞');
+        if (!purse || clubDaysLeft < 1) return joinLabel;
         if (purse.minutesUntilExpiration > -1 && purse.minutesUntilExpiration < 60 * 24) {
             return FriendlyTime.shortFormat(purse.minutesUntilExpiration * 60);
         }
-        return FriendlyTime.shortFormat((purse.clubPeriods * 31 + purse.clubDays) * 86400);
-    }, [purse, joinLabel]);
+        return FriendlyTime.shortFormat(clubDaysLeft * 86400);
+    }, [purse, clubDaysLeft, joinLabel]);
 
     const earningsLabel = useMemo(() => localizeWithFallback('earnings.title', 'Earnings'), []);
-    const helpLabel = useMemo(() => localizeWithFallback('help.button.name', 'Help'), []);
-    const translateLabel = useMemo(() => localizeWithFallback('purse.settings.translate', 'Translate'), []);
+    const helpLabel = useMemo(() => localizeWithFallback('toolbar.help', 'Help'), []);
+    const logoutLabel = useMemo(() => localizeWithFallback('toolbar.logout', 'Log out'), []);
+    const settingsLabel = useMemo(() => localizeWithFallback('widget.memenu.settings', 'Settings'), []);
+    const clubTitle = useMemo(() => localizeWithFallback('catalog.club.hc', 'Habbo Club'), []);
+    const hasClubTime = clubDaysLeft >= 1;
 
     const openClub = useCallback((event: React.MouseEvent) => {
         event.stopPropagation();
@@ -83,7 +104,7 @@ export const PurseView: FC<{}> = (props) => {
         }
 
         // Best effort: the server revokes the access token; local logout proceeds regardless.
-        await logoutSession({ accessToken, ssoTicket, rememberToken });
+        if (authEnabled) await logoutSession({ accessToken, ssoTicket, rememberToken });
 
         try {
             GetCommunication().connection.dispose();
@@ -111,7 +132,7 @@ export const PurseView: FC<{}> = (props) => {
         }
 
         window.location.reload();
-    }, []);
+    }, [authEnabled]);
 
     if (!purse) return null;
 
@@ -131,20 +152,20 @@ export const PurseView: FC<{}> = (props) => {
                                 type="button"
                                 className="octane-purse__btn octane-purse__btn--join octane-purse-subscription club-text"
                                 onClick={openClub}
-                                title={purse.isComplimentaryClub ? localizeWithFallback('purse.club.complimentary', 'Complimentary HC') : clubLabel}
+                                aria-label={clubTitle}
                             >
                                 <img src={hcIcon} alt="" className="octane-purse__btn-img" />
-                                <span>{clubLabel}</span>
+                                <span className={hasClubTime ? 'octane-purse__btn-days' : 'octane-purse__btn-join'}>{clubLabel}</span>
                             </button>
                         )}
                         <button
                             type="button"
                             className="octane-purse__btn octane-purse__btn--earnings octane-purse-subscription club-text"
                             onClick={openEarnings}
-                            title={earningsLabel}
+                            aria-label={earningsLabel}
                         >
                             <img src={earningsIcon} alt="" className="octane-purse__btn-img" />
-                            <span>{earningsLabel}</span>
+                            <span className="octane-purse__btn-earnings">{earningsLabel}</span>
                         </button>
                     </div>
                     <div className="octane-purse__divider" aria-hidden="true" />
@@ -156,18 +177,18 @@ export const PurseView: FC<{}> = (props) => {
                                 event.stopPropagation();
                                 CreateLinkEvent('help/show');
                             }}
-                            title={helpLabel}
+                            aria-label={helpLabel}
                         >
                             <span>{helpLabel}</span>
                         </button>
-                        <button
+                        {authEnabled && <button
                             type="button"
                             className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--logout octane-purse-right-button disconnect"
                             onClick={handleLogout}
-                            title="Log out"
+                            aria-label={logoutLabel}
                         >
                             <img src={logoutIcon} alt="" className="octane-purse__btn-img" />
-                        </button>
+                        </button>}
                         <button
                             type="button"
                             className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--settings octane-purse-right-button settings"
@@ -175,7 +196,7 @@ export const PurseView: FC<{}> = (props) => {
                                 event.stopPropagation();
                                 setSettingsMenuOpen((value) => !value);
                             }}
-                            title={LocalizeText('widget.memenu.settings.title')}
+                            aria-label={settingsLabel}
                         >
                             <img src={settingsIcon} alt="" className="octane-purse__btn-img" />
                         </button>
@@ -184,40 +205,25 @@ export const PurseView: FC<{}> = (props) => {
             </div>
             {settingsMenuOpen && (
                 <div className="octane-purse-menu">
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('')}>
-                        {localizeWithFallback('widget.memenu.settings.title', 'Settings')}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('audio')}>
+                        {localizeWithFallback('widget.memenu.settings.audio', 'Sound settings')}
                     </button>
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('privacy')}>
-                        {localizeWithFallback('purse.settings.game_privacy', 'Game Privacy')}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('chat')}>
+                        {localizeWithFallback('widget.memenu.settings.chat', 'Chat settings')}
                     </button>
-                    <button
-                        type="button"
-                        className="octane-purse-menu__item"
-                        onClick={() => {
-                            CreateLinkEvent('translation-settings/toggle');
-                            setSettingsMenuOpen(false);
-                        }}
-                    >
-                        {translateLabel}
+                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('other')}>
+                        {localizeWithFallback('widget.memenu.settings.other', 'Other settings')}
                     </button>
-                    <button
-                        type="button"
-                        className="octane-purse-menu__item"
-                        onClick={() => {
-                            CreateLinkEvent('user-account-settings/show');
-                            setSettingsMenuOpen(false);
-                        }}
-                    >
-                        {localizeWithFallback('purse.settings.account', 'Account Management')}
-                    </button>
-                    <button type="button" className="octane-purse-menu__item octane-purse-menu__item--disabled" disabled>
-                        {localizeWithFallback('purse.settings.wordfilter', 'Word Filter')}
-                    </button>
+                    {GetConfigurationValue<boolean>('user.custom.filter.enabled', false) && (
+                        <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('wordfilter')}>
+                            {localizeWithFallback('word_filter.settings.title', 'Word filter')}
+                        </button>
+                    )}
                 </div>
             )}
-            {otherCurrencies.length > 0 && (
+            {seasonalCurrencies.length > 0 && (
                 <div className="octane-purse__other">
-                    {otherCurrencies.map((type) => (
+                    {seasonalCurrencies.map((type) => (
                         <SeasonalView key={type} type={type} amount={purse.activityPoints.get(type) || 0} />
                     ))}
                 </div>

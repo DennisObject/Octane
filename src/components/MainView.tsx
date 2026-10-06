@@ -11,11 +11,11 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, IsTouchDevice } from '../api';
+import { NativeTextHaloFilter } from '../common';
 import { useOctaneEventReducer } from '../hooks';
 import { AchievementsView } from './achievements/AchievementsView';
 import { GoogleAdsView } from './ads/GoogleAdsView';
 import { AvatarEditorView } from './avatar-editor';
-import { AvatarEffectsView } from './avatar-effects';
 import { BadgeCreatorView } from './badge-creator';
 import { BadgeLeaderboardView } from './badge-leaderboard/BadgeLeaderboardView';
 import { CameraWidgetView } from './camera/CameraWidgetView';
@@ -52,7 +52,6 @@ import { TranslationBootstrap } from './translation/TranslationBootstrap';
 import { TranslationSettingsView } from './translation/TranslationSettingsView';
 import { TraxEditorView } from './trax-editor/TraxEditorView';
 import { UserProfileView } from './user-profile/UserProfileView';
-import { UserAccountSettingsView } from './user-settings/UserAccountSettingsView';
 import { UserSettingsView } from './user-settings/UserSettingsView';
 import { VariablesExplorerView } from './variables-explorer/VariablesExplorerView';
 import { VaultView } from './vault/VaultView';
@@ -140,6 +139,7 @@ export const MainView: FC<{}> = (props) =>
     return (
         <>
             <div className="hidden" data-localization-version={localizationVersion} />
+            <NativeTextHaloFilter />
             <AnimatePresence>
                 {landingViewVisible && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -161,7 +161,6 @@ export const MainView: FC<{}> = (props) =>
             <BadgeCreatorView />
             <BadgeLeaderboardView />
             <EmuStatsView />
-            <AvatarEffectsView />
             <AchievementsView />
             <HabbiconHubView />
             <NavigatorView />
@@ -171,7 +170,6 @@ export const MainView: FC<{}> = (props) =>
             <FriendsView />
             <RightSideView />
             <UserSettingsView />
-            <UserAccountSettingsView />
             <DiscordSettingsView />
             <VaultView />
             <QuestsView />

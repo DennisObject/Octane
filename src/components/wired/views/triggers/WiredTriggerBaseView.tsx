@@ -9,6 +9,7 @@ export interface WiredTriggerBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    nativeLayout?: boolean;
 }
 
 export const WiredTriggerBaseView: FC<PropsWithChildren<WiredTriggerBaseViewProps>> = (props) => {
@@ -19,7 +20,8 @@ export const WiredTriggerBaseView: FC<PropsWithChildren<WiredTriggerBaseViewProp
         children = null,
         footer = null,
         footerCollapsible = true,
-        selectionPreview = null
+        selectionPreview = null,
+        nativeLayout = false
     } = props;
 
     const onSave = () => save && save();
@@ -33,6 +35,7 @@ export const WiredTriggerBaseView: FC<PropsWithChildren<WiredTriggerBaseViewProp
             footer={footer}
             footerCollapsible={footerCollapsible}
             selectionPreview={selectionPreview}
+            nativeLayout={nativeLayout}
         >
             {children}
         </WiredBaseView>

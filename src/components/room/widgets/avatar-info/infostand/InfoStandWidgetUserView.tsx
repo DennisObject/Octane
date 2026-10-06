@@ -12,8 +12,9 @@ import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCall
 import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
-import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
+import { Column, Flex, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
 import { useMessageEvent, useOctaneEvent, useRoom } from '../../../../../hooks';
+import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandBadgeSlotView } from './InfoStandBadgeSlotView';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
 import { InfoStandWidgetUserTagsView } from './InfoStandWidgetUserTagsView';
@@ -129,10 +130,11 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
 
     if (!avatarInfo) return null;
 
+    // The room unit packet of this hotel carries no badge rank, which the official infostand then shows as 0.
+    const badgesRank = 0;
     const isOwnUser = avatarInfo.type === AvatarInfoUser.OWN_USER;
     const mottoMaxLength = GetConfigurationValue<number>('motto.max.length', 38);
     const showAchievementScore = GetConfigurationValue<boolean>('activity.point.display.enabled', true);
-    const hasRelationships = !!relationships?.relationshipStatusMap.length;
 
     return (
         <>
@@ -158,7 +160,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                 <div className="octane-infostand__rule" />
                 <div className="octane-infostand__figure-row">
                     <div className="octane-infostand__avatar-well" onClick={handleProfileClick}>
-                        <LayoutAvatarImageView direction={2} figure={avatarInfo.figure} />
+                        <InfoStandAvatarView direction={4} figure={avatarInfo.figure} top={24} left={17} />
                     </div>
                     <div className="octane-infostand__badges">
                         {(() => {
@@ -197,7 +199,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                     </div>
                 </div>
                 <div className="octane-infostand__rule" />
-                <div className="octane-infostand__motto">
+                <div className="octane-infostand__motto octane-infostand__motto--box">
                     {isOwnUser && <img src={pencilIcon} alt="" className="octane-infostand__pen" />}
                     {!isOwnUser && (
                         <Text fullWidth pointer textBreak wrap className="octane-infostand__motto-text" variant="white">
@@ -235,6 +237,8 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                         </>
                     )}
                 </div>
+                <div className="octane-infostand__rule" />
+                <div className="octane-infostand__score">{localizeWithFallback('infostand.text.badges_rank', `Badge rank: #${badgesRank}`, ['rank'], [`#${badgesRank}`])}</div>
                 {showAchievementScore && (
                     <>
                         <div className="octane-infostand__rule" />
@@ -245,25 +249,26 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                                 title={localizeWithFallback('achievements.title', 'Achievements')}
                                 onClick={() => CreateLinkEvent('achievements/show')}
                             >
-                                {LocalizeText('infostand.text.achievement_score')} {avatarInfo.achievementScore}
+                                {LocalizeText('infostand.text.achievement_score')}
                             </button>
                         ) : (
-                            <div className="octane-infostand__score">
-                                {LocalizeText('infostand.text.achievement_score')} {avatarInfo.achievementScore}
-                            </div>
+                            <div className="octane-infostand__score">{LocalizeText('infostand.text.achievement_score')}</div>
                         )}
+                        <div className="octane-infostand__score">{avatarInfo.achievementScore}</div>
                     </>
                 )}
                 {avatarInfo.carryItem > 0 && (
                     <>
                         <div className="octane-infostand__rule" />
-                        <Text small wrap variant="white">
+                        <div className="octane-infostand__carry">
                             {LocalizeText('infostand.text.handitem', ['item'], [LocalizeText('handitem' + avatarInfo.carryItem)])}
-                        </Text>
+                        </div>
                     </>
                 )}
-                <div className={`octane-infostand__rule ${hasRelationships ? '' : 'octane-infostand__rule--footer'}`} />
-                <InfoStandWidgetUserRelationshipsView relationships={relationships} />
+                <div className="octane-infostand__rule" />
+                <div className="octane-infostand__relationships">
+                    <InfoStandWidgetUserRelationshipsView relationships={relationships} />
+                </div>
                 {GetConfigurationValue('user.tags.enabled') && (
                     <Column className="mt-1" gap={1}>
                         <InfoStandWidgetUserTagsView tags={GetSessionDataManager().tags} />

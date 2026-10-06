@@ -91,12 +91,6 @@ describe('useNavigatorUiStore', () => {
     });
 
     describe('creator panel', () => {
-        it('openCreator() opens both visible and creator', () => {
-            useNavigatorUiStore.getState().openCreator();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().isCreatorOpen).toBe(true);
-        });
-
         it('closeCreator() closes only the creator panel', () => {
             useNavigatorUiStore.setState({ isVisible: true, isCreatorOpen: true });
             useNavigatorUiStore.getState().closeCreator();

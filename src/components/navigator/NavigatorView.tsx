@@ -11,7 +11,7 @@ import {
     RemoveLinkEventTracker,
     RoomSessionEvent
 } from '@octane/renderer';
-import { CSSProperties, FC, PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, PointerEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, localizeWithFallback, SendMessageComposer, TryVisitRoom } from '../../api';
 import createRoomImg from '../../assets/images/navigator/air/create-room.png';
 import promoteRoomImg from '../../assets/images/navigator/air/promote-room.png';
@@ -52,12 +52,17 @@ const persistNavigatorBounds = (element: HTMLElement | null) => {
 export const NavigatorView: FC<{}> = () => {
     const { topLevelContext, topLevelContexts, navigatorData, navigatorSearches } = useNavigatorData();
     const { searchResult, isFetching } = useNavigatorSearch();
-    const { isVisible, isCreatorOpen, isRoomInfoOpen, isRoomLinkOpen, isOpenSavesSearches, needsInit, currentTabCode, windowHeight } = useNavigatorUiState();
+    const { isVisible, isCreatorOpen, isRoomInfoOpen, isRoomLinkOpen, isOpenSavesSearches, needsInit, currentTabCode, windowX, windowY, windowHeight } =
+        useNavigatorUiState();
     const elementRef = useRef<HTMLDivElement>(null);
     const [resultsScrollable, setResultsScrollable] = useState(false);
     const frameRef = useRef<HTMLDivElement>(null);
     const tabsRef = useRef<HTMLDivElement>(null);
     const resizeRef = useRef<{ y: number; height: number; scale: number } | null>(null);
+    const onPositionChange = useCallback((position: { x: number; y: number }) => {
+        useNavigatorUiStore.setState({ windowX: position.x, windowY: position.y });
+        requestAnimationFrame(() => persistNavigatorBounds(frameRef.current));
+    }, []);
 
     useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, () => {
         useNavigatorUiStore.getState().hide();
@@ -143,7 +148,7 @@ export const NavigatorView: FC<{}> = () => {
         };
         AddLinkEventTracker(linkTracker);
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [navigatorData]);
+    }, [navigatorData.homeRoomId]);
 
     useEffect(() => {
         if (!searchResult) return;
@@ -152,11 +157,11 @@ export const NavigatorView: FC<{}> = () => {
     }, [searchResult]);
 
     useEffect(() => {
-        if (!isVisible || !needsInit) return;
+        if (!needsInit) return;
         SendMessageComposer(new NavigatorInitComposer());
         SendMessageComposer(new GetCategoriesWithUserCountMessageComposer());
         useNavigatorUiStore.getState().markInitDone();
-    }, [isVisible, needsInit]);
+    }, [needsInit]);
 
     useEffect(() => {
         LegacyExternalInterface.addCallback(HabboWebTools.OPENROOM, (k: string) => SendMessageComposer(new ConvertGlobalRoomIdMessageComposer(k)));
@@ -201,22 +206,18 @@ export const NavigatorView: FC<{}> = () => {
         updateScrollState();
 
         return () => observer.disconnect();
-    }, [isVisible, isCreatorOpen, searchResult]);
+    }, [isVisible, isCreatorOpen, searchResult, topLevelContexts]);
 
     const quickLinksLabel = localizeWithFallback('navigator.quick.links.title', 'Quick links');
     const navigatorLabel = localizeWithFallback('navigator.title', 'Navigator');
     const quickLinksToggleLabel = localizeWithFallback('navigator.tooltip.left.show.hide', 'Show or hide quick links');
     const showPromote = searchResult?.code === 'myworld_view' || searchResult?.code === 'roomads_view';
-    const headerText = isCreatorOpen
-        ? LocalizeText('navigator.createroom.title')
-        : isFetching
-          ? LocalizeText('navigator.title.is.busy')
-          : LocalizeText('navigator.title');
+    const headerText = isFetching ? LocalizeText('navigator.title.is.busy') : LocalizeText('navigator.title');
 
     const onToggleQuickLinks = () => {
         useNavigatorRoomInfoPopupStore.getState().hide();
         useNavigatorUiStore.getState().toggleSavesSearches();
-        persistNavigatorBounds(document.querySelector('.octane-navigator-air') as HTMLElement | null);
+        requestAnimationFrame(() => persistNavigatorBounds(frameRef.current));
     };
 
     const onCreateRoom = () => {
@@ -232,7 +233,7 @@ export const NavigatorView: FC<{}> = () => {
 
     const onPromoteRoom = () => {
         useNavigatorRoomInfoPopupStore.getState().hide();
-        CreateLinkEvent('catalog/open/room_event');
+        CreateLinkEvent('catalog/open/room_ad');
     };
 
     const onResizeStart = (event: PointerEvent<HTMLButtonElement>) => {
@@ -264,11 +265,17 @@ export const NavigatorView: FC<{}> = () => {
 
     return (
         <>
-            {isVisible && (
-                <DraggableWindow uniqueKey="navigator" handleSelector=".octane-navigator-air__caption">
+            {isVisible && topLevelContexts?.length > 0 && (
+                <DraggableWindow
+                    uniqueKey="navigator"
+                    handleSelector=".octane-navigator-air__caption"
+                    initialPosition={{ x: windowX, y: windowY }}
+                    constrainToViewport={true}
+                    onPositionChange={onPositionChange}
+                >
                     <div
                         ref={frameRef}
-                        className={`octane-navigator-air max-w-[calc(100vw-16px)]${isOpenSavesSearches ? ' is-quick-links' : ''}`}
+                        className={`octane-navigator-air${isOpenSavesSearches ? ' is-quick-links' : ''}`}
                         data-air-frame="ubuntu-3"
                         style={{ '--navigator-height': `${windowHeight || 628}px` } as CSSProperties}
                     >
@@ -302,7 +309,7 @@ export const NavigatorView: FC<{}> = () => {
                             {topLevelContexts &&
                                 topLevelContexts.length > 0 &&
                                 topLevelContexts.map((context) => {
-                                    const active = (currentTabCode ? currentTabCode === context.code : topLevelContext === context) && !isCreatorOpen;
+                                    const active = currentTabCode ? currentTabCode === context.code : topLevelContext === context;
 
                                     return (
                                         <button
@@ -322,78 +329,71 @@ export const NavigatorView: FC<{}> = () => {
                                 })}
                         </div>
                         <div className="octane-navigator-air__body">
-                            {!isCreatorOpen && (
-                                <div className="octane-navigator-air__workspace">
-                                    {isOpenSavesSearches && (
-                                        <nav className="octane-navigator-air__quick-links" aria-label={quickLinksLabel}>
-                                            <NavigatorSearchSavesResultView searches={navigatorSearches || []} />
-                                        </nav>
-                                    )}
-                                    <main className="octane-navigator-air__main" aria-label={navigatorLabel}>
-                                        <NavigatorSearchView searchResult={searchResult} />
-                                        <div ref={elementRef} className="octane-navigator-air__results has-air-scrollbar" data-scrollable={resultsScrollable}>
-                                            {isFetching && <div className="octane-navigator-air__busy-mask" aria-hidden="true" />}
-                                            {searchResult &&
-                                                searchResult.results.map((result, index) => (
-                                                    <NavigatorSearchResultView
-                                                        key={result.code || index}
-                                                        searchResult={result}
-                                                        parentCode={searchResult.code}
-                                                        parentFilter={searchResult.data}
-                                                        forceOpen={searchResult.results.length === 1}
-                                                    />
-                                                ))}
-                                            {searchResult && (!searchResult.results || searchResult.results.length === 0) && (
-                                                <NavigatorEmptyStateView code={searchResult.code} />
-                                            )}
-                                        </div>
-                                        <div className="octane-navigator-air__actions">
+                            <div className="octane-navigator-air__workspace">
+                                {isOpenSavesSearches && (
+                                    <nav className="octane-navigator-air__quick-links" aria-label={quickLinksLabel}>
+                                        <NavigatorSearchSavesResultView searches={navigatorSearches || []} />
+                                    </nav>
+                                )}
+                                <main className="octane-navigator-air__main" aria-label={navigatorLabel}>
+                                    <NavigatorSearchView searchResult={searchResult} />
+                                    <div ref={elementRef} className="octane-navigator-air__results has-air-scrollbar" data-scrollable={resultsScrollable}>
+                                        {searchResult &&
+                                            searchResult.results.map((result, index) => (
+                                                <NavigatorSearchResultView
+                                                    key={result.code || index}
+                                                    searchResult={result}
+                                                    parentCode={searchResult.code}
+                                                    parentFilter={searchResult.data}
+                                                    forceOpen={searchResult.results.length === 1}
+                                                />
+                                            ))}
+                                        {searchResult && (!searchResult.results || searchResult.results.length === 0) && (
+                                            <NavigatorEmptyStateView code={searchResult.code} />
+                                        )}
+                                    </div>
+                                    {isFetching && <div className="octane-navigator-air__busy-mask" aria-hidden="true" />}
+                                    <div className="octane-navigator-air__actions">
+                                        <button
+                                            type="button"
+                                            className="octane-navigator-air__action octane-navigator-air__action--create"
+                                            onClick={onCreateRoom}
+                                        >
+                                            <div className="octane-navigator-air__action-content">
+                                                <img src={createRoomImg} alt="" />
+                                                <span>{localizeWithFallback('navigator.create.room', LocalizeText('navigator.createroom.create'))}</span>
+                                            </div>
+                                            <i className="octane-navigator-air__action-border" aria-hidden="true" />
+                                        </button>
+                                        {!showPromote && (
                                             <button
                                                 type="button"
-                                                className="octane-navigator-air__action octane-navigator-air__action--create"
-                                                onClick={onCreateRoom}
+                                                className="octane-navigator-air__action octane-navigator-air__action--random"
+                                                onClick={onRandomRoom}
                                             >
                                                 <div className="octane-navigator-air__action-content">
-                                                    <img src={createRoomImg} alt="" />
-                                                    <span>{localizeWithFallback('navigator.create.room', LocalizeText('navigator.createroom.create'))}</span>
+                                                    <img src={randomRoomImg} alt="" />
+                                                    <span>{LocalizeText('navigator.random.room')}</span>
                                                 </div>
                                                 <i className="octane-navigator-air__action-border" aria-hidden="true" />
                                             </button>
-                                            {!showPromote && (
-                                                <button
-                                                    type="button"
-                                                    className="octane-navigator-air__action octane-navigator-air__action--random"
-                                                    onClick={onRandomRoom}
-                                                >
-                                                    <div className="octane-navigator-air__action-content">
-                                                        <img src={randomRoomImg} alt="" />
-                                                        <span>{LocalizeText('navigator.random.room')}</span>
-                                                    </div>
-                                                    <i className="octane-navigator-air__action-border" aria-hidden="true" />
-                                                </button>
-                                            )}
-                                            {showPromote && (
-                                                <button
-                                                    type="button"
-                                                    className="octane-navigator-air__action octane-navigator-air__action--promote"
-                                                    onClick={onPromoteRoom}
-                                                >
-                                                    <div className="octane-navigator-air__action-content">
-                                                        <img src={promoteRoomImg} alt="" />
-                                                        <span>{LocalizeText('navigator.promote.room')}</span>
-                                                    </div>
-                                                    <i className="octane-navigator-air__action-border" aria-hidden="true" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </main>
-                                </div>
-                            )}
-                            {isCreatorOpen && (
-                                <WidgetErrorBoundary name="NavigatorRoomCreator">
-                                    <NavigatorRoomCreatorView />
-                                </WidgetErrorBoundary>
-                            )}
+                                        )}
+                                        {showPromote && (
+                                            <button
+                                                type="button"
+                                                className="octane-navigator-air__action octane-navigator-air__action--promote"
+                                                onClick={onPromoteRoom}
+                                            >
+                                                <div className="octane-navigator-air__action-content">
+                                                    <img src={promoteRoomImg} alt="" />
+                                                    <span>{LocalizeText('navigator.promote.room')}</span>
+                                                </div>
+                                                <i className="octane-navigator-air__action-border" aria-hidden="true" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </main>
+                            </div>
                         </div>
                         <button
                             type="button"
@@ -418,6 +418,9 @@ export const NavigatorView: FC<{}> = () => {
                     </div>
                 </DraggableWindow>
             )}
+            <WidgetErrorBoundary name="NavigatorRoomCreator">
+                <NavigatorRoomCreatorView />
+            </WidgetErrorBoundary>
             <NavigatorRoomInfoPopupView />
             <WidgetErrorBoundary name="NavigatorDoorState">
                 <NavigatorDoorStateView />

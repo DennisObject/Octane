@@ -86,7 +86,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
 
     const expressionsMenuEnabled = GetConfigurationValue('avatar.expressions_menu.enabled', true);
     const signsEnabled = GetConfigurationValue('avatar.signs.enabled', true);
-    const effectsEnabled = !GetConfigurationValue('memenu.effects.widget.disabled', false);
     const handItemDropEnabled = GetConfigurationValue('handitem.drop.enabled', true);
     const sittingEnabled = GetConfigurationValue('avatar.sitting.enabled', true);
     const expression67Enabled = GetConfigurationValue('avatar.expression.67.enabled', false);
@@ -120,9 +119,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                         break;
                     case 'change_looks':
                         CreateLinkEvent('avatar-editor/show');
-                        break;
-                    case 'avatar_effect':
-                        CreateLinkEvent('avatar-effects/show');
                         break;
                     case 'badge_leaderboard':
                         CreateLinkEvent('badge-leaderboard/show');
@@ -260,11 +256,6 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                         {avatarInfo.carryItem > 0 && avatarInfo.carryItem < 999999 && handItemDropEnabled && (
                             <ContextMenuListItemView onClick={() => processAction('drop_carry_item')}>
                                 {LocalizeText('avatar.widget.drop_hand_item')}
-                            </ContextMenuListItemView>
-                        )}
-                        {effectsEnabled && !isRidingHorse && (
-                            <ContextMenuListItemView classNames={['air-avatar-menu-item--link']} onClick={() => processAction('avatar_effect')}>
-                                {LocalizeText('widget.memenu.effects')}
                             </ContextMenuListItemView>
                         )}
                         {showInspectButton && (

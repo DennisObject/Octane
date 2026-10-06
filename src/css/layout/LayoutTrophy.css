@@ -5,19 +5,50 @@
     color: black;
     pointer-events: all;
 
+    font-size: 12px;
+    line-height: 12px;
     background-position: 0px 0px;
     background-image: url('@/assets/images/room-widgets/trophy-widget/trophy-spritesheet.png');
 
     &.trophy-2 {
+        --trophy-patch: #c9bdcc;
         background-position: 0px 173px;
     }
 
     &.trophy-3 {
+        --trophy-patch: #b87834;
         background-position: 0px 346px;
+    }
+
+    * {
+        font-size: inherit !important;
+        line-height: inherit !important;
     }
 
     .trophy-header {
         height: 22px;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 110px;
+            width: 120px;
+            height: 18px;
+            background: var(--trophy-patch, #ecc547);
+        }
+
+        > * {
+            position: relative;
+        }
+
+        > .trophy-close {
+            position: absolute;
+        }
+
+        > :not(.trophy-close) {
+            transform: translateY(2px);
+        }
 
         .trophy-close {
             width: 15px;
@@ -28,6 +59,7 @@
     }
 
     .trophy-content {
+        transform: translate(4px, 0);
         width: 297px;
         height: 116px;
         white-space: pre-wrap;
@@ -35,6 +67,11 @@
     }
 
     .trophy-footer {
+        transform: translateY(3px);
         width: 297px;
+
+        > :first-child {
+            margin-left: 3px;
+        }
     }
 }

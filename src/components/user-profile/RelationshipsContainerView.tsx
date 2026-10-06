@@ -1,17 +1,16 @@
 import { FindNewFriendsMessageComposer, RelationshipStatusEnum, RelationshipStatusInfoMessageParser } from '@octane/renderer';
 import { FC } from 'react';
 import { GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../api';
-import { Flex, LayoutAvatarImageView } from '../../common';
+import bobba from '../../assets/images/user-profile/swf/bobba.png';
+import heart from '../../assets/images/user-profile/swf/heart.png';
+import smile from '../../assets/images/user-profile/swf/smile.png';
+import { LayoutAvatarImageView } from '../../common';
 import { useNotification } from '../../hooks';
 
 interface RelationshipsContainerViewProps {
     relationships: RelationshipStatusInfoMessageParser;
     /** Closes the profile once the user agrees to go looking for friends. */
     onClose?: () => void;
-}
-
-interface RelationshipsContainerRelationshipViewProps {
-    type: number;
 }
 
 export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (props) => {
@@ -36,18 +35,16 @@ export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (
             localizeWithFallback('extendedprofile.add.friends.alert.title', 'Leave the room?')
         );
 
-    const RelationshipComponent = ({ type }: RelationshipsContainerRelationshipViewProps) => {
+    const renderRelationship = (type: number) => {
         const relationshipInfo = relationships && relationships.relationshipStatusMap.hasKey(type) ? relationships.relationshipStatusMap.getValue(type) : null;
         const relationshipName = RelationshipStatusEnum.RELATIONSHIP_NAMES[type].toLocaleLowerCase();
 
         return (
-            <div className="octane-extended-profile__relationship">
-                <Flex center className="octane-extended-profile__relationship-icon">
-                    <i className={`octane-friends-spritesheet icon-${relationshipName}`} />
-                </Flex>
+            <div key={type} className="octane-extended-profile__relationship">
+                <img className="octane-extended-profile__relationship-icon" src={type === RelationshipStatusEnum.HEART ? heart : type === RelationshipStatusEnum.SMILE ? smile : bobba} alt="" />
                 <div className="octane-extended-profile__relationship-copy">
                     <div className="octane-extended-profile__relationship-box">
-                        <p
+                        <button type="button"
                             className="octane-extended-profile__relationship-name"
                             onClick={(event) =>
                                 relationshipInfo && relationshipInfo.randomFriendId >= 1
@@ -57,11 +54,11 @@ export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (
                         >
                             {(!relationshipInfo || relationshipInfo.friendCount === 0) && LocalizeText('extendedprofile.add.friends')}
                             {relationshipInfo && relationshipInfo.friendCount >= 1 && relationshipInfo.randomFriendName}
-                        </p>
+                        </button>
                         {relationshipInfo && relationshipInfo.friendCount >= 1 && (
                             <div className="octane-extended-profile__relationship-head">
                                 {/* Official avatar_image:direction "southwest", which the AIR widget maps to 4. */}
-                                <LayoutAvatarImageView direction={4} figure={relationshipInfo.randomFriendFigure} headOnly={true} />
+                                <LayoutAvatarImageView direction={4} figure={relationshipInfo.randomFriendFigure} headOnly nativeCroppedHead />
                             </div>
                         )}
                     </div>
@@ -79,9 +76,7 @@ export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (
 
     return (
         <>
-            <RelationshipComponent type={RelationshipStatusEnum.HEART} />
-            <RelationshipComponent type={RelationshipStatusEnum.SMILE} />
-            <RelationshipComponent type={RelationshipStatusEnum.BOBBA} />
+            {[RelationshipStatusEnum.HEART, RelationshipStatusEnum.SMILE, RelationshipStatusEnum.BOBBA].map(renderRelationship)}
         </>
     );
 };

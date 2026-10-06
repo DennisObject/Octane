@@ -1,10 +1,6 @@
-import {
-    NavigatorCategoryListModeComposer,
-    NavigatorSearchCloseComposer,
-    NavigatorSearchOpenComposer,
-    NavigatorSettingsSaveComposer
-} from '@octane/renderer';
+import { NavigatorCategoryListModeComposer, NavigatorSearchCloseComposer, NavigatorSearchOpenComposer, NavigatorSettingsSaveComposer } from '@octane/renderer';
 import { SendMessageComposer } from '../../api';
+import { useRoomCreatorStore } from '../../components/navigator/views/navigatorRoomCreatorStore';
 import { createOctaneStore } from '../../state/createOctaneStore';
 
 const QUICK_LINKS_STORAGE_KEY = 'nitro.navigator.air.quickLinksOpen';
@@ -13,6 +9,16 @@ const EXPANDED_RESULTS_STORAGE_KEY = 'nitro.navigator.air.expandedResults';
 const RESULT_VIEW_MODES_STORAGE_KEY = 'nitro.navigator.air.resultViewModes';
 const NAVIGATOR_MIN_HEIGHT = 500;
 const NAVIGATOR_DEFAULT_HEIGHT = 628;
+
+type NavigatorSearchContext = { code: string; filter: string };
+type NavigatorSearchRequest = NavigatorSearchContext & { refresh: boolean };
+
+const queueSearch = (code: string, filter: string, refresh = false) => ({
+    currentTabCode: code,
+    currentFilter: filter,
+    needsSearch: true,
+    searchRequest: { code, filter, refresh }
+});
 
 const persistBooleanPreference = (key: string, value: boolean) => {
     try {
@@ -67,6 +73,7 @@ export type NavigatorUiState = {
     isReady: boolean;
     isCreatorOpen: boolean;
     isRoomInfoOpen: boolean;
+    roomInfoEmbedExpanded: boolean;
     isRoomLinkOpen: boolean;
     isOpenSavesSearches: boolean;
     isLoading: boolean;
@@ -74,6 +81,11 @@ export type NavigatorUiState = {
     needsSearch: boolean;
     currentTabCode: string;
     currentFilter: string;
+    searchRequest: NavigatorSearchRequest | null;
+    searchHistory: NavigatorSearchContext[];
+    searchHistoryCursor: number;
+    isHistoryNavigation: boolean;
+    searchResultVersion: number;
     windowX: number;
     windowY: number;
     windowHeight: number;
@@ -89,6 +101,7 @@ export type NavigatorUiActions = {
     openCreator(): void;
     closeCreator(): void;
     setRoomInfoOpen(open: boolean): void;
+    setRoomInfoEmbedExpanded(expanded: boolean): void;
     toggleRoomInfo(): void;
     setRoomLinkOpen(open: boolean): void;
     toggleRoomLink(): void;
@@ -96,8 +109,10 @@ export type NavigatorUiActions = {
     setLoading(loading: boolean): void;
     markReady(): void;
     markInitDone(): void;
-    requestSearch(): void;
+    requestSearch(refresh?: boolean): void;
     consumeSearchRequest(): void;
+    recordSearchResult(code: string, filter: string): void;
+    goBack(): void;
     setTab(code: string): void;
     setFilter(value: string): void;
     setSearch(code: string, filter: string): void;
@@ -114,6 +129,7 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     isReady: false,
     isCreatorOpen: false,
     isRoomInfoOpen: false,
+    roomInfoEmbedExpanded: false,
     isRoomLinkOpen: false,
     isOpenSavesSearches: false,
     isLoading: false,
@@ -121,6 +137,11 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     needsSearch: false,
     currentTabCode: '',
     currentFilter: '',
+    searchRequest: null,
+    searchHistory: [],
+    searchHistoryCursor: -1,
+    isHistoryNavigation: false,
+    searchResultVersion: 0,
     windowX: 0,
     windowY: 0,
     windowHeight: NAVIGATOR_DEFAULT_HEIGHT,
@@ -128,12 +149,21 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     expandedResultCodes: [],
     resultViewModes: {},
 
-    show: () => set({ isVisible: true, needsSearch: true }),
+    show: () => set({ isVisible: true }),
     hide: () => set({ isVisible: false }),
-    toggle: () => set((s) => (s.isVisible ? { isVisible: false } : { isVisible: true, needsSearch: true })),
-    openCreator: () => set({ isVisible: true, isCreatorOpen: true }),
+    toggle: () =>
+        set((state) =>
+            state.isVisible
+                ? { isVisible: false }
+                : { isVisible: true, ...(state.currentTabCode ? queueSearch(state.currentTabCode, state.currentFilter, true) : {}) }
+        ),
+    openCreator: () => {
+        useRoomCreatorStore.getState().prepareForShow();
+        set({ isCreatorOpen: true });
+    },
     closeCreator: () => set({ isCreatorOpen: false }),
     setRoomInfoOpen: (open) => set({ isRoomInfoOpen: open }),
+    setRoomInfoEmbedExpanded: (expanded) => set({ roomInfoEmbedExpanded: expanded }),
     toggleRoomInfo: () => set((s) => ({ isRoomInfoOpen: !s.isRoomInfoOpen })),
     setRoomLinkOpen: (open) => set({ isRoomLinkOpen: open }),
     toggleRoomLink: () => set((s) => ({ isRoomLinkOpen: !s.isRoomLinkOpen })),
@@ -148,11 +178,38 @@ export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & Navigato
     setLoading: (loading) => set({ isLoading: loading }),
     markReady: () => set({ isReady: true }),
     markInitDone: () => set({ needsInit: false }),
-    requestSearch: () => set({ needsSearch: true }),
-    consumeSearchRequest: () => set({ needsSearch: false }),
-    setTab: (code) => set({ currentTabCode: code, currentFilter: '', isCreatorOpen: false }),
-    setFilter: (value) => set({ currentFilter: value }),
-    setSearch: (code, filter) => set({ currentTabCode: code, currentFilter: filter, isCreatorOpen: false }),
+    requestSearch: (refresh = true) => set((state) => queueSearch(state.currentTabCode, state.currentFilter, refresh)),
+    consumeSearchRequest: () => set({ needsSearch: false, searchRequest: null }),
+    recordSearchResult: (code, filter) =>
+        set((state) => {
+            const searchHistory = state.isHistoryNavigation
+                ? state.searchHistory
+                : [...state.searchHistory.slice(0, state.searchHistoryCursor + 1), { code, filter }];
+
+            return {
+                searchHistory,
+                searchHistoryCursor: state.isHistoryNavigation ? state.searchHistoryCursor : searchHistory.length - 1,
+                isHistoryNavigation: false,
+                searchResultVersion: state.searchResultVersion + 1
+            };
+        }),
+    goBack: () =>
+        set((state) => {
+            if (state.searchHistoryCursor <= 0) return state;
+
+            const searchHistoryCursor = state.searchHistoryCursor - 1;
+            const previous = state.searchHistory[searchHistoryCursor];
+
+            return {
+                ...queueSearch(previous.code, previous.filter),
+                searchHistoryCursor,
+                isHistoryNavigation: true,
+                isCreatorOpen: false
+            };
+        }),
+    setTab: (code) => set({ ...queueSearch(code, ''), isCreatorOpen: false }),
+    setFilter: (value) => set((state) => queueSearch(state.currentTabCode, value)),
+    setSearch: (code, filter) => set({ ...queueSearch(code, filter), isCreatorOpen: false }),
     hydrateAirPreferences: () =>
         set({
             isOpenSavesSearches: readBooleanPreference(QUICK_LINKS_STORAGE_KEY, false),

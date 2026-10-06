@@ -1,3 +1,7 @@
+:root {
+  --octane-native-text-halo: url('#octane-native-text-halo');
+}
+
 .octane-use-product-confirmation {
   width: min(350px, calc(100vw - 16px));
   min-width: 0;
@@ -47,28 +51,29 @@
   pointer-events: auto;
   padding: 4px;
   border: 6px solid transparent;
-  border-radius: 6px;
-  border-image-source: url('../../assets/images/habbo-skin/slices/border-black.png');
-  border-image-slice: 24;
-  border-image-width: 6px;
-  border-image-repeat: stretch;
-  background-color: #3d3d3d;
-  background-clip: padding-box;
+  isolation: isolate;
   box-shadow: none;
-  color: #ffffff;
-  font-family: Ubuntu, sans-serif;
-  font-size: 11px;
+  color: #fefefe;
+  font-family: Volter, monospace;
+  font-size: 9px;
+  line-height: 12px;
+  -webkit-font-smoothing: none;
   image-rendering: var(--octane-pixel-art, pixelated);
+
+  /* Painted on a layer of its own so the glyphs get greyscale antialiasing like the native bitmap text. */
+  &::before {
+    position: absolute;
+    inset: -6px;
+    z-index: -1;
+    content: '';
+    border: 6px solid transparent;
+    border-image: url('@/assets/images/infostand/panel-bg.png') 6 fill / 6px stretch;
+    pointer-events: none;
+  }
 
   @media (max-width: 576px) {
     top: 0;
     padding: 4px;
-  }
-
-  &:has(.octane-infostand__header) {
-    width: fit-content;
-    min-width: 190px;
-    max-width: 280px;
   }
 
   .form-control-sm {
@@ -101,20 +106,22 @@
     image-rendering: var(--octane-pixel-art, pixelated);
   }
 
+  /* profile_link region x=18 y=0 135x12; home_icon bitmap 16x15 at border (8,11) = list (-2,1). */
   .octane-infostand__header {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 4px;
     box-sizing: border-box;
+    width: 170px;
     min-width: 170px;
-    height: 24px;
-    padding-right: 14px;
+    height: 12px;
   }
 
   .octane-infostand__home {
-    flex: 0 0 auto;
-    margin-left: -2px;
+    position: absolute;
+    top: -2px;
+    left: -5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 16px;
     height: 15px;
     padding: 0;
@@ -131,11 +138,13 @@
   }
 
   .octane-infostand__profile-link {
+    position: absolute;
+    top: 1px;
+    left: 21px;
     display: flex;
     align-items: center;
-    flex: 0 1 auto;
-    min-width: 0;
-    height: 24px;
+    width: 135px;
+    height: 12px;
     padding: 0;
     overflow: hidden;
     border: 0;
@@ -151,7 +160,6 @@
   }
 
   .octane-infostand__identity {
-    background: #3d3d3d;
     color: #ffffff;
     font-family: Volter, monospace;
     font-size: 9px;
@@ -159,6 +167,14 @@
     line-height: 12px;
     -webkit-font-smoothing: none;
   }
+
+  /* name_text of the pet and bot infostands: the Flash text field carries a 3px inset. */
+  .octane-infostand__identity--plain {
+    display: block;
+    padding-left: 3px;
+    margin-top: 1px;
+  }
+
 
   .octane-infostand__rule {
     height: 1px;
@@ -168,6 +184,14 @@
 
   .octane-infostand__rule--footer {
     margin-bottom: 0;
+  }
+
+  /* relationship_status_container: 170x55, kept even when it holds no rows. */
+  .octane-infostand__relationships {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 55px;
   }
 
   .octane-infostand__figure-row {
@@ -188,9 +212,20 @@
     height: 130px;
     overflow: hidden;
     border-radius: 0;
-    background: url('@/assets/images/infostand/avatar-background.png') no-repeat center;
+    background: url('@/assets/images/infostand/avatar-well.png') no-repeat center;
     cursor: pointer;
     z-index: 1;
+
+  }
+
+  /* avatar_image widget (16,21) 34x84 inside the 67x130 grey_bg. */
+  .octane-infostand__avatar {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    width: 34px;
+    height: 84px;
+    pointer-events: none;
   }
 
   .octane-infostand__badges {
@@ -201,20 +236,16 @@
     grid-auto-rows: 42px;
     gap: 1px 1px;
     width: 85px;
-    margin-top: 1px;
+    margin: 0 0 0 -1px;
   }
 
   .octane-infostand__badge-slot {
     box-sizing: border-box;
     transition: opacity 150ms ease, background-color 150ms ease;
 
+    /* The official infostand draws nothing for an empty slot; it only stays a drop target. */
     &.is-empty {
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      opacity: 0.4;
-
-      &:hover {
-        opacity: 0.7;
-      }
+      opacity: 0;
     }
 
     &.is-drag-over {
@@ -246,6 +277,97 @@
     background: transparent;
   }
 
+  /* rentable_bot_view: infostand_bot_info_bg circuit over grey_bg, badge widget at list (100,21),
+     description_text 170x31, owner_text 126x13, all in the list's 3px spacing. */
+  .octane-infostand__avatar-well--bot {
+    background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat 1px 1px, url('@/assets/images/infostand/avatar-well.png') no-repeat center;
+  }
+
+  .octane-infostand__rentable-badge {
+    position: absolute;
+    top: 20px;
+    left: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+  }
+
+  .octane-infostand__description {
+    box-sizing: border-box;
+    width: 170px;
+    height: 31px;
+    position: relative;
+    top: 1px;
+    margin-top: 3px;
+    padding-left: 3px;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 9px;
+    line-height: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .octane-infostand__owner-line {
+    position: relative;
+    top: 1px;
+    box-sizing: border-box;
+    width: 126px;
+    height: 13px;
+    margin-top: 3px;
+    padding-left: 3px;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 9px;
+    line-height: 12px;
+    white-space: nowrap;
+  }
+
+  /* user_view motto_container: grey_bg border style, Volter regular line at x=20+3, y=2. */
+  .octane-infostand__motto--box {
+    isolation: isolate;
+    min-height: 26px;
+    padding: 3px 6px 1px 23px;
+    margin: 0;
+  }
+
+  .octane-infostand__motto--box::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    box-sizing: border-box;
+    content: '';
+    border: 6px solid transparent;
+    border-image: url('@/assets/images/infostand/grey-box.png') 6 fill / 6px stretch;
+    pointer-events: none;
+  }
+
+  .octane-infostand__motto--box .octane-infostand__motto-text {
+    padding-top: 0;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 12px;
+    -webkit-font-smoothing: none;
+  }
+
+  /* bot_view motto_text x=5 w=160 (no pen). */
+  .octane-infostand__motto--plain {
+    padding: 3px 5px 1px 8px;
+  }
+
+  /* handitem_txt: 170 wide, height = textHeight + 5. */
+  .octane-infostand__carry {
+    box-sizing: content-box;
+    width: 170px;
+    padding-bottom: 5px;
+    color: #ffffff;
+    font-size: 9px;
+    line-height: 12px;
+    overflow-wrap: anywhere;
+  }
+
   .octane-infostand__motto-text {
     box-sizing: border-box;
     max-height: 50px;
@@ -272,7 +394,9 @@
   /* Achievement score: one Volter line, label and value. */
   .octane-infostand__score {
     display: block;
+    box-sizing: border-box;
     min-width: 170px;
+    padding-left: 3px;
     height: 15px;
     color: #ffffff;
     font-family: Volter, monospace;
@@ -282,8 +406,12 @@
     -webkit-font-smoothing: none;
   }
 
+  .octane-infostand__score + .octane-infostand__score {
+    margin-top: 3px;
+  }
+
   .octane-infostand__score-link {
-    padding: 0;
+    padding: 0 0 0 3px;
     border: 0;
     background: transparent;
     text-align: left;
@@ -435,6 +563,193 @@
     border-image-repeat: stretch;
 }
 
+/* furni_view infostand_element_list: x=10 y=10 w=170, itemlist spacing 5, 1px #333333 spacers;
+   controller: border.height = list.height + 20, name_text.height = textHeight + 5. */
+.octane-furni-infostand__list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-sizing: border-box;
+    width: 190px;
+    padding: 10px;
+    color: #fefefe;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    line-height: 12px;
+    -webkit-font-smoothing: none;
+}
+
+.octane-furni-infostand__name {
+    box-sizing: content-box;
+    width: 159px;
+    padding: 2px 0 2px 3px;
+    color: #fefefe;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 10px;
+    -webkit-font-smoothing: none;
+    overflow-wrap: anywhere;
+}
+
+.octane-furni-infostand__rule {
+    flex: 0 0 1px;
+    height: 1px;
+    background: #333333;
+}
+
+/* image_container 170 x (image + 5px top/bottom), image box x=5 w=140 centred, plaque widgets at x=128 y=6. */
+.octane-furni-infostand__image {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 170px;
+    min-height: 55px;
+    max-height: 210px;
+    padding: 5px 25px 5px 5px;
+    overflow: hidden;
+}
+
+/* crackable_furni_view: the image box is 140 wide at x=0 and the container hugs the bitmap. */
+.octane-furni-infostand--crackable .octane-furni-infostand__image {
+    min-height: 0;
+    padding: 0 30px 0 0;
+}
+
+/* hits_remaining: x=0 y=182 h=14 text field. */
+.octane-furni-infostand--crackable .octane-furni-infostand__text {
+    box-sizing: border-box;
+    height: 14px;
+    padding: 1px 0 1px 3px;
+}
+
+/* Flash centres the item bitmap with a floored offset; a half pixel would otherwise round up. */
+.octane-furni-infostand__image > :last-child {
+    position: relative;
+    top: -0.5px;
+}
+
+/* owner_region 170x17: owner_link icon x=0 y=2 (20x15), owner_name x=20 y=0 h=15. */
+.octane-furni-infostand__owner {
+    position: relative;
+    flex: 0 0 17px;
+    width: 170px;
+    height: 17px;
+}
+
+.octane-furni-infostand__owner-icon {
+    position: absolute;
+    top: 2px;
+    left: 0;
+}
+
+.octane-furni-infostand__owner-name {
+    position: absolute;
+    top: 1px;
+    left: 23px;
+    width: 147px;
+    height: 14px;
+    color: #fefefe;
+    overflow-wrap: anywhere;
+}
+
+/* group_details_container 170x40: group_badge_image 40x40 at 0,0; group_name x=45 y=10. */
+.octane-furni-infostand__group {
+    position: relative;
+    flex: 0 0 40px;
+    width: 170px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.octane-furni-infostand__group-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-furni-infostand__group-name {
+    position: absolute;
+    top: 10px;
+    left: 45px;
+    width: 125px;
+    color: #fefefe;
+    overflow-wrap: anywhere;
+}
+
+/* purchase_buttons 170x23; catalog_button container_button 72x23 (black skin): icon x=2 y=3 (20x18), text x=22 y=4. */
+.octane-furni-infostand__purchase {
+    display: flex;
+    flex: 0 0 23px;
+    gap: 5px;
+    width: 170px;
+    height: 23px;
+}
+
+.octane-furni-infostand__shop {
+    position: relative;
+    box-sizing: border-box;
+    flex: 0 0 72px;
+    width: 72px;
+    height: 23px;
+    padding: 0;
+    border: 3px solid transparent;
+    border-image-source: var(--habbo-skin-button);
+    border-image-slice: 3 fill;
+    border-image-width: 3px;
+    border-image-repeat: stretch;
+    background: transparent;
+    color: #000000;
+    text-shadow: none;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-infostand__shop:hover {
+    border-image-source: var(--habbo-skin-button-hover);
+}
+
+.octane-furni-infostand__shop:active {
+    border-image-source: var(--habbo-skin-button-pressed);
+}
+
+.octane-furni-infostand__shop-icon {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 20px;
+    height: 18px;
+    background: url("../../assets/images/infostand/furni-shop.png") center / 14px 17px no-repeat;
+}
+
+.octane-furni-infostand__shop-text {
+    position: absolute;
+    top: 2px;
+    left: 22px;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    line-height: 13px;
+    white-space: nowrap;
+}
+
+.octane-furni-infostand__text {
+    color: #fefefe;
+    overflow-wrap: anywhere;
+}
+
+.octane-furni-infostand__link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .octane-furni-infostand__close {
     position: absolute;
     top: 6px;
@@ -459,11 +774,261 @@
     font-family: Volter, monospace !important;
     font-size: 9px !important;
     font-weight: 400 !important;
+    color: #fefefe !important;
+    text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15) !important;
     line-height: 1 !important;
     min-height: 25px !important;
-    padding: 4px 8px !important;
+    padding: 5px 5px 3px 8px !important;
 }
 
 .octane-infostand-actions {
     gap: 10px;
+}
+
+/* rentable_bot_view button_list: right-aligned CMD_BUTTON regions, 5px apart. */
+.octane-infostand-actions--tight {
+    gap: 5px;
+}
+
+.octane-infostand-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.octane-infostand-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.octane-pet-infostand-stack {
+  gap: 10px;
+}
+
+.octane-pet-actions {
+  flex-flow: row-reverse wrap;
+  justify-content: flex-start !important;
+  width: 250px;
+  gap: 5px;
+}
+
+/* pet_view (default pets): fixed 190x316 box, every element positioned from the layout rects and the controller. */
+.octane-infostand.octane-pet-infostand {
+  box-sizing: border-box;
+  height: 316px;
+  padding: 0;
+  border: 0;
+}
+
+.octane-pet-infostand::before {
+  inset: 0;
+}
+
+.octane-pet-infostand .octane-infostand__close {
+  top: 6px;
+  right: auto;
+  left: 170px;
+}
+
+.octane-pet-infostand__name,
+.octane-pet-infostand__breed,
+.octane-pet-infostand__label,
+.octane-pet-infostand__line,
+.octane-pet-infostand__level,
+.octane-pet-infostand__bar-value,
+.octane-pet-infostand__respect {
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__name,
+.octane-pet-infostand__breed,
+.octane-pet-infostand__label,
+.octane-pet-infostand__line {
+  position: absolute;
+  left: 10px;
+  height: 12px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__name {
+  top: 11px;
+  font-weight: bold;
+}
+
+.octane-pet-infostand__breed {
+  top: 24px;
+}
+
+.octane-pet-infostand__level {
+  position: absolute;
+  top: 47px;
+  left: 99px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__image {
+  position: absolute;
+  top: 37px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 83px;
+}
+
+.octane-pet-infostand__status-icon {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  width: 18px;
+  height: 18px;
+  image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-pet-infostand__bar {
+  position: absolute;
+  left: 16px;
+  width: 162px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid #dadada;
+  background: #3a3a3a;
+}
+
+.octane-pet-infostand__bar-fill,
+.octane-pet-infostand__bar-highlight {
+  position: absolute;
+  left: 0;
+}
+
+.octane-pet-infostand__bar-fill {
+  top: 4px;
+  height: 10px;
+}
+
+.octane-pet-infostand__bar-highlight {
+  top: 0;
+  height: 4px;
+}
+
+.octane-pet-infostand__bar-value {
+  position: absolute;
+  top: 1px;
+  left: -2px;
+  height: 12px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__respect {
+  position: absolute;
+  top: 265px;
+  left: 14px;
+  height: 12px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.octane-pet-infostand__respect img {
+  position: relative;
+  top: -3px;
+  display: inline-block;
+  width: 13px;
+  height: 21px;
+  margin-left: 3px;
+  vertical-align: top;
+  image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* Monsterplant variant of pet_view: 190x307, no breed line. */
+.octane-infostand.octane-pet-infostand--plant {
+  height: 307px;
+}
+
+.octane-pet-infostand--plant .octane-pet-infostand__image {
+  top: 27px;
+}
+
+.octane-pet-infostand__clock {
+  position: absolute;
+  top: 163px;
+  width: 27px;
+  height: 23px;
+  background-repeat: no-repeat;
+}
+
+.octane-pet-infostand__clock span {
+  position: absolute;
+  inset: 0;
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 23px;
+  color: #fff;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__clock em {
+  position: absolute;
+  top: 27px;
+  left: 0;
+  width: 27px;
+  font-size: 9px;
+  font-style: normal;
+  line-height: 12px;
+  color: #121212;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__clock i {
+  position: absolute;
+  top: 5px;
+  left: 29px;
+  width: 6px;
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 13px;
+  color: #121212;
+  text-align: center;
+  filter: var(--octane-native-text-halo);
+}
+
+.octane-pet-infostand__rarity {
+  position: absolute;
+  top: 219px;
+  left: 77px;
+  width: 36px;
+  height: 28px;
+  background: url('@/assets/images/infostand/rarity-level.png') no-repeat;
+}
+
+.octane-pet-infostand__rarity div {
+  font-family: Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 26px;
+  color: #333301;
+  text-align: center;
+}
+
+/* Native Flash text halo on the dark infostand panels. */
+.octane-infostand__identity,
+.octane-infostand__score,
+.octane-infostand__motto-text,
+.octane-infostand__carry,
+.octane-infostand__description,
+.octane-infostand__owner-line,
+.octane-furni-infostand__name,
+.octane-furni-infostand__owner-name,
+.octane-furni-infostand__group-name,
+.octane-furni-infostand__text {
+    filter: var(--octane-native-text-halo);
 }

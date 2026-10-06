@@ -33,6 +33,10 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
         dragStyle,
         offsetLeft,
         offsetTop,
+        initialPosition,
+        constrainToViewport,
+        unconstrainedPosition,
+        onPositionChange,
         ...rest
     } = props;
     const elementRef = useRef<HTMLDivElement>(null);
@@ -62,6 +66,10 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
                 handleSelector={handleSelector}
                 offsetLeft={offsetLeft}
                 offsetTop={offsetTop}
+                initialPosition={initialPosition}
+                constrainToViewport={constrainToViewport}
+                unconstrainedPosition={unconstrainedPosition}
+                onPositionChange={onPositionChange}
                 uniqueKey={uniqueKey}
                 windowPosition={windowPosition}
             >

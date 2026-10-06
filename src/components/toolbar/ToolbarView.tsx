@@ -1,4 +1,4 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
@@ -8,10 +8,12 @@ import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
-import { BottomDockLayout, resolveBottomDockLayout } from './bottomDockLayout';
+import { usePerkAllowed } from '../../state/perkAllowancesStore';
+import { AIR_RAISED_CHAT_BOTTOM } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
 import { ToolbarProgressionView } from './ToolbarProgressionView';
+import { ToolbarUnseenCountView } from './ToolbarUnseenCountView';
 import { YouTubePlayerView } from './YouTubePlayerView';
 
 const containerVariants: Variants = {
@@ -32,7 +34,8 @@ const SHELL_TRANSITION = { type: 'spring' as const, stiffness: 260, damping: 26 
 const NAV_TRANSITION = { type: 'spring' as const, stiffness: 300, damping: 28 };
 const ME_POPOVER_TRANSITION = { type: 'spring' as const, stiffness: 420, damping: 28 };
 const LEFT_COLLAPSED_STORAGE_KEY = 'nitro.toolbar.leftCollapsed';
-const RIGHT_COLLAPSED_STORAGE_KEY = 'nitro.toolbar.rightCollapsed';
+// UI flag 1 (SessionDataManager.setFriendBarState): set while the friend bar is expanded.
+const FRIEND_BAR_UI_FLAG = 1;
 
 
 const readCollapsedPreference = (key: string): boolean =>
@@ -56,10 +59,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ isProgressionExpanded, setProgressionExpanded ] = useState(false);
     const [ isTouchLayout, setIsTouchLayout ] = useState(false);
     const [ leftCollapsed, setLeftCollapsed ] = useState(() => readCollapsedPreference(LEFT_COLLAPSED_STORAGE_KEY));
-    const [ rightCollapsed, setRightCollapsed ] = useState(() => readCollapsedPreference(RIGHT_COLLAPSED_STORAGE_KEY));
-    const [ dockLayout, setDockLayout ] = useState<BottomDockLayout>({ chatRaised: false, chatBottom: 7 });
+    const [ rightCollapsed, setRightCollapsed ] = useState(() => !((GetSessionDataManager()?.uiFlags ?? 0) & FRIEND_BAR_UI_FLAG));
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
-    const [ useGuideTool, setUseGuideTool ] = useState(false);
+    const useGuideTool = usePerkAllowed(PerkEnum.USE_GUIDE_TOOL);
+    const cameraAllowed = usePerkAllowed(PerkEnum.CAMERA);
     const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
@@ -95,15 +98,20 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const socialInSideStack = touchLayout;
     const sideStackClasses = touchLayout ? '' : 'hidden';
     const storiesEnabled = useMemo(() => GetConfigurationValue<boolean>('toolbar.stories.enabled', false), []);
+    // CAMERA icon: room only, camera.launch.ui.position "bottom-icons" and the CAMERA perk.
+    const cameraInBottomBar = GetConfigurationValue<string>('camera.launch.ui.position', 'bottom-icons') === 'bottom-icons';
+    const cameraAvailable = isInRoom && cameraInBottomBar && cameraAllowed;
+    const gamesAvailable = GetConfigurationValue<boolean>('games_icon_enabled', GetConfigurationValue<boolean>('game.center.enabled', false));
     const [ messengerNotifyFrame, setMessengerNotifyFrame ] = useState(0);
     const chatFrameStyle = useMemo<CSSProperties | undefined>(() =>
     {
         if(touchLayout) return undefined;
 
-        return { bottom: `${ dockLayout.chatBottom }px` };
-    }, [ dockLayout.chatBottom, touchLayout ]);
+        // chatinput_window_new keeps its place above the bottom bar; it never moves into the bar.
+        return { bottom: `${ AIR_RAISED_CHAT_BOTTOM }px` };
+    }, [ touchLayout ]);
 
-    const railMaxWidthClass = (isInRoom && !dockLayout.chatRaised) ? 'max-w-[calc(50vw-242px)]' : 'max-w-[calc(50vw-12px)]';
+    const railMaxWidthClass = 'max-w-[calc(50vw-12px)]';
     const chatFramePositionClass = touchLayout ? 'bottom-[90px]' : '';
     const leftNavVariants = useMemo<Variants>(() => ({
         hidden: { opacity: 0, x: isInRoom ? -10 : 0, y: isInRoom ? 0 : 8, pointerEvents: 'none' },
@@ -169,82 +177,13 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         }
     }, [ leftCollapsed ]);
 
-    useEffect(() =>
+    useOctaneEvent<SessionDataPreferencesEvent>(SessionDataPreferencesEvent.UPDATED, event => setRightCollapsed(!(event.uiFlags & FRIEND_BAR_UI_FLAG)));
+
+    const toggleFriendBar = (collapsed: boolean) =>
     {
-        try
-        {
-            window.localStorage.setItem(RIGHT_COLLAPSED_STORAGE_KEY, rightCollapsed ? '1' : '0');
-        }
-        catch
-        {
-        }
-    }, [ rightCollapsed ]);
-
-    useLayoutEffect(() =>
-    {
-        if(touchLayout || !isInRoom) return;
-
-        const leftDock = leftDockRef.current;
-        const rightDock = rightDockRef.current;
-
-        if(!leftDock || !rightDock) return;
-
-        let frame = 0;
-
-        const applyMeasurement = () =>
-        {
-            const leftRect = leftDock.getBoundingClientRect();
-            const rightRect = rightDock.getBoundingClientRect();
-            const leftEdge = leftRect.left + Math.max(leftRect.width, leftDock.scrollWidth);
-            const rightEdge = rightRect.right - Math.max(rightRect.width, rightDock.scrollWidth);
-            const next = resolveBottomDockLayout({
-                viewportWidth: window.innerWidth,
-                leftEdge,
-                rightEdge
-            });
-
-            setDockLayout(previous => (
-                previous.chatRaised === next.chatRaised && previous.chatBottom === next.chatBottom
-                    ? previous
-                    : next
-            ));
-        };
-
-        const measure = () =>
-        {
-            window.cancelAnimationFrame(frame);
-            frame = window.requestAnimationFrame(applyMeasurement);
-        };
-
-        applyMeasurement();
-
-        const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
-
-        observer?.observe(leftDock);
-        observer?.observe(rightDock);
-        observer?.observe(document.body);
-        window.addEventListener('resize', measure);
-
-        return () =>
-        {
-            window.cancelAnimationFrame(frame);
-            observer?.disconnect();
-            window.removeEventListener('resize', measure);
-        };
-    }, [
-        buildHeightAvailable,
-        buildersClubEnabled,
-        hkEnabled,
-        iconState,
-        isHk,
-        isInRoom,
-        isMod,
-        leftCollapsed,
-        rightCollapsed,
-        showToolbarButton,
-        touchLayout,
-        youtubeEnabled
-    ]);
+        setRightCollapsed(collapsed);
+        GetSessionDataManager()?.setFriendBarState(!collapsed);
+    };
 
     useEffect(() =>
     {
@@ -309,11 +248,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     }, [ isMeExpanded, isProgressionExpanded, leftCollapsed, touchLayout ]);
 
     const openYouTubePlayer = () => window.dispatchEvent(new CustomEvent('youtube:toggle'));
-
-    useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
-    {
-        setUseGuideTool(event.getParser().isAllowed(PerkEnum.USE_GUIDE_TOOL));
-    });
 
     useOctaneEvent<OctaneToolbarAnimateIconEvent>(OctaneToolbarAnimateIconEvent.ANIMATE_ICON, event =>
     {
@@ -392,9 +326,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
             {isInRoom && (
                 <div
-                    data-chat-raised={dockLayout.chatRaised ? 'true' : 'false'}
                     style={chatFrameStyle}
-                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 -translate-x-1/2 z-[71] flex h-[38px] w-[466px] max-w-[95vw] items-center p-0 pointer-events-none`}
+                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 ml-[calc(min(236px,47.5vw)*-1)] z-[71] flex h-[38px] w-[471px] max-w-[95vw] items-center p-0 pointer-events-none`}
                 >
                     <Flex
                         alignItems="center"
@@ -419,7 +352,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 animate={visibilityVariant}
                 variants={leftNavVariants}
                 transition={NAV_TRANSITION}
-                className={`tb-nav-clip absolute bottom-0 left-0 z-[71] h-[46px] ${railMaxWidthClass} items-center ${desktopFlexClasses}`}
+                className={`tb-nav-clip tb-left-dock absolute bottom-0 left-0 z-[71] h-[46px] ${railMaxWidthClass} items-center ${desktopFlexClasses}`}
             >
                 <button
                     type="button"
@@ -456,9 +389,11 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                         }}
                                         className="tb-icon"
                                     />
+                                    <ToolbarUnseenCountView count={unseenProgMenuCount} />
                                 </motion.div>
                             )}
-                            {GetConfigurationValue('game.center.enabled') && (
+                            {/* GAMES: visible in room and hotel view when games_icon_enabled (game.center.enabled kept as a fallback key) */}
+                            {gamesAvailable && (
                                 <motion.div variants={itemVariants} className="tb-slot">
                                     <ToolbarItemView icon="game" onClick={() => CreateLinkEvent('games/toggle')} className="tb-icon" />
                                 </motion.div>
@@ -481,7 +416,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     {isInRoom && (
                         <motion.div variants={itemVariants} className="relative tb-slot tb-slot-inventory">
                             <ToolbarItemView icon="inventory" onClick={() => CreateLinkEvent('inventory/toggle')} className="tb-icon" />
-                            {getFullCount > 0 && <LayoutItemCountView count={getFullCount} className="absolute -right-1 top-0" />}
+                            <ToolbarUnseenCountView count={getFullCount} />
                         </motion.div>
                     )}
                     <motion.div
@@ -504,16 +439,13 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <LayoutAvatarImageView airMeMenu={true} direction={3} figure={userFigure} />
                         </motion.div>
                         <img src={memenuCircleImg} alt="" className="tb-memenu-circle" />
-                        {unseenProgMenuCount > 0 && (
-                            <LayoutItemCountView count={unseenProgMenuCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
-                        )}
                     </motion.div>
                     {isInRoom && showToolbarButton && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
                             <ToolbarItemView icon="wired-tools" onClick={openMonitor} className="tb-icon" />
                         </motion.div>
                     )}
-                    {isInRoom && (
+                    {cameraAvailable && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
                             <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
                         </motion.div>
@@ -555,19 +487,17 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 variants={rightNavVariants}
                 transition={NAV_TRANSITION}
                 data-collapsed={rightCollapsed ? 'true' : 'false'}
-                className={`tb-nav-clip tb-right-dock absolute z-[71] ${railMaxWidthClass} items-center ${desktopFlexClasses} ${isInRoom ? 'right-0' : 'right-3'}`}
+                className={`tb-nav-clip tb-right-dock absolute right-0 z-[71] ${desktopFlexClasses}`}
             >
-                <motion.div
-                    variants={containerVariants}
-                    className="tb-open-shell tb-open-shell-right flex h-[46px] max-w-full items-start overflow-visible bg-transparent"
-                >
-                    {!rightCollapsed && <img src={dividerImg} alt="" className="tb-divider tb-right-divider" />}
+                {/* new_bar_xml: the visible children are laid out left to right from x=0 (friendtools 150, page arrows, list, collapse_right 15). */}
+                <motion.div variants={containerVariants} className="tb-friendtools">
+                    {!rightCollapsed && <img src={dividerImg} alt="" className="tb-friendtools-line" />}
                     <motion.div variants={itemVariants} className="relative tb-slot tb-right-friends">
                         <ToolbarItemView icon="friendall" onClick={() => CreateLinkEvent('friends/toggle')} className="tb-icon" />
-                        {requests.length > 0 && <LayoutItemCountView count={requests.length} className="absolute -right-2 -top-1" />}
+                        <ToolbarUnseenCountView count={requests.length} className="tb-unseen-count--friends" />
                     </motion.div>
                     <motion.div variants={itemVariants} className="tb-slot tb-right-search">
-                        <ToolbarItemView icon="friendsearch" onClick={() => SendMessageComposer(new FindNewFriendsMessageComposer())} className="tb-icon" />
+                        <ToolbarItemView icon="friendsearch" onClick={() => CreateLinkEvent('friends/search')} className="tb-icon" />
                     </motion.div>
                     {iconState !== MessengerIconState.HIDDEN && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-messenger tb-right-messenger">
@@ -578,18 +508,27 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             />
                         </motion.div>
                     )}
-                    {!rightCollapsed && (
-                        <>
-                            <div className={`tb-right-friend-bar h-full shrink-0 ${desktopBlockClasses}`} id="toolbar-friend-bar-container-desktop" />
-                        </>
+                    {rightCollapsed && (
+                        <button
+                            type="button"
+                            onClick={() => toggleFriendBar(false)}
+                            aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
+                            className="tb-collapse tb-collapse--friendbar-left pointer-events-auto"
+                        />
                     )}
                 </motion.div>
-                <button
-                    type="button"
-                    onClick={() => setRightCollapsed((value) => !value)}
-                    aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
-                    className={`tb-collapse pointer-events-auto ${rightCollapsed ? 'tb-collapse--left' : 'tb-collapse--right'}`}
-                />
+                {/* Collapsing only clips the bar, so the tabs keep their state. */}
+                <div className={`tb-right-friend-bar ${rightCollapsed ? 'hidden' : ''}`} id="toolbar-friend-bar-container-desktop" />
+                {!rightCollapsed && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => toggleFriendBar(true)}
+                            aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
+                            className="tb-collapse tb-collapse--friendbar-right pointer-events-auto"
+                        />
+                    </>
+                )}
             </motion.div>
             <motion.div
                 initial="visible"
@@ -612,7 +551,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="rooms" onClick={() => CreateLinkEvent('navigator/toggle')} className="tb-icon" />
                     </motion.div>
-                    {GetConfigurationValue('game.center.enabled') && (
+                    {gamesAvailable && (
                         <motion.div variants={itemVariants}>
                             <ToolbarItemView icon="game" onClick={() => CreateLinkEvent('games/toggle')} className="tb-icon" />
                         </motion.div>
@@ -700,7 +639,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         <ToolbarItemView icon="buildersclub" onClick={() => CreateLinkEvent('catalog/toggle/builder')} className="tb-icon" />
                     </motion.div>
                 )}
-                {isInRoom && (
+                {cameraAvailable && (
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
                     </motion.div>

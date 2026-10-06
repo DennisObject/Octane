@@ -12,6 +12,11 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetRoomSession, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
 import { useMessageEvent, useOctaneEvent, useWired } from '../../../hooks';
+import arrowLeft from '../../../assets/images/wired/native/arrow-left.png';
+import arrowRight from '../../../assets/images/wired/native/arrow-right.png';
+import { useWiredNative } from './WiredNativeContext';
+import { WiredSection } from './WiredSection';
+import { WiredShellButton } from './WiredShellHeaderView';
 
 export const FURNI_SOURCES = [
     { value: 100, label: 'wiredfurni.params.sources.furni.100' },
@@ -219,6 +224,7 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
         onChangeUsers = null
     } = props;
     const { trigger = null } = useWired();
+    const native = useWiredNative();
     const availableUserSources = useAvailableUserSources(trigger, userSources, usersTitle, allowClickedUserSource);
     const orderedFurniSources = useMemo(() => sortWiredSourceOptions(furniSources, 'furni'), [furniSources]);
     const orderedUserSources = useMemo(() => {
@@ -265,6 +271,37 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     };
 
     if (!showFurni && !showUsers) return null;
+
+    if (native) {
+        const row = (label: string, onPrevious: () => void, onNext: () => void) => (
+            <div className="octane-wired__slider-row octane-wired__source-row">
+                <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" onClick={onPrevious}>
+                    <img alt="" draggable={false} src={arrowLeft} />
+                </WiredShellButton>
+                <span className="octane-wired__text octane-wired__source-label">{LocalizeText(label)}</span>
+                <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" onClick={onNext}>
+                    <img alt="" draggable={false} src={arrowRight} />
+                </WiredShellButton>
+            </div>
+        );
+
+        return (
+            <>
+                {showFurni && (
+                    <WiredSection title={LocalizeText(furniTitle)}>
+                        {row(orderedFurniSources[furniIndex].label, prevFurni, nextFurni)}
+                        {furniDetail}
+                    </WiredSection>
+                )}
+                {showUsers && (
+                    <WiredSection title={LocalizeText(usersTitle)}>
+                        {row(orderedUserSources[userIndex].label, prevUsers, nextUsers)}
+                        {userDetail}
+                    </WiredSection>
+                )}
+            </>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-2">

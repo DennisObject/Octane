@@ -1,3 +1,4 @@
+import { isOctaneAuthEnabled } from '../auth';
 import { GetConfigurationValue } from '../octane';
 import { HousekeepingTabId } from './HousekeepingTabId';
 
@@ -13,7 +14,7 @@ export const HOUSEKEEPING_MODE_KEY = 'housekeeping.mode';
  * lets the operator disable HK at the build/deploy level even when
  * the permission exists on the server.
  */
-export const isHousekeepingEnabled = (): boolean => GetConfigurationValue<boolean>(HOUSEKEEPING_ENABLED_KEY, false) === true;
+export const isHousekeepingEnabled = (): boolean => isOctaneAuthEnabled() && GetConfigurationValue<boolean>(HOUSEKEEPING_ENABLED_KEY, false) === true;
 
 /**
  * `full` (default) exposes the five-tab layout: dashboard, users,

@@ -297,11 +297,6 @@ export class FavouritesEvent extends MessageEvent {}
 export class FlatCreatedEvent extends MessageEvent {}
 export class NavigatorHomeRoomEvent extends MessageEvent {}
 export class NavigatorMetadataEvent extends MessageEvent {}
-export class AvatarEffectsEvent extends MessageEvent {}
-export class AvatarEffectAddedEvent extends MessageEvent {}
-export class AvatarEffectExpiredEvent extends MessageEvent {}
-export class AvatarEffectActivatedEvent extends MessageEvent {}
-export class AvatarEffectSelectedEvent extends MessageEvent {}
 export class IsFirstLoginOfDayEvent extends MessageEvent {}
 export class NavigatorOpenRoomCreatorEvent extends MessageEvent {}
 export class NavigatorSearchesEvent extends MessageEvent {}
@@ -439,7 +434,6 @@ export class HabboWebTools extends StubClass {}
 // Composers — symbol-only constructors; only their identity matters in the
 // codebase ("did the SUT call SendMessageComposer(new FooComposer(args))").
 export class AddFavouriteRoomMessageComposer extends StubClass {}
-export class AvatarEffectActivatedComposer extends StubClass {}
 export class DeleteFavouriteRoomMessageComposer extends StubClass {}
 export class FollowFriendMessageComposer extends StubClass {}
 export class GetUserEventCatsMessageComposer extends StubClass {}

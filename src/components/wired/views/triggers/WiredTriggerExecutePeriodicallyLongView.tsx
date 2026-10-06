@@ -1,10 +1,10 @@
 import { FC, useEffect, useState } from 'react';
-import { FriendlyTime, LocalizeText, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { WiredFurniType, WIRED_SLIDER_SECONDS_5 } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
-export const WiredTriggeExecutePeriodicallyLongView: FC<{}> = (props) => {
+export const WiredTriggeExecutePeriodicallyLongView: FC<{}> = () => {
     const [time, setTime] = useState(1);
     const { trigger = null, setIntParams = null } = useWired();
 
@@ -15,11 +15,8 @@ export const WiredTriggeExecutePeriodicallyLongView: FC<{}> = (props) => {
     }, [trigger]);
 
     return (
-        <WiredTriggerBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.setlongtime', ['time'], [FriendlyTime.format(time * 5).toString()])}</Text>
-                <Slider max={120} min={1} value={time} onChange={(event) => setTime(event)} />
-            </div>
+        <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSliderSection converter={WIRED_SLIDER_SECONDS_5} max={120} min={1} titleKey="wiredfurni.params.settime3" value={time} onChange={setTime} />
         </WiredTriggerBaseView>
     );
 };

@@ -15,8 +15,14 @@ export const Button: FC<ButtonProps> = (props) => {
     const getClassNames = useMemo(() => {
         // fucked up method i know (i dont have a clue what im doing because im a ninja)
 
+        // Skinned small buttons take size, padding and font from the .habbo-btn-* skin
+        // metrics; unskinned variants keep their utility sizing.
+        const skinned = size === 'sm' && ['primary', 'success', 'danger', 'warning', 'secondary', 'gray'].includes(variant);
+
         const newClassNames: string[] = [
-            'pointer-events-auto font-bold leading-tight text-center no-underline cursor-pointer select-none px-[.75rem] py-[.375rem] text-[.9rem] rounded-none'
+            skinned
+                ? 'pointer-events-auto leading-tight text-center no-underline cursor-pointer select-none rounded-none'
+                : 'pointer-events-auto font-bold leading-tight text-center no-underline cursor-pointer select-none px-[.75rem] py-[.375rem] text-[.9rem] rounded-none'
         ];
 
         if (variant) {
@@ -39,7 +45,7 @@ export const Button: FC<ButtonProps> = (props) => {
 
         if (size) {
             if (size == 'sm') {
-                newClassNames.push('px-[.5rem]! py-[.25rem]! text-[.7875rem]! rounded-none! min-h-[24px]!');
+                newClassNames.push(skinned ? 'rounded-none!' : 'px-[.5rem]! py-[.25rem]! text-[.7875rem]! rounded-none! min-h-[24px]!');
             }
         }
 

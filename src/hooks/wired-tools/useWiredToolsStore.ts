@@ -14,11 +14,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook } from '@/state/useSharedHook';
 import {
     createPacketCooldownGate,
+    GetConfigurationValue,
     LocalizeText,
     NotificationAlertType,
     normalizeWiredStyle,
     SendMessageComposer,
     WIRED_STYLE_DEFAULT,
+    WiredShellStyle,
     WiredStyleName
 } from '../../api';
 import { useMessageEvent } from '../events';
@@ -26,6 +28,7 @@ import { useNotification } from '../notification';
 import { useRoom } from '../rooms';
 
 export interface IWiredAccountPreferences {
+    playTestMode: boolean;
     showInspectButton: boolean;
     showSystemNotifications: boolean;
     showToolbarButton: boolean;
@@ -125,6 +128,7 @@ const getCurrentUnixTime = () => Math.floor(Date.now() / 1000);
 const DEFAULT_ACCOUNT_PREFERENCES: IWiredAccountPreferences = {
     showToolbarButton: false,
     showInspectButton: false,
+    playTestMode: false,
     showSystemNotifications: false,
     wiredStyle: WIRED_STYLE_DEFAULT
 };
@@ -155,6 +159,9 @@ export const useWiredToolsStore = () => {
     const { roomSession = null } = useRoom();
     const { simpleAlert = null } = useNotification();
     const [accountPreferences, setAccountPreferences] = useState<IWiredAccountPreferences>(DEFAULT_ACCOUNT_PREFERENCES);
+    const [activeWiredStyle, setActiveWiredStyle] = useState<WiredShellStyle>('illumina');
+    const [areAccountPreferencesHydrated, setAreAccountPreferencesHydrated] = useState(false);
+    const previousWiredStyleRef = useRef<WiredStyleName>('volter');
     const [roomSettings, setRoomSettings] = useState<IWiredRoomSettings>(DEFAULT_ROOM_SETTINGS);
     const [userVariableDefinitions, setUserVariableDefinitions] = useState<IWiredUserVariableDefinition[]>([]);
     const [userVariableAssignments, setUserVariableAssignments] = useState<Record<number, IWiredUserVariableAssignment[]>>({});
@@ -184,32 +191,47 @@ export const useWiredToolsStore = () => {
         return `${WIRED_TOOLS_STORAGE_PREFIX}.${userId || 'guest'}`;
     }, []);
 
+    // HBe/bRe keep preference history separate from the active factory. Local storage
+    // supplies compatibility preference events here; it is not the native 1175 receiver.
+    const applyWiredStylePreference = useCallback((value: unknown) => {
+        const style = normalizeWiredStyle(value);
+
+        if (style === previousWiredStyleRef.current) return;
+
+        previousWiredStyleRef.current = style;
+
+        if (GetConfigurationValue<boolean>('wired.ui_picker_enabled', false)) setActiveWiredStyle(style || 'volter');
+    }, []);
+
     useEffect(() => {
+        let preferences = DEFAULT_ACCOUNT_PREFERENCES;
+
         try {
             const rawValue = window.localStorage.getItem(storageKey);
 
-            if (!rawValue) {
-                setAccountPreferences(DEFAULT_ACCOUNT_PREFERENCES);
-                return;
+            if (rawValue) {
+                const parsedValue = JSON.parse(rawValue) as Partial<IWiredAccountPreferences>;
+
+                preferences = {
+                    ...DEFAULT_ACCOUNT_PREFERENCES,
+                    ...(parsedValue || {}),
+                    wiredStyle: normalizeWiredStyle(parsedValue?.wiredStyle)
+                };
             }
+        } catch {}
 
-            const parsedValue = JSON.parse(rawValue) as Partial<IWiredAccountPreferences>;
-
-            setAccountPreferences({
-                ...DEFAULT_ACCOUNT_PREFERENCES,
-                ...(parsedValue || {}),
-                wiredStyle: normalizeWiredStyle(parsedValue?.wiredStyle)
-            });
-        } catch {
-            setAccountPreferences(DEFAULT_ACCOUNT_PREFERENCES);
-        }
-    }, [storageKey]);
+        applyWiredStylePreference(preferences.wiredStyle);
+        setAccountPreferences(preferences);
+        setAreAccountPreferencesHydrated(true);
+    }, [applyWiredStylePreference, storageKey]);
 
     useEffect(() => {
+        if (!areAccountPreferencesHydrated) return;
+
         try {
             window.localStorage.setItem(storageKey, JSON.stringify(accountPreferences));
         } catch {}
-    }, [accountPreferences, storageKey]);
+    }, [accountPreferences, areAccountPreferencesHydrated, storageKey]);
 
     useEffect(() => {
         if (!roomSession?.roomId) {
@@ -295,12 +317,19 @@ export const useWiredToolsStore = () => {
         setAreUserVariablesLoaded(true);
     });
 
-    const updateAccountPreferences = useCallback((partialPreferences: Partial<IWiredAccountPreferences>) => {
-        setAccountPreferences((prevValue) => ({
-            ...prevValue,
-            ...partialPreferences
-        }));
-    }, []);
+    const updateAccountPreferences = useCallback(
+        (partialPreferences: Partial<IWiredAccountPreferences>) => {
+            const preferences =
+                'wiredStyle' in partialPreferences
+                    ? { ...partialPreferences, wiredStyle: normalizeWiredStyle(partialPreferences.wiredStyle) }
+                    : partialPreferences;
+
+            if ('wiredStyle' in preferences) applyWiredStylePreference(preferences.wiredStyle);
+
+            setAccountPreferences((prevValue) => ({ ...prevValue, ...preferences }));
+        },
+        [applyWiredStylePreference]
+    );
 
     // The official permissions packet carries the timezone too, so every save sends all three and
     // the server answers with the settings it kept.
@@ -693,6 +722,7 @@ export const useWiredToolsStore = () => {
 
     return {
         accountPreferences,
+        activeWiredStyle,
         roomSettings,
         showInspectButton,
         showToolbarButton,

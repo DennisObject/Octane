@@ -2,75 +2,76 @@ import { FindNewFriendsMessageComposer, MouseEventType } from '@octane/renderer'
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetUserProfile, LocalizeText, MessengerFriend, OpenMessengerChat, SendMessageComposer } from '../../../../api';
-import staffChatFrankIcon from '../../../../assets/images/friends/staff-chat-frank.svg';
-import addFriendsIcon from '../../../../assets/images/friends/swf/add_friends_icon.png';
+import findFriendsIcon from '../../../../assets/images/toolbar/air/find-friends-icon.png';
 import chatIcon from '../../../../assets/images/friends/swf/friendlist_chat.png';
 import profileIcon from '../../../../assets/images/friends/swf/friendlist_eye.png';
 import visitIcon from '../../../../assets/images/friends/swf/friendlist_go_room.png';
-import searchFriendsIcon from '../../../../assets/images/friends/swf/search_friends_icon.png';
 import { LayoutAvatarImageView, LayoutBadgeImageView } from '../../../../common';
 import { useFriends } from '../../../../hooks';
 import { isStaffChatIdentity } from '../../staffChatIdentity';
 import { StaffChatFrankIconView } from '../../StaffChatFrankIconView';
 
-export const FriendBarItemView: FC<{ friend: MessengerFriend }> = (props) => {
-    const { friend = null } = props;
-    const [isVisible, setVisible] = useState(false);
+interface FriendBarItemViewProps
+{
+    friend: MessengerFriend;
+    selected: boolean;
+    onToggle: () => void;
+    onDeselect: () => void;
+}
+
+export const FriendBarItemView: FC<FriendBarItemViewProps> = (props) => {
+    const { friend = null, selected = false, onToggle = null, onDeselect = null } = props;
+    const [ exposed, setExposed ] = useState(false);
+    const [ concealed, setConcealed ] = useState(false);
     const { followFriend = null } = useFriends();
     const elementRef = useRef<HTMLDivElement>(null);
+    const isVisible = selected;
+    const setVisible = (value: boolean) => (value ? (!selected && onToggle()) : (selected && onDeselect()));
 
     useEffect(() => {
+        if (!selected) return;
+
         const onClick = (event: MouseEvent) => {
             const element = elementRef.current;
             if (!element) return;
-            if (event.target !== element && !element.contains(event.target as Node)) {
-                setVisible(false);
-            }
+            if (event.target !== element && !element.contains(event.target as Node)) onDeselect();
         };
         document.addEventListener(MouseEventType.MOUSE_CLICK, onClick);
         return () => document.removeEventListener(MouseEventType.MOUSE_CLICK, onClick);
-    }, []);
+    }, [ selected, onDeselect ]);
 
     if (!friend) {
-        return (
-            <div ref={elementRef} className={`friend-bar-find-friends ${isVisible ? 'is-selected' : ''}`}>
-                <button
-                    type="button"
-                    className="friend-bar-item friend-bar-search find-friends"
-                    aria-expanded={isVisible}
-                    onClick={() => setVisible((prev) => !prev)}
-                >
-                    <img className="friend-bar-search-icon" src={searchFriendsIcon} alt="" />
-                    <span className="friend-bar-text">{LocalizeText('friend.bar.find.title')}</span>
-                </button>
+        // add_friends_tab_xml (AddFriendsTab b4e): 127x36 tab that grows to 164px upwards when selected.
+        // Frame colour: the layout's 0x74dbfa until the tab is first exposed or selected, then 0x91e1f9 while
+        // exposed (hover) and 0x7fc8de otherwise; selecting conceals the tab.
+        const frameColor = selected ? '7fc8de' : (exposed ? '91e1f9' : (concealed ? '7fc8de' : '74dbfa'));
 
-                <AnimatePresence>
-                    {isVisible && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 6 }}
-                            transition={{ duration: 0.12 }}
-                            className="friend-bar-find-friends-panel"
+        return (
+            <div
+                ref={elementRef}
+                className={`friend-bar-add-tab frame-${ frameColor } ${ selected ? 'is-selected' : '' } ${ (exposed && !selected) ? 'is-exposed' : '' }`}
+                onClick={() => { setExposed(false); setConcealed(true); onToggle(); }}
+                onMouseEnter={() => !selected && setExposed(true)}
+                onMouseLeave={() => { if (exposed) { setExposed(false); setConcealed(true); } }}
+            >
+                <img className="friend-bar-add-tab__icon" src={findFriendsIcon} alt="" />
+                <span className="friend-bar-add-tab__title">{LocalizeText('friend.bar.find.title')}</span>
+                {selected && (
+                    <>
+                        <div className="friend-bar-add-tab__text">{LocalizeText('friend.bar.find.text')}</div>
+                        <button
+                            type="button"
+                            className="friend-bar-add-tab__button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                SendMessageComposer(new FindNewFriendsMessageComposer());
+                                onDeselect();
+                            }}
                         >
-                            <div className="friend-bar-find-friends-header">
-                                <img src={addFriendsIcon} alt="" />
-                                <span>{LocalizeText('friend.bar.find.title')}</span>
-                            </div>
-                            <div className="friend-bar-find-friends-copy">{LocalizeText('friend.bar.find.text')}</div>
-                            <button
-                                className="friend-bar-find-friends-button"
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    SendMessageComposer(new FindNewFriendsMessageComposer());
-                                    setVisible(false);
-                                }}
-                            >
-                                {LocalizeText('friend.bar.find.button')}
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            {LocalizeText('friend.bar.find.button')}
+                        </button>
+                    </>
+                )}
             </div>
         );
     }
@@ -101,7 +102,7 @@ export const FriendBarItemView: FC<{ friend: MessengerFriend }> = (props) => {
             <motion.button
                 type="button"
                 className={`friend-bar-item friend-bar-tab find-friends-active ${friend.id <= 0 ? 'group' : ''}`}
-                onClick={() => setVisible((prev) => !prev)}
+                onClick={() => onToggle()}
             >
                 <div className="friend-bar-text">{friend.name}</div>
             </motion.button>

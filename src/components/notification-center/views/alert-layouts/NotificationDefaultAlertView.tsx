@@ -9,6 +9,9 @@ import {
     SanitizeHtml
 } from '../../../../api';
 import { Button, Column, Flex, LayoutNotificationAlertView, LayoutNotificationAlertViewProps } from '../../../../common';
+import { NativeMotdView } from '../native/NativeMotdView';
+import { NativeNotificationPopupView } from '../native/NativeNotificationPopupView';
+import { NativeSimpleAlertView } from '../native/NativeSimpleAlertView';
 
 interface NotificationDefaultAlertViewProps extends LayoutNotificationAlertViewProps {
     item: NotificationAlertItem;
@@ -40,7 +43,7 @@ const CommandFilterInput: FC<CommandFilterInputProps> = ({ value, onChange }) =>
     />
 );
 
-export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
+const LegacyNotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
     const { item = null, title = (props.item && props.item.title) || '', onClose = null, classNames = [], ...rest } = props;
     const [imageFailed, setImageFailed] = useState<boolean>(false);
     const [commandFilter, setCommandFilter] = useState<string>('');
@@ -198,11 +201,58 @@ export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps>
                 <>
                     <Column center alignItems="center" gap={0}>
                         <hr className="my-2 w-full" />
-                        {!item.clickUrl && <Button onClick={onClose}>{LocalizeText('generic.close')}</Button>}
+                        {!item.clickUrl && (
+                            <button
+                                type="button"
+                                className="inline-flex items-center justify-center pointer-events-auto leading-tight text-center no-underline cursor-pointer select-none rounded-none habbo-btn-primary rounded-none!"
+                                style={{ fontFamily: 'HabboAirUbuntu, Ubuntu, sans-serif', lineHeight: '14px' }}
+                                onClick={onClose}
+                            >
+                                {LocalizeText('generic.close')}
+                            </button>
+                        )}
                         {item.clickUrl && item.clickUrl.length > 0 && <Button onClick={visitUrl}>{LocalizeText(item.clickUrlText)}</Button>}
                     </Column>
                 </>
             )}
         </LayoutNotificationAlertView>
     );
+};
+
+const isCommandTemplate = (item: NotificationAlertItem) => {
+    const lines = item.messages.flatMap((message) => message.split(/\r\n|\r|\n/g));
+
+    return lines.filter((line) => COMMAND_LINE_PATTERN.test(line)).length >= 4 || lines.some((line) => COMMAND_HEADING_PATTERN.test(line.trim()));
+};
+
+// The v75 client shows broadcasts and moderator messages in the simple alert (simple_alert_xml) and every other notification
+// type, with its optional link and image, in the notification popup (layout_notification_popup_xml). The MOTD has its own window
+// (motd_notification_xml); the command listing keeps its custom layout.
+export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = (props) => {
+    const { item = null, onClose = null, title = (props.item && props.item.title) || '' } = props;
+
+    if (isCommandTemplate(item)) return <LegacyNotificationDefaultAlertView {...props} />;
+
+    if (item.alertType === NotificationAlertType.MOTD) return <NativeMotdView messages={item.messages} title={title} onClose={onClose} />;
+
+    const message = item.messages.join('\n');
+    const linkTitle = item.clickUrlText ? LocalizeText(item.clickUrlText) : '';
+
+    if (item.alertType === NotificationAlertType.DEFAULT || item.alertType === NotificationAlertType.MODERATION) {
+        const isModeration = item.alertType === NotificationAlertType.MODERATION;
+
+        return (
+            <NativeSimpleAlertView
+                caption={isModeration ? '' : title}
+                imageUrl={item.imageUrl || undefined}
+                linkTitle={linkTitle}
+                linkUrl={item.clickUrl ?? ''}
+                message={message}
+                subtitle={isModeration ? title : ''}
+                onClose={onClose}
+            />
+        );
+    }
+
+    return <NativeNotificationPopupView imageUrl={item.imageUrl ?? ''} linkTitle={linkTitle} linkUrl={item.clickUrl ?? ''} message={message} title={title} onClose={onClose} />;
 };

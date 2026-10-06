@@ -13,6 +13,7 @@ export interface WiredExtraBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    nativeLayout?: boolean;
     showSelection?: boolean;
 }
 
@@ -27,7 +28,8 @@ export const WiredExtraBaseView: FC<PropsWithChildren<WiredExtraBaseViewProps>> 
         footer = null,
         footerCollapsible = true,
         selectionPreview = null,
-        showSelection = true
+        showSelection = true,
+        nativeLayout = false
     } = props;
     const { trigger = null, setActionDelay = null } = useWired();
 
@@ -46,6 +48,7 @@ export const WiredExtraBaseView: FC<PropsWithChildren<WiredExtraBaseViewProps>> 
             footer={footer}
             footerCollapsible={footerCollapsible}
             selectionPreview={selectionPreview}
+            nativeLayout={nativeLayout}
             showSelection={showSelection}
         >
             {children}

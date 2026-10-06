@@ -1,8 +1,9 @@
 import { WiredActionDefinition } from '@octane/renderer';
 import { CSSProperties, FC, PropsWithChildren, ReactNode, useEffect } from 'react';
-import { GetWiredTimeLocale, LocalizeText, WiredFurniType } from '../../../../api';
+import { GetWiredTimeLocale, LocalizeText, WiredFurniType, WIRED_SLIDER_PULSES } from '../../../../api';
 import { Slider, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredBaseView } from '../WiredBaseView';
 
 export interface WiredActionBaseViewProps {
@@ -15,6 +16,7 @@ export interface WiredActionBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    nativeLayout?: boolean;
 }
 
 export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>> = (props) => {
@@ -28,7 +30,8 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
         hideDelay = false,
         footer = null,
         footerCollapsible = true,
-        selectionPreview = null
+        selectionPreview = null,
+        nativeLayout = false
     } = props;
     const { trigger = null, actionDelay = 0, setActionDelay = null } = useWired();
 
@@ -47,15 +50,35 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
             footer={footer}
             footerCollapsible={footerCollapsible}
             selectionPreview={selectionPreview}
+            nativeLayout={nativeLayout}
+            delay={
+                !hideDelay && (
+                    <WiredSliderSection
+                        className="octane-wired__section--delay"
+                        converter={WIRED_SLIDER_PULSES}
+                        max={20}
+                        min={0}
+                        titleKey="wiredfurni.params.delay"
+                        unit="seconds"
+                        value={actionDelay}
+                        withInput={false}
+                        onChange={setActionDelay}
+                    />
+                )
+            }
+            legacyDelay={
+                !hideDelay && (
+                    <>
+                        {!!children && <div className="octane-wired__divider" />}
+                        <div className="flex flex-col octane-wired__section octane-wired__section--delay">
+                            <Text bold>{LocalizeText('wiredfurni.params.delay', ['seconds'], [GetWiredTimeLocale(actionDelay)])}</Text>
+                            <Slider max={20} min={0} value={actionDelay} onChange={(event) => setActionDelay(event)} />
+                        </div>
+                    </>
+                )
+            }
         >
             {children}
-            {!hideDelay && !!children && <div className="octane-wired__divider" />}
-            {!hideDelay && (
-                <div className="flex flex-col octane-wired__section octane-wired__section--delay">
-                    <Text bold>{LocalizeText('wiredfurni.params.delay', ['seconds'], [GetWiredTimeLocale(actionDelay)])}</Text>
-                    <Slider max={20} min={0} value={actionDelay} onChange={(event) => setActionDelay(event)} />
-                </div>
-            )}
         </WiredBaseView>
     );
 };

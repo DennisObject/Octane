@@ -6,12 +6,19 @@
 
 .furniture-stack-height--walk { height: 210px; }
 
+.furniture-stack-height .air-frame__title {
+    left: 10px;
+    top: 11px;
+    font-size: 10.5px;
+}
+
 .furniture-stack-height .furniture-stack-height__text {
     position: absolute;
-    left: 10px;
+    left: 12px;
     top: 5px;
     width: 294px;
     height: 59px;
+    font-size: 11.5px;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -36,9 +43,9 @@
 
 .furniture-stack-height .furniture-stack-height__input-border input {
     position: absolute;
-    left: 7px;
-    top: 7px;
-    width: 45px;
+    left: 9px;
+    top: 4px;
+    width: 43px;
     height: 20px;
     margin: 0;
     padding: 0;
@@ -48,21 +55,22 @@
     box-shadow: none;
     color: #000;
     font: inherit;
+    font-size: 11.5px;
 }
 
 .furniture-stack-height .furniture-stack-height__above {
     position: absolute;
     left: 12px;
     top: 110px;
-    width: 134px;
+    width: 88px;
     height: 29px;
 }
 
 .furniture-stack-height .furniture-stack-height__floor {
     position: absolute;
-    left: 182px;
+    left: 187px;
     top: 110px;
-    width: 126px;
+    width: 121px;
     height: 29px;
 }
 

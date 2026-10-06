@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, LocalizeText, WiredActionLayoutCode, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { WiredSection } from '../WiredSection';
+import { WiredTextInput } from '../WiredTextInput';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -31,20 +31,15 @@ export const WiredActionKickFromRoomView: FC<{}> = (props) => {
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
             {showMessage && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{LocalizeText('wiredfurni.params.message')}</Text>
-                    <OctaneInput
-                        maxLength={GetConfigurationValue<number>('wired.action.kick.from.room.max.length', 100)}
-                        type="text"
-                        value={message}
-                        onChange={(event) => setMessage(event.target.value)}
-                    />
-                </div>
+                <WiredSection title={LocalizeText('wiredfurni.params.message')}>
+                    <WiredTextInput maxLength={GetConfigurationValue<number>('wired.action.kick.from.room.max.length', 100)} value={message} onChange={setMessage} />
+                </WiredSection>
             )}
         </WiredActionBaseView>
     );

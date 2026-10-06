@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp } from 'react-icons/fa';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';

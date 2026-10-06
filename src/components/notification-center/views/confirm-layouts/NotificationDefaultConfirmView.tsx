@@ -1,13 +1,14 @@
 import { FC } from 'react';
-import { NotificationAlertType, NotificationConfirmItem } from '../../../../api';
-import { Button, Flex, LayoutNotificationAlertView, LayoutNotificationAlertViewProps, Text } from '../../../../common';
+import { NotificationConfirmItem } from '../../../../api';
+import { LayoutNotificationAlertViewProps } from '../../../../common';
+import { NativeConfirmView } from '../native/NativeConfirmView';
 
 export interface NotificationDefaultConfirmViewProps extends LayoutNotificationAlertViewProps {
     item: NotificationConfirmItem;
 }
 
 export const NotificationDefaultConfirmView: FC<NotificationDefaultConfirmViewProps> = (props) => {
-    const { item = null, onClose = null, ...rest } = props;
+    const { item = null, onClose = null } = props;
     const { message = null, onConfirm = null, onCancel = null, confirmText = null, cancelText = null, title = null } = item;
 
     const confirm = () => {
@@ -22,19 +23,5 @@ export const NotificationDefaultConfirmView: FC<NotificationDefaultConfirmViewPr
         onClose();
     };
 
-    return (
-        <LayoutNotificationAlertView title={title} onClose={onClose} {...rest} type={NotificationAlertType.ALERT}>
-            <Flex center grow>
-                <Text className="whitespace-pre-line">{message}</Text>
-            </Flex>
-            <div className="flex gap-1">
-                <Button fullWidth variant="danger" onClick={cancel}>
-                    {cancelText}
-                </Button>
-                <Button fullWidth onClick={confirm}>
-                    {confirmText}
-                </Button>
-            </div>
-        </LayoutNotificationAlertView>
-    );
+    return <NativeConfirmView cancelText={cancelText} confirmText={confirmText} message={message} title={title} onCancel={cancel} onConfirm={confirm} />;
 };

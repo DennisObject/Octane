@@ -283,66 +283,69 @@
     }
 }
 
-.tb-open-shell.tb-open-shell-right {
-    position: relative;
-    width: 282px;
-    min-width: 282px;
-    gap: 0;
-    margin-left: 0;
-}
-
+/* new_bar_xml (HabboFriendBarCom): 48px tall, one pixel above the bottom edge, right aligned. */
 .tb-right-dock {
     bottom: 1px;
     height: 48px;
-    min-width: 297px;
+    align-items: flex-start;
 }
 
-.tb-right-dock[data-collapsed="true"] {
+.tb-friendtools {
+    position: relative;
+    flex: 0 0 150px;
     width: 150px;
-    min-width: 150px;
-    max-width: 150px;
+    height: 46px;
+    margin-top: 2px;
 }
 
-.tb-right-dock[data-collapsed="true"] .tb-open-shell-right {
-    width: 135px;
-    min-width: 135px;
-}
-
-.tb-open-shell-right .tb-right-divider {
+.tb-friendtools-line {
     position: absolute;
-    top: 4px;
+    top: 3px;
     left: 1px;
-    margin: 0;
+    display: block;
+    width: 1px;
+    height: 40px;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.tb-open-shell-right .tb-right-friends,
-.tb-open-shell-right .tb-right-search,
-.tb-open-shell-right .tb-right-messenger {
+.tb-friendtools .tb-slot {
     position: absolute;
-    top: 2px;
-    margin: 0;
+    top: 5px;
 }
 
-.tb-open-shell-right .tb-right-friends { left: 18px; }
-.tb-open-shell-right .tb-right-search { left: 64px; }
-.tb-open-shell-right .tb-right-messenger { left: 103px; }
+.tb-friendtools .tb-right-friends { left: 18px; }
+.tb-friendtools .tb-right-search { left: 64px; }
+.tb-friendtools .tb-right-messenger { left: 103px; margin: 0; }
 
-.tb-open-shell-right .tb-right-friend-bar {
+.tb-nav-clip .tb-friendtools .tb-slot .octane-icon { top: 0; left: 0; }
+
+.tb-right-friend-bar {
+    flex: 0 0 auto;
+    height: 48px;
+}
+
+/* collapse_left / collapse_right: 15x46 regions, a 20x43 style-2 #3b3933 border at (x,1) clipped by the region, arrow at (4,18). */
+.tb-collapse--friendbar-left,
+.tb-collapse--friendbar-right {
+    overflow: hidden;
+    background-image: url("../../assets/images/toolbar/air/collapse-border-3b3933.png");
+    background-repeat: no-repeat;
+    background-position: 0 1px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-collapse--friendbar-left {
     position: absolute;
     top: 0;
-    left: 145px;
+    left: 135px;
 }
 
-.tb-right-friend-bar .friend-bar {
-    gap: 0;
-    padding-right: 0;
-    padding-left: 0;
+.tb-collapse--friendbar-right {
+    margin-top: 2px;
 }
 
-.tb-right-friend-bar .friend-bar .friend-bar-button {
-    width: 28px;
-    margin-right: 0;
-    margin-left: 0;
+.tb-collapse--friendbar-right::before {
+    transform: scaleX(-1);
 }
 
 .tbme-panel {
@@ -482,4 +485,59 @@
         opacity: 0.85;
         transform: translateY(0);
     }
+}
+
+.tb-unseen-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    height: 18px;
+    min-width: 17px;
+    padding: 0 3px 0 4px;
+    overflow: hidden;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tb-unseen-count__text {
+    z-index: 1;
+    clip-path: inset(0 1px 0 0);
+}
+
+.tb-unseen-count::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-bottom-width: 7px;
+    border-image-source: url("../../assets/images/toolbar/air/unseen-counter-border-ee2924.png");
+    border-image-slice: 6 6 7 fill;
+    border-image-width: 6px 6px 7px;
+    border-image-repeat: stretch;
+    content: "";
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-unseen-count::after {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-bottom-width: 7px;
+    border-image-source: url("../../assets/images/toolbar/air/unseen-counter-border-ee2924.png");
+    border-image-slice: 6 6 7;
+    border-image-width: 6px 6px 7px;
+    border-image-repeat: stretch;
+    clip-path: polygon(0 0, 100% 0, 100% 3px, 0 3px, 0 0, 0 14px, 100% 14px, 100% 100%, 0 100%, 0 14px);
+    content: "";
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-unseen-count.tb-unseen-count--friends {
+    right: 5px;
 }

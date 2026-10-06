@@ -1,0 +1,287 @@
+/* v75 furniture dialogs on the style 3 frame (content origin 3,36). Buttons use the shiny skins. */
+.fnd-button {
+    appearance: none;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    margin: 0;
+    padding: 0 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 5px solid transparent;
+    border-image-source: var(--habbo-skin-shiny);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #111;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.fnd-button:hover {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.fnd-button:active {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.fnd-button:disabled {
+    cursor: default;
+    border-image-source: var(--habbo-skin-shiny-disabled);
+}
+
+.fnd-button.fnd-button-thick {
+    border-image-source: var(--habbo-skin-shiny-thick);
+}
+
+.fnd-button.fnd-button-thick:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.fnd-button.fnd-button-thick:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.fnd-button.fnd-button-thick.fnd-button-green {
+    border-image-source: var(--habbo-skin-shiny-thick-green);
+    color: #fff;
+    font-weight: 700;
+}
+
+.fnd-button.fnd-button-thick.fnd-button-green:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-green-hover);
+}
+
+.fnd-button.fnd-button-thick.fnd-button-green:active {
+    border-image-source: var(--habbo-skin-shiny-thick-green-pressed);
+}
+
+/* The native title sits two pixels lower in the style 3 title bar. */
+.octane-furni-gift .octane-card-title {
+    transform: translateY(2px);
+}
+
+/* packagecard_new / packagecard_new_opened */
+.octane-furni-gift {
+    box-sizing: border-box;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+}
+
+.octane-furni-gift.is-closed {
+    width: 332px;
+}
+
+.octane-furni-gift.is-opened {
+    width: 342px;
+}
+
+.octane-furni-gift .fnd-gift-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #e9e9e1;
+}
+
+.octane-furni-gift.is-closed .fnd-gift-content {
+    gap: 10px;
+    padding: 10px 10px 0;
+}
+
+/* packagecard_new warning: 306x56 white frame, 300x50 #b1004c body (untrusted), icon container 70 wide
+   (alert 26x26 at 22,12), warning_text x=65 y=10 w=235 min-height 30, Ubuntu 11 bold white. */
+.octane-furni-gift .fnd-gift-warning {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 306px;
+    height: 56px;
+    padding: 3px;
+    background: #fff;
+}
+
+.octane-furni-gift .fnd-gift-warning-body {
+    position: relative;
+    box-sizing: border-box;
+    height: 50px;
+    padding: 7px 0 0 68px;
+    overflow: hidden;
+    background: #b1004c;
+}
+
+.octane-furni-gift .fnd-gift-warning-icon {
+    position: absolute;
+    top: 12px;
+    left: 22px;
+    width: 26px;
+    height: 26px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-gift .fnd-gift-warning-text {
+    width: 235px;
+    min-height: 30px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 12.5px;
+}
+
+.octane-furni-gift .fnd-gift-card {
+    position: relative;
+    flex: 0 0 149px;
+    width: 306px;
+    height: 149px;
+}
+
+.octane-furni-gift .fnd-gift-card-image {
+    position: absolute;
+    inset: 0;
+    width: 306px;
+    height: 149px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-gift .fnd-gift-avatar {
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 140px;
+    overflow: hidden;
+}
+
+.octane-furni-gift .fnd-gift-avatar .avatar-image {
+    position: static !important;
+    inset: auto !important;
+    flex: 0 0 auto;
+    width: auto !important;
+    height: auto !important;
+}
+
+.octane-furni-gift .fnd-gift-avatar img {
+    display: block;
+    max-width: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-gift .fnd-gift-message {
+    position: absolute;
+    top: 32px;
+    left: 97px;
+    width: 190px;
+    height: 100px;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 15px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.octane-furni-gift .fnd-gift-from {
+    position: absolute;
+    top: 120px;
+    left: 95px;
+    width: 190px;
+    cursor: pointer;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 15px;
+    text-align: right;
+}
+
+.octane-furni-gift.is-closed .fnd-button {
+    align-self: center;
+    width: 206px;
+}
+
+.octane-furni-gift .fnd-gift-separator {
+    flex: 0 0 1px;
+    height: 1px;
+}
+
+/* packagecard_new_opened: the gift contents at x=30 (275 wide), buttons 10px below, give row last. */
+.octane-furni-gift .fnd-gift-opened-message {
+    display: flex;
+    width: 275px;
+    height: 100px;
+    margin: 0 0 10px 30px;
+}
+
+.octane-furni-gift .fnd-gift-image {
+    position: relative;
+    flex: 0 0 81px;
+    width: 81px;
+    height: 81px;
+    margin-top: 9px;
+}
+
+.octane-furni-gift .fnd-gift-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-furni-gift .fnd-gift-image-product {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+}
+
+.octane-furni-gift .fnd-gift-opened-text {
+    display: flex;
+    flex: 0 0 184px;
+    align-items: center;
+    width: 184px;
+    height: 81px;
+    margin: 9px 0 0 10px;
+    font-size: 12px;
+    line-height: 15px;
+    overflow-wrap: anywhere;
+}
+
+.octane-furni-gift .fnd-gift-opened-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.octane-furni-gift .fnd-gift-opened-buttons .fnd-button {
+    width: 208px;
+}
+
+.octane-furni-gift .fnd-gift-give {
+    position: relative;
+    height: 70px;
+    background: #96a4a5;
+}
+
+.octane-furni-gift .fnd-gift-give .fnd-button {
+    position: absolute;
+    top: 21px;
+    left: 20px;
+    width: 246px;
+}
+
+.octane-furni-gift .fnd-gift-give .fnd-gift-avatar {
+    top: 13px;
+    left: 290px;
+    width: 45px;
+    height: 45px;
+}
