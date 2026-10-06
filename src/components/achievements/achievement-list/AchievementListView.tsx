@@ -6,7 +6,8 @@ import { AchievementListItemView } from './AchievementListItemView';
 
 // The AIR scroll area moves a fixed distance per wheel event, whatever the wheel delta is.
 const WHEEL_STEP = 75;
-// The arrow buttons scroll on press, not on release.
+// The arrow buttons scroll on press, not on release. The same step serves keyboard activation of the buttons
+// and the thumb's ArrowUp/ArrowDown, which ClassicScrollAreaView handles with its scrollStep.
 const ARROW_STEP = 15;
 
 const restoreScroll = (viewport: HTMLElement) => {
@@ -39,15 +40,25 @@ export const AchievementListView: FC<AchievementListViewProps> = (props) => {
 
             viewport.scrollBy({ top: isUp ? -ARROW_STEP : ARROW_STEP, behavior: 'auto' });
         };
+        // A pointer click already scrolled on press; only a keyboard-activated click (detail 0) reaches the component's own step.
+        const onArrowClick = (event: MouseEvent) => {
+            if (event.detail > 0) event.stopPropagation();
+        };
         const onScroll = () => useAchievementListScrollStore.setState({ scrollTop: viewport.scrollTop });
 
         restoreScroll(viewport);
         viewport.addEventListener('wheel', onWheel, { passive: false });
         viewport.addEventListener('scroll', onScroll);
-        arrows.forEach((arrow) => arrow.addEventListener('pointerdown', onArrowDown));
+        arrows.forEach((arrow) => {
+            arrow.addEventListener('pointerdown', onArrowDown);
+            arrow.addEventListener('click', onArrowClick);
+        });
 
         return () => {
-            arrows.forEach((arrow) => arrow.removeEventListener('pointerdown', onArrowDown));
+            arrows.forEach((arrow) => {
+                arrow.removeEventListener('pointerdown', onArrowDown);
+                arrow.removeEventListener('click', onArrowClick);
+            });
             viewport.removeEventListener('wheel', onWheel);
             viewport.removeEventListener('scroll', onScroll);
         };
@@ -71,7 +82,7 @@ export const AchievementListView: FC<AchievementListViewProps> = (props) => {
                 </filter>
             </svg>
             {isScrollable ? (
-                <ClassicScrollAreaView className="air-achievements-scroll-area" scrollStep={0} viewportRef={setViewport}>
+                <ClassicScrollAreaView className="air-achievements-scroll-area" scrollStep={ARROW_STEP} viewportRef={setViewport}>
                     {grid}
                 </ClassicScrollAreaView>
             ) : (
