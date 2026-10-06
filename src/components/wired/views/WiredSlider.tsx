@@ -1,9 +1,11 @@
 import { CSSProperties, FC, PointerEvent as ReactPointerEvent, ReactNode, useRef } from 'react';
 import { LocalizeText, WiredSliderConverter, WIRED_SLIDER_ECHO } from '../../../api';
+import { Slider, SliderProps } from '../../../common';
 import sliderTrack from '../../../assets/images/wired/native/slider_track.png';
 import sliderThumb from '../../../assets/images/wired/native/slider_obj.png';
 import arrowLeft from '../../../assets/images/wired/native/arrow-left.png';
 import arrowRight from '../../../assets/images/wired/native/arrow-right.png';
+import { useWiredNative } from './WiredNativeContext';
 import { WiredNumberInput } from './WiredNumberInput';
 import { WiredSection, WiredSectionProps } from './WiredSection';
 import { WiredShellButton } from './WiredShellHeaderView';
@@ -118,4 +120,14 @@ export const WiredSliderSection: FC<WiredSliderSectionProps> = ({
             <WiredSlider max={max} min={min} step={step} value={value} onChange={onChange} />
         </WiredSection>
     );
+};
+
+/** Drop-in for the shared Slider: the native arrow slider in the Illumina frame, the shared one elsewhere. */
+export const WiredLegacySlider: FC<SliderProps> = (props) => {
+    const native = useWiredNative();
+    const { min = 0, max = 100, step = 1, value, disabled = false, onChange } = props;
+
+    if (!native || Array.isArray(value)) return <Slider {...props} />;
+
+    return <WiredSlider disabled={disabled} max={max} min={min} step={step} value={typeof value === 'number' ? value : 0} onChange={(next) => onChange?.(next, 0)} />;
 };

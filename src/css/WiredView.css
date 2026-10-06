@@ -1894,8 +1894,7 @@
     isolation: isolate;
 }
 
-.octane-wired__input-box::before,
-.octane-wired__input-box::after {
+.octane-wired__input-box::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -1904,13 +1903,10 @@
     image-rendering: pixelated;
 }
 
-.octane-wired__input-box::before {
-    border-image: url('../assets/images/wired/native/input_background.png') 8 5 4 5 fill / 8px 5px 4px 5px stretch;
-}
-
-/* The straight edges are single AIR pixel rows, so the bitmap keeps only those inside the 4px edge bands. */
-.octane-wired__input-box::after {
-    border-image: url('../assets/images/wired/native/input_border.png') 4 4 5 4 / 4px 4px 5px 4px stretch;
+/* The 21px Illumina input: background and border parts pre-composed at the template height. */
+.octane-wired__input-box::before,
+.octane-wired--native-layout .octane-wired__section--body :is(input[type='text'], input[type='number'], .form-control) {
+    background: url('../assets/images/wired/native/input_left.png') 0 0 no-repeat, url('../assets/images/wired/native/input_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/input_mid.png') 0 0 repeat-x;
 }
 
 .octane-wired__input-box.is-invalid::before {
@@ -2122,4 +2118,156 @@
     font-size: 11px !important;
     line-height: 16px;
     text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+}
+
+/* Views that still use the old free-form markup get the native section rhythm, option rows and text metrics. */
+.octane-wired.octane-wired--native-layout .octane-wired__section--body {
+    .octane-wired__native-section-inner > .flex.flex-col {
+        gap: 0;
+    }
+
+    .octane-wired__native-section-inner > .flex.flex-col > * + * {
+        margin-top: 5px;
+    }
+
+    .octane-wired__native-section-inner > .flex.flex-col > label.flex + label.flex {
+        margin-top: 0;
+    }
+
+    .octane-wired__native-section-inner > * + * {
+        position: relative;
+        padding-top: 7px;
+    }
+
+    .octane-wired__native-section-inner > * + *::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -5px;
+        right: -5px;
+        height: 2px;
+        background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
+    }
+
+    hr {
+        flex: none;
+        height: 2px;
+        margin: 0 -5px !important;
+        border: 0;
+        background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
+        box-shadow: none;
+        opacity: 1;
+    }
+
+    :is(.font-bold, .inline) {
+        display: block;
+        padding: 0 1px 0 2px;
+        font-size: 11px !important;
+        line-height: 16px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    }
+
+    .font-bold {
+        font-weight: 700 !important;
+        white-space: normal;
+    }
+
+    label.flex {
+        align-items: flex-start;
+        gap: 3px;
+        height: 20px;
+        margin: 0;
+    }
+
+    label.flex:last-child {
+        height: 16px;
+    }
+
+    label.flex:has(> input[type='checkbox']) {
+        height: 25px;
+    }
+
+    label.flex:has(> input[type='checkbox']):last-child {
+        height: 21px;
+    }
+
+    label.flex:has(> input[type='checkbox']) > .inline {
+        margin-top: 2px;
+    }
+}
+
+.octane-wired.octane-wired--native-layout input[type='radio'] {
+    flex: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 2px 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/radio.png') 0 0 / 11px 24px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout input[type='radio']:checked {
+    background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 19px;
+    height: 20px;
+    min-width: 19px;
+    margin: 0 0 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/checkbox.png') 0 -23px / 19px 43px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox']:checked {
+    background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox']::before,
+.octane-wired.octane-wired--native-layout input[type='checkbox']::after {
+    content: none;
+}
+
+/* Dropdowns: the Illumina dropmenu frame (22px) with its arrow/separator part on the right. */
+.octane-wired.octane-wired--native-layout :is(select, .form-select) {
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 22px;
+    min-height: 22px !important;
+    padding: 0 28px 0 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: url('../assets/images/wired/native/dropdown_left.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid.png') 0 0 repeat-x !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font-size: 11px !important;
+    line-height: 22px;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout :is(select, .form-select):hover {
+    background: url('../assets/images/wired/native/dropdown_left_hover.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right_hover.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid_hover.png') 0 0 repeat-x !important;
+}
+
+.octane-wired__source-row {
+    min-height: 23px;
+}
+
+.octane-wired__source-label {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    white-space: normal;
 }

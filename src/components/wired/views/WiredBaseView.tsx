@@ -15,6 +15,7 @@ import volterAtlas from '../../../assets/images/wired/volter_shell_atlas.png';
 import { OctaneCardContentView, OctaneCardView, Text } from '../../../common';
 import { useWired, useWiredTools } from '../../../hooks';
 import { WiredBannerCanvas } from './WiredBannerCanvas';
+import { WiredNativeContext } from './WiredNativeContext';
 import { WiredFurniSelectorSection, WiredFurniSelectorView } from './WiredFurniSelectorView';
 import { WiredSection, WiredSplitter } from './WiredSection';
 import { WiredShellButton, WiredShellHeaderView } from './WiredShellHeaderView';
@@ -261,6 +262,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
     );
 
     return (
+        <WiredNativeContext.Provider value={isNative}>
         <OctaneCardView
             className={`octane-wired octane-wired--official ${isNative ? 'octane-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'octane-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'octane-wired--volter-colour' : ''}`}
             theme="primary-slim"
@@ -321,5 +323,6 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                 </div>
             </OctaneCardContentView>
         </OctaneCardView>
+        </WiredNativeContext.Provider>
     );
 };
