@@ -1,13 +1,15 @@
 import { RoomObjectType } from '@octane/renderer';
 import { FC, useMemo } from 'react';
 import { ChatEntryType, IChatEntry, LocalizeText, ReportState, ReportType } from '../../../api';
-import { useChatHistory, useHelp, useNotification } from '../../../hooks';
+import { useChatHistory, useHelp } from '../../../hooks';
+import { useHelpAlert } from './HelpAlertView';
 import { HelpActionButton, HelpInputSkin } from './HelpIndexView';
+import { HELP_WHITE_COLOR, HelpText } from './HelpText';
 
 export const SelectReportedChatsView: FC = () => {
     const { activeReport, setActiveReport } = useHelp();
     const { chatHistory, messengerHistory } = useChatHistory();
-    const { simpleAlert } = useNotification();
+    const showAlert = useHelpAlert();
     const isIm = activeReport.reportType === ReportType.IM;
     const userChats = useMemo(
         () =>
@@ -33,7 +35,7 @@ export const SelectReportedChatsView: FC = () => {
     };
     const submitChats = () => {
         if (!activeReport.reportedChats.length) {
-            simpleAlert(LocalizeText('help.cfh.error.chatmissing'), null, null, null, LocalizeText('generic.alert.title'));
+            showAlert('help.cfh.error.chatmissing');
             return;
         }
         setActiveReport((previous) => ({ ...previous, cfhCategory: -1, currentStep: ReportState.SELECT_TOPICS }));
@@ -41,8 +43,12 @@ export const SelectReportedChatsView: FC = () => {
     return (
         <>
             <div className="help-report-panel help-chat-panel">
-                <h2 className="help-report-title">{LocalizeText('help.emergency.chat_report.subtitle')}</h2>
-                <p className="help-chat-description">{LocalizeText('help.emergency.chat_report.description')}</p>
+                <h2 className="help-report-title">
+                    <HelpText text={LocalizeText('help.emergency.chat_report.subtitle')} textStyle="u_headline_medium" maxWidth={287} />
+                </h2>
+                <p className="help-chat-description">
+                    <HelpText text={LocalizeText('help.emergency.chat_report.description')} maxWidth={380} />
+                </p>
                 <div className="help-chat-border help-input-skin">
                     <HelpInputSkin />
                     <div className="help-chat-list help-scroll">
@@ -54,7 +60,9 @@ export const SelectReportedChatsView: FC = () => {
                                     checked={activeReport.reportedChats.some((entry) => entry.id === chat.id)}
                                     onChange={() => selectChat(chat)}
                                 />
-                                <span className="help-chat-text">{chat.message}</span>
+                                <span className="help-chat-text">
+                                    <HelpText text={chat.message} background={HELP_WHITE_COLOR} maxWidth={336} />
+                                </span>
                             </label>
                         ))}
                     </div>

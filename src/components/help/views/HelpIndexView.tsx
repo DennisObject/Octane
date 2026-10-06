@@ -8,13 +8,15 @@ import {
     OpenUrl,
     ReportState,
     ReportType,
-    SanitizeHtml,
     SendMessageComposer
 } from '../../../api';
 import inputAtlas from '../../../assets/images/friends/swf/illumina_light_input_chat.png';
 import helpDuck from '../../../assets/images/help/help-duck.png';
 import linkIcon from '../../../assets/images/help/icons_link_icon.png';
-import { useChatHistory, useHelp, useNotification } from '../../../hooks';
+import { NativeTextStyleName } from '../../../common/native-text/NativeTextStyles';
+import { useChatHistory, useHelp } from '../../../hooks';
+import { useHelpAlert } from './HelpAlertView';
+import { HelpCenteredText, HelpText } from './HelpText';
 
 export const HELP_INDEX_STEP = -1;
 
@@ -36,15 +38,20 @@ export const createHelpReportDraft = (reportType: number, currentStep: number, o
     ...options
 });
 
-export const HelpActionButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'green' | 'red' | 'gray'; thick?: boolean }> = ({
+export const HelpActionButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'green' | 'red' | 'gray'; thick?: boolean; textStyle?: NativeTextStyleName; textSize?: number; textWidth?: number }> = ({
     tone = 'green',
     thick = false,
+    textStyle = 'u_headline_medium',
+    textSize,
+    textWidth = thick ? 365 : 169,
     className = '',
     children,
     ...props
 }) => (
     <button type="button" className={'help-action help-action--' + tone + (thick ? ' help-action--thick ' : ' ') + className} {...props}>
-        <span>{children}</span>
+        <span>
+            <HelpCenteredText width={textWidth} text={String(children)} textStyle={textStyle} size={textSize} onButton="light" />
+        </span>
     </button>
 );
 
@@ -79,13 +86,13 @@ export const HelpInputSkin: FC = () => (
 export const HelpIndexView: FC<{ onClose: () => void }> = ({ onClose }) => {
     const { setActiveReport } = useHelp();
     const { chatHistory } = useChatHistory();
-    const { simpleAlert } = useNotification();
+    const showAlert = useHelpAlert();
     const onReportClick = () => {
         const hasUsers = chatHistory.some(
             (entry) => entry.type === ChatEntryType.TYPE_CHAT && entry.entityType === RoomObjectType.USER && entry.webId !== GetSessionDataManager().userId
         );
         if (!hasUsers) {
-            simpleAlert(LocalizeText('help.cfh.error.nochathistory'), null, null, null, LocalizeText('generic.alert.title'));
+            showAlert('help.cfh.error.nochathistory');
             return;
         }
         setActiveReport((previous) =>
@@ -98,11 +105,15 @@ export const HelpIndexView: FC<{ onClose: () => void }> = ({ onClose }) => {
     };
     return (
         <div className="help-index">
-            <h1 className="help-index-title">{LocalizeText('help.main.frame.title')}</h1>
+            <h1 className="help-index-title">
+                <HelpText text={LocalizeText('help.main.frame.title')} textStyle="u_headline_big" size={24} maxWidth={382} />
+            </h1>
             <div className="help-index-duck">
                 <img src={helpDuck} alt="" draggable={false} />
             </div>
-            <div className="help-index-description" dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('help.main.frame.description')) }} />
+            <div className="help-index-description">
+                <HelpText text={LocalizeText('help.main.frame.description')} maxWidth={250} />
+            </div>
             <HelpActionButton thick className="help-index-report" onClick={onReportClick}>
                 {LocalizeText('help.main.bully.subtitle')}
             </HelpActionButton>
@@ -118,17 +129,17 @@ export const HelpIndexView: FC<{ onClose: () => void }> = ({ onClose }) => {
             </HelpActionButton>
             <img className="help-index-icon help-index-icon--faq" src={linkIcon} alt="" draggable={false} />
             <button type="button" className="help-index-link help-index-link--faq" onClick={() => OpenUrl(GetConfigurationValue<string>('cfh.faq.url', ''))}>
-                {LocalizeText('help.main.faq.link.text')}
+                <HelpText text={LocalizeText('help.main.faq.link.text')} textStyle="u_bold" size={14} underline maxWidth={354} />
             </button>
             <img className="help-index-icon help-index-icon--sanction" src={linkIcon} alt="" draggable={false} />
             <button type="button" className="help-index-link help-index-link--sanction" onClick={() => requestStatus(false)}>
-                {LocalizeText('help.main.my.sanction.status')}
+                <HelpText text={LocalizeText('help.main.my.sanction.status')} textStyle="u_bold" size={14} underline maxWidth={354} />
             </button>
             {GetConfigurationValue<boolean>('my.reports.status.enabled', false) && (
                 <>
                     <img className="help-index-icon help-index-icon--reports" src={linkIcon} alt="" draggable={false} />
                     <button type="button" className="help-index-link help-index-link--reports" onClick={() => requestStatus(true)}>
-                        {LocalizeText('help.main.my.reports.status')}
+                        <HelpText text={LocalizeText('help.main.my.reports.status')} textStyle="u_bold" size={14} underline maxWidth={354} />
                     </button>
                 </>
             )}

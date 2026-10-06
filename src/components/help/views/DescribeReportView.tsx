@@ -1,11 +1,13 @@
 import { FC } from 'react';
 import { GetConfigurationValue, LocalizeText, ReportState } from '../../../api';
-import { useHelp, useNotification } from '../../../hooks';
+import { useHelp } from '../../../hooks';
+import { useHelpAlert } from './HelpAlertView';
 import { HelpActionButton, HelpInputSkin } from './HelpIndexView';
+import { HELP_WHITE_COLOR, HelpText } from './HelpText';
 
 export const DescribeReportView: FC = () => {
     const { activeReport, setActiveReport } = useHelp();
-    const { simpleAlert } = useNotification();
+    const showAlert = useHelpAlert();
     const submitMessage = () => {
         const errorKey = !activeReport.message.length
             ? 'help.cfh.error.nomsg'
@@ -13,7 +15,7 @@ export const DescribeReportView: FC = () => {
               ? 'help.cfh.error.msgtooshort'
               : null;
         if (errorKey) {
-            simpleAlert(LocalizeText(errorKey), null, null, null, LocalizeText('generic.alert.title'));
+            showAlert(errorKey);
             return;
         }
         setActiveReport((previous) => ({ ...previous, currentStep: ReportState.REPORT_SUMMARY }));
@@ -21,13 +23,17 @@ export const DescribeReportView: FC = () => {
     return (
         <>
             <div className="help-report-panel help-message-panel">
-                <h2 className="help-report-title">{LocalizeText('help.emergency.main.step.one.title')}</h2>
-                <p className="help-message-description">{LocalizeText('help.emergency.main.step.one.description')}</p>
+                <h2 className="help-report-title">
+                    <HelpText text={LocalizeText('help.emergency.main.step.one.title')} textStyle="u_headline_medium" maxWidth={278} />
+                </h2>
+                <p className="help-message-description">
+                    <HelpText text={LocalizeText('help.emergency.main.step.one.description')} maxWidth={380} />
+                </p>
                 <div className="help-message-input help-input-skin">
                     <HelpInputSkin />
                     {!activeReport.message.length && (
                         <span className="help-message-placeholder" aria-hidden="true">
-                            {LocalizeText('help.emergency.main.step.one.entry.instruction')}
+                            <HelpText text={LocalizeText('help.emergency.main.step.one.entry.instruction')} size={11} color={0x888888} background={HELP_WHITE_COLOR} maxWidth={380} />
                         </span>
                     )}
                     <textarea
