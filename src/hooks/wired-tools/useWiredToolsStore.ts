@@ -28,6 +28,7 @@ import { useNotification } from '../notification';
 import { useRoom } from '../rooms';
 
 export interface IWiredAccountPreferences {
+    playTestMode: boolean;
     showInspectButton: boolean;
     showSystemNotifications: boolean;
     showToolbarButton: boolean;
@@ -127,6 +128,7 @@ const getCurrentUnixTime = () => Math.floor(Date.now() / 1000);
 const DEFAULT_ACCOUNT_PREFERENCES: IWiredAccountPreferences = {
     showToolbarButton: false,
     showInspectButton: false,
+    playTestMode: false,
     showSystemNotifications: false,
     wiredStyle: WIRED_STYLE_DEFAULT
 };

@@ -2271,3 +2271,452 @@
     text-align: center;
     white-space: normal;
 }
+
+/* wired_menu_view: absolute client coordinates of the 500x500 Wired Creator Tools window. */
+.octane-wired-menu.octane-card-shell.octane-card-frame-3 {
+    width: 500px;
+    min-width: 500px;
+    height: 500px;
+    min-height: 500px;
+    padding: 0 !important;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px;
+}
+
+.octane-wired-menu.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 4px !important;
+}
+
+.octane-wired-menu__client {
+    position: absolute;
+    left: 0;
+    top: 36px;
+    width: 500px;
+    height: 464px;
+    overflow: hidden;
+}
+
+.octane-wired-menu__tabs {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 500px;
+    height: 30px;
+}
+
+.octane-wired-menu__tab {
+    position: absolute;
+    top: 0;
+    width: 96px;
+    height: 30px;
+    padding: 5px 0 0;
+    overflow: hidden;
+    border: 0;
+    background: url('../assets/images/wired/native/menu_tab_default_left.png') left top / 9px 32px no-repeat, url('../assets/images/wired/native/menu_tab_default_right.png') right top / 9px 32px no-repeat,
+        url('../assets/images/wired/native/menu_tab_default_mid.png') 9px top / calc(100% - 18px) 32px no-repeat;
+    color: #000;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+    line-height: 17px;
+    text-align: center;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__tab:hover {
+    background-image: url('../assets/images/wired/native/menu_tab_hover_left.png'), url('../assets/images/wired/native/menu_tab_hover_right.png'), url('../assets/images/wired/native/menu_tab_hover_mid.png');
+}
+
+.octane-wired-menu__tab.is-active {
+    background-image: url('../assets/images/wired/native/menu_tab_selected_left.png'), url('../assets/images/wired/native/menu_tab_selected_right.png'), url('../assets/images/wired/native/menu_tab_selected_mid.png');
+}
+
+.octane-wired-menu__header {
+    position: absolute;
+    left: 1px;
+    top: 32px;
+    width: 498px;
+    height: 50px;
+    overflow: hidden;
+    background: #486f81;
+}
+
+.octane-wired-menu__header-inner {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 494px;
+    height: 46px;
+    background: #235061;
+}
+
+.octane-wired-menu__box-lines {
+    position: absolute;
+    width: 64px;
+    height: 51px;
+    opacity: 0.302;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-wired-menu__header-title {
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 500px;
+    height: 21px;
+    margin-left: -1px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 21px;
+    text-align: center;
+}
+
+.octane-wired-menu__discord {
+    position: absolute;
+    left: 472px;
+    top: 3px;
+    width: 22px;
+    height: 25px;
+}
+
+.octane-wired-menu__discord img {
+    position: absolute;
+    left: 0;
+    top: 1px;
+}
+
+.octane-wired-menu__body {
+    position: absolute;
+    left: 0;
+    top: 82px;
+    width: 500px;
+    height: 382px;
+    color: #000;
+}
+
+.octane-wired-menu__item {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.octane-wired-menu__panel {
+    background: #dadada;
+    /* Skin border style 3: corners cut two pixels on the long side and one on the short. */
+    clip-path: polygon(
+        2px 0,
+        calc(100% - 2px) 0,
+        calc(100% - 2px) 1px,
+        calc(100% - 1px) 1px,
+        calc(100% - 1px) 2px,
+        100% 2px,
+        100% calc(100% - 2px),
+        calc(100% - 1px) calc(100% - 2px),
+        calc(100% - 1px) calc(100% - 1px),
+        calc(100% - 2px) calc(100% - 1px),
+        calc(100% - 2px) 100%,
+        2px 100%,
+        2px calc(100% - 1px),
+        1px calc(100% - 1px),
+        1px calc(100% - 2px),
+        0 calc(100% - 2px),
+        0 2px,
+        1px 2px,
+        1px 1px,
+        2px 1px
+    );
+}
+
+.octane-wired-menu__text {
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.octane-wired-menu__text--bold {
+    font-weight: 700;
+}
+
+.octane-wired-menu__list {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.octane-wired-menu__stat {
+    height: 18px;
+    line-height: 16px;
+}
+
+.octane-wired-menu__monitor-image img {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.octane-wired-menu__option {
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+.octane-wired-menu__option .octane-wired-menu__text {
+    margin-left: 0;
+    line-height: 17px;
+}
+
+.octane-wired-menu__option input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 20px;
+    height: 15px;
+    margin: 0;
+    border: 0;
+    background: url('../assets/images/wired/native/menu_checkbox.png') 0 0 no-repeat;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__option input[type='checkbox']:checked {
+    background-image: url('../assets/images/wired/native/menu_checkbox_checked.png');
+}
+
+.octane-wired-menu__option.is-disabled {
+    opacity: 0.6;
+}
+
+.octane-wired-menu__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 5px solid transparent;
+    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch;
+    background: none;
+    color: #000;
+    font-size: 12px;
+    line-height: 16px;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__button:hover:enabled {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-wired-menu__button:active:enabled,
+.octane-wired-menu__button.is-selected {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-wired-menu__button:disabled {
+    border-image-source: var(--habbo-skin-shiny-disabled);
+    color: #8c8c88;
+}
+
+.octane-wired-menu__button.is-danger {
+    border-image-source: var(--habbo-skin-shiny-red);
+    color: #fff;
+}
+
+.octane-wired-menu__button.is-danger:hover:enabled {
+    border-image-source: var(--habbo-skin-shiny-red-hover);
+}
+
+.octane-wired-menu__button.is-danger:active:enabled {
+    border-image-source: var(--habbo-skin-shiny-red-pressed);
+}
+
+.octane-wired-menu__button.is-danger:disabled {
+    border-image-source: var(--habbo-skin-shiny-red-disabled);
+    color: #fff;
+}
+
+.octane-wired-menu__dropdown {
+    appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 0 22px 0 0;
+    line-height: 13px;
+    border: 6px solid transparent;
+    border-image: url('../assets/images/habbo-skin/slices/dropmenu-3.png') 6 fill / 6px stretch;
+        color: #000;
+    font-size: 12px;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__dropdown:disabled {
+    color: #8c8c88;
+}
+
+.octane-wired-menu__table {
+    border: 1px solid #b1b1ab;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__table-title {
+    display: flex;
+    height: 23px;
+    margin: 5px 5px 0;
+}
+
+.octane-wired-menu__table-splitter {
+    height: 1px;
+    margin: 0 5px;
+    background: #d2d2cd;
+}
+
+.octane-wired-menu__table-rows {
+    height: calc(100% - 30px);
+    margin: 0 5px 5px;
+    overflow-y: auto;
+}
+
+.octane-wired-menu__table-row {
+    display: flex;
+    height: 20px;
+}
+
+.octane-wired-menu__table-row.is-even {
+    background: #eaeaea;
+}
+
+.octane-wired-menu__cell {
+    flex: none;
+    height: 20px;
+    padding: 0 4px;
+    overflow: hidden;
+    line-height: 20px;
+    text-overflow: ellipsis;
+}
+
+.octane-wired-menu__table-empty {
+    padding-top: 60px;
+    color: #333;
+    text-align: center;
+}
+
+.octane-wired-menu__link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0000ee;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.octane-wired-menu__text--soft {
+    color: #8c8c88;
+}
+
+.octane-wired-menu__box {
+    border: 1px solid #b1b1ab;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__picker-list {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.octane-wired-menu__picker-row {
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: left;
+}
+
+.octane-wired-menu__picker-row.is-selected {
+    background: #cbe3f0;
+}
+
+.octane-wired-menu__empty {
+    padding-top: 100px;
+    color: #333;
+    text-align: center;
+}
+
+.octane-wired-menu__type-icon {
+    display: block;
+    margin: auto;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__preview-image {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-wired-menu__preview-instruction {
+    position: absolute;
+    top: 104px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.octane-wired-menu__trash-icon {
+    display: block;
+    margin: 0 auto;
+}
+
+.octane-wired-menu__table-row.is-selected {
+    background: #cbe3f0;
+}
+
+.octane-wired-menu__cell-input {
+    width: 100%;
+    height: 18px;
+    padding: 0 3px;
+    border: 1px solid #5e5e58;
+    background: #fff;
+    font-size: 12px;
+}
+
+.octane-wired-menu__bubble {
+    z-index: 5;
+    border: 1px solid #5e5e58;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__value-box input {
+    width: 100%;
+    height: 22px;
+    padding: 0 4px;
+    border: 1px solid #5e5e58;
+    background: #fff;
+    font-size: 12px;
+}
+
+.octane-wired-menu__dropdown-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.octane-wired-menu__dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    width: 22px;
+    height: 20px;
+    background: url('../assets/images/habbo-skin/slices/dropmenu-arrow.png') no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-wired-menu__discord img {
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.28));
+}

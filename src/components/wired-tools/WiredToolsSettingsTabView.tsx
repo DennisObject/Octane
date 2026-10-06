@@ -8,8 +8,8 @@ import {
     WIRED_STYLE_OPTIONS,
     wiredStyleTitle
 } from '../../api';
-import { Button, Text } from '../../common';
 import { useNotification, useRoom, useWiredTools } from '../../hooks';
+import { WiredMenuButton, WiredMenuCheckbox, WiredMenuItem, WiredMenuPanel, WiredMenuTitle } from './WiredMenuParts';
 
 const WIRED_ACCESS_EVERYONE = 1;
 const WIRED_ACCESS_USERS_WITH_RIGHTS = 2;
@@ -133,41 +133,63 @@ export const WiredToolsSettingsTabView: FC<WiredToolsSettingsTabViewProps> = ({ 
         );
     };
 
-    const renderAccessOption = (option: RoomAccessOption, mask: number, onToggle: (bit: number) => void) => {
-        const checked = (mask & option.bit) !== 0;
-        const disabled = !roomSettings.isLoaded || !canManageSettings;
+    const renderAccessOption = (option: RoomAccessOption, mask: number, onToggle: (bit: number) => void, y: number) => (
+        <WiredMenuCheckbox
+            key={option.label}
+            checked={(mask & option.bit) !== 0}
+            disabled={!roomSettings.isLoaded || !canManageSettings}
+            h={19}
+            label={option.label}
+            w={214}
+            x={0}
+            y={y}
+            onChange={() => onToggle(option.bit)}
+        />
+    );
 
-        return (
-            <label key={option.label} className={`flex items-center gap-2 text-[12px] ${disabled ? 'text-[#8c877d]' : 'text-[#222]'}`}>
-                <input checked={checked} className="form-check-input mt-0" disabled={disabled} type="checkbox" onChange={() => onToggle(option.bit)} />
-                <span>{option.label}</span>
-            </label>
+    const confirmReload = () =>
+        confirmRoomState(
+            'wiredmenu.settings.room_state.reload.warning',
+            'Reload the wired of this room? Every box is wired up again from the furniture as it stands now.',
+            reloadRoomWired
         );
-    };
+    const confirmRollback = () =>
+        confirmRoomState(
+            'wiredmenu.settings.room_state.rollback.warning',
+            'Roll back the wired of this room? Every box is re-read from storage and edits that were never saved are lost.',
+            rollbackRoomWired
+        );
 
     return (
-        <div className="p-3 min-h-[360px] flex flex-col gap-3">
-            <Text bold>Room settings:</Text>
-            <div className="grid grid-cols-2 gap-3">
-                <div className="rounded bg-[#dfddd7] p-3 flex flex-col gap-2">
-                    <Text bold small>
-                        Who can modify Wired:
-                    </Text>
-                    {modifyOptions.map((option) => renderAccessOption(option, roomSettings.modifyMask, updateModifyMask))}
-                </div>
-                <div className="rounded bg-[#dfddd7] p-3 flex flex-col gap-2">
-                    <Text bold small>
-                        Who can inspect Wired:
-                    </Text>
-                    {inspectOptions.map((option) => renderAccessOption(option, roomSettings.inspectMask, updateInspectMask))}
-                </div>
-                <div className="rounded bg-[#dfddd7] p-3 flex flex-col gap-2">
-                    <Text bold small>
-                        Timezone:
-                    </Text>
-                    <select
+        <>
+            <WiredMenuTitle h={19} w={208} x={14} y={18}>
+                Room settings:
+            </WiredMenuTitle>
+            <WiredMenuPanel h={111} w={227} x={14} y={38}>
+                <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                    Who can modify Wired:
+                </WiredMenuTitle>
+                <WiredMenuItem x={10} y={28}>
+                    {modifyOptions.map((option, index) => renderAccessOption(option, roomSettings.modifyMask, updateModifyMask, index * 19))}
+                </WiredMenuItem>
+            </WiredMenuPanel>
+            <WiredMenuPanel h={111} w={227} x={259} y={38}>
+                <WiredMenuTitle h={20} w={195} x={10} y={8}>
+                    Who can inspect Wired:
+                </WiredMenuTitle>
+                <WiredMenuItem x={10} y={28}>
+                    {inspectOptions.map((option, index) => renderAccessOption(option, roomSettings.inspectMask, updateInspectMask, index * 19))}
+                </WiredMenuItem>
+            </WiredMenuPanel>
+            <WiredMenuPanel h={64} w={227} x={14} y={161}>
+                <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                    Timezone:
+                </WiredMenuTitle>
+                <WiredMenuItem h={25} w={206} x={10} y={29}>
+                    <div className="octane-wired-menu__dropdown-wrap">
+<select
                         aria-label="Timezone"
-                        className="w-full rounded border border-[#9d998e] bg-[#f4f0e8] px-2 py-[6px] text-[12px] text-[#555] disabled:opacity-70"
+                        className="octane-wired-menu__dropdown"
                         disabled={!roomSettings.isLoaded || !canManageSettings}
                         value={selectedTimeZone}
                         onChange={(event) => saveRoomTimezone(event.target.value)}
@@ -178,107 +200,68 @@ export const WiredToolsSettingsTabView: FC<WiredToolsSettingsTabViewProps> = ({ 
                             </option>
                         ))}
                     </select>
-                </div>
-                <div className="rounded bg-[#dfddd7] p-3 flex flex-col gap-2">
-                    <Text bold small>
-                        Room state:
-                    </Text>
-                    <div className="flex gap-2">
-                        <Button
-                            classNames={['flex-1']}
-                            disabled={!canChangeRoomState}
-                            variant="secondary"
-                            onClick={() =>
-                                confirmRoomState(
-                                    'wiredmenu.settings.room_state.reload.warning',
-                                    'Reload the wired of this room? Every box is wired up again from the furniture as it stands now.',
-                                    reloadRoomWired
-                                )
-                            }
+</div>
+                </WiredMenuItem>
+            </WiredMenuPanel>
+            <WiredMenuPanel h={64} w={227} x={259} y={161}>
+                <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                    Room state:
+                </WiredMenuTitle>
+                <WiredMenuButton disabled={!canChangeRoomState} h={28} w={98} x={10} y={29} onClick={confirmReload}>
+                    Reload
+                </WiredMenuButton>
+                <WiredMenuButton danger={true} disabled={!canChangeRoomState} h={28} w={98} x={119} y={29} onClick={confirmRollback}>
+                    Rollback
+                </WiredMenuButton>
+            </WiredMenuPanel>
+            <WiredMenuTitle h={19} w={208} x={14} y={237}>
+                Account preferences:
+            </WiredMenuTitle>
+            <WiredMenuPanel h={111} w={227} x={14} y={257}>
+                <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                    General:
+                </WiredMenuTitle>
+                <WiredMenuItem x={10} y={28}>
+                    <WiredMenuCheckbox checked={accountPreferences.showToolbarButton} h={19} label="Show wired menu in toolbar" w={214} x={0} y={0} onChange={(showToolbarButton) => updateAccountPreferences({ showToolbarButton })} />
+                    <WiredMenuCheckbox checked={accountPreferences.showInspectButton} h={19} label="Furni/user inspect button" w={214} x={0} y={19} onChange={(showInspectButton) => updateAccountPreferences({ showInspectButton })} />
+                    <WiredMenuCheckbox checked={accountPreferences.playTestMode} h={19} label="Enable playtesting mode" w={214} x={0} y={38} onChange={(playTestMode) => updateAccountPreferences({ playTestMode })} />
+                    <WiredMenuCheckbox checked={accountPreferences.showSystemNotifications} h={19} label="Show all system notifications" w={214} x={0} y={57} onChange={(showSystemNotifications) => updateAccountPreferences({ showSystemNotifications })} />
+                </WiredMenuItem>
+            </WiredMenuPanel>
+            {GetConfigurationValue<boolean>('wired.ui_picker_enabled', false) && (
+                <WiredMenuPanel h={64} w={227} x={259} y={257}>
+                    <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                        {localizeWithFallback('wiredmenu.settings.preferences.wired_style', 'Wired style:')}
+                    </WiredMenuTitle>
+                    <WiredMenuItem h={25} w={206} x={10} y={29}>
+                        <div className="octane-wired-menu__dropdown-wrap">
+<select
+                            className="octane-wired-menu__dropdown"
+                            value={normalizeWiredStyle(accountPreferences.wiredStyle)}
+                            onChange={(event) => updateAccountPreferences({ wiredStyle: normalizeWiredStyle(event.target.value) })}
                         >
-                            Reload
-                        </Button>
-                        <Button
-                            classNames={['flex-1']}
-                            disabled={!canChangeRoomState}
-                            variant="danger"
-                            onClick={() =>
-                                confirmRoomState(
-                                    'wiredmenu.settings.room_state.rollback.warning',
-                                    'Roll back the wired of this room? Every box is re-read from storage and edits that were never saved are lost.',
-                                    rollbackRoomWired
-                                )
-                            }
-                        >
-                            Rollback
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            <div className="flex flex-col gap-2">
-                <Text bold>Account preferences:</Text>
-                <div className="rounded bg-[#dfddd7] p-3 flex flex-col gap-2">
-                    <Text bold small>
-                        General:
-                    </Text>
-                    <label className="flex items-center gap-2 text-[12px] text-[#222]">
-                        <input
-                            checked={accountPreferences.showToolbarButton}
-                            className="form-check-input mt-0"
-                            type="checkbox"
-                            onChange={(event) => updateAccountPreferences({ showToolbarButton: event.target.checked })}
-                        />
-                        <span>Show wired menu in toolbar</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-[12px] text-[#222]">
-                        <input
-                            checked={accountPreferences.showInspectButton}
-                            className="form-check-input mt-0"
-                            type="checkbox"
-                            onChange={(event) => updateAccountPreferences({ showInspectButton: event.target.checked })}
-                        />
-                        <span>Furni/user inspect button</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-[12px] text-[#222]">
-                        <input
-                            checked={accountPreferences.showSystemNotifications}
-                            className="form-check-input mt-0"
-                            type="checkbox"
-                            onChange={(event) => updateAccountPreferences({ showSystemNotifications: event.target.checked })}
-                        />
-                        <span>Show all system notifications</span>
-                    </label>
-                    {GetConfigurationValue<boolean>('wired.ui_picker_enabled', false) && (
-                        <label className="flex items-center gap-2 text-[12px] text-[#222]">
-                            <span>{localizeWithFallback('wiredmenu.settings.preferences.wired_style', 'Wired style:')}</span>
-                            <select
-                                className="form-select form-select-sm"
-                                value={normalizeWiredStyle(accountPreferences.wiredStyle)}
-                                onChange={(event) => updateAccountPreferences({ wiredStyle: normalizeWiredStyle(event.target.value) })}
-                            >
-                                {WIRED_STYLE_OPTIONS.map((style) => (
-                                    <option key={style} value={style}>
-                                        {style === WIRED_STYLE_DEFAULT
-                                            ? localizeWithFallback('wiredmenu.settings.preferences.wired_style.default', 'Default (Default)', ['name'], ['Default'])
-                                            : wiredStyleTitle(style)}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    )}
-                </div>
-            </div>
-            {showSelfDonation && (
-                <div className="flex flex-col gap-2">
-                    <Text bold>{localizeWithFallback('selfdonation.section', 'Sandbox tools:')}</Text>
-                    <div className="rounded bg-[#dfddd7] p-3 flex items-center justify-between gap-3">
-                        <Text small>{localizeWithFallback('selfdonation.info', 'Give yourself furni to test wired with. Only staff with the sandbox permission can use it.')}</Text>
-                        <Button variant="secondary" onClick={onOpenSelfDonation}>
-                            {localizeWithFallback('selfdonation.title', 'Sandbox donation tool')}
-                        </Button>
-                    </div>
-                </div>
+                            {WIRED_STYLE_OPTIONS.map((style) => (
+                                <option key={style} value={style}>
+                                    {style === WIRED_STYLE_DEFAULT
+                                        ? localizeWithFallback('wiredmenu.settings.preferences.wired_style.default', 'Default (Default)', ['name'], ['Default'])
+                                        : wiredStyleTitle(style)}
+                                </option>
+                            ))}
+                        </select>
+</div>
+                    </WiredMenuItem>
+                </WiredMenuPanel>
             )}
-        </div>
+            {showSelfDonation && (
+                <WiredMenuPanel h={64} w={227} x={259} y={337}>
+                    <WiredMenuTitle h={20} w={205} x={10} y={8}>
+                        {localizeWithFallback('selfdonation.section', 'Sandbox tools:')}
+                    </WiredMenuTitle>
+                    <WiredMenuButton h={28} w={206} x={10} y={29} onClick={onOpenSelfDonation}>
+                        {localizeWithFallback('selfdonation.title', 'Sandbox donation tool')}
+                    </WiredMenuButton>
+                </WiredMenuPanel>
+            )}
+        </>
     );
 };

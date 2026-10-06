@@ -1,6 +1,7 @@
 import { FC, useLayoutEffect, useRef } from 'react';
 import wiredBgLeft from '../../../assets/images/wired/wired_bg_left.png';
 import wiredBgRight from '../../../assets/images/wired/wired_bg_right.png';
+import frameSkin from '../../../assets/images/friends/swf/illumina_light_border_frame.png';
 
 const FRAME_COLOR = 0xe2;
 // ColorTransform alpha of the three layers (blend 0.1, 0.1 and 0.12 of the wired_banner container).
@@ -29,8 +30,11 @@ const readPixels = (image: HTMLImageElement) => {
     return context.getImageData(0, 0, image.width, image.height);
 };
 
-let artwork: Promise<[ImageData, ImageData]> | null = null;
-const loadArtwork = () => (artwork ??= Promise.all([loadImage(wiredBgLeft), loadImage(wiredBgRight)]).then(([left, right]) => [readPixels(left), readPixels(right)]));
+let artwork: Promise<[ImageData, ImageData, ImageData]> | null = null;
+const loadArtwork = () =>
+    (artwork ??= Promise.all([loadImage(wiredBgLeft), loadImage(wiredBgRight), loadImage(frameSkin)]).then(([left, right, skin]) => [readPixels(left), readPixels(right), readPixels(skin)]));
+
+const SKIN_CORNER = 4;
 
 /** Composites the illumina wired banner with the integer maths of the AIR bitmap pipeline, so every pixel matches. */
 export const WiredBannerCanvas: FC = () => {
@@ -42,7 +46,7 @@ export const WiredBannerCanvas: FC = () => {
 
         let cancelled = false;
         const draw = async () => {
-            const [left, right] = await loadArtwork();
+            const [left, right, skin] = await loadArtwork();
             if (cancelled) return;
 
             const width = canvas.clientWidth;
@@ -77,6 +81,18 @@ export const WiredBannerCanvas: FC = () => {
             }
             for (let index = 3; index < width * SKIN_HIGHLIGHT_ROWS * 4; index += 4) data[index] = 255;
             blend(right, width - right.width, RIGHT_OFFSET_Y, RIGHT_ALPHA);
+
+            // The frame skin's rounded corners are painted above the banner (the canvas starts at frame pixel 1,1).
+            const frameWidth = width + 2;
+            for (let y = 0; y < SKIN_CORNER - 1; y++) {
+                for (let x = 0; x < width; x++) {
+                    const frameX = x + 1;
+                    const tileX = frameX < SKIN_CORNER ? frameX : frameX >= frameWidth - SKIN_CORNER ? skin.width - SKIN_CORNER + (frameX - (frameWidth - SKIN_CORNER)) : -1;
+                    if (tileX < 0) continue;
+
+                    if (skin.data[((y + 1) * skin.width + tileX) * 4 + 3] > 0) data[(y * width + x) * 4 + 3] = 0;
+                }
+            }
 
             context.putImageData(output, 0, 0);
         };

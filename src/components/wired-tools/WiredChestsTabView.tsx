@@ -18,6 +18,7 @@ import { FC, Fragment, JSX, useCallback, useEffect, useMemo, useRef, useState } 
 import { localizeWithFallback, ProductImageUtility, SendMessageComposer } from '../../api';
 import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
 import { useMessageEvent, useNotification, useRoom } from '../../hooks';
+import { WiredMenuButton, WiredMenuItem, WiredMenuPanel, WiredMenuTable, WiredMenuText } from './WiredMenuParts';
 
 /** Rows per request. The preview and the detail window share one page size, so one response shape
  * serves both and there is never a question of which request a page belongs to. */
@@ -194,47 +195,6 @@ export const WiredChestsTabView: FC<{}> = () => {
             ? localizeWithFallback('wiredchests.logs.source.wired', 'Wired')
             : localizeWithFallback('wiredchests.logs.source.user', 'Player');
 
-    const renderPreviewBody = () => {
-        if (!loaded) return null;
-
-        if (!previewRows.length) {
-            return (
-                <div className="p-3 text-[12px] text-[#6b6659]">
-                    {localizeWithFallback('wiredmenu.chests.room_logs.empty', 'No transactions yet.')}
-                </div>
-            );
-        }
-
-        return (
-            <table className="w-full text-[12px]">
-                <thead className="bg-[#efede5] sticky top-0">
-                    <tr>
-                        <th className="text-left px-2 py-1">{localizeWithFallback('wiredmenu.chests.room_logs.column.type', 'Type')}</th>
-                        <th className="text-left px-2 py-1">
-                            {localizeWithFallback('wiredmenu.chests.room_logs.column.username', 'Username')}
-                        </th>
-                        <th className="text-right px-2 py-1">
-                            {localizeWithFallback('wiredmenu.chests.room_logs.column.withdraws', 'Withdrawals')}
-                        </th>
-                        <th className="text-right px-2 py-1">
-                            {localizeWithFallback('wiredmenu.chests.room_logs.column.deposits', 'Deposits')}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {previewRows.map((row) => (
-                        <tr key={row.transactionId} className="border-t border-[#e4e0d5]">
-                            <td className="px-2 py-1">{typeLabel(row)}</td>
-                            <td className="px-2 py-1">{row.userName || sourceLabel(row)}</td>
-                            <td className="px-2 py-1 text-right tabular-nums">{row.withdrawn || '-'}</td>
-                            <td className="px-2 py-1 text-right tabular-nums">{row.deposited || '-'}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        );
-    };
-
     const renderDetailItems = (transactionId: number, hasDetails: boolean) => {
         const detail = details[transactionId];
 
@@ -266,75 +226,57 @@ export const WiredChestsTabView: FC<{}> = () => {
 
     return (
         <>
-            <div className="p-3 flex flex-col gap-3">
-                <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
-                    <div className="flex items-center justify-between gap-2">
-                        <Text bold>{localizeWithFallback('wiredmenu.chests.room_logs.title', 'Room transaction log')}</Text>
-                        <select
-                            className="rounded border border-[#7f7f7f] bg-[#ece9e1] px-2 py-[2px] text-[11px] text-[#333]"
-                            value={filter}
-                            onChange={(event) => setFilter(parseInt(event.target.value, 10))}
-                        >
-                            {FILTERS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {localizeWithFallback(option.key, option.fallback)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    {!!onlyChestId && (
-                        <div className="flex items-center justify-between gap-2 rounded border border-[#c08a5a] bg-[#f7e6cf] px-2 py-1">
-                            <span className="text-[11px] text-[#7a4a1c]">
-                                {localizeWithFallback(
-                                    'wiredmenu.chests.room_logs.filtered_to_chest',
-                                    'Showing chest %id% only',
-                                    ['id'],
-                                    [String(onlyChestId)],
-                                )}
-                            </span>
-                            <Button variant="secondary" onClick={() => setOnlyChestId(0)}>
-                                {localizeWithFallback('wiredmenu.chests.room_logs.show_all_chests', 'All chests')}
-                            </Button>
-                        </div>
-                    )}
-                    <div className="max-h-[180px] overflow-y-auto border border-[#d1ccbf] rounded">{renderPreviewBody()}</div>
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-[#6b6659] tabular-nums">
-                            {localizeWithFallback('wiredmenu.chests.room_logs.total', '%count% transactions', ['count'], [String(totalRows)])}
-                        </span>
-                        <Button disabled={!totalRows} variant="secondary" onClick={() => setDetailsOpen(true)}>
-                            {localizeWithFallback('wiredmenu.chests.room_logs.view_in_detail', 'View in detail')}
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
-                    <Text bold>{localizeWithFallback('wiredmenu.chests.chest_control.title', 'Chest control')}</Text>
-                    <div className="text-[11px] text-[#6b6659]">
-                        {localizeWithFallback(
-                            'wiredmenu.chests.chest_control.hint',
-                            'A locked chest still answers wired - only what people do by hand is blocked, in both directions.',
-                        )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Button disabled={!canManageOwn || lockBusy} variant="secondary" onClick={() => sendLock(true, false)}>
-                            {localizeWithFallback('wiredmenu.chests.chest_control.lock_own', 'Lock my chests')}
-                        </Button>
-                        <Button disabled={!canManageOwn || lockBusy} variant="secondary" onClick={() => sendLock(false, false)}>
-                            {localizeWithFallback('wiredmenu.chests.chest_control.unlock_own', 'Unlock my chests')}
-                        </Button>
-                        <Button disabled={!canManageAll || lockBusy} variant="danger" onClick={lockEveryChest}>
-                            {localizeWithFallback('wiredmenu.chests.chest_control.lock_all', 'Lock every chest')}
-                        </Button>
-                    </div>
-                    {!canManageAll && (
-                        <div className="text-[11px] text-[#8c877d]">
-                            {localizeWithFallback('wiredmenu.chests.chest_control.owner_only', 'Only the room owner can lock every chest.')}
-                        </div>
-                    )}
-                    {!!lockResult && <div className="text-[11px] text-[#2f6b2f]">{lockResult}</div>}
-                </div>
-            </div>
+            <WiredMenuItem h={17} w={84} x={14} y={18}>
+                <span className="octane-wired-menu__text octane-wired-menu__text--bold">Chest control:</span>
+            </WiredMenuItem>
+            <WiredMenuPanel h={90} w={472} x={14} y={38}>
+                <WiredMenuButton disabled={!canManageOwn || lockBusy} h={30} w={221} x={10} y={10} onClick={() => sendLock(true, false)}>
+                    Lock all your chests
+                </WiredMenuButton>
+                <WiredMenuButton disabled={!canManageOwn || lockBusy} h={30} w={221} x={241} y={10} onClick={() => sendLock(false, false)}>
+                    Unlock all your chests
+                </WiredMenuButton>
+                <WiredMenuButton disabled={!canManageAll || lockBusy} h={30} w={221} x={10} y={50} onClick={lockEveryChest}>
+                    Lock all chests
+                </WiredMenuButton>
+                {!!lockResult && (
+                    <WiredMenuText h={19} w={221} x={241} y={55}>
+                        {lockResult}
+                    </WiredMenuText>
+                )}
+            </WiredMenuPanel>
+            <WiredMenuItem h={17} w={136} x={14} y={139}>
+                <span className="octane-wired-menu__text octane-wired-menu__text--bold">Room Transaction Logs:</span>
+            </WiredMenuItem>
+            <WiredMenuItem h={17} w={197} x={286} y={139}>
+                {onlyChestId ? (
+                    <button className="octane-wired-menu__link octane-wired-menu__text" type="button" onClick={() => setOnlyChestId(0)}>
+                        {localizeWithFallback('wiredmenu.chests.room_logs.show_all_chests', 'All chests')}
+                    </button>
+                ) : (
+                    <span className="octane-wired-menu__text octane-wired-menu__text--soft">PREVIEW - showing 10 most recent</span>
+                )}
+            </WiredMenuItem>
+            <WiredMenuTable
+                columns={[
+                    { key: 'type', title: 'Type', factor: 0.28 },
+                    { key: 'username', title: 'Username', factor: 0.24 },
+                    { key: 'withdraws', title: 'Withdrawals', factor: 0.24 },
+                    { key: 'deposits', title: 'Deposits', factor: 0.24 }
+                ]}
+                emptyText={loaded ? 'Nothing to display' : ''}
+                h={168}
+                rows={previewRows.map((row) => ({
+                    key: String(row.transactionId),
+                    cells: { type: typeLabel(row), username: row.userName || sourceLabel(row), withdraws: row.withdrawn || '-', deposits: row.deposited || '-' }
+                }))}
+                w={472}
+                x={14}
+                y={159}
+            />
+            <WiredMenuButton disabled={!totalRows} h={30} w={114} x={14} y={336} onClick={() => setDetailsOpen(true)}>
+                View detailed list
+            </WiredMenuButton>
 
             {detailsOpen && (
                 <WiredChestTransactionsWindow
