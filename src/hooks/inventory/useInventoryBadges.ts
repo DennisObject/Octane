@@ -113,14 +113,12 @@ const useInventoryBadgesState = () => {
     });
 
     useEffect(() => {
-        if (!badgeCodes || !badgeCodes.length) return;
-
         setSelectedBadgeCode((prevValue) => {
             let newValue = prevValue;
 
             if (newValue && badgeCodes.indexOf(newValue) === -1) newValue = null;
 
-            if (!newValue) newValue = badgeCodes[0];
+            if (!newValue) newValue = badgeCodes[0] ?? null;
 
             return newValue;
         });
