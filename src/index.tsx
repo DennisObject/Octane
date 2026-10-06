@@ -68,6 +68,8 @@ import './css/achievements/AchievementsView.css';
 import './css/notification/NotificationCenterView.css';
 import './css/notification/HotelAlertToast.css';
 
+import './css/octanepedia/OctanepediaView.css';
+
 import './css/purse/PurseView.css';
 import './css/radio/RadioView.css';
 

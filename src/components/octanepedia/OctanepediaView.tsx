@@ -1,54 +1,60 @@
 import { AddLinkEventTracker, ILinkEventTracker, OctaneLogger, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect, useRef, useState } from 'react';
-import { GetConfigurationValue, OpenUrl } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import DOMPurify from 'dompurify';
+import { FC, MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { CreateLinkEvent, GetConfigurationValue, OpenUrl } from '../../api';
+import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
 
 const NEW_LINE_REGEX = /\n\r|\n|\r/gm;
+const INTERNAL_LINK_PREFIX = '#habbopages/';
 
-export const OctanepediaView: FC<{}> = (props) => {
-    const [content, setContent] = useState<string>(null);
-    const [header, setHeader] = useState<string>('');
-    const [dimensions, setDimensions] = useState<{ width: number; height: number }>(null);
-    const elementRef = useRef<HTMLDivElement>(null);
+interface PageContent {
+    dimensions: { width: number; height: number } | null;
+    header: string;
+    markup: string;
+}
+
+const sanitizePageMarkup = (markup: string) =>
+    DOMPurify.sanitize(markup.replaceAll('event:habbopages/', INTERNAL_LINK_PREFIX), {
+        ALLOWED_TAGS: ['a', 'b', 'br', 'div', 'em', 'font', 'h1', 'h2', 'h3', 'i', 'img', 'p', 'span', 'strong', 'u'],
+        ALLOWED_ATTR: ['align', 'alt', 'class', 'height', 'href', 'hspace', 'rel', 'size', 'src', 'style', 'target', 'vspace', 'width'],
+        ALLOW_DATA_ATTR: false
+    });
+
+export const OctanepediaView: FC<{}> = () => {
+    const [page, setPage] = useState<PageContent>(null);
+
+    const openPage = useCallback(async (path: string) => {
+        const url = GetConfigurationValue<string>('habbopages.url') + path;
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) throw new Error(response.statusText);
+
+            const splitData = (await response.text()).split(NEW_LINE_REGEX);
+            const line = (splitData.shift() ?? '').split('|');
+            let dimensions: PageContent['dimensions'] = null;
+
+            if (line[1] && line[1].split(';').length === 2) {
+                const [width, height] = line[1].split(';').map((value) => parseInt(value, 10));
+
+                if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) dimensions = { width, height };
+            }
+
+            setPage({ dimensions, header: line[0], markup: splitData.join('\n') });
+        } catch (error) {
+            OctaneLogger.error(`Failed to fetch ${url}`);
+        }
+    }, []);
 
     useEffect(() => {
-        const openPage = async (link: string) => {
-            try {
-                const response = await fetch(link);
-
-                if (!response) return;
-
-                const text = await response.text();
-                const splitData = text.split(NEW_LINE_REGEX);
-                const line = splitData.shift().split('|');
-
-                setHeader(line[0]);
-
-                setDimensions((prevValue) => {
-                    if (line[1] && line[1].split(';').length === 2) {
-                        const [width, height] = line[1].split(';').map((value) => parseInt(value, 10));
-
-                        if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) return { width, height };
-                    }
-
-                    return null;
-                });
-
-                setContent(splitData.join(''));
-            } catch (error) {
-                OctaneLogger.error(`Failed to fetch ${link}`);
-            }
-        };
-
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
-                const value = url.split('/');
+                const path = url.slice('habbopages/'.length);
 
-                if (value.length < 2) return;
+                if (!path) return;
 
-                value.shift();
-
-                openPage(GetConfigurationValue<string>('habbopages.url') + value.join('/'));
+                openPage(path);
             },
             eventUrlPrefix: 'habbopages/'
         };
@@ -56,44 +62,38 @@ export const OctanepediaView: FC<{}> = (props) => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+    }, [openPage]);
 
-    useEffect(() => {
-        const handle = (event: MouseEvent) => {
-            if (!(event.target instanceof HTMLAnchorElement)) return;
+    const markup = useMemo(() => (page ? sanitizePageMarkup(page.markup) : ''), [page]);
 
-            // Only the links inside this window: the listener sits on the document, so without
-            // this check it opened every link in the client (the profile's unblock link, chat
-            // links...) in a new browser page, even with Octanepedia closed.
-            if (!elementRef.current?.contains(event.target)) return;
+    const handleContentClick = (event: MouseEvent<HTMLDivElement>) => {
+        const link = (event.target as HTMLElement).closest('a');
 
-            event.preventDefault();
+        if (!link || !event.currentTarget.contains(link)) return;
 
-            const link = event.target.href;
+        event.preventDefault();
 
-            if (!link || !link.length) return;
+        const href = link.getAttribute('href') ?? '';
 
-            OpenUrl(link);
-        };
+        if (href.startsWith(INTERNAL_LINK_PREFIX)) CreateLinkEvent(href.slice(1));
+        else if (href) OpenUrl(link.href);
+    };
 
-        document.addEventListener('click', handle);
-
-        return () => {
-            document.removeEventListener('click', handle);
-        };
-    }, []);
-
-    if (!content) return null;
+    if (!page) return null;
 
     return (
         <OctaneCardView
-            className="octanepedia w-[450px] h-[400px] max-w-[90vw] max-h-[85vh]"
-            style={dimensions ? { width: dimensions.width, height: dimensions.height } : {}}
-            theme="primary-slim">
-            <OctaneCardHeaderView headerText={header} onCloseClick={() => setContent(null)} />
-            <OctaneCardContentView>
-                <div ref={elementRef} className="text-black size-full" dangerouslySetInnerHTML={{ __html: content }} />
-            </OctaneCardContentView>
+            className="octanepedia"
+            frameStyle={3}
+            initialPosition={{ x: 23, y: 41 }}
+            isResizable={false}
+            style={page.dimensions ? { width: page.dimensions.width, height: page.dimensions.height } : undefined}
+            uniqueKey="octanepedia"
+            unconstrainedPosition>
+            <OctaneCardHeaderView headerText={page.header} onCloseClick={() => setPage(null)} />
+            <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" scrollStep={42}>
+                <div dangerouslySetInnerHTML={{ __html: markup }} onClick={handleContentClick} />
+            </ClassicScrollAreaView>
         </OctaneCardView>
     );
 };
