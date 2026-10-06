@@ -348,7 +348,7 @@ const useNotificationStore = () => {
 
         const notification = new AchievementNotificationBubbleItem(
             parser.data,
-            localizeWithFallback('notification.new.achievement', `Achievement unlocked: ${badgeName}`, ['achievement_name'], [badgeName]),
+            localizeWithFallback('notification.new.achievement', `You advanced to ${badgeName}!`, ['achievement_name'], [badgeName]),
             badgeImage
         );
 
