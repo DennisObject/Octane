@@ -14,7 +14,7 @@ export const NotificationBadgeReceivedBubbleView: FC<NotificationBadgeReceivedBu
         ? item.message
         : item.senderName
           ? LocalizeText('notifications.text.received.badge', ['user_name'], [item.senderName])
-          : localizeWithFallback('notification.new.badge', `You received the badge ${item.message}`, ['badge_name'], [item.message]);
+          : localizeWithFallback('notification.new.badge', `You got a new badge: ${item.message}!`, ['badge_name'], [item.message]);
 
     return (
         <NativeNotificationBubbleView
