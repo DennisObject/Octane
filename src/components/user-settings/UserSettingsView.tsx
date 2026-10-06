@@ -45,6 +45,7 @@ export const UserSettingsView: FC<{}> = () => {
     const [open, setOpen] = useState<Record<SettingsSection, boolean>>(CLOSED);
     const [userSettings, setUserSettings] = useState<OctaneSettingsEvent>(null);
     const [onlineIndicatorPreference, setOnlineIndicatorPreference] = useState<number>(null);
+    const [disableWiredWhisper, setDisableWiredWhisper] = useState(false);
     const { chatPreferences, updateChatPreferences } = useChatPreferences();
     const wasAudioOpenRef = useRef(false);
 
@@ -304,6 +305,10 @@ export const UserSettingsView: FC<{}> = () => {
                                 <span>{localizeWithFallback('memenu.settings.other.disable.room.camera.follow', "Don't focus on own avatar")}</span>
                             </label>
                         )}
+                        <label className="us-check-row">
+                            <input checked={disableWiredWhisper} className="us-check" type="checkbox" onChange={(event) => setDisableWiredWhisper(event.target.checked)} />
+                            <span>{localizeWithFallback('memenu.settings.wired_whisper_read_disable', 'Disable whispering to Wired')}</span>
+                        </label>
                         <div className="us-text us-label">
                             {localizeWithFallback('memenu.settings.other.friend.online.notification.title', 'Show "friend online" notification for:')}
                         </div>
