@@ -1,4 +1,4 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
@@ -32,7 +32,8 @@ const SHELL_TRANSITION = { type: 'spring' as const, stiffness: 260, damping: 26 
 const NAV_TRANSITION = { type: 'spring' as const, stiffness: 300, damping: 28 };
 const ME_POPOVER_TRANSITION = { type: 'spring' as const, stiffness: 420, damping: 28 };
 const LEFT_COLLAPSED_STORAGE_KEY = 'nitro.toolbar.leftCollapsed';
-const RIGHT_COLLAPSED_STORAGE_KEY = 'nitro.toolbar.rightCollapsed';
+// UI flag 1 (SessionDataManager.setFriendBarState): set while the friend bar is expanded.
+const FRIEND_BAR_UI_FLAG = 1;
 
 
 const readCollapsedPreference = (key: string): boolean =>
@@ -56,7 +57,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ isProgressionExpanded, setProgressionExpanded ] = useState(false);
     const [ isTouchLayout, setIsTouchLayout ] = useState(false);
     const [ leftCollapsed, setLeftCollapsed ] = useState(() => readCollapsedPreference(LEFT_COLLAPSED_STORAGE_KEY));
-    const [ rightCollapsed, setRightCollapsed ] = useState(() => readCollapsedPreference(RIGHT_COLLAPSED_STORAGE_KEY));
+    const [ rightCollapsed, setRightCollapsed ] = useState(() => !((GetSessionDataManager()?.uiFlags ?? 0) & FRIEND_BAR_UI_FLAG));
     const [ dockLayout, setDockLayout ] = useState<BottomDockLayout>({ chatRaised: false, chatBottom: 7 });
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
@@ -169,16 +170,13 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         }
     }, [ leftCollapsed ]);
 
-    useEffect(() =>
+    useOctaneEvent<SessionDataPreferencesEvent>(SessionDataPreferencesEvent.UPDATED, event => setRightCollapsed(!(event.uiFlags & FRIEND_BAR_UI_FLAG)));
+
+    const toggleFriendBar = (collapsed: boolean) =>
     {
-        try
-        {
-            window.localStorage.setItem(RIGHT_COLLAPSED_STORAGE_KEY, rightCollapsed ? '1' : '0');
-        }
-        catch
-        {
-        }
-    }, [ rightCollapsed ]);
+        setRightCollapsed(collapsed);
+        GetSessionDataManager()?.setFriendBarState(!collapsed);
+    };
 
     useLayoutEffect(() =>
     {
@@ -579,7 +577,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     {rightCollapsed && (
                         <button
                             type="button"
-                            onClick={() => setRightCollapsed(false)}
+                            onClick={() => toggleFriendBar(false)}
                             aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
                             className="tb-collapse tb-collapse--friendbar-left pointer-events-auto"
                         />
@@ -591,7 +589,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <>
                         <button
                             type="button"
-                            onClick={() => setRightCollapsed(true)}
+                            onClick={() => toggleFriendBar(true)}
                             aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
                             className="tb-collapse tb-collapse--friendbar-right pointer-events-auto"
                         />

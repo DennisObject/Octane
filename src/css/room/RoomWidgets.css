@@ -58,6 +58,12 @@
     }
 
     /* 130x30: text (6,4), 125x1 line (3,26) 0x707070 at 0.5, 18x18 buttons at (87,3) and (107,3). */
+    /* window_bg blend 0.8 also applies to the controls drawn inside it (the history sprites carry it already) */
+    .room-tools-zoom-row,
+    .room-tool-row {
+        opacity: 0.8;
+    }
+
     .room-tools-zoom-row {
         position: relative;
         flex: 0 0 30px;
@@ -73,13 +79,15 @@
         top: 26px;
         width: 125px;
         height: 1px;
-        background: rgba(112, 112, 112, 0.5);
+        /* the line's own 0.5 blend does not show on the v75 client; only the window's 0.8 does */
+        background: #707070;
     }
 
+    /* text fields draw their glyphs 2px right and 1px down of the XML origin (Glaze text margins) */
     .room-tools-zoom-text {
         position: absolute;
-        left: 6px;
-        top: 4px;
+        left: 8px;
+        top: 5px;
         width: 90px;
         height: 14px;
         overflow: hidden;
@@ -139,7 +147,7 @@
     }
 
     .room-tool-row.is-disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: default;
     }
 
@@ -158,6 +166,16 @@
         justify-content: center;
     }
 
+    /* button_like: its 27x25 bitmap box sits at (2,0); pivot center truncates the 20x22 icon to (3,1) */
+    .room-tool-row--like_room .room-tool-icon {
+        left: 2px;
+        box-sizing: border-box;
+        width: 27px;
+        padding: 1px 0 0 3px;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
     .room-tool-icon .octane-icon {
         flex: 0 0 auto;
         background-repeat: no-repeat !important;
@@ -168,8 +186,8 @@
 
     .room-tool-label {
         position: absolute;
-        left: 36px;
-        top: 3px;
+        left: 38px;
+        top: 4px;
         width: 90px;
         height: 14px;
         overflow: hidden;
@@ -178,7 +196,7 @@
     }
 
     .room-tool-row--settings .room-tool-label {
-        top: 4px;
+        top: 5px;
     }
 
     /* cnt_history 115x43 at list y=180: back (0,3) 37x34, open (38,0) 35x38, forward (74,5) 34x32. */
@@ -286,15 +304,18 @@
         font-family: Ubuntu, sans-serif;
         font-size: 12px;
         line-height: 17px;
+        /* the items are children of the 0.8 blended history border */
+        opacity: 0.8;
     }
 
     .room-history-item:hover {
         filter: brightness(1.2);
     }
 
+    /* label (3,3) plus its 3px glyph inset on the v75 client */
     .room-history-item-name {
         position: absolute;
-        left: 3px;
+        left: 6px;
         top: 3px;
         width: 145px;
         overflow: hidden;

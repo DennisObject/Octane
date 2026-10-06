@@ -1,38 +1,14 @@
-import { CreateLinkEvent, GetGuestRoomResultEvent, GetRoomEngine, RateFlatMessageComposer, RoomEngineEvent, RoomGeometry } from '@octane/renderer';
+import { CreateLinkEvent, GetGuestRoomResultEvent, GetRoomEngine, GetSessionDataManager, RateFlatMessageComposer, RoomEngineEvent, RoomGeometry } from '@octane/renderer';
 import { CSSProperties, FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, LocalizeText, SendMessageComposer, SetLocalStorage, TryVisitRoom } from '../../../../api';
+import { GetConfigurationValue, LocalizeText, SendMessageComposer, TryVisitRoom } from '../../../../api';
 import { localizeWithFallback } from '../../../../api/utils/localizeWithFallback';
 import { useAchievements, useMessageEvent, useNavigatorData, useOctaneEvent, useRoom } from '../../../../hooks';
 import { classNames } from '../../../../layout';
 import { getRegisteredPlugins, IOctanePlugin, subscribePlugins } from '../../../plugins/OctanePluginApi';
+import { getRoomHistoryList, useRoomToolsHistoryStore } from './roomToolsHistoryStore';
 import { applyRoomZoom } from './roomZoom.helpers';
 
-interface RoomHistoryEntry {
-    roomId: number;
-    roomName: string;
-}
-
-const ROOM_HISTORY_KEY = 'nitro.room.history';
-const ROOM_HISTORY_MAX = 10;
-const ROOM_NAME_MAX = 80;
 const ROOM_ZOOM_SCALES = [0.5, 1, 2, 4, 8, 16];
-
-const readRoomHistory = (): RoomHistoryEntry[] => {
-    try {
-        const raw = window.localStorage.getItem(ROOM_HISTORY_KEY);
-        if (!raw) return [];
-
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
-
-        return parsed
-            .filter((entry) => entry && Number.isInteger(entry.roomId) && entry.roomId > 0 && typeof entry.roomName === 'string')
-            .slice(-ROOM_HISTORY_MAX)
-            .map((entry) => ({ roomId: entry.roomId, roomName: entry.roomName.slice(0, ROOM_NAME_MAX) }));
-    } catch {
-        return [];
-    }
-};
 
 const getNearestZoomScale = (scale: number) => {
     if (Number.isNaN(scale) || scale <= 0) return 1;
@@ -54,14 +30,24 @@ const getNextZoomScale = (scale: number, direction: number) => {
     return currentScale;
 };
 
+// UI flag 2 (SessionDataManager.setRoomToolsState): set while the room tools are expanded; new users start collapsed.
+const ROOM_TOOLS_UI_FLAG = 2;
+
+const readRoomToolsOpen = () => {
+    const sessionData = GetSessionDataManager();
+
+    return !(sessionData?.isNoob || !((sessionData?.uiFlags ?? 0) & ROOM_TOOLS_UI_FLAG));
+};
+
 const getZoomText = (scale: number) => (Math.round(Math.log(getNearestZoomScale(scale)) / Math.LN2) + 1).toString();
 
 export const RoomToolsWidgetView: FC<{}> = (props) => {
     const [zoomScale, setZoomScale] = useState<number>(1);
     const [hasLikedRoom, setHasLikedRoom] = useState<boolean>(false);
-    const [isToolsOpen, setIsToolsOpen] = useState<boolean>(true);
+    const [isToolsOpen, setIsToolsOpen] = useState<boolean>(readRoomToolsOpen);
     const [isOpenHistory, setIsOpenHistory] = useState<boolean>(false);
-    const [roomHistory, setRoomHistory] = useState<RoomHistoryEntry[]>([]);
+    const historyEntries = useRoomToolsHistoryStore((state) => state.entries);
+    const historyIndex = useRoomToolsHistoryStore((state) => state.index);
     const [plugins, setPlugins] = useState<IOctanePlugin[]>([]);
     const { navigatorData } = useNavigatorData();
     const { hasWiredAchievements } = useAchievements();
@@ -145,47 +131,33 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
                 CreateLinkEvent('navigator/toggle-room-link');
                 return;
             case 'room_history':
-                if (roomHistory.length > 0) setIsOpenHistory((prev) => !prev);
+                if (historyEntries.length > 1) setIsOpenHistory((prev) => !prev);
                 return;
-            case 'room_history_back':
-                const prevIndex = roomHistory.findIndex((room) => room.roomId === navigatorData.currentRoomId) - 1;
-                if (prevIndex >= 0) TryVisitRoom(roomHistory[prevIndex].roomId);
+            case 'room_history_back': {
+                const entry = useRoomToolsHistoryStore.getState().back();
+                if (entry) TryVisitRoom(entry.roomId);
                 return;
-            case 'room_history_next':
-                const nextIndex = roomHistory.findIndex((room) => room.roomId === navigatorData.currentRoomId) + 1;
-                if (nextIndex < roomHistory.length) TryVisitRoom(roomHistory[nextIndex].roomId);
+            }
+            case 'room_history_next': {
+                const entry = useRoomToolsHistoryStore.getState().forward();
+                if (entry) TryVisitRoom(entry.roomId);
                 return;
+            }
         }
     };
 
-    const currentRoomHistoryIndex = navigatorData ? roomHistory.findIndex((room) => room.roomId === navigatorData.currentRoomId) : -1;
-    const hasHistory = roomHistory.length > 0;
-    const canGoBack = currentRoomHistoryIndex > 0;
-    const canGoNext = currentRoomHistoryIndex !== -1 && currentRoomHistoryIndex < roomHistory.length - 1;
-
-    const onChangeRoomHistory = (roomId: number, roomName: string) => {
-        if (!Number.isInteger(roomId) || roomId <= 0) return;
-
-        let newStorage = readRoomHistory();
-        if (newStorage.some((room) => room.roomId === roomId)) return;
-
-        if (newStorage.length >= ROOM_HISTORY_MAX) newStorage.shift();
-        newStorage = [...newStorage, { roomId, roomName: (roomName || '').slice(0, ROOM_NAME_MAX) }];
-
-        setRoomHistory(newStorage);
-        SetLocalStorage(ROOM_HISTORY_KEY, newStorage);
-    };
+    // RoomTools history buttons: back/forward follow the history index, the list needs more than one entry.
+    const hasHistory = historyEntries.length > 1;
+    const canGoBack = historyIndex > 0;
+    const canGoNext = historyIndex >= 0 && historyIndex < historyEntries.length - 1;
+    const roomHistory = getRoomHistoryList(historyEntries);
 
     useMessageEvent<GetGuestRoomResultEvent>(GetGuestRoomResultEvent, (event) => {
         const parser = event.getParser();
         if (!parser.roomEnter || parser.data.roomId !== roomSession.roomId) return;
 
-        onChangeRoomHistory(parser.data.roomId, parser.data.roomName);
+        useRoomToolsHistoryStore.getState().visit(parser.data.roomId, parser.data.roomName);
     });
-
-    useEffect(() => {
-        setRoomHistory(readRoomHistory());
-    }, []);
 
     useEffect(() => {
         setHasLikedRoom(false);
@@ -211,6 +183,13 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
             : []),
         { action: 'toggle_room_link', icon: 'icon-room-link', label: LocalizeText('navigator.embed.caption') }
     ];
+
+    const toggleTools = () => {
+        const next = !isToolsOpen;
+
+        setIsToolsOpen(next);
+        GetSessionDataManager()?.setRoomToolsState(next);
+    };
 
     const canZoomIn = getNextZoomScale(zoomScale, 1) !== getNearestZoomScale(zoomScale);
     const canZoomOut = getNextZoomScale(zoomScale, -1) !== getNearestZoomScale(zoomScale);
@@ -296,7 +275,7 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
                     </div>
                 </div>
             </div>
-            <button className="room-tools-collapse-toggle" type="button" onClick={() => setIsToolsOpen((prevValue) => !prevValue)}>
+            <button className="room-tools-collapse-toggle" type="button" onClick={toggleTools}>
                 <span className="room-tools-collapse-arrow" />
             </button>
             {historyOpen && (

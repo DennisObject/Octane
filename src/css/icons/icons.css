@@ -452,7 +452,7 @@
 .octane-icon.icon-room-history-back-enabled {
     background: url("@/assets/images/icons/room-history-back-enabled.png");
     width: 34px;
-    height: 31px;
+    height: 32px;
 }
 
 .octane-icon.icon-room-history-back-disabled {
@@ -464,7 +464,7 @@
 .octane-icon.icon-room-history-next-enabled {
     background: url("@/assets/images/icons/room-history-next-enabled.png");
     width: 34px;
-    height: 31px;
+    height: 32px;
 }
 
 .octane-icon.icon-room-history-next-disabled {

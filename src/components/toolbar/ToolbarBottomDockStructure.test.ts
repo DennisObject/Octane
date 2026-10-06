@@ -19,7 +19,6 @@ describe('AIR bottom dock integration', () => {
         const source = readSource('src/components/toolbar/ToolbarView.tsx');
 
         expect(source).toContain("'nitro.toolbar.leftCollapsed'");
-        expect(source).toContain("'nitro.toolbar.rightCollapsed'");
         expect(source).not.toContain("'hidden min-[1700px]:flex'");
     });
 
