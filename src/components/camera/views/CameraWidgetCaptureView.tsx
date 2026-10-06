@@ -12,7 +12,7 @@ import {
     SoundNames,
     snapshotViewfinder
 } from '../../../api';
-import { Button, Column, DraggableWindow } from '../../../common';
+import { Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
 import { getNextEmptyCameraSlot, willFillLastCameraSlot } from '../CameraAirUtilities';
 
@@ -301,14 +301,14 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
                     {selectedPicture?.draftId && (
                         <div className="octane-camera-capture__preview-actions">
-                            <Button
-                                className="octane-camera-capture__editor-button"
+                            <button
+                                className="habbo-btn-primary octane-camera-capture__editor-button"
                                 title={LocalizeText('camera.editor.button.tooltip')}
-                                variant="success"
+                                type="button"
                                 onClick={onEdit}
                             >
                                 {LocalizeText('camera.editor.button.text')}
-                            </Button>
+                            </button>
                         </div>
                     )}
                     <button
