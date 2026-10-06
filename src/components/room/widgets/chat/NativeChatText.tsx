@@ -175,8 +175,9 @@ export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, 
             }
 
             const metrics = resolveLineMetrics(loadedRuns[0]?.loaded.font.swfFont, 12, false);
+            const lineHeight = metrics.textHeight + 1;
             const fieldWidth = Math.ceil(Math.max(0, ...widths)) + 4;
-            const fieldHeight = Math.ceil(lines.length * metrics.textHeight) + 4;
+            const fieldHeight = Math.ceil(lines.length * lineHeight) + 4;
             if (fieldWidth * fieldHeight > 2 * 1024 * 1024) return;
             const pixels = new Uint8ClampedArray(fieldWidth * fieldHeight * 4);
             lines.forEach((line, lineIndex) => {
@@ -199,7 +200,7 @@ export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, 
                             width: fieldWidth,
                             height: fieldHeight,
                             offsetX: Math.round(x),
-                            offsetY: Math.round(lineIndex * metrics.textHeight)
+                            offsetY: Math.round(lineIndex * lineHeight)
                         }
                     });
                     x += measureNativeText(run.loaded.font, run.text, run.style);
