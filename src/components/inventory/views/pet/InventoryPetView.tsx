@@ -1,10 +1,9 @@
 import { InventoryFilterSelect } from '../InventoryFilterSelect';
-import { DeletePetMessageComposer, IRoomSession, RoomPreviewer } from '@octane/renderer';
+import { IRoomSession, RoomPreviewer } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { FaTrashAlt } from 'react-icons/fa';
-import { attemptPetPlacement, LocalizeText, localizeWithFallback, SendMessageComposer, UnseenItemCategory } from '../../../../api';
+import { attemptPetPlacement, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { ClassicScrollAreaView } from '../../../../common/scroll-area/ClassicScrollAreaView';
-import { useInventoryPets, useInventoryUnseenTracker, useNotification } from '../../../../hooks';
+import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
 import { OctaneButton } from '../../../../layout';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryPetImageView } from './InventoryPetImageView';
@@ -18,7 +17,6 @@ export const InventoryPetView: FC<{
     const [isVisible, setIsVisible] = useState(false);
     const { petItems = null, selectedPet = null, setSelectedPet, activate = null, deactivate = null } = useInventoryPets();
     const { isUnseen = null, removeUnseen = null } = useInventoryUnseenTracker();
-    const { showConfirm = null } = useNotification();
 
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
@@ -38,24 +36,6 @@ export const InventoryPetView: FC<{
     useEffect(() => {
         if (!visiblePets.includes(selectedPet)) setSelectedPet(visiblePets[0] ?? null);
     }, [visiblePets, selectedPet, setSelectedPet]);
-
-    const attemptDeletePet = () => {
-        if (!selectedPet?.petData) return;
-
-        showConfirm(
-            localizeWithFallback(
-                'inventory.delete.confirm_delete.info',
-                `Delete ${selectedPet.petData.name}?`,
-                ['furniname', 'amount'],
-                [selectedPet.petData.name, '1']
-            ),
-            () => SendMessageComposer(new DeletePetMessageComposer(selectedPet.petData.id)),
-            null,
-            null,
-            null,
-            localizeWithFallback('inventory.delete.confirm_delete.title', 'Delete pet')
-        );
-    };
 
     useEffect(() => {
         if (!selectedPet || !isUnseen(UnseenItemCategory.PET, selectedPet.petData.id)) return;
@@ -153,10 +133,6 @@ export const InventoryPetView: FC<{
                         onClick={() => attemptPetPlacement(selectedPet)}
                     >
                         {LocalizeText('inventory.pets.placetoroom')}
-                    </OctaneButton>
-                    <OctaneButton className="octane-inventory-btn-delete" disabled={!selectedPet} onClick={attemptDeletePet}>
-                        <FaTrashAlt className="fa-icon" />
-                        <span>{LocalizeText('generic.delete')}</span>
                     </OctaneButton>
                 </div>
             </div>

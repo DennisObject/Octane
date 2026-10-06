@@ -27,9 +27,6 @@
 }
 
 /* Dev chrome-ownership scopes kept alongside AIR inventory skins */
-.octane-inventory-window .octane-inventory-filter-bar.is-badges {
-    width: min(320px, 100%);
-}
 
 .octane-inventory-window :where(.bg-card-grid-item, .bg-white, .bg-light, .bg-muted) {
     background-color: var(--inv-beige) !important;
@@ -268,7 +265,7 @@
     top: 0;
     left: 5px;
     width: 170px;
-    height: calc(100% - 107px);
+    height: 130px;
     min-height: 50px;
     margin: 0 auto;
     overflow: hidden;
@@ -541,7 +538,6 @@
 
 .octane-inventory-pages button[aria-current='page'] { font-weight: bold; }
 
-.octane-inventory-window.has-badge-controls { height: 364px !important; min-height: 322px !important; }
 
 .octane-inventory-thumb-image {
     position: absolute;
@@ -857,4 +853,74 @@
 
 .octane-inventory-thumb-image img {
     position: absolute;
+}
+
+/* v75 furni preview column: Flash text fields keep a 2px gutter, the description is 12px black and the whole
+   button stack sits 2px lower; fit buttons measure 97/125px for the English captions. */
+.octane-inventory-furni-name,
+.octane-inventory-furni-desc {
+    padding-left: 2px;
+    color: #000;
+}
+
+.octane-inventory-furni-desc {
+    font-size: 12px;
+}
+
+.octane-inventory-furni-actions {
+    margin-top: 14px;
+}
+
+.octane-inventory-window .octane-inventory-btn-place {
+    width: 97px !important;
+}
+
+.octane-inventory-window .octane-inventory-btn-sell {
+    width: 125px !important;
+}
+
+/* inventory_thumb number_container: 15px tall plate with a #2f6982 frame on three sides, anchored 2px from the
+   thumb's right edge and growing leftwards, Volter digits. */
+.octane-inventory-window .octane-inventory-thumb > .bg-red-700 {
+    top: 3px;
+    right: 2px;
+    box-sizing: border-box;
+    min-width: 11px;
+    height: 15px;
+    padding: 3px 2px 0 3px;
+    border: 1px solid #2f6982;
+    border-right: 0;
+    border-radius: 0;
+    background: #fff;
+    color: #2f6982;
+    font: 9px/7px Volter, sans-serif;
+    text-align: left;
+}
+
+.octane-inventory-furni-details {
+    margin-bottom: -2px;
+}
+
+/* tradeable_number / recyclable_number: 1px hard white outline instead of a blurred glow, sitting 2px lower and right. */
+.octane-inventory-furni-status-count {
+    top: 3px;
+    text-shadow: -1px -1px 0 #fff, 0 -1px 0 #fff, 1px -1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff, -1px 1px 0 #fff, 0 1px 0 #fff, 1px 1px 0 #fff;
+}
+
+.octane-inventory-furni-status-count.is-trade-count {
+    left: 35px;
+}
+
+.octane-inventory-furni-status-count.is-recycle-count {
+    left: 20px;
+}
+
+.octane-inventory-furni-status-icon + .octane-inventory-furni-status-icon {
+    margin-top: 1px;
+}
+
+/* In trade mode the preview image keeps its 130px while the name and description are drawn over it. */
+.octane-inventory-furni-details {
+    position: relative;
+    z-index: 3;
 }

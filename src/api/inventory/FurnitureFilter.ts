@@ -13,7 +13,7 @@ export const FURNI_MAIN_FILTER = {
 export type FurniMainFilter = (typeof FURNI_MAIN_FILTER)[keyof typeof FURNI_MAIN_FILTER];
 
 export const FURNI_TYPE_OPTIONS: Record<FurniMainFilter, string[]> = {
-    all: ['any', 'sittable', 'layable', 'tiles_or_rugs', 'ltd', 'wired', 'credit_furni', 'clothes', 'pet_food', 'tradable', 'non_tradable', 'recyclable'],
+    all: ['any', 'sittable', 'layable', 'tiles_or_rugs', 'ltd', 'wired', 'credit_furni', 'clothes', 'pet_food', 'collectibles', 'tradable', 'non_tradable', 'recyclable'],
     floor_items: [
         'any',
         'sittable',
@@ -24,6 +24,7 @@ export const FURNI_TYPE_OPTIONS: Record<FurniMainFilter, string[]> = {
         'credit_furni',
         'clothes',
         'pet_food',
+        'collectibles',
         'tradable',
         'non_tradable',
         'recyclable'
@@ -88,6 +89,8 @@ const matchesTypeFilter = (item: GroupItem, typeId: string): boolean => {
             return item.category === FurniCategory.FIGURE_PURCHASABLE_SET;
         case 'pet_food':
             return className.startsWith('petfood') || furniLine === 'pet_food';
+        case 'collectibles':
+            return false;
         case 'tradable':
             return data?.tradeable ?? !!last?.isTradable;
         case 'non_tradable':

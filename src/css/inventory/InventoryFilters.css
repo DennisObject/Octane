@@ -173,3 +173,23 @@
     font-size: 9px !important;
     line-height: 12px;
 }
+
+/* v75 dropmenu rows: 16px pitch, caption 12px from the menu edge, the current choice painted #f2f2f2. */
+.octane-inventory-filter-menu {
+    padding: 2px 6px 3px;
+}
+
+.octane-inventory-filter-option {
+    min-height: 16px;
+    padding: 2px 4px 2px 7px;
+}
+
+.octane-inventory-filter-option[aria-selected='true'].is-active {
+    background: #f2f2f2;
+}
+
+/* A disabled dropmenu keeps its frame and greys the caption to 50% black. */
+.octane-inventory-window .octane-inventory-filter-select:disabled {
+    color: #7f7f7f;
+    cursor: default;
+}

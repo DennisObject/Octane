@@ -1,24 +1,7 @@
-import { CreateLinkEvent, DeleteBadgeMessageComposer } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaPaintBrush, FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
-import {
-    deleteCustomBadge,
-    ensureBadgeLeaderboardLoaded,
-    ensureCustomBadgeTexts,
-    fetchCustomBadges,
-    getCachedBadgeRarityStat,
-    GetConfigurationValue,
-    isCustomBadgeCode,
-    LocalizeBadgeDescription,
-    LocalizeBadgeName,
-    LocalizeText,
-    localizeWithFallback,
-    refreshCustomBadgeTexts,
-    SendMessageComposer,
-    UnseenItemCategory
-} from '../../../../api';
+import { GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, localizeWithFallback, UnseenItemCategory } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
-import { useInventoryBadges, useInventoryUnseenTracker, useNotification } from '../../../../hooks';
+import { useInventoryBadges, useInventoryUnseenTracker } from '../../../../hooks';
 import { OctaneButton } from '../../../../layout';
 import { InventoryBadgeItemView } from './InventoryBadgeItemView';
 
@@ -81,87 +64,16 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
         deactivate = null
     } = useInventoryBadges();
     const { isUnseen = null, removeUnseen = null } = useInventoryUnseenTracker();
-    const { showConfirm = null } = useNotification();
     const [isDragOverInventory, setIsDragOverInventory] = useState(false);
     const [isDraggingFromActive, setIsDraggingFromActive] = useState(false);
     const maxSlots = useMemo(() => GetConfigurationValue<number>('user.badges.max.slots', 5), []);
-    const [ownCustomBadgeIds, setOwnCustomBadgeIds] = useState<Set<string>>(() => new Set());
     const [page, setPage] = useState(0);
-    const [customFilter, setCustomFilter] = useState<'all' | 'custom'>('all');
-    const [rarityStat, setRarityStat] = useState(() => (selectedBadgeCode ? getCachedBadgeRarityStat(selectedBadgeCode) : null));
-
-    const refreshOwnCustomBadges = useCallback(async () => {
-        try {
-            const data = await fetchCustomBadges();
-            setOwnCustomBadgeIds(new Set((data.badges ?? []).map((b) => b.badgeId)));
-        } catch {
-            setOwnCustomBadgeIds(new Set());
-        }
-    }, []);
-
-    useEffect(() => {
-        refreshOwnCustomBadges();
-        ensureCustomBadgeTexts();
-        ensureBadgeLeaderboardLoaded();
-    }, [refreshOwnCustomBadges]);
-
-    useEffect(() => {
-        if (!selectedBadgeCode) {
-            setRarityStat(null);
-            return;
-        }
-        setRarityStat(getCachedBadgeRarityStat(selectedBadgeCode));
-        ensureBadgeLeaderboardLoaded().then(() => setRarityStat(getCachedBadgeRarityStat(selectedBadgeCode)));
-    }, [selectedBadgeCode]);
 
     const baseCodes = filteredBadgeCodes !== null ? filteredBadgeCodes : badgeCodes;
-    const customCount = useMemo(() => baseCodes.filter((c) => isCustomBadgeCode(c)).length, [baseCodes]);
-    const displayCodes = useMemo(() => (customFilter === 'custom' ? baseCodes.filter((c) => isCustomBadgeCode(c)) : baseCodes), [baseCodes, customFilter]);
-
-    const inactiveCodes = displayCodes.filter((code) => !isWearingBadge(code));
+    const inactiveCodes = baseCodes.filter((code) => !isWearingBadge(code));
     // AIR BadgeGridView uses pages of 200 and keeps the integer-division extra page.
     const pageCount = Math.floor(inactiveCodes.length / 200) + 1;
     const currentPage = Math.min(page, pageCount - 1);
-
-    const isOwnCustomBadge = (code: string | null) => !!code && isCustomBadgeCode(code) && ownCustomBadgeIds.has(code);
-
-    const handleEditCustom = useCallback(() => {
-        if (!selectedBadgeCode) return;
-        CreateLinkEvent(`badge-creator/edit/${selectedBadgeCode}`);
-    }, [selectedBadgeCode]);
-
-    const handleDeleteCustom = useCallback(() => {
-        if (!selectedBadgeCode) return;
-        const target = selectedBadgeCode;
-        showConfirm(
-            LocalizeText('inventory.delete.confirm_delete.info', ['furniname', 'amount'], [LocalizeBadgeName(target), '1']),
-            async () => {
-                try {
-                    await deleteCustomBadge(target);
-                    await refreshOwnCustomBadges();
-                    refreshCustomBadgeTexts();
-                } catch {
-                    /* server surfaces errors */
-                }
-            },
-            null,
-            null,
-            null,
-            LocalizeText('inventory.delete.confirm_delete.title')
-        );
-    }, [selectedBadgeCode, showConfirm, refreshOwnCustomBadges]);
-
-    const attemptDeleteBadge = () => {
-        if (!selectedBadgeCode) return;
-        showConfirm(
-            LocalizeText('inventory.delete.confirm_delete.info', ['furniname', 'amount'], [LocalizeBadgeName(selectedBadgeCode), '1']),
-            () => SendMessageComposer(new DeleteBadgeMessageComposer(selectedBadgeCode)),
-            null,
-            null,
-            null,
-            LocalizeText('inventory.delete.confirm_delete.title')
-        );
-    };
 
     const handleDropOnSlot = useCallback(
         (badgeCode: string, slotIndex: number, sourceSlot?: number) => {
@@ -199,8 +111,9 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
     }, []);
 
     const description = selectedBadgeCode ? LocalizeBadgeDescription(selectedBadgeCode) : '';
-    const rarityLabel = rarityStat ? localizeWithFallback(`badge.rarity.${rarityStat.rarity}`, rarityStat.rarity) : '';
-    const rarityText = rarityStat ? localizeWithFallback('badge.rarity.badge', `${rarityLabel} badge`, ['rarity'], [rarityLabel]) : '';
+    // v75 only learns a badge's rarity from BADGE_INFO; without it every badge reads "Common badge".
+    const rarityLabel = localizeWithFallback('badge.rarity.common', 'Common');
+    const rarityText = localizeWithFallback('badge.rarity.badge', `${rarityLabel} badge`, ['rarity'], [rarityLabel]);
 
     return (
         <div className="octane-inventory-badges">
@@ -266,24 +179,14 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                         </div>
                         <div className="octane-inventory-badges-footer-details">
                             <div className="octane-inventory-badges-footer-name">{LocalizeBadgeName(selectedBadgeCode)}</div>
-                            {description && description !== selectedBadgeCode && <div className="octane-inventory-badges-footer-desc">{description}</div>}
+                            {description && description !== selectedBadgeCode && description !== `badge_desc_${selectedBadgeCode}` && <div className="octane-inventory-badges-footer-desc">{description}</div>}
                             <div className="octane-inventory-badges-footer-meta">
-                                {rarityText && <span className={`octane-inventory-badge-rarity rarity-${rarityStat.rarity}`}>{rarityText}</span>}
-                                {rarityStat && rarityStat.ownerCount > 0 && rarityStat.ownerCount < 1000 && (
-                                    <span className="octane-inventory-badge-owners">
-                                        {localizeWithFallback(
-                                            'badge.owner_count',
-                                            `${rarityStat.ownerCount.toLocaleString()} owners`,
-                                            ['count'],
-                                            [rarityStat.ownerCount.toLocaleString()]
-                                        )}
-                                    </span>
-                                )}
+                                <span className="octane-inventory-badge-rarity">{rarityText}</span>
                             </div>
                         </div>
                         <div className="octane-inventory-badges-footer-actions">
                             <OctaneButton
-                                className="button-shiny octane-inventory-btn-wear"
+                                className={`button-shiny octane-inventory-btn-wear ${isWearingBadge(selectedBadgeCode) ? 'is-clear' : ''}`}
                                 disabled={!isWearingBadge(selectedBadgeCode) && !canWearBadges()}
                                 onClick={() => toggleBadge(selectedBadgeCode)}
                             >
@@ -298,35 +201,6 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                         {localizeWithFallback('inventory.badges.wearbadge', 'Wear badge')}
                     </OctaneButton>
                 )}
-            </div>
-            <div className="octane-inventory-badges-polaris-row">
-                {selectedBadgeCode && (
-                    <>
-                        {isOwnCustomBadge(selectedBadgeCode) && (
-                            <OctaneButton className="octane-inventory-btn-icon" onClick={handleEditCustom}>
-                                <FaPencilAlt className="fa-icon" />
-                            </OctaneButton>
-                        )}
-                        {!isWearingBadge(selectedBadgeCode) && (
-                            <OctaneButton
-                                className="octane-inventory-btn-delete"
-                                onClick={isOwnCustomBadge(selectedBadgeCode) ? handleDeleteCustom : attemptDeleteBadge}
-                            >
-                                <FaTrashAlt className="fa-icon" />
-                            </OctaneButton>
-                        )}
-                    </>
-                )}
-
-                <button type="button" className={customFilter === 'all' ? 'is-active' : ''} onClick={() => setCustomFilter('all')}>
-                    {localizeWithFallback('inventory.badges.tab.all', 'All')} ({baseCodes.length})
-                </button>
-                <button type="button" className={customFilter === 'custom' ? 'is-active' : ''} onClick={() => setCustomFilter('custom')}>
-                    {localizeWithFallback('inventory.badges.tab.custom', 'Custom')} ({customCount})
-                </button>
-                <button type="button" className="is-create" onClick={() => CreateLinkEvent('badge-creator/show')}>
-                    <FaPaintBrush className="fa-icon" /> {localizeWithFallback('inventory.badges.create', 'Create badge')}
-                </button>
             </div>
         </div>
     );

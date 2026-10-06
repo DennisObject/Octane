@@ -138,4 +138,24 @@
     .octane-inventory-animal-preview { width: 170px; right: 0; }
 }
 
-.octane-inventory-window.has-pet-controls { height: 372px !important; }
+
+
+/* Pet thumbs carry the 32x9 level plate at (5,30) with a 4px digit in the middle of it. */
+.octane-inventory-animal-level {
+    position: absolute;
+    left: 5px;
+    top: 30px;
+    width: 32px;
+    height: 9px;
+    background: url('@/assets/images/inventory/pet-level-plate.png') no-repeat;
+    color: #000;
+    font: 9px/9px Volter, sans-serif;
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.octane-inventory-animal-name {
+    padding-left: 3px;
+}
