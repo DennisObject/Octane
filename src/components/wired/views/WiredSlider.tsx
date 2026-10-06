@@ -104,7 +104,7 @@ export const WiredSliderSection: FC<WiredSliderSectionProps> = ({
     onChange,
     ...rest
 }) => {
-    const title = withInput ? LocalizeText(titleKey) : LocalizeText(titleKey, [unit], [converter.toString(value)]);
+    const title = unit ? LocalizeText(titleKey, [unit], [converter.toString(value)]) : LocalizeText(titleKey);
 
     return (
         <WiredSection

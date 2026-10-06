@@ -1,26 +1,22 @@
 import { FC, useEffect, useState } from 'react';
-import { GetWiredTimeLocale, LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
+import { WiredFurniType, WIRED_SLIDER_PULSES } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 export const WiredConditionTimeElapsedLessView: FC<{}> = (props) => {
-    const [time, setTime] = useState(-1);
+    const [time, setTime] = useState(1);
     const { trigger = null, setIntParams = null } = useWired();
 
     const save = () => setIntParams([time]);
 
     useEffect(() => {
-        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 0);
+        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 1);
     }, [trigger]);
 
     return (
-        <WiredConditionBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.allowbefore2', LocalizeText('wiredfurni.params.allowbefore', ['seconds'], [GetWiredTimeLocale(time)]))}</Text>
-                <Slider max={1200} min={1} value={time} onChange={(event) => setTime(event)} />
-            </div>
+        <WiredConditionBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSliderSection converter={WIRED_SLIDER_PULSES} max={1200} min={1} titleKey="wiredfurni.params.allowbefore2" value={time} onChange={setTime} />
         </WiredConditionBaseView>
     );
 };

@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
+import { WiredFurniType, WIRED_SLIDER_ECHO } from '../../../../api';
+import { WiredSliderSection } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
@@ -32,18 +31,13 @@ export const WiredConditionUserCountInRoomView: FC<{}> = (props) => {
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.usercountmin', ['value'], [min.toString()])}</Text>
-                <Slider max={125} min={0} value={min} onChange={(event) => setMin(event)} />
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.usercountmax', ['value'], [max.toString()])}</Text>
-                <Slider max={125} min={0} value={max} onChange={(event) => setMax(event)} />
-            </div>
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={125} min={0} titleKey="wiredfurni.params.usercountmin" unit="value" value={min} withInput={false} onChange={setMin} />
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={125} min={0} titleKey="wiredfurni.params.usercountmax" unit="value" value={max} withInput={false} onChange={setMax} />
         </WiredConditionBaseView>
     );
 };

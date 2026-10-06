@@ -12,6 +12,7 @@ export interface WiredSelectorBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    nativeLayout?: boolean;
 }
 
 export const WiredSelectorBaseView: FC<PropsWithChildren<WiredSelectorBaseViewProps>> = (props) => {
@@ -24,7 +25,8 @@ export const WiredSelectorBaseView: FC<PropsWithChildren<WiredSelectorBaseViewPr
         cardStyle = undefined,
         footer = null,
         footerCollapsible = true,
-        selectionPreview = null
+        selectionPreview = null,
+        nativeLayout = false
     } = props;
 
     return (
@@ -38,6 +40,7 @@ export const WiredSelectorBaseView: FC<PropsWithChildren<WiredSelectorBaseViewPr
             footer={footer}
             footerCollapsible={footerCollapsible}
             selectionPreview={selectionPreview}
+            nativeLayout={nativeLayout}
         >
             {children}
         </WiredBaseView>
