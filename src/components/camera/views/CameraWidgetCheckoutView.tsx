@@ -17,7 +17,8 @@ import creditIcon from '../../../assets/images/camera/checkout/credit.png';
 import ducketIcon from '../../../assets/images/camera/checkout/ducket.png';
 import { OctaneCardView } from '../../../common';
 import { useMessageEvent, useNotification, usePurse } from '../../../hooks';
-import { CAMERA_BOX_COLOR, CAMERA_COMPETITION_COLOR, CAMERA_PANEL_COLOR, CameraCenteredText, CameraNativeText } from './CameraNativeText';
+import { CAMERA_BOX_COLOR, CAMERA_COMPETITION_COLOR, CameraCenteredText, CameraNativeText } from './CameraNativeText';
+import { CameraSkinButton } from './CameraSkinButton';
 
 export interface CameraWidgetCheckoutViewProps {
     picture: CameraPicture;
@@ -311,18 +312,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
     const competitionDisabled = isWaiting || !isImageLoaded || ['submitted', 'limit', 'error'].includes(competitionState);
     const costLabel = LocalizeText('catalog.purchase.confirmation.dialog.cost');
     const renderButton = (key: string, className: string, label: string, disabled: boolean, variant: 'green' | 'gray', onClick: () => void) => (
-        <button key={key} className={`octane-camera-checkout__button is-${variant} ${className}`} disabled={disabled} type="button" onClick={onClick}>
-            <span className="octane-camera-checkout__button-label">
-                <CameraCenteredText
-                    background={variant === 'green' ? 0x000000 : 0xffffff}
-                    color={variant === 'green' ? 0xffffff : 0x000000}
-                    style={{ mixBlendMode: variant === 'green' ? 'screen' : 'multiply', opacity: disabled ? 0.5 : 1 }}
-                    text={label}
-                    textStyle="button_shiny_regular"
-                    width={112}
-                />
-            </span>
-        </button>
+        <CameraSkinButton key={key} className={className} disabled={disabled} label={label} variant={variant} onClick={onClick} />
     );
 
     return (
