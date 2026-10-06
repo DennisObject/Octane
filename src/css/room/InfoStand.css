@@ -55,7 +55,9 @@
   background-color: #3d3d3d;
   background-clip: padding-box;
   box-shadow: none;
-  color: #ffffff;
+  color: #fefefe;
+  /* The native Flash text rasteriser leaves a ~1px halo around bitmap glyphs. */
+  text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15);
   font-family: Volter, monospace;
   font-size: 9px;
   line-height: 12px;
@@ -504,7 +506,8 @@
     box-sizing: border-box;
     width: 190px;
     padding: 10px;
-    color: #ffffff;
+    color: #fefefe;
+    text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15);
     font-family: Volter, monospace;
     font-size: 9px;
     line-height: 12px;
@@ -514,12 +517,12 @@
 .octane-furni-infostand__name {
     box-sizing: content-box;
     width: 159px;
-    padding: 3px 0 2px 3px;
-    color: #ffffff;
+    padding: 2px 0 2px 3px;
+    color: #fefefe;
     font-family: Volter, monospace;
     font-size: 9px;
     font-weight: bold;
-    line-height: 9px;
+    line-height: 10px;
     -webkit-font-smoothing: none;
     overflow-wrap: anywhere;
 }
@@ -536,13 +539,19 @@
     box-sizing: border-box;
     display: flex;
     flex: 0 0 auto;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     width: 170px;
-    min-height: 45px;
+    min-height: 55px;
     max-height: 210px;
     padding: 5px 25px 5px 5px;
     overflow: hidden;
+}
+
+/* Flash centres the item bitmap with a floored offset; a half pixel would otherwise round up. */
+.octane-furni-infostand__image > :last-child {
+    position: relative;
+    top: -0.5px;
 }
 
 /* owner_region 170x17: owner_link icon x=0 y=2 (20x15), owner_name x=20 y=0 h=15. */
@@ -565,7 +574,7 @@
     left: 23px;
     width: 147px;
     height: 14px;
-    color: #ffffff;
+    color: #fefefe;
     overflow-wrap: anywhere;
 }
 
@@ -594,7 +603,7 @@
     top: 10px;
     left: 45px;
     width: 125px;
-    color: #ffffff;
+    color: #fefefe;
     overflow-wrap: anywhere;
 }
 
@@ -615,27 +624,28 @@
     height: 23px;
     padding: 0;
     border: 3px solid transparent;
-    border-image-source: var(--habbo-skin-button-black);
+    border-image-source: var(--habbo-skin-button);
     border-image-slice: 3 fill;
     border-image-width: 3px;
     border-image-repeat: stretch;
     background: transparent;
-    color: #ffffff;
+    color: #000000;
+    text-shadow: none;
     cursor: pointer;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 .octane-furni-infostand__shop:hover {
-    border-image-source: var(--habbo-skin-button-black-hover);
+    border-image-source: var(--habbo-skin-button-hover);
 }
 
 .octane-furni-infostand__shop:active {
-    border-image-source: var(--habbo-skin-button-black-pressed);
+    border-image-source: var(--habbo-skin-button-pressed);
 }
 
 .octane-furni-infostand__shop-icon {
     position: absolute;
-    top: 0;
+    top: -1px;
     left: -1px;
     width: 20px;
     height: 18px;
@@ -644,8 +654,8 @@
 
 .octane-furni-infostand__shop-text {
     position: absolute;
-    top: 1px;
-    left: 19px;
+    top: 2px;
+    left: 22px;
     font-family: Volter, monospace;
     font-size: 9px;
     line-height: 13px;
@@ -653,7 +663,7 @@
 }
 
 .octane-furni-infostand__text {
-    color: #ffffff;
+    color: #fefefe;
     overflow-wrap: anywhere;
 }
 
@@ -686,6 +696,8 @@
     font-family: Volter, monospace !important;
     font-size: 9px !important;
     font-weight: 400 !important;
+    color: #fefefe !important;
+    text-shadow: -1px 0 rgba(254, 254, 254, 0.2), 0 -1px rgba(254, 254, 254, 0.16), 0 1px rgba(254, 254, 254, 0.18), 1px 0 rgba(254, 254, 254, 0.15) !important;
     line-height: 1 !important;
     min-height: 25px !important;
     padding: 5px 5px 3px 8px !important;
