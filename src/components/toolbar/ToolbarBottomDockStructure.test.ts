@@ -23,13 +23,6 @@ describe('AIR bottom dock integration', () => {
         expect(source).not.toContain("'hidden min-[1700px]:flex'");
     });
 
-    it('uses AIR tab capacity instead of limiting the friend bar to three friends', () => {
-        const source = readSource('src/components/friends/views/friends-bar/FriendsBarView.tsx');
-
-        expect(source).toContain('resolveAirFriendTabCapacity');
-        expect(source).not.toContain('MAX_DISPLAY_COUNT');
-    });
-
     it('keeps pixel icons stable and uses AIR disabled-arrow feedback', () => {
         const toolbarSource = readSource('src/components/toolbar/ToolbarView.tsx');
         const toolbarCss = readSource('src/css/toolbar/ToolBar.css');

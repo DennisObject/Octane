@@ -296,6 +296,15 @@ export const FriendsListView: FC<{}> = (props) => {
                     case 'toggle':
                         changeVisibility(!isVisible);
                         return;
+                    case 'search':
+                        // Friend bar search icon: opens the list on its search tab, closes it when already there.
+                        if (isVisible && activePanel === 'search') {
+                            changeVisibility(false);
+                            return;
+                        }
+                        changePanel('search');
+                        changeVisibility(true);
+                        return;
                     case 'request':
                         if (parts.length < 4) return;
 
@@ -308,7 +317,7 @@ export const FriendsListView: FC<{}> = (props) => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [requestFriend, changeVisibility, isVisible]);
+    }, [requestFriend, changeVisibility, changePanel, isVisible, activePanel]);
 
     useEffect(() => {
         if (activePanel === 'requests' && !requests.length) changePanel('friends');

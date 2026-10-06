@@ -419,7 +419,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 animate={visibilityVariant}
                 variants={leftNavVariants}
                 transition={NAV_TRANSITION}
-                className={`tb-nav-clip absolute bottom-0 left-0 z-[71] h-[46px] ${railMaxWidthClass} items-center ${desktopFlexClasses}`}
+                className={`tb-nav-clip tb-left-dock absolute bottom-0 left-0 z-[71] h-[46px] ${railMaxWidthClass} items-center ${desktopFlexClasses}`}
             >
                 <button
                     type="button"
@@ -555,19 +555,17 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 variants={rightNavVariants}
                 transition={NAV_TRANSITION}
                 data-collapsed={rightCollapsed ? 'true' : 'false'}
-                className={`tb-nav-clip tb-right-dock absolute z-[71] ${railMaxWidthClass} items-center ${desktopFlexClasses} ${isInRoom ? 'right-0' : 'right-3'}`}
+                className={`tb-nav-clip tb-right-dock absolute right-0 z-[71] ${desktopFlexClasses}`}
             >
-                <motion.div
-                    variants={containerVariants}
-                    className="tb-open-shell tb-open-shell-right flex h-[46px] max-w-full items-start overflow-visible bg-transparent"
-                >
-                    {!rightCollapsed && <img src={dividerImg} alt="" className="tb-divider tb-right-divider" />}
+                {/* new_bar_xml: the visible children are laid out left to right from x=0 (friendtools 150, page arrows, list, collapse_right 15). */}
+                <motion.div variants={containerVariants} className="tb-friendtools">
+                    {!rightCollapsed && <img src={dividerImg} alt="" className="tb-friendtools-line" />}
                     <motion.div variants={itemVariants} className="relative tb-slot tb-right-friends">
                         <ToolbarItemView icon="friendall" onClick={() => CreateLinkEvent('friends/toggle')} className="tb-icon" />
                         {requests.length > 0 && <LayoutItemCountView count={requests.length} className="absolute -right-2 -top-1" />}
                     </motion.div>
                     <motion.div variants={itemVariants} className="tb-slot tb-right-search">
-                        <ToolbarItemView icon="friendsearch" onClick={() => SendMessageComposer(new FindNewFriendsMessageComposer())} className="tb-icon" />
+                        <ToolbarItemView icon="friendsearch" onClick={() => CreateLinkEvent('friends/search')} className="tb-icon" />
                     </motion.div>
                     {iconState !== MessengerIconState.HIDDEN && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-messenger tb-right-messenger">
@@ -578,18 +576,27 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             />
                         </motion.div>
                     )}
-                    {!rightCollapsed && (
-                        <>
-                            <div className={`tb-right-friend-bar h-full shrink-0 ${desktopBlockClasses}`} id="toolbar-friend-bar-container-desktop" />
-                        </>
+                    {rightCollapsed && (
+                        <button
+                            type="button"
+                            onClick={() => setRightCollapsed(false)}
+                            aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
+                            className="tb-collapse tb-collapse--friendbar-left pointer-events-auto"
+                        />
                     )}
                 </motion.div>
-                <button
-                    type="button"
-                    onClick={() => setRightCollapsed((value) => !value)}
-                    aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
-                    className={`tb-collapse pointer-events-auto ${rightCollapsed ? 'tb-collapse--left' : 'tb-collapse--right'}`}
-                />
+                {/* Collapsing only clips the bar, so the tabs keep their state. */}
+                <div className={`tb-right-friend-bar ${rightCollapsed ? 'hidden' : ''}`} id="toolbar-friend-bar-container-desktop" />
+                {!rightCollapsed && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setRightCollapsed(true)}
+                            aria-label={localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons')}
+                            className="tb-collapse tb-collapse--friendbar-right pointer-events-auto"
+                        />
+                    </>
+                )}
             </motion.div>
             <motion.div
                 initial="visible"

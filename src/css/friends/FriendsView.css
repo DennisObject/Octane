@@ -3363,3 +3363,136 @@ button.swf-friends-section-header {
 .swf-friends-window .swf-friends-close::after {
     display: none;
 }
+
+/* HabboFriendBarView (new_bar_xml): [button_left_page 28] list (y=6, 127px tabs, spacing 3) [button_right_page 29]. */
+.tb-right-friend-bar .friend-bar {
+    display: flex;
+    align-items: flex-start;
+    height: 48px;
+    max-height: none;
+    gap: 0;
+    padding: 0;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+}
+
+.tb-right-friend-bar .friend-bar-list {
+    display: flex;
+    gap: 3px;
+    height: 36px;
+    margin-top: 6px;
+}
+
+.tb-right-friend-bar .friend-bar .friend-bar-button {
+    position: relative;
+    width: 28px;
+    height: 40px;
+    margin: 4px 0 0;
+}
+
+.tb-right-friend-bar .friend-bar .friend-bar-button.right {
+    width: 29px;
+}
+
+.tb-right-friend-bar .friend-bar .friend-bar-button .friend-bar-browse-bg {
+    top: 4px;
+}
+
+.tb-right-friend-bar .friend-bar .friend-bar-button.right .friend-bar-browse-bg {
+    top: 5px;
+}
+
+.tb-right-friend-bar .friend-bar .friend-bar-button.left .friend-bar-browse-arrow { left: 12px; top: 15px; }
+.tb-right-friend-bar .friend-bar .friend-bar-button.right .friend-bar-browse-arrow { left: 11px; top: 15px; }
+
+/* add_friends_tab_xml: border style 6 frame; itemlist at (7,3) with the header icon at (-2,-5) and title at (29,0). */
+.friend-bar-add-tab {
+    position: relative;
+    flex: 0 0 127px;
+    width: 127px;
+    height: 36px;
+    cursor: pointer;
+    pointer-events: all;
+    border: 8px solid transparent;
+    border-image-slice: 8 fill;
+    border-image-width: 8px;
+    border-image-repeat: stretch;
+    box-sizing: border-box;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.friend-bar-add-tab.frame-74dbfa { border-image-source: url("../../assets/images/toolbar/air/friend-tab-border-74dbfa.png"); }
+.friend-bar-add-tab.frame-7fc8de { border-image-source: url("../../assets/images/toolbar/air/friend-tab-border-7fc8de.png"); }
+.friend-bar-add-tab.frame-91e1f9 { border-image-source: url("../../assets/images/toolbar/air/friend-tab-border-91e1f9.png"); }
+
+.friend-bar-add-tab.is-selected {
+    z-index: 2;
+    height: 164px;
+    margin-top: -128px;
+}
+
+.friend-bar-add-tab > * {
+    position: absolute;
+}
+
+.friend-bar-add-tab__icon {
+    top: -10px;
+    left: -3px;
+    width: 31px;
+    height: 34px;
+    pointer-events: none;
+}
+
+.friend-bar-add-tab__title {
+    top: -3px;
+    left: 30px;
+    width: 77px;
+    height: 30px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 13px;
+    white-space: normal;
+}
+
+.friend-bar-add-tab.is-exposed .friend-bar-add-tab__title {
+    text-decoration: underline;
+}
+
+.friend-bar-add-tab__text {
+    top: 26px;
+    left: -1px;
+    box-sizing: border-box;
+    width: 112px;
+    height: 62px;
+    padding: 4px 2px 0 5px;
+    background: #fff;
+    color: #000;
+    font-size: 12px;
+    line-height: 13px;
+    cursor: default;
+}
+
+.friend-bar-add-tab__button {
+    top: 94px;
+    left: -1px;
+    box-sizing: border-box;
+    width: 111px;
+    height: 32px;
+    padding: 0;
+    border: 5px solid transparent;
+    border-image-source: var(--habbo-skin-shiny-thick);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    background: transparent;
+    color: #000;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 15px;
+    padding-bottom: 2px;
+    cursor: pointer;
+}
+
+.friend-bar-add-tab__button:hover { border-image-source: var(--habbo-skin-shiny-thick-hover); }
+.friend-bar-add-tab__button:active { border-image-source: var(--habbo-skin-shiny-thick-pressed); }
