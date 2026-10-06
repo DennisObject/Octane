@@ -160,10 +160,10 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                 style={chat.styleId === 0 && defaultSkin ? { borderImageSource: `url(${defaultSkin})` } : undefined}
             >
                 <div className="user-container absolute overflow-hidden" style={{
-                    left: 13 - faceSize.width / 2,
+                    left: 12 - faceSize.width / 2,
                     width: faceSize.width,
                     height: `min(${faceSize.height}px, 100%)`,
-                    top: `max(1px, calc(12px - min(${faceSize.height}px, 100%) / 2))`
+                    top: `max(1px, calc(14px - min(${faceSize.height}px, 100%) / 2))`
                 }}>
                     {!anonymous && chat.imageUrl && chat.imageUrl.length > 0 && (
                         <img

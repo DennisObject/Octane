@@ -8,7 +8,6 @@ import {
     TextureUtils,
     Vector3d
 } from '@octane/renderer';
-import { GetConfigurationValue } from '../../octane/GetConfigurationValue';
 
 export class ChatBubbleUtilities {
     private static MAX_CACHE_SIZE: number = 200;
@@ -32,8 +31,7 @@ export class ChatBubbleUtilities {
     }
 
     public static async setFigureImage(figure: string): Promise<string> {
-        const zoom = GetConfigurationValue<boolean>('zoom.enabled', false);
-        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, zoom ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, null, {
             resetFigure: (figure) => this.setFigureImage(figure),
             dispose: () => {},
             disposed: false
@@ -62,23 +60,14 @@ export class ChatBubbleUtilities {
             image.onerror = reject;
             image.src = sourceUrl;
         });
+        const bounds = this.getOpaqueBounds(source) ?? { x: 0, y: 0, width: source.width, height: source.height };
+        const scale = 0.5;
         const canvas = document.createElement('canvas');
-        canvas.width = 50;
-        canvas.height = 50;
+        canvas.width = Math.max(1, Math.round(bounds.width * scale));
+        canvas.height = Math.max(1, Math.round(bounds.height * scale));
         const context = canvas.getContext('2d');
-        context.imageSmoothingEnabled = false;
-        if (zoom) {
-            const scaled = document.createElement('canvas');
-            scaled.width = Math.round(source.width / 2);
-            scaled.height = Math.round(source.height / 2);
-            const scaledContext = scaled.getContext('2d');
-            scaledContext.imageSmoothingEnabled = true;
-            scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
-            canvas.width = 25;
-            canvas.height = 25;
-            context.imageSmoothingEnabled = false;
-            context.drawImage(scaled, 10, 14, 25, 25, 0, 0, 25, 25);
-        } else context.drawImage(source, 21, 28, 50, 50, 0, 0, 50, 50);
+        context.imageSmoothingEnabled = true;
+        context.drawImage(source, bounds.x, bounds.y, bounds.width, bounds.height, 0, 0, canvas.width, canvas.height);
         const imageUrl = canvas.toDataURL('image/png');
         if (isPlaceholder) this.placeHolderImageUrl = imageUrl;
 
@@ -87,6 +76,34 @@ export class ChatBubbleUtilities {
         this.pruneCache(this.AVATAR_IMAGE_CACHE);
 
         return imageUrl;
+    }
+
+    private static getOpaqueBounds(image: HTMLImageElement): { x: number; y: number; width: number; height: number } | null {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const context = canvas.getContext('2d');
+
+        if (!context || !canvas.width || !canvas.height) return null;
+
+        context.drawImage(image, 0, 0);
+
+        const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        let minX = canvas.width, minY = canvas.height, maxX = -1, maxY = -1;
+
+        for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+                if (!data[((y * canvas.width) + x) * 4 + 3]) continue;
+
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+        }
+
+        return (maxX < 0) ? null : { x: minX, y: minY, width: (maxX - minX + 1), height: (maxY - minY + 1) };
     }
 
     public static async getUserImage(figure: string): Promise<string> {
