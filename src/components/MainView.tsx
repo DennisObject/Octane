@@ -10,7 +10,7 @@ import {
 } from '@octane/renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, IsTouchDevice } from '../api';
+import { GetConfigurationValue, isOctaneAuthEnabled, IsTouchDevice } from '../api';
 import { useOctaneEventReducer } from '../hooks';
 import { AchievementsView } from './achievements/AchievementsView';
 import { GoogleAdsView } from './ads/GoogleAdsView';
@@ -61,6 +61,7 @@ import { WiredCreatorToolsView } from './wired-tools/WiredCreatorToolsView';
 
 export const MainView: FC<{}> = (props) =>
 {
+    const authEnabled = isOctaneAuthEnabled();
     const [isReady, setIsReady] = useState(false);
     const [localizationVersion, setLocalizationVersion] = useState(0);
 
@@ -171,7 +172,7 @@ export const MainView: FC<{}> = (props) =>
             <FriendsView />
             <RightSideView />
             <UserSettingsView />
-            <UserAccountSettingsView />
+            {authEnabled && <UserAccountSettingsView />}
             <DiscordSettingsView />
             <VaultView />
             <QuestsView />

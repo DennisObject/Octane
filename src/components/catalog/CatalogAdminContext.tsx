@@ -1,4 +1,5 @@
 import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
+import { isOctaneAuthEnabled } from '../../api';
 import { Permission } from '../../api/permissions';
 import { useHasPermission } from '../../hooks';
 import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
@@ -19,7 +20,8 @@ const CatalogAdminContext = createContext<ICatalogAdminContext>(null);
 export const useCatalogAdmin = () => useContext(CatalogAdminContext);
 
 export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const canEdit = useHasPermission(Permission.CatalogEdit);
+    const hasPermission = useHasPermission(Permission.CatalogEdit);
+    const canEdit = isOctaneAuthEnabled() && hasPermission;
     const mutations = useCatalogAdminMutations();
     const adminMode = useCatalogAdminUiStore((state) => state.adminMode);
     const setAdminMode = useCatalogAdminUiStore((state) => state.setAdminMode);
