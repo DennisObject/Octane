@@ -718,6 +718,27 @@
     background: transparent url('@/assets/images/chat-input-swf/sticky_note.png') 0 0 / auto no-repeat;
 }
 
+.swf-chat-input .swf-chat-help-button {
+    position: absolute;
+    left: 382px;
+    top: 8px;
+    z-index: 3;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: url('@/assets/images/habbo-skin/slices/help-3-default.png') 0 0 no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.swf-chat-input .swf-chat-help-button:hover {
+    background-image: url('@/assets/images/habbo-skin/slices/help-3-hover.png');
+}
+
+.swf-chat-input .swf-chat-help-button:active {
+    background-image: url('@/assets/images/habbo-skin/slices/help-3-pressed.png');
+}
+
 .swf-chat-input .habbicon-chat-trigger:hover {
     transform: translateY(-1px);
 }

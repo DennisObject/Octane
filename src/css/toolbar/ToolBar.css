@@ -494,15 +494,17 @@
     z-index: 10;
     box-sizing: border-box;
     height: 18px;
-    padding: 0 4px 0 5px;
-    color: #ffffff;
-    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 17px;
+    min-width: 17px;
+    padding: 0 3px 0 4px;
+    overflow: hidden;
     text-align: center;
     white-space: nowrap;
     pointer-events: none;
+}
+
+.tb-unseen-count__text {
+    z-index: 1;
+    clip-path: inset(0 1px 0 0);
 }
 
 .tb-unseen-count::before {
@@ -516,6 +518,22 @@
     border-image-slice: 6 6 7 fill;
     border-image-width: 6px 6px 7px;
     border-image-repeat: stretch;
+    content: "";
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.tb-unseen-count::after {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-bottom-width: 7px;
+    border-image-source: url("../../assets/images/toolbar/air/unseen-counter-border-ee2924.png");
+    border-image-slice: 6 6 7;
+    border-image-width: 6px 6px 7px;
+    border-image-repeat: stretch;
+    clip-path: polygon(0 0, 100% 0, 100% 3px, 0 3px, 0 0, 0 14px, 100% 14px, 100% 100%, 0 100%, 0 14px);
     content: "";
     image-rendering: var(--octane-pixel-art, pixelated);
 }

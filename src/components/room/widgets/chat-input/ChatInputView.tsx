@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChatMessageTypeEnum, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
+import { ChatMessageTypeEnum, CreateLinkEvent, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
 import { useChatCommandSelector, useChatInputWidget, useClientAccessLists, useRoom, useSessionInfo, useUiEvent, useUserDataSnapshot } from '../../../../hooks';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
@@ -306,6 +306,12 @@ export const ChatInputView: FC<{}> = (props) => {
                     </Text>
                 </div>
             )}
+            <button
+                aria-label={LocalizeText('chat.input.help')}
+                className="swf-chat-help-button"
+                type="button"
+                onClick={() => CreateLinkEvent('habbopages/chat/commands')}
+            />
             <ChatInputHabbiconSelectorView />
         </div>,
         portalTarget
