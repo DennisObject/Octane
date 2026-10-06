@@ -27,6 +27,7 @@ import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
+import { clearRoomToolsHistory } from './components/room/widgets/room-tools/roomToolsHistoryStore';
 import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
 import { clearPerkAllowances, listenForPerkAllowances } from './state/perkAllowancesStore';
 import { SharedHookRegistry } from './state/useSharedHook';
@@ -123,6 +124,7 @@ export const App: FC<{}> = (props) => {
         forgetAccessToken();
         ClearStoredChatHistory();
         clearPerkAllowances();
+        clearRoomToolsHistory();
         void revokeSession(accessToken, ssoTicket);
         try {
             delete (window as any).OctaneConfig?.['sso.ticket'];
@@ -197,6 +199,8 @@ export const App: FC<{}> = (props) => {
     const applySsoTicket = useCallback((ssoTicket: string) => {
         if (!ssoTicket) return;
         ClearStoredChatHistory();
+        clearPerkAllowances();
+        clearRoomToolsHistory();
         window.OctaneConfig['sso.ticket'] = ssoTicket;
         GetConfiguration().setValue('sso.ticket', ssoTicket);
         void exchangeSsoTicketForAccessToken(ssoTicket);

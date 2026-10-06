@@ -99,7 +99,9 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const sideStackClasses = touchLayout ? '' : 'hidden';
     const storiesEnabled = useMemo(() => GetConfigurationValue<boolean>('toolbar.stories.enabled', false), []);
     // CAMERA icon: room only, camera.launch.ui.position "bottom-icons" and the CAMERA perk.
-    const cameraInBottomBar = useMemo(() => GetConfigurationValue<string>('camera.launch.ui.position', 'bottom-icons') === 'bottom-icons', []);
+    const cameraInBottomBar = GetConfigurationValue<string>('camera.launch.ui.position', 'bottom-icons') === 'bottom-icons';
+    const cameraAvailable = isInRoom && cameraInBottomBar && cameraAllowed;
+    const gamesAvailable = GetConfigurationValue<boolean>('games_icon_enabled', GetConfigurationValue<boolean>('game.center.enabled', false));
     const [ messengerNotifyFrame, setMessengerNotifyFrame ] = useState(0);
     const chatFrameStyle = useMemo<CSSProperties | undefined>(() =>
     {
@@ -391,7 +393,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                 </motion.div>
                             )}
                             {/* GAMES: visible in room and hotel view when games_icon_enabled (game.center.enabled kept as a fallback key) */}
-                            {GetConfigurationValue<boolean>('games_icon_enabled', GetConfigurationValue<boolean>('game.center.enabled', false)) && (
+                            {gamesAvailable && (
                                 <motion.div variants={itemVariants} className="tb-slot">
                                     <ToolbarItemView icon="game" onClick={() => CreateLinkEvent('games/toggle')} className="tb-icon" />
                                 </motion.div>
@@ -443,7 +445,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <ToolbarItemView icon="wired-tools" onClick={openMonitor} className="tb-icon" />
                         </motion.div>
                     )}
-                    {isInRoom && cameraInBottomBar && cameraAllowed && (
+                    {cameraAvailable && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
                             <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
                         </motion.div>
@@ -549,7 +551,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="rooms" onClick={() => CreateLinkEvent('navigator/toggle')} className="tb-icon" />
                     </motion.div>
-                    {GetConfigurationValue('game.center.enabled') && (
+                    {gamesAvailable && (
                         <motion.div variants={itemVariants}>
                             <ToolbarItemView icon="game" onClick={() => CreateLinkEvent('games/toggle')} className="tb-icon" />
                         </motion.div>
@@ -637,7 +639,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         <ToolbarItemView icon="buildersclub" onClick={() => CreateLinkEvent('catalog/toggle/builder')} className="tb-icon" />
                     </motion.div>
                 )}
-                {isInRoom && (
+                {cameraAvailable && (
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
                     </motion.div>

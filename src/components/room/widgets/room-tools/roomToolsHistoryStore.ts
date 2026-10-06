@@ -71,6 +71,8 @@ export const getRoomHistoryList = (entries: RoomHistoryEntry[]): RoomHistoryEntr
     return list;
 };
 
+export const clearRoomToolsHistory = () => useRoomToolsHistoryStore.setState({ entries: [], index: -1 });
+
 export const useRoomToolsHistoryStore = createOctaneStore<RoomToolsHistoryState>()((set, get) => ({
     entries: [],
     index: -1,
