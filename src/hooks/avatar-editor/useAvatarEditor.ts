@@ -442,6 +442,10 @@ const useAvatarEditorState = () => {
     }, [isVisible, gender, figureSetIds, nftFigureSetIds, clothingChangeData]);
 
     useEffect(() => {
+        genderFigures.current = { userId: 0, figures: {} };
+    }, [userData.userId]);
+
+    useEffect(() => {
         if (clothingChangeData) {
             if (!isVisible) return;
 
@@ -453,15 +457,19 @@ const useAvatarEditorState = () => {
             return;
         }
 
-        if (!isVisible) return;
+        if (!isVisible) {
+            if (userData.userId && genderFigures.current.userId === userData.userId) {
+                genderFigures.current.figures[gender] = getFigureString;
+            }
 
-        if (genderFigures.current.userId !== userData.userId) {
-            genderFigures.current = { userId: userData.userId, figures: {} };
+            return;
         }
 
+        // Native reloads the current gender on opening; later acknowledgements leave staged edits intact.
+        genderFigures.current.userId = userData.userId;
         genderFigures.current.figures[userData.gender] = userData.figure;
         loadAvatarData(userData.figure, userData.gender);
-    }, [isVisible, loadAvatarData, clothingChangeData, userData.userId, userData.figure, userData.gender]);
+    }, [isVisible, loadAvatarData, clothingChangeData, userData.userId]);
 
     useEffect(() => {
         if (!isVisible || savedFigures) return;

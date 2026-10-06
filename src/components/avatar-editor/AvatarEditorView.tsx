@@ -8,7 +8,7 @@ import {
     SetClothingChangeDataMessageComposer,
     UserFigureComposer
 } from '@octane/renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../api';
 import mainGenericSrc from '../../assets/images/avatareditor/air/main-generic.png';
 import mainHeadSrc from '../../assets/images/avatareditor/air/main-head.png';
@@ -51,10 +51,12 @@ const MAIN_TAB_ORDER: string[] = [
 
 // The v75 AvatarEditor window opens at (100, 30) and is never recentred.
 const INITIAL_EDITOR_POSITION = { x: 100, y: 30 };
+const SAVE_COOLDOWN_MS = 1500;
 
 export const AvatarEditorView: FC<{}> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const saveTimer = useRef<number>(null);
     const [editorPosition, setEditorPosition] = useState(INITIAL_EDITOR_POSITION);
     const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
     const {
@@ -85,9 +87,13 @@ export const AvatarEditorView: FC<{}> = (props) => {
         });
 
     const saveAvatar = () => {
-        if (isSaving) return;
+        if (saveTimer.current !== null) return;
 
         setIsSaving(true);
+        saveTimer.current = window.setTimeout(() => {
+            saveTimer.current = null;
+            setIsSaving(false);
+        }, SAVE_COOLDOWN_MS);
         if (clothingChangeData) {
             SendMessageComposer(new SetClothingChangeDataMessageComposer(clothingChangeData.objectId, gender, getFigureString));
         } else {
@@ -97,13 +103,9 @@ export const AvatarEditorView: FC<{}> = (props) => {
         setIsVisible(false);
     };
 
-    useEffect(() => {
-        if (!isSaving) return;
-
-        const timer = window.setTimeout(() => setIsSaving(false), 1500);
-
-        return () => window.clearTimeout(timer);
-    }, [isSaving]);
+    useEffect(() => () => {
+        if (saveTimer.current !== null) window.clearTimeout(saveTimer.current);
+    }, []);
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
