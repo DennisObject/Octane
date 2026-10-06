@@ -1,10 +1,8 @@
 import {
     BuyMarketplaceOfferMessageComposer,
     GetMarketplaceOffersMessageComposer,
-    HabboBroadcastMessageEvent,
     MarketPlaceOffersEvent,
-    MarketplaceBuyOfferResultEvent,
-    PurchaseOKMessageEvent
+    MarketplaceBuyOfferResultEvent
 } from '@octane/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -21,15 +19,6 @@ import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, PUBLIC_OFFER } from './CatalogLayoutMarketplaceItemView';
 import { SearchFormView } from './CatalogLayoutMarketplaceSearchFormView';
 
-// Current emulator refusals are alerts rather than MarketplaceBuyOfferResult.
-const MARKETPLACE_REFUSALS = new Set([
-    'To prevent average boosting you cannot purchase your own marketplace offers.',
-    'Oops, you do not have enough credits for this.',
-    'Oops, this offer is no longer available.',
-    'Oops, this offer has expired..',
-    "Item isn't in the hotel anymore."
-]);
-
 const SORT_TYPES_VALUE = [1, 2];
 const SORT_TYPES_ACTIVITY = [3, 4, 5, 6];
 const SORT_TYPES_ADVANCED = [1, 2, 3, 4, 5, 6];
@@ -42,8 +31,14 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     const [lastSearch, setLastSearch] = useState<IMarketplaceSearchOptions>({ minPrice: -1, maxPrice: -1, query: '', type: 3 });
     const { getCurrencyAmount = null } = usePurse();
     const { simpleAlert = null, showConfirm = null } = useNotification();
-    const isBuyingRef = useRef<boolean>(false);
-    const purchaseAcknowledgedRef = useRef(false);
+    const pendingOfferIdRef = useRef<number>(null);
+
+    const buyOffer = useCallback((offerId: number) => {
+        if (pendingOfferIdRef.current !== null) return;
+
+        pendingOfferIdRef.current = offerId;
+        SendMessageComposer(new BuyMarketplaceOfferMessageComposer(offerId));
+    }, []);
 
     const requestOffers = useCallback((options: IMarketplaceSearchOptions) => {
         setLastSearch(options);
@@ -79,20 +74,14 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
 
             showConfirm(
                 LocalizeText('catalog.marketplace.confirm_header'),
-                () => {
-                    if (isBuyingRef.current) return;
-
-                    isBuyingRef.current = true;
-                    purchaseAcknowledgedRef.current = false;
-                    SendMessageComposer(new BuyMarketplaceOfferMessageComposer(offerId));
-                },
+                () => buyOffer(offerId),
                 null,
                 null,
                 null,
                 LocalizeText('catalog.marketplace.confirm_title')
             );
         },
-        [getCurrencyAmount, simpleAlert, showConfirm]
+        [getCurrencyAmount, simpleAlert, showConfirm, buyOffer]
     );
 
     useMessageEvent<MarketPlaceOffersEvent>(MarketPlaceOffersEvent, (event) => {
@@ -117,34 +106,18 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
             latestOffers.set(entry.offerId, offerEntry);
         });
 
-        // The emulator acknowledges marketplace delivery with an empty PurchaseOK
-        // offer, then refreshes the list. A search refresh alone is not completion.
-        if (purchaseAcknowledgedRef.current) {
-            isBuyingRef.current = false;
-            purchaseAcknowledgedRef.current = false;
-        }
         setTotalItemsFound(parser.totalItemsFound);
         setOffers(latestOffers);
-    });
-
-    useMessageEvent<PurchaseOKMessageEvent>(PurchaseOKMessageEvent, (event) => {
-        const offer = event.getParser()?.offer;
-        if (isBuyingRef.current && offer?.offerId === 0 && offer.localizationId === '') purchaseAcknowledgedRef.current = true;
-    });
-
-    useMessageEvent<HabboBroadcastMessageEvent>(HabboBroadcastMessageEvent, (event) => {
-        if (!isBuyingRef.current || !MARKETPLACE_REFUSALS.has(event.getParser()?.message)) return;
-        isBuyingRef.current = false;
-        purchaseAcknowledgedRef.current = false;
     });
 
     useMessageEvent<MarketplaceBuyOfferResultEvent>(MarketplaceBuyOfferResultEvent, (event) => {
         const parser = event.getParser();
 
-        isBuyingRef.current = false;
-        purchaseAcknowledgedRef.current = false;
+        if (!parser || parser.requestedOfferId !== pendingOfferIdRef.current || ![1, 2, 3, 4].includes(parser.result)) return;
 
-        if (!parser) return;
+        // Typed marketplace results carry the requested offer id; unrelated purchases,
+        // alerts and search refreshes cannot release an active buy.
+        pendingOfferIdRef.current = null;
 
         switch (parser.result) {
             case 1:
@@ -191,9 +164,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                     LocalizeText('catalog.marketplace.confirm_higher_header') +
                         '\n' +
                         LocalizeText('catalog.marketplace.confirm_price', ['price'], [parser.newPrice.toString()]),
-                    () => {
-                        SendMessageComposer(new BuyMarketplaceOfferMessageComposer(parser.offerId));
-                    },
+                    () => buyOffer(parser.offerId),
                     null,
                     null,
                     null,
