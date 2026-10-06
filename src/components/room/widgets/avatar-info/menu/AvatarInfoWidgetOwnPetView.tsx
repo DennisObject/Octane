@@ -124,7 +124,7 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = (
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own']}
+            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--pet']}
             collapsable={true}
             freezePositionOnHover={true}
             objectId={avatarInfo.roomIndex}

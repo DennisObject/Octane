@@ -1,9 +1,10 @@
-import { CreateLinkEvent, PetRespectComposer, PetType } from '@octane/renderer';
+import { CreateLinkEvent, PetRespectComposer, PetType, RoomControllerLevel } from '@octane/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { ConvertSeconds, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { Button, Column, Flex, LayoutCounterTimeView, LayoutPetImageView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
 import { useRoom, useSessionInfo } from '../../../../../hooks';
 import { InfoStandHeaderView } from './InfoStandHeaderView';
+import { HasPermission, Permission } from '../../../../../api/permissions';
 import { InfoStandCenteredText } from './InfoStandCenteredText';
 import { InfoStandUnitIdView } from './InfoStandUnitIdView';
 import energyIcon from '../../../../../assets/images/infostand/pet/icon_pet_energy.png';
@@ -208,13 +209,16 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
         [avatarInfo, petRespectRemaining, respectPet, roomSession, onClose]
     );
 
-    // button_list: regions are laid out from the right edge in layout order, so left to right the row reads
-    // kick, treat, respect, buy food, train, compost, pick up.
+    // button_list: a 250px list whose regions are placed from the right edge in layout order (pick up, train, buy food,
+    // respect, treat, kick) and wrap onto a new 25px row, 5px below, when the next one no longer fits.
     const buttons = [
         {
+            // The pet widget enables kick for the pet's owner, the room owner, anyone with rooms rights or any room controller.
             action: 'pick_up',
             label: LocalizeText('infostand.button.petkick'),
-            condition: !avatarInfo.isOwner && !!roomSession?.isRoomOwner && avatarInfo.petType !== PetType.MONSTERPLANT
+            condition:
+                avatarInfo.petType !== PetType.MONSTERPLANT &&
+                (avatarInfo.isOwner || !!roomSession?.isRoomOwner || roomSession?.controllerLevel >= RoomControllerLevel.GUEST || HasPermission(Permission.RoomOwnerAny))
         },
         {
             action: 'treat',
@@ -249,8 +253,8 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
     ];
 
     const actions = (
-        <Flex className="octane-infostand-actions octane-infostand-actions--tight" justifyContent="end">
-            {buttons.map(
+        <Flex className="octane-infostand-actions octane-infostand-actions--tight octane-pet-actions" justifyContent="end">
+            {[...buttons].reverse().map(
                 (button) =>
                     button.condition && (
                         <Button key={button.action + button.label} variant="dark" size={null} className="habbo-btn-black" onClick={() => processButtonAction(button.action)}>
@@ -273,7 +277,7 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                         {LocalizeText(`pet.breed.${avatarInfo.petType}.${avatarInfo.petBreed}`)}
                     </InfoStandCenteredText>
                     <div className="octane-pet-infostand__image">
-                        <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
+                        <LayoutPetImageView direction={2} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
                     </div>
                     <div className="octane-pet-infostand__level">
                         {LocalizeText('pet.level', ['level', 'maxlevel'], [avatarInfo.level.toString(), avatarInfo.maximumLevel.toString()])}
@@ -288,7 +292,7 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                         value={avatarInfo.happyness}
                     />
                     <PetStatusBar
-                        color="#8553be"
+                        color="#8547be"
                         highlight="#a06ad2"
                         icon={experienceIcon}
                         label={LocalizeText('infostand.pet.text.experience')}
@@ -297,7 +301,7 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                         value={avatarInfo.experience}
                     />
                     <PetStatusBar
-                        color="#5ea000"
+                        color="#5e9d00"
                         highlight="#8ac51e"
                         icon={energyIcon}
                         label={LocalizeText('infostand.pet.text.energy')}

@@ -793,6 +793,12 @@
   gap: 10px;
 }
 
+.octane-pet-actions {
+  flex-flow: row-reverse wrap;
+  width: 250px;
+  gap: 5px;
+}
+
 /* pet_view (default pets): fixed 190x316 box, every element positioned from the layout rects and the controller. */
 .octane-infostand.octane-pet-infostand {
   box-sizing: border-box;

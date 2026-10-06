@@ -1120,7 +1120,6 @@
     min-height: 40px;
     flex: 0 0 40px;
     padding: 0;
-    overflow: visible;
 }
 
 .air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--toggle::before {
@@ -1129,27 +1128,48 @@
 
 .air-avatar-menu-checkbox {
     position: absolute;
-    top: 17px;
-    left: 9px;
-    width: 19px;
-    height: 20px;
-    background: url('../../assets/images/habbo-skin/slices/checkbox-default.png') 0 0 no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    top: 14px;
+    left: 7px;
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #fff;
+    background: #3d3d3d;
 }
 
-.air-avatar-menu-checkbox.is-checked {
-    background-image: url('../../assets/images/habbo-skin/slices/checkbox-checked.png');
+.air-avatar-menu-checkbox.is-checked::after {
+    position: absolute;
+    inset: 2px;
+    content: '';
+    background: #fff;
 }
 
 .air-avatar-menu-toggle-label {
     position: absolute;
     top: 3px;
-    left: 26px;
+    left: 25px;
     width: 78px;
     height: 40px;
-    line-height: 16px;
-    text-align: center;
+    font-size: 11.5px;
+    line-height: 12px;
+    text-align: left;
     white-space: normal;
+}
+
+/* pet_menu / own_pet_menu: the name block is 28px high, so the rule and the rows sit 4px lower than in the avatar menus. */
+.octane-avatar-action-menu--pet .octane-context-menu-header {
+    height: 20px;
+    min-height: 20px;
+    flex-basis: 20px;
+}
+
+.octane-avatar-action-menu--pet .octane-context-menu-header::after {
+    top: 24px;
+}
+
+.octane-avatar-action-menu--pet.octane-avatar-action-menu--own .octane-context-menu-footer {
+    height: 14px;
+    min-height: 14px;
 }
 
 .air-avatar-menu-extra-label {
