@@ -1,11 +1,7 @@
 .octanepedia.octane-card-shell.octane-card-frame-3 {
     box-sizing: border-box;
     width: 418px;
-    min-width: 418px;
-    max-width: 418px;
     height: 398px;
-    min-height: 398px;
-    max-height: 398px;
     padding: 33px 3px 3px;
     color: #111;
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
@@ -13,13 +9,27 @@
     line-height: 14px;
 }
 
+.octanepedia.octane-card-shell.octane-card-frame-3::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: 32px;
+    border-radius: 6px 6px 0 0;
+    background: #578ca5;
+    box-shadow: inset 0 2px #67a3bf, inset 0 -1px #05121a;
+    content: '';
+    pointer-events: none;
+}
+
 .octanepedia > .octane-card-header-shell { cursor: move; }
 
 .octanepedia__viewport {
     position: relative;
     box-sizing: border-box;
-    width: 411px;
-    height: 340px;
+    width: calc(100% - 1px);
+    height: calc(100% - 22px);
     margin: 2px 0 0 1px;
     overflow: hidden;
     border: 0;
@@ -57,7 +67,7 @@
 .octanepedia__content > div {
     box-sizing: border-box;
     min-height: 100%;
-    padding: 5px 5px 8px;
+    padding: 3px 5px 8px;
     overflow-wrap: break-word;
     color: #111;
     background: #fff;
@@ -67,7 +77,7 @@
 
 .octanepedia__content h1 {
     color: #ff5c00;
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 700;
     line-height: 28px;
 }
@@ -81,6 +91,8 @@
 
 .octanepedia__content a { color: #e74613; text-decoration: underline; }
 .octanepedia__content img { max-width: none; }
+.octanepedia__content img[height] { height: attr(height px); }
+.octanepedia__content img[width] { width: attr(width px); }
 
 .octanepedia__content .padding-top,
 .octanepedia__content .padding-bottom {
@@ -92,3 +104,10 @@
 .octanepedia__content .padding-top br,
 .octanepedia__content .padding-bottom br { display: none; }
 .octanepedia__content .bullet-item { line-height: 14px; }
+
+.octanepedia__content font[size='12px'] { font-size: 12px; }
+.octanepedia__content font[size='-1'] { font-size: 10px; }
+
+/* Legacy Flash HTML inserted empty FONT/P rows to reserve bitmap height.
+   Browser images already participate in flow, so retaining both doubles it. */
+.octanepedia__content img + font { display: none; }
