@@ -236,3 +236,18 @@ export const TEAM_COLOR_NAMES: Record<number, string> = {
 export const WEEKDAY_NAMES: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export const MONTH_NAMES: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 export const DIRECTION_NAMES: string[] = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
+
+/** wired_menu_view statistics html captions, in WiredMenuMonitorTab.updateRoomStatsUI order. */
+export const MONITOR_STAT_CAPTIONS: string[] = [
+    'Wired usage:',
+    'Is heavy:',
+    'Floor furni:',
+    'Wall furni:',
+    'Permanent furni vars:',
+    'Permanent user vars:',
+    'Permanent global vars:'
+];
+
+export const MONITOR_COLOR_RED = 'ff5733';
+export const MONITOR_COLOR_ORANGE = 'BD7800';
+export const MONITOR_COLOR_GREEN = '008000';

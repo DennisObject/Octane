@@ -59,6 +59,8 @@ export interface InspectionUserLiveState {
 export interface MonitorStat {
     label: string;
     value: string;
+    /** WiredMenuMonitorTab.colorize result (hex without #); Octane-only rows have none. */
+    color?: string;
 }
 
 export interface MonitorLog {

@@ -72,8 +72,11 @@ import {
     EDITABLE_FURNI_VARIABLES,
     EDITABLE_USER_VARIABLES,
     INSPECTION_ELEMENTS,
+    MONITOR_COLOR_GREEN,
+    MONITOR_COLOR_ORANGE,
     MONITOR_ERROR_INFO,
     MONITOR_LOG_ORDER,
+    MONITOR_STAT_CAPTIONS,
     MONTH_NAMES,
     TABS,
     TEAM_COLOR_NAMES,
@@ -91,6 +94,7 @@ import {
     WIRED_VARIABLES_POLL_MS
 } from './WiredCreatorTools.constants';
 import {
+    colorizeMonitorStat,
     formatMonitorHistoryOccurrence,
     formatMonitorLatestOccurrence,
     formatMonitorSource,
@@ -179,6 +183,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const [furniInternalRevision, setFurniInternalRevision] = useState(0);
     const [roomEnteredAt, setRoomEnteredAt] = useState(Date.now());
     const monitorSnapshot = useWiredCreatorToolsUiStore((s) => s.monitorSnapshot);
+    // WiredMenuMonitorTab.isDataReady: the tab stays in its loading state until the server answers.
+    const [monitorLoaded, setMonitorLoaded] = useState(false);
     const setMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.setMonitorSnapshot);
     const resetMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.resetMonitorSnapshot);
     const [selectedMonitorError, setSelectedMonitorError] = useState<{ type: string; category: string }>(null);
@@ -706,6 +712,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             logs: [...(parser.logs ?? [])],
             history: [...(parser.history ?? [])]
         });
+        setMonitorLoaded(true);
     });
 
     useMessageEvent<WiredFurniRuntimeStateEvent>(WiredFurniRuntimeStateEvent, (event) => {
@@ -854,6 +861,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
     useEffect(() => {
         resetMonitorSnapshot();
+        setMonitorLoaded(false);
         setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
@@ -882,6 +890,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     useEffect(() => {
         if (!isVisible || activeTab !== 'monitor' || !roomSession?.roomId) return;
 
+        // startViewing clears the data and shows the loading state until the next answer.
+        setMonitorLoaded(false);
         requestMonitorSnapshot();
 
         const interval = window.setInterval(requestMonitorSnapshot, WIRED_MONITOR_POLL_MS);
@@ -1096,59 +1106,55 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         }
     }, [inspectionType]);
     const monitorStats = useMemo<MonitorStat[]>(() => {
-        if (!roomSession) {
-            return [
-                { label: 'Wired usage', value: '0/0' },
-                { label: 'Is heavy', value: 'No' },
-                { label: 'Room furni', value: '0/0' },
-                { label: 'Wall furni', value: '0/0' },
-                { label: 'Delayed events', value: '0/0' },
-                { label: 'Average execution', value: '0ms' },
-                { label: 'Peak execution', value: '0ms' },
-                { label: 'Recursion', value: '0/0' },
-                { label: 'Killed remaining', value: '0s' },
-                { label: 'Permanent furni vars', value: '0/60' }
-            ];
-        }
+        // WiredMenuMonitorTab.updateRoomStatsUI rows. Until the room stats arrive the html fields keep their
+        // layout captions, so the values stay empty. This server reports no permanent user/global variable
+        // counts; those two rows keep their caption only.
+        if (!monitorLoaded) return MONITOR_STAT_CAPTIONS.map((label) => ({ label, value: '' }));
 
-        const roomFurniValue =
-            monitorRoomStats.roomItemLimit > 0
-                ? `${monitorRoomStats.roomFurniCount}/${monitorRoomStats.roomItemLimit}`
-                : String(monitorRoomStats.roomFurniCount);
-        const wallFurniValue =
-            monitorRoomStats.roomItemLimit > 0
-                ? `${monitorRoomStats.wallFurniCount}/${monitorRoomStats.roomItemLimit}`
-                : String(monitorRoomStats.wallFurniCount);
-        const usageValue = `${monitorSnapshot.usageCurrentWindow}/${Math.max(0, monitorSnapshot.usageLimitPerWindow)}`;
-        const delayedValue = `${monitorSnapshot.delayedEventsPending}/${Math.max(0, monitorSnapshot.delayedEventsLimit)}`;
+        const floorFurniCount = monitorRoomStats.roomFurniCount - monitorRoomStats.wallFurniCount;
+        const itemLimit = monitorRoomStats.roomItemLimit;
+        const usageColor = colorizeMonitorStat(monitorSnapshot.usageCurrentWindow, monitorSnapshot.usageLimitPerWindow, 0.3, 0.7);
 
         return [
-            { label: 'Wired usage', value: usageValue },
-            { label: 'Is heavy', value: monitorSnapshot.isHeavy ? 'Yes' : 'No' },
-            { label: 'Room furni', value: roomFurniValue },
-            { label: 'Wall furni', value: wallFurniValue },
-            { label: 'Delayed events', value: delayedValue },
+            { label: MONITOR_STAT_CAPTIONS[0], value: `${monitorSnapshot.usageCurrentWindow}/${Math.max(0, monitorSnapshot.usageLimitPerWindow)}`, color: usageColor },
+            {
+                label: MONITOR_STAT_CAPTIONS[1],
+                value: monitorSnapshot.isHeavy ? localizeWithFallback('wiredmenu.bool.yes', 'Yes') : localizeWithFallback('wiredmenu.bool.no', 'No'),
+                color: monitorSnapshot.isHeavy ? MONITOR_COLOR_ORANGE : MONITOR_COLOR_GREEN
+            },
+            // Without a room item limit from the server there is no cap to show or to colour against.
+            itemLimit > 0
+                ? { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}/${itemLimit}`, color: colorizeMonitorStat(floorFurniCount, itemLimit, 0.6, 0.85) }
+                : { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}` },
+            itemLimit > 0
+                ? { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}/${itemLimit}`, color: colorizeMonitorStat(monitorRoomStats.wallFurniCount, itemLimit, 0.6, 0.85) }
+                : { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}` },
+            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}/60`, color: colorizeMonitorStat(monitorRoomStats.permanentFurniVariables, 60, 0.5, 0.8) },
+            { label: MONITOR_STAT_CAPTIONS[5], value: '' },
+            { label: MONITOR_STAT_CAPTIONS[6], value: '' },
+            // Octane's executor metrics, not part of the official list: kept after the official rows.
+            { label: 'Delayed events', value: `${monitorSnapshot.delayedEventsPending}/${Math.max(0, monitorSnapshot.delayedEventsLimit)}` },
             { label: 'Average execution', value: `${monitorSnapshot.averageExecutionMs}ms` },
             { label: 'Peak execution', value: `${monitorSnapshot.peakExecutionMs}ms` },
             { label: 'Recursion', value: `${monitorSnapshot.recursionDepthCurrent}/${Math.max(0, monitorSnapshot.recursionDepthLimit)}` },
-            { label: 'Killed remaining', value: `${Math.max(0, monitorSnapshot.killedRemainingSeconds)}s` },
-            { label: 'Permanent furni vars', value: `${monitorRoomStats.permanentFurniVariables}/60` }
+            { label: 'Killed remaining', value: `${Math.max(0, monitorSnapshot.killedRemainingSeconds)}s` }
         ];
-    }, [roomSession, monitorRoomStats, monitorSnapshot]);
+    }, [monitorLoaded, monitorRoomStats, monitorSnapshot]);
+    // ErrorDataTableObject rows: exactly the errors the server lists, none while loading.
     const monitorLogs = useMemo<MonitorLog[]>(() => {
-        return MONITOR_LOG_ORDER.map((type) => {
-            const log = monitorSnapshot.logs.find((entry) => entry.type === type);
-            const fallbackInfo = MONITOR_ERROR_INFO[type];
+        if (!monitorLoaded) return [];
+
+        return monitorSnapshot.logs.map((log) => {
             const amount = Number(log?.amount ?? 0);
 
             return {
-                type,
-                category: String(log?.severity ?? fallbackInfo?.severity ?? 'ERROR'),
+                type: log.type,
+                category: String(log?.severity ?? MONITOR_ERROR_INFO[log.type]?.severity ?? 'ERROR'),
                 amount: String(amount),
                 latest: amount > 0 ? formatMonitorLatestOccurrence(Number(log?.latestOccurrenceSeconds ?? 0), globalClock) : '/'
             };
         });
-    }, [monitorSnapshot.logs, globalClock]);
+    }, [monitorLoaded, monitorSnapshot.logs, globalClock]);
     const monitorHistoryRows = useMemo(() => {
         return monitorSnapshot.history.map((entry, index) => ({
             id: `${entry.type}-${entry.occurredAtSeconds}-${index}`,
@@ -3112,7 +3118,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 activeTab={activeTab}
                 headerTitle={MENU_HEADER_TITLES[activeTab]}
                 tabs={TABS}
-                title={localizeWithFallback('wiredmenu.title', 'Wired Creator Tools - Loading')}
+                title={
+                    activeTab === 'monitor' && !monitorLoaded
+                        ? localizeWithFallback('wiredmenu.title.loading', 'Wired Creator Tools - Loading')
+                        : localizeWithFallback('wiredmenu.title', 'Wired Creator Tools (:wired)')
+                }
                 onClose={() => setIsVisible(false)}
                 onTabChange={(tab) => setActiveTab(tab as WiredToolsTab)}
             >
@@ -3120,6 +3130,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     <>
                     {activeTab === 'monitor' && (
                         <WiredMonitorTabView
+                            loading={!monitorLoaded}
+                            canClear={roomSettings.canModify}
                             monitorStats={monitorStats}
                             monitorLogs={monitorLogs}
                             monitorHistoryRows={monitorHistoryRows}

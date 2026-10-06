@@ -2555,32 +2555,33 @@
 }
 
 .octane-wired-menu__table {
-    border: 1px solid #b1b1ab;
+    border: 1px solid #5d5d5a;
     border-radius: 5px;
-    background: #f2f2ed;
+    background: #fff;
 }
 
 .octane-wired-menu__table-title {
     display: flex;
-    height: 23px;
-    margin: 5px 5px 0;
+    height: 22px;
+    margin: 5px 4px 0;
 }
 
 .octane-wired-menu__table-splitter {
     height: 1px;
-    margin: 0 5px;
-    background: #d2d2cd;
+    margin: 0 4px;
+    background: #afafaf;
 }
 
 .octane-wired-menu__table-rows {
-    height: calc(100% - 30px);
-    margin: 0 5px 5px;
+    height: calc(100% - 29px);
+    margin: 0 4px 4px;
     overflow-y: auto;
 }
 
 .octane-wired-menu__table-row {
     display: flex;
     height: 20px;
+    background: #f9f9f9;
 }
 
 .octane-wired-menu__table-row.is-even {
@@ -2597,7 +2598,7 @@
 }
 
 .octane-wired-menu__table-empty {
-    padding-top: 60px;
+    padding-top: 47px;
     color: #333;
     text-align: center;
 }
@@ -2837,6 +2838,11 @@
     display: flex;
     justify-content: center;
     text-decoration: none;
+}
+
+.octane-wired-menu__loading {
+    z-index: 5;
+    background: rgba(233, 233, 225, 0.6);
 }
 
 /* CheckboxOptionPreset: the label sits checkboxYOffset (2px) lower than the 19x20 box. */
