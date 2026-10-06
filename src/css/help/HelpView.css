@@ -280,7 +280,8 @@
 .octane-help .help-chat-text { display: block; width: 336px; min-height: 17px; line-height: 17px; overflow-wrap: anywhere; white-space: pre-wrap; }
 .octane-help .help-chat-check { appearance: none; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url("../../assets/images/floorplan-editor/air/checkbox-default.png") 0 0 / 15px 15px no-repeat; box-shadow: none; cursor: pointer; image-rendering: pixelated; }
 .octane-help .help-chat-check:checked { background-image: url("../../assets/images/floorplan-editor/air/checkbox-selected.png"); background-color: transparent; }
-.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #000; resize: none; outline: none; font-size: 11px; line-height: 16px; }
+.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; outline: none; font-size: 11px; line-height: 16px; color: transparent; caret-color: #000; }
+.octane-help .help-message-text { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; overflow: hidden; color: #000; pointer-events: none; }
 .octane-help .help-message-placeholder { position: absolute; left: 6px; top: 5px; height: 16px; color: #888; font-size: 11px; line-height: 16px; pointer-events: none; }
 
 .octane-help .help-topics-panel { position: absolute; left: 0; top: 90px; width: 445px; height: 340px; }
@@ -365,9 +366,9 @@
     min-height: 57px;
 }
 
-.octane-help-alert .octane-help-alert-ok {
+.octane-help-alert .octane-native-button.is-thick.octane-help-alert-ok {
     position: absolute;
-    left: 108px;
+    left: 107px;
     top: 81px;
     bottom: auto;
     width: 50px;
@@ -394,3 +395,5 @@
 /* The caption is a native TextField (HelpFrameTitle) one pixel above the shared frame-3 title strip. */
 .octane-help.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title,
 .octane-help-alert.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title { top: 3px !important; line-height: 0 !important; letter-spacing: 0 !important; text-align: left; }
+
+.octane-help-alert.octane-native-confirm.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title { top: 3px !important; }

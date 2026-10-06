@@ -36,6 +36,11 @@ export const DescribeReportView: FC = () => {
                             <HelpText text={LocalizeText('help.emergency.main.step.one.entry.instruction')} size={11} color={0x888888} background={HELP_WHITE_COLOR} maxWidth={380} />
                         </span>
                     )}
+                    {!!activeReport.message.length && (
+                        <span className="help-message-text" aria-hidden="true">
+                            <HelpText text={activeReport.message} size={11} background={HELP_WHITE_COLOR} maxWidth={380} />
+                        </span>
+                    )}
                     <textarea
                         aria-label={LocalizeText('help.emergency.main.step.one.title')}
                         maxLength={253}
