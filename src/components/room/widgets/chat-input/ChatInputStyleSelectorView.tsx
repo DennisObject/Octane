@@ -31,9 +31,7 @@ export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = (
         <Popover.Root open={selectorVisible} onOpenChange={setSelectorVisible}>
             <Popover.Trigger asChild>
                 <div className="swf-chat-style-trigger flex items-center cursor-pointer select-none" aria-label="Stili chat">
-                    <svg className="swf-chat-style-arrow shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <span className="swf-chat-style-arrow shrink-0" />
                     <div className="swf-chat-style-icon" />
                 </div>
             </Popover.Trigger>

@@ -62,6 +62,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ dockLayout, setDockLayout ] = useState<BottomDockLayout>({ chatRaised: false, chatBottom: 7 });
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
+    const [ cameraAllowed, setCameraAllowed ] = useState(false);
     const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
@@ -97,6 +98,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const socialInSideStack = touchLayout;
     const sideStackClasses = touchLayout ? '' : 'hidden';
     const storiesEnabled = useMemo(() => GetConfigurationValue<boolean>('toolbar.stories.enabled', false), []);
+    // CAMERA icon: room only, camera.launch.ui.position "bottom-icons" and the CAMERA perk.
+    const cameraInBottomBar = useMemo(() => GetConfigurationValue<string>('camera.launch.ui.position', 'bottom-icons') === 'bottom-icons', []);
     const [ messengerNotifyFrame, setMessengerNotifyFrame ] = useState(0);
     const chatFrameStyle = useMemo<CSSProperties | undefined>(() =>
     {
@@ -312,6 +315,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
     {
         setUseGuideTool(event.getParser().isAllowed(PerkEnum.USE_GUIDE_TOOL));
+        setCameraAllowed(event.getParser().isAllowed(PerkEnum.CAMERA));
     });
 
     useOctaneEvent<OctaneToolbarAnimateIconEvent>(OctaneToolbarAnimateIconEvent.ANIMATE_ICON, event =>
@@ -393,7 +397,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 <div
                     data-chat-raised={dockLayout.chatRaised ? 'true' : 'false'}
                     style={chatFrameStyle}
-                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 -translate-x-1/2 z-[71] flex h-[38px] w-[468px] max-w-[95vw] items-center p-0 pointer-events-none`}
+                    className={`tb-frame absolute ${chatFramePositionClass} left-1/2 ml-[calc(min(236px,47.5vw)*-1)] z-[71] flex h-[38px] w-[471px] max-w-[95vw] items-center p-0 pointer-events-none`}
                 >
                     <Flex
                         alignItems="center"
@@ -510,7 +514,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <ToolbarItemView icon="wired-tools" onClick={openMonitor} className="tb-icon" />
                         </motion.div>
                     )}
-                    {isInRoom && (
+                    {isInRoom && cameraInBottomBar && cameraAllowed && (
                         <motion.div variants={itemVariants} className="tb-slot tb-slot-tall">
                             <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
                         </motion.div>

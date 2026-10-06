@@ -445,7 +445,7 @@
 .octane-chat-input-container.swf-chat-input {
     /* chatinput_window_new: input_border 400x38 at x=11, styles 57x38 at x=0, extra button 41x38 at x=427. */
     width: 100% !important;
-    max-width: 468px;
+    max-width: 471px;
     height: 38px !important;
     min-height: 38px;
     gap: 0 !important;
@@ -477,9 +477,9 @@
     left: 10px;
     top: 17px;
     width: 10px;
-    height: 6px;
-    color: #4c4c4c;
-    filter: drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.65));
+    height: 5px;
+    background: url('@/assets/images/chat-input-swf/chat_style_arrow.png') 0 0 no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-style-icon {
@@ -647,7 +647,8 @@
     width: 400px !important;
     min-width: 0;
     margin: 0 0 0 -46px;
-    padding: 7px 24px 7px 50px !important;
+    /* chat_input (50,7) 326x24; the v75 text field draws its glyphs 3px right and 1px up of that */
+    padding: 6px 24px 8px 53px !important;
     align-self: center;
     overflow: visible;
     border: 0;
