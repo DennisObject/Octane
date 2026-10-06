@@ -24,7 +24,12 @@ const attemptPlaceMarketplaceOffer = (groupItem: GroupItem) => {
     const item = groupItem.getLastItem();
     if (!item) return false;
     if (!item.sellable) return false;
-    DispatchUiEvent(new CatalogPostMarketplaceOfferEvent(item));
+    DispatchUiEvent(
+        new CatalogPostMarketplaceOfferEvent(
+            item,
+            groupItem.items.filter((groupedItem) => groupedItem.sellable && !groupedItem.locked).map((groupedItem) => groupedItem.id)
+        )
+    );
 };
 
 const attemptDeleteItem = (groupItem: GroupItem) => {

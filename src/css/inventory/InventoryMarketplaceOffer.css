@@ -1,0 +1,163 @@
+/* v75 make_marketplace_offer: 300px frame, controls at their XML rect inside the client area that starts at (6,29). */
+.octane-market-offer {
+    box-sizing: border-box !important;
+    width: 300px !important;
+    min-width: 300px !important;
+    padding: 29px 6px 14px !important;
+    background: transparent !important;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    color: #000;
+    font-kerning: none;
+    will-change: transform;
+}
+
+.octane-market-offer-body {
+    position: relative;
+    width: 288px;
+    height: 310px;
+}
+
+.octane-market-offer-image {
+    position: absolute;
+    left: 10px;
+    top: 12px;
+    width: 70px;
+    height: 70px;
+    overflow: hidden;
+}
+
+.octane-market-offer-name {
+    position: absolute;
+    left: 88px;
+    top: 13px;
+    width: 190px;
+    max-height: 56px;
+    padding-left: 2px;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+}
+
+.octane-market-offer-expiration {
+    position: absolute;
+    left: 10px;
+    top: 87px;
+    width: 268px;
+    padding-left: 2px;
+}
+
+.octane-market-offer-label {
+    position: absolute;
+    left: -86px;
+    width: 295px;
+    height: 19px;
+    font-weight: 700;
+    line-height: 19px;
+    text-align: right;
+}
+
+.octane-market-offer-label.is-price {
+    top: 131px;
+}
+
+.octane-market-offer-label.is-amount {
+    top: 160px;
+}
+
+/* input_border / amount_input_border: 66x26 white box around a 50x19 input at (8,3). */
+.octane-market-offer-field {
+    position: absolute;
+    left: 212px;
+    width: 66px;
+    height: 26px;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
+}
+
+.octane-market-offer-field.is-price {
+    top: 129px;
+}
+
+.octane-market-offer-field.is-amount {
+    top: 158px;
+}
+
+.octane-market-offer-field input {
+    position: absolute;
+    left: 2px;
+    top: -3px;
+    width: 50px;
+    height: 19px;
+    padding: 0 2px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    outline: none;
+}
+
+/* itemlist (10,190) 268 wide, spacing 7. */
+.octane-market-offer-list {
+    position: absolute;
+    left: 10px;
+    top: 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 268px;
+}
+
+.octane-market-offer-list button {
+    box-sizing: border-box;
+    padding: 0;
+    border: 5px solid transparent;
+    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch;
+    background: transparent;
+    color: #111;
+    font: inherit;
+    line-height: 14px;
+    white-space: nowrap;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-market-offer-list button:hover:not(:disabled) { border-image-source: var(--habbo-skin-shiny-hover); }
+.octane-market-offer-list button:active:not(:disabled) { border-image-source: var(--habbo-skin-shiny-pressed); }
+.octane-market-offer-list button:disabled { border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png'); opacity: 1; }
+
+.octane-market-offer-copy {
+    align-self: flex-end;
+    width: 138px;
+    height: 24px;
+}
+
+.octane-market-offer-final {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 268px;
+    height: 54px;
+    padding: 0 6px;
+    border: 6px solid transparent;
+    border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
+    text-align: center;
+}
+
+.octane-market-offer-buttons {
+    position: relative;
+    height: 30px;
+}
+
+.octane-market-offer-buttons button {
+    position: absolute;
+    top: 0;
+    width: 130px;
+    height: 28px;
+}
+
+.octane-market-offer-post { left: 0; }
+.octane-market-offer-cancel { left: 138px; }
