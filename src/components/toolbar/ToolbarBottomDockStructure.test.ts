@@ -5,16 +5,6 @@ import { describe, expect, it } from 'vitest';
 const readSource = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 
 describe('AIR bottom dock integration', () => {
-    it('measures both desktop rails and positions chat from the resolved dock layout', () => {
-        const source = readSource('src/components/toolbar/ToolbarView.tsx');
-
-        expect(source).toContain('resolveBottomDockLayout');
-        expect(source).toContain('leftDockRef');
-        expect(source).toContain('rightDockRef');
-        expect(source).toContain('dockLayout.chatBottom');
-        expect(source).not.toContain("const compactFramePosition = 'bottom-[90px] min-[1700px]:bottom-[7px]'");
-    });
-
     it('persists manual rail collapse without using the desktop width as a fake input mode', () => {
         const source = readSource('src/components/toolbar/ToolbarView.tsx');
 

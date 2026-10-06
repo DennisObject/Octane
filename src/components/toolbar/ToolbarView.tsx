@@ -8,7 +8,7 @@ import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
-import { BottomDockLayout, resolveBottomDockLayout } from './bottomDockLayout';
+import { AIR_RAISED_CHAT_BOTTOM } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
 import { ToolbarProgressionView } from './ToolbarProgressionView';
@@ -59,7 +59,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ isTouchLayout, setIsTouchLayout ] = useState(false);
     const [ leftCollapsed, setLeftCollapsed ] = useState(() => readCollapsedPreference(LEFT_COLLAPSED_STORAGE_KEY));
     const [ rightCollapsed, setRightCollapsed ] = useState(() => !((GetSessionDataManager()?.uiFlags ?? 0) & FRIEND_BAR_UI_FLAG));
-    const [ dockLayout, setDockLayout ] = useState<BottomDockLayout>({ chatRaised: false, chatBottom: 7 });
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
     const [ cameraAllowed, setCameraAllowed ] = useState(false);
@@ -105,10 +104,11 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     {
         if(touchLayout) return undefined;
 
-        return { bottom: `${ dockLayout.chatBottom }px` };
-    }, [ dockLayout.chatBottom, touchLayout ]);
+        // chatinput_window_new keeps its place above the bottom bar; it never moves into the bar.
+        return { bottom: `${ AIR_RAISED_CHAT_BOTTOM }px` };
+    }, [ touchLayout ]);
 
-    const railMaxWidthClass = (isInRoom && !dockLayout.chatRaised) ? 'max-w-[calc(50vw-242px)]' : 'max-w-[calc(50vw-12px)]';
+    const railMaxWidthClass = 'max-w-[calc(50vw-12px)]';
     const chatFramePositionClass = touchLayout ? 'bottom-[90px]' : '';
     const leftNavVariants = useMemo<Variants>(() => ({
         hidden: { opacity: 0, x: isInRoom ? -10 : 0, y: isInRoom ? 0 : 8, pointerEvents: 'none' },
@@ -181,72 +181,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         setRightCollapsed(collapsed);
         GetSessionDataManager()?.setFriendBarState(!collapsed);
     };
-
-    useLayoutEffect(() =>
-    {
-        if(touchLayout || !isInRoom) return;
-
-        const leftDock = leftDockRef.current;
-        const rightDock = rightDockRef.current;
-
-        if(!leftDock || !rightDock) return;
-
-        let frame = 0;
-
-        const applyMeasurement = () =>
-        {
-            const leftRect = leftDock.getBoundingClientRect();
-            const rightRect = rightDock.getBoundingClientRect();
-            const leftEdge = leftRect.left + Math.max(leftRect.width, leftDock.scrollWidth);
-            const rightEdge = rightRect.right - Math.max(rightRect.width, rightDock.scrollWidth);
-            const next = resolveBottomDockLayout({
-                viewportWidth: window.innerWidth,
-                leftEdge,
-                rightEdge
-            });
-
-            setDockLayout(previous => (
-                previous.chatRaised === next.chatRaised && previous.chatBottom === next.chatBottom
-                    ? previous
-                    : next
-            ));
-        };
-
-        const measure = () =>
-        {
-            window.cancelAnimationFrame(frame);
-            frame = window.requestAnimationFrame(applyMeasurement);
-        };
-
-        applyMeasurement();
-
-        const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
-
-        observer?.observe(leftDock);
-        observer?.observe(rightDock);
-        observer?.observe(document.body);
-        window.addEventListener('resize', measure);
-
-        return () =>
-        {
-            window.cancelAnimationFrame(frame);
-            observer?.disconnect();
-            window.removeEventListener('resize', measure);
-        };
-    }, [
-        buildHeightAvailable,
-        buildersClubEnabled,
-        hkEnabled,
-        iconState,
-        isHk,
-        isInRoom,
-        isMod,
-        leftCollapsed,
-        rightCollapsed,
-        showToolbarButton,
-        touchLayout,
-        youtubeEnabled
-    ]);
 
     useEffect(() =>
     {
@@ -395,7 +329,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
             {isInRoom && (
                 <div
-                    data-chat-raised={dockLayout.chatRaised ? 'true' : 'false'}
                     style={chatFrameStyle}
                     className={`tb-frame absolute ${chatFramePositionClass} left-1/2 ml-[calc(min(236px,47.5vw)*-1)] z-[71] flex h-[38px] w-[471px] max-w-[95vw] items-center p-0 pointer-events-none`}
                 >
