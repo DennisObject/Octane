@@ -1,7 +1,10 @@
-import { Game2GetAccountGameStatusMessageComposer, Game2LoadStageReadyMessageComposer, Game2MakeSnowballMessageComposer, Game2RequestFullStatusUpdateMessageComposer, Game2SetUserMoveTargetMessageComposer, Game2ThrowSnowballAtHumanMessageComposer, Game2ThrowSnowballAtPositionMessageComposer, IMessageComposer } from '@octane/renderer';
+import { Game2GetAccountGameStatusMessageComposer, Game2LoadStageReadyMessageComposer, Game2MakeSnowballMessageComposer, Game2RequestFullStatusUpdateMessageComposer, Game2SetUserMoveTargetMessageComposer, Game2ThrowSnowballAtHumanMessageComposer, Game2ThrowSnowballAtPositionMessageComposer } from '@octane/renderer';
+import type { IMessageComposer } from '@octane/renderer';
 import { SUBTURN_MS, SUBTURNS_PER_TURN, TILE_WIDTH } from './SnowWarMath';
-import { SnowWarHumanObject, SnowWarSimEventData, SnowWarSimNotification, SnowWarSimObjectData, SnowWarStage } from './SnowWarSimulation';
-import { ISnowWarEngine, ISnowWarHuman, ISnowWarObject, SnowWarArenaPlayer, SnowWarClickModifiers, SnowWarEngineEvent, SnowWarEngineEventType, SnowWarEngineListener, SnowWarEngineState, SnowWarEngineStateId, SnowWarLevel, SnowWarTileInfo, SnowWarTrajectory } from './SnowWarTypes';
+import { SnowWarHumanObject, SnowWarStage } from './SnowWarSimulation';
+import type { SnowWarSimEventData, SnowWarSimNotification, SnowWarSimObjectData } from './SnowWarSimulation';
+import { SnowWarEngineState, SnowWarTrajectory } from './SnowWarTypes';
+import type { ISnowWarEngine, ISnowWarHuman, ISnowWarObject, SnowWarArenaPlayer, SnowWarClickModifiers, SnowWarEngineEvent, SnowWarEngineEventType, SnowWarEngineListener, SnowWarEngineStateId, SnowWarLevel, SnowWarTileInfo } from './SnowWarTypes';
 
 export interface SnowWarEngineDependencies
 {
