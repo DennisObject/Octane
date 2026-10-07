@@ -20,13 +20,7 @@ export const useCatalogData = () => {
             frontPageItems: state.frontPageItems,
             searchResult: state.searchResult,
             roomPreviewer: state.roomPreviewer,
-            catalogLocalizationVersion: state.catalogLocalizationVersion,
-            furniCount: state.furniCount,
-            furniLimit: state.furniLimit,
-            maxFurniLimit: state.maxFurniLimit,
-            secondsLeft: state.secondsLeft,
-            secondsLeftWithGrace: state.secondsLeftWithGrace,
-            updateTime: state.updateTime
+            catalogLocalizationVersion: state.catalogLocalizationVersion
         }))
     );
     const indexQuery = useCatalogIndexQuery(ui.currentType, ui.isVisible);
@@ -46,13 +40,7 @@ export const useCatalogData = () => {
         frontPageItems: ui.frontPageItems,
         searchResult: ui.searchResult,
         roomPreviewer: ui.roomPreviewer,
-        catalogLocalizationVersion: ui.catalogLocalizationVersion,
-        furniCount: ui.furniCount,
-        furniLimit: ui.furniLimit,
-        maxFurniLimit: ui.maxFurniLimit,
-        secondsLeft: ui.secondsLeft,
-        secondsLeftWithGrace: ui.secondsLeftWithGrace,
-        updateTime: ui.updateTime
+        catalogLocalizationVersion: ui.catalogLocalizationVersion
     };
 };
 
@@ -86,8 +74,8 @@ export const useCatalogUiState = () =>
 
 /**
  * Imperative actions: open / toggle the catalog, navigate the tree, send
- * an offer to the mover, look up nodes, run the Builders Club placement
- * check. All are stable references from the store.
+ * an offer to the mover and look up nodes. All are stable references
+ * from the store.
  */
 export const useCatalogActions = () =>
     useCatalogStore(
@@ -103,7 +91,6 @@ export const useCatalogActions = () =>
             getNodeById: state.getNodeById,
             getNodeByName: state.getNodeByName,
             getNodesByOfferId: state.getNodesByOfferId,
-            getBuilderFurniPlaceableStatus: state.getBuilderFurniPlaceableStatus,
             resetPlacedOfferData: state.resetPlacedOfferData,
             retryCurrentPage: state.retryCurrentPage,
             refreshIndex: state.refreshIndex,

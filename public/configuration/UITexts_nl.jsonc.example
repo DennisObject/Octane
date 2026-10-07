@@ -629,9 +629,6 @@
 
     // --- custom hardcoded-string fixes (2026-06-23) ---
     "toolbar.icons.toggle": "Pictogrammen tonen/verbergen",
-    "catalog.bc.member.full": "Volwaardig lid",
-    "catalog.bc.member.trial": "Gratis proefperiode",
-    "catalog.bc.logo.hint": "Logo — stel de headline-afbeelding in via Beheer",
     "wiredfurni.sendsignal.users": "Gebruikers om door te sturen:",
     "wiredfurni.condition.room.active": "Terwijl de kamer actief is",
     "wiredfurni.sendsignal.furni": "Meubels om door te sturen:",

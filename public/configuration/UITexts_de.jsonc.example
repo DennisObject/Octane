@@ -628,9 +628,6 @@
 
     // --- benutzerdefinierte Fixes für hartcodierte Strings (2026-06-23) ---
     "toolbar.icons.toggle": "Symbole ein-/ausblenden",
-    "catalog.bc.member.full": "Vollmitglied",
-    "catalog.bc.member.trial": "Kostenlose Testphase",
-    "catalog.bc.logo.hint": "Logo — lege das Titelbild in der Verwaltung fest",
     "wiredfurni.sendsignal.users": "Weiterzuleitende Benutzer:",
     "wiredfurni.condition.room.active": "Während der Raum aktiv ist",
     "wiredfurni.sendsignal.furni": "Weiterzuleitende Möbel:",

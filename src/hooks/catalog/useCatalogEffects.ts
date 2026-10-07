@@ -1,9 +1,4 @@
 import {
-    BuildersClubFurniCountMessageEvent,
-    BuildersClubPlaceRoomItemMessageComposer,
-    BuildersClubPlaceWallItemMessageComposer,
-    BuildersClubQueryFurniCountMessageComposer,
-    BuildersClubSubscriptionStatusMessageEvent,
     CatalogPublishedMessageEvent,
     FurniturePlaceComposer,
     FurniturePlacePaintComposer,
@@ -11,7 +6,6 @@ import {
     GetRoomContentLoader,
     GetRoomEngine,
     GetSessionDataManager,
-    GetTickerTime,
     LegacyDataType,
     LimitedEditionSoldOutEvent,
     MarketplaceMakeOfferResult,
@@ -51,7 +45,7 @@ import {
 } from '../../events';
 import { useConnectionState, useMessageEvent, useOctaneEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
-import { DUMMY_PAGE_ID_FOR_OFFER_SEARCH, useCatalogStore } from './catalogStore';
+import { useCatalogStore } from './catalogStore';
 import { getNodesByOfferIdFromMap, restoreCatalogActivePath, RoomObjectCategory } from './useCatalog.helpers';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import {
@@ -65,8 +59,7 @@ import {
     prefetchCatalogIndex,
     readCatalogIndex,
     useCatalogIndexQuery,
-    useCatalogPageQuery,
-    isOfferAllowedInCatalogType
+    useCatalogPageQuery
 } from './useCatalogQueries';
 import { useCatalogSkipPurchaseConfirmation } from './useCatalogSkipPurchaseConfirmation';
 
@@ -101,7 +94,7 @@ const refreshImportedFurnidata = (mergedRef: { current: boolean }, force: boolea
 export const useCatalogEffects = (): void => {
     const queryClient = useQueryClient();
     const connectionState = useConnectionState();
-    const { simpleAlert = null, showConfirm = null } = useNotification();
+    const { simpleAlert = null } = useNotification();
     const [catalogSkipPurchaseConfirmation] = useCatalogSkipPurchaseConfirmation();
     const [catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjectsPreference] = useCatalogPlaceMultipleItems();
     const importedFurnidataMerged = useRef(false);
@@ -175,12 +168,11 @@ export const useCatalogEffects = (): void => {
         if (was) dropCatalogCache();
     }, [connectionState.authenticated]);
 
-    // Opening the catalog: imported furnidata and the Builders Club counters.
+    // Opening the catalog: imported furnidata.
     useEffect(() => {
         if (!isVisible) return;
 
         refreshImportedFurnidata(importedFurnidataMerged);
-        SendMessageComposer(new BuildersClubQueryFurniCountMessageComposer());
     }, [isVisible, currentType]);
 
     // Pending deep link and default first page, once the index is in cache.
@@ -273,9 +265,6 @@ export const useCatalogEffects = (): void => {
         if (!offer) return;
 
         const state = useCatalogStore.getState();
-
-        if (!isOfferAllowedInCatalogType(offer, state.currentType)) return;
-
         const index = readCatalogIndex(state.currentType);
         const matchingNodes = getNodesByOfferIdFromMap(offer.offerId, index?.offersToNodes, true) || getNodesByOfferIdFromMap(offer.offerId, index?.offersToNodes);
         const referencePage = state.pageOverride ?? pageQuery.data?.page ?? null;
@@ -318,26 +307,7 @@ export const useCatalogEffects = (): void => {
     useMessageEvent<UserPermissionsEvent>(UserPermissionsEvent, () =>
     {
         invalidateCatalogIndex(CatalogType.NORMAL);
-        invalidateCatalogIndex(CatalogType.BUILDER);
         invalidateCatalogPages();
-    });
-
-    useMessageEvent<BuildersClubFurniCountMessageEvent>(BuildersClubFurniCountMessageEvent, (event) => {
-        useCatalogStore.getState().setBuildersClubFurniCount(event.getParser().furniCount);
-    });
-
-    useMessageEvent<BuildersClubSubscriptionStatusMessageEvent>(BuildersClubSubscriptionStatusMessageEvent, (event) => {
-        const parser = event.getParser();
-
-        useCatalogStore.getState().setBuildersClubSubscription({
-            furniLimit: parser.furniLimit,
-            maxFurniLimit: parser.maxFurniLimit,
-            secondsLeft: parser.secondsLeft,
-            updateTime: GetTickerTime(),
-            secondsLeftWithGrace: parser.secondsLeftWithGrace,
-            placementBlockedByVisitors: parser.placementBlockedByVisitors,
-            placementAllowedInCurrentRoom: parser.placementAllowedInCurrentRoom
-        });
     });
 
     useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, () => PlaySound(SoundNames.CREDITS));
@@ -431,42 +401,6 @@ export const useCatalogEffects = (): void => {
                 }
 
                 if (state.catalogPlaceMultipleObjects) state.requestOfferToMover(purchasableOffer);
-                break;
-            }
-            case CatalogType.BUILDER: {
-                const placeBuilderItem = () => {
-                    let builderPageId = purchasableOffer.page.pageId;
-
-                    if (builderPageId === DUMMY_PAGE_ID_FOR_OFFER_SEARCH) builderPageId = -1;
-
-                    switch (event.category) {
-                        case RoomObjectCategory.FLOOR:
-                            SendMessageComposer(
-                                new BuildersClubPlaceRoomItemMessageComposer(builderPageId, purchasableOffer.offerId, product.extraParam, event.x, event.y, event.direction)
-                            );
-                            break;
-                        case RoomObjectCategory.WALL:
-                            SendMessageComposer(new BuildersClubPlaceWallItemMessageComposer(builderPageId, purchasableOffer.offerId, product.extraParam, event.wallLocation));
-                            break;
-                    }
-
-                    const latest = useCatalogStore.getState();
-
-                    if (latest.catalogPlaceMultipleObjects && latest.furniCount + 1 < latest.furniLimit) latest.requestOfferToMover(purchasableOffer);
-                };
-
-                if (state.secondsLeft <= 0 && state.furniCount <= 0 && !state.builderTrialRoomHideConfirmed && showConfirm) {
-                    showConfirm(
-                        LocalizeText('room.confirm.hide_room'),
-                        () => {
-                            useCatalogStore.getState().setBuilderTrialRoomHideConfirmed(true);
-                            placeBuilderItem();
-                        },
-                        () => useCatalogStore.getState().resetPlacedOfferData()
-                    );
-                } else {
-                    placeBuilderItem();
-                }
                 break;
             }
         }

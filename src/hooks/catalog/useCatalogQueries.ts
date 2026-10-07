@@ -10,7 +10,6 @@ import { keepPreviousData, QueryClient, UseQueryResult } from '@tanstack/react-q
 import { awaitOctaneResponse, useOctaneQuery } from '../../api/octane-query';
 import {
     CatalogPage,
-    CatalogType,
     GetFurnitureData,
     GetProductDataForLocalization,
     ICatalogNode,
@@ -127,21 +126,15 @@ export const buildPurchasableOffer = (offer: ParserOffer, lookups: OfferLookups 
     );
 };
 
-export const isOfferAllowedInCatalogType = (offer: IPurchasableOffer, type: string): boolean => {
-    if (type === CatalogType.NORMAL) return true;
-
-    return offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE && offer.pricingModel !== Offer.PRICING_MODEL_MULTI;
-};
-
 export const selectCatalogIndex = (parser: { root: NodeData }): CatalogIndexData => buildCatalogNodeTree(parser.root);
 
-export const selectCatalogPage = (parser: ParserPage, type: string, lookups: OfferLookups = defaultLookups): CatalogPageData => {
+export const selectCatalogPage = (parser: ParserPage, lookups: OfferLookups = defaultLookups): CatalogPageData => {
     const offers: IPurchasableOffer[] = [];
 
     for (const parserOffer of parser.offers) {
         const offer = buildPurchasableOffer(parserOffer, lookups);
 
-        if (offer && isOfferAllowedInCatalogType(offer, type)) offers.push(offer);
+        if (offer) offers.push(offer);
     }
 
     const page = new CatalogPage(
@@ -181,7 +174,7 @@ export const useCatalogPageQuery = (type: string, pageId: number, enabled: boole
 
             return parser.pageId === pageId && normalizeCatalogType(parser.catalogType) === type;
         },
-        select: (event) => selectCatalogPage(event.getParser() as unknown as ParserPage, type),
+        select: (event) => selectCatalogPage(event.getParser() as unknown as ParserPage),
         enabled: enabled && pageId > -1,
         staleTime: CATALOG_PAGE_STALE_MS,
         timeoutMs: CATALOG_PAGE_TIMEOUT_MS,

@@ -67,7 +67,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         const grid = screen.getByRole('listbox', { name: 'Catalog items' });
         const columnCount = Number(grid.style.getPropertyValue('--octane-air-column-count'));
-        const expectedLayout = layoutAirCatalogOffers(offers, columnCount, 'NORMAL');
+        const expectedLayout = layoutAirCatalogOffers(offers, columnCount);
         expect(grid.style.height).toBe(`${expectedLayout.height}px`);
 
         const viewport = getViewport(container);
@@ -178,7 +178,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         const grid = screen.getByRole('listbox', { name: 'Catalog items' });
         const columnCount = Number(grid.style.getPropertyValue('--octane-air-column-count'));
-        const newLayout = layoutAirCatalogOffers(tallerOffers, columnCount, 'NORMAL');
+        const newLayout = layoutAirCatalogOffers(tallerOffers, columnCount);
         const expectedTopIndexes = getVisibleAirGridEntries(newLayout.entries, 0, 200)
             .map((entry) => entry.index)
             .sort((a, b) => a - b);

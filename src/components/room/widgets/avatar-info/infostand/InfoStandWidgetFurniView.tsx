@@ -178,11 +178,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const [songCreator, setSongCreator] = useState<string>('');
     const [dropdownOpen, setDropdownOpen] = useState(sessionStorage.getItem('dropdownOpen') === 'true');
     const [furniLocationZ, setFurniLocationZ] = useState<number>(null);
-    const showOwnerProfileIcon = useMemo(() => {
-        const ownerName = (avatarInfo?.ownerName || '').trim().toLowerCase();
-
-        return !!avatarInfo && avatarInfo.ownerId > 0 && ownerName !== 'builders club';
-    }, [avatarInfo]);
+    const showOwnerProfileIcon = useMemo(() => !!avatarInfo && avatarInfo.ownerId > 0, [avatarInfo]);
 
     const sendUpdate = useCallback(
         (deltaX: number, deltaY: number, newZ: number = 0, deltaDirection: number = 0) => {

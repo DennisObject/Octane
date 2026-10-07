@@ -18,9 +18,8 @@ vi.mock('@octane/renderer', () => ({
 }));
 
 vi.mock('../../../../../api', () => ({
-    BuilderFurniPlaceableStatus: { NOT_GROUP_ADMIN: 1, OKAY: 0 },
     CatalogPurchaseState: { CONFIRM: 1, FAILED: 3, NONE: 0, PURCHASE: 2, SOLD_OUT: 4 },
-    CatalogType: { BUILDER: 'BUILDERS_CLUB', NORMAL: 'NORMAL' },
+    CatalogType: { NORMAL: 'NORMAL' },
     DispatchUiEvent: vi.fn(),
     GetClubMemberLevel: vi.fn(() => 0),
     GetConfigurationValue: vi.fn((_key: string, fallback: unknown) => fallback),
@@ -93,7 +92,6 @@ beforeEach(() => {
     habbiconCatalog.entries = [];
     vi.mocked(GetClubMemberLevel).mockReturnValue(0);
     vi.mocked(useCatalogActions).mockReturnValue({
-        getBuilderFurniPlaceableStatus: () => 0,
         getNodesByOfferId: () => [],
         requestOfferToMover: vi.fn(),
         resetPlacedOfferData: vi.fn()

@@ -46,9 +46,7 @@
     "radio_ui.enabled": false,
     "guides.enabled": true,
 	"housekeeping.enabled": true,
-    "buildersclub.enabled": true,
     "toolbar.hide.quests": true,
-    "toolbar.buildersclub.enabled": true,
     "toolbar.rarevalues.enabled": true,
     "show.google.ads": false,
     "catalog.classic.style": false,
@@ -992,42 +990,6 @@
         "notification.admin.transient": {
             "display": "POP_UP",
             "image": "${image.library.url}/album1358/frank_wave_001.gif"
-        },
-        "notification.builders_club.membership_expired": {
-            "display": "POP_UP"
-        },
-        "notification.builders_club.membership_expires": {
-            "display": "POP_UP",
-            "image": "${image.library.url}/notifications/builders_club_room_locked_small.png"
-        },
-        "notification.builders_club.membership_extended": {
-            "delivery": "PERSISTENT",
-            "display": "POP_UP"
-        },
-        "notification.builders_club.membership_made": {
-            "delivery": "PERSISTENT",
-            "display": "POP_UP",
-            "image": "${image.library.url}/notifications/builders_club_membership_extended.png"
-        },
-        "notification.builders_club.membership_renewed": {
-            "delivery": "PERSISTENT",
-            "display": "POP_UP",
-            "image": "${image.library.url}/notifications/builders_club_membership_extended.png"
-        },
-        "notification.builders_club.room_locked": {
-            "display": "BUBBLE",
-            "image": "${image.library.url}/notifications/builders_club_room_locked_small.png"
-        },
-        "notification.builders_club.room_unlocked": {
-            "display": "BUBBLE"
-        },
-        "notification.builders_club.visit_denied_for_owner": {
-            "display": "BUBBLE",
-            "image": "${image.library.url}/notifications/builders_club_room_locked_small.png"
-        },
-        "notification.builders_club.visit_denied_for_visitor": {
-            "display": "POP_UP",
-            "image": "${image.library.url}/notifications/builders_club_room_locked.png"
         },
         "notification.campaign.credit.donation": {
             "display": "BUBBLE"

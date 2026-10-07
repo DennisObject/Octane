@@ -13,7 +13,6 @@ import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
 import { CatalogAdminOfferEditView } from './views/admin/CatalogAdminOfferEditView';
 import { CatalogAdminPageEditView } from './views/admin/CatalogAdminPageEditView';
 import { CatalogLoadingStateView } from './views/CatalogLoadingStateView';
-import { CatalogBuildersClubStatusView } from './views/catalog-header/CatalogBuildersClubStatusView';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogBreadcrumbView } from './views/navigation/CatalogBreadcrumbView';
@@ -30,8 +29,7 @@ const CatalogViewInner: FC<{}> = () => {
         setIsVisible = null,
         setNavigationHidden = null,
         activeNodes = [],
-        setSearchResult = null,
-        currentType = CatalogType.NORMAL
+        setSearchResult = null
     } = useCatalogUiState();
     const {
         openPageById = null,
@@ -49,7 +47,6 @@ const CatalogViewInner: FC<{}> = () => {
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
     const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
-    const buildersClubEnabled = GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true));
     // Keep technical suffixes and numeric page hints out of the tab captions.
     const stripSwfTabSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
     const getSwfTabLabel = (label: string) => stripSwfTabSuffix(parseCatalogTabLabel(label).name);
@@ -60,18 +57,6 @@ const CatalogViewInner: FC<{}> = () => {
     const sidebarHidden = layoutRenderer === 'frontpage' || layoutRenderer === 'info';
 
     useEffect(() => {
-        const getCatalogTypeFromLink = (type?: string) => {
-            switch ((type || '').toLowerCase()) {
-                case 'bc':
-                case 'builder':
-                case 'buildersclub':
-                case 'builders_club':
-                    return buildersClubEnabled ? CatalogType.BUILDER : CatalogType.NORMAL;
-                default:
-                    return CatalogType.NORMAL;
-            }
-        };
-
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
                 const parts = url.split('/');
@@ -81,7 +66,7 @@ const CatalogViewInner: FC<{}> = () => {
                 switch (parts[1]) {
                     case 'show':
                         if (parts.length > 2) {
-                            openCatalogByType(getCatalogTypeFromLink(parts[2]));
+                            openCatalogByType(CatalogType.NORMAL);
 
                             return;
                         }
@@ -93,7 +78,7 @@ const CatalogViewInner: FC<{}> = () => {
                         return;
                     case 'toggle':
                         if (parts.length > 2) {
-                            toggleCatalogByType(getCatalogTypeFromLink(parts[2]));
+                            toggleCatalogByType(CatalogType.NORMAL);
 
                             return;
                         }
@@ -127,7 +112,7 @@ const CatalogViewInner: FC<{}> = () => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [setIsVisible, openPageById, openPageByOfferId, openPageByName, openCatalogByType, toggleCatalogByType, buildersClubEnabled]);
+    }, [setIsVisible, openPageById, openPageByOfferId, openPageByName, openCatalogByType, toggleCatalogByType]);
 
     return (
         <>
@@ -140,7 +125,6 @@ const CatalogViewInner: FC<{}> = () => {
                     uniqueKey="catalog"
                 >
                     <OctaneCardHeaderView
-                        className={currentType === CatalogType.BUILDER ? 'builders-club-card-header' : ''}
                         headerText={isBusy ? LocalizeText('generic.loading') || 'Loading...' : LocalizeText('catalog.title')}
                         onCloseClick={() => setIsVisible(false)}
                     />
@@ -191,7 +175,7 @@ const CatalogViewInner: FC<{}> = () => {
                             </OctaneCardTabsItemView>
                         )}
                     </OctaneCardTabsView>
-                    <div className={`octane-catalog-standard-header ${currentType === CatalogType.BUILDER ? 'is-builder' : ''}`}>
+                    <div className="octane-catalog-standard-header">
                         <div
                             className="octane-catalog-standard-header-bg"
                             style={currentPage?.localization?.getImage(0) ? { backgroundImage: `url(${currentPage.localization.getImage(0)})` } : undefined}
@@ -200,31 +184,25 @@ const CatalogViewInner: FC<{}> = () => {
                             <CatalogIconView icon={activeCatalogNode?.iconId ?? rootNode?.iconId ?? 1} />
                         </div>
                         <div className="octane-catalog-standard-header-copy">
-                            {currentType === CatalogType.BUILDER ? (
-                                <CatalogBuildersClubStatusView />
-                            ) : (
-                                <>
-                                    <div className="octane-catalog-standard-header-title">
-                                        {searchResult
-                                            ? LocalizeText('catalog.search.header')
-                                            : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title'))}
-                                    </div>
-                                    <div
-                                        className="octane-catalog-standard-header-description"
-                                        dangerouslySetInnerHTML={{
-                                            __html: SanitizeHtml(
-                                                searchResult
-                                                    ? LocalizeText(
-                                                          'catalog.search.results',
-                                                          ['count', 'needle'],
-                                                          [String(searchResult.offers.length), searchResult.searchValue]
-                                                      )
-                                                    : getCatalogHeaderDescription(currentPage?.layoutCode, currentPage?.localization)
-                                            )
-                                        }}
-                                    />
-                                </>
-                            )}
+                            <div className="octane-catalog-standard-header-title">
+                                {searchResult
+                                    ? LocalizeText('catalog.search.header')
+                                    : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title'))}
+                            </div>
+                            <div
+                                className="octane-catalog-standard-header-description"
+                                dangerouslySetInnerHTML={{
+                                    __html: SanitizeHtml(
+                                        searchResult
+                                            ? LocalizeText(
+                                                  'catalog.search.results',
+                                                  ['count', 'needle'],
+                                                  [String(searchResult.offers.length), searchResult.searchValue]
+                                              )
+                                            : getCatalogHeaderDescription(currentPage?.layoutCode, currentPage?.localization)
+                                    )
+                                }}
+                            />
                         </div>
                     </div>
                     <OctaneCardContentView classNames={['octane-catalog-content-shell']}>
@@ -235,7 +213,7 @@ const CatalogViewInner: FC<{}> = () => {
                                         <CatalogSearchView />
                                     </div>
                                     <div className="octane-catalog-navigation-shell">
-                                        {activeNodes && activeNodes.length > 0 && <CatalogNavigationView node={activeNodes[0]} catalogType={currentType} />}
+                                        {activeNodes && activeNodes.length > 0 && <CatalogNavigationView node={activeNodes[0]} />}
                                     </div>
                                 </div>
                             )}

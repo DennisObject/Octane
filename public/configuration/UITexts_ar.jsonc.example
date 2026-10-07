@@ -549,9 +549,6 @@
 
     // --- custom hardcoded-string fixes (2026-06-23) ---
     "toolbar.icons.toggle": "إظهار/إخفاء الأيقونات",
-    "catalog.bc.member.full": "عضو كامل",
-    "catalog.bc.member.trial": "تجربة مجانية",
-    "catalog.bc.logo.hint": "الشعار — عيّن صورة العنوان من الإدارة",
     "wiredfurni.sendsignal.users": "المستخدمون المراد إرسالهم:",
     "wiredfurni.condition.room.active": "أثناء نشاط الغرفة",
     "wiredfurni.sendsignal.furni": "الأثاث المراد إرساله:",

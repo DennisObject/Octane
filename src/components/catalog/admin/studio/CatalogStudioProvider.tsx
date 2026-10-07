@@ -13,6 +13,7 @@ import { useConnectionState, useMessageEvent } from '../../../../hooks';
 import { CatalogAdminUnansweredReason, createCatalogAdminRequestTracker } from '../../../../hooks/catalog/catalogAdminRequestTracker';
 import { localizeCatalogAdminCode, localizeCatalogAdminPlainMessage } from '../../../../hooks/catalog/catalogAdminServerErrors.helpers';
 import { applyCatalogStudioMutation, nextCatalogStudioOperationId } from '../../../../hooks/catalog/catalogStudio.helpers';
+import { isNormalCatalogRow } from '../../../../hooks/catalog/catalogAdminTree.helpers';
 import { CatalogStudioHistoryGroup, CatalogStudioMutationResult, CatalogStudioSession } from '../../../../hooks/catalog/catalogStudio.types';
 import { CatalogStudioContext, CatalogStudioContextValue } from '../../../../hooks/catalog/useCatalogStudio';
 
@@ -126,8 +127,8 @@ export const CatalogStudioProvider: FC<{ active: boolean; children: ReactNode }>
             validationCurrent: parser.validationCurrent,
             validationIssueCount: parser.validationIssueCount,
             publishedVersions: parser.publishedVersions.map((version) => ({ ...version })),
-            pages: (parser.pages ?? []).map((page) => ({ ...page })),
-            offers: (parser.offers ?? []).map((offer) => ({ ...offer }))
+            pages: (parser.pages ?? []).filter(isNormalCatalogRow).map((page) => ({ ...page })),
+            offers: (parser.offers ?? []).filter(isNormalCatalogRow).map((offer) => ({ ...offer }))
         });
         setLoading(false);
         setLastError(null);

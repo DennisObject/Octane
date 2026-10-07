@@ -10,7 +10,6 @@ import {
     dropCatalogCache,
     invalidateCatalogIndex,
     invalidateCatalogPage,
-    isOfferAllowedInCatalogType,
     readCatalogIndex,
     selectCatalogIndex,
     selectCatalogPage
@@ -64,7 +63,7 @@ const parserNode = (pageId: number, children: any[] = [], offerIds: number[] = [
 describe('catalog query keys', () => {
     it('scope the index and the pages under the same root', () => {
         expect(catalogIndexKey(CatalogType.NORMAL)).toEqual(['octane', 'catalog', 'index', 'NORMAL']);
-        expect(catalogPageKey(CatalogType.BUILDER, 7)).toEqual(['octane', 'catalog', 'page', CatalogType.BUILDER, 7]);
+        expect(catalogPageKey(CatalogType.NORMAL, 7)).toEqual(['octane', 'catalog', 'page', CatalogType.NORMAL, 7]);
     });
 });
 
@@ -80,17 +79,6 @@ describe('buildPurchasableOffer', () => {
 
     it('returns null when the parser offer carries no products', () => {
         expect(buildPurchasableOffer(parserOffer(5, []), lookups)).toBeNull();
-    });
-});
-
-describe('isOfferAllowedInCatalogType', () => {
-    it('keeps every offer in the normal catalog and drops bundles in the builder catalog', () => {
-        const bundle = buildPurchasableOffer(parserOffer(1, [parserProduct(), parserProduct({ furniClassId: 11 })]), lookups);
-        const single = buildPurchasableOffer(parserOffer(2), lookups);
-
-        expect(isOfferAllowedInCatalogType(bundle, CatalogType.NORMAL)).toBe(true);
-        expect(isOfferAllowedInCatalogType(bundle, CatalogType.BUILDER)).toBe(false);
-        expect(isOfferAllowedInCatalogType(single, CatalogType.BUILDER)).toBe(true);
     });
 });
 
@@ -118,7 +106,7 @@ describe('selectCatalogPage', () => {
     });
 
     it('builds the page, skipping parser offers without products', () => {
-        const data = selectCatalogPage(parserPage() as any, CatalogType.NORMAL, lookups);
+        const data = selectCatalogPage(parserPage() as any, lookups);
 
         expect(data.page).toBeInstanceOf(CatalogPage);
         expect(data.page.pageId).toBe(3);
@@ -129,16 +117,10 @@ describe('selectCatalogPage', () => {
         expect(data.offerId).toBe(2);
     });
 
-    it('applies the builder pricing-model filter', () => {
-        const bundle = parserOffer(9, [parserProduct(), parserProduct({ furniClassId: 11 })]);
-        const data = selectCatalogPage(parserPage({ offers: [bundle, parserOffer(1)] }) as any, CatalogType.BUILDER, lookups);
-
-        expect(data.page.offers.map((offer) => offer.offerId)).toEqual([1]);
-    });
 
     it('passes the front page items through', () => {
         const items = [{ type: 1 }] as any;
-        const data = selectCatalogPage(parserPage({ frontPageItems: items }) as any, CatalogType.NORMAL, lookups);
+        const data = selectCatalogPage(parserPage({ frontPageItems: items }) as any, lookups);
 
         expect(data.frontPageItems).toBe(items);
     });

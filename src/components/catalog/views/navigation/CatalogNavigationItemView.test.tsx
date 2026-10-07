@@ -49,11 +49,10 @@ describe('catalog navigation item accessibility', () => {
         expect(activateNode).toHaveBeenCalledWith(node);
     });
 
-    it('keeps the normal and Builders Club standard selection palettes', () => {
+    it('keeps the standard selection palette', () => {
         const css = readFileSync(resolve(process.cwd(), 'src/css/catalog/CatalogView.css'), 'utf8');
 
         expect(css).toMatch(/--catalog-standard-select:\s*#63c5e9/);
         expect(css).toMatch(/--catalog-standard-select-outer:\s*#82d1ed/);
-        expect(css).toMatch(/octane-catalog-navigation-list\.is-builders-club[\s\S]*--catalog-standard-select:\s*var\(--catalog-standard-bc\)/);
     });
 });
