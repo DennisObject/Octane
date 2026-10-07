@@ -310,10 +310,12 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     </div>
                     {!selectedPicture && <div className="octane-camera-capture__crosshair" aria-hidden="true" />}
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
-                    {selectedPicture?.draftId && (
+                    {selectedPicture && (
                         <div className="octane-camera-capture__preview-actions">
+                            {/* A photo opened before the server's capture arrives can't be edited or bought yet. */}
                             <button
                                 className="habbo-btn-primary octane-camera-capture__editor-button"
+                                disabled={!selectedPicture.draftId}
                                 title={LocalizeText('camera.editor.button.tooltip')}
                                 type="button"
                                 onClick={onEdit}
@@ -349,8 +351,6 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                     className="octane-camera-roll__slot-button"
                                     aria-label={picture ? LocalizeText('camera.editor.button.tooltip') : LocalizeText('camera.take.photo.button.tooltip')}
                                     onClick={() => {
-                                        if (isTakingPictureRef.current) return;
-
                                         setActivePictureSlotIndex(index);
                                         setSelectedPictureIndex(picture ? index : -1);
                                     }}
@@ -363,9 +363,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                         className="octane-camera-roll__delete"
                                         aria-label={LocalizeText('camera.delete.button.text')}
                                         title={LocalizeText('camera.delete.button.text')}
-                                        onClick={() => {
-                                            if (!isTakingPictureRef.current) onDelete();
-                                        }}
+                                        onClick={onDelete}
                                     />
                                 )}
                             </div>
