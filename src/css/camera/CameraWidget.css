@@ -218,6 +218,10 @@
     border-image-source: var(--habbo-skin-shiny-thick-green-pressed);
 }
 
+.octane-camera-capture__editor-button:disabled {
+    background: none;
+}
+
 .octane-camera-capture__shutter {
     position: absolute;
     top: 362px;
