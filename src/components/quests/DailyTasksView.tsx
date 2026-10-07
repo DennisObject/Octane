@@ -51,9 +51,21 @@ const CLAIM_BANDS = {
     disabled: [{ from: 0, to: 23, background: 0x298b26 }]
 };
 
-const FrameTitle: FC<{ text: string }> = ({ text }) => (
-    <NativeText background={0x377998} className="air-quests-native-title" overrides={{ color: 0xffffff }} text={text} textStyle="u_frame_title" />
-);
+/** The official title lands one pixel further left than CSS centring when its raster is an odd number of pixels wide (428 wide window). */
+const FrameTitle: FC<{ text: string; oddOffset?: boolean }> = ({ text, oddOffset = false }) => {
+    const fieldWidth = useAirFieldWidth(text, 12, true, 'u_frame_title');
+
+    return (
+        <NativeText
+            background={0x377998}
+            className="air-quests-native-title"
+            overrides={{ color: 0xffffff }}
+            style={oddOffset && fieldWidth !== undefined ? { marginLeft: fieldWidth % 2 === 1 ? -1 : 0 } : undefined}
+            text={text}
+            textStyle="u_frame_title"
+        />
+    );
+};
 
 /** The official client draws these over the card with alpha: the reward title text at 167/255 black, the amount badge at 231/255. */
 const blend = (surface: number, color: number, alpha: number): number => {
@@ -321,7 +333,7 @@ export const DailyTasksView: FC<{}> = () => {
                 dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
             >
                 <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
-                    <FrameTitle text={getDailyTasksWindowCaption(maxSecondsLeft)} />
+                    <FrameTitle oddOffset text={getDailyTasksWindowCaption(maxSecondsLeft)} />
                 </OctaneCardHeaderView>
                 <div className="air-dt-content octane-card-content-shell">
                     {unclaimedTasks.length > 0 && (

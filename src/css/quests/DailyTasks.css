@@ -38,12 +38,7 @@
     top: 3px;
     right: auto !important;
     left: calc(50% - 0.01px);
-    margin-left: -1px;
     transform: translateX(-50%);
-}
-
-.octane-daily-tasks-unclaimed .air-quests-native-title {
-    margin-left: 0;
 }
 
 .octane-daily-tasks-air .air-dt-content.octane-card-content-shell {
