@@ -1081,8 +1081,9 @@
 }
 
 .octane-reward-track .octane-reward-track-filter[data-active="true"]::before {
-    border-width: 5px;
-    border-image: var(--rt-tab-selected) 5 fill / 5px stretch;
+    /* a 6px bottom slice puts the light/dark band seam on the native row (13 light rows of 29) */
+    border-width: 5px 5px 6px;
+    border-image: var(--rt-tab-selected) 5 5 6 fill / 5px 5px 6px stretch;
 }
 
 /* tasks: scrollable_itemlist_vertical style 100 (Illumina light, 9px scrollbar, auto-hidden). */
