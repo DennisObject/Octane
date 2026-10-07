@@ -389,6 +389,8 @@ export type SnowWarEngineEvent =
     | { type: 'makeEnd'; humanId: number }
     | { type: 'scoreChange'; humanId: number; team: number; delta: number; score: number; teamScores: readonly number[] }
     | { type: 'humanLeft'; humanId: number }
+    /** Plus extra: a ray gun fired 7 snowballs (ids firstSnowballId..+6); show the gun furni in state 1 for 500 ms. */
+    | { type: 'rayGunBurst'; humanId: number; rayGunFuseObjectId: number; firstSnowballId: number }
     /** Object entered/left the stage (CreateSnowball, full status rebuild, delete list). */
     | { type: 'objectAdded'; objectId: number; objectType: number }
     | { type: 'objectRemoved'; objectId: number; objectType: number }
@@ -447,6 +449,8 @@ export interface ISnowWarEngine
     throwAtPosition(tileX: number, tileY: number, trajectory: number): void;
     /** Throw at an opponent (Game2ThrowSnowballAtHuman); ignored when the own human cannot throw. */
     throwAtHuman(humanId: number, trajectory: number): void;
+    /** Click on an arena furni: a ray gun (Plus extra) moves the own human to its use tile. Returns whether it was handled. */
+    clickFuseObject(fuseObjectId: number): boolean;
     makeSnowball(): boolean;
     canThrow(): boolean;
     canMakeSnowball(): boolean;

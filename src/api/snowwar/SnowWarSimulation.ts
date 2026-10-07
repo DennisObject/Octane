@@ -17,6 +17,8 @@ export interface SnowWarSimLevel
 
 export interface SnowWarSimFuseObject
 {
+    id?: number;
+    name?: string;
     x: number;
     y: number;
     xDimension: number;
@@ -47,11 +49,37 @@ export interface SnowWarSimEventData
     x: number;
     y: number;
     trajectory: number;
+    /** Event 100 only. */
+    rayGunFuseObjectId?: number;
 }
 
 export type SnowWarSimNotification = SnowWarEngineEvent | { type: 'stopWaitingForSnowball'; humanId: number } | { type: 'sound'; name: string };
 
 const INFINITE_HEIGHT = 100000;
+
+/** Plus extra (CONTRACT §7, Polaris "Domexx" ray gun): not part of any official client. */
+export const RAY_GUN_FUSE_NAME = 'ads_igorraygun';
+export const RAY_GUN_BURST_EVENT = 100;
+const RAY_GUN_RANGE = 15;
+const RAY_GUN_TARGET_OFFSETS: readonly (readonly [ number, number ])[] = [ [ 0, 0 ], [ 0, 1 ], [ 1, 0 ], [ -1, 1 ], [ -1, -1 ], [ 1, -1 ], [ 1, 1 ] ];
+
+export const isRayGun = (fuseObject: SnowWarSimFuseObject): boolean =>
+    (fuseObject.name === RAY_GUN_FUSE_NAME) && ((fuseObject.direction & 1) === 0) && (fuseObject.direction >= 0) && (fuseObject.direction <= 6);
+
+/** The tile behind the gun a human stands on to fire it; E/W guns swap the footprint like the stage does. */
+export const getRayGunUseTile = (gun: SnowWarSimFuseObject): { x: number; y: number } =>
+{
+    const dx = DIRECTION8_X[gun.direction];
+    const dy = DIRECTION8_Y[gun.direction];
+    const rotated = (gun.direction === 2) || (gun.direction === 6);
+    const xDimension = rotated ? gun.yDimension : gun.xDimension;
+    const yDimension = rotated ? gun.xDimension : gun.yDimension;
+
+    return {
+        x: gun.x + ((dx < 0) ? xDimension : ((dx > 0) ? -1 : 0)),
+        y: gun.y + ((dy < 0) ? yDimension : ((dy > 0) ? -1 : 0))
+    };
+};
 
 const HUMAN_SPEED = 534;
 const MAXIMUM_SNOWBALL_COUNT = 5;
@@ -1102,6 +1130,7 @@ export class SnowWarStage
 {
     private _tiles: SnowWarTile[][] = [];
     private _width = 0;
+    private _fuseObjects = new Map<number, SnowWarSimFuseObject>();
     private _objects = new Map<number, SnowWarSimObject>();
     private _deleteList: SnowWarSimObject[] = [];
     private _queues = new Map<number, SnowWarArenaEvent[][]>();
@@ -1140,6 +1169,8 @@ export class SnowWarStage
 
         for(const fuseObject of level.fuseObjects)
         {
+            if(fuseObject.id !== undefined) this._fuseObjects.set(fuseObject.id, fuseObject);
+
             const tile = this.getTileAt(fuseObject.x, fuseObject.y);
 
             if(!tile) continue;
@@ -1545,6 +1576,37 @@ export class SnowWarStage
                     actor.snowballs += count;
                     stage.notify({ type: 'sound', name: 'HBSTG_snowwar_get_snowball' });
                     stage.notify({ type: 'pickup', humanId: actor.id, sourceId: source.id, count });
+                };
+            }
+            case RAY_GUN_BURST_EVENT: {
+                const gun = this._fuseObjects.get(data.rayGunFuseObjectId);
+
+                if(!actor || !gun || !isRayGun(gun)) return null;
+
+                const balls = RAY_GUN_TARGET_OFFSETS.map((_, index) => new SnowWarSnowballObject(data.snowBallGameObjectId + index));
+
+                return stage =>
+                {
+                    const dx = DIRECTION8_X[gun.direction];
+                    const dy = DIRECTION8_Y[gun.direction];
+                    const centreX = gun.x + (RAY_GUN_RANGE * dx);
+                    const centreY = gun.y + (RAY_GUN_RANGE * dy);
+
+                    // Faces the gun's way and holds the throw pose; the burst costs no ammo.
+                    actor.bodyDirection = gun.direction;
+                    actor.startThrowTimer();
+
+                    balls.forEach((ball, index) =>
+                    {
+                        const [ offsetX, offsetY ] = RAY_GUN_TARGET_OFFSETS[index];
+
+                        ball.initialize(actor.location.x, actor.location.y, INITIAL_HEIGHT, SnowWarTrajectory.DEFAULT, (centreX + offsetX) * TILE_WIDTH, (centreY + offsetY) * TILE_WIDTH, actor);
+                        stage.addGameObject(ball);
+                        stage.notify({ type: 'snowballCreated', snowballId: ball.id, humanId: actor.id });
+                    });
+
+                    stage.notify({ type: 'sound', name: 'HBSTG_snowwar_throw' });
+                    stage.notify({ type: 'rayGunBurst', humanId: actor.id, rayGunFuseObjectId: data.rayGunFuseObjectId, firstSnowballId: data.snowBallGameObjectId });
                 };
             }
             default:

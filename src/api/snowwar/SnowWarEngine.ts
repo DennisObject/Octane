@@ -1,7 +1,7 @@
 import { Game2GetAccountGameStatusMessageComposer, Game2LoadStageReadyMessageComposer, Game2MakeSnowballMessageComposer, Game2RequestFullStatusUpdateMessageComposer, Game2SetUserMoveTargetMessageComposer, Game2ThrowSnowballAtHumanMessageComposer, Game2ThrowSnowballAtPositionMessageComposer } from '@octane/renderer';
 import type { IMessageComposer } from '@octane/renderer';
 import { SUBTURN_MS, SUBTURNS_PER_TURN, TILE_WIDTH } from './SnowWarMath';
-import { SnowWarHumanObject, SnowWarStage } from './SnowWarSimulation';
+import { getRayGunUseTile, isRayGun, SnowWarHumanObject, SnowWarStage } from './SnowWarSimulation';
 import type { SnowWarSimEventData, SnowWarSimNotification, SnowWarSimObjectData } from './SnowWarSimulation';
 import { SnowWarEngineState, SnowWarTrajectory } from './SnowWarTypes';
 import type { ISnowWarEngine, ISnowWarHuman, ISnowWarObject, SnowWarArenaPlayer, SnowWarClickModifiers, SnowWarEngineEvent, SnowWarEngineEventType, SnowWarEngineListener, SnowWarEngineStateId, SnowWarLevel, SnowWarTileInfo } from './SnowWarTypes';
@@ -255,6 +255,19 @@ export class SnowWarEngine implements ISnowWarEngine
 
         this.tick();
         this._dependencies.send(new Game2ThrowSnowballAtHumanMessageComposer(humanId, trajectory, this.turn, this.subturn));
+    }
+
+    public clickFuseObject(fuseObjectId: number): boolean
+    {
+        const fuseObject = this._level?.fuseObjects.find(candidate => (candidate.id === fuseObjectId));
+
+        if(!fuseObject || !isRayGun(fuseObject)) return false;
+
+        const useTile = getRayGunUseTile(fuseObject);
+
+        this.moveTo(useTile.x, useTile.y);
+
+        return true;
     }
 
     public makeSnowball(): boolean
