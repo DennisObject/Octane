@@ -50,12 +50,14 @@ export class ChatBubbleUtilities {
             return placeholderImageUrl;
         }
 
+        // Chat reads the colour with the room unit's figure string, which the renderer may normalise.
+        const requestedFigure = figure;
         figure = avatarImage.getFigure().getFigureString();
 
         avatarImage.setDirection(AvatarSetType.HEAD, 2);
         const sourceUrl = avatarImage.processAsImageUrl(AvatarSetType.HEAD);
         const color = avatarImage.getPartColor(AvatarFigurePartType.CHEST);
-        this.AVATAR_COLOR_CACHE.set(figure, (color && color.rgb) || 16777215);
+        this.AVATAR_COLOR_CACHE.set(requestedFigure, (color && color.rgb) || 16777215);
         this.pruneCache(this.AVATAR_COLOR_CACHE);
         avatarImage.dispose();
         const source = await new Promise<HTMLImageElement>((resolve, reject) => {
