@@ -45,7 +45,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
                             {currentOffer.product.productType !== ProductTypeEnum.BADGE && (
                                 <>
                                     <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
-                                    <CatalogViewProductWidgetView height={348} />
+                                    <CatalogViewProductWidgetView height={240} />
                                     <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 right-1 absolute" />
                                 </>
                             )}
