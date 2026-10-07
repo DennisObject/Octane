@@ -3,7 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
 import { useModTools, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
-import { ModToolsRoomView } from './views/room/ModToolsRoomView';
+import { RoomToolView } from './views/RoomToolView';
 import { StartPanelView } from './views/StartPanelView';
 import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
 import { ModToolsUserChatlogView } from './views/user/ModToolsUserChatlogView';
@@ -166,7 +166,17 @@ export const ModToolsView: FC<{}> = () => {
                 />
             )}
             {openRooms.map((roomId) => (
-                <ModToolsRoomView key={roomId} roomId={roomId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-room-info/${roomId}`)} />
+                <RoomToolView
+                    key={roomId}
+                    currentRoomId={isInRoom ? currentRoomId : 0}
+                    roomId={roomId}
+                    settings={settings}
+                    x={295}
+                    y={64}
+                    onClose={() => CreateLinkEvent(`mod-tools/close-room-info/${roomId}`)}
+                    onOpenChatlog={(id) => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${id}`)}
+                    onOpenUserInfo={(id) => CreateLinkEvent(`mod-tools/toggle-user-info/${id}`)}
+                />
             ))}
             {openRoomChatlogs.map((roomId) => (
                 <ModToolsChatlogView key={roomId} roomId={roomId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-room-chatlog/${roomId}`)} />

@@ -129,7 +129,7 @@ export const NativeNodeView: FC<{ node: NativeNode; context: NativeLayoutContext
         case 'border':
             return (
                 <div className="native-border" data-native-name={name} style={rectStyle(node)}>
-                    <NativeSkinView atlas={borderSunkAtlas} atlasHeight={30} atlasWidth={30} height={nativeNumber(node, 'height')} layout="illumina_light_border_sunk" skin={BORDER_SUNK} width={nativeNumber(node, 'width')} />
+                    <NativeSkinView atlas={borderSunkAtlas} height={nativeNumber(node, 'height')} layout="illumina_light_border_sunk" skin={BORDER_SUNK} width={nativeNumber(node, 'width')} />
                 </div>
             );
         case 'itemlist':

@@ -56,8 +56,6 @@ describe('UI CSS ownership', () =>
         const roomSettingsCss = readSource('src/css/room/NavigatorRoomSettings.css');
         const indexCss = readSource('src/css/index.css');
         const wiredCss = readSource('src/css/WiredView.css');
-        const modToolsView = readSource('src/components/mod-tools/ModToolsView.tsx');
-        const modToolsRoomView = readSource('src/components/mod-tools/views/room/ModToolsRoomView.tsx');
         const modToolsTicketsView = readSource('src/components/mod-tools/views/tickets/ModToolsTicketsView.tsx');
         const modToolsUserView = readSource('src/components/mod-tools/views/user/ModToolsUserView.tsx');
         const inventoryView = readSource('src/components/inventory/InventoryView.tsx');
@@ -119,8 +117,6 @@ describe('UI CSS ownership', () =>
         expect(indexCss).toContain('[class*="octane-mod-tools-"] :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-white\\/70)');
         expect(wiredCss).toContain('.octane-wired__body');
         expect(wiredCss).toContain('overflow-y: auto');
-        expect(modToolsView).toContain('max-w-[calc(100vw-16px)]');
-        expect(modToolsRoomView).toContain('max-w-[calc(100vw-16px)]');
         expect(modToolsTicketsView).toContain('max-w-[calc(100vw-16px)]');
         expect(modToolsUserView).toContain('max-w-[calc(100vw-16px)]');
         expect(inventoryView).toContain('max-w-[calc(100vw-16px)]');

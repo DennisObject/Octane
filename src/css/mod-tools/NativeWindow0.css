@@ -1,0 +1,34 @@
+/* classic v75 window manager, legacy style 0 windows (blue frame 0xff418db0, Volter text) */
+.native0-frame { position: relative; margin: 0; padding: 0; pointer-events: auto; filter: drop-shadow(3px 3px 2px rgb(0 0 0 / 35%)); }
+.native0-frame *, .native0-frame *::before, .native0-frame *::after { box-sizing: border-box; }
+.native0-frame > .native-skin { position: absolute; left: 0; top: 0; }
+.native0-header, .native0-close, .native0-box, .native0-text, .native0-client { position: absolute; }
+.native0-header > .native-skin { position: absolute; left: 0; top: 0; }
+.native0-header__caption { position: absolute; display: flex; align-items: center; padding: 0 8px; background: #418db0; pointer-events: none; }
+.native0-header { cursor: move; user-select: none; }
+.native0-close { cursor: pointer; }
+.native0-box > .native-skin { position: absolute; left: 0; top: 0; }
+.native0-button { cursor: pointer; }
+.native0-button[data-native-enabled='false'] { cursor: default; }
+.native0-button__label { position: absolute; left: 0; top: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.native0-checkbox { cursor: pointer; }
+
+.native0-underline { position: absolute; height: 1px; pointer-events: none; }
+
+/* Volter text fields: 2px gutter, 10px line, pixel glyphs on whole pixels */
+.native0-text { padding: 2px; line-height: 10px; font: 400 9px/10px Volter, monospace; overflow: visible; }
+.native0-text__line { position: relative; left: 1px; font: 400 9px/10px Volter, monospace; white-space: nowrap; font-synthesis: none; }
+.native0-text__line.is-bold { font-weight: 700; }
+.native0-text__line.is-wrap { white-space: normal; overflow-wrap: break-word; display: block; }
+.native0-text__line.is-underline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.native0-header__caption .native0-text__line { color: #fff; }
+
+.native0-input { position: absolute; margin: 0; padding: 1px 1px 1px 2px; border: 1px solid #000; border-radius: 0; background: transparent; color: #000; font: 400 9px/10px Volter, monospace; resize: none; outline: none; overflow: hidden; caret-color: #000; }
+.native0-input.is-active { background: #fff; }
+.native0-dropmenu__region { position: absolute; inset: 0; cursor: pointer; }
+.native0-dropmenu__list { position: absolute; left: 0; z-index: 5; }
+.native0-dropmenu__list > .native-skin { position: absolute; left: 0; top: 0; }
+.native0-dropmenu__item { position: absolute; left: 3px; right: 3px; height: 16px; cursor: pointer; }
+.native0-dropmenu__item.is-hover { background: #d9d9d9; }
+.native0-dropmenu__item { z-index: 1; }
+.native0-text { white-space: nowrap; }
