@@ -78,6 +78,9 @@ export class AvatarInfoUtilities {
     }
 
     public static getFurniInfo(objectId: number, category: number): AvatarInfoFurni {
+        // Temporary objects, such as an offer dropped from the catalog, have no infostand.
+        if (objectId < 0) return null;
+
         const roomSession = GetRoomSession();
         const roomObject = GetRoomEngine().getRoomObject(roomSession.roomId, objectId, category);
 
