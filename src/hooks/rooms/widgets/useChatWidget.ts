@@ -196,7 +196,7 @@ const useChatWidgetState = () => {
 
             switch (userType) {
                 case RoomObjectType.PET:
-                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
+                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 32, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
                     break;
                 case RoomObjectType.USER:
                     imagePromise = ChatBubbleUtilities.getUserImage(figure).catch(() => null);
