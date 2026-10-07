@@ -432,7 +432,7 @@ export const BadgeLeaderboardView: FC<{}> = () => {
                                     type="button"
                                     onClick={() => show(option.type, option.rarity, 0)}
                                 >
-                                    <LeaderboardText size={11} value={option.label} x={2} y={1} />
+                                    <LeaderboardText size={11} value={option.label} x={4} y={1} />
                                 </button>
                             ))}
                         </div>
