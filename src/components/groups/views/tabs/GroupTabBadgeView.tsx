@@ -26,7 +26,7 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
 
         let badgeCode = '';
 
-        badgeParts.forEach((part) => part.code && (badgeCode += part.code));
+        badgeParts.forEach((part) => part.previewCode && (badgeCode += part.previewCode));
 
         return badgeCode;
     };
@@ -52,7 +52,8 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
         const badge = [];
 
         badgeParts.forEach((part) => {
-            if (!part.code) return;
+            // The v75 client sends only the layers that hold a part, an unset base included.
+            if (!part.previewCode) return;
 
             badge.push(part.key);
             badge.push(part.color);

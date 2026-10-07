@@ -6,6 +6,7 @@ import groupTypeIcon1 from '../../../../assets/images/groups/native/grouptype_ic
 import groupTypeIcon2 from '../../../../assets/images/groups/native/grouptype_icon_2.png';
 import { useNotification } from '../../../../hooks';
 import { GroupBox, GroupText } from '../GroupNativeLayout';
+import { GroupRichText } from '../GroupRichText';
 
 const STATES: string[] = ['regular', 'exclusive', 'private'];
 const TYPE_ICONS: string[] = [groupTypeIcon0, groupTypeIcon1, groupTypeIcon2];
@@ -93,7 +94,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
                             <Check checked={groupState === index} kind="radio" x={5} y={7 + index * 60} onSelect={() => setGroupState(index)} />
                             <GroupText text={LocalizeText(`group.edit.settings.type.${state}.label`)} textStyle="u_bold" x={25} y={5 + index * 60} />
                             <img alt="" className="octane-group-native__type-icon" draggable={false} src={TYPE_ICONS[index]} style={{ left: 5, top: 27 + index * 60 }} />
-                            <GroupText height={45} text={LocalizeText(`group.edit.settings.type.${state}.help`)} width={132} wrap x={25} y={20 + index * 60} />
+                            <GroupRichText html={LocalizeText(`group.edit.settings.type.${state}.help`)} width={132} x={25} y={20 + index * 60} />
                         </div>
                     ))}
                 </GroupBox>
@@ -103,14 +104,14 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
                 <GroupBox height={135} kind="tan" width={162} x={4} y={4}>
                     <Check checked={groupDecorate} kind="checkbox" x={5} y={5} onSelect={() => setGroupDecorate((value) => !value)} />
                     <GroupText text={LocalizeText('group.edit.settings.rights.members.label')} textStyle="u_bold" x={25} y={5} />
-                    <GroupText height={100} text={LocalizeText('group.edit.settings.rights.members.help')} width={152} wrap x={5} y={25} />
+                    <GroupRichText html={LocalizeText('group.edit.settings.rights.members.help')} width={152} x={5} y={25} />
                 </GroupBox>
             </GroupBox>
             <GroupBox height={86} kind="white" width={170} x={207} y={179}>
                 <GroupBox height={78} kind="tan" width={162} x={4} y={4}>
                     <Check checked={groupForum} kind="checkbox" x={5} y={5} onSelect={handleForumToggle} />
                     <GroupText text={localizeWithFallback('group.forum.enable.caption', 'Enable / Disable group forum')} textStyle="u_bold" x={25} y={5} />
-                    <GroupText height={50} text={localizeWithFallback('group.forum.enable.help', 'Members can open the group forum while this option is enabled.')} width={152} wrap x={5} y={25} />
+                    <GroupRichText html={localizeWithFallback('group.forum.enable.help', 'Members can open the group forum while this option is enabled.')} width={152} x={5} y={25} />
                 </GroupBox>
             </GroupBox>
         </div>

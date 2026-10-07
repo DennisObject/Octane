@@ -42,7 +42,8 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
         const badge = [];
 
         groupData.groupBadgeParts.forEach((part) => {
-            if (part.code) {
+            // The v75 client sends only the layers that hold a part, an unset base included.
+            if (part.previewCode) {
                 badge.push(part.key);
                 badge.push(part.color);
                 badge.push(part.position);

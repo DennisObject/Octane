@@ -11,12 +11,12 @@ import { GroupTabSettingsView } from './tabs/GroupTabSettingsView';
 
 const TABS: number[] = [1, 2, 3, 5];
 
-// edit_guild_tab_context sits at (-6, 89): [x, width] of its four tab_buttons.
-const TAB_RECTS: [number, number][] = [
-    [-6, 97],
-    [91, 101],
-    [192, 101],
-    [293, 101]
+// edit_guild_tab_context sits at (-6, 89); its tab_buttons scale to their captions: [x, width, caption shift] as drawn by the v75 client.
+const TAB_RECTS: [number, number, number][] = [
+    [0, 78, 2],
+    [77, 77, 1],
+    [152, 77, 1],
+    [227, 82, 2]
 ];
 
 export const GroupManagerView: FC<{}> = (props) => {
@@ -103,11 +103,11 @@ export const GroupManagerView: FC<{}> = (props) => {
                         <button
                             key={tab}
                             className={`octane-group-native__tab${currentTab === tab ? ' is-selected' : ''}`}
-                            style={{ left: TAB_RECTS[index][0], width: TAB_RECTS[index][1] }}
+                            style={{ left: TAB_RECTS[index][0], width: TAB_RECTS[index][1], paddingLeft: TAB_RECTS[index][2] * 2 }}
                             type="button"
                             onClick={() => changeTab(tab)}
                         >
-                            <GroupText blend="multiply" className="is-static" text={LocalizeText(`group.edit.tab.${tab}`)} x={0} y={0} />
+                            <GroupText blend="multiply" className="is-static" text={LocalizeText(`group.edit.tab.${tab}`)} textStyle="button_tab" x={0} y={0} />
                         </button>
                     ))}
                 </div>

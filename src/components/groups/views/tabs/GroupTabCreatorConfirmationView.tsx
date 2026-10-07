@@ -22,7 +22,7 @@ export const GroupTabCreatorConfirmationView: FC<GroupTabCreatorConfirmationView
 
         let badgeCode = '';
 
-        groupData.groupBadgeParts.forEach((part) => part.code && (badgeCode += part.code));
+        groupData.groupBadgeParts.forEach((part) => part.previewCode && (badgeCode += part.previewCode));
 
         return badgeCode;
     };

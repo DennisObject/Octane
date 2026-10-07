@@ -14,7 +14,6 @@ interface GroupTabColorsViewProps {
 
 // step_cont_3 sits at client y=110.
 const STEP_Y = 110;
-const DEFAULT_SECONDARY_COLOR = 'ffd601';
 
 export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     const { groupData = null, setGroupData = null, setCloseAction = null } = props;
@@ -72,9 +71,8 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     useEffect(() => {
         if (!groupCustomize?.groupColorsA?.length || !groupCustomize?.groupColorsB?.length || (groupData.groupColors && groupData.groupColors.length)) return;
 
-        // The layout opens with the first primary swatch and the gold secondary swatch selected.
-        const gold = groupCustomize.groupColorsB.find((item) => item.color === DEFAULT_SECONDARY_COLOR) ?? groupCustomize.groupColorsB[0];
-        const groupColors = [groupCustomize.groupColorsA[0].id, gold.id];
+        // The v75 layout opens with a different default each session (gold/gold, white/gold, white/white were all observed): first swatch of each list.
+        const groupColors = [groupCustomize.groupColorsA[0].id, groupCustomize.groupColorsB[0].id];
 
         setGroupData((prevValue) => {
             return { ...prevValue, groupColors };

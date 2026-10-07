@@ -62,8 +62,8 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
 
     if (!groupCustomize || !badgeParts || !badgeParts.length) return null;
 
-    // Symbol layers first, the base last (the part list is stored base first).
-    const layerOrder = [...badgeParts.keys()].slice(1).concat(0);
+    // The last symbol layer is listed first and the base last (the part list is stored base first).
+    const layerOrder = [...badgeParts.keys()].slice(1).reverse().concat(0);
 
     const renderLayer = (partIndex: number, y: number) => {
         const part = badgeParts[partIndex];
@@ -73,9 +73,9 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
             <div key={partIndex} className="octane-group-native__layer" style={{ left: EDIT_X, top: y }}>
                 <GroupBox height={49} kind="dark" width={247} x={0} y={0} />
                 <button className="octane-group-native__layer-part" type="button" onClick={() => setSelectedIndex(partIndex)}>
-                    {part.code ? (
+                    {part.previewCode ? (
                         <div className="octane-group-native__badge">
-                            <LayoutBadgeImageView badgeCode={part.code} isGroup={true} />
+                            <LayoutBadgeImageView badgeCode={part.previewCode} isGroup={true} />
                         </div>
                     ) : (
                         <img alt="" className="octane-group-native__badge" draggable={false} src={badgePartAdd} />

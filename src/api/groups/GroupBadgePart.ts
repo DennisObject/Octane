@@ -15,6 +15,13 @@ export class GroupBadgePart {
     }
 
     public get code(): string {
+        if (this.key === 0 && this.type !== GroupBadgePart.BASE) return null;
+
+        return GroupBadgePart.getCode(this.type, this.key, this.color, this.position);
+    }
+
+    /** The code to draw: a layer without a part (key 0, including an unset base) draws nothing. */
+    public get previewCode(): string {
         if (this.key === 0) return null;
 
         return GroupBadgePart.getCode(this.type, this.key, this.color, this.position);

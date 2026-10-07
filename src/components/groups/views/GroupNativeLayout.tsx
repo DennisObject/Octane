@@ -159,32 +159,64 @@ interface GroupInputProps {
     onChange: (value: string) => void;
 }
 
-/** An editable input TextField: the browser keeps focus, caret and selection, the glyphs are the v75 raster drawn over it. */
-export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, onChange }) => (
-    <div className={`octane-group-native__field${multiline ? ' is-multiline' : ''}`} style={{ left: x, top: y, width, height }}>
-        {multiline ? (
-            <textarea
-                aria-label={label}
-                className="octane-group-native__input"
-                maxLength={maxLength}
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-            />
-        ) : (
-            <input
-                aria-label={label}
-                className="octane-group-native__input"
-                maxLength={maxLength}
-                type="text"
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-            />
-        )}
-        <div aria-hidden="true" className="octane-group-native__field-text">
-            <NativeText background={0xffffff} maxWidth={multiline ? width : undefined} overrides={flatText(13)} text={value} textStyle="u_regular" />
+/**
+ * An editable input TextField. The browser input keeps its own visible text while it has focus or whenever the v75 raster would not
+ * sit inside the field (overflow, unsupported glyphs), so caret, selection, scrolling and IME stay the browser's; at rest the
+ * v75 raster is drawn over the input.
+ */
+export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, onChange }) => {
+    const overlayRef = useRef<HTMLDivElement>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [rasterFits, setRasterFits] = useState(false);
+
+    // The raster fits when it was drawn natively (no glyph fallback) and stays inside the bordered field.
+    useLayoutEffect(() => {
+        const overlay = overlayRef.current;
+        const field = overlay?.firstElementChild as HTMLElement | null;
+
+        if (!field) return;
+
+        const measure = () => {
+            const isNative = field.dataset.nativeText !== 'fallback';
+
+            setRasterFits(isNative && field.offsetWidth <= width - 2 && field.offsetHeight <= height - 2);
+        };
+        const observer = new ResizeObserver(measure);
+        const mutations = new MutationObserver(measure);
+
+        measure();
+        observer.observe(field);
+        mutations.observe(field, { attributes: true, attributeFilter: ['data-native-text'] });
+
+        return () => {
+            observer.disconnect();
+            mutations.disconnect();
+        };
+    }, [value, width, height, multiline]);
+
+    const showRaster = !isEditing && rasterFits && value.length > 0;
+    const inputProps = {
+        'aria-label': label,
+        className: 'octane-group-native__input' + (showRaster ? ' is-raster' : ''),
+        maxLength,
+        value,
+        onBlur: () => setIsEditing(false),
+        onFocus: () => setIsEditing(true)
+    };
+
+    return (
+        <div className={`octane-group-native__field${multiline ? ' is-multiline' : ''}`} style={{ left: x, top: y, width, height }}>
+            {multiline ? (
+                <textarea {...inputProps} onChange={(event) => onChange(event.target.value)} />
+            ) : (
+                <input {...inputProps} type="text" onChange={(event) => onChange(event.target.value)} />
+            )}
+            <div ref={overlayRef} aria-hidden="true" className={`octane-group-native__field-text${showRaster ? '' : ' is-hidden'}`}>
+                <NativeText background={0xffffff} maxWidth={multiline ? width : undefined} overrides={flatText(13)} text={value} textStyle="u_regular" />
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 /** The frame caption: u_frame_title drawn with the v75 raster, centred across the whole window. */
 export const GroupWindowTitle: FC<{ title: string; width: number }> = ({ title, width }) => (

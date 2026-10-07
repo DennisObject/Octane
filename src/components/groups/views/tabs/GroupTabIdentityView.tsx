@@ -102,13 +102,14 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
                     <GroupBox height={94} kind="white" width={94} x={17} y={11}>
                         <GroupBox height={86} kind="tan" width={86} x={4} y={4} />
                         <div className="octane-group-native__badge" style={{ left: 27, top: 27 }}>
-                            <LayoutBadgeImageView badgeCode={groupData.groupBadgeParts.map((part) => part.code || '').join('')} isGroup={true} />
+                            <LayoutBadgeImageView badgeCode={groupData.groupBadgeParts.map((part) => part.previewCode || '').join('')} isGroup={true} />
                         </div>
                     </GroupBox>
                     <GroupText
                         align="center"
                         className="is-link"
                         overrides={{ underline: true }}
+                        textStyle="u_bold"
                         text={LocalizeText('group.membercount', ['totalMembers'], [String(groupData.groupMembersCount ?? 0)])}
                         width={94}
                         x={17}
@@ -117,6 +118,7 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
                             if (saveIdentity()) GetGroupMembers(groupData.groupId);
                         }}
                     />
+                    {/* The v75 client offers delete from the group information window; kept here until that window carries it. */}
                     <GroupText
                         align="center"
                         className="is-link"

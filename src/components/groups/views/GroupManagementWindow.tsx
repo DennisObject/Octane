@@ -53,6 +53,8 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
     children
 }) => {
     const [alert, setAlert] = useState<GroupAlert>(null);
+    // Without the step header (edit mode) the header band's picture and captions sit higher.
+    const isEditing = step === 0;
 
     return (
         <GroupAlertContext.Provider value={setAlert}>
@@ -100,7 +102,13 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                             })}
                         </div>
                     )}
-                    <img alt="" className="octane-group-native__header-image" draggable={false} src={HEADER_IMAGES[headerImageStep]} />
+                    <img
+                        alt=""
+                        className="octane-group-native__header-image"
+                        draggable={false}
+                        src={HEADER_IMAGES[headerImageStep]}
+                        style={{ top: isEditing ? 0 : 36 }}
+                    />
                     <GroupText
                         background={GROUP_HEADER_SURFACE}
                         height={24}
@@ -108,7 +116,7 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                         text={caption}
                         width={263}
                         x={126}
-                        y={43}
+                        y={isEditing ? 23 : 43}
                     />
                     <GroupText
                         background={GROUP_HEADER_SURFACE}
@@ -118,7 +126,7 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                         text={description}
                         width={232}
                         x={126}
-                        y={69}
+                        y={isEditing ? 52 : 69}
                     />
                     {tabs}
                     {children}
