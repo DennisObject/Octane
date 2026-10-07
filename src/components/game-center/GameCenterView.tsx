@@ -1,18 +1,10 @@
-import { AddLinkEventTracker, Game2GetAccountGameStatusMessageComposer, GetGameStatusMessageComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { useEffect } from 'react';
-import { LocalizeText, SendMessageComposer } from '../../api';
-import { useGameCenter } from '../../hooks';
-import { GameStageView } from './views/GameStageView';
-import { GameTileView } from './views/GameTileView';
-
-const localizeWithFallback = (key: string, fallback: string) =>
-{
-    const text = LocalizeText(key);
-    return text && text !== key ? text : fallback;
-};
+import { useGameCenter, useSnowWar } from '../../hooks';
 
 export const GameCenterView = () => {
-    const { isVisible, setIsVisible, games, selectedGame, accountStatus } = useGameCenter();
+    const { isVisible, setIsVisible } = useGameCenter();
+    const { refreshStatus } = useSnowWar();
 
     useEffect(() => {
         const toggleGameCenter = () => {
@@ -38,24 +30,9 @@ export const GameCenterView = () => {
     }, [setIsVisible]);
 
     useEffect(() => {
-        if (!selectedGame) return;
+        if (isVisible) refreshStatus();
+    }, [isVisible, refreshStatus]);
 
-        SendMessageComposer(new GetGameStatusMessageComposer(selectedGame.gameId));
-        SendMessageComposer(new Game2GetAccountGameStatusMessageComposer(selectedGame.gameId));
-    }, [selectedGame]);
-
-    if (!isVisible || !games || !accountStatus) return;
-
-    return (
-        <div className="game-center-main">
-            <div className="game-center-header">
-                <div className="game-center-header__title">{localizeWithFallback('gamecenter.game_list_title', 'Choose a game')}</div>
-                <button className="game-center-header__close" type="button" onClick={() => setIsVisible(false)}>&times;</button>
-            </div>
-            <div className="game-tile-grid">
-                {games.map((game) => <GameTileView key={game.gameId} game={game} />)}
-            </div>
-            <GameStageView />
-        </div>
-    );
+    // The AIR games_main window renders here.
+    return null;
 };

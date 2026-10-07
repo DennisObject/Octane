@@ -1,798 +1,750 @@
 import {
+    Game2AccountGameStatusMessageEvent,
+    Game2CheckGameDirectoryStatusMessageComposer,
+    Game2EnterArenaFailedMessageEvent,
+    Game2EnterArenaMessageEvent,
+    Game2ExitGameMessageComposer,
+    Game2FriendsLeaderboardEvent,
+    Game2FullGameStatusMessageEvent,
+    Game2GameCancelledMessageEvent,
+    Game2GameChatMessageComposer,
+    Game2GameChatMessageEvent,
+    Game2GameCreatedMessageEvent,
+    Game2GameDirectoryStatusMessageEvent,
+    Game2GameEndingMessageEvent,
+    Game2GameLongDataMessageEvent,
+    Game2GameStartedMessageEvent,
+    Game2GameStatusMessageEvent,
+    Game2GetAccountGameStatusMessageComposer,
+    Game2GetFriendsLeaderboardComposer,
+    Game2GetTotalGroupLeaderboardComposer,
+    Game2GetTotalLeaderboardComposer,
+    Game2GetWeeklyFriendsLeaderboardComposer,
+    Game2GetWeeklyGroupLeaderboardComposer,
+    Game2GetWeeklyLeaderboardComposer,
+    Game2InArenaQueueMessageEvent,
+    Game2JoiningGameFailedMessageEvent,
+    Game2LeaveLobbyMessageComposer,
+    Game2PlayAgainMessageComposer,
+    Game2PlayerRematchesMessageEvent,
+    Game2QuickJoinMessageComposer,
+    Game2RejoinPreviousRoomMessageEvent,
+    Game2StageEndingMessageEvent,
+    Game2StageLoadMessageEvent,
+    Game2StageRunningMessageEvent,
+    Game2StageStartingMessageEvent,
+    Game2StageStillLoadingMessageEvent,
+    Game2StartCounterMessageEvent,
+    Game2StartingGameFailedMessageEvent,
+    Game2StopCounterMessageEvent,
+    Game2TotalGroupLeaderboardEvent,
+    Game2TotalLeaderboardEvent,
+    Game2UserBlockedMessageEvent,
+    Game2UserJoinedGameMessageEvent,
+    Game2UserLeftGameMessageEvent,
     Game2WeeklyFriendsLeaderboardEvent,
+    Game2WeeklyGroupLeaderboardEvent,
     Game2WeeklyLeaderboardEvent,
-    SnowWarCreateSnowballComposer,
-    SnowWarEditRoomComposer,
-    SnowWarExitEditorComposer,
-    SnowWarExitGameComposer,
-    SnowWarFullGameStatusEvent,
-    SnowWarGameChatComposer,
-    SnowWarGameEndedEvent,
-    SnowWarGameStatusEvent,
-    SnowWarGamesInformationEvent,
-    SnowWarGamesLeftEvent,
-    SnowWarGenericErrorEvent,
-    SnowWarGetAllTimeFriendsLeaderboardComposer,
-    SnowWarGetAllTimeLeaderboardComposer,
-    SnowWarGetWeeklyFriendsLeaderboardComposer,
-    SnowWarGetWeeklyLeaderboardComposer,
-    SnowWarInitArenaEvent,
-    SnowWarJoinQueueComposer,
-    SnowWarLeaveQueueComposer,
-    SnowWarLevelDataEvent,
-    SnowWarLoadStageReadyComposer,
-    SnowWarLobbyTeamsEvent,
-    SnowWarOnGameEndingEvent,
-    SnowWarOnStageEndingEvent,
-    SnowWarOnStageRunningEvent,
-    SnowWarOnStageStartEvent,
-    SnowWarPlayAgainComposer,
-    SnowWarPlayerExitedArenaEvent,
-    SnowWarQueuePositionEvent,
-    SnowWarRejoinPreviousRoomEvent,
-    SnowWarRequestFullGameStatusComposer,
-    SnowWarSaveEditorComposer,
-    SnowWarSelectArenaComposer,
-    SnowWarStartLobbyCounterEvent,
-    SnowWarThrowAtLocationComposer,
-    SnowWarThrowAtPlayerComposer,
-    SnowWarUserChatEvent,
-    SnowWarUserRematchedEvent,
-    SnowWarWalkComposer,
-    WeeklyCompetitiveFriendsLeaderboardEvent,
-    WeeklyCompetitiveLeaderboardEvent,
+    GameLevelData,
+    GameLobbyData,
+    GameLobbyPlayerData,
+    GetSnowWarGameTokensOfferComposer,
+    LeaderboardEntry,
+    PurchaseSnowWarGameTokensOfferComposer,
+    SnowWarGameTokensMessageEvent
 } from '@octane/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
-import { PlaySound, SendMessageComposer, SoundNames, TryVisitRoom } from '../../api';
+import { GetConfigurationValue, GetRoomSession, GetSessionDataManager, PlaySound, SendMessageComposer, TryVisitRoom, VisitDesktop } from '../../api';
 import {
     consumeSnowWarReturnRoom,
-    SNOWWAR_EVENT_MACHINE_TRANSFER,
-    SnowWarSimEvent,
-    SnowWarSimulation,
-    SUBTURN_MS,
-    SUBTURNS_PER_TICK,
-    snowWarDeadlineFromSeconds,
-    snowWarSecondsRemaining,
+    setSnowWarReturnRoom,
+    SnowWarAccountStatus,
+    SnowWarChatMessage,
+    SnowWarDirectoryStatus,
+    SnowWarEngine,
+    SnowWarEngineState,
+    SnowWarEngineStateId,
+    SnowWarHookState,
+    SnowWarLeaderboard,
+    SnowWarLeaderboardEntry,
+    SnowWarLeaderboardKind,
+    SnowWarLeaderboardRequest,
+    SnowWarLevel,
+    SnowWarLoadingState,
+    SnowWarLobbyData,
+    SnowWarLobbyPlayer,
+    SnowWarLobbyState,
+    SnowWarResults,
+    SnowWarTokenOffer
 } from '../../api/snowwar';
 import { useMessageEvent } from '../events';
 
-export type SnowWarPhase =
-    | 'idle'
-    | 'queued'
-    | 'lobby'
-    | 'loading'
-    | 'preparing'
-    | 'playing'
-    | 'ending'
-    | 'results';
+const SNOWSTORM_GAME_TYPE = 0;
+const MAX_CHAT_MESSAGES = 50;
 
-export interface SnowWarLevelState {
-    gameLengthSeconds: number;
-    canEditRoom: boolean;
-    arenaName: string;
-    mapId: number;
-    teamCount: number;
-    heightmapRows: string[];
-    items: { name: string; x: number; y: number; rotation: number; imageUrl: string; offsetZ: number; walkableHeight?: number; width?: number; length?: number; state?: number; stateCount?: number }[];
-    machines: { objectId: number; x: number; y: number }[];
-    players: { objectId: number; userId: number; teamId: number; name: string; figure: string; gender: string }[];
-}
+// One engine per client: the arena view reads it every frame; the hook drives its state machine.
+const SNOWWAR_ENGINE = new SnowWarEngine({
+    send: composer => SendMessageComposer(composer),
+    playSound: name => PlaySound(name),
+    getOwnUser: () => ({ userId: GetSessionDataManager().userId, userName: GetSessionDataManager().userName })
+});
 
-export interface SnowWarLobbyTeamsState {
-    teamCount: number;
-    leaderUserId: number;
-    selectedArenaId: number;
-    arenas: { id: number; name: string; official: boolean }[];
-    players: { userId: number; teamId: number; name: string; figure: string; gender: string }[];
-}
+const toLobbyPlayer = (player: GameLobbyPlayerData): SnowWarLobbyPlayer => ({
+    userId: player.userId,
+    name: player.name,
+    figure: player.figure,
+    gender: player.gender,
+    teamId: player.teamId,
+    skillLevel: player.skillLevel,
+    totalScore: player.totalScore,
+    scoreToNextLevel: player.scoreToNextLevel
+});
 
-export interface SnowWarResultsState {
-    secondsToResults: number;
-    teams: {
-        teamId: number;
-        score: number;
-        players: { userId: number; name: string; score: number }[];
-    }[];
-}
+const toLobbyData = (data: GameLobbyData): SnowWarLobbyData => ({
+    gameId: data.gameId,
+    levelName: data.levelName,
+    gameType: data.gameType,
+    fieldType: data.fieldType,
+    numberOfTeams: data.numberOfTeams,
+    maximumPlayers: data.maximumPlayers,
+    owningPlayerName: data.owningPlayerName,
+    levelEntryId: data.levelEntryId,
+    players: data.players.map(toLobbyPlayer)
+});
 
-export interface SnowWarChatMessage {
-    id: number;
-    objectId: number;
-    name: string;
-    message: string;
-    receivedAt: number;
-}
+const toLevel = (level: GameLevelData): SnowWarLevel => ({
+    width: level.width,
+    height: level.height,
+    heightMap: level.heightMap,
+    fuseObjects: level.fuseObjects.map(fuse => ({
+        name: fuse.name,
+        id: fuse.id,
+        x: fuse.x,
+        y: fuse.y,
+        xDimension: fuse.xDimension,
+        yDimension: fuse.yDimension,
+        height: fuse.height,
+        direction: fuse.direction,
+        altitude: fuse.altitude,
+        canStandOn: fuse.canStandOn,
+        state: fuse.stuffData?.getLegacyString() ?? ''
+    }))
+});
 
-export interface SnowWarLeaderboardState {
-    isOpen: boolean;
-    weekly: boolean;
-    friendsOnly: boolean;
-    loading: boolean;
-    year: number;
-    week: number;
-    maxOffset: number;
-    currentOffset: number;
-    minutesUntilReset: number;
-    totalListSize: number;
-    entries: { userId: number; score: number; rank: number; name: string; figure: string; gender: string }[];
-}
+const toLeaderboardEntries = (entries: LeaderboardEntry[]): SnowWarLeaderboardEntry[] =>
+    entries.map(entry => ({ userId: entry.userId, score: entry.score, rank: entry.rank, name: entry.name, figure: entry.figure, gender: entry.gender }));
 
-// One shared world per session — the arena view reads it every animation frame.
-const SNOWWAR_SIMULATION = new SnowWarSimulation();
+const emptyLeaderboard = (kind: SnowWarLeaderboardKind): SnowWarLeaderboard => ({
+    kind,
+    entries: [],
+    totalListSize: 0,
+    year: 0,
+    week: 0,
+    maxOffset: 0,
+    currentOffset: 0,
+    minutesUntilReset: 0,
+    favouriteGroupId: 0
+});
 
-// Dev-only console handle: Vite serves HMR-updated modules under versioned
-// URLs, so a plain dynamic import from devtools gets a second instance. This
-// is the only reliable way to inspect the live replica while debugging.
-if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) (window as Window & { __SNOWWAR_SIM?: SnowWarSimulation }).__SNOWWAR_SIM = SNOWWAR_SIMULATION;
-
-// Sounds fire when the replica APPLIES an event, not when the packet lands —
-// the replay can trail the wire by a few subturns, and AIR keys its audio off
-// the engine replay too, so this keeps what you hear matched to what you see.
-SNOWWAR_SIMULATION.onEventApplied = event =>
+/** `class_1951.onJoiningGameFailed`. */
+const joiningFailedKey = (reason: number): string =>
 {
-    switch (event.type)
+    switch(reason)
     {
-        case 3:
-            PlaySound(SoundNames.SNOWWAR_MAKE_SNOWBALL);
-            break;
-        case 4:
-        case 10:
-            PlaySound(SoundNames.SNOWWAR_THROW);
-            break;
-        case 5:
-            PlaySound(SoundNames.SNOWWAR_HIT);
-            break;
-        case SNOWWAR_EVENT_MACHINE_TRANSFER:
-            PlaySound(SoundNames.SNOWWAR_GET_SNOWBALL);
-            break;
-        case 9:
-            PlaySound(SoundNames.SNOWWAR_STUN);
-            break;
+        case 2: return 'snowwar.error.duplicate_machineid';
+        case 6:
+        case 7: return 'snowwar.error.has_active_instance';
+        case 8: return 'snowwar.error.no_free_games_left';
+        default: return 'snowwar.error.generic';
     }
 };
 
-const SNOWWAR_QUEUE_MAX_WAIT_MS = 120000;
-
-let CHAT_MESSAGE_ID = 0;
-
-export const GetSnowWarSimulation = (): SnowWarSimulation => SNOWWAR_SIMULATION;
-
-/** Map a parsed subturn event onto the simulation's positional event shape. */
-const toSimEvent = (event: {
-    eventType: number;
-    objectId: number;
-    throwerObjectId: number;
-    targetObjectId: number;
-    targetX: number;
-    targetY: number;
-    trajectory: number;
-    direction: number;
-    machineObjectId: number;
-    avatarObjectId: number;
-    height: number;
-    state: number;
-}): SnowWarSimEvent =>
+/** `GameEndingViewController.changeToWaitState`: rematching players stay, the rest leave the screen. */
+const toWaitState = (results: SnowWarResults, rematching: boolean): SnowWarResults =>
 {
-    switch (event.eventType)
-    {
-        case 2: return { type: 2, p1: event.objectId, p2: event.targetX, p3: event.targetY, p4: 0, p5: 0 };
-        case 3: return { type: 3, p1: event.objectId, p2: 0, p3: 0, p4: 0, p5: 0 };
-        case 4: return {
-            type: 4,
-            p1: event.objectId,
-            p2: event.throwerObjectId,
-            p3: event.targetX,
-            p4: event.targetY,
-            p5: event.trajectory,
-        };
-        case 5: return { type: 5, p1: event.throwerObjectId, p2: event.targetObjectId, p3: event.direction, p4: 0, p5: 0 };
-        case 11: return { type: 11, p1: event.machineObjectId, p2: 0, p3: 0, p4: 0, p5: 0 };
-        case 12: return { type: 12, p1: event.avatarObjectId, p2: event.machineObjectId, p3: 0, p4: 0, p5: 0 };
-        case 8: return { type: 8, p1: event.objectId, p2: event.targetX, p3: event.targetY, p4: event.height, p5: event.trajectory };
-        case 9: return { type: 9, p1: event.targetObjectId, p2: event.throwerObjectId, p3: event.direction, p4: 0, p5: 0 };
-        case 10: return {
-            type: 10,
-            p1: event.objectId,
-            p2: event.throwerObjectId,
-            p3: event.targetX,
-            p4: event.targetY,
-            p5: event.trajectory,
-        };
-        case 13: return { type: 13, p1: event.targetX, p2: event.targetY, p3: event.state, p4: 0, p5: 0 };
-        default: return { type: event.eventType, p1: 0, p2: 0, p3: 0, p4: 0, p5: 0 };
-    }
+    if(!rematching) return { ...results, mode: 'afterSki', rematchUserIds: [] };
+
+    return {
+        ...results,
+        mode: 'waiting',
+        countdownDeadline: null,
+        teams: results.teams.map(team => ({ ...team, players: team.players.filter(player => results.rematchUserIds.includes(player.userId)) }))
+    };
 };
 
-const useSnowWarState = () =>
+const useSnowWarState = (): SnowWarHookState =>
 {
-    const [phase, setPhase] = useState<SnowWarPhase>('idle');
-    const [queuePosition, setQueuePosition] = useState(0);
-    const [queueSize, setQueueSize] = useState(0);
-    const [lobbySeconds, setLobbySeconds] = useState(0);
-    const [preparingSeconds, setPreparingSeconds] = useState(0);
-    const [secondsLeft, setSecondsLeft] = useState(0);
-    const [levelData, setLevelData] = useState<SnowWarLevelState>(null);
-    const [lobbyTeams, setLobbyTeams] = useState<SnowWarLobbyTeamsState>(null);
-    const [results, setResults] = useState<SnowWarResultsState>(null);
-    const [chatMessages, setChatMessages] = useState<SnowWarChatMessage[]>([]);
-    const [rematchedUserIds, setRematchedUserIds] = useState<number[]>([]);
-    const [errorCode, setErrorCode] = useState<number>(null);
-    const [queueExpired, setQueueExpired] = useState(false);
-    const [gamesLeft, setGamesLeft] = useState(-1);
-    const [queueInfo, setQueueInfo] = useState<{ playersInQueue: number; gamesPlayed: number; minPlayers: number; canEdit: boolean }>(null);
-    const [leaderboard, setLeaderboard] = useState<SnowWarLeaderboardState>({
-        isOpen: false,
-        weekly: true,
-        friendsOnly: false,
-        loading: false,
-        year: 0,
-        week: 0,
-        maxOffset: 0,
-        currentOffset: 0,
-        minutesUntilReset: 0,
-        totalListSize: 0,
-        entries: [],
-    });
-    // In-arena WYSIWYG editor: the client edits the current level snapshot and
-    // publishes it with the save packet. editingRef mirrors it for the stable
-    // packet callbacks (which capture [] deps).
-    const [editing, setEditing] = useState(false);
-    const editingRef = useRef(false);
-    // AIR stamps every arena action with the last authoritative turn and the
-    // locally replayed subturn. Polaris keeps these fields optional server-side
-    // so older custom clients remain compatible.
-    const protocolTurnRef = useRef(0);
-    const lobbyDeadlineRef = useRef<number | null>(null);
-    const preparingDeadlineRef = useRef<number | null>(null);
-    const gameDeadlineRef = useRef<number | null>(null);
-    const lastWalkSentAtRef = useRef(0);
-    const queuedWalkRef = useRef<{ worldX: number; worldY: number } | null>(null);
-    const walkFlushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [ state, setState ] = useState<SnowWarEngineStateId>(SNOWWAR_ENGINE.state);
+    const [ directory, setDirectory ] = useState<SnowWarDirectoryStatus>(null);
+    const [ account, setAccount ] = useState<SnowWarAccountStatus>(null);
+    const [ blockLength, setBlockLength ] = useState(0);
+    const [ lobby, setLobby ] = useState<SnowWarLobbyState>(null);
+    const [ loading, setLoading ] = useState<SnowWarLoadingState>(null);
+    const [ results, setResultsState ] = useState<SnowWarResults>(null);
+    const [ leaderboard, setLeaderboard ] = useState<SnowWarLeaderboard>(null);
+    const [ tokenOffers, setTokenOffers ] = useState<SnowWarTokenOffer[]>([]);
+    const [ chatMessages, setChatMessages ] = useState<SnowWarChatMessage[]>([]);
+    const [ error, setError ] = useState<string>(null);
+    const [ roomBeforeGame, setRoomBeforeGameState ] = useState(-1);
 
-    const getProtocolClock = useCallback((): [number, number] => [
-        Math.max(0, protocolTurnRef.current),
-        SNOWWAR_SIMULATION.subturnCount % SUBTURNS_PER_TICK,
-    ], []);
+    // AIR `var_475`: the player asked for a rematch (or the server opened the rematch lobby).
+    const rematchRequestedRef = useRef(false);
+    const resultsRef = useRef<SnowWarResults>(null);
+    const roomBeforeGameRef = useRef(-1);
+    const returnedToRoomRef = useRef(true);
+    const playersRef = useRef(new Map<number, SnowWarLobbyPlayer>());
+    const chatIdRef = useRef(0);
 
-    const resetToIdle = useCallback(() =>
+    useEffect(() => SNOWWAR_ENGINE.on('stateChanged', event => setState(event.state)), []);
+
+    const setResults = useCallback((update: (current: SnowWarResults) => SnowWarResults) =>
     {
-        SNOWWAR_SIMULATION.reset();
-        protocolTurnRef.current = 0;
-        lobbyDeadlineRef.current = null;
-        preparingDeadlineRef.current = null;
-        gameDeadlineRef.current = null;
-        lastWalkSentAtRef.current = 0;
-        queuedWalkRef.current = null;
-        if (walkFlushTimerRef.current !== null) clearTimeout(walkFlushTimerRef.current);
-        walkFlushTimerRef.current = null;
-        editingRef.current = false;
-        setEditing(false);
-        setPhase('idle');
-        setQueuePosition(0);
-        setQueueSize(0);
-        setLobbySeconds(0);
-        setPreparingSeconds(0);
-        setSecondsLeft(0);
-        setLevelData(null);
-        setLobbyTeams(null);
-        setResults(null);
-        setChatMessages([]);
-        setRematchedUserIds([]);
+        resultsRef.current = update(resultsRef.current);
+        setResultsState(resultsRef.current);
     }, []);
 
-    // Lobby / preparing / game clocks are wall-clock deadlines. setInterval
-    // and requestAnimationFrame are throttled in background/minimized tabs, so
-    // neither may be used as elapsed time. Server packets reset the deadline;
-    // every visible tick derives the display from Date.now().
-    const lobbyTicking = (phase === 'lobby') && (lobbySeconds > 0);
-    const preparingTicking = (phase === 'preparing') && (preparingSeconds > 0);
-    const clockTicking = (phase === 'playing') && (secondsLeft > 0);
-
-    useEffect(() =>
+    const setRoomBeforeGame = useCallback((roomId: number) =>
     {
-        if (!lobbyTicking) return;
-        const tick = () =>
+        roomBeforeGameRef.current = roomId;
+        setRoomBeforeGameState(roomId);
+    }, []);
+
+    /** Back to the room the player was in before the arena (AIR class_2142 = GetGuestRoom(room, false, true)). */
+    const returnToRoom = useCallback(() =>
+    {
+        const remembered = consumeSnowWarReturnRoom();
+
+        if(returnedToRoomRef.current) return;
+
+        returnedToRoomRef.current = true;
+
+        const roomId = (roomBeforeGameRef.current > 0) ? roomBeforeGameRef.current : remembered;
+
+        if(roomId > 0) TryVisitRoom(roomId);
+    }, []);
+
+    /** `SnowWarEngine.resetSession` (game cancelled, results closed). */
+    const resetSession = useCallback(() =>
+    {
+        SendMessageComposer(new Game2GetAccountGameStatusMessageComposer(SNOWSTORM_GAME_TYPE));
+        SNOWWAR_ENGINE.reset();
+        rematchRequestedRef.current = false;
+        setResults(() => null);
+        setLoading(null);
+        setLobby(null);
+    }, [ setResults ]);
+
+    // ---- directory / account ----
+
+    useMessageEvent<Game2GameDirectoryStatusMessageEvent>(Game2GameDirectoryStatusMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setDirectory({ status: parser.status, blockLength: parser.blockLength, gamesPlayed: parser.gamesPlayed, freeGamesLeft: parser.freeGamesLeft });
+
+        if(parser.status !== 0) return;
+
+        setBlockLength(parser.blockLength);
+        setAccount(previous => ({
+            gameTypeId: SNOWSTORM_GAME_TYPE,
+            freeGamesLeft: parser.freeGamesLeft,
+            gamesPlayedTotal: previous?.gamesPlayedTotal ?? parser.gamesPlayed,
+            hasUnlimitedGames: parser.freeGamesLeft === -1
+        }));
+    }, []));
+
+    useMessageEvent<Game2AccountGameStatusMessageEvent>(Game2AccountGameStatusMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        if(parser.gameTypeId !== SNOWSTORM_GAME_TYPE) return;
+
+        setAccount({ gameTypeId: parser.gameTypeId, freeGamesLeft: parser.freeGamesLeft, gamesPlayedTotal: parser.gamesPlayedTotal, hasUnlimitedGames: parser.hasUnlimitedGames });
+    }, []));
+
+    useMessageEvent<Game2UserBlockedMessageEvent>(Game2UserBlockedMessageEvent, useCallback(event => setBlockLength(event.getParser().playerBlockLength), []));
+
+    useMessageEvent<Game2JoiningGameFailedMessageEvent>(Game2JoiningGameFailedMessageEvent, useCallback(event => setError(joiningFailedKey(event.getParser().reason)), []));
+
+    useMessageEvent<Game2StartingGameFailedMessageEvent>(Game2StartingGameFailedMessageEvent, useCallback(() => setError('snowwar.error.generic'), []));
+
+    useMessageEvent<Game2GameCancelledMessageEvent>(Game2GameCancelledMessageEvent, useCallback(() =>
+    {
+        resetSession();
+        returnToRoom();
+    }, [ resetSession, returnToRoom ]));
+
+    // ---- lobby (SnowWarEngine.createLobby / userJoined / userLeft / lobby counters) ----
+
+    const inRematchLobby = () => (SNOWWAR_ENGINE.state === SnowWarEngineState.REJOIN_GAME) && !!resultsRef.current;
+
+    const createLobby = useCallback((parserData: GameLobbyData) =>
+    {
+        const data = toLobbyData(parserData);
+
+        if(SNOWWAR_ENGINE.state === SnowWarEngineState.GAME_OVER) rematchRequestedRef.current = true;
+
+        if(resultsRef.current && SNOWWAR_ENGINE.state !== SnowWarEngineState.REJOIN_GAME)
         {
-            if (lobbyDeadlineRef.current !== null)
-                setLobbySeconds(snowWarSecondsRemaining(lobbyDeadlineRef.current, Date.now()));
-        };
-        tick();
-        const interval = setInterval(tick, 250);
-        document.addEventListener('visibilitychange', tick);
-        return () =>
-        {
-            clearInterval(interval);
-            document.removeEventListener('visibilitychange', tick);
-        };
-    }, [lobbyTicking]);
+            const rematching = rematchRequestedRef.current;
 
-    useEffect(() =>
-    {
-        if (!preparingTicking) return;
-        const tick = () =>
-        {
-            if (preparingDeadlineRef.current !== null)
-                setPreparingSeconds(snowWarSecondsRemaining(preparingDeadlineRef.current, Date.now()));
-        };
-        tick();
-        const interval = setInterval(tick, 250);
-        document.addEventListener('visibilitychange', tick);
-        return () =>
-        {
-            clearInterval(interval);
-            document.removeEventListener('visibilitychange', tick);
-        };
-    }, [preparingTicking]);
-
-    useEffect(() =>
-    {
-        if (!clockTicking) return;
-        const tick = () =>
-        {
-            if (gameDeadlineRef.current !== null)
-                setSecondsLeft(snowWarSecondsRemaining(gameDeadlineRef.current, Date.now()));
-        };
-        tick();
-        const interval = setInterval(tick, 250);
-        document.addEventListener('visibilitychange', tick);
-        return () =>
-        {
-            clearInterval(interval);
-            document.removeEventListener('visibilitychange', tick);
-        };
-    }, [clockTicking]);
-
-    useEffect(() =>
-    {
-        if (!errorCode) return;
-        const timeout = setTimeout(() => setErrorCode(null), 5000);
-        return () => clearTimeout(timeout);
-    }, [errorCode]);
-
-    useEffect(() =>
-    {
-        if (phase !== 'queued') return;
-        const timeout = setTimeout(() =>
-        {
-            SendMessageComposer(new SnowWarLeaveQueueComposer());
-            resetToIdle();
-            setQueueExpired(true);
-        }, SNOWWAR_QUEUE_MAX_WAIT_MS);
-        return () => clearTimeout(timeout);
-    }, [phase, resetToIdle]);
-
-    useEffect(() =>
-    {
-        if (!queueExpired) return;
-        const timeout = setTimeout(() => setQueueExpired(false), 6000);
-        return () => clearTimeout(timeout);
-    }, [queueExpired]);
-
-    // All packet handlers are useCallback-stable and read the parser into a
-    // local BEFORE any setState. Both rules are load-bearing: this hook lives
-    // inside a shared singleton whose effects react to state updates, so
-    // synchronously on state updates, so an unstable handler identity makes
-    // useMessageEvent unregister+dispose its event (nulling the parser)
-    // mid-callback — and briefly leaves the header without a listener, which
-    // can drop packets from the 150ms GameStatus stream.
-
-    const onQueuePosition = useCallback((event: SnowWarQueuePositionEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        setQueueExpired(false);
-        setPhase(current => (current === 'idle' || current === 'queued' || current === 'lobby') ? 'queued' : current);
-        setQueuePosition(parser.position);
-        setQueueSize(parser.queueSize);
-    }, []);
-
-    const onStartLobbyCounter = useCallback((event: SnowWarStartLobbyCounterEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        const seconds = parser.secondsUntilStart;
-        lobbyDeadlineRef.current = snowWarDeadlineFromSeconds(Date.now(), seconds);
-        setPhase('lobby');
-        setLobbySeconds(seconds);
-    }, []);
-
-    const onLobbyTeams = useCallback((event: SnowWarLobbyTeamsEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        setLobbyTeams({
-            teamCount: parser.teamCount,
-            leaderUserId: parser.leaderUserId,
-            selectedArenaId: parser.selectedArenaId,
-            arenas: parser.arenas,
-            players: parser.players.map(player => ({
-                userId: player.userId,
-                teamId: player.teamId,
-                name: player.name,
-                figure: player.figure,
-                gender: player.gender,
-            })),
-        });
-    }, []);
-
-    const onInitArena = useCallback(() =>
-    {
-        SNOWWAR_SIMULATION.reset();
-        setResults(null);
-        setRematchedUserIds([]);
-        setChatMessages([]);
-        setPhase('loading');
-        SendMessageComposer(new SnowWarLoadStageReadyComposer(100));
-    }, []);
-
-    const onLevelData = useCallback((event: SnowWarLevelDataEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        SNOWWAR_SIMULATION.setLevel(parser.heightmapRows, parser.items, parser.machines);
-        setLevelData({
-            gameLengthSeconds: parser.gameLengthSeconds,
-            canEditRoom: parser.canEditRoom,
-            arenaName: parser.arenaName,
-            mapId: parser.mapId,
-            teamCount: parser.teamCount,
-            heightmapRows: parser.heightmapRows,
-            items: parser.items,
-            machines: parser.machines,
-            players: parser.players,
-        });
-        gameDeadlineRef.current = null;
-        setSecondsLeft(parser.gameLengthSeconds);
-        if (editingRef.current) setPhase('playing');
-    }, []);
-
-    const onFullGameStatus = useCallback((event: SnowWarFullGameStatusEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        protocolTurnRef.current = parser.turn;
-        SNOWWAR_SIMULATION.applyFullStatus(parser.objects);
-        gameDeadlineRef.current = snowWarDeadlineFromSeconds(Date.now(), parser.totalSecondsLeft);
-        setSecondsLeft(parser.totalSecondsLeft);
-    }, []);
-
-    const onStageStart = useCallback((event: SnowWarOnStageStartEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        const seconds = parser.preparingSeconds;
-        preparingDeadlineRef.current = snowWarDeadlineFromSeconds(Date.now(), seconds);
-        setPhase('preparing');
-        setPreparingSeconds(seconds);
-        PlaySound(SoundNames.SNOWWAR_COUNTDOWN);
-    }, []);
-
-    const onGameStatus = useCallback((event: SnowWarGameStatusEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        // One server turn always represents exactly three 50 ms subturns.
-        // Duplicate/out-of-order packets must not be replayed: doing so applies
-        // movement frames twice and makes click-spam appear to accelerate the
-        // avatar even though the authoritative server speed is fixed.
-        if (parser.turn <= protocolTurnRef.current) return;
-        protocolTurnRef.current = parser.turn;
-        SNOWWAR_SIMULATION.queueGameStatus(parser.subturns.map(subturn => subturn.map(toSimEvent)));
-        setPhase(current => ((current === 'preparing') || (current === 'loading')) ? 'playing' : current);
-    }, []);
-
-    const onStageRunning = useCallback((event: SnowWarOnStageRunningEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        gameDeadlineRef.current = snowWarDeadlineFromSeconds(Date.now(), parser.totalSecondsLeft);
-        setSecondsLeft(parser.totalSecondsLeft);
-        setPhase(current => ((current === 'preparing') || (current === 'loading')) ? 'playing' : current);
-    }, []);
-
-    const onStageEnding = useCallback(() => setPhase('ending'), []);
-
-    const onGameEnding = useCallback((event: SnowWarOnGameEndingEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        const nextResults = { secondsToResults: parser.secondsToResults, teams: parser.teams };
-        setResults(nextResults);
-        setPhase('results');
-    }, []);
-
-    const onGameEnded = useCallback(() =>
-    {
-        setPhase(current => (current === 'results') ? current : 'results');
-    }, []);
-
-    const onRejoinPreviousRoom = useCallback(() =>
-    {
-        if (editingRef.current) return;
-        resetToIdle();
-        const roomId = consumeSnowWarReturnRoom();
-        if (roomId) TryVisitRoom(roomId);
-    }, [resetToIdle]);
-
-    const onPlayerExitedArena = useCallback((event: SnowWarPlayerExitedArenaEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        SNOWWAR_SIMULATION.avatars.delete(parser.objectId);
-    }, []);
-
-    const onUserChat = useCallback((event: SnowWarUserChatEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        const objectId = parser.objectId;
-        const message = parser.message;
-        const avatar = SNOWWAR_SIMULATION.avatars.get(objectId);
-        setChatMessages(messages => [
-            ...messages.slice(-30),
-            {
-                id: ++CHAT_MESSAGE_ID,
-                objectId,
-                name: avatar?.name ?? '',
-                message,
-                receivedAt: Date.now(),
-            },
-        ]);
-    }, []);
-
-    const onGenericError = useCallback((event: SnowWarGenericErrorEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        setErrorCode(parser.errorCode);
-    }, []);
-
-    const onUserRematched = useCallback((event: SnowWarUserRematchedEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        const userId = parser.userId;
-        setRematchedUserIds(ids => (ids.includes(userId) ? ids : [...ids, userId]));
-    }, []);
-
-    const onGamesLeft = useCallback((event: SnowWarGamesLeftEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        setGamesLeft(parser.gamesLeft);
-    }, []);
-
-    const onGamesInformation = useCallback((event: SnowWarGamesInformationEvent) =>
-    {
-        const parser = event.getParser();
-        if (!parser) return;
-        setQueueInfo({ playersInQueue: parser.playersInQueue, gamesPlayed: parser.gamesPlayed, minPlayers: parser.minPlayers, canEdit: parser.canEdit });
-    }, []);
-
-    const applyLeaderboard = useCallback((event: Game2WeeklyLeaderboardEvent | Game2WeeklyFriendsLeaderboardEvent | WeeklyCompetitiveLeaderboardEvent | WeeklyCompetitiveFriendsLeaderboardEvent, weekly: boolean, friendsOnly: boolean) =>
-    {
-        const parser = event.getParser();
-        if (!parser || parser.gameTypeId !== 0) return;
-        setLeaderboard({
-            isOpen: true,
-            weekly,
-            friendsOnly,
-            loading: false,
-            year: parser.year,
-            week: parser.week,
-            maxOffset: parser.maxOffset,
-            currentOffset: parser.currentOffset,
-            minutesUntilReset: parser.minutesUntilReset,
-            totalListSize: parser.totalListSize,
-            entries: parser.leaderboard.map(entry => ({
-                userId: entry.userId,
-                score: entry.score,
-                rank: entry.rank,
-                name: entry.name,
-                figure: entry.figure,
-                gender: entry.gender,
-            })),
-        });
-    }, []);
-
-    const onAllTimeLeaderboard = useCallback((event: Game2WeeklyLeaderboardEvent) =>
-        applyLeaderboard(event, false, false), [applyLeaderboard]);
-    const onAllTimeFriendsLeaderboard = useCallback((event: Game2WeeklyFriendsLeaderboardEvent) =>
-        applyLeaderboard(event, false, true), [applyLeaderboard]);
-    const onWeeklyLeaderboard = useCallback((event: WeeklyCompetitiveLeaderboardEvent) =>
-        applyLeaderboard(event, true, false), [applyLeaderboard]);
-    const onWeeklyFriendsLeaderboard = useCallback((event: WeeklyCompetitiveFriendsLeaderboardEvent) =>
-        applyLeaderboard(event, true, true), [applyLeaderboard]);
-
-    useMessageEvent<SnowWarQueuePositionEvent>(SnowWarQueuePositionEvent, onQueuePosition);
-    useMessageEvent<SnowWarStartLobbyCounterEvent>(SnowWarStartLobbyCounterEvent, onStartLobbyCounter);
-    useMessageEvent<SnowWarLobbyTeamsEvent>(SnowWarLobbyTeamsEvent, onLobbyTeams);
-    useMessageEvent<SnowWarInitArenaEvent>(SnowWarInitArenaEvent, onInitArena);
-    useMessageEvent<SnowWarLevelDataEvent>(SnowWarLevelDataEvent, onLevelData);
-    useMessageEvent<SnowWarFullGameStatusEvent>(SnowWarFullGameStatusEvent, onFullGameStatus);
-    useMessageEvent<SnowWarOnStageStartEvent>(SnowWarOnStageStartEvent, onStageStart);
-    useMessageEvent<SnowWarGameStatusEvent>(SnowWarGameStatusEvent, onGameStatus);
-    useMessageEvent<SnowWarOnStageRunningEvent>(SnowWarOnStageRunningEvent, onStageRunning);
-    useMessageEvent<SnowWarOnStageEndingEvent>(SnowWarOnStageEndingEvent, onStageEnding);
-    useMessageEvent<SnowWarOnGameEndingEvent>(SnowWarOnGameEndingEvent, onGameEnding);
-    useMessageEvent<SnowWarGameEndedEvent>(SnowWarGameEndedEvent, onGameEnded);
-    useMessageEvent<SnowWarRejoinPreviousRoomEvent>(SnowWarRejoinPreviousRoomEvent, onRejoinPreviousRoom);
-    useMessageEvent<SnowWarPlayerExitedArenaEvent>(SnowWarPlayerExitedArenaEvent, onPlayerExitedArena);
-    useMessageEvent<SnowWarUserChatEvent>(SnowWarUserChatEvent, onUserChat);
-    useMessageEvent<SnowWarGenericErrorEvent>(SnowWarGenericErrorEvent, onGenericError);
-    useMessageEvent<SnowWarUserRematchedEvent>(SnowWarUserRematchedEvent, onUserRematched);
-    useMessageEvent<SnowWarGamesLeftEvent>(SnowWarGamesLeftEvent, onGamesLeft);
-    useMessageEvent<SnowWarGamesInformationEvent>(SnowWarGamesInformationEvent, onGamesInformation);
-    useMessageEvent<Game2WeeklyLeaderboardEvent>(Game2WeeklyLeaderboardEvent, onAllTimeLeaderboard);
-    useMessageEvent<Game2WeeklyFriendsLeaderboardEvent>(Game2WeeklyFriendsLeaderboardEvent, onAllTimeFriendsLeaderboard);
-    useMessageEvent<WeeklyCompetitiveLeaderboardEvent>(WeeklyCompetitiveLeaderboardEvent, onWeeklyLeaderboard);
-    useMessageEvent<WeeklyCompetitiveFriendsLeaderboardEvent>(WeeklyCompetitiveFriendsLeaderboardEvent, onWeeklyFriendsLeaderboard);
-
-    const requestLeaderboard = useCallback((weekly = true, friendsOnly = false, weekOffset = 0) =>
-    {
-        setLeaderboard(current => ({ ...current, isOpen: true, weekly, friendsOnly, loading: true }));
-        const common = [ 0, -1, 0, 8, 50 ] as const;
-        if (weekly)
-        {
-            SendMessageComposer(friendsOnly
-                ? new SnowWarGetWeeklyFriendsLeaderboardComposer(0, weekOffset, -1, 0, 8, 50)
-                : new SnowWarGetWeeklyLeaderboardComposer(0, weekOffset, -1, 0, 8, 50));
+            setResults(current => toWaitState(current, rematching));
+            SNOWWAR_ENGINE.setState(SnowWarEngineState.REJOIN_GAME);
+            rematchRequestedRef.current = false;
         }
-        else
+
+        if(inRematchLobby())
         {
-            SendMessageComposer(friendsOnly
-                ? new SnowWarGetAllTimeFriendsLeaderboardComposer(...common)
-                : new SnowWarGetAllTimeLeaderboardComposer(...common));
-        }
-    }, []);
+            setResults(current => ({ ...current, mode: 'lobby', lobby: data, lobbyPlayers: [ ...data.players ], teams: [] }));
 
-    const closeLeaderboard = useCallback(() =>
-        setLeaderboard(current => ({ ...current, isOpen: false })), []);
-
-    const joinQueue = useCallback(() => SendMessageComposer(new SnowWarJoinQueueComposer()), []);
-
-    const selectArena = useCallback((arenaId: number) =>
-        SendMessageComposer(new SnowWarSelectArenaComposer(arenaId)), []);
-
-    const leaveQueue = useCallback(() =>
-    {
-        SendMessageComposer(new SnowWarLeaveQueueComposer());
-        resetToIdle();
-    }, [resetToIdle]);
-
-    const startEditing = useCallback(() =>
-    {
-        // Server verifies arena build permission and removes us from the running
-        // game/queue; we keep the level snapshot and edit it in place.
-        editingRef.current = true;
-        setEditing(true);
-        SendMessageComposer(new SnowWarEditRoomComposer());
-    }, []);
-
-    const saveArena = useCallback((
-        mapId: number,
-        items: { name: string; x: number; y: number; rotation: number; imageUrl: string; offsetZ: number; state: number }[],
-        spawns: { x: number; y: number }[],
-        heightmap: string[],
-        arenaName: string) =>
-    {
-        SendMessageComposer(new SnowWarSaveEditorComposer(mapId, items, spawns, heightmap, arenaName));
-    }, []);
-
-    const stopEditing = useCallback(() =>
-    {
-        editingRef.current = false;
-        setEditing(false);
-        SendMessageComposer(new SnowWarExitEditorComposer());
-        resetToIdle();
-        const roomId = consumeSnowWarReturnRoom();
-        if (roomId) TryVisitRoom(roomId);
-    }, [resetToIdle]);
-
-    const exitGame = useCallback(() =>
-    {
-        SendMessageComposer(new SnowWarExitGameComposer());
-        resetToIdle();
-    }, [resetToIdle]);
-
-    const playAgain = useCallback(() => SendMessageComposer(new SnowWarPlayAgainComposer()), []);
-
-    const walkTo = useCallback((worldX: number, worldY: number) =>
-    {
-        const send = (targetX: number, targetY: number) =>
-        {
-            const [turn, subturn] = getProtocolClock();
-            SendMessageComposer(new SnowWarWalkComposer(targetX, targetY, turn, subturn));
-            lastWalkSentAtRef.current = Date.now();
-        };
-
-        const elapsed = Date.now() - lastWalkSentAtRef.current;
-        if (elapsed >= SUBTURN_MS && walkFlushTimerRef.current === null)
-        {
-            send(worldX, worldY);
             return;
         }
 
-        // AIR can consume at most one new movement goal per subturn. Keep only
-        // the latest clicked tile during that 50 ms window; queuing every click
-        // just floods duplicate goals and can cause clients to replay excess
-        // movement packets.
-        queuedWalkRef.current = { worldX, worldY };
-        if (walkFlushTimerRef.current !== null) return;
+        SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
+        setLobby({ data, players: [ ...data.players ], queuePosition: 0, countdownDeadline: null });
+    }, [ setResults ]);
 
-        walkFlushTimerRef.current = setTimeout(() =>
+    useMessageEvent<Game2GameCreatedMessageEvent>(Game2GameCreatedMessageEvent, useCallback(event => createLobby(event.getParser().gameLobbyData), [ createLobby ]));
+
+    useMessageEvent<Game2GameLongDataMessageEvent>(Game2GameLongDataMessageEvent, useCallback(event => createLobby(event.getParser().gameLobbyData), [ createLobby ]));
+
+    useMessageEvent<Game2UserJoinedGameMessageEvent>(Game2UserJoinedGameMessageEvent, useCallback(event =>
+    {
+        const player = toLobbyPlayer(event.getParser().user);
+        const join = (players: SnowWarLobbyPlayer[]) => [ ...players.filter(existing => existing.userId !== player.userId), player ];
+
+        if(inRematchLobby())
         {
-            walkFlushTimerRef.current = null;
-            const queued = queuedWalkRef.current;
-            queuedWalkRef.current = null;
-            if (queued) send(queued.worldX, queued.worldY);
-        }, Math.max(0, SUBTURN_MS - elapsed));
-    }, [getProtocolClock]);
+            setResults(current => ({ ...current, lobbyPlayers: join(current.lobbyPlayers) }));
 
-    const throwAtLocation = useCallback((worldX: number, worldY: number, trajectory: number) =>
-    {
-        const [turn, subturn] = getProtocolClock();
-        SendMessageComposer(new SnowWarThrowAtLocationComposer(worldX, worldY, trajectory, turn, subturn));
-    }, [getProtocolClock]);
+            return;
+        }
 
-    const throwAtPlayer = useCallback((targetObjectId: number, trajectory: number) =>
-    {
-        const [turn, subturn] = getProtocolClock();
-        SendMessageComposer(new SnowWarThrowAtPlayerComposer(targetObjectId, trajectory, turn, subturn));
-    }, [getProtocolClock]);
+        SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
+        setLobby(current => current && { ...current, players: join(current.players) });
+    }, [ setResults ]));
 
-    const createSnowball = useCallback(() =>
+    useMessageEvent<Game2UserLeftGameMessageEvent>(Game2UserLeftGameMessageEvent, useCallback(event =>
     {
-        const [turn, subturn] = getProtocolClock();
-        SendMessageComposer(new SnowWarCreateSnowballComposer(turn, subturn));
-    }, [getProtocolClock]);
+        const userId = event.getParser().userId;
+
+        if(inRematchLobby())
+        {
+            setResults(current => ({ ...current, lobbyPlayers: current.lobbyPlayers.filter(player => player.userId !== userId) }));
+
+            return;
+        }
+
+        SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
+        setLobby(current => current && { ...current, players: current.players.filter(player => player.userId !== userId) });
+    }, [ setResults ]));
+
+    useMessageEvent<Game2InArenaQueueMessageEvent>(Game2InArenaQueueMessageEvent, useCallback(event =>
+    {
+        const position = event.getParser().position;
+
+        setLobby(current => current && { ...current, queuePosition: position });
+    }, []));
+
+    useMessageEvent<Game2StartCounterMessageEvent>(Game2StartCounterMessageEvent, useCallback(event =>
+    {
+        const deadline = Date.now() + (event.getParser().countDownLength * 1000);
+
+        if(inRematchLobby())
+        {
+            setResults(current => ({ ...current, mode: 'lobby', countdownDeadline: deadline }));
+
+            return;
+        }
+
+        setLobby(current => current && { ...current, countdownDeadline: deadline });
+    }, [ setResults ]));
+
+    useMessageEvent<Game2StopCounterMessageEvent>(Game2StopCounterMessageEvent, useCallback(() =>
+    {
+        if(inRematchLobby())
+        {
+            rematchRequestedRef.current = true;
+            setResults(current => toWaitState(current, true));
+
+            return;
+        }
+
+        setLobby(current => current && { ...current, countdownDeadline: null });
+    }, [ setResults ]));
+
+    // ---- loading and arena ----
+
+    useMessageEvent<Game2GameStartedMessageEvent>(Game2GameStartedMessageEvent, useCallback(event =>
+    {
+        const data = toLobbyData(event.getParser().lobbyData);
+
+        rematchRequestedRef.current = false;
+        playersRef.current = new Map(data.players.map(player => [ player.userId, player ]));
+        setChatMessages([]);
+        setResults(() => null);
+        setLobby(null);
+        setLoading({ lobby: data, percentage: 0, finishedUserIds: [] });
+        SNOWWAR_ENGINE.gameStarted();
+    }, [ setResults ]));
+
+    useMessageEvent<Game2EnterArenaMessageEvent>(Game2EnterArenaMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        // The player stays in their room while browsing; the arena replaces it (AIR initArena disposes the session).
+        setSnowWarReturnRoom(GetRoomSession()?.roomId ?? null);
+        returnedToRoomRef.current = false;
+        VisitDesktop();
+
+        SNOWWAR_ENGINE.enterArena(parser.gameType, parser.fieldType, parser.numberOfTeams, parser.players.map(player => ({
+            referenceId: player.referenceId,
+            userName: player.userName,
+            figure: player.figure,
+            gender: player.gender,
+            teamId: player.teamId
+        })), toLevel(parser.gameLevel));
+    }, []));
+
+    useMessageEvent<Game2EnterArenaFailedMessageEvent>(Game2EnterArenaFailedMessageEvent, useCallback(event =>
+        setError((event.getParser().reason === 1) ? 'snowwar.error.game_already_started' : 'snowwar.error.generic'), []));
+
+    useMessageEvent<Game2StageLoadMessageEvent>(Game2StageLoadMessageEvent, useCallback(() => SNOWWAR_ENGINE.stageLoad(), []));
+
+    useMessageEvent<Game2StageStillLoadingMessageEvent>(Game2StageStillLoadingMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        SNOWWAR_ENGINE.stageLoading();
+        setLoading(current => current && { ...current, percentage: parser.percentage, finishedUserIds: [ ...parser.finishedPlayers ] });
+    }, []));
+
+    useMessageEvent<Game2StageStartingMessageEvent>(Game2StageStartingMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        SNOWWAR_ENGINE.stageStarting(parser.countDown, parser.gameObjects.gameObjects);
+        setLoading(null);
+    }, []));
+
+    useMessageEvent<Game2StageRunningMessageEvent>(Game2StageRunningMessageEvent, useCallback(event => SNOWWAR_ENGINE.stageRunning(event.getParser().timeToStageEnd), []));
+
+    useMessageEvent<Game2GameStatusMessageEvent>(Game2GameStatusMessageEvent, useCallback(event =>
+    {
+        const status = event.getParser().status;
+
+        SNOWWAR_ENGINE.gameStatus(status.turn, status.checksum, status.events);
+    }, []));
+
+    useMessageEvent<Game2FullGameStatusMessageEvent>(Game2FullGameStatusMessageEvent, useCallback(event =>
+    {
+        const fullStatus = event.getParser().fullStatus;
+
+        SNOWWAR_ENGINE.fullGameStatus(fullStatus.gameObjects.gameObjects, fullStatus.gameStatus.turn, fullStatus.gameStatus.checksum, fullStatus.gameStatus.events);
+    }, []));
+
+    useMessageEvent<Game2StageEndingMessageEvent>(Game2StageEndingMessageEvent, useCallback(event =>
+    {
+        if(event.getParser().timeToNextState === 0) SNOWWAR_ENGINE.resetGameSession();
+    }, []));
+
+    useMessageEvent<Game2GameChatMessageEvent>(Game2GameChatMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+        const player = playersRef.current.get(parser.userId);
+
+        if(!player) return;
+
+        const message: SnowWarChatMessage = {
+            id: ++chatIdRef.current,
+            userId: player.userId,
+            name: player.name,
+            figure: player.figure,
+            gender: player.gender,
+            teamId: player.teamId,
+            message: parser.chatMessage,
+            receivedAt: Date.now()
+        };
+
+        setChatMessages(current => [ ...current, message ].slice(-MAX_CHAT_MESSAGES));
+    }, []));
+
+    // ---- results (gameOver / rejoinGame / playerRematches) ----
+
+    useMessageEvent<Game2GameEndingMessageEvent>(Game2GameEndingMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        SNOWWAR_ENGINE.setState(SnowWarEngineState.GAME_OVER);
+        setResults(() => ({
+            mode: 'results',
+            result: { isDeathMatch: parser.gameResult.isDeathMatch, resultType: parser.gameResult.resultType, winnerId: parser.gameResult.winnerId },
+            teams: parser.teams.map(team => ({
+                teamReference: team.teamReference,
+                score: team.score,
+                players: team.players.map(player => ({
+                    userName: player.userName,
+                    userId: player.userId,
+                    figure: player.figure,
+                    gender: player.gender,
+                    score: player.score,
+                    teamId: player.teamId,
+                    stats: { ...player.playerStats }
+                }))
+            })),
+            playerWithMostKills: parser.generalStats.playerWithMostKills,
+            playerWithMostHits: parser.generalStats.playerWithMostHits,
+            countdownDeadline: Date.now() + (parser.timeToNextState * 1000),
+            rematchUserIds: [],
+            lobbyPlayers: [],
+            lobby: null
+        }));
+    }, [ setResults ]));
+
+    useMessageEvent<Game2PlayerRematchesMessageEvent>(Game2PlayerRematchesMessageEvent, useCallback(event =>
+    {
+        const userId = event.getParser().userId;
+
+        setResults(current => current && { ...current, rematchUserIds: current.rematchUserIds.includes(userId) ? current.rematchUserIds : [ ...current.rematchUserIds, userId ] });
+    }, [ setResults ]));
+
+    useMessageEvent<Game2RejoinPreviousRoomMessageEvent>(Game2RejoinPreviousRoomMessageEvent, useCallback(event =>
+    {
+        const rematching = rematchRequestedRef.current;
+
+        setRoomBeforeGame(event.getParser().roomBeforeGame);
+
+        if(!resultsRef.current)
+        {
+            // Left from the arena or the loading screen: nothing else keeps the player here.
+            returnToRoom();
+
+            return;
+        }
+
+        SNOWWAR_ENGINE.setState(rematching ? SnowWarEngineState.REJOIN_GAME : SnowWarEngineState.GAME_OVER);
+        setResults(current => toWaitState(current, rematching));
+        rematchRequestedRef.current = false;
+    }, [ setResults, setRoomBeforeGame, returnToRoom ]));
+
+    // ---- leaderboards and tokens ----
+
+    useMessageEvent<Game2TotalLeaderboardEvent>(Game2TotalLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ ...emptyLeaderboard('total'), entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize });
+    }, []));
+
+    useMessageEvent<Game2FriendsLeaderboardEvent>(Game2FriendsLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ ...emptyLeaderboard('friends'), entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize });
+    }, []));
+
+    useMessageEvent<Game2TotalGroupLeaderboardEvent>(Game2TotalGroupLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ ...emptyLeaderboard('totalGroup'), entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize, favouriteGroupId: parser.favouriteGroupId });
+    }, []));
+
+    useMessageEvent<Game2WeeklyLeaderboardEvent>(Game2WeeklyLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ kind: 'weekly', entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize, year: parser.year, week: parser.week, maxOffset: parser.maxOffset, currentOffset: parser.currentOffset, minutesUntilReset: parser.minutesUntilReset, favouriteGroupId: 0 });
+    }, []));
+
+    useMessageEvent<Game2WeeklyFriendsLeaderboardEvent>(Game2WeeklyFriendsLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ kind: 'weeklyFriends', entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize, year: parser.year, week: parser.week, maxOffset: parser.maxOffset, currentOffset: parser.currentOffset, minutesUntilReset: parser.minutesUntilReset, favouriteGroupId: 0 });
+    }, []));
+
+    useMessageEvent<Game2WeeklyGroupLeaderboardEvent>(Game2WeeklyGroupLeaderboardEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+
+        setLeaderboard({ kind: 'weeklyGroup', entries: toLeaderboardEntries(parser.leaderboard), totalListSize: parser.totalListSize, year: parser.year, week: parser.week, maxOffset: parser.maxOffset, currentOffset: parser.currentOffset, minutesUntilReset: parser.minutesUntilReset, favouriteGroupId: parser.favouriteGroupId });
+    }, []));
+
+    useMessageEvent<SnowWarGameTokensMessageEvent>(SnowWarGameTokensMessageEvent, useCallback(event =>
+    {
+        setTokenOffers(event.getParser().offers.map(offer => ({
+            offerId: offer.offerId,
+            localizationId: offer.localizationId,
+            priceCredits: offer.priceInCredits,
+            pricePoints: offer.priceInActivityPoints,
+            pointsType: offer.activityPointType
+        })));
+    }, []));
+
+    // ---- actions ----
+
+    const refreshStatus = useCallback(() =>
+    {
+        SendMessageComposer(new Game2CheckGameDirectoryStatusMessageComposer());
+        SendMessageComposer(new Game2GetAccountGameStatusMessageComposer(SNOWSTORM_GAME_TYPE));
+    }, []);
+
+    const play = useCallback(() =>
+    {
+        setError(null);
+        SendMessageComposer(new Game2QuickJoinMessageComposer());
+    }, []);
+
+    const leaveLobby = useCallback(() =>
+    {
+        SendMessageComposer(new Game2LeaveLobbyMessageComposer());
+        setLobby(null);
+    }, []);
+
+    /** `GameEndingViewController.onJoinRematch`. */
+    const rematch = useCallback(() =>
+    {
+        rematchRequestedRef.current = true;
+        SendMessageComposer(new Game2PlayAgainMessageComposer());
+        setResults(current => current && { ...current, mode: 'rematchRequested' });
+    }, [ setResults ]);
+
+    /** `GameEndingViewController.onPlayAgain` (after the rematch window). */
+    const playAgain = useCallback(() => SendMessageComposer(new Game2QuickJoinMessageComposer()), []);
+
+    /** `GameEndingViewController.onClose(true)`. */
+    const closeResults = useCallback(() =>
+    {
+        const mode = resultsRef.current?.mode;
+
+        resetSession();
+
+        if(mode === 'lobby' || mode === 'waiting')
+        {
+            SendMessageComposer(new Game2LeaveLobbyMessageComposer());
+            returnToRoom();
+
+            return;
+        }
+
+        if(mode === 'afterSki' && roomBeforeGameRef.current > -1)
+        {
+            returnToRoom();
+
+            return;
+        }
+
+        SendMessageComposer(new Game2ExitGameMessageComposer(true));
+    }, [ resetSession, returnToRoom ]);
+
+    const exitGame = useCallback(() =>
+    {
+        const engineState = SNOWWAR_ENGINE.state;
+
+        if(resultsRef.current)
+        {
+            closeResults();
+
+            return;
+        }
+
+        if(engineState === SnowWarEngineState.INACTIVE)
+        {
+            leaveLobby();
+
+            return;
+        }
+
+        SendMessageComposer(new Game2ExitGameMessageComposer(true));
+
+        if(engineState === SnowWarEngineState.GAME_STARTING || engineState === SnowWarEngineState.STAGE_LOADING)
+        {
+            // GameLoadingViewController leave link: cancel, exit, back to the previous room.
+            resetSession();
+            returnToRoom();
+
+            return;
+        }
+
+        // SnowWarUI exit confirmation: resetGameSession + resetRoomSession; RejoinPreviousRoom brings the player back.
+        SNOWWAR_ENGINE.resetGameSession();
+        SNOWWAR_ENGINE.reset();
+        returnToRoom();
+    }, [ closeResults, leaveLobby, resetSession, returnToRoom ]);
 
     const sendChat = useCallback((message: string) =>
     {
-        const trimmed = message.trim();
-        if (!trimmed.length) return;
-        SendMessageComposer(new SnowWarGameChatComposer(trimmed.substring(0, 100)));
+        if(message.trim().length) SendMessageComposer(new Game2GameChatMessageComposer(message));
     }, []);
 
-    const requestFullStatus = useCallback(() =>
-        SendMessageComposer(new SnowWarRequestFullGameStatusComposer()), []);
+    const requestLeaderboard = useCallback((request: SnowWarLeaderboardRequest) =>
+    {
+        const startRank = request.startRank ?? -1;
+        const direction = request.direction ?? 0;
+        const weekOffset = request.weekOffset ?? 0;
+        const viewSize = request.viewSize ?? GetConfigurationValue<number>('games.highscores.viewSize', 8);
+        const windowSize = request.windowSize ?? GetConfigurationValue<number>('games.highscores.windowSize', 50);
+
+        switch(request.kind)
+        {
+            case 'total':
+                SendMessageComposer(new Game2GetTotalLeaderboardComposer(SNOWSTORM_GAME_TYPE, startRank, direction, viewSize, windowSize));
+                return;
+            case 'friends':
+                SendMessageComposer(new Game2GetFriendsLeaderboardComposer(SNOWSTORM_GAME_TYPE, startRank, direction, viewSize, windowSize));
+                return;
+            case 'totalGroup':
+                SendMessageComposer(new Game2GetTotalGroupLeaderboardComposer(SNOWSTORM_GAME_TYPE, startRank, direction, viewSize, windowSize));
+                return;
+            case 'weekly':
+                SendMessageComposer(new Game2GetWeeklyLeaderboardComposer(SNOWSTORM_GAME_TYPE, weekOffset, startRank, direction, viewSize, windowSize));
+                return;
+            case 'weeklyFriends':
+                SendMessageComposer(new Game2GetWeeklyFriendsLeaderboardComposer(SNOWSTORM_GAME_TYPE, weekOffset, startRank, direction, viewSize, windowSize));
+                return;
+            case 'weeklyGroup':
+                SendMessageComposer(new Game2GetWeeklyGroupLeaderboardComposer(SNOWSTORM_GAME_TYPE, weekOffset, startRank, direction, viewSize, windowSize));
+                return;
+        }
+    }, []);
+
+    const closeLeaderboard = useCallback(() => setLeaderboard(null), []);
+
+    const requestTokenOffers = useCallback(() => SendMessageComposer(new GetSnowWarGameTokensOfferComposer()), []);
+
+    const purchaseTokenOffer = useCallback((offerId: number) => SendMessageComposer(new PurchaseSnowWarGameTokensOfferComposer(offerId)), []);
+
+    const clearError = useCallback(() => setError(null), []);
 
     return {
-        phase,
-        queuePosition,
-        queueSize,
-        lobbySeconds,
-        preparingSeconds,
-        secondsLeft,
-        levelData,
-        lobbyTeams,
+        engine: SNOWWAR_ENGINE,
+        state,
+        directory,
+        account,
+        blockLength,
+        lobby,
+        loading,
         results,
-        chatMessages,
-        rematchedUserIds,
-        errorCode,
-        gamesLeft,
-        queueInfo,
         leaderboard,
-        queueExpired,
-        editing,
-        simulation: SNOWWAR_SIMULATION,
-        joinQueue,
-        selectArena,
-        leaveQueue,
-        exitGame,
-        startEditing,
-        saveArena,
-        stopEditing,
+        tokenOffers,
+        chatMessages,
+        error,
+        roomBeforeGame,
+        refreshStatus,
+        play,
+        leaveLobby,
+        rematch,
         playAgain,
-        walkTo,
-        throwAtLocation,
-        throwAtPlayer,
-        createSnowball,
+        exitGame,
+        closeResults,
         sendChat,
-        requestFullStatus,
         requestLeaderboard,
         closeLeaderboard,
+        requestTokenOffers,
+        purchaseTokenOffer,
+        clearError
     };
 };
 
