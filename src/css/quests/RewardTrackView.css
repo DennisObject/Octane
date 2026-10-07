@@ -1633,11 +1633,11 @@
 /* ---- premium purchase confirmation (390x352, margins 1/25/1/7) ---- */
 
 /* each hidden benefit row takes 29px (24px + 5px gap) off the window, the panel and everything under the list */
-.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="1"]) { --rt-shrink: 29px; --rt-name-nudge: 1px; }
-.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="2"]) { --rt-shrink: 58px; --rt-name-nudge: 1px; }
-.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="3"]) { --rt-shrink: 87px; --rt-name-nudge: 1px; }
-.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="4"]) { --rt-shrink: 116px; --rt-name-nudge: 1px; }
-.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="5"]) { --rt-shrink: 145px; --rt-name-nudge: 1px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="1"]) { --rt-shrink: 29px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="2"]) { --rt-shrink: 58px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="3"]) { --rt-shrink: 87px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="4"]) { --rt-shrink: 116px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="5"]) { --rt-shrink: 145px; }
 
 .draggable-window:has(> .octane-reward-track-premium) {
     width: 390px;
@@ -1734,7 +1734,7 @@
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel-name {
-    top: calc(138px - var(--rt-shrink, 0px) / 2 + var(--rt-name-nudge, 0px));
+    top: calc(139px - var(--rt-shrink, 0px) / 2);
     height: 19px;
     color: #5d2c82;
     font-size: 14px;
