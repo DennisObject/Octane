@@ -1035,11 +1035,6 @@ export class SelectClubGiftComposer extends RecordingComposer {}
 
 // Catalog store, queries and effects hook: the events they subscribe to and
 // the composers they send.
-export class BuildersClubFurniCountMessageEvent extends MessageEvent {}
-export class BuildersClubPlaceRoomItemMessageComposer extends StubClass {}
-export class BuildersClubPlaceWallItemMessageComposer extends StubClass {}
-export class BuildersClubQueryFurniCountMessageComposer extends StubClass {}
-export class BuildersClubSubscriptionStatusMessageEvent extends MessageEvent {}
 export class CatalogPageMessageEvent extends MessageEvent {}
 export class CatalogPagesListEvent extends MessageEvent {}
 export class CatalogPublishedMessageEvent extends MessageEvent {}

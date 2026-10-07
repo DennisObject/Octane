@@ -1,14 +1,11 @@
 import { CreateLinkEvent, PurchaseFromCatalogComposer } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    BuilderFurniPlaceableStatus,
     CatalogPurchaseState,
-    CatalogType,
     DispatchUiEvent,
     GetClubMemberLevel,
     GetConfigurationValue,
     LocalizeText,
-    NotificationBubbleType,
     Offer,
     OpenUrl,
     ProductTypeEnum,
@@ -17,7 +14,7 @@ import {
 import { getCatalogBundlePrice } from '../../../../../api/catalog/CatalogBundleDiscount';
 import { useHabbiconCatalog } from '../../../../../api/habbicons';
 import { localizeWithFallback } from '../../../../../api/utils/localizeWithFallback';
-import { LayoutLoadingSpinnerView, Text } from '../../../../../common';
+import { LayoutLoadingSpinnerView } from '../../../../../common';
 import {
     CatalogEvent,
     CatalogInitGiftEvent,
@@ -48,7 +45,6 @@ interface CatalogPurchaseWidgetViewProps {
 
 export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (props) => {
     const { disabled = false, noGiftOption = false, purchaseCallback = null } = props;
-    const [builderPlaceableRefreshTick, setBuilderPlaceableRefreshTick] = useState(0);
     const habbicons = useHabbiconCatalog();
     const [purchaseWillBeGift, setPurchaseWillBeGift] = useState(false);
     const [purchaseState, setPurchaseState] = useState(CatalogPurchaseState.NONE);
@@ -60,15 +56,13 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
     const { data: bundleDiscountRuleset = null } = useCatalogBundleDiscountRuleset();
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const {
-        currentType = CatalogType.NORMAL,
         giftReceiver = null,
         purchaseOptions = null,
-        setPurchaseOptions = null,
-        setCatalogPlaceMultipleObjects = null
+        setPurchaseOptions = null
     } = useCatalogUiState();
-    const { requestOfferToMover = null, getBuilderFurniPlaceableStatus = null, getNodesByOfferId = null, resetPlacedOfferData = null } = useCatalogActions();
+    const { getNodesByOfferId = null, resetPlacedOfferData = null } = useCatalogActions();
     const { getCurrencyAmount = null } = usePurse();
-    const { showConfirm = null, showSingleBubble = null, simpleAlert = null } = useNotification();
+    const { showConfirm = null, simpleAlert = null } = useNotification();
 
     const resetPurchaseGuard = useCallback(() => {
         purchasePendingRef.current = false;
@@ -296,41 +290,13 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
         };
     }, [purchaseState]);
 
-    const isBuildersClubOffer = currentType === CatalogType.BUILDER;
-    const isBuildersClubPlaceable =
-        isBuildersClubOffer &&
-        !!currentOffer &&
-        !!currentOffer.product &&
-        (currentOffer.product.productType === ProductTypeEnum.FLOOR || currentOffer.product.productType === ProductTypeEnum.WALL);
-    const builderPlaceableStatus = useMemo(() => {
-        if (!isBuildersClubPlaceable || !getBuilderFurniPlaceableStatus || !currentOffer) return BuilderFurniPlaceableStatus.OKAY;
-
-        return getBuilderFurniPlaceableStatus(currentOffer);
-    }, [currentOffer, getBuilderFurniPlaceableStatus, isBuildersClubPlaceable, builderPlaceableRefreshTick]);
-    const buildersClubPlaceOneButtonStyle = useMemo(
-        () => ({
-            background: 'linear-gradient(180deg, #d89f2d 0%, #c68515 100%)',
-            borderColor: '#d79d2e',
-            color: '#ffffff'
-        }),
-        []
-    );
-
-    useEffect(() => {
-        if (!isBuildersClubPlaceable) return;
-
-        const interval = setInterval(() => setBuilderPlaceableRefreshTick((prevValue) => prevValue + 1), 500);
-
-        return () => clearInterval(interval);
-    }, [isBuildersClubPlaceable]);
-
     if (!currentOffer) return null;
 
     const isLimitedEditionOffer = !!(currentOffer.product && currentOffer.product.isUniqueLimitedItem);
     const isOfferUnavailable = !canPurchaseCatalogOffer(currentOffer);
     // A club-locked offer replaces the purchase buttons with the club invitation; either
     // button would only open the club centre for a player below the offer's club level.
-    const isClubLocked = !isBuildersClubOffer && !isOfferUnavailable && !habbiconOwned && GetClubMemberLevel() < currentOffer.clubLevel;
+    const isClubLocked = !isOfferUnavailable && !habbiconOwned && GetClubMemberLevel() < currentOffer.clubLevel;
 
     const PurchaseButton = () => {
         const standardButtonClassNames = ['octane-catalog-standard-button'];
@@ -342,58 +308,6 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
                     {localizeWithFallback('generic.owned', 'Owned')}
                 </button>
             );
-
-        if (isBuildersClubPlaceable) {
-            const hasMissingExtraParam = purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length);
-            const isBlockedByVisitors = builderPlaceableStatus === BuilderFurniPlaceableStatus.VISITORS_IN_ROOM;
-            const isDisabled =
-                hasMissingExtraParam ||
-                isBlockedByVisitors ||
-                builderPlaceableStatus === BuilderFurniPlaceableStatus.MISSING_OFFER ||
-                builderPlaceableStatus === BuilderFurniPlaceableStatus.NOT_IN_ROOM ||
-                builderPlaceableStatus === BuilderFurniPlaceableStatus.NOT_ROOM_OWNER ||
-                builderPlaceableStatus === BuilderFurniPlaceableStatus.NOT_GROUP_ADMIN;
-            const startBuilderPlacement = (placeMultiple: boolean) => {
-                if (builderPlaceableStatus === BuilderFurniPlaceableStatus.FURNI_LIMIT_REACHED) {
-                    showSingleBubble(LocalizeText('room.error.max_furniture'), NotificationBubbleType.INFO);
-                    return;
-                }
-
-                if (isDisabled) return;
-
-                setCatalogPlaceMultipleObjects(placeMultiple);
-                requestOfferToMover(currentOffer);
-            };
-
-            return (
-                <div className="flex flex-col gap-1.5 items-start">
-                    <div className="flex gap-1.5 flex-wrap">
-                        <button type="button" className={standardButtonClassNames.join(' ')} disabled={isDisabled} onClick={() => startBuilderPlacement(true)}>
-                            {LocalizeText('builder.placement_widget.place_many')}
-                        </button>
-                        <button
-                            type="button"
-                            className={standardButtonClassNames.join(' ')}
-                            disabled={isDisabled}
-                            onClick={() => startBuilderPlacement(false)}
-                            style={buildersClubPlaceOneButtonStyle}
-                        >
-                            {LocalizeText('builder.placement_widget.place_one')}
-                        </button>
-                    </div>
-                    {isBlockedByVisitors && (
-                        <Text className="max-w-full" small variant="danger">
-                            {LocalizeText('builder.placement_widget.error.visitors')}
-                        </Text>
-                    )}
-                    {builderPlaceableStatus === BuilderFurniPlaceableStatus.NOT_GROUP_ADMIN && (
-                        <Text className="max-w-full" small variant="danger">
-                            {LocalizeText('builder.placement_widget.error.not_group_admin')}
-                        </Text>
-                    )}
-                </div>
-            );
-        }
 
         if (isOfferUnavailable)
             return (
@@ -466,7 +380,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
     return (
         <>
             {isClubLocked && <CatalogClubUpgradeButton />}
-            {!isClubLocked && !isBuildersClubOffer && !noGiftOption && !currentOffer.isRentOffer && (
+            {!isClubLocked && !noGiftOption && !currentOffer.isRentOffer && (
                 <button
                     type="button"
                     className="octane-catalog-standard-button octane-catalog-standard-gift-button"

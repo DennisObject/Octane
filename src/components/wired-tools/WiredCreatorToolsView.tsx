@@ -1320,10 +1320,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             },
             { key: '@is_invisible', value: '0' },
             ...(wallItemOffset ? [{ key: '@wallitem_offset', value: wallItemOffset, editable: canEditInspection }] : []),
-            {
-                key: '@type',
-                value: `${selectedFurnitureData?.availableForBuildersClub ? 1 : 0}${selectedFurnitureData?.availableForBuildersClub ? ' (BC)' : ' (Normal)'}`
-            },
             ...dynamicFlags,
             { key: '@dimensions.x', value: String(selectedFurni.info?.tileSizeX ?? 0) },
             { key: '@dimensions.y', value: String(selectedFurni.info?.tileSizeY ?? 0) },

@@ -42,7 +42,6 @@ describe('OctaneCardView.css', () => {
         const legacySwfWindowClass = ['habbo', 'swf', 'window'].join('-');
 
         expect(catalogView).not.toContain(legacySwfWindowClass);
-        expect(catalogView).not.toContain('buildersClubHeaderStyle');
         expect(indexTsx).not.toContain(['Habbo', 'Swf', 'Skin', 'css'].join('.'));
         expect(existsSync(legacyHabboSwfSkinPath)).toBe(false);
         expect(catalogCss).not.toMatch(/\.octane-catalog-window\s+\.octane-card-(?:header|header-shell|title|close-button)/);

@@ -1,4 +1,4 @@
-import { CatalogType, IPurchasableOffer } from '../../../../../api';
+import { IPurchasableOffer } from '../../../../../api';
 
 export const AIR_CATALOG_GRID_HORIZONTAL_SPACING = 3;
 export const AIR_GRID_WINDOW_OVERSCAN = 120;
@@ -18,21 +18,20 @@ export interface CatalogAirGridLayout {
     height: number;
 }
 
-export const isAirBaseCatalogOffer = (offer: IPurchasableOffer, currentType: string) =>
-    currentType === CatalogType.BUILDER || (offer.priceInCredits <= 0 && offer.priceInActivityPoints <= 0);
+export const isAirBaseCatalogOffer = (offer: IPurchasableOffer) => offer.priceInCredits <= 0 && offer.priceInActivityPoints <= 0;
 
-export const getAirCatalogOfferDimensions = (offer: IPurchasableOffer, currentType: string) =>
-    isAirBaseCatalogOffer(offer, currentType) ? { width: 36, height: 36 } : { width: 53, height: 74 };
+export const getAirCatalogOfferDimensions = (offer: IPurchasableOffer) =>
+    isAirBaseCatalogOffer(offer) ? { width: 36, height: 36 } : { width: 53, height: 74 };
 
 /** Mirrors ItemGridController.resolveColumnForNextItem for the first visual row. */
-export const getAirCatalogColumnCount = (offers: IPurchasableOffer[], availableWidth: number, currentType: string) => {
+export const getAirCatalogColumnCount = (offers: IPurchasableOffer[], availableWidth: number) => {
     if (!offers.length) return 0;
 
     let columnCount = 1;
-    let right = getAirCatalogOfferDimensions(offers[0], currentType).width;
+    let right = getAirCatalogOfferDimensions(offers[0]).width;
 
     while (columnCount < offers.length) {
-        const nextWidth = getAirCatalogOfferDimensions(offers[columnCount], currentType).width;
+        const nextWidth = getAirCatalogOfferDimensions(offers[columnCount]).width;
 
         if (right + nextWidth > availableWidth) break;
 
@@ -44,7 +43,7 @@ export const getAirCatalogColumnCount = (offers: IPurchasableOffer[], availableW
 };
 
 /** AIR fills columns round-robin, widens each to its widest child, and stacks with no vertical gap. */
-export const layoutAirCatalogOffers = (offers: IPurchasableOffer[], columnCount: number, currentType: string): CatalogAirGridLayout => {
+export const layoutAirCatalogOffers = (offers: IPurchasableOffer[], columnCount: number): CatalogAirGridLayout => {
     if (!offers.length || columnCount <= 0) return { entries: [], width: 0, height: 0 };
 
     const safeColumnCount = Math.min(columnCount, offers.length);
@@ -52,7 +51,7 @@ export const layoutAirCatalogOffers = (offers: IPurchasableOffer[], columnCount:
 
     offers.forEach((offer, index) => {
         const columnIndex = index % safeColumnCount;
-        columnWidths[columnIndex] = Math.max(columnWidths[columnIndex], getAirCatalogOfferDimensions(offer, currentType).width);
+        columnWidths[columnIndex] = Math.max(columnWidths[columnIndex], getAirCatalogOfferDimensions(offer).width);
     });
 
     const columnLefts = columnWidths.map((_, index) =>
@@ -61,7 +60,7 @@ export const layoutAirCatalogOffers = (offers: IPurchasableOffer[], columnCount:
     const columnHeights = Array.from({ length: safeColumnCount }, () => 0);
     const entries = offers.map((offer, index) => {
         const columnIndex = index % safeColumnCount;
-        const dimensions = getAirCatalogOfferDimensions(offer, currentType);
+        const dimensions = getAirCatalogOfferDimensions(offer);
         const entry = {
             offer,
             index,

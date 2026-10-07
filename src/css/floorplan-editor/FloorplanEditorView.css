@@ -1861,27 +1861,6 @@
     right: 3px !important;
 }
 
-.octane-floorplan-help {
-    position: absolute;
-    top: 2px;
-    right: 27px;
-    width: 19px;
-    height: 20px;
-    padding: 0;
-    border: 0;
-    background: url("../../assets/images/habbo-skin/slices/help-3-default.png") 0 0 / 19px 20px no-repeat;
-    cursor: pointer;
-    image-rendering: pixelated;
-}
-
-.octane-floorplan-help:hover {
-    background-image: url("../../assets/images/habbo-skin/slices/help-3-hover.png");
-}
-
-.octane-floorplan-help:active {
-    background-image: url("../../assets/images/habbo-skin/slices/help-3-pressed.png");
-}
-
 .octane-floorplan-window .fp-bc-logo {
     left: 12px;
     top: 7px;

@@ -11,8 +11,6 @@
     --catalog-standard-blue-border: #376275;
     --catalog-standard-select: #63c5e9;
     --catalog-standard-select-outer: #82d1ed;
-    --catalog-standard-bc: #ff8d00;
-    --catalog-standard-bc-outer: #ffb53c;
     /* Quantity stepper +/- sprites, kept identical to origin/main so the
        glyphs stay put through hover/active/disabled states. */
     --habbo-stepper-plus: url("../../assets/images/catalog/buttons/plus.png");
@@ -56,8 +54,7 @@
 .octane-catalog-mobile-header,
 .octane-catalog-layout-header-shell,
 .octane-catalog-layout-hero,
-.octane-catalog-window .octane-catalog-header,
-.octane-catalog-window .builders-club-status-shell {
+.octane-catalog-window .octane-catalog-header {
     display: none !important;
 }
 
@@ -299,34 +296,6 @@
     overflow: hidden;
 }
 
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-title {
-    height: 30px;
-    min-height: 30px;
-    font-size: 24px;
-    line-height: 30px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description {
-    position: absolute;
-    left: 0;
-    width: 475px;
-    height: 19px;
-    margin-top: 0;
-    display: block;
-    -webkit-line-clamp: initial;
-    line-clamp: initial;
-    max-height: 19px;
-    line-height: 19px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description.is-builder-membership {
-    top: 30px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description.is-builder-limit {
-    top: 45px;
-}
-
 .octane-catalog-standard-header-description b,
 .octane-catalog-standard-header-description strong {
     font-weight: 400;
@@ -531,15 +500,6 @@
     content: "";
     border: 1px solid var(--catalog-standard-select-outer);
     background: linear-gradient(180deg, var(--catalog-standard-select-outer) 0 2px, var(--catalog-standard-select) 2px calc(100% - 2px), var(--catalog-standard-select-outer) calc(100% - 2px));
-}
-
-.octane-catalog-navigation-list.is-builders-club .octane-catalog-navigation-item::before {
-    --catalog-standard-select: var(--catalog-standard-bc);
-    --catalog-standard-select-outer: var(--catalog-standard-bc-outer);
-}
-
-.octane-catalog-navigation-list.is-builders-club .octane-catalog-navigation-node.is-child .octane-catalog-navigation-item {
-    color: #b77734;
 }
 
 .octane-catalog-navigation-item:hover::before,
@@ -1529,14 +1489,6 @@
 .octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active.uses-base-grid-template::before {
     width: 36px;
     height: 36px;
-}
-
-.octane-catalog-window .octane-catalog-grid-density-standard.is-builder-grid .layout-grid-item.is-active::before {
-    border-color: var(--catalog-standard-bc-outer);
-}
-
-.octane-catalog-window .is-builder-grid .layout-grid-item.is-active {
-    border-color: var(--catalog-standard-bc-outer) !important;
 }
 
 .octane-catalog-window .layout-grid-item.has-highlight {

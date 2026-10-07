@@ -9,7 +9,7 @@ export interface CatalogStudioPublishedVersion {
     publishedAt: string;
 }
 
-export type CatalogStudioCatalogType = 'NORMAL' | 'BUILDER';
+export type CatalogStudioCatalogType = 'NORMAL';
 
 export interface CatalogStudioPageSnapshot {
     catalogType: CatalogStudioCatalogType;

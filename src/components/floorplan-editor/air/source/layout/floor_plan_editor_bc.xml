@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><layout name="floor_plan_editor_bc" width="662" height="600" version="0.1" uid="420BD4CE-A996-888B-61DE-61A19833B25E">
+<?xml version="1.0" encoding="UTF-8"?>
+<layout name="floor_plan_editor_bc" width="662" height="600" version="0.1" uid="420BD4CE-A996-888B-61DE-61A19833B25E">
   <window>
     <frame x="23" y="16" width="662" height="600" params="98305" style="3" caption="%24%7Bfloor.plan.editor.title%7D" color="0x0ff8d00" width_min="662" width_max="1380" height_min="600" height_max="900">
       <filters>
@@ -415,7 +416,6 @@
         </container>
       </children>
       <variables>
-        <var key="help_page" value="builders-club/info" type="String"/>
         <var key="margin_left" value="0" type="int"/>
         <var key="margin_top" value="33" type="int"/>
         <var key="margin_right" value="0" type="int"/>

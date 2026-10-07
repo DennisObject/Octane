@@ -1,8 +1,8 @@
 import { InfiniteGrid } from '@layout/InfiniteGrid';
 import { CSSProperties, FC, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { CatalogType, IPurchasableOffer } from '../../../../../api';
+import { IPurchasableOffer } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView } from '../../../../../common';
-import { useCatalogActions, useCatalogData, useCatalogUiState, useInventoryFurni, useScrollWindow } from '../../../../../hooks';
+import { useCatalogActions, useCatalogData, useInventoryFurni, useScrollWindow } from '../../../../../hooks';
 import { useCatalogAdminOfferReorder } from '../../../../../hooks/catalog/useCatalogAdminOfferReorder';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
@@ -28,7 +28,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     } = props;
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const { selectCatalogOffer = null } = useCatalogActions();
-    const { currentType = CatalogType.NORMAL } = useCatalogUiState();
     const adminMode = useCatalogAdmin()?.adminMode ?? false;
     const reorderOffers = useCatalogAdminOfferReorder();
     const elementRef = useRef<HTMLDivElement>(null);
@@ -39,20 +38,20 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const isAirStandardDensity = className.split(/\s+/).includes('octane-catalog-grid-density-standard');
 
     const offers = currentPage?.offers ?? [];
-    const hasAirBaseOffer = offers.some((offer) => isAirBaseCatalogOffer(offer, currentType));
-    const hasAirPricedOffer = offers.some((offer) => !isAirBaseCatalogOffer(offer, currentType));
+    const hasAirBaseOffer = offers.some((offer) => isAirBaseCatalogOffer(offer));
+    const hasAirPricedOffer = offers.some((offer) => !isAirBaseCatalogOffer(offer));
     const usesAirMixedGridTemplate = isAirStandardDensity && hasAirBaseOffer && hasAirPricedOffer;
     const usesAirBaseGridTemplate = isAirStandardDensity && offers.length > 0 && hasAirBaseOffer && !hasAirPricedOffer;
     const effectiveColumnMinHeight = usesAirBaseGridTemplate ? 36 : columnMinHeight;
     const effectiveColumnMinWidth = usesAirBaseGridTemplate ? 36 : columnMinWidth;
     const gridClassName =
-        `${baseGridClassName} ${usesAirBaseGridTemplate ? 'uses-base-grid-template' : ''} ${usesAirMixedGridTemplate ? 'uses-mixed-grid-template' : ''} ${currentType === CatalogType.BUILDER ? 'is-builder-grid' : ''}`.trim();
+        `${baseGridClassName} ${usesAirBaseGridTemplate ? 'uses-base-grid-template' : ''} ${usesAirMixedGridTemplate ? 'uses-mixed-grid-template' : ''}`.trim();
     const useVirtualGrid = shouldVirtualizeCatalogOffers(offers.length, adminMode) && !usesAirMixedGridTemplate;
     const airGridStyle = {
         ...style,
         ...(isAirStandardDensity && { '--octane-air-column-count': airColumnCount.toString() })
     } as CSSProperties;
-    const mixedLayout = useMemo(() => layoutAirCatalogOffers(offers, airColumnCount, currentType), [airColumnCount, currentType, offers]);
+    const mixedLayout = useMemo(() => layoutAirCatalogOffers(offers, airColumnCount), [airColumnCount, offers]);
 
     useLayoutEffect(() => {
         if (elementRef.current) {
@@ -94,7 +93,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
 
             if (availableWidth <= 0) return;
 
-            setAirColumnCount(getAirCatalogColumnCount(offers, availableWidth, currentType));
+            setAirColumnCount(getAirCatalogColumnCount(offers, availableWidth));
         };
 
         recompute();
@@ -105,7 +104,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         observer.observe(element);
 
         return () => observer.disconnect();
-    }, [columnCount, currentType, isAirStandardDensity, offers]);
+    }, [columnCount, isAirStandardDensity, offers]);
 
     const handleDragStart = useCallback((index: number) => {
         setDragIndex(index);

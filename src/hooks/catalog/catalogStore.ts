@@ -1,6 +1,5 @@
-import { CreateLinkEvent, FrontPageItem, GetRoomEngine, GetSessionDataManager, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@octane/renderer';
+import { CreateLinkEvent, FrontPageItem, GetRoomEngine, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@octane/renderer';
 import {
-    BuilderFurniPlaceableStatus,
     CatalogType,
     GetRoomSession,
     ICatalogNode,
@@ -19,14 +18,11 @@ import {
     getNodesByOfferIdFromMap,
     normalizeCatalogType,
     replaceCatalogPageOffers,
-    resolveBuilderFurniPlaceableStatus,
     RoomControllerLevel,
-    RoomObjectCategory,
-    RoomObjectType
+    RoomObjectCategory
 } from './useCatalog.helpers';
 import { invalidateCatalogIndex, invalidateCatalogPage, readCatalogIndex, refetchCatalogPage } from './useCatalogQueries';
 
-export const DUMMY_PAGE_ID_FOR_OFFER_SEARCH = -12345678;
 const DRAG_AND_DROP_ENABLED = true;
 
 export type CatalogPendingRequest = { kind: 'id'; id: number } | { kind: 'name'; name: string } | { kind: 'offer'; offerId: number };
@@ -54,15 +50,6 @@ export interface CatalogUiState {
     objectMoverRequested: boolean;
     purchasableOffer: IPurchasableOffer | null;
     placedObjectPurchaseData: PlacedObjectPurchaseData | null;
-    furniCount: number;
-    furniLimit: number;
-    maxFurniLimit: number;
-    secondsLeft: number;
-    updateTime: number;
-    secondsLeftWithGrace: number;
-    builderPlacementBlockedByVisitors: boolean;
-    builderPlacementAllowedInCurrentRoom: boolean;
-    builderTrialRoomHideConfirmed: boolean;
 }
 
 export interface CatalogActions {
@@ -89,18 +76,6 @@ export interface CatalogActions {
     setCatalogPlaceMultipleObjects: (flag: boolean) => void;
     bumpLocalizationVersion: () => void;
     setRoomPreviewer: (previewer: RoomPreviewer | null) => void;
-    setBuildersClubFurniCount: (furniCount: number) => void;
-    setBuildersClubSubscription: (status: {
-        furniLimit: number;
-        maxFurniLimit: number;
-        secondsLeft: number;
-        updateTime: number;
-        secondsLeftWithGrace: number;
-        placementBlockedByVisitors: boolean;
-        placementAllowedInCurrentRoom: boolean;
-    }) => void;
-    setBuilderTrialRoomHideConfirmed: (flag: boolean) => void;
-    getBuilderFurniPlaceableStatus: (offer: IPurchasableOffer) => BuilderFurniPlaceableStatus;
     isDraggable: (offer: IPurchasableOffer) => boolean;
     requestOfferToMover: (offer: IPurchasableOffer) => void;
     cancelObjectMover: () => void;
@@ -136,16 +111,7 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     roomPreviewer: null,
     objectMoverRequested: false,
     purchasableOffer: null,
-    placedObjectPurchaseData: null,
-    furniCount: 0,
-    furniLimit: 0,
-    maxFurniLimit: 0,
-    secondsLeft: 0,
-    updateTime: 0,
-    secondsLeftWithGrace: 0,
-    builderPlacementBlockedByVisitors: false,
-    builderPlacementAllowedInCurrentRoom: false,
-    builderTrialRoomHideConfirmed: false
+    placedObjectPurchaseData: null
 };
 
 const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
@@ -405,77 +371,17 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         })),
     setRoomPreviewer: (roomPreviewer) => set({ roomPreviewer }),
 
-    setBuildersClubFurniCount: (furniCount) => set({ furniCount }),
-    setBuildersClubSubscription: (status) =>
-        set({
-            furniLimit: status.furniLimit,
-            maxFurniLimit: status.maxFurniLimit,
-            secondsLeft: status.secondsLeft,
-            updateTime: status.updateTime,
-            secondsLeftWithGrace: status.secondsLeftWithGrace,
-            builderPlacementBlockedByVisitors: status.placementBlockedByVisitors,
-            builderPlacementAllowedInCurrentRoom: status.placementAllowedInCurrentRoom,
-            builderTrialRoomHideConfirmed: status.secondsLeft > 0 ? false : get().builderTrialRoomHideConfirmed
-        }),
-    setBuilderTrialRoomHideConfirmed: (builderTrialRoomHideConfirmed) => set({ builderTrialRoomHideConfirmed }),
-
-    getBuilderFurniPlaceableStatus: (offer) => {
-        const { secondsLeft, furniCount, furniLimit, builderPlacementAllowedInCurrentRoom, builderPlacementBlockedByVisitors } = get();
-        const roomSession = GetRoomSession();
-
-        let visitorCount = 0;
-
-        if (roomSession && secondsLeft <= 0 && !builderPlacementBlockedByVisitors) {
-            const roomEngine = GetRoomEngine();
-            const userDataManager = roomSession.userDataManager;
-            const sessionDataManager = GetSessionDataManager();
-
-            if (roomEngine && userDataManager && sessionDataManager) {
-                const roomObjects = roomEngine.getRoomObjects(roomSession.roomId, RoomObjectCategory.UNIT);
-
-                if (roomObjects && roomObjects.length) {
-                    for (const roomObject of roomObjects) {
-                        if (!roomObject) continue;
-
-                        const userData = userDataManager.getUserDataByIndex(roomObject.id);
-
-                        if (!userData || userData.type !== RoomObjectType.USER) continue;
-                        if (userData.webID === sessionDataManager.userId) continue;
-                        if (userData.isModerator) continue;
-
-                        visitorCount++;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return resolveBuilderFurniPlaceableStatus({
-            offer,
-            roomSession: roomSession
-                ? { isGuildRoom: roomSession.isGuildRoom, isRoomOwner: roomSession.isRoomOwner, controllerLevel: roomSession.controllerLevel }
-                : null,
-            secondsLeft,
-            furniCount,
-            furniLimit,
-            builderPlacementAllowedInCurrentRoom,
-            builderPlacementBlockedByVisitors,
-            visitorCount
-        });
-    },
-
     isDraggable: (offer) => {
         const roomSession = GetRoomSession();
         const { currentType } = get();
 
         return (
-            ((DRAG_AND_DROP_ENABLED &&
-                roomSession &&
-                offer.page &&
-                offer.page.layoutCode !== 'sold_ltd_items' &&
-                currentType === CatalogType.NORMAL &&
-                (roomSession.isRoomOwner || (roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_MEMBER))) ||
-                (currentType === CatalogType.BUILDER && get().getBuilderFurniPlaceableStatus(offer) === BuilderFurniPlaceableStatus.OKAY)) &&
+            DRAG_AND_DROP_ENABLED &&
+            roomSession &&
+            offer.page &&
+            offer.page.layoutCode !== 'sold_ltd_items' &&
+            currentType === CatalogType.NORMAL &&
+            (roomSession.isRoomOwner || (roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_MEMBER)) &&
             offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE &&
             offer.product.productType !== ProductTypeEnum.EFFECT &&
             offer.product.productType !== ProductTypeEnum.HABBO_CLUB

@@ -1,7 +1,5 @@
 import {
     AddLinkEventTracker,
-    CreateLinkEvent,
-    BuildersClubSubscriptionStatusMessageEvent,
     FloorHeightMapEvent,
     GetOccupiedTilesMessageComposer,
     GetRoomEntryTileMessageComposer,
@@ -15,7 +13,7 @@ import {
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { LocalizeText, Permission, SendMessageComposer } from '../../api';
+import { GetRoomSession, LocalizeText, Permission, SendMessageComposer } from '../../api';
 import { OctaneCardContentView, OctaneCardView } from '../../common';
 import { useHasPermission, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
 import { AIR_FLOOR_ASSETS } from './air/airAssets';
@@ -94,25 +92,19 @@ const OfficialFloorplanEditor: FC = () => {
     const [floorDrop, setFloorDrop] = useState<ThicknessLevel>(0);
     const [committedWall, setCommittedWall] = useState<ThicknessLevel>(0);
     const [committedFloor, setCommittedFloor] = useState<ThicknessLevel>(0);
-    const [canSaveWithBc, setCanSaveWithBc] = useState(false);
-    const [importCanSaveWithBc, setImportCanSaveWithBc] = useState(false);
     const canSaveAnyRoom = useHasPermission(Permission.RoomOwnerAny);
-    const canSave = canSaveAnyRoom || canSaveWithBc;
-    const importCanSave = canSaveAnyRoom || importCanSaveWithBc;
-    const bcSecondsRef = useRef(0);
-    const windowCreatedRef = useRef(false);
-    const roomVisibleRef = useRef(false);
+    // The server saves a floor plan only for the room owner or a room_any_owner account.
+    const canSave = canSaveAnyRoom || !!GetRoomSession()?.isRoomOwner;
+    const importCanSave = canSave;
     const { simpleAlert } = useNotification();
     const [largeFloorPlans, setLargeFloorPlans] = useState(false);
     const lastReceivedRef = useRef('');
     const planRef = useRef(plan);
-    const bcTimerRef = useRef<number | null>(null);
     const previewStageRef = useRef<HTMLDivElement>(null);
     const previewTimerRef = useRef<number | null>(null);
     const previewCenteredRef = useRef(false);
 
     planRef.current = plan;
-    roomVisibleRef.current = roomVisible;
 
     const liveState = useMemo<FloorplanState>(() => ({
         ...initialState,
@@ -132,10 +124,6 @@ const OfficialFloorplanEditor: FC = () => {
     useEffect(() => {
         if (!roomVisible) return;
 
-        if (!windowCreatedRef.current) {
-            setCanSaveWithBc(bcSecondsRef.current > 0);
-            windowCreatedRef.current = true;
-        }
         setWallDrop(committedWall);
         setFloorDrop(committedFloor);
         setWallsFixed(fixedWallsWireRef.current !== -1);
@@ -168,22 +156,8 @@ const OfficialFloorplanEditor: FC = () => {
     };
 
     useEffect(() => () => {
-        if (bcTimerRef.current !== null) window.clearInterval(bcTimerRef.current);
         if (previewTimerRef.current !== null) window.clearInterval(previewTimerRef.current);
     }, []);
-
-    useMessageEvent<BuildersClubSubscriptionStatusMessageEvent>(BuildersClubSubscriptionStatusMessageEvent, (event) => {
-        const seconds = event.getParser()?.secondsLeft ?? 0;
-
-        bcSecondsRef.current = seconds;
-
-        if (bcTimerRef.current === null) {
-            bcTimerRef.current = window.setInterval(() => {
-                bcSecondsRef.current -= 10;
-                if (roomVisibleRef.current) setCanSaveWithBc(bcSecondsRef.current > 0);
-            }, 10000);
-        }
-    });
 
     useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, (event) => {
         const parser = event.getParser() as { isAllowed?: (code: string) => boolean; isPerkAllowed?: (code: string) => boolean } | undefined;
@@ -328,7 +302,6 @@ const OfficialFloorplanEditor: FC = () => {
                         <span className="octane-card-title">
                             <FloorplanCenteredText background={0xd77900} color={0xffffff} text={LocalizeText('floor.plan.editor.title')} textStyle="u_frame_title" />
                         </span>
-                        <button aria-label={LocalizeText('generic.help')} className="octane-floorplan-help" type="button" onClick={() => CreateLinkEvent('habbopages/builders-club/info')} />
                         <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => setRoomVisible(false)} />
                     </div>
                     <OctaneCardContentView overflow="hidden">
@@ -404,7 +377,6 @@ const OfficialFloorplanEditor: FC = () => {
                                 <div className="fp-bc-footer-right">
                                     <button type="button" className="fp-bc-btn" data-testid="floorplan-import-export" onClick={() => {
                                         if (importExportVisible) { setImportExportVisible(false); return; }
-                                        setImportCanSaveWithBc(bcSecondsRef.current > 0);
                                         setImportExportVisible(true);
                                     }}><span className="fp-bc-btn-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply' }} text={LocalizeText('floor.plan.editor.import.export')} textStyle="button_shiny_bold" /></span></button>
                                     <button type="button" className="fp-bc-btn" data-testid="floorplan-cancel" onClick={() => setRoomVisible(false)}><span className="fp-bc-btn-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply' }} text={LocalizeText('floor.plan.editor.cancel')} textStyle="button_shiny_bold" /></span></button>
