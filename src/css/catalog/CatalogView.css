@@ -685,9 +685,9 @@
     top: 0;
     left: 0;
     width: 100% !important;
-    height: 348px !important;
-    min-height: 348px !important;
-    max-height: 348px !important;
+    height: 240px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
     max-width: 100%;
     border-radius: 0 !important;
     box-shadow: none !important;

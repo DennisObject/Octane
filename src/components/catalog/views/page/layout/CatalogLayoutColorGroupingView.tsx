@@ -162,7 +162,7 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
                 <div className="octane-catalog-offer-panel flex flex-col items-center grow overflow-hidden gap-2">
                     <div className="octane-catalog-offer-preview relative flex items-center justify-center overflow-hidden">
                         <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
-                        <CatalogViewProductWidgetView height={348} />
+                        <CatalogViewProductWidgetView height={240} />
                         <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 inset-e-1" position="absolute" />
                         {currentOffer.product.furnitureData.hasIndexedColor && (
                             <Button className="bottom-1 inset-s-1" position="absolute" onClick={(event) => setColorsShowing((prev) => !prev)}>
