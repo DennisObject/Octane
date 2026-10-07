@@ -12,6 +12,7 @@ const EFFECT_RED_TEAM = 95;
 const EFFECT_BLUE_TEAM = 96;
 const EFFECT_CROSSHAIR = 98;
 const SPLASH_LIFE_SPAN_TIME = 500;
+const RAY_GUN_BURST_MS = 500;
 const INVINCIBLE_ALPHA = 100;
 const WALK_SOUND = 'HBSTG_snowwar_walk';
 const NAME_COLOR_TEAM_1 = '#2F9EC9';
@@ -34,6 +35,7 @@ export class SnowWarArenaRoom implements IRoomGameInputHandler
     private _humans: Set<number> = new Set();
     private _snowballs: Set<number> = new Set();
     private _splashes: { id: number; time: number }[] = [];
+    private _rayGunTimers = new Map<number, ReturnType<typeof setTimeout>>();
     private _effects: Map<number, number> = new Map();
     private _playerUnderCursor: number = -1;
     private _walkSound: HTMLAudioElement = null;
@@ -95,6 +97,19 @@ export class SnowWarArenaRoom implements IRoomGameInputHandler
         if(!level.fuseObjects.length) this.notifyStageLoaded();
 
         this._disposers.push(this._engine.on('splash', event => this.addSplash(event)));
+        this._disposers.push(this._engine.on('rayGunBurst', event => this.showRayGunBurst(event.rayGunFuseObjectId)));
+    }
+
+    /** Plus extra: the gun furni shows state 1 for 500 ms on every burst. */
+    private showRayGunBurst(fuseObjectId: number): void
+    {
+        clearTimeout(this._rayGunTimers.get(fuseObjectId));
+        this.updateFurnitureState(fuseObjectId, 1);
+        this._rayGunTimers.set(fuseObjectId, setTimeout(() =>
+        {
+            this._rayGunTimers.delete(fuseObjectId);
+            this.updateFurnitureState(fuseObjectId, 0);
+        }, RAY_GUN_BURST_MS));
     }
 
     public dispose(): void
@@ -102,6 +117,10 @@ export class SnowWarArenaRoom implements IRoomGameInputHandler
         for(const dispose of this._disposers) dispose();
 
         this._disposers = [];
+
+        for(const timer of this._rayGunTimers.values()) clearTimeout(timer);
+
+        this._rayGunTimers.clear();
 
         this.setWalkSoundPlaying(false);
 
@@ -311,6 +330,11 @@ export class SnowWarArenaRoom implements IRoomGameInputHandler
         }
 
         this._engine.clickTile(tileX, tileY, { altKey, shiftKey });
+    }
+
+    public handleClickOnFurniture(objectId: number): boolean
+    {
+        return this._engine.clickFuseObject(objectId);
     }
 
     public handleClickOnHuman(objectId: number, altKey: boolean, shiftKey: boolean): void
