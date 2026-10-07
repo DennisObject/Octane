@@ -36,12 +36,14 @@ interface QuestButtonProps {
     textStyle?: NativeTextStyleName;
     style?: CSSProperties;
     tint?: boolean;
+    /** Label colour; coloured (tinted) buttons draw a white label. */
+    labelColor?: number;
     /** The button height of the layout; the label bands split the face at row 15 and the lower band runs to the bottom. */
     height?: number;
     children?: ReactNode;
 }
 
-export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onClick, title, textStyle = 'button_shiny_bold', style, height = 29, tint = false }) => {
+export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onClick, title, textStyle = 'button_shiny_bold', style, height = 29, tint = false, labelColor = 0x000000 }) => {
     const [state, setState] = useState<'default' | 'hover' | 'pressed'>('default');
     const bands = BANDS[state].map((band) => (tint ? { ...band, background: tintBand(band.background) } : band));
 
@@ -60,7 +62,7 @@ export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onC
             <span className="air-quest-button-seam" style={{ background: `#${bands[0].background.toString(16).padStart(6, '0')}` }} />
             {bands.map((band) => (
                 <span key={band.from} className="air-quest-button-band" style={{ clipPath: `inset(${band.from}px 0 ${height - (band.to === 29 ? height : band.to)}px 0)` }}>
-                    <AchievementText align="center" background={band.background} text={label} textStyle={textStyle} width={width} x={0} y={0} />
+                    <AchievementText align="center" background={band.background} color={labelColor} text={label} textStyle={textStyle} width={width} x={0} y={0} />
                 </span>
             ))}
         </button>

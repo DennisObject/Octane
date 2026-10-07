@@ -156,7 +156,7 @@ export const QuestsView: FC<{}> = () => {
                         <FrameTitle text={localizeWithFallback('quests.list.caption', 'Quests')} />
                     </OctaneCardHeaderView>
                     <div className="air-quests-content octane-card-content-shell">
-                        <ClassicScrollAreaView className="air-quests-list air-style0-scroll-area" scrollStep={LIST_ARROW_STEP} thumbSizeAdjustment={1} viewportRef={setListViewport}>
+                        <ClassicScrollAreaView className="air-quests-list air-style0-scroll-area" scrollStep={LIST_ARROW_STEP} viewportRef={setListViewport}>
                             <div className="air-quests-entries" style={{ height: Math.max(0, sorted.length * 124 - 10) }}>
                                 {sorted.map((quest) => (
                                     <QuestEntryView key={`${quest.campaignCode}-${quest.id}`} quest={quest} onAccept={onAccept} onReject={onReject} />

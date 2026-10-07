@@ -525,3 +525,8 @@
 .octane-quest-details-air .air-quests-native-title {
     margin-left: -2px;
 }
+
+/* The 30px tinted button draws its label one row lower than the 29px quest buttons. */
+.air-quest-get-hc.air-quest-get-hc-green .air-achievement-text {
+    top: 6px !important;
+}
