@@ -8,7 +8,6 @@ export interface CatalogOfferTileViewProps extends LayoutGridItemProps {
     offer: IPurchasableOffer;
     selectOffer: (offer: IPurchasableOffer) => void;
     requestOfferToMover?: (offer: IPurchasableOffer) => void;
-    inventoryVisible?: boolean;
     readOnly?: boolean;
     tintColor?: string;
     showTechnicalDetails?: boolean;
@@ -20,7 +19,6 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
         offer = null,
         selectOffer = null,
         requestOfferToMover = null,
-        inventoryVisible = false,
         readOnly = false,
         itemActive = false,
         tintColor = null,
@@ -83,7 +81,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                 setMouseDown(false);
                 return;
             case MouseEventType.ROLL_OUT:
-                if (readOnly || !isMouseDown || !itemActive || !inventoryVisible) return;
+                if (readOnly || !isMouseDown || !itemActive) return;
                 requestOfferToMover?.(offer);
                 return;
         }

@@ -15,6 +15,7 @@ import { CatalogAdminPageEditView } from './views/admin/CatalogAdminPageEditView
 import { CatalogLoadingStateView } from './views/CatalogLoadingStateView';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
+import { CatalogPlacedOfferConfirmView } from './views/CatalogPlacedOfferConfirmView';
 import { CatalogBreadcrumbView } from './views/navigation/CatalogBreadcrumbView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
@@ -235,6 +236,7 @@ const CatalogViewInner: FC<{}> = () => {
             <CatalogAdminPageEditView />
             <CatalogAdminOfferEditView />
             <CatalogGiftView />
+            <CatalogPlacedOfferConfirmView />
             <MarketplacePostOfferView />
         </>
     );

@@ -11,3 +11,4 @@ export * from './useMarketplaceConfiguration';
 export * from './useSellablePetPalette';
 export * from './useScrollWindow';
 export * from './useMeasuredFloorHeight';
+export * from './useCatalogPlacedOffer';
