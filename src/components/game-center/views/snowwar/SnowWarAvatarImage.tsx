@@ -93,7 +93,7 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
 
             image.setDirection(avatarSetType, direction);
 
-            const url = image.processAsCroppedImageUrl(avatarSetType);
+            const url = image.processAsCroppedImageUrl(avatarSetType, true);
             const placeholder = image.isPlaceholder();
 
             image.dispose();

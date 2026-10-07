@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { SnowWarAvatarImage, getSnowWarUniformFigure } from './SnowWarAvatarImage';
-import { SnowWarAnimation, SnowWarBitmap, SnowWarBox, snowWarBitmapSize, snowWarBitmapUrl } from './SnowWarBitmap';
+import { SnowWarAnimation, SnowWarBitmap, SnowWarBox, SnowWarImage, snowWarBitmapSize, snowWarBitmapUrl } from './SnowWarBitmap';
 import { SnowWarPlayerRow, SnowWarPlayerRowView } from './SnowWarPlayerRowView';
 import { localizeSnowWar, SnowWarStrokeText, SnowWarText, SnowWarThickButton } from './SnowWarText';
 
@@ -105,9 +105,10 @@ const SnowWarEndingFrame: FC<EndingFrameProps> = ({ header, headerColour, header
 const SnowWarLoadingContainer: FC<{ fieldType: number; showText: boolean; allReady?: boolean }> = ({ fieldType, showText, allReady = false }) => (
     <SnowWarBox name="loadingContainer" x={337} y={167} width={208} height={235}>
         {showText && <SnowWarStrokeText align="center" name="loadingText" size={17} strokeColor={0x1077ac} text={LocalizeText(allReady ? 'snowwar.loading_arena' : 'snowwar.waiting_players')} x={0} y={0} width={208} height={23} />}
-        <SnowWarBitmap bitmap={`arena_${ fieldType }_preview`} name="arenaPreview" x={0} y={35} width={208} height={100} />
-        {/* arenaName: auto_size left from x=102, as in the layout. */}
-        <SnowWarText bold color={0x1077ac} name="arenaName" size={14} text={LocalizeText(`snowwar.field.name.${ fieldType }`)} x={102} y={140} width={4} height={4} style={{ width: 'auto' }} />
+        {/* arenaPreview.bitmap is assigned directly (not setElementImage), so the 191x97 asset stretches to the 208x100 window. */}
+        <SnowWarImage imageHeight={100} imageWidth={208} name="arenaPreview" src={snowWarBitmapUrl(`arena_${ fieldType }_preview`)} x={0} y={35} width={208} height={100} />
+        {/* arenaName: a 4px auto-size field at x=102 kept centred by its relative_horizontal_scale_center params. */}
+        <SnowWarText align="center" bold color={0x1077ac} name="arenaName" size={14} text={LocalizeText(`snowwar.field.name.${ fieldType }`)} x={0} y={140} width={208} height={4} />
         {allReady && <SnowWarAnimation frames={8} name="mainLoadingIcon" prefix="load_" x={79} y={180} width={50} height={50} />}
     </SnowWarBox>
 );
@@ -145,8 +146,9 @@ const SnowWarMostContainer: FC<MostContainerProps> = ({ name, x, player }) =>
     return (
         <SnowWarBox name={`${ name }Container`} x={x} y={180} width={130} height={117}>
             <SnowWarBitmap bitmap={player.teamId === 2 ? 'red_square' : 'blue_square'} name="backgroundImage" x={30} y={26} width={70} height={70} />
-            <SnowWarStrokeText align="center" name={`${ name }Label`} size={17} strokeColor={colour} text={LocalizeText(name === 'mostKills' ? 'snowwar.most_kills' : 'snowwar.most_hits')} x={8} y={2} width={115} height={23} />
-            <SnowWarText align="center" bold color={colour} name="playerName" size={14} text={player.name} x={0} y={92} width={130} height={19} />
+            {/* mostKills texts carry text_style u_bold after their font settings, which sets 12px (the stroke keeps UbuntuThick); mostHits keeps 17 / 14. */}
+            <SnowWarStrokeText align="center" name={`${ name }Label`} size={name === 'mostKills' ? 12 : 17} strokeColor={colour} text={LocalizeText(name === 'mostKills' ? 'snowwar.most_kills' : 'snowwar.most_hits')} x={8} y={2} width={115} height={23} />
+            <SnowWarText align="center" bold color={colour} name="playerName" size={name === 'mostKills' ? 12 : 14} text={player.name} x={0} y={92} width={130} height={19} />
             <SnowWarAvatarImage direction={player.teamId === 2 ? 4 : 2} figure={getSnowWarUniformFigure(player.figure, player.teamId)} gender={player.gender} half name="playerImage" setType="full" x={30} y={26} width={70} height={70} />
         </SnowWarBox>
     );

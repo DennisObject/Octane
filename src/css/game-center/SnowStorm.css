@@ -15,7 +15,8 @@
     overflow: hidden;
 }
 
-/* AIR TextField: 2px gutter, line height = ascent + descent. */
+/* AIR TextField: 2px gutter, line height = ascent + descent. From 14px up Chrome draws Ubuntu one
+   pixel above the native glyph baseline (round(ascent + 2)); SnowWarText adds that pixel. */
 .snowwar-text {
     position: absolute;
     box-sizing: border-box;
@@ -84,18 +85,15 @@
     white-space: nowrap;
 }
 
-/* play.button: play_text (20px bold) auto-sizes and reflects its width to the button,
-   which keeps its right edge; the text sits at (28, 10) inside the 5px skin border. */
-.snowwar-play-button {
-    width: auto;
-    min-width: 0;
-}
-
+/* play.button: play_text (20px bold) at (28, 10) 135 wide, centred in the 190x50 button. */
 .snowwar-play-button__text {
-    display: block;
-    margin: 5px 22px 0 23px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 5px;
     padding: 2px;
     font: 700 20px/1.121 Ubuntu, sans-serif;
+    text-align: center;
     white-space: nowrap;
 }
 

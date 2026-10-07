@@ -54,8 +54,9 @@ export const GameCenterView = () =>
 
     useEffect(() =>
     {
-        if(state !== SnowWarEngineState.INACTIVE) setMainVisible(false);
-    }, [ state, setMainVisible ]);
+        // gameStarted / gameOver close games_main.
+        if(state !== SnowWarEngineState.INACTIVE || loading || results) setMainVisible(false);
+    }, [ state, loading, results, setMainVisible ]);
 
     const closeMain = () =>
     {
