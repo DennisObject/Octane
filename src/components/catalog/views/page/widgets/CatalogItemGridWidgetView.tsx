@@ -2,7 +2,7 @@ import { InfiniteGrid } from '@layout/InfiniteGrid';
 import { CSSProperties, FC, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IPurchasableOffer } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView } from '../../../../../common';
-import { useCatalogActions, useCatalogData, useInventoryFurni, useScrollWindow } from '../../../../../hooks';
+import { useCatalogActions, useCatalogData, useScrollWindow } from '../../../../../hooks';
 import { useCatalogAdminOfferReorder } from '../../../../../hooks/catalog/useCatalogAdminOfferReorder';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
@@ -73,7 +73,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                 : [...visibleMixedEntries, ...mixedLayout.entries.filter((entry) => entry.index === dragIndex)],
         [visibleMixedEntries, mixedLayout, dragIndex]
     );
-    const { isVisible: inventoryVisible = false } = useInventoryFurni();
 
     useLayoutEffect(() => {
         if (!isAirStandardDensity || !offers.length) {
@@ -163,7 +162,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                     tintColor={tintColor}
                     showTechnicalDetails={adminMode}
                     showPrices={showPrices}
-                    inventoryVisible={inventoryVisible}
                 />
             </div>
         );

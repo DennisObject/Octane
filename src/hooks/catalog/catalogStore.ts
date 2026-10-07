@@ -383,6 +383,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             currentType === CatalogType.NORMAL &&
             (roomSession.isRoomOwner || (roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_MEMBER)) &&
             offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE &&
+            offer.pricingModel !== Offer.PRICING_MODEL_MULTI &&
             offer.product.productType !== ProductTypeEnum.EFFECT &&
             offer.product.productType !== ProductTypeEnum.HABBO_CLUB
         );
