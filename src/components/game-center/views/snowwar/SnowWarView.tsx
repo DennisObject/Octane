@@ -121,18 +121,17 @@ export const SnowWarView: FC = () =>
         clearError();
     }, [ error, simpleAlert, clearError ]);
 
-    if(results) return <SnowWarResultsContainer results={results} snowWar={snowWar} />;
-
-    const loadingVisible = !!loading && (state === SnowWarEngineState.GAME_STARTING || state === SnowWarEngineState.STAGE_LOADING);
-    const arenaVisible = state >= SnowWarEngineState.STAGE_LOADING && state <= SnowWarEngineState.STAGE_ENDING;
-    const hudVisible = state >= SnowWarEngineState.STAGE_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
-
-    if(!loadingVisible && !arenaVisible) return null;
+    const inGame = state >= SnowWarEngineState.GAME_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
+    const loadingVisible = !!loading && !results && (state === SnowWarEngineState.GAME_STARTING || state === SnowWarEngineState.STAGE_LOADING);
+    const hudVisible = !results && state >= SnowWarEngineState.STAGE_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
 
     return (
-        <div className="snowwar-overlay">
-            {arenaVisible && <SnowWarArenaView />}
-            {hudVisible && <SnowWarHudView engine={engine} onExit={exitGame} />}
+        <>
+            {/* The arena gates itself: AIR builds the room on StageLoad and the server waits for its LoadStageReady. */}
+            <div className={`snowwar-arena-layer ${ inGame ? 'snowwar-arena-layer--active' : '' }`}>
+                <SnowWarArenaView />
+                {hudVisible && <SnowWarHudView engine={engine} onExit={exitGame} />}
+            </div>
             {loadingVisible && (
                 <SnowWarLoadingView
                     allReady={loading.lobby.players.every(player => loading.finishedUserIds.includes(player.userId))}
@@ -152,6 +151,7 @@ export const SnowWarView: FC = () =>
                     onLeave={exitGame}
                 />
             )}
-        </div>
+            {results && <SnowWarResultsContainer results={results} snowWar={snowWar} />}
+        </>
     );
 };

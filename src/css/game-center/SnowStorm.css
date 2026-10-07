@@ -198,6 +198,18 @@
     white-space: nowrap;
 }
 
+/* The arena room canvas and the HUD; inert until a game runs so the room underneath keeps its input. */
+.snowwar-arena-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    pointer-events: none;
+}
+
+.snowwar-arena-layer--active {
+    pointer-events: auto;
+}
+
 /* snowwar_loading_background_xml on desktop 0. */
 .snowwar-ending-layer {
     position: fixed;
