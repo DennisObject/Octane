@@ -1704,9 +1704,10 @@
     padding: 0 !important;
 }
 
-/* The dialog's drop shadow, fitted to the pixels around the running client's dialog (offset 3.5px, blur 2.2px, 35%); the shared card default is 4px. */
+/* The editor and its dialog share one drop shadow, fitted to the pixels around the running client's windows (offset 3.5px, blur 2.5px, 35%); the shared card default is 4px. */
+.draggable-window:has(.octane-floorplan-window),
 .draggable-window:has(.octane-floorplan-import) {
-    filter: drop-shadow(3.5px 3.5px 2.2px rgba(0, 0, 0, 0.35)) !important;
+    filter: drop-shadow(3.5px 3.5px 2.5px rgba(0, 0, 0, 0.35)) !important;
 }
 
 .octane-floorplan-import.is-official .octane-card-content-shell {
