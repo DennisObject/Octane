@@ -51,6 +51,7 @@ import { useHasPermission, useNotification, useRewardTracks } from '../../hooks'
 import { OctaneCard } from '../../layout';
 import { useAirFieldWidth } from '../achievements/AchievementText';
 import { RewardTrackAdminView } from './RewardTrackAdminView';
+import { RewardTrackScrollList } from './RewardTrackScrollList';
 
 const CURRENCY_TYPES: Record<string, number> = { credits: -1, duckets: 0, diamonds: 5 };
 const FILTERS: RewardTrackTaskFilter[] = ['all', 'in_progress', 'completed'];
@@ -715,7 +716,7 @@ export const RewardTrackView: FC<{}> = () => {
                                             </button>
                                         ))}
                                     </div>
-                                    <div className="octane-reward-track-task-list">
+                                    <RewardTrackScrollList key={`${track.id}:${filter}`} className="octane-reward-track-task-list" contentClassName="octane-reward-track-task-list-content" height={259}>
                                         {filteredTasks.map((task) => {
                                             const level = task.activeLevel;
                                             const ratio = task.progressRatioFor(level);
@@ -748,7 +749,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                 </button>
                                             );
                                         })}
-                                    </div>
+                                    </RewardTrackScrollList>
                                     {(!track.hasPremiumConfig || track.premium) && (
                                         <div className="octane-reward-track-tip">
                                             <img className="octane-reward-track-tip-gift" src={rewardGift} alt="" width={41} height={36} draggable={false} />

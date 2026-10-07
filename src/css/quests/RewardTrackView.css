@@ -1086,18 +1086,64 @@
     border-image: var(--rt-tab-selected) 5 5 6 fill / 5px 5px 6px stretch;
 }
 
-/* tasks: scrollable_itemlist_vertical style 100 (Illumina light, 9px scrollbar, auto-hidden). */
+/* tasks: scrollable_itemlist_vertical style 100 (RewardTrackScrollList): 422x259, content 406 wide, 9px scrollbar at the right edge. */
 .octane-reward-track .octane-reward-track-task-list {
     position: absolute;
     left: 14px;
     top: 94px;
-    display: flex;
-    flex-direction: column;
     width: 422px;
     height: 259px;
+}
+
+.octane-reward-track .octane-reward-track-scroll-viewport {
+    width: 422px;
+    height: 259px;
+    overflow: hidden;
+}
+
+.octane-reward-track .octane-reward-track-task-list-content {
+    display: flex;
+    flex-direction: column;
     gap: 5px;
-    overflow-x: hidden;
-    overflow-y: auto;
+    width: 406px;
+}
+
+/* track window 9x259 (skin slice 2/5/2); the lift is a child window with its own 4/1/4 skin and two transparent rows at each end. */
+.octane-reward-track .octane-reward-track-scrollbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 9px;
+    height: 259px;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar::before,
+.octane-reward-track .octane-reward-track-scrollbar-lift::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    border-style: solid;
+    border-color: transparent;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar::before {
+    border-width: 2px 0;
+    border-image: url("../../assets/images/reward-track/air/scrollbar-track.png") 2 0 fill / 2px 0 stretch;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar-lift {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 9px;
+    touch-action: none;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar-lift::before {
+    border-width: 4px 0;
+    border-image: url("../../assets/images/reward-track/air/scrollbar-lift.png") 4 0 fill / 4px 0 stretch;
 }
 
 .octane-reward-track .octane-reward-track-task {
@@ -1521,21 +1567,21 @@
 }
 
 /* Illumina light scrollbar (style 100): track 2/5/2, lift 4/1/4, 9px, no arrows. */
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar {
     width: 9px !important;
     height: 9px !important;
     background: transparent !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button,
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button:single-button:vertical:decrement,
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button:single-button:vertical:increment {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button,
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button:single-button:vertical:decrement,
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button:single-button:vertical:increment {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-track:vertical {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-track:vertical {
     border: solid transparent !important;
     border-width: 2px 0 !important;
     border-image: url("../../assets/images/reward-track/air/scrollbar-track.png") 2 0 fill / 2px 0 stretch !important;
@@ -1543,7 +1589,7 @@
     image-rendering: pixelated !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-thumb:vertical {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-thumb:vertical {
     min-height: 9px !important;
     border: solid transparent !important;
     border-width: 4px 0 !important;
