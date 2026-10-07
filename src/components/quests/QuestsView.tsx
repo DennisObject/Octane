@@ -1,6 +1,7 @@
 import {
     AddLinkEventTracker,
     CreateLinkEvent,
+    GetSessionDataManager,
     ILinkEventTracker,
     QuestMessageData,
     RemoveLinkEventTracker
@@ -9,7 +10,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { localizeWithFallback } from '../../api';
 import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
-import { usePurse, useQuests } from '../../hooks';
+import { useQuests } from '../../hooks';
 import { AchievementText } from '../achievements/AchievementText';
 import { useAirScrollInput } from '../achievements/useAirScrollInput';
 import { QuestButton } from './QuestButton';
@@ -45,9 +46,7 @@ export const QuestsView: FC<{}> = () => {
 
     useAirScrollInput(listViewport, { wheelStep: LIST_WHEEL_STEP, arrowStep: LIST_ARROW_STEP });
 
-    // The official quest windows read the purse's days to the end of the subscription period (sessionDataManager.hasClub).
-    const { purse = null } = usePurse();
-    const hasClub = (purse?.clubDays ?? 0) > 0;
+    const hasClub = GetSessionDataManager().clubLevel > 0;
 
     const show = useCallback(() => {
         setIsVisible(true);
