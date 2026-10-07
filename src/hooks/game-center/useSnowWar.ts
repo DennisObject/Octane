@@ -48,12 +48,14 @@ import {
     GameLevelData,
     GameLobbyData,
     GameLobbyPlayerData,
+    GetCommunication,
     GetSnowWarGameTokensOfferComposer,
     LeaderboardEntry,
     OctaneEventType,
     PurchaseSnowWarGameTokensOfferComposer,
     SnowWarGameTokensMessageEvent
 } from '@octane/renderer';
+import type { ConnectionStatePhase } from '@octane/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { GetConfigurationValue, GetRoomSession, GetSessionDataManager, PlaySound, SendMessageComposer, TryVisitRoom, VisitDesktop } from '../../api';
@@ -82,6 +84,7 @@ import {
 import { useMessageEvent, useOctaneEvent } from '../events';
 
 const SNOWSTORM_GAME_TYPE = 0;
+const CONNECTION_LOST_PHASES: readonly ConnectionStatePhase[] = [ 'disconnected', 'reconnecting', 'reauthenticating', 'failed' ];
 const MAX_CHAT_MESSAGES = 50;
 
 // One engine per client: the arena view reads it every frame; the hook drives its state machine.
@@ -198,6 +201,7 @@ const useSnowWarState = (): SnowWarHookState =>
     const returnedToRoomRef = useRef(true);
     const playersRef = useRef(new Map<number, SnowWarLobbyPlayer>());
     const chatIdRef = useRef(0);
+    const connectionLostRef = useRef(false);
 
     useEffect(() => SNOWWAR_ENGINE.on('stateChanged', event => setState(event.state)), []);
 
@@ -245,12 +249,23 @@ const useSnowWarState = (): SnowWarHookState =>
     }, [ clearSession ]);
 
     // The server drops the player from lobby and game when the socket goes, so no message ends this session:
-    // clear it on close, and after the reconnect go back to the room the arena replaced.
-    useOctaneEvent(OctaneEventType.SOCKET_CLOSED, useCallback(() => clearSession(), [ clearSession ]));
-
-    useOctaneEvent(OctaneEventType.SOCKET_REAUTHENTICATED, useCallback(() =>
+    // clear it as soon as the connection is lost (the state ReconnectView shows), and once the session is
+    // authenticated again go back to the room the arena replaced.
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, useCallback(() =>
     {
-        clearSession();
+        const { phase, authenticated } = GetCommunication().connection.connectionState;
+
+        if(CONNECTION_LOST_PHASES.includes(phase))
+        {
+            connectionLostRef.current = true;
+            clearSession();
+
+            return;
+        }
+
+        if(!authenticated || !connectionLostRef.current) return;
+
+        connectionLostRef.current = false;
         returnToRoom();
     }, [ clearSession, returnToRoom ]));
 
