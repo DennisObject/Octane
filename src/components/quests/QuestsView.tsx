@@ -40,6 +40,7 @@ export const QuestsView: FC<{}> = () => {
     const [position, setPosition] = useState<{ x: number; y: number }>(null);
     const [detailsQuest, setDetailsQuest] = useState<QuestMessageData>(null);
     const [detailsPosition, setDetailsPosition] = useState<{ x: number; y: number }>(null);
+    const [detailsBlockHeight, setDetailsBlockHeight] = useState(114);
     const [listViewport, setListViewport] = useState<HTMLDivElement>(null);
     const { quests = [], openRequests = 0, trackedQuest = null, requestQuests = null, acceptQuest = null, rejectQuest = null } = useQuests();
 
@@ -187,6 +188,7 @@ export const QuestsView: FC<{}> = () => {
                     uniqueKey="quest-details"
                     frameStyle={3}
                     isResizable={false}
+                    style={{ height: detailsBlockHeight + 56 }}
                     initialPosition={detailsPosition}
                     onPositionChange={setDetailsPosition}
                     unconstrainedPosition
@@ -196,7 +198,7 @@ export const QuestsView: FC<{}> = () => {
                         <FrameTitle text={localizeWithFallback('quests.details.caption', 'Quest')} />
                     </OctaneCardHeaderView>
                     <div className="air-quest-details-content octane-card-content-shell">
-                        <QuestEntryView quest={detailsQuest} showHint onAccept={onAccept} onReject={onReject} />
+                        <QuestEntryView quest={detailsQuest} showHint onAccept={onAccept} onReject={onReject} onBlockHeight={setDetailsBlockHeight} />
                     </div>
                 </OctaneCardView>
             )}

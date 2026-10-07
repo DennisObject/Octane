@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useEffect, useState } from 'react';
+import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { loadNativeFont, measureNativeText } from '../../common/native-text/NativeFont';
 import { NativeText } from '../../common/native-text/NativeText';
 import { NativeTextStyleName } from '../../common/native-text/NativeTextStyles';
@@ -23,6 +23,8 @@ interface AchievementTextProps {
     maxWidth?: number;
     /** A text_styles_css entry instead of the quest engine's explicit Ubuntu style (size and weight come from the entry). */
     textStyle?: NativeTextStyleName;
+    /** Called with the raster height once it is drawn and whenever it changes (fields that grow with their text). */
+    onHeight?: (height: number) => void;
     className?: string;
     style?: CSSProperties;
 }
@@ -33,12 +35,26 @@ interface AchievementTextProps {
 // backdrop when no ancestor between the text and that backdrop is isolated (no transform, opacity, filter or z-index).
 // Quest engine text fields set font_face Ubuntu, sharpness 0, thickness 0 and kerning false
 // instead of a text_styles_css entry, so the style is spelled out here.
-export const AchievementText: FC<AchievementTextProps> = ({ text, background, size = 12, bold = false, underline = false, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, className = '', style }) => {
+export const AchievementText: FC<AchievementTextProps> = ({ text, background, size = 12, bold = false, underline = false, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, onHeight, className = '', style }) => {
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const wrapper = wrapperRef.current;
+
+        if (!onHeight || !wrapper || typeof ResizeObserver === 'undefined') return;
+
+        const observer = new ResizeObserver(() => onHeight(wrapper.offsetHeight));
+
+        observer.observe(wrapper);
+
+        return () => observer.disconnect();
+    }, [onHeight]);
+
     const bitmap = background === undefined;
     const onBlack = color === 0xffffff;
 
     return (
         <div
+            ref={wrapperRef}
             className={`air-achievement-text ${className}`.trim()}
             style={{ position: 'absolute', left: x, top: y, width, height, overflow: height === undefined ? undefined : 'hidden', textAlign: align, paddingRight: floorCenter ? 0.02 : undefined, whiteSpace: 'nowrap', pointerEvents: 'none', ...style }}
         >

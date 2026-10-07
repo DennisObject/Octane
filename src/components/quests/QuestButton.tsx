@@ -39,6 +39,7 @@ export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onC
             onPointerDown={() => setState('pressed')}
             onPointerUp={() => setState('hover')}
         >
+            <span className="air-quest-button-seam" style={{ background: `#${BANDS[state][0].background.toString(16)}` }} />
             {BANDS[state].map((band) => (
                 <span key={band.from} className="air-quest-button-band" style={{ clipPath: `inset(${band.from}px 0 ${29 - band.to}px 0)` }}>
                     <AchievementText align="center" background={band.background} text={label} textStyle="button_shiny_bold" width={width} x={0} y={0} />

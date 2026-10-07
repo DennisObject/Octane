@@ -24,7 +24,6 @@
 
 .octane-card-shell.octane-quest-details-air {
     width: 493px !important;
-    height: 253px !important;
 }
 
 .draggable-window:has(> .octane-quests-air) {
@@ -34,7 +33,6 @@
 
 .draggable-window:has(> .octane-quest-details-air) {
     width: 493px;
-    height: 253px;
 }
 
 .octane-quests-air *,
@@ -74,7 +72,6 @@
 
 .octane-quest-details-air .air-quest-details-content.octane-card-content-shell {
     width: 493px;
-    height: 220px;
 }
 
 /* ---- list ---- */
@@ -119,12 +116,16 @@
     height: 124px;
 }
 
+.air-quest-counter-text {
+    margin-top: var(--air-quest-extra, 0px);
+}
+
 .octane-quests-air .air-quest-entry:last-child {
     height: 116px;
 }
 
 .octane-quest-details-air .air-quest-entry {
-    margin: 10px 0 0 10px;
+    margin: 11px 0 0 11px;
 }
 
 .air-quest-campaign {
@@ -132,7 +133,7 @@
     top: 0;
     left: 0;
     width: 103px;
-    height: 114px;
+    height: calc(114px + var(--air-quest-extra, 0px));
     background: #646464;
 }
 
@@ -149,13 +150,13 @@
 
 .air-quest-campaign-top {
     top: 2px;
-    height: 110px;
+    height: calc(110px + var(--air-quest-extra, 0px));
     background: #bababa;
 }
 
 .air-quest-campaign-bottom {
-    top: 57px;
-    height: 55px;
+    top: calc(57px + var(--air-quest-extra-floor, 0px));
+    height: calc(55px + var(--air-quest-extra-floor, 0px));
     background: #ababab;
 }
 
@@ -169,7 +170,8 @@
 
 .air-quest-campaign-image {
     position: absolute;
-    top: 21px;
+    /* the picture field is centred in the campaign block that grows with the hint (floor), the arrow rounds up */
+    top: calc(21px + var(--air-quest-extra-floor, 0px));
     left: 11px;
     width: 84px;
     height: 72px;
@@ -181,7 +183,7 @@
 
 .air-quest-counter {
     position: absolute;
-    top: 84px;
+    top: calc(84px + var(--air-quest-extra, 0px));
     left: 27px;
     width: 49px;
     height: 20px;
@@ -189,7 +191,7 @@
 
 .air-quest-arrow {
     position: absolute;
-    top: 45px;
+    top: calc(45px + var(--air-quest-extra-ceil, 0px));
     left: 101px;
     width: 15px;
     height: 25px;
@@ -378,6 +380,16 @@
     height: 29px;
 }
 
+/* The stretched skin switches from the light to the dark band one row early; this row restores the official seam. */
+.air-quest-button-seam {
+    position: absolute;
+    top: 14px;
+    right: 5px;
+    left: 5px;
+    height: 1px;
+    pointer-events: none;
+}
+
 .air-quest-button-band {
     position: absolute;
     inset: 0;
@@ -495,4 +507,12 @@
 .air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
     bottom: 0;
     background-position: 0 -22px;
+}
+
+.octane-quest-details-air .air-quest-cancel {
+    left: 275px;
+}
+
+.octane-quest-details-air .air-quests-native-title {
+    margin-left: -2px;
 }
