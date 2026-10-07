@@ -1,7 +1,7 @@
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { loadNativeFont, measureNativeText } from '../../common/native-text/NativeFont';
 import { NativeText } from '../../common/native-text/NativeText';
-import { NativeTextStyleName } from '../../common/native-text/NativeTextStyles';
+import { NativeTextStyleName, nativeTextStyles } from '../../common/native-text/NativeTextStyles';
 
 interface AchievementTextProps {
     text: string;
@@ -17,10 +17,12 @@ interface AchievementTextProps {
     width?: number;
     /** Field height from the layout XML: AIR clips the raster to the field. */
     height?: number;
-    align?: 'left' | 'center';
+    align?: 'left' | 'center' | 'right';
     /** auto_size="center" fields: the raster lands on floor((field - raster) / 2); CSS rounds a half pixel up. */
     floorCenter?: boolean;
     maxWidth?: number;
+    /** Overrides the kerning of a `textStyle` entry (layout text fields without a kerning variable do not kern). */
+    kerning?: boolean;
     /** A text_styles_css entry instead of the quest engine's explicit Ubuntu style (size and weight come from the entry). */
     textStyle?: NativeTextStyleName;
     /** Called with the raster height once it is drawn and whenever it changes (fields that grow with their text). */
@@ -35,7 +37,7 @@ interface AchievementTextProps {
 // backdrop when no ancestor between the text and that backdrop is isolated (no transform, opacity, filter or z-index).
 // Quest engine text fields set font_face Ubuntu, sharpness 0, thickness 0 and kerning false
 // instead of a text_styles_css entry, so the style is spelled out here.
-export const AchievementText: FC<AchievementTextProps> = ({ text, background, size = 12, bold = false, underline = false, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, onHeight, className = '', style }) => {
+export const AchievementText: FC<AchievementTextProps> = ({ text, background, size, bold, underline, color = 0x000000, x, y, width, height, align = 'left', floorCenter = false, maxWidth, textStyle, kerning, onHeight, className = '', style }) => {
     const wrapperRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const wrapper = wrapperRef.current;
@@ -61,7 +63,11 @@ export const AchievementText: FC<AchievementTextProps> = ({ text, background, si
             <NativeText
                 background={bitmap ? (onBlack ? 0x000000 : 0xffffff) : background}
                 maxWidth={maxWidth}
-                overrides={textStyle ? { color } : { family: 'Ubuntu', size, bold, underline, color, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' }}
+                overrides={
+                    textStyle
+                        ? { color, ...(size !== undefined && { size }), ...(bold !== undefined && { bold }), ...(underline !== undefined && { underline }), ...(kerning !== undefined && { kerning }) }
+                        : { family: 'Ubuntu', size: size ?? 12, bold: bold ?? false, underline: underline ?? false, color, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' }
+                }
                 style={bitmap ? { mixBlendMode: onBlack ? 'screen' : 'multiply' } : undefined}
                 text={text}
                 textStyle={textStyle ?? 'u_regular'}
@@ -72,13 +78,15 @@ export const AchievementText: FC<AchievementTextProps> = ({ text, background, si
 
 // An AIR text field is floor(textWidth) + 1 + 4 wide, so a text that measures exactly N.0 is one pixel wider than the
 // ceil(textWidth) + 4 raster NativeText draws. Fields laid out one after another need the AIR width.
-export const useAirFieldWidth = (text: string, size = 12, bold = false): number | undefined => {
+export const useAirFieldWidth = (text: string, size = 12, bold = false, textStyle?: NativeTextStyleName): number | undefined => {
     const [width, setWidth] = useState<{ key: string; value: number }>(null);
-    const key = `${size}:${bold}:${text}`;
+    const key = `${textStyle ?? ''}:${size}:${bold}:${text}`;
 
     useEffect(() => {
         let disposed = false;
-        const style = { family: 'Ubuntu' as const, size, bold, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' as const };
+        const style = textStyle
+            ? { ...nativeTextStyles[textStyle], size, bold }
+            : { family: 'Ubuntu' as const, size, bold, sharpness: 0, thickness: 0, kerning: false, antiAliasType: 'advanced' as const };
 
         loadNativeFont(style)
             .then((loaded) => {
@@ -89,7 +97,7 @@ export const useAirFieldWidth = (text: string, size = 12, bold = false): number 
         return () => {
             disposed = true;
         };
-    }, [key, size, bold, text]);
+    }, [key, size, bold, text, textStyle]);
 
     return width?.key === key ? width.value : undefined;
 };

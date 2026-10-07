@@ -11,6 +11,8 @@ interface AirAchievementProgressBarProps {
     scoreAtStartOfLevel?: number;
     /** The left/centre/right track frame; the quest tracker draws its track in its own bitmap and shows only the fill. */
     hasFrame?: boolean;
+    /** The percent mode of the quest engine bar: the caption shows floor(100 * progress / max) instead of the raw amounts. */
+    percentCaption?: boolean;
     className?: string;
 }
 
@@ -22,6 +24,7 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
     width,
     scoreAtStartOfLevel = 0,
     hasFrame = true,
+    percentCaption = false,
     className = ''
 }) => {
     const targetWidth = maxProgress > 0 ? Math.max(0, Math.round((width * progress) / maxProgress)) : 0;
@@ -100,7 +103,9 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
                         ? LocalizeText(
                               localizationKey,
                               ['progress', 'limit'],
-                              [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
+                              percentCaption
+                                  ? [String(Math.floor((animation.progress / maxProgress) * 100)), String(maxProgress)]
+                                  : [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
                           )
                         : `${animation.progress + scoreAtStartOfLevel}/${maxProgress + scoreAtStartOfLevel}`
                 }

@@ -1,6 +1,6 @@
 import type { DailyTaskData, QuestMessageData, RewardTrackData, RewardTrackPrizeData } from '@octane/renderer';
 import { GetConfigurationValue } from '../octane';
-import { LocalizeText, localizeWithFallback } from '../utils';
+import { FriendlyTime, LocalizeText, localizeWithFallback } from '../utils';
 
 /** The official quest engine texts and image rules (HabboQuestEngine / QuestsList / QuestCompleted). */
 
@@ -124,26 +124,9 @@ export const getDailyTasksWindowCaption = (maxSecondsLeft: number): string => {
 
     if (maxSecondsLeft <= 0) return title;
 
-    const refresh = localizeWithFallback('dailytasks.refreshes', 'Refresh in %time%', ['time'], [formatFriendlySeconds(maxSecondsLeft)]);
+    const refresh = localizeWithFallback('dailytasks.refreshes', 'Refresh in %time%', ['time'], [FriendlyTime.format(maxSecondsLeft)]);
 
     return `${title} - ${refresh}`;
-};
-
-/** "2h 5m" style countdowns; the official client uses FriendlyTime, this keeps it self-contained. */
-export const formatFriendlySeconds = (seconds: number): string => {
-    const total = Math.max(0, Math.floor(seconds));
-    const days = Math.floor(total / 86400);
-    const hours = Math.floor((total % 86400) / 3600);
-    const minutes = Math.floor((total % 3600) / 60);
-    const secs = total % 60;
-
-    if (days > 0) return `${days}d ${hours}h`;
-
-    if (hours > 0) return `${hours}h ${minutes}m`;
-
-    if (minutes > 0) return `${minutes}m ${secs}s`;
-
-    return `${secs}s`;
 };
 
 // ---------------------------------------------------------------- reward track
