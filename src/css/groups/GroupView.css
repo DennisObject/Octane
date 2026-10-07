@@ -43,20 +43,6 @@
     font-size: 12px;
 }
 
-.octane-groups-tab-header {
-    display: flex;
-    min-height: 70px;
-    padding: 6px;
-    margin-bottom: 6px;
-    border: 1px solid #b4b4ad;
-    border-radius: 6px;
-    background: #f7f7f2;
-}
-
-.octane-group-tab-image {
-    flex: 0 0 auto;
-}
-
 .octane-groups-footer {
     margin-top: 6px;
     padding-top: 6px;
@@ -1141,18 +1127,6 @@
     margin: 0;
 }
 
-/* Badge editor part picker: cap the symbol/base grid at 8 rows and scroll the
-   rest. Each tile is 48px tall (40px badge + 2x4px padding) with 4px gaps, so
-   8 rows + 7 gaps = 412px. The rows template/height overrides undo the Grid
-   component's h-full + 1fr stretched rows so tiles keep their natural height. */
-.octane-group-badge-part-picker {
-    max-height: 412px;
-    overflow-y: auto;
-    grid-template-rows: none !important;
-    grid-auto-rows: max-content;
-    align-content: start;
-}
-
 /* button_thick style 3: neutral shiny skin shared by group controls. */
 .octane-groups-window .octane-groups-button--primary,
 .octane-group-information-standalone .octane-extended-profile-group-info__button,
@@ -1202,10 +1176,4 @@
 .octane-group-room-info .octane-group-room-info__button:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;
-}
-
-.octane-group-manager .form-check-input {
-    appearance: auto;
-    accent-color: #337d92;
-    cursor: pointer;
 }

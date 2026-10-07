@@ -1,9 +1,10 @@
 import { GroupSaveColorsComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { AutoGrid, Button, Column, Grid, Text } from '../../../../common';
-import { useGroup, useNotification } from '../../../../hooks';
-import { classNames } from '../../../../layout';
+import { useGroup } from '../../../../hooks';
+import { GroupColorChip } from '../GroupBadgeCreatorView';
+import { useGroupAlert } from '../GroupNativeAlertView';
+import { GroupBox, GroupButton, GroupSwatch, GroupText } from '../GroupNativeLayout';
 
 interface GroupTabColorsViewProps {
     groupData: IGroupData;
@@ -11,11 +12,15 @@ interface GroupTabColorsViewProps {
     setCloseAction: Dispatch<SetStateAction<{ action: () => boolean }>>;
 }
 
+// step_cont_3 sits at client y=110.
+const STEP_Y = 110;
+const DEFAULT_SECONDARY_COLOR = 'ffd601';
+
 export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     const { groupData = null, setGroupData = null, setCloseAction = null } = props;
     const [colors, setColors] = useState<number[]>(null);
     const { groupCustomize = null } = useGroup();
-    const { simpleAlert } = useNotification();
+    const showAlert = useGroupAlert();
 
     const getGroupColor = (colorIndex: number) => {
         if (!groupCustomize || !colors) return '000000';
@@ -40,7 +45,7 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
         if (!groupData) return false;
         if (!colors || !groupCustomize?.groupColorsA?.some(color => color.id === colors[0]) || !groupCustomize?.groupColorsB?.some(color => color.id === colors[1]))
         {
-            simpleAlert(LocalizeText('group.edit.error.no.color.selected'), null, null, null, LocalizeText('group.edit.error.title'));
+            showAlert({ title: LocalizeText('group.edit.error.title'), message: LocalizeText('group.edit.error.no.color.selected') });
             return false;
         }
 
@@ -62,12 +67,14 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
         setGroupData(prevValue => ({ ...prevValue, groupColors: [...colors] }));
 
         return true;
-    }, [groupData, colors, setGroupData, groupCustomize, simpleAlert]);
+    }, [groupData, colors, setGroupData, groupCustomize, showAlert]);
 
     useEffect(() => {
         if (!groupCustomize?.groupColorsA?.length || !groupCustomize?.groupColorsB?.length || (groupData.groupColors && groupData.groupColors.length)) return;
 
-        const groupColors = [groupCustomize.groupColorsA[0].id, groupCustomize.groupColorsB[0].id];
+        // The layout opens with the first primary swatch and the gold secondary swatch selected.
+        const gold = groupCustomize.groupColorsB.find((item) => item.color === DEFAULT_SECONDARY_COLOR) ?? groupCustomize.groupColorsB[0];
+        const groupColors = [groupCustomize.groupColorsA[0].id, gold.id];
 
         setGroupData((prevValue) => {
             return { ...prevValue, groupColors };
@@ -93,61 +100,31 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     if (!colors) return null;
 
     return (
-        <Grid overflow="hidden">
-            <Column gap={1} size={2}>
-                <Text bold>{LocalizeText('group.edit.color.guild.color')}</Text>
-                {groupData.groupColors && groupData.groupColors.length > 0 && (
-                    <div className="flex overflow-hidden border rounded">
-                        <div className="w-[30px] h-[40px]" style={{ backgroundColor: '#' + getGroupColor(0) }} />
-                        <div className="w-[30px] h-[40px]" style={{ backgroundColor: '#' + getGroupColor(1) }} />
-                    </div>
-                )}
-                {groupData.groupId > 0 && (
-                    <Button variant="link" onClick={() => setColors([...groupData.groupColors])}>
-                        {LocalizeText('group.edit.reset.color')}
-                    </Button>
-                )}
-            </Column>
-            <Column gap={1} overflow="hidden" size={5}>
-                <Text bold>{LocalizeText('group.edit.color.primary.color')}</Text>
-                <AutoGrid columnCount={7} columnMinHeight={16} columnMinWidth={16} gap={1}>
-                    {groupData.groupColors &&
-                        groupCustomize?.groupColorsA &&
-                        groupCustomize.groupColorsA.map((item, index) => {
-                            return (
-                                <div
-                                    key={index}
-                                    className={classNames(
-                                        'relative rounded-[.25rem] w-[16px] h-[16px] bg-[#fff] border-2 border-[solid] border-[#fff] [box-shadow:inset_3px_3px_#0000001a] [box-shadow:inset_2px_2px_#0003] cursor-pointer',
-                                        colors[0] === item.id && 'bg-primary [box-shadow:none]'
-                                    )}
-                                    style={{ backgroundColor: '#' + item.color }}
-                                    onClick={() => selectColor(0, item.id)}
-                                ></div>
-                            );
-                        })}
-                </AutoGrid>
-            </Column>
-            <Column gap={1} overflow="hidden" size={5}>
-                <Text bold>{LocalizeText('group.edit.color.secondary.color')}</Text>
-                <AutoGrid columnCount={7} columnMinHeight={16} columnMinWidth={16} gap={1}>
-                    {groupData.groupColors &&
-                        groupCustomize?.groupColorsB &&
-                        groupCustomize.groupColorsB.map((item, index) => {
-                            return (
-                                <div
-                                    key={index}
-                                    className={classNames(
-                                        'relative rounded-[.25rem] w-[16px] h-[16px] bg-[#fff] border-2 border-[solid] border-[#fff] [box-shadow:inset_3px_3px_#0000001a] [box-shadow:inset_2px_2px_#0003] cursor-pointer',
-                                        colors[1] === item.id && 'bg-primary [box-shadow:none]'
-                                    )}
-                                    style={{ backgroundColor: '#' + item.color }}
-                                    onClick={() => selectColor(1, item.id)}
-                                ></div>
-                            );
-                        })}
-                </AutoGrid>
-            </Column>
-        </Grid>
+        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+            <GroupText align="center" text={LocalizeText('group.edit.color.guild.color')} textStyle="u_bold" width={92} x={13} y={8} />
+            <GroupBox height={46} kind="outline" width={92} x={13} y={29}>
+                <GroupBox height={38} kind="tan" width={84} x={4} y={4}>
+                    <GroupSwatch color={getGroupColor(0)} x={4} y={4} />
+                    <GroupSwatch color={getGroupColor(1)} x={44} y={4} />
+                </GroupBox>
+            </GroupBox>
+            {groupData.groupId > 0 && <GroupButton height={29} label={LocalizeText('group.edit.reset.color')} width={90} x={15} y={85} onClick={() => setColors([...groupData.groupColors])} />}
+            <GroupText align="center" text={LocalizeText('group.edit.color.primary.color')} textStyle="u_bold" width={142} x={128} y={8} />
+            <GroupText align="center" text={LocalizeText('group.edit.color.secondary.color')} textStyle="u_bold" width={100} x={280} y={8} />
+            <GroupBox height={277} kind="dark" width={142} x={128} y={29}>
+                <div className="octane-group-native__color-grid" style={{ left: 3, top: 3, width: 138, gridTemplateColumns: 'repeat(9, 15px)' }}>
+                    {groupCustomize?.groupColorsA.map((item) => (
+                        <GroupColorChip key={item.id} color={item.color} selected={colors[0] === item.id} onSelect={() => selectColor(0, item.id)} />
+                    ))}
+                </div>
+            </GroupBox>
+            <GroupBox height={277} kind="dark" width={96} x={280} y={29}>
+                <div className="octane-group-native__color-grid" style={{ left: 3, top: 3, width: 94, gridTemplateColumns: 'repeat(6, 15px)' }}>
+                    {groupCustomize?.groupColorsB.map((item) => (
+                        <GroupColorChip key={item.id} color={item.color} selected={colors[1] === item.id} onSelect={() => selectColor(1, item.id)} />
+                    ))}
+                </div>
+            </GroupBox>
+        </div>
     );
 };

@@ -2,6 +2,7 @@ import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, ILinkE
 import { FC, useEffect, useState } from 'react';
 import { SendMessageComposer, TryVisitRoom } from '../../api';
 import { useGroup, useMessageEvent } from '../../hooks';
+import { GroupCreatedView } from './views/GroupCreatedView';
 import { GroupCreatorView } from './views/GroupCreatorView';
 import { GroupInformationStandaloneView } from './views/GroupInformationStandaloneView';
 import { GroupManagerView } from './views/GroupManagerView';
@@ -9,12 +10,14 @@ import { GroupMembersView } from './views/GroupMembersView';
 
 export const GroupsView: FC<{}> = (props) => {
     const [isCreatorVisible, setCreatorVisible] = useState<boolean>(false);
+    const [isCreatedVisible, setCreatedVisible] = useState<boolean>(false);
     const {} = useGroup();
 
     useMessageEvent<GroupPurchasedEvent>(GroupPurchasedEvent, (event) => {
         const parser = event.getParser();
 
         setCreatorVisible(false);
+        setCreatedVisible(true);
         TryVisitRoom(parser.roomId);
     });
 
@@ -48,6 +51,7 @@ export const GroupsView: FC<{}> = (props) => {
     return (
         <>
             {isCreatorVisible && <GroupCreatorView onClose={() => setCreatorVisible(false)} />}
+            {isCreatedVisible && <GroupCreatedView onClose={() => setCreatedVisible(false)} />}
             {!isCreatorVisible && <GroupManagerView />}
             <GroupMembersView />
             <GroupInformationStandaloneView />

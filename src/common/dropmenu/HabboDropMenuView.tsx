@@ -18,6 +18,7 @@ interface HabboDropMenuViewProps<T> {
     onSelect: (value: T) => void;
     disabled?: boolean;
     className?: string;
+    popupClassName?: string;
     style?: CSSProperties;
 }
 
@@ -54,7 +55,7 @@ const ThumbSkin = ({ pressed, patternId }: { pressed: boolean; patternId: string
 };
 
 /** Native style-0 dropmenu; feature adapters own preference/domain values and saves. */
-export const HabboDropMenuView = <T extends string | number,>({ label, options, value, onSelect, disabled = false, className = '', style }: HabboDropMenuViewProps<T>): ReactNode => {
+export const HabboDropMenuView = <T extends string | number,>({ label, options, value, onSelect, disabled = false, className = '', popupClassName = '', style }: HabboDropMenuViewProps<T>): ReactNode => {
     const id = useId();
     const triggerRef = useRef<HTMLButtonElement>(null);
     const popupRef = useRef<HTMLDivElement>(null);
@@ -260,7 +261,7 @@ export const HabboDropMenuView = <T extends string | number,>({ label, options, 
             {isOpen && createPortal(
                 <div
                     ref={popupRef}
-                    className="habbo-dropmenu-popup"
+                    className={'habbo-dropmenu-popup ' + popupClassName}
                     style={popup}
                     onKeyDown={onKeyDown}
                     onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
