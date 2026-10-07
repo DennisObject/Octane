@@ -5,6 +5,7 @@ import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { FloorplanThicknessMenu } from './FloorplanThicknessMenu';
 import { THICKNESS_NAMES } from '../state/constants';
 import { EntryDir, FloorplanAction, FloorplanState, ThicknessLevel } from '../state/types';
+import { FloorplanNativeText } from './FloorplanNativeText';
 
 type Props = {
     state: FloorplanState;
@@ -76,7 +77,9 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch, official = f
     return (
         <div className="fp-bc-room-controls" data-testid="floorplan-room-controls">
             <div className="fp-bc-direction" data-testid="floorplan-orientation">
-                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.enter.direction')}</div>
+                <div className="fp-bc-direction-label">
+                    {official ? <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.enter.direction')} /> : LocalizeText('floor.plan.editor.enter.direction')}
+                </div>
                 <button type="button" className="fp-bc-dir-btn" data-testid="entry-dir-prev" title="Rotate door" onClick={() => setDir(rotateDir(state.door.dir, 1))}>
                     <img src={AIR_FLOOR_ASSETS.arrowLeft} alt="" />
                 </button>
@@ -94,7 +97,9 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch, official = f
             </div>
             <img className="fp-bc-vdivider" src={AIR_FLOOR_ASSETS.receptionDivider} alt="" />
             <div className="fp-bc-thickness" data-testid="floorplan-appearance">
-                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.room.options')}</div>
+                <div className="fp-bc-direction-label">
+                    {official ? <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.room.options')} /> : LocalizeText('floor.plan.editor.room.options')}
+                </div>
                 <Menu value={state.thickness.wall} onChange={setWall} testId="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
                 <Menu value={state.thickness.floor} onChange={setFloor} testId="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
             </div>

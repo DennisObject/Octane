@@ -1,5 +1,6 @@
 import {
     AddLinkEventTracker,
+    CreateLinkEvent,
     BuildersClubSubscriptionStatusMessageEvent,
     FloorHeightMapEvent,
     GetOccupiedTilesMessageComposer,
@@ -15,7 +16,7 @@ import {
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { LocalizeText, Permission, SendMessageComposer } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { OctaneCardContentView, OctaneCardView } from '../../common';
 import { useHasPermission, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
 import { AIR_FLOOR_ASSETS } from './air/airAssets';
 import { FloorplanEditorLegacyView } from './FloorplanEditorLegacyView';
@@ -38,6 +39,7 @@ import { FloorplanImportExport } from './views/FloorplanImportExport';
 import { FloorplanOfficialCanvas } from './views/FloorplanOfficialCanvas';
 import { FloorplanOfficialPreview } from './views/FloorplanOfficialPreview';
 import { FloorplanOptionsPanel } from './views/FloorplanOptionsPanel';
+import { FloorplanCenteredText, FloorplanNativeText } from './views/FloorplanNativeText';
 import { FloorplanToolbar } from './views/FloorplanToolbar';
 import { FloorplanWallHeightSlider } from './views/FloorplanWallHeightSlider';
 
@@ -322,12 +324,20 @@ const OfficialFloorplanEditor: FC = () => {
         <>
             {roomVisible && (
                 <OctaneCardView uniqueKey="floorpan-editor" frameStyle={3} className="w-[662px] h-[600px]" classNames={['octane-floorplan-window']} theme="primary" isResizable>
-                    <OctaneCardHeaderView headerText={LocalizeText('floor.plan.editor.title')} onCloseClick={() => setRoomVisible(false)} />
+                    <div className="octane-card-header-shell">
+                        <span className="octane-card-title">
+                            <FloorplanCenteredText background={0xd77900} color={0xffffff} text={LocalizeText('floor.plan.editor.title')} textStyle="u_frame_title" width={662} />
+                        </span>
+                        <button aria-label={LocalizeText('generic.help')} className="octane-floorplan-help" type="button" onClick={() => CreateLinkEvent('habbopages/builders-club/info')} />
+                        <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => setRoomVisible(false)} />
+                    </div>
                     <OctaneCardContentView overflow="hidden">
                         <div className="fp-bc" data-testid="floorplan-official">
                             <div className="fp-bc-banner">
                                 <img className="fp-bc-logo" src={AIR_FLOOR_ASSETS.logo} alt="" />
-                                <span className="fp-bc-subtitle">{LocalizeText('floor.plan.editor.subtitle')}</span>
+                                <span className="fp-bc-subtitle">
+                                    <FloorplanNativeText background={0x2d2724} color={0xffffff} text={LocalizeText('floor.plan.editor.subtitle')} textStyle="u_small" />
+                                </span>
                             </div>
                             <section className="fp-bc-heightmap" data-testid="floorplan-plan-panel">
                                 <FloorplanToolbar
@@ -336,7 +346,9 @@ const OfficialFloorplanEditor: FC = () => {
                                     extras={false}
                                 />
                                 <div className="fp-bc-height-row">
-                                    <span className="fp-bc-height-label">{LocalizeText('floor.plan.editor.tile.height')}</span>
+                                    <span className="fp-bc-height-label">
+                                        <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.tile.height')} />
+                                    </span>
                                     <FloorplanHeightPicker selectedH={drawingHeight} onSelect={setDrawingHeight} official />
                                 </div>
                                 <div className="fp-bc-map">
@@ -372,8 +384,12 @@ const OfficialFloorplanEditor: FC = () => {
 
                                         }}
                                     />
-                                    <span className="fp-bc-wall-label">{LocalizeText('floor.editor.wall.height')}</span>
-                                    <span className="fp-bc-wall-number" data-testid="wall-height-badge">{displayedWall}</span>
+                                    <span className="fp-bc-wall-label">
+                                        <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.editor.wall.height')} />
+                                    </span>
+                                    <span className="fp-bc-wall-number" data-testid="wall-height-badge">
+                                        <FloorplanNativeText background={0xbdbdb5} text={String(displayedWall)} />
+                                    </span>
                                     <FloorplanWallHeightSlider value={displayedWall} disabled={!wallsFixed} official onChange={(value) => dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' })} />
                                 </div>
                                 <div className="fp-bc-preview-stage" ref={previewStageRef}>
@@ -384,15 +400,15 @@ const OfficialFloorplanEditor: FC = () => {
                                 </div>
                             </section>
                             <div className="fp-bc-footer">
-                                <button type="button" className="fp-bc-btn" data-testid="floorplan-revert" onClick={reloadFromLast}>{LocalizeText('floor.plan.editor.reload')}</button>
+                                <button type="button" className="fp-bc-btn is-reload" data-testid="floorplan-revert" onClick={reloadFromLast}><span className="fp-bc-btn-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply' }} text={LocalizeText('floor.plan.editor.reload')} textStyle="button_shiny_bold" /></span></button>
                                 <div className="fp-bc-footer-right">
                                     <button type="button" className="fp-bc-btn" data-testid="floorplan-import-export" onClick={() => {
                                         if (importExportVisible) { setImportExportVisible(false); return; }
                                         setImportCanSaveWithBc(bcSecondsRef.current > 0);
                                         setImportExportVisible(true);
-                                    }}>{LocalizeText('floor.plan.editor.import.export')}</button>
-                                    <button type="button" className="fp-bc-btn" data-testid="floorplan-cancel" onClick={() => setRoomVisible(false)}>{LocalizeText('floor.plan.editor.cancel')}</button>
-                                    <button type="button" className="fp-bc-btn is-save" data-testid="floorplan-save" disabled={!canSave} onClick={saveFloorChanges}>{LocalizeText('floor.plan.editor.save')}</button>
+                                    }}><span className="fp-bc-btn-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply' }} text={LocalizeText('floor.plan.editor.import.export')} textStyle="button_shiny_bold" /></span></button>
+                                    <button type="button" className="fp-bc-btn" data-testid="floorplan-cancel" onClick={() => setRoomVisible(false)}><span className="fp-bc-btn-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply' }} text={LocalizeText('floor.plan.editor.cancel')} textStyle="button_shiny_bold" /></span></button>
+                                    <button type="button" className="fp-bc-btn is-save" data-testid="floorplan-save" disabled={!canSave} onClick={saveFloorChanges}><span className="fp-bc-btn-label"><FloorplanNativeText background={0x000000} color={0xffffff} style={{ mixBlendMode: 'screen' }} text={LocalizeText('floor.plan.editor.save')} textStyle="button_shiny_bold" /></span></button>
                                 </div>
                             </div>
                         </div>

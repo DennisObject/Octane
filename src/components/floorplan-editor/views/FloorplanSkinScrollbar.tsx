@@ -5,7 +5,7 @@ type Axis = 'vertical' | 'horizontal';
 type SkinState = 'default' | 'hover' | 'pressed' | 'passive';
 
 type Props = {
-    scrollerRef: { current: HTMLDivElement | null };
+    scrollerRef: { current: HTMLElement | null };
     axis: Axis;
     slot: number;
     className?: string;
@@ -14,7 +14,7 @@ type Props = {
 
 const EMPTY: ScrollMetrics = { track: 0, maxScroll: 0, thumb: 0, thumbPos: 0 };
 
-const readMetrics = (axis: Axis, scroller: HTMLDivElement, bar: HTMLDivElement): ScrollMetrics => {
+const readMetrics = (axis: Axis, scroller: HTMLElement, bar: HTMLDivElement): ScrollMetrics => {
     const barLength = axis === 'vertical' ? bar.clientHeight : bar.clientWidth;
     const content = axis === 'vertical' ? scroller.scrollHeight : scroller.scrollWidth;
     const viewport = axis === 'vertical' ? scroller.clientHeight : scroller.clientWidth;

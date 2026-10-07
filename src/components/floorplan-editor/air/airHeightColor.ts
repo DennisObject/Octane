@@ -51,6 +51,9 @@ export const airHeightRgb = (level: number, occupied = false): [number, number, 
     return occupied ? airHslToRgb(hue, 0.33, 0.4) : airHslToRgb(hue, 1, 0.5);
 };
 
+/** The running client rounds each ColorTransform product to the nearest byte (34 * 0.4 -> 14, 255 * 0.4 -> 102). */
+const truncChannel = (value: number): number => Math.round(value);
+
 /** Tile ColorTransform. Multipliers are the HSL floats, not the bar bytes. Alpha stays 1. */
 export const applyTileColor = (
     red: number,
@@ -61,9 +64,9 @@ export const applyTileColor = (
     greenMultiplier: number,
     blueMultiplier: number
 ): [number, number, number, number] => [
-    Math.trunc(red * redMultiplier),
-    Math.trunc(green * greenMultiplier),
-    Math.trunc(blue * blueMultiplier),
+    truncChannel(red * redMultiplier),
+    truncChannel(green * greenMultiplier),
+    truncChannel(blue * blueMultiplier),
     alpha
 ];
 

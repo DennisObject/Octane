@@ -28,6 +28,8 @@
     height: 567px;
     padding: 0 !important;
     overflow: hidden;
+    /* the frame bitmap supplies the cream fill and its white inner border */
+    background: transparent !important;
 }
 
 .octane-floorplan-window.octane-card-shell.octane-card-frame-3 .octane-card-content-shell {
@@ -601,7 +603,7 @@
     height: 100%;
     color: #111111;
     font-size: 12px;
-    background: #e9e9e1;
+    background: transparent;
 }
 
 .fp-bc-banner {
@@ -882,6 +884,8 @@
 
 .fp-bc-bitmap {
     display: block;
+    /* heightmap_bitmap sits at y=29 inside its 331x304 wrapper */
+    margin-top: 29px;
     background: #000000;
     image-rendering: pixelated;
     cursor: crosshair;
@@ -1228,18 +1232,19 @@
 
 .fp-bc-preview-bitmap {
     display: block;
-    margin: auto;
+    /* the preview bitmap is drawn at the origin of its 273x300 window, not centred */
+    margin: 0;
     image-rendering: pixelated;
     background: #ffffff;
 }
 
 .fp-bc-footer {
     position: absolute;
-    left: 10px;
+    left: 12px;
     right: 9px;
     bottom: 9px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     height: 40px;
 }
@@ -1247,9 +1252,11 @@
 .fp-bc-btn {
     flex: 0 0 auto;
     box-sizing: border-box;
-    width: 120px;
+    /* button_thick: width follows the caption inside the layout's min and max (reload 100-120, others 90-120) */
+    min-width: 90px;
+    max-width: 120px;
     height: 35px;
-    padding: 0 8px;
+    padding: 0 6px;
     border-style: solid;
     border-color: transparent;
     border-width: 5px;
@@ -1268,8 +1275,22 @@
 }
 
 .fp-bc-footer .fp-bc-btn {
-    padding: 5px 10px 6px;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 4px 0 5px;
+    line-height: 0;
     color: #111111;
+}
+
+.fp-bc-btn.is-reload {
+    min-width: 100px;
+}
+
+.fp-bc-btn-label {
+    display: block;
+    margin-top: 3px;
 }
 
 .fp-bc-btn:hover {
@@ -1288,35 +1309,22 @@
     gap: 8px;
 }
 
-.octane-floorplan-window .fp-bc-btn.is-save,
-.octane-floorplan-window .fp-bc-btn.is-save:hover,
-.octane-floorplan-window .fp-bc-btn.is-save:active,
-.octane-floorplan-window .fp-bc-btn.is-save:disabled {
-    border-width: 0;
-    border-image-source: initial;
-    border-image-width: 0;
-    border-image-slice: 0;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 120px 35px;
-    color: #111111;
-}
-
+/* style 5 thick button with colour 0x0bb3e3: the thick skin multiplied by the window colour */
 .octane-floorplan-window .fp-bc-btn.is-save {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-default.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-default-0bb3e3.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:hover {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-hover.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-hover-0bb3e3.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:active {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-pressed.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-pressed-0bb3e3.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:disabled,
 .octane-floorplan-window .fp-bc-btn.is-save:disabled:hover {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-disabled.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-disabled-0bb3e3.png");
     cursor: default;
 }
 
@@ -1586,9 +1594,9 @@
 
 .fp-bc-thickness-menu .fp-bc-drop span {
     position: absolute;
-    left: 0;
-    top: -2px;
-    width: 102px;
+    left: -2px;
+    top: -1px;
+    width: 106px;
     height: 17px;
     padding: 0 2px;
     box-sizing: border-box;
@@ -1632,7 +1640,8 @@
     min-width: max-content;
     height: 23px;
     margin: 0;
-    padding: 2px 6px 4px;
+    padding: 2px 4px 4px;
+    line-height: 0;
     box-sizing: border-box;
     border: 0;
     background: #ffffff;
@@ -1649,22 +1658,189 @@
 .fp-bc-drop-item.is-highlighted { background: #ebebeb; }
 .fp-bc-drop-item[aria-selected="true"].is-highlighted { background: #dddddd; }
 
-/* The import frame overrides the style-3 default content margins in its XML. */
+/* v75 floor_plan_export_import_xml (379x374, colour 0x418db0): everything is placed in dialog coordinates measured on the running client. */
 .octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 {
-    padding: 30px 1px 1px !important;
+    padding: 0 !important;
 }
 
 .octane-floorplan-import.is-official .octane-card-content-shell {
     position: absolute;
-    top: 30px;
-    right: 1px;
-    bottom: 1px;
-    left: 1px;
+    inset: 0;
     height: auto;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import {
+    position: absolute;
+    inset: 0;
+    height: auto;
+}
+
+.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: 379px !important;
+    height: 18px !important;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-data {
+    left: 8px;
+    top: 42px;
+    width: 348px;
+    height: 268px;
+    box-sizing: border-box;
+    padding: 1px 2px 2px 3px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 13px;
+    overflow: scroll;
+    scrollbar-width: none;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-data::-webkit-scrollbar {
+    display: none;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-vbar {
+    position: absolute;
+    left: 356px;
+    top: 42px;
+    height: 268px;
+    width: 18px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-hbar {
+    position: absolute;
+    left: 8px;
+    top: 310px;
+    width: 349px;
+    height: 18px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import .fp-bc-btn {
+    position: absolute;
+    top: 335px;
+    box-sizing: border-box;
+    height: 26px;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 4px 4px 2px;
+    border-image: url("../../assets/images/habbo-skin/slices/button-small-101.png") 4 4 2 4 fill / 4px 4px 2px 4px stretch;
+    line-height: 0;
+    cursor: pointer;
+    image-rendering: pixelated;
 }
 
 .octane-floorplan-import.is-official .fp-bc-import-revert {
-    left: -3px;
+    left: 8px;
+    width: 158px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-save {
+    left: 312px;
+    width: 51px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-revert .fp-bc-import-label {
+    left: 10px;
+    top: 2px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-save .fp-bc-import-label {
+    left: 10px;
+    top: 2px;
+}
+
+/* v75 text fields: left aligned native rasters, offsets measured against the running client */
+.fp-bc .fp-bc-room-controls .fp-bc-direction .fp-bc-direction-label {
+    left: 7px;
+    text-align: left;
+}
+
+.fp-bc .fp-bc-thickness .fp-bc-direction-label {
+    left: 14px;
+    text-align: left;
+}
+
+.octane-floorplan-window .fp-bc-subtitle {
+    left: 77px;
+    top: 11px;
+    line-height: 0;
+}
+
+.octane-floorplan-window .fp-bc-zoom {
+    left: 16px;
+    bottom: 11px;
+}
+
+/* frame 3 header: native title text centred on the whole window, help button 27px and close button 3px from the right edge */
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: 662px !important;
+    height: 18px !important;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-floorplan-help {
+    position: absolute;
+    top: 2px;
+    right: 27px;
+    width: 19px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: url("../../assets/images/habbo-skin/slices/help-3-default.png") 0 0 / 19px 20px no-repeat;
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+
+.octane-floorplan-help:hover {
+    background-image: url("../../assets/images/habbo-skin/slices/help-3-hover.png");
+}
+
+.octane-floorplan-help:active {
+    background-image: url("../../assets/images/habbo-skin/slices/help-3-pressed.png");
+}
+
+.octane-floorplan-window .fp-bc-logo {
+    left: 12px;
+    top: 7px;
+}
+
+/* the ghost avatar widget draws its figure 7px higher than the shared avatar crop */
+.fp-bc .fp-bc-ghost {
+    margin-top: -7px;
+}
+
+/* the heightmap bar sits over the black map, the track colour has to come from the bar itself */
+.fp-bc-map-vbar {
+    background: #bdbdb5;
 }
