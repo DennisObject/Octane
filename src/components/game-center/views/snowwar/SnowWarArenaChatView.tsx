@@ -1,10 +1,9 @@
 import { RoomChatSettings, RoomObjectCategory } from '@octane/renderer';
-import { FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ChatBubbleMessage, ChatBubbleUtilities, GetConfigurationValue, RoomChatFormatter, SnowWarChatMessage } from '../../../../api';
+import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ChatBubbleMessage, ChatBubbleUtilities, GetConfigurationValue, RoomChatFormatter, SnowWarChatMessage, SNOWWAR_ROOM_ID } from '../../../../api';
 import { getChatViewerHeight } from '../../../room/widgets/chat/freeFlowChatLayout';
 import { ChatWidgetMessageView } from '../../../room/widgets/chat/ChatWidgetMessageView';
-import { captureNativeChatCreation, NativeChatScroller } from '../../../room/widgets/chat/nativeChatScroller';
-import { SNOWWAR_ROOM_ID } from './SnowWarArenaRoom';
+import { NativeChatScroller } from '../../../room/widgets/chat/nativeChatScroller';
 
 // AIR SnowWarEngine.addChatMessage + ChatEventHandler.gameEventHandler: free flow chat with style 121 (team 1)
 // or 120, forced to stage centre -300 / +300, showing the player's own figure and name.
@@ -19,7 +18,8 @@ const SCROLL_SPEED = 6000;
 const createBubble = (message: SnowWarChatMessage): ChatBubbleMessage =>
 {
     const team1 = (message.teamId === 1);
-    const bubble = new ChatBubbleMessage(
+
+    return new ChatBubbleMessage(
         message.userId,
         RoomObjectCategory.UNIT,
         SNOWWAR_ROOM_ID,
@@ -31,54 +31,62 @@ const createBubble = (message: SnowWarChatMessage): ChatBubbleMessage =>
         (team1 ? TEAM_1_STYLE : TEAM_2_STYLE),
         null,
         (team1 ? TEAM_1_COLOR : TEAM_2_COLOR));
+};
 
-    captureNativeChatCreation(bubble, RoomChatSettings.CHAT_MODE_FREE_FLOW);
+interface SnowWarArenaChatBubble
+{
+    messageId: number;
+    figure: string;
+    bubble: ChatBubbleMessage;
+}
 
-    return bubble;
+interface SnowWarArenaChatState
+{
+    messages: readonly SnowWarChatMessage[];
+    /** Every message that got a bubble; a scrolled-out bubble is not made again. */
+    knownMessageIds: ReadonlySet<number>;
+    bubbles: SnowWarArenaChatBubble[];
+}
+
+const addBubbles = (state: SnowWarArenaChatState, messages: readonly SnowWarChatMessage[]): SnowWarArenaChatState =>
+{
+    const messageIds = new Set(messages.map(message => message.id));
+    const created = messages.filter(message => !state.knownMessageIds.has(message.id)).map(message => ({ messageId: message.id, figure: message.figure, bubble: createBubble(message) }));
+
+    return {
+        messages,
+        knownMessageIds: new Set([ ...state.knownMessageIds, ...created.map(entry => entry.messageId) ]),
+        bubbles: [ ...state.bubbles.filter(entry => messageIds.has(entry.messageId)), ...created ]
+    };
 };
 
 export const SnowWarArenaChatView: FC<{ chatMessages: readonly SnowWarChatMessage[] }> = ({ chatMessages }) =>
 {
     const elementRef = useRef<HTMLDivElement>(null);
-    const bubblesRef = useRef<Map<number, ChatBubbleMessage>>(new Map());
-    const [ removedIds, setRemovedIds ] = useState<ReadonlySet<number>>(new Set());
-    const [ , setImagesLoaded ] = useState(0);
+    const requestedImagesRef = useRef<Set<ChatBubbleMessage>>(new Set());
+    const bubblesRef = useRef<SnowWarArenaChatBubble[]>([]);
+    const [ chat, setChat ] = useState<SnowWarArenaChatState>(() => addBubbles({ messages: [], knownMessageIds: new Set(), bubbles: [] }, chatMessages));
     const [ scroller ] = useState(() => new NativeChatScroller());
 
-    const bubbles = useMemo(() =>
+    if(chat.messages !== chatMessages) setChat(addBubbles(chat, chatMessages));
+
+    useEffect(() =>
     {
-        const current = new Map<number, ChatBubbleMessage>();
+        bubblesRef.current = chat.bubbles;
 
-        for(const message of chatMessages)
+        for(const { bubble, figure } of chat.bubbles)
         {
-            if(removedIds.has(message.id)) continue;
+            if(requestedImagesRef.current.has(bubble)) continue;
 
-            let bubble = bubblesRef.current.get(message.id);
+            requestedImagesRef.current.add(bubble);
 
-            if(!bubble)
+            ChatBubbleUtilities.getUserImage(figure).then(imageUrl =>
             {
-                const created = createBubble(message);
-
-                ChatBubbleUtilities.getUserImage(message.figure).then(imageUrl =>
-                {
-                    created.imageUrl = imageUrl;
-                    setImagesLoaded(count => (count + 1));
-                }).catch(() => null);
-
-                bubble = created;
-            }
-
-            current.set(message.id, bubble);
+                bubble.imageUrl = imageUrl;
+                setChat(state => ({ ...state, bubbles: [ ...state.bubbles ] }));
+            }).catch(() => null);
         }
-
-        bubblesRef.current = current;
-
-        return Array.from(current.values());
-    }, [ chatMessages, removedIds ]);
-
-    const bubblesListRef = useRef(bubbles);
-
-    bubblesListRef.current = bubbles;
+    }, [ chat.bubbles ]);
 
     const makeRoom = useCallback((chat: ChatBubbleMessage, creationMode: number) =>
     {
@@ -114,16 +122,11 @@ export const SnowWarArenaChatView: FC<{ chatMessages: readonly SnowWarChatMessag
         const update = () =>
         {
             const now = Date.now();
-            const removed = scroller.advance((now - previous), bubblesListRef.current);
+            const removed = scroller.advance((now - previous), bubblesRef.current.map(entry => entry.bubble));
 
             previous = now;
 
-            if(removed.length)
-            {
-                const ids = Array.from(bubblesRef.current.entries()).filter(([ , bubble ]) => removed.includes(bubble.id)).map(([ id ]) => id);
-
-                if(ids.length) setRemovedIds(previousIds => new Set([ ...previousIds, ...ids ]));
-            }
+            if(removed.length) setChat(state => ({ ...state, bubbles: state.bubbles.filter(entry => !removed.includes(entry.bubble.id)) }));
 
             frame = window.requestAnimationFrame(update);
         };
@@ -139,7 +142,7 @@ export const SnowWarArenaChatView: FC<{ chatMessages: readonly SnowWarChatMessag
 
     return (
         <div ref={ elementRef } className="absolute flex justify-center items-center w-full top-0 min-h-px z-(--chat-zindex) bg-transparent shadow-none pointer-events-none">
-            { bubbles.map(bubble => <ChatWidgetMessageView key={ bubble.id } chat={ bubble } makeRoom={ makeRoom } mode={ RoomChatSettings.CHAT_MODE_FREE_FLOW } />) }
+            { chat.bubbles.map(({ bubble }) => <ChatWidgetMessageView key={ bubble.id } chat={ bubble } makeRoom={ makeRoom } mode={ RoomChatSettings.CHAT_MODE_FREE_FLOW } />) }
         </div>
     );
 };

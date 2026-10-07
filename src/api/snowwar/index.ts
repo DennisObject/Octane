@@ -1,3 +1,4 @@
+export * from './SnowWarArenaRoom';
 export * from './SnowWarEngine';
 export * from './SnowWarMath';
 export * from './SnowWarSimulation';
