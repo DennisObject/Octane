@@ -1134,6 +1134,7 @@
     "snowwar.descriptionBody": "Play against other Habbos in epic snowball battles!",
     "snowwar.descriptionHeader": "Hit or get hit!",
     "snowwar.error.duplicate_machineid": "You can only play one game at a time.",
+    "snowwar.error.game_already_started": "This game has already started.",
     "snowwar.error.generic": "Oops. Something went wrong!",
     "snowwar.error.has_active_instance": "You cannot play until your previous game has finished!",
     "snowwar.error.no_free_games_left": "You have no free games left!",

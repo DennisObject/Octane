@@ -1,5 +1,5 @@
-import { LocalizeText } from '../../../../api';
-import { SnowWarHookState } from '../../../../api/snowwar';
+import { LocalizeText } from '../utils';
+import { SnowWarHookState } from './SnowWarTypes';
 
 type ShowConfirm = (message: string, onConfirm: () => void, onCancel: () => void, confirmText?: string, cancelText?: string, title?: string) => void;
 
