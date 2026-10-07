@@ -157,11 +157,11 @@ const useElementSize = (ref: RefObject<HTMLElement>, dependency: unknown): { wid
     return size;
 };
 
-/** rank_border (border style 14, 25x25 or 27x25 for the own row) grows with its number so it always holds it, and stays centred in the 45px rank_container. */
+/** rank_border (border style 14, 25x25) grows with its number so it always holds it, and stays centred in the 45px rank_container. */
 const RankBubble: FC<{ rank: number; isOwn: boolean }> = ({ rank, isOwn }) => {
     const textRef = useRef<HTMLDivElement>(null);
     const { width: textWidth } = useElementSize(textRef, rank);
-    const width = Math.max(isOwn ? 27 : 25, (textWidth || 13) + 12);
+    const width = Math.max(25, (textWidth || 13) + 12);
 
     return (
         <div
@@ -432,7 +432,7 @@ export const BadgeLeaderboardView: FC<{}> = () => {
                                     type="button"
                                     onClick={() => show(option.type, option.rarity, 0)}
                                 >
-                                    <LeaderboardText value={option.label} x={2} y={1} />
+                                    <LeaderboardText size={11} value={option.label} x={2} y={1} />
                                 </button>
                             ))}
                         </div>
