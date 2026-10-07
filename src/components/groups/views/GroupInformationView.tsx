@@ -52,7 +52,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
         shownGroupIdRef.current = 0;
     }, []);
 
-    const { request: requestMemberRemoval, claimReply } = useGroupMemberRemoval();
+    const { request: requestMemberRemoval, claimReply, isCurrentSession } = useGroupMemberRemoval();
 
     // The reply names no group (see useGroupMemberRemoval): it is shown only when this window owns the one outstanding request for the group still on screen.
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
@@ -69,8 +69,8 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
             () => {
                 confirmOpenRef.current = false;
 
-                // One removal per confirmation, whatever re-renders or repeated callback invocations happen, and only while that group is shown.
-                if (isSent || removal.groupId !== shownGroupIdRef.current) return;
+                // One removal per confirmation, whatever re-renders or repeated callback invocations happen, and only while that group is shown and the same user is signed in.
+                if (isSent || removal.groupId !== shownGroupIdRef.current || !isCurrentSession(removal)) return;
 
                 isSent = true;
                 SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));

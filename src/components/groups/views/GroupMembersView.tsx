@@ -48,7 +48,10 @@ export const GroupMembersView: FC<{}> = (props) => {
     const [isOwner, setIsOwner] = useState(false);
     const pendingRemoval = useRef<{ groupId: number; userId: number; name: string }>(null);
     const { showConfirm = null } = useNotification();
-    const { request: requestMemberRemoval, claimReply } = useGroupMemberRemoval();
+    const { request: requestMemberRemoval, claimReply, isCurrentSession } = useGroupMemberRemoval();
+    const groupIdRef = useRef<number>(-1);
+
+    groupIdRef.current = groupId;
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
     const getRankDescription = (member: GroupMemberParser) => {
@@ -158,7 +161,8 @@ export const GroupMembersView: FC<{}> = (props) => {
                 [removal.name, parser.furnitureCount.toString()]
             ),
             () => {
-                if (isSent) return;
+                // Valid only while this window still shows that group for the same signed-in user.
+                if (isSent || removal.groupId !== groupIdRef.current || !isCurrentSession(owned)) return;
 
                 isSent = true;
                 SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));
@@ -205,7 +209,11 @@ export const GroupMembersView: FC<{}> = (props) => {
     }, [groupId, levelId, pageId, searchQuery]);
 
     useEffect(() => {
-        if (groupId === -1) return;
+        if (groupId === -1) {
+            pendingRemoval.current = null;
+
+            return;
+        }
 
         setMembersData(null);
         setTotalPages(0);
