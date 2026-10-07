@@ -83,7 +83,16 @@ export const RoomPromotesWidgetView: FC<{}> = () => {
                 {showModify && canExtend && <RoomPromoteText alignRight className="is-link" height={17} text={LocalizeText('roomad.extend.event')} underline width={88} x={88} y={110} onClick={extend} />}
                 <img alt="" className="octane-event-info__icon" draggable={false} src={eventIcon} />
             </div>
-            {isEditingPromote && hasEvent && <RoomPromoteEditWidgetView eventId={eventData.adId} eventName={eventData.eventName} eventDescription={eventData.eventDescription} onClose={() => setIsEditingPromote(false)} />}
+            {/* Keyed by the event: when another event replaces this one the window starts over from the new event instead of saving the old draft into it. */}
+            {isEditingPromote && hasEvent && (
+                <RoomPromoteEditWidgetView
+                    key={eventData.adId}
+                    eventDescription={eventData.eventDescription}
+                    eventId={eventData.adId}
+                    eventName={eventData.eventName}
+                    onClose={() => setIsEditingPromote(false)}
+                />
+            )}
         </>
     );
 };
