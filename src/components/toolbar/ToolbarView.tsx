@@ -7,7 +7,7 @@ import dividerImg from '../../assets/images/toolbar/air/divider.png';
 import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
-import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
+import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useOctaneEvent, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
 import { usePerkAllowed } from '../../state/perkAllowancesStore';
 import { AIR_RAISED_CHAT_BOTTOM } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -82,14 +82,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const buildersClubEnabled = useMemo(() => GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true)), []);
     const { openMonitor, showToolbarButton } = useWiredTools();
     const { available: buildHeightAvailable, toggle: toggleBuildHeight } = useBuildHeight();
-    const isMod = useHasPermission(Permission.ModerationTool);
     const isHk = useHasPermission(Permission.HousekeepingAccess);
     const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
-    const { tickets = [] } = useModTools();
-    const openTicketsCount = useMemo(
-        () => isMod ? tickets.filter(ticket => ticket && (ticket.state === 1)).length : 0,
-        [ isMod, tickets ]
-    );
     const visibilityVariant = 'visible';
     const touchLayout = isTouchLayout;
     const mobileOnlyClasses = touchLayout ? '' : 'hidden';
@@ -463,14 +457,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                     <ToolbarItemView icon="buildheight" onClick={toggleBuildHeight} className="tb-icon" />
                                 </motion.div>
                             )}
-                            {isMod && (
-                                <motion.div variants={itemVariants} className="relative tb-slot">
-                                    <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/toggle')} className="tb-icon" />
-                                    {openTicketsCount > 0 && (
-                                        <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
-                                    )}
-                                </motion.div>
-                            )}
                             {isHk && hkEnabled && (
                                 <motion.div variants={itemVariants} className="tb-slot">
                                     <ToolbarItemView icon="housekeeping" onClick={() => CreateLinkEvent('housekeeping/toggle')} className="tb-icon" />
@@ -642,12 +628,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 {cameraAvailable && (
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />
-                    </motion.div>
-                )}
-                {isMod && (
-                    <motion.div variants={itemVariants} className="relative">
-                        <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/toggle')} className="tb-icon" />
-                        {openTicketsCount > 0 && <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />}
                     </motion.div>
                 )}
                 {isHk && hkEnabled && (
