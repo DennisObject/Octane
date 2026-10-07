@@ -266,6 +266,18 @@ export interface SnowWarLobbyState
     queuePosition: number;
     /** Wall-clock deadline (ms) of `Game2StartCounter`; null while waiting for players. */
     countdownDeadline: number | null;
+    /** Plus arena voting (SnowStormArenaVotes); null until the server sends the offered arenas. */
+    arenaVotes: SnowWarArenaVotes | null;
+}
+
+/** Plus arena voting (CONTRACT §8): offered arenas in server order. */
+export interface SnowWarArenaVotes
+{
+    arenas: { fieldType: number; votes: number }[];
+    /** Most voted arena; 0 while tied (including no votes). */
+    leadingFieldType: number;
+    /** The field type this client voted for, 0 before voting. */
+    ownVote: number;
 }
 
 export interface SnowWarLoadingState
@@ -486,6 +498,8 @@ export interface SnowWarHookState
     play(): void;
     /** Lobby cancel link (LeaveLobby). */
     leaveLobby(): void;
+    /** Plus arena voting: vote (or move the vote) for an offered arena (Game2VoteArena). */
+    voteArena(fieldType: number): void;
     /** Results rematch button (PlayAgain). */
     rematch(): void;
     /** Results "play again" after the rematch window (QuickJoin from the results screen). */

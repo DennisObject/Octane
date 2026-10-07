@@ -272,3 +272,21 @@ body.snowwar-desktop-hidden #draggable-windows-container > .draggable-window:not
     opacity: 0.5;
     image-rendering: pixelated;
 }
+
+/* Plus arena voting row in the lobby: official previews scaled to 115x58. */
+.snowwar-arena-vote__preview {
+    position: absolute;
+    top: 0;
+    max-width: none;
+    image-rendering: auto;
+}
+
+.snowwar-arena-vote:hover .snowwar-arena-vote__preview {
+    filter: brightness(1.08);
+}
+
+/* Own vote: the 0x55cc00 of the Play button skin. */
+.snowwar-arena-vote--own .snowwar-arena-vote__preview {
+    outline: 2px solid #55cc00;
+    outline-offset: -1px;
+}

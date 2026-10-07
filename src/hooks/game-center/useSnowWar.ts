@@ -23,6 +23,8 @@ import {
     Game2GetWeeklyGroupLeaderboardComposer,
     Game2GetWeeklyLeaderboardComposer,
     Game2InArenaQueueMessageEvent,
+    Game2VoteArenaMessageComposer,
+    SnowStormArenaVotesMessageEvent,
     Game2JoiningGameFailedMessageEvent,
     Game2LeaveLobbyMessageComposer,
     Game2PlayAgainMessageComposer,
@@ -336,7 +338,7 @@ const useSnowWarState = (): SnowWarHookState =>
         }
 
         SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
-        setLobby({ data, players: [ ...data.players ], queuePosition: -1, countdownDeadline: null });
+        setLobby({ data, players: [ ...data.players ], queuePosition: -1, countdownDeadline: null, arenaVotes: null });
     }, [ setResults ]);
 
     useMessageEvent<Game2GameCreatedMessageEvent>(Game2GameCreatedMessageEvent, useCallback(event => createLobby(event.getParser().gameLobbyData), [ createLobby ]));
@@ -373,6 +375,17 @@ const useSnowWarState = (): SnowWarHookState =>
         SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
         setLobby(current => current && { ...current, players: current.players.filter(player => player.userId !== userId) });
     }, [ setResults ]));
+
+    useMessageEvent<SnowStormArenaVotesMessageEvent>(SnowStormArenaVotesMessageEvent, useCallback(event =>
+    {
+        const parser = event.getParser();
+        const arenas = parser.arenas.map(arena => ({ fieldType: arena.fieldType, votes: arena.votes }));
+
+        setLobby(current => current && {
+            ...current,
+            arenaVotes: { arenas, leadingFieldType: parser.leadingFieldType, ownVote: current.arenaVotes?.ownVote ?? 0 }
+        });
+    }, []));
 
     useMessageEvent<Game2InArenaQueueMessageEvent>(Game2InArenaQueueMessageEvent, useCallback(event =>
     {
@@ -643,6 +656,12 @@ const useSnowWarState = (): SnowWarHookState =>
         setLobby(null);
     }, []);
 
+    const voteArena = useCallback((fieldType: number) =>
+    {
+        SendMessageComposer(new Game2VoteArenaMessageComposer(fieldType));
+        setLobby(current => current?.arenaVotes ? { ...current, arenaVotes: { ...current.arenaVotes, ownVote: fieldType } } : current);
+    }, []);
+
     /** `GameEndingViewController.onJoinRematch`. */
     const rematch = useCallback(() =>
     {
@@ -776,6 +795,7 @@ const useSnowWarState = (): SnowWarHookState =>
         refreshStatus,
         play,
         leaveLobby,
+        voteArena,
         rematch,
         playAgain,
         exitGame,

@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
-import { SnowWarLobbyPlayer } from '../../../../api/snowwar';
+import { SnowWarArenaVotes, SnowWarLobbyPlayer } from '../../../../api/snowwar';
 import { SnowWarAnimation, SnowWarBitmap, SnowWarBox } from './SnowWarBitmap';
 import { SnowWarLobbyView } from './SnowWarLobbyView';
 import { SnowWarStrokeText, SnowWarText, SnowWarThickButton } from './SnowWarText';
@@ -18,6 +18,7 @@ export interface SnowWarGamesMainLobby
     maxPlayers: number;
     queuePosition: number;
     countdownDeadline: number | null;
+    arenaVotes: SnowWarArenaVotes | null;
 }
 
 export interface SnowWarGamesMainViewProps
@@ -35,12 +36,13 @@ export interface SnowWarGamesMainViewProps
     onOpenClubCenter: () => void;
     onShowLeaderboard: () => void;
     onCancelLobby: () => void;
+    onVoteArena: (fieldType: number) => void;
 }
 
 /** AIR `games_main` (frame 413x530) driven like `GamesMainViewController`. */
 export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
 {
-    const { freeGamesLeft, hasUnlimitedGames, blockLength, leaderboardEnabled, lobby, onClose, onPlay, onBuyTokens, onOpenClubCenter, onShowLeaderboard, onCancelLobby } = props;
+    const { freeGamesLeft, hasUnlimitedGames, blockLength, leaderboardEnabled, lobby, onClose, onPlay, onBuyTokens, onOpenClubCenter, onShowLeaderboard, onCancelLobby, onVoteArena } = props;
     const [ instructionsVisible, setInstructionsVisible ] = useState(false);
     const [ page, setPage ] = useState(0);
     const [ hoveredOffer, setHoveredOffer ] = useState<string>(null);
@@ -155,7 +157,7 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
                         </SnowWarBox>
                     </SnowWarBox>
                 )}
-                {lobby && <SnowWarLobbyView {...lobby} onCancel={onCancelLobby} />}
+                {lobby && <SnowWarLobbyView {...lobby} onCancel={onCancelLobby} onVoteArena={onVoteArena} />}
             </div>
         </OctaneCardView>
     );
