@@ -326,17 +326,20 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
 
 interface Native0RowsProps {
     width: number;
-    height: number;
+    height?: number;
     /** The colour of each row, top to bottom (RGB). */
     colors: number[];
-    rowHeight: number;
+    /** One height for every row, or the height of each row. */
+    rowHeight?: number;
+    heights?: number[];
 }
 
 /**
  * Row backgrounds of a list drawn as one canvas: text set over opaque divs of its own layer gets LCD subpixel fringes, text over a canvas layer stays greyscale like the
  * classic client's.
  */
-export const Native0Rows: FC<Native0RowsProps> = ({ width, height, colors, rowHeight }) => {
+export const Native0Rows: FC<Native0RowsProps> = ({ width, height: fixedHeight, colors, rowHeight = 14, heights }) => {
+    const height = fixedHeight ?? (heights ?? []).reduce((sum, value) => sum + value, 0);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useLayoutEffect(() => {
@@ -345,11 +348,17 @@ export const Native0Rows: FC<Native0RowsProps> = ({ width, height, colors, rowHe
         if (!context) return;
 
         context.clearRect(0, 0, width, height);
+
+        let top = 0;
+
         colors.forEach((color, index) => {
+            const rowTall = heights ? heights[index] : rowHeight;
+
             context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
-            context.fillRect(0, index * rowHeight, width, rowHeight);
+            context.fillRect(0, top, width, rowTall);
+            top += rowTall;
         });
-    }, [width, height, colors, rowHeight]);
+    }, [width, height, colors, rowHeight, heights]);
 
     return <canvas ref={canvasRef} className="native0-rows" height={height} style={{ position: 'absolute', left: 0, top: 0 }} width={width} />;
 };

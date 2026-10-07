@@ -2,7 +2,7 @@ import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEven
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
 import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
-import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
+import { EvidenceChatlogView } from './views/EvidenceChatlogView';
 import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
 import { RoomVisitsView } from './views/RoomVisitsView';
@@ -10,7 +10,6 @@ import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
 import { UserInfoView } from './views/UserInfoView';
 import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
-import { ModToolsUserChatlogView } from './views/user/ModToolsUserChatlogView';
 
 
 // Classic v75 ModerationManager / StartPanelCtrl (fme): the panel opens when the moderator init message arrives, the room and chatlog buttons follow the
@@ -33,17 +32,7 @@ export const ModToolsView: FC<{}> = () => {
     const resizeWindow = useModWindowTrackerStore((state) => state.resize);
     const startPanel = useModWindowTrackerStore((state) => state.startPanel);
     const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
-    const {
-        settings = null,
-        openRoomChatlogs = [],
-        openUserChatlogs = [],
-        openRoomChatlog = null,
-        closeRoomChatlog = null,
-        toggleRoomChatlog = null,
-        openUserChatlog = null,
-        closeUserChatlog = null,
-        toggleUserChatlog = null
-    } = useModTools();
+    const { settings = null } = useModTools();
 
     useEffect(() => {
         settingsRef.current = settings;
@@ -98,13 +87,11 @@ export const ModToolsView: FC<{}> = () => {
                         closeWindow('roomTool', parts[2]);
                         return;
                     case 'open-room-chatlog':
-                        openRoomChatlog(Number(parts[2]));
+                    case 'toggle-room-chatlog':
+                        showWindow({ type: 'roomChatlog', key: parts[2], ...MOD_WINDOW_SIZE.roomChatlog, parent: useModWindowTrackerStore.getState().startPanel, toggle: parts[1] === 'toggle-room-chatlog' });
                         return;
                     case 'close-room-chatlog':
-                        closeRoomChatlog(Number(parts[2]));
-                        return;
-                    case 'toggle-room-chatlog':
-                        toggleRoomChatlog(Number(parts[2]));
+                        closeWindow('roomChatlog', parts[2]);
                         return;
                     case 'open-user-info':
                     case 'toggle-user-info':
@@ -114,13 +101,11 @@ export const ModToolsView: FC<{}> = () => {
                         closeWindow('userInfo', parts[2]);
                         return;
                     case 'open-user-chatlog':
-                        openUserChatlog(Number(parts[2]));
+                    case 'toggle-user-chatlog':
+                        showWindow({ type: 'userChatlog', key: parts[2], ...MOD_WINDOW_SIZE.userChatlog, parent: useModWindowTrackerStore.getState().startPanel, toggle: parts[1] === 'toggle-user-chatlog' });
                         return;
                     case 'close-user-chatlog':
-                        closeUserChatlog(Number(parts[2]));
-                        return;
-                    case 'toggle-user-chatlog':
-                        toggleUserChatlog(Number(parts[2]));
+                        closeWindow('userChatlog', parts[2]);
                         return;
                 }
             },
@@ -130,16 +115,7 @@ export const ModToolsView: FC<{}> = () => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [
-        showWindow,
-        closeWindow,
-        openRoomChatlog,
-        closeRoomChatlog,
-        toggleRoomChatlog,
-        openUserChatlog,
-        closeUserChatlog,
-        toggleUserChatlog
-    ]);
+    }, [showWindow, closeWindow]);
 
     const isInRoom = currentRoomId > 0 && roomEntered;
 
@@ -175,7 +151,7 @@ export const ModToolsView: FC<{}> = () => {
                             x={entry.x}
                             y={entry.y}
                             onClose={() => closeWindow('roomTool', entry.key)}
-                            onOpenChatlog={(id) => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${id}`)}
+                            onOpenChatlog={(id) => showWindow({ type: 'roomChatlog', key: `${id}`, ...MOD_WINDOW_SIZE.roomChatlog, parent: entry, toggle: true })}
                             onOpenUserInfo={(id) => showWindow({ type: 'userInfo', key: `${id}`, ...MOD_WINDOW_SIZE.userInfo, parent: entry, toggle: true })}
                         />
                     );
@@ -190,12 +166,31 @@ export const ModToolsView: FC<{}> = () => {
                             x={entry.x}
                             y={entry.y}
                             onClose={() => closeWindow('userInfo', entry.key)}
-                            onOpenChatlog={() => CreateLinkEvent(`mod-tools/toggle-user-chatlog/${entry.key}`)}
+                            onOpenChatlog={() => showWindow({ type: 'userChatlog', key: entry.key, ...MOD_WINDOW_SIZE.userChatlog, parent: entry, below: true, toggle: true })}
                             onOpenModAction={() => CreateLinkEvent(`mod-tools/toggle-user-mod-action/${entry.key}`)}
                             onOpenRoomVisits={() => showWindow({ type: 'roomVisits', key: entry.key, ...MOD_WINDOW_SIZE.roomVisits, parent: entry, below: true, toggle: true })}
                             onOpenSendMessage={(userName) =>
                                 showWindow({ type: 'sendMessage', key: userName, ...MOD_WINDOW_SIZE.sendMessage, parent: entry, below: true, toggle: true, params: { userId: Number(entry.key) } })
                             }
+                        />
+                    );
+                }
+
+                if (entry.type === 'userChatlog' || entry.type === 'roomChatlog' || entry.type === 'cfhChatlog') {
+                    return (
+                        <EvidenceChatlogView
+                            key={key}
+                            height={entry.height}
+                            id={Number(entry.key)}
+                            kind={entry.type === 'userChatlog' ? 'user' : entry.type === 'roomChatlog' ? 'room' : 'cfh'}
+                            width={entry.width}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow(entry.type, entry.key)}
+                            onEnterRoom={(roomId) => CreateLinkEvent(`navigator/goto/${roomId}`)}
+                            onOpenRoomTool={(roomId) => showWindow({ type: 'roomTool', key: `${roomId}`, ...MOD_WINDOW_SIZE.roomTool, parent: entry, toggle: true })}
+                            onOpenUserInfo={(userId) => showWindow({ type: 'userInfo', key: `${userId}`, ...MOD_WINDOW_SIZE.userInfo, parent: entry, toggle: true })}
+                            onResize={(width, height) => resizeWindow(entry.type, entry.key, width, height)}
                         />
                     );
                 }
@@ -233,12 +228,6 @@ export const ModToolsView: FC<{}> = () => {
 
                 return null;
             })}
-            {openRoomChatlogs.map((roomId) => (
-                <ModToolsChatlogView key={roomId} roomId={roomId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-room-chatlog/${roomId}`)} />
-            ))}
-            {openUserChatlogs.map((userId) => (
-                <ModToolsUserChatlogView key={userId} userId={userId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-user-chatlog/${userId}`)} />
-            ))}
             <NativeAlertView />
             {isTicketsVisible && <ModToolsTicketsView onCloseClick={() => setIsTicketsVisible(false)} />}
         </>

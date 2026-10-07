@@ -21,55 +21,9 @@ import { showModAlert } from './modAlertStore';
 
 const useModToolsState = () => {
     const [settings, setSettings] = useState<ModeratorInitData>(null);
-    const [openRoomChatlogs, setOpenRoomChatlogs] = useState<number[]>([]);
-    const [openUserChatlogs, setOpenUserChatlogs] = useState<number[]>([]);
     const [tickets, setTickets] = useState<IssueMessageData[]>([]);
     const [cfhCategories, setCfhCategories] = useState<CallForHelpCategoryData[]>([]);
     const { simpleAlert = null } = useNotification();
-
-    const openRoomChatlog = (roomId: number) => {
-        if (openRoomChatlogs.indexOf(roomId) >= 0) return;
-
-        setOpenRoomChatlogs((prevValue) => [...prevValue, roomId]);
-    };
-
-    const closeRoomChatlog = (roomId: number) => {
-        setOpenRoomChatlogs((prevValue) => {
-            const newValue = [...prevValue];
-            const existingIndex = newValue.indexOf(roomId);
-
-            if (existingIndex >= 0) newValue.splice(existingIndex, 1);
-
-            return newValue;
-        });
-    };
-
-    const toggleRoomChatlog = (roomId: number) => {
-        if (openRoomChatlogs.indexOf(roomId) >= 0) closeRoomChatlog(roomId);
-        else openRoomChatlog(roomId);
-    };
-
-    const openUserChatlog = (userId: number) => {
-        if (openUserChatlogs.indexOf(userId) >= 0) return;
-
-        setOpenUserChatlogs((prevValue) => [...prevValue, userId]);
-    };
-
-    const closeUserChatlog = (userId: number) => {
-        setOpenUserChatlogs((prevValue) => {
-            const newValue = [...prevValue];
-            const existingIndex = newValue.indexOf(userId);
-
-            if (existingIndex >= 0) newValue.splice(existingIndex, 1);
-
-            return newValue;
-        });
-    };
-
-    const toggleUserChatlog = (userId: number) => {
-        if (openUserChatlogs.indexOf(userId) >= 0) closeUserChatlog(userId);
-        else openUserChatlog(userId);
-    };
 
     useMessageEvent<ModeratorInitMessageEvent>(ModeratorInitMessageEvent, (event) => {
         const parser = event.getParser();
@@ -144,16 +98,8 @@ const useModToolsState = () => {
 
     return {
         settings,
-        openRoomChatlogs,
-        openUserChatlogs,
         cfhCategories,
-        tickets,
-        openRoomChatlog,
-        closeRoomChatlog,
-        toggleRoomChatlog,
-        openUserChatlog,
-        closeUserChatlog,
-        toggleUserChatlog
+        tickets
     };
 };
 
