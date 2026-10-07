@@ -447,6 +447,14 @@ export const RewardTrackView: FC<{}> = () => {
 
     if (!trackId) return null;
 
+    // the official list re-selects its first task when the selected one drops out of the new filter, and keeps it afterwards
+    const onFilter = (value: RewardTrackTaskFilter) => {
+        const next = filterRewardTrackTasks(track?.tasks ?? [], value);
+
+        if (!next.some((task) => task.id === selectedTask?.id)) setSelectedTaskId(next[0]?.id ?? null);
+
+        setFilter(value);
+    };
     const onClaim = (prize: RewardTrackPrizeData) => track && claimPrize && claimPrize(track.id, prize.id);
     const onPremium = () => track && track.hasPremiumConfig && !track.premium && setPremiumConfirm(true);
     const progressX = track ? layout.xForPoints(track.points, safePage) : 0;
@@ -679,7 +687,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                 type="button"
                                                 className="octane-reward-track-filter"
                                                 data-active={filter === value}
-                                                onClick={() => setFilter(value)}
+                                                onClick={() => onFilter(value)}
                                             >
                                                 {filterText(value)}
                                             </button>
