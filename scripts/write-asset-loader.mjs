@@ -244,10 +244,8 @@ const ASSET_LOADER_JS = `(() => {
   const renderShell = () => {
     const root = document.getElementById("root");
     if(!root || root.firstChild) return;
-    // Match the React LoadingView background so the pre-React shell paints
-    // the same gradient — no light-blue login-skeleton flash before the
-    // loader takes over.
-    root.innerHTML = '<div style="position:fixed;inset:0;background:radial-gradient(#1d1a24,#003a6b);overflow:hidden;z-index:1"></div>';
+    // Paint the React LoadingView background until the app mounts.
+    root.innerHTML = '<div style="position:fixed;inset:0;background:#0e151c;overflow:hidden;z-index:1"></div>';
   };
 
   const decodeAsset = (bytes) => {
