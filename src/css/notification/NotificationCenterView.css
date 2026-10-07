@@ -36,8 +36,7 @@
     }
 
     &.octane-alert-system {
-        width: auto;
-        min-width: 260px;
+        width: 340px;
         max-width: 90vw;
         min-height: auto;
         max-height: none;
@@ -780,14 +779,6 @@
 .octane-swf-notification-bubble .btn:hover,
 .octane-swf-notification-bubble button:hover {
     border-image-source: var(--habbo-skin-button-hover) !important;
-}
-
-.alertView_octane-coolui-logo {
-	width: 150px;
-	height: 73px;
-	position: relative;
-	background-image: url("@/assets/images/notifications/octane_v3.png");
-	background-repeat: no-repeat;
 }
 
 .octane-friendonline-notification {
