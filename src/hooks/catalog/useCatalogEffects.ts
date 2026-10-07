@@ -1,12 +1,8 @@
 import {
     CatalogPublishedMessageEvent,
     FurnitureListAddOrUpdateEvent,
-    FurnitureListComposer,
     FurnitureListEvent,
     FurnitureListInvalidateEvent,
-    FurnitureListItemParser,
-    FurniturePlaceComposer,
-    FurniturePlacePaintComposer,
     GetConfiguration,
     GetRoomContentLoader,
     GetRoomEngine,
@@ -14,6 +10,7 @@ import {
     LegacyDataType,
     LimitedEditionSoldOutEvent,
     MarketplaceMakeOfferResult,
+    NotEnoughBalanceMessageEvent,
     ProductOfferEvent,
     PurchaseErrorMessageEvent,
     PurchaseFromCatalogComposer,
@@ -32,7 +29,6 @@ import {
     CatalogPage,
     CatalogType,
     DispatchUiEvent,
-    GetRoomSession,
     ICatalogNode,
     LocalizeText,
     NotificationAlertType,
@@ -53,7 +49,16 @@ import { useConnectionState, useMessageEvent, useOctaneEvent, useUiEvent } from 
 import { useNotification } from '../notification';
 import { useCatalogStore } from './catalogStore';
 import { getNodesByOfferIdFromMap, restoreCatalogActivePath, RoomObjectCategory } from './useCatalog.helpers';
-import { claimPlacedOfferPurchase } from './useCatalogPlacedOffer';
+import {
+    claimPlacedOfferPurchase,
+    markPlacedPurchaseBought,
+    recordPlacedPurchaseInvalidated,
+    recordPlacedPurchaseItems,
+    recordPlacedPurchaseListFragment,
+    recordPlacedPurchaseUnseen,
+    releasePlacedOfferPurchase,
+    takePlacedPurchaseAnswer
+} from './useCatalogPlacedOffer';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import {
     bindCatalogQueryClient,
@@ -242,34 +247,72 @@ export const useCatalogEffects = (): void => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
 
         const purchase = event.getParser().offer;
+        const forPlacedOffer = takePlacedPurchaseAnswer();
 
         DispatchUiEvent(new CatalogPurchasedEvent(purchase));
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
 
-        const { placedObjectPurchaseData, placedObjectPurchaseSent } = useCatalogStore.getState();
-
-        if (!placedObjectPurchaseSent || !placedObjectPurchaseData || purchase?.offerId !== placedObjectPurchaseData.offerId) return;
-
-        getPlacedPurchaseState(placedObjectPurchaseData).bought = true;
-
-        resolvePlacedPurchase();
+        if (forPlacedOffer) markPlacedPurchaseBought(purchase?.offerId);
     });
 
+    // A dropped offer's purchase failed: PurchaseConfirmationDialog closes and the temporary object goes.
+    const rollBackPlacedOffer = (message: string, title: string) => {
+        simpleAlert?.(message, null, null, null, title);
+        useCatalogStore.getState().resetPlacedOfferData();
+    };
+
     useMessageEvent<PurchaseErrorMessageEvent>(PurchaseErrorMessageEvent, (event) => {
-        DispatchUiEvent(new CatalogPurchaseFailureEvent(event.getParser().code));
+        const code = event.getParser().code;
+        const forPlacedOffer = takePlacedPurchaseAnswer();
+
+        DispatchUiEvent(new CatalogPurchaseFailureEvent(code));
+
+        if (forPlacedOffer)
+            rollBackPlacedOffer(
+                LocalizeText(code > 0 ? `catalog.alert.purchaseerror.description.${code}` : 'catalog.alert.purchaseerror.description'),
+                LocalizeText('catalog.alert.purchaseerror.title')
+            );
     });
 
     useMessageEvent<PurchaseNotAllowedMessageEvent>(PurchaseNotAllowedMessageEvent, (event) => {
-        DispatchUiEvent(new CatalogPurchaseNotAllowedEvent(event.getParser().code));
+        const code = event.getParser().code;
+        const forPlacedOffer = takePlacedPurchaseAnswer();
+
+        DispatchUiEvent(new CatalogPurchaseNotAllowedEvent(code));
+
+        if (forPlacedOffer)
+            rollBackPlacedOffer(
+                LocalizeText(code === 1 ? 'catalog.alert.purchasenotallowed.hc.description' : 'catalog.alert.purchasenotallowed.unknown.description'),
+                LocalizeText('catalog.alert.purchasenotallowed.title')
+            );
     });
 
     useMessageEvent<LimitedEditionSoldOutEvent>(LimitedEditionSoldOutEvent, () => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
+        const forPlacedOffer = takePlacedPurchaseAnswer();
 
         DispatchUiEvent(new CatalogPurchaseSoldOutEvent());
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
+
+        if (forPlacedOffer) rollBackPlacedOffer(LocalizeText('catalog.alert.limited_edition_sold_out.message'), LocalizeText('catalog.alert.limited_edition_sold_out.title'));
+    });
+
+    // PurchaseConfirmationDialog.notEnoughCredits: the dialog stays and Buy works again.
+    useMessageEvent<NotEnoughBalanceMessageEvent>(NotEnoughBalanceMessageEvent, (event) => {
+        if (!takePlacedPurchaseAnswer()) return;
+
+        const parser = event.getParser();
+
+        releasePlacedOfferPurchase();
+        simpleAlert?.(
+            LocalizeText(parser.notEnoughCredits ? 'catalog.alert.notenough.credits.description' : 'catalog.alert.notenough.activitypoints.description'),
+            null,
+            null,
+            null,
+            LocalizeText(parser.notEnoughCredits ? 'catalog.alert.notenough.title' : 'catalog.alert.notenough.activitypoints.title')
+        );
     });
 
     useMessageEvent<ProductOfferEvent>(ProductOfferEvent, (event) => {
@@ -429,159 +472,19 @@ export const useCatalogEffects = (): void => {
     });
 
     // HabboCatalog.itemAddedToInventory places the bought item on the dropped spot. Here the item
-    // must be one the server announced as new after Buy and whose inventory data shows this drop's
-    // product; it is placed once, after this drop's own PurchaseOK.
-    useMessageEvent<UnseenItemsEvent>(UnseenItemsEvent, (event) => {
-        const purchaseState = getSentPurchaseState();
+    // must be one the server announced as new during this attempt and whose inventory data shows
+    // the drop's product; see useCatalogPlacedOffer.
+    useMessageEvent<UnseenItemsEvent>(UnseenItemsEvent, (event) => recordPlacedPurchaseUnseen(event.getParser().getItemsByCategory(UnseenItemCategory.FURNI)));
 
-        if (!purchaseState) return;
-
-        for (const itemId of event.getParser().getItemsByCategory(UnseenItemCategory.FURNI) ?? []) purchaseState.unseenIds.add(itemId);
-
-        resolvePlacedPurchase();
-    });
-
-    useMessageEvent<FurnitureListAddOrUpdateEvent>(FurnitureListAddOrUpdateEvent, (event) => {
-        const purchaseState = getSentPurchaseState();
-
-        if (!purchaseState) return;
-
-        recordInventoryItems(purchaseState, event.getParser().items);
-        resolvePlacedPurchase();
-    });
+    useMessageEvent<FurnitureListAddOrUpdateEvent>(FurnitureListAddOrUpdateEvent, (event) => recordPlacedPurchaseItems(event.getParser().items));
 
     useMessageEvent<FurnitureListEvent>(FurnitureListEvent, (event) => {
-        const purchaseState = getSentPurchaseState();
-
-        if (!purchaseState) return;
-
         const parser = event.getParser();
 
-        recordInventoryItems(purchaseState, parser.fragment.values());
-
-        if (purchaseState.listRequested && parser.fragmentNumber === parser.totalFragments - 1) purchaseState.listLoaded = true;
-
-        resolvePlacedPurchase();
+        recordPlacedPurchaseListFragment(parser.totalFragments, parser.fragmentNumber, parser.fragment.values());
     });
 
-    useMessageEvent<FurnitureListInvalidateEvent>(FurnitureListInvalidateEvent, () => {
-        const purchaseState = getSentPurchaseState();
-
-        if (!purchaseState) return;
-
-        purchaseState.invalidated = true;
-
-        resolvePlacedPurchase();
-    });
-};
-
-interface PlacedPurchaseState {
-    data: PlacedObjectPurchaseData;
-    bought: boolean;
-    unseenIds: Set<number>;
-    spriteIds: Map<number, number>;
-    listRequested: boolean;
-    listLoaded: boolean;
-    invalidated: boolean;
-}
-
-let placedPurchaseState: PlacedPurchaseState = null;
-
-const getPlacedPurchaseState = (data: PlacedObjectPurchaseData): PlacedPurchaseState => {
-    if (!placedPurchaseState || placedPurchaseState.data !== data)
-        placedPurchaseState = { data, bought: false, unseenIds: new Set(), spriteIds: new Map(), listRequested: false, listLoaded: false, invalidated: false };
-
-    return placedPurchaseState;
-};
-
-// Packets only count while this drop's purchase is in flight.
-const getSentPurchaseState = (): PlacedPurchaseState => {
-    const { placedObjectPurchaseData, placedObjectPurchaseSent } = useCatalogStore.getState();
-
-    if (!placedObjectPurchaseSent || !placedObjectPurchaseData) return null;
-
-    return getPlacedPurchaseState(placedObjectPurchaseData);
-};
-
-const recordInventoryItems = (purchaseState: PlacedPurchaseState, items: Iterable<FurnitureListItemParser>) => {
-    // Owned items are recorded too; only ids announced as new are ever matched.
-    for (const item of items) purchaseState.spriteIds.set(item.itemId, item.spriteId);
-};
-
-// The bought item is placed when exactly one announced item is this product. When the announced
-// items are unknown the inventory list is asked for once; anything still unresolved, or two
-// matching items, leaves the item in the inventory and retires the temporary object.
-const resolvePlacedPurchase = () => {
-    const purchaseState = getSentPurchaseState();
-
-    if (!purchaseState || !purchaseState.bought) return;
-
-    const placed = purchaseState.data;
-    const announced = [...purchaseState.unseenIds];
-    const matches = announced.filter((itemId) => purchaseState.spriteIds.get(itemId) === placed.productClassId);
-    const unknown = announced.filter((itemId) => !purchaseState.spriteIds.has(itemId));
-
-    if (matches.length > 1) {
-        useCatalogStore.getState().resetPlacedOfferData();
-
-        return;
-    }
-
-    // An announced item missing from the loaded inventory cannot be the product.
-    if (matches.length === 1 && (!unknown.length || purchaseState.listLoaded)) {
-        placeBoughtItem(placed, matches[0]);
-
-        return;
-    }
-
-    if (unknown.length && !purchaseState.listRequested) {
-        purchaseState.listRequested = true;
-
-        SendMessageComposer(new FurnitureListComposer());
-
-        return;
-    }
-
-    const exhausted = announced.length ? !unknown.length || purchaseState.listLoaded : purchaseState.invalidated;
-
-    if (exhausted) useCatalogStore.getState().resetPlacedOfferData();
-};
-
-const placeBoughtItem = (placed: PlacedObjectPurchaseData, itemId: number) => {
-    const state = useCatalogStore.getState();
-    const roomEngine = GetRoomEngine();
-
-    if (state.placedObjectPurchaseData !== placed) return;
-
-    // The room was left; the item stays in the inventory. The engine keeps its last room id on
-    // the hotel view, so the room session decides.
-    if (placed.roomId !== roomEngine.activeRoomId || GetRoomSession()?.roomId !== placed.roomId) {
-        state.resetPlacedOfferData();
-
-        return;
-    }
-
-    const roomId = roomEngine.activeRoomId;
-
-    switch (placed.furniData?.className) {
-        case 'floor':
-            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_FLOOR_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
-            break;
-        case 'wallpaper':
-            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_WALL_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
-            break;
-        case 'landscape':
-            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
-            break;
-        default:
-            SendMessageComposer(new FurniturePlaceComposer(itemId, placed.category, placed.wallLocation, placed.x, placed.y, placed.direction));
-            break;
-    }
-
-    placedPurchaseState = null;
-
-    if (state.catalogPlaceMultipleObjects) state.setPlacedObjectPurchaseSent(false);
-    else state.resetPlacedOfferData();
+    useMessageEvent<FurnitureListInvalidateEvent>(FurnitureListInvalidateEvent, () => recordPlacedPurchaseInvalidated());
 };
 
 const isNodeInTree = (node: ICatalogNode | null, root: ICatalogNode): boolean => {

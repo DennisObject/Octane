@@ -51,6 +51,7 @@ export interface CatalogUiState {
     purchasableOffer: IPurchasableOffer | null;
     placedObjectPurchaseData: PlacedObjectPurchaseData | null;
     placedObjectPurchaseSent: boolean;
+    placedObjectPurchaseBought: boolean;
 }
 
 export interface CatalogActions {
@@ -83,6 +84,7 @@ export interface CatalogActions {
     resetObjectMover: (flag?: boolean) => void;
     setPlacedObjectPurchaseData: (data: PlacedObjectPurchaseData | null) => void;
     setPlacedObjectPurchaseSent: (sent: boolean) => void;
+    setPlacedObjectPurchaseBought: (bought: boolean) => void;
     resetPlacedOfferData: (flag?: boolean) => void;
     resetRoomPaint: (planeType: string, type: string) => void;
     refreshIndex: () => void;
@@ -114,7 +116,8 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     objectMoverRequested: false,
     purchasableOffer: null,
     placedObjectPurchaseData: null,
-    placedObjectPurchaseSent: false
+    placedObjectPurchaseSent: false,
+    placedObjectPurchaseBought: false
 };
 
 const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
@@ -429,9 +432,11 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({ objectMoverRequested: false });
     },
 
-    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData, placedObjectPurchaseSent: false }),
+    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData, placedObjectPurchaseSent: false, placedObjectPurchaseBought: false }),
 
-    setPlacedObjectPurchaseSent: (placedObjectPurchaseSent) => set({ placedObjectPurchaseSent }),
+    setPlacedObjectPurchaseSent: (placedObjectPurchaseSent) => set({ placedObjectPurchaseSent, placedObjectPurchaseBought: false }),
+
+    setPlacedObjectPurchaseBought: (placedObjectPurchaseBought) => set({ placedObjectPurchaseBought }),
 
     resetRoomPaint: (planeType, type) => {
         const roomEngine = GetRoomEngine();
@@ -488,7 +493,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             }
         }
 
-        set({ placedObjectPurchaseData: null, placedObjectPurchaseSent: false });
+        set({ placedObjectPurchaseData: null, placedObjectPurchaseSent: false, placedObjectPurchaseBought: false });
     },
 
     refreshIndex: () => invalidateCatalogIndex(get().currentType),

@@ -267,6 +267,7 @@ export class HabbiconShopDataEvent extends MessageEvent {}
 export class HabbiconInfoEvent extends MessageEvent {}
 export class PurchaseOKMessageEvent extends MessageEvent {}
 export class PurchaseErrorMessageEvent extends MessageEvent {}
+export class NotEnoughBalanceMessageEvent extends MessageEvent {}
 export class PurchaseNotAllowedMessageEvent extends MessageEvent {}
 
 export const MessengerMessageType = {
