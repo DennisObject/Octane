@@ -11,6 +11,7 @@
     "gamedata.url": "https://nitro.example.com:2096/nitro-sec/file?kind=gamedata&file=",
     "sounds.url": "${asset.url}/sounds/%sample%.mp3",
     "external.texts.url": [
+        "${gamedata.url}/QuestUITexts.jsonc?t=%timestamp%",
         "${gamedata.url}/ExternalTexts.json?t=%timestamp%",
         "${gamedata.url}/UITexts.jsonc?t=%timestamp%"
     ],

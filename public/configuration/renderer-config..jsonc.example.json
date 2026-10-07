@@ -12,6 +12,7 @@
   "sounds.url": "http://localhost:5173/nitro-assets/sounds/%sample%.mp3",
   // Text, translations, and game data loaded at runtime.
   "external.texts.url": [
+    "${gamedata.url}/QuestUITexts.jsonc",
     "${gamedata.url}/ExternalTexts.json",
     "${gamedata.url}/UITexts.jsonc"
   ],
