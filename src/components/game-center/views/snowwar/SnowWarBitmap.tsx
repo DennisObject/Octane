@@ -2,7 +2,7 @@ import { CSSProperties, FC, ReactNode, useEffect, useState } from 'react';
 
 // HabboGamesCom bitmaps from the v75 library (byte-identical PNGs).
 const BITMAP_URLS = Object.fromEntries(
-    Object.entries(import.meta.glob('../../../../assets/images/snowstorm/air/*.png', { eager: true, import: 'default' }) as Record<string, string>)
+    Object.entries(import.meta.glob('../../../../assets/images/snowstorm/air/*.png', { eager: true, import: 'default' }))
         .map(([ path, url ]) => [ path.slice(path.lastIndexOf('/') + 1, -4), url ])
 );
 
@@ -28,7 +28,6 @@ const BITMAP_SIZES: Record<string, [number, number]> = {
     bg_vista_2: [444, 187],
     bg_vista_3: [444, 274],
     blue_ball: [59, 59],
-    blue_ball_rematch: [59, 59],
     blue_glove: [80, 101],
     blue_infobox: [162, 63],
     blue_square: [62, 63],
@@ -48,12 +47,6 @@ const BITMAP_SIZES: Record<string, [number, number]> = {
     explosion0008: [106, 96],
     explosion0009: [117, 102],
     explosion0010: [78, 75],
-    explosion0011: [62, 69],
-    explosion0012: [62, 58],
-    free_games_bg: [59, 48],
-    gray_ball: [59, 59],
-    gray_infobox: [162, 63],
-    gray_square: [62, 63],
     green_square: [62, 63],
     hc_icon: [24, 24],
     leaderboard_bg: [431, 472],
@@ -76,10 +69,8 @@ const BITMAP_SIZES: Record<string, [number, number]> = {
     pagination_ball: [7, 7],
     pagination_ball_hilite: [7, 7],
     quick_play_background: [405, 357],
-    quick_play_instructions: [140, 246],
     quick_play_teaser: [365, 117],
     red_ball: [59, 59],
-    red_ball_rematch: [59, 59],
     red_glove: [80, 101],
     red_infobox: [162, 63],
     red_square: [62, 63],
@@ -93,13 +84,11 @@ const BITMAP_SIZES: Record<string, [number, number]> = {
     right_blue: [119, 28],
     scroll_down_click: [58, 28],
     scroll_down_hilite: [58, 28],
-    scroll_down_inactive: [58, 28],
     scroll_down_normal: [58, 28],
     scroll_left: [14, 18],
     scroll_right: [14, 18],
     scroll_up_click: [58, 28],
     scroll_up_hilite: [58, 28],
-    scroll_up_inactive: [58, 28],
     scroll_up_normal: [58, 28],
     snowstorm_logo: [308, 83],
     star_empty: [14, 13],
@@ -123,7 +112,6 @@ const BITMAP_SIZES: Record<string, [number, number]> = {
     ui_ball: [29, 29],
     ui_ball_indicator_bg: [57, 202],
     ui_exit_down: [68, 50],
-    ui_exit_up: [68, 50],
     ui_make_balls_down: [57, 58],
     ui_make_balls_up: [57, 58],
     ui_me_bg: [171, 73],
@@ -221,12 +209,10 @@ export const SnowWarAnimation: FC<SnowWarBoxProps & { prefix: string; frames: nu
 
     useEffect(() =>
     {
-        setIndex(1 % list.length);
-
         const timer = setInterval(() => setIndex(value => (value + 1) % list.length), interval);
 
         return () => clearInterval(timer);
     }, [ prefix, list.length, interval ]);
 
-    return <SnowWarBitmap {...props} bitmap={list[index]} />;
+    return <SnowWarBitmap {...props} bitmap={list[index % list.length]} />;
 };

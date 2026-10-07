@@ -100,12 +100,13 @@ export const SnowWarPlayerRowView: FC<SnowWarPlayerRowViewProps> = ({ row, team,
             <SnowWarBox name="playerDataContainer" x={dataX} y={0} width={162} height={62}>
                 <SnowWarBitmap bitmap={`${ colour }_infobox`} name="playerDataBackground" x={0} y={0} width={162} height={62} />
                 <SnowWarStrokeText name="playerName" size={14} strokeColor={blue ? 0x336699 : 0x993333} text={row.name} x={lobbyLayout ? 46 : 47} y={3} width={lobbyLayout ? 71 : 68} height={19} style={{ width: 'auto', maxWidth: 150 }} />
+                {/* text_style u_regular / u_bold follow font_size in these texts, so they render at 12px. */}
                 {row.stats && (
                     <SnowWarBox name="playerStats" x={20} y={26} width={135} height={35}>
-                        <SnowWarText bold color={0xffffff} name="playerHitsLabel" size={11} text={LocalizeText('snowwar.results.hits')} x={0} y={0} width={112} height={16} style={{ width: 'auto' }} />
-                        <SnowWarStrokeText align="right" name="playerHits" size={12} strokeColor={blue ? 0x6699cc : 0xcc6666} text={String(row.stats.hits)} x={62} y={0} width={60} height={17} />
-                        <SnowWarText bold color={0xffffff} name="playerKillsLabel" size={11} text={LocalizeText('snowwar.results.kills')} x={0} y={14} width={114} height={16} style={{ width: 'auto' }} />
-                        <SnowWarStrokeText align="right" name="playerKills" size={12} strokeColor={blue ? 0x6699cc : 0xcc6666} text={String(row.stats.kills)} x={62} y={14} width={60} height={17} />
+                        <SnowWarText bold color={0xffffff} name="playerHitsLabel" size={12} text={LocalizeText('snowwar.results.hits')} x={0} y={0} width={112} height={16} style={{ width: 'auto' }} />
+                        <SnowWarStrokeText align="right" name="playerHits" size={12} thickStroke={false} strokeColor={blue ? 0x6699cc : 0xcc6666} text={String(row.stats.hits)} x={62} y={0} width={60} height={17} />
+                        <SnowWarText bold color={0xffffff} name="playerKillsLabel" size={12} text={LocalizeText('snowwar.results.kills')} x={0} y={14} width={114} height={16} style={{ width: 'auto' }} />
+                        <SnowWarStrokeText align="right" name="playerKills" size={12} thickStroke={false} strokeColor={blue ? 0x6699cc : 0xcc6666} text={String(row.stats.kills)} x={62} y={14} width={60} height={17} />
                     </SnowWarBox>
                 )}
                 {row.skill && (

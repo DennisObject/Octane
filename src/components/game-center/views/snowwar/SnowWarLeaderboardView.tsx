@@ -54,7 +54,8 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
         onRequest({ kind: STATE_KINDS[state], startRank: -1, direction: 0, weekOffset, viewSize, windowSize });
     };
 
-    useEffect(() => show(0), []);
+    // showLeaderboard → showFriendsAllTime: the initial table state is already state 0.
+    useEffect(() => onRequest({ kind: STATE_KINDS[0], startRank: -1, direction: 0, weekOffset: 0, viewSize, windowSize }), [ onRequest, viewSize, windowSize ]);
 
     const current = leaderboard && leaderboard.kind === STATE_KINDS[table.state] ? leaderboard : null;
     const entries = current?.entries ?? [];
@@ -83,7 +84,7 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
         });
 
         if(isWeekly(table.state)) setResetMinutes(current.minutesUntilReset);
-    }, [ current ]);
+    }, [ current, ownUserId, table.state, viewSize, windowSize ]);
 
     // startWeeklyResetTimer: one tick per minute.
     useEffect(() =>

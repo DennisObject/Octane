@@ -35,6 +35,8 @@ export const SnowWarText: FC<SnowWarTextProps> = ({ x, y, width, height, text, s
             top: y,
             width,
             minHeight: height,
+            paddingTop: size >= 14 ? 3 : 2,
+            paddingBottom: size >= 14 ? 1 : 2,
             color: toCss(color),
             fontSize: size,
             fontWeight: bold || thick ? 700 : 400,
@@ -53,11 +55,12 @@ export const SnowWarText: FC<SnowWarTextProps> = ({ x, y, width, height, text, s
 
 /**
  * The `<name>_stroke` + `<name>` pair the SnowStorm layouts use for outlined captions:
- * an UbuntuThick copy in the stroke colour under the white Ubuntu caption.
+ * an UbuntuThick copy in the stroke colour under the white Ubuntu caption. A `text_style`
+ * listed after `font_face` replaces it, so those pairs draw the same Ubuntu glyphs twice (thickStroke false).
  */
-export const SnowWarStrokeText: FC<Omit<SnowWarTextProps, 'thick' | 'color'> & { strokeColor: number; color?: number; strokeHeight?: number }> = ({ strokeColor, color = 0xffffff, strokeHeight, ...props }) => (
+export const SnowWarStrokeText: FC<Omit<SnowWarTextProps, 'thick' | 'color'> & { strokeColor: number; color?: number; strokeHeight?: number; thickStroke?: boolean }> = ({ strokeColor, color = 0xffffff, strokeHeight, thickStroke = true, ...props }) => (
     <>
-        <SnowWarText {...props} thick color={strokeColor} height={strokeHeight ?? props.height} onClick={undefined} name={props.name ? `${ props.name }_stroke` : undefined} />
+        <SnowWarText {...props} bold thick={thickStroke} color={strokeColor} height={strokeHeight ?? props.height} onClick={undefined} name={props.name ? `${ props.name }_stroke` : undefined} />
         <SnowWarText {...props} bold color={color} />
     </>
 );

@@ -44,16 +44,14 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
     const [ instructionsVisible, setInstructionsVisible ] = useState(false);
     const [ page, setPage ] = useState(0);
     const [ hoveredOffer, setHoveredOffer ] = useState<string>(null);
-    const [ blockSeconds, setBlockSeconds ] = useState(0);
-
     // changeBlockStatus: a one-second Timer counts the block down on the Play button.
+    const [ blockTicks, setBlockTicks ] = useState<{ length: number; ticks: number }>({ length: 0, ticks: 0 });
+
     useEffect(() =>
     {
         if(blockLength <= 0) return;
 
-        setBlockSeconds(blockLength);
-
-        const timer = setInterval(() => setBlockSeconds(value => Math.max(0, value - 1)), 1000);
+        const timer = setInterval(() => setBlockTicks(value => ({ length: blockLength, ticks: value.length === blockLength ? value.ticks + 1 : 1 })), 1000);
         const stop = setTimeout(() => clearInterval(timer), blockLength * 1000);
 
         return () =>
@@ -62,6 +60,8 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
             clearTimeout(stop);
         };
     }, [ blockLength ]);
+
+    const blockSeconds = blockLength > 0 ? Math.max(0, blockLength - (blockTicks.length === blockLength ? blockTicks.ticks : 0)) : 0;
 
     // updateGameStartingStatus → checkGameAmountStatus / checkBlockStatus.
     const gamesLeftVisible = !hasUnlimitedGames && freeGamesLeft !== -1;
@@ -148,8 +148,7 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
                                 <SnowWarText name="games.lobby.get.vip" size={14} text={LocalizeText('snowwar.get_more_games')} underline wrap x={31} y={2} width={158} height={35} />
                             </SnowWarBox>
                             {playVisible && (
-                                // play_text reflects its auto-size to the button (0x400000) and the button keeps its right edge.
-                                <SnowWarThickButton className="snowwar-play-button" disabled={blocked} height={50} name="play.button" right={407 - 394} y={64} onClick={play}>
+                                <SnowWarThickButton className="snowwar-play-button" disabled={blocked} height={50} name="play.button" width={190} x={204} y={64} onClick={play}>
                                     <span className="snowwar-play-button__text">{playCaption}</span>
                                 </SnowWarThickButton>
                             )}

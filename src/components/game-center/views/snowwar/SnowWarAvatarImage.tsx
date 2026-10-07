@@ -65,18 +65,12 @@ interface SnowWarAvatarImageProps extends SnowWarBoxProps
 export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender, setType, direction, half = false, ...box }) =>
 {
     const key = [ figure, gender, setType, direction, half ].join('|');
-    const [ bitmap, setBitmap ] = useState<AvatarBitmap>(() => CACHE.get(key) ?? null);
+    const [ rendered, setRendered ] = useState<{ key: string; bitmap: AvatarBitmap }>(null);
+    const bitmap = CACHE.get(key) ?? (rendered?.key === key ? rendered.bitmap : null);
 
     useEffect(() =>
     {
-        const cached = CACHE.get(key);
-
-        if(cached)
-        {
-            setBitmap(cached);
-
-            return;
-        }
+        if(CACHE.has(key)) return;
 
         let disposed = false;
 
@@ -93,7 +87,7 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
 
             image.setDirection(avatarSetType, direction);
 
-            const url = image.processAsCroppedImageUrl(avatarSetType);
+            const url = image.processAsCroppedImageUrl(avatarSetType, true);
             const placeholder = image.isPlaceholder();
 
             image.dispose();
@@ -111,7 +105,7 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
                         CACHE.set(key, result);
                     }
 
-                    setBitmap(result);
+                    setRendered({ key, bitmap: result });
                 })
                 .catch(() => null);
         };

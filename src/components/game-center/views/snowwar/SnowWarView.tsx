@@ -8,25 +8,21 @@ import { SnowWarHudView } from './SnowWarHudView';
 import { SnowWarPlayerRow } from './SnowWarPlayerRowView';
 import { buySnowWarTokens } from './SnowWarTokenPurchase';
 
-const secondsUntil = (deadline: number | null) => (deadline ? Math.max(0, Math.ceil((deadline - Date.now()) / 1000)) : 0);
-
 /** One-second countdown text for GameEndingViewController's Timer. */
 const useCountdown = (deadline: number | null) =>
 {
-    const [ seconds, setSeconds ] = useState(() => secondsUntil(deadline));
+    const [ now, setNow ] = useState(Date.now);
 
     useEffect(() =>
     {
-        setSeconds(secondsUntil(deadline));
-
         if(!deadline) return;
 
-        const timer = setInterval(() => setSeconds(secondsUntil(deadline)), 250);
+        const timer = setInterval(() => setNow(Date.now()), 250);
 
         return () => clearInterval(timer);
     }, [ deadline ]);
 
-    return seconds;
+    return deadline ? Math.max(0, Math.ceil((deadline - now) / 1000)) : 0;
 };
 
 const SnowWarResultsContainer: FC<{ snowWar: SnowWarHookState; results: SnowWarResults }> = ({ snowWar, results }) =>

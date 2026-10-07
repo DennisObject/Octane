@@ -21,28 +21,23 @@ const TILE_HEIGHT = 63;
 const GRID_SPACING = 3;
 const GRID_COLUMNS = Math.floor((335 + GRID_SPACING) / (TILE_WIDTH + GRID_SPACING));
 
-const secondsUntil = (deadline: number) => Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+const secondsUntil = (deadline: number, now: number) => Math.max(0, Math.ceil((deadline - now) / 1000));
 
 /** `snowwar_lobby_cont` inside games_main (GameLobbyWindowCtrl); `center()`ed in the 407x491 frame content. */
 export const SnowWarLobbyView: FC<SnowWarLobbyViewProps> = ({ players, maxPlayers, queuePosition, countdownDeadline, onCancel }) =>
 {
-    const [ seconds, setSeconds ] = useState(() => (countdownDeadline ? secondsUntil(countdownDeadline) : -1));
+    const [ now, setNow ] = useState(Date.now);
 
     useEffect(() =>
     {
-        if(!countdownDeadline)
-        {
-            setSeconds(-1);
+        if(!countdownDeadline) return;
 
-            return;
-        }
-
-        setSeconds(secondsUntil(countdownDeadline));
-
-        const timer = setInterval(() => setSeconds(secondsUntil(countdownDeadline)), 250);
+        const timer = setInterval(() => setNow(Date.now()), 250);
 
         return () => clearInterval(timer);
     }, [ countdownDeadline ]);
+
+    const seconds = countdownDeadline ? secondsUntil(countdownDeadline, now) : -1;
 
     // updateDialog: countdown first, then queue position, else waiting.
     const waitText = seconds >= 0
