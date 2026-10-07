@@ -1,4 +1,4 @@
-import { GetAvatarRenderManager, GetSessionDataManager, RoomObjectVariable, Vector3d } from '@octane/renderer';
+import { GetAvatarRenderManager, GetRoomEngine, GetSessionDataManager, RoomObjectVariable, Vector3d } from '@octane/renderer';
 import { FC, useEffect } from 'react';
 import { FurniCategory, GetProductIconUrl, Offer, ProductTypeEnum } from '../../../../../api';
 import { AutoGrid, Column, LayoutGridItem, LayoutHabbiconImageView, LayoutRoomPreviewerView } from '../../../../../common';
@@ -12,9 +12,23 @@ const HABBICON_PREVIEW_REPEAT_MS = 4000;
 // Extra lift for the habbicon preview, so the room sits higher in the view.
 const HABBICON_PREVIEW_EXTRA_LIFT = 40;
 
-const NEUTRAL_FLOOR = 'default';
-const NEUTRAL_WALL = 'default';
+// RoomPreviewer.onRoomInitialized gives the preview room floor 110 and wall 99999.
+const NEUTRAL_FLOOR = '110';
+const NEUTRAL_WALL = '99999';
 const NEUTRAL_LANDSCAPE = 'default';
+
+// ProductViewCatalogWidget previews floor, wallpaper and landscape on the active room's planes.
+const getActiveRoomPlanes = () => {
+    const roomEngine = GetRoomEngine();
+    const roomId = roomEngine.activeRoomId;
+    const read = (key: string, fallback: string) => roomEngine.getRoomInstanceVariable<string>(roomId, key) || fallback;
+
+    return {
+        floor: read(RoomObjectVariable.ROOM_FLOOR_TYPE, '101'),
+        wall: read(RoomObjectVariable.ROOM_WALL_TYPE, '101'),
+        landscape: read(RoomObjectVariable.ROOM_LANDSCAPE_TYPE, '1.1')
+    };
+};
 
 export const CatalogViewProductWidgetView: FC<{ height?: number }> = (props) => {
     const { height = 240 } = props;
@@ -36,7 +50,7 @@ export const CatalogViewProductWidgetView: FC<{ height?: number }> = (props) => 
             return;
         }
 
-        roomPreviewer.addViewOffset.y = -(PREVIEW_LIFT + (product.isUniqueLimitedItem ? 15 : 0));
+        roomPreviewer.addViewOffset.y = product.isUniqueLimitedItem ? -15 : 0;
         roomPreviewer.centerWallItems = true;
         roomPreviewer.setAutomaticStateChange(false);
         roomPreviewer.updateRoomWallsAndFloorVisibility(true, true);
@@ -94,16 +108,24 @@ export const CatalogViewProductWidgetView: FC<{ height?: number }> = (props) => 
                     roomPreviewer.updateRoomWallsAndFloorVisibility(true, true);
 
                     switch (product.furnitureData.specialType) {
-                        case FurniCategory.FLOOR:
+                        case FurniCategory.FLOOR: {
+                            const planes = getActiveRoomPlanes();
+
                             roomPreviewer.reset(true);
-                            roomPreviewer.updateObjectRoom(product.extraParam, NEUTRAL_WALL, NEUTRAL_LANDSCAPE);
+                            roomPreviewer.updateObjectRoom(product.extraParam, planes.wall, planes.landscape);
                             return;
-                        case FurniCategory.WALL_PAPER:
+                        }
+                        case FurniCategory.WALL_PAPER: {
+                            const planes = getActiveRoomPlanes();
+
                             roomPreviewer.reset(true);
-                            roomPreviewer.updateObjectRoom(NEUTRAL_FLOOR, product.extraParam, NEUTRAL_LANDSCAPE);
+                            roomPreviewer.updateObjectRoom(planes.floor, product.extraParam, planes.landscape);
                             return;
+                        }
                         case FurniCategory.LANDSCAPE: {
-                            roomPreviewer.updateObjectRoom(NEUTRAL_FLOOR, NEUTRAL_WALL, product.extraParam);
+                            const planes = getActiveRoomPlanes();
+
+                            roomPreviewer.updateObjectRoom(planes.floor, planes.wall, product.extraParam);
 
                             const furniData = GetSessionDataManager().getWallItemDataByName('window_double_default');
 

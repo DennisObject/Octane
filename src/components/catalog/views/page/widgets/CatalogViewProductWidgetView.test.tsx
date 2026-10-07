@@ -104,7 +104,7 @@ describe('catalog product preview', () => {
             expect(roomPreviewer.addAvatarIntoRoom).toHaveBeenCalledWith('composed-figure', 0);
             expect(roomPreviewer.zoomIn).toHaveBeenCalledOnce();
             // 41px on a canvas the same step has already doubled: half that in engine pixels.
-            expect(roomPreviewer.addViewOffset.y).toBe(-21);
+            expect(roomPreviewer.addViewOffset.y).toBe(0);
             expect(roomPreviewer.setAutomaticStateChange).toHaveBeenLastCalledWith(false);
         });
     });
@@ -134,11 +134,11 @@ describe('catalog product preview', () => {
             expect(roomPreviewer.zoomIn).not.toHaveBeenCalled();
             // Furniture is not zoomed, but it is lifted: the canvas is centred in a box shorter
             // than itself, so dead centre reads low for everything in it, not just avatars.
-            expect(roomPreviewer.addViewOffset.y).toBe(-21);
+            expect(roomPreviewer.addViewOffset.y).toBe(0);
             expect(roomPreviewer.centerWallItems).toBe(true);
             // The previewer is shared: without the neutral repaint, a wallpaper
             // or landscape previewed earlier would still be on the walls here.
-            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('default', 'default', 'default');
+            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('110', '99999', 'default');
             expect(roomPreviewer.setAutomaticStateChange).toHaveBeenLastCalledWith(true);
         });
     });
@@ -190,7 +190,7 @@ describe('catalog product preview', () => {
 
         const view = render(<CatalogViewProductWidgetView />);
 
-        await waitFor(() => expect(roomPreviewer.addViewOffset.y).toBe(-21));
+        await waitFor(() => expect(roomPreviewer.addViewOffset.y).toBe(0));
 
         view.unmount();
 
@@ -214,7 +214,7 @@ describe('catalog product preview', () => {
         render(<CatalogViewProductWidgetView />);
 
         await waitFor(() => {
-            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('default', 'default', 'default');
+            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('110', '99999', 'default');
             expect(roomPreviewer.addWallItemIntoRoom).toHaveBeenCalledWith(700, expect.anything(), '');
         });
     });
@@ -230,7 +230,7 @@ describe('catalog product preview', () => {
         render(<CatalogViewProductWidgetView />);
 
         await waitFor(() => {
-            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('default', 'default', 'landscape');
+            expect(roomPreviewer.updateObjectRoom).toHaveBeenCalledWith('101', '101', 'landscape');
         });
     });
 
