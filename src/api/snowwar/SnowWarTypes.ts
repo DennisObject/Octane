@@ -426,6 +426,8 @@ export interface ISnowWarEngine
     readonly teamScores: readonly number[];
     /** Increments after every simulated subturn and every object rebuild; cheap change detector for render loops. */
     readonly version: number;
+    /** Increments on every EnterArena; identifies the arena (game) the stage and level belong to. 0 before the first. */
+    readonly arenaId: number;
     /** 0..1 progress towards the next simulated subturn, for interpolating positions between pulses. */
     readonly subturnFraction: number;
 
@@ -475,6 +477,8 @@ export interface SnowWarHookState
     error: string | null;
     /** Room id from RejoinPreviousRoom, -1 when unknown. */
     roomBeforeGame: number;
+    /** `engine.arenaId` once StageLoad arrived for it (AIR builds the game room then, `initView`), else 0. Key the arena view on it. */
+    arenaViewId: number;
 
     /** games_main opened: Game2CheckGameDirectoryStatus + Game2GetAccountGameStatus(0). */
     refreshStatus(): void;

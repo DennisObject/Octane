@@ -39,7 +39,7 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
 {
     const viewSize = GetConfigurationValue<number>('games.highscores.viewSize', 8);
     const windowSize = GetConfigurationValue<number>('games.highscores.windowSize', 50);
-    const scrolling = GetConfigurationValue<boolean>('games.highscores.scrolling.enabled', false);
+    const scrolling = GetConfigurationValue<boolean>('games.highscores.scrolling.enabled', true);
     // showLeaderboard → showFriendsAllTime.
     const [ table, setTable ] = useState<TableState>({ state: 0, weekOffset: 0, index: -1, waiting: true });
     const [ scrollImages, setScrollImages ] = useState({ up: 'normal', down: 'normal' });

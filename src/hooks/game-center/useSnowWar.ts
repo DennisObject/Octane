@@ -188,6 +188,7 @@ const useSnowWarState = (): SnowWarHookState =>
     const [ chatMessages, setChatMessages ] = useState<SnowWarChatMessage[]>([]);
     const [ error, setError ] = useState<string>(null);
     const [ roomBeforeGame, setRoomBeforeGameState ] = useState(-1);
+    const [ arenaViewId, setArenaViewId ] = useState(0);
 
     // AIR `var_475`: the player asked for a rematch (or the server opened the rematch lobby).
     const rematchRequestedRef = useRef(false);
@@ -387,6 +388,7 @@ const useSnowWarState = (): SnowWarHookState =>
         setResults(() => null);
         setLobby(null);
         setLoading({ lobby: data, percentage: 0, finishedUserIds: [] });
+        setArenaViewId(0);
         SNOWWAR_ENGINE.gameStarted();
     }, [ setResults ]));
 
@@ -411,7 +413,12 @@ const useSnowWarState = (): SnowWarHookState =>
     useMessageEvent<Game2EnterArenaFailedMessageEvent>(Game2EnterArenaFailedMessageEvent, useCallback(event =>
         setError((event.getParser().reason === 1) ? 'snowwar.error.game_already_started' : 'snowwar.error.generic'), []));
 
-    useMessageEvent<Game2StageLoadMessageEvent>(Game2StageLoadMessageEvent, useCallback(() => SNOWWAR_ENGINE.stageLoad(), []));
+    // AIR `initView`: the game room is built on StageLoad, from the level of the arena just entered.
+    useMessageEvent<Game2StageLoadMessageEvent>(Game2StageLoadMessageEvent, useCallback(() =>
+    {
+        SNOWWAR_ENGINE.stageLoad();
+        setArenaViewId(SNOWWAR_ENGINE.arenaId);
+    }, []));
 
     useMessageEvent<Game2StageStillLoadingMessageEvent>(Game2StageStillLoadingMessageEvent, useCallback(event =>
     {
@@ -733,6 +740,7 @@ const useSnowWarState = (): SnowWarHookState =>
         chatMessages,
         error,
         roomBeforeGame,
+        arenaViewId,
         refreshStatus,
         play,
         leaveLobby,

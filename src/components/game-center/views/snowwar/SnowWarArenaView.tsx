@@ -26,12 +26,13 @@ const isArenaState = (state: number) => (state >= SnowWarEngineState.GAME_STARTI
 
 export const SnowWarArenaView: FC<{}> = () =>
 {
-    const { engine, state, chatMessages } = useSnowWar();
+    const { engine, state, chatMessages, arenaViewId } = useSnowWar();
 
-    if(!engine || !engine.level || !isArenaState(state)) return null;
+    // One room per game: a rematch remounts it from the new arena's level once its StageLoad arrived.
+    if(!engine || !engine.level || !arenaViewId || (arenaViewId !== engine.arenaId) || !isArenaState(state)) return null;
 
     // The room UI only becomes visible on StageStarting (`SnowWarEngine.startStage`); the loading view covers it before.
-    return <SnowWarArenaStageView engine={ engine } chatMessages={ chatMessages } visible={ state >= SnowWarEngineState.STAGE_STARTING } />;
+    return <SnowWarArenaStageView key={ arenaViewId } engine={ engine } chatMessages={ chatMessages } visible={ state >= SnowWarEngineState.STAGE_STARTING } />;
 };
 
 export const SnowWarArenaStageView: FC<{ engine: ISnowWarEngine; chatMessages: readonly SnowWarChatMessage[]; visible: boolean }> = ({ engine, chatMessages, visible }) =>
