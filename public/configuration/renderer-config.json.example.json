@@ -72,6 +72,7 @@
 	"login.remember.endpoint": "${api.url}/api/auth/remember",
 	"login.server_key.endpoint": "${api.url}/api/auth/server-key",
 	"login.sso-token.endpoint": "${api.url}/api/auth/sso-token",
+	"login.ticket.endpoint": "${api.url}/api/auth/ticket",
 	"login.refresh.endpoint": "${api.url}/api/auth/refresh",
 	"login.health.method": "GET",
 	"login.news.url": "${asset.url}/news/news.json",
