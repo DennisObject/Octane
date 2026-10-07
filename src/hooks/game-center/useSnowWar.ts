@@ -60,7 +60,7 @@ import {
 import type { ConnectionStatePhase } from '@octane/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
-import { GetConfigurationValue, GetRoomSession, GetSessionDataManager, PlaySound, SendMessageComposer, TryVisitRoom, VisitDesktop } from '../../api';
+import { CreateRoomSession, GetConfigurationValue, GetRoomSession, GetSessionDataManager, PlaySound, SendMessageComposer, TryVisitRoom, VisitDesktop } from '../../api';
 import {
     consumeSnowWarReturnRoom,
     setSnowWarReturnRoom,
@@ -220,7 +220,7 @@ const useSnowWarState = (): SnowWarHookState =>
     }, []);
 
     /** Back to the room the player was in before the arena (AIR class_2142 = GetGuestRoom(room, false, true)). */
-    const returnToRoom = useCallback(() =>
+    const returnToRoom = useCallback((reconnected: boolean = false) =>
     {
         const remembered = consumeSnowWarReturnRoom();
 
@@ -230,7 +230,12 @@ const useSnowWarState = (): SnowWarHookState =>
 
         const roomId = (roomBeforeGameRef.current > 0) ? roomBeforeGameRef.current : remembered;
 
-        if(roomId > 0) TryVisitRoom(roomId);
+        if(roomId <= 0) return;
+
+        // After a reconnect the room is entered at once, as the renderer re-enters a normal room, so the
+        // home-room entry that follows every login finds a room session and does not enter a second time.
+        if(reconnected) CreateRoomSession(roomId);
+        else TryVisitRoom(roomId);
     }, []);
 
     /** `SnowWarEngine.resetSession` (game cancelled, results closed). */
@@ -255,21 +260,19 @@ const useSnowWarState = (): SnowWarHookState =>
     // authenticated again go back to the room the arena replaced.
     useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, useCallback(() =>
     {
-        const { phase, authenticated } = GetCommunication().connection.connectionState;
+        if(!CONNECTION_LOST_PHASES.includes(GetCommunication().connection.connectionState.phase)) return;
 
-        if(CONNECTION_LOST_PHASES.includes(phase))
-        {
-            connectionLostRef.current = true;
-            clearSession();
+        connectionLostRef.current = true;
+        clearSession();
+    }, [ clearSession ]));
 
-            return;
-        }
-
-        if(!authenticated || !connectionLostRef.current) return;
+    useOctaneEvent(OctaneEventType.SOCKET_REAUTHENTICATED, useCallback(() =>
+    {
+        if(!connectionLostRef.current) return;
 
         connectionLostRef.current = false;
-        returnToRoom();
-    }, [ clearSession, returnToRoom ]));
+        returnToRoom(true);
+    }, [ returnToRoom ]));
 
     // ---- directory / account ----
 

@@ -292,6 +292,17 @@ export const loginWithRememberToken = async (rememberToken: string, options: Aut
     return mapSession(result, { remember: true });
 };
 
+// A new game ticket for the running session, e.g. after a dropped connection: the server spends
+// the access token and answers with its successor, which expires when it would have.
+export const renewSsoTicket = async (accessToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<LoginSession>> =>
+{
+    const init = jsonPost({}, options);
+
+    init.headers = { ...(init.headers as Record<string, string>), Authorization: `Bearer ${accessToken}` };
+
+    return mapSession(await request(resolveAuthEndpoint('login.ticket.endpoint', '/api/auth/ticket'), init), { remember: false });
+};
+
 export const refreshRememberToken = async (rememberToken: string, options: AuthRequestOptions = {}): Promise<AuthResult<RememberRefresh>> =>
 {
     const result = await postJson(resolveAuthEndpoint('login.refresh.endpoint', '/api/auth/refresh'), { rememberToken }, options);
