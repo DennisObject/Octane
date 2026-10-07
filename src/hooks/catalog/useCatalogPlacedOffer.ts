@@ -26,9 +26,9 @@ interface PlacedPurchaseAttempt {
 }
 
 let attempt: PlacedPurchaseAttempt = null;
-// Set once an attempt is dropped before its answer came, or bought but never placed while no new
-// item was announced for it. Purchase answers and item notices carry no request id, so its answer
-// or item may still arrive; for the rest of the session no bought item is placed automatically.
+// Set once an attempt is dropped before its answer came, or bought but never placed. Purchase
+// answers and item notices carry no request id, so its answer or item may still arrive; for the
+// rest of the session no bought item is placed automatically.
 let placementTainted = false;
 
 /** The catalog offer dropped in the room and waiting for its purchase confirmation. */
@@ -50,7 +50,7 @@ const syncAttempt = () => {
 
     if (placedObjectPurchaseData === attempt.data && placedObjectPurchaseSent) return;
 
-    if (!attempt.answered || (attempt.bought && !attempt.placed && !attempt.unseenIds.size)) placementTainted = true;
+    if (!attempt.answered || (attempt.bought && !attempt.placed)) placementTainted = true;
 
     clearTimeout(attempt.timer);
     attempt = null;
