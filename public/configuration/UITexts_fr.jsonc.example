@@ -629,9 +629,6 @@
 
     // --- custom hardcoded-string fixes (2026-06-23) ---
     "toolbar.icons.toggle": "Afficher/masquer les icônes",
-    "catalog.bc.member.full": "Membre complet",
-    "catalog.bc.member.trial": "Essai gratuit",
-    "catalog.bc.logo.hint": "Logo — définissez l'image de titre dans Gestion",
     "wiredfurni.sendsignal.users": "Utilisateurs à faire avancer :",
     "wiredfurni.condition.room.active": "Tant que la salle est active",
     "wiredfurni.sendsignal.furni": "Mobilier à faire avancer :",

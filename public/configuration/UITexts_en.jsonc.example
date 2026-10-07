@@ -879,9 +879,6 @@
 
     // --- custom hardcoded-string fixes (2026-06-23) ---
     "toolbar.icons.toggle": "Show/hide icons",
-    "catalog.bc.member.full": "Full Member",
-    "catalog.bc.member.trial": "Free Trial",
-    "catalog.bc.logo.hint": "Logo — set the headline image in Management",
     "wiredfurni.sendsignal.users": "Users to send forward:",
     "wiredfurni.condition.room.active": "While the room is active",
     "wiredfurni.sendsignal.furni": "Furniture to send forward:",
