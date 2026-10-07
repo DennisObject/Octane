@@ -23,6 +23,9 @@ const CATEGORY_NO_TOPIC = 27;
 const CLOSE_USELESS = 1;
 const CLOSE_RESOLVED = 3;
 
+// the classic handler sets its white bold headings with a fainter glow than the other windows (about 16% against 37%)
+const HANDLER_GLOW = 0.16;
+
 export interface IssueHandlerProps {
     bundleId: number;
     x: number;
@@ -175,13 +178,17 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     return (
         <NativeWindowShell type="issueHandler" windowKey={`${bundleId}`} x={x} y={y}>
-            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
+            <Native0Frame caption={nativeCaption(root)} glow={HANDLER_GLOW} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
-                {header.children.map((node, index) => (
-                    <Native0Text key={index} bold color={0xffffff} text={nativeCaption(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x')} y={yHeader + nativeNumber(node, 'y')} />
-                ))}
-                <div className="native0-list" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, backgroundColor: '#fff' }}>
+                {/* text on an opaque background is set with LCD subpixel fringes: the backgrounds are drawn apart and the texts get a layer of their own */}
+                <div style={{ position: 'absolute', left: 0, top: 0, width: 280, height: yHeader + 20, willChange: 'transform', pointerEvents: 'none' }}>
+                    {header.children.map((node, index) => (
+                        <Native0Text key={index} bold color={0xffffff} glow={HANDLER_GLOW} text={nativeCaption(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x')} y={yHeader + nativeNumber(node, 'y')} />
+                    ))}
+                </div>
+                <div className="native0-box" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, backgroundColor: '#fff' }} />
+                <div className="native0-list" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, willChange: 'transform' }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, width: 280, height: Math.max(rows.issues, issues.length * 16) }}>
                         {issues.map((tracked, index) => (
                             <div key={tracked.issue.issueId} style={{ position: 'absolute', left: 0, top: index * 16, width: 280, height: 16, cursor: 'pointer' }} onClick={() => setSelectedIssueId(tracked.issue.issueId)}>
@@ -193,12 +200,13 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         ))}
                     </div>
                 </div>
-                <Native0Text bold color={0xffffff} text="Caller User Info" width={100} x={95} y={yCallerCaption} />
+                <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Caller User Info" width={100} x={95} y={yCallerCaption} />
                 <div style={{ position: 'absolute', left: 0, top: yCaller, width: 280, height: 207 }}>
                     <UserInfoPanel key={callerId} settings={settings} userId={callerId} {...panelHandlers(callerId)} />
                 </div>
-                <Native0Text bold color={0xffffff} text="Messages" width={60} x={111} y={yMessagesCaption} />
-                <div className="native0-list" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, backgroundColor: '#fff' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - rows.messages), clampedMessages + event.deltaY * 0.75)))}>
+                <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Messages" width={60} x={110} y={yMessagesCaption} />
+                <div className="native0-box" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, backgroundColor: '#fff' }} />
+                <div className="native0-list" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, willChange: 'transform' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - rows.messages), clampedMessages + event.deltaY * 0.75)))}>
                     <div style={{ position: 'absolute', left: 0, top: -clampedMessages, width: msgOverflow ? 263 : 280, height: messagesHeight }}>
                         <Native0Rows colors={messageRows.map((row) => row.color)} heights={messageRows.map((row) => row.height)} width={msgOverflow ? 263 : 280} />
                         {messageRows.map((row, index) => (
@@ -209,7 +217,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                 {msgOverflow && <Native0Scrollbar contentHeight={messagesHeight} height={rows.messages} offset={clampedMessages} viewHeight={rows.messages} x={263} y={yMessages} onOffset={setMessageOffset} />}
                 {reportedShown && (
                     <>
-                        <Native0Text bold color={0xffffff} text="Reported User Info" width={120} x={80} y={yReportedCaption} />
+                        <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Reported User Info" width={120} x={80} y={yReportedCaption} />
                         <div style={{ position: 'absolute', left: 0, top: yReported, width: 280, height: 207 }}>
                             <UserInfoPanel key={bundle.reportedUserId} settings={settings} userId={bundle.reportedUserId} {...panelHandlers(bundle.reportedUserId)} />
                         </div>
@@ -242,13 +250,13 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         }}
                     />
                     <Native0Checkbox checked={autoNext} x={itemX(buttonNode('buttons'), 'handle_next_checkbox').x} y={itemX(buttonNode('buttons'), 'handle_next_checkbox').y} onToggle={() => setAutoNext((value) => !value)} />
-                    <Native0Text color={0xffffff} text={nativeCaption(buttonNode('handle_next_text'))} width={153} x={itemX(buttonNode('buttons'), 'handle_next_text').x} y={itemX(buttonNode('buttons'), 'handle_next_text').y} />
+                    <Native0Text color={0xffffff} glow={HANDLER_GLOW} text={nativeCaption(buttonNode('handle_next_text'))} width={153} x={itemX(buttonNode('buttons'), 'handle_next_text').x} y={itemX(buttonNode('buttons'), 'handle_next_text').y} />
                     {/* held: the default sanction packets have no server handler and no matching SDK composer */}
                     <Native0Button enabled={false} height={22} label={nativeCaption(buttonNode('close_sanction'))} width={110} x={itemX(buttonNode('buttons'), 'close_sanction').x} y={itemX(buttonNode('buttons'), 'close_sanction').y} />
                 </div>
                 {!evidence && (
                     <div style={{ position: 'absolute', left: chatCont.x, top: chatCont.y }}>
-                        <Native0Scrollbar contentHeight={0} height={scroller.height + stretch} offset={0} blend={0.4} variant={3} viewHeight={evidenceList.height + stretch} x={scroller.x} y={0} onOffset={() => undefined} />
+                        <Native0Scrollbar arrowsOpaque blend={0.4} contentHeight={0} height={scroller.height + stretch} offset={0} variant={3} viewHeight={evidenceList.height + stretch} x={scroller.x} y={0} onOffset={() => undefined} />
                     </div>
                 )}
                 {evidence && (
@@ -271,6 +279,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                     caption={topicIndex >= 0 ? topicNames[topicIndex] : nativeCaption(findNativeNode(root, 'cfh_topics'))}
                     height={menu.height}
                     items={topicNames}
+                    listExtra={1}
                     open={menuOpen && categoryId !== CATEGORY_NO_TOPIC}
                     selectedIndex={topicIndex}
                     width={menu.width}

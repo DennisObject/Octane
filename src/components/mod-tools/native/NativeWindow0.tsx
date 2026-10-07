@@ -54,6 +54,8 @@ interface Native0TextProps {
     underline?: boolean;
     wrap?: boolean;
     background?: number;
+    /** Bold white letters with a glow of this opacity around them (a heading on the blue of a frame). */
+    glow?: number;
     /** The field keeps its box and clips what does not fit (a non-wrapping text field of fixed width). */
     clip?: boolean;
     textStyle?: NativeTextStyleName;
@@ -66,7 +68,7 @@ interface Native0TextProps {
  * A `text` window set in Volter: the field's own 2px gutter puts the first glyph at (2, 2) and a line is 10px high, so a field is `lines * 10 + 4` high
  * (AS textHeight + 5, which `onSize` reports). The shared NativeText raster smears Volter glyphs across pixels, so the Volter web font draws the pixel glyphs.
  */
-export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, bold, color = 0, underline, wrap, background, clip, textStyle, onClick, style, onSize }) => {
+export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, bold, color = 0, underline, wrap, background, glow, clip, textStyle, onClick, style, onSize }) => {
     const ref = useRef<HTMLDivElement>(null);
     const white = textStyle === 'frame_title';
 
@@ -91,10 +93,10 @@ export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, b
             <div
                 ref={ref}
                 className="native0-text"
-                style={{ left: x, top: y, width: wrap || clip ? width : undefined, height: height === undefined ? undefined : height, overflow: clip ? 'hidden' : undefined, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...style }}
+                style={{ left: x, top: y, width: wrap || clip ? width : undefined, height: height === undefined ? undefined : height, overflow: clip ? 'hidden' : undefined, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...(glow === undefined ? {} : { ['--native0-glow' as string]: glow }), ...style }}
                 onClick={onClick}
             >
-                <span className={`native0-text__line${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}>{text}</span>
+                <span className={`native0-text__line${glow === undefined ? '' : ' has-glow'}${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}>{text}</span>
             </div>
         </>
     );
@@ -135,14 +137,15 @@ export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, lab
     const labelRef = useRef<HTMLSpanElement>(null);
     const [labelOffset, setLabelOffset] = useState({ left: 0, top: 0 });
 
-    // The label is centred on whole pixels (flex centring lands on half pixels and blurs the pixel glyphs); a label wider than the face minus 5px of padding on both sides
+    // The label is centred on whole pixels (flex centring lands on half pixels and blurs the pixel glyphs): the native text field is 13px high and its first glyph row is 2px in, so a
+    // 22px button sets its label one row lower than a 21px one; a label wider than the face minus 5px of padding on both sides
     // starts 10px in and runs under the right edge (the native "Send Message" button).
     useLayoutEffect(() => {
         const element = labelRef.current;
 
         if (!element) return;
 
-        const place = () => setLabelOffset({ left: element.offsetWidth > width - 10 ? 10 : Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - element.offsetHeight) / 2) });
+        const place = () => setLabelOffset({ left: element.offsetWidth > width - 10 ? 10 : Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - 13) / 2) + 2 });
 
         place();
 
@@ -257,10 +260,12 @@ interface Native0FrameProps {
     className?: string;
     /** A resizable frame (params 98305) shows the scaler in its corner; the new size is reported while it is dragged (minimum 150 x 100). */
     onResize?: (width: number, height: number) => void;
+    /** Opacity of the glow around the caption letters (0.38 unless the window says otherwise). */
+    glow?: number;
 }
 
 /** Frame style 0: blue skin, header (6,6) with tiled centre and shine, centred frame_title caption, 15x15 close button; content sits at (6,25). */
-export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, onClose, children, className = '', onResize }) => {
+export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, onClose, children, className = '', onResize, glow }) => {
     const headerWidth = width - 12;
     const [closeState, setCloseState] = useState<'default' | 'hovering' | 'pressed'>('default');
     const captionRef = useRef<HTMLDivElement>(null);
@@ -284,7 +289,7 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
             <div className="native0-header" style={rect(6, 6, headerWidth, 15)}>
                 <NativeSkinView atlas={blueAtlas} color={FRAME_COLOR} height={15} layout="header" skin={SKINS.header} width={headerWidth} />
                 <div className="native0-header__caption-bg" style={{ left: Math.floor((headerWidth - captionWidth) / 2), top: 0, width: captionWidth, height: 15 }} />
-                <div ref={captionRef} className="native0-header__caption" style={{ left: Math.floor((headerWidth - captionWidth) / 2), top: 0, height: 15 }}>
+                <div ref={captionRef} className="native0-header__caption" style={{ left: Math.floor((headerWidth - captionWidth) / 2), top: 0, height: 15, ...(glow === undefined ? {} : { ['--native0-glow' as string]: glow }) }}>
                     <span className="native0-text__line is-bold">{caption}</span>
                 </div>
                 <div
@@ -427,6 +432,8 @@ interface Native0ScrollbarProps {
     variant?: 0 | 3;
     /** The opacity the scrollbar is drawn with over its surroundings (the style 3 scrollbar in the issue handler is 40% over the frame). */
     blend?: number;
+    /** The arrow buttons stay opaque while the rest of the scrollbar is drawn at `blend` (the style 3 scrollbar of the handler's evidence list before its answer arrives). */
+    arrowsOpaque?: boolean;
 }
 
 const SCROLL_LINE = 15;
@@ -436,7 +443,7 @@ const SCROLL_WHEEL = 0.75;
  * The style 0 vertical scrollbar (habbo_skin_scrollbar): a 17px column with a 16px arrow button at each end, a track between them and a lift whose height is the track
  * times view / content (at least 12px). The arrows scroll 15px (repeating while held), the track a page less 16px, the wheel 75px per notch (deltaY 100).
  */
-export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, viewHeight, contentHeight, offset, onOffset, variant = 0, blend }) => {
+export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, viewHeight, contentHeight, offset, onOffset, variant = 0, blend, arrowsOpaque = false }) => {
     const [pressed, setPressed] = useState<'up' | 'down' | 'lift' | null>(null);
     const [hover, setHover] = useState<'up' | 'down' | 'lift' | null>(null);
     const skin = variant === 3 ? SKINS.scrollbar3 : SKINS.scrollbar;
@@ -473,12 +480,14 @@ export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, view
     };
 
     return (
-        <div className="native0-box native0-scrollbar" style={{ ...rect(x, y, 17, height), opacity: blend }} onWheel={(event) => onOffset(clamp(offset + event.deltaY * SCROLL_WHEEL))}>
-            <NativeSkinView atlas={atlas} height={height} layout={`scrollbar_vertical${suffix}`} skin={skin} width={17} />
+        <div className="native0-box native0-scrollbar" style={{ ...rect(x, y, 17, height), opacity: arrowsOpaque ? undefined : blend }} onWheel={(event) => onOffset(clamp(offset + event.deltaY * SCROLL_WHEEL))}>
+            <div style={{ position: 'absolute', left: 0, top: 0, width: 17, height, opacity: arrowsOpaque ? blend : undefined }}>
+                <NativeSkinView atlas={atlas} height={height} layout={`scrollbar_vertical${suffix}`} skin={skin} width={17} />
+            </div>
             <div className="native0-scrollbar__part" style={rect(0, 0, 17, 16)} onPointerDown={() => hold(-1, 'up')} onPointerEnter={() => setHover('up')} onPointerLeave={() => setHover(null)}>
                 <NativeSkinView atlas={atlas} height={16} layout={`scrollbar_button_up${suffix}`} skin={skin} state={range === 0 ? 'disabled' : stateOf('up', 'default')} width={17} />
             </div>
-            <div className="native0-scrollbar__part" style={rect(0, 16, 17, track)} onPointerDown={(event) => {
+            <div className="native0-scrollbar__part" style={{ ...rect(0, 16, 17, track), opacity: arrowsOpaque ? blend : undefined }} onPointerDown={(event) => {
                 const bounds = event.currentTarget.getBoundingClientRect();
                 const at = event.clientY - bounds.top;
 

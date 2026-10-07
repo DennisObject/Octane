@@ -156,7 +156,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                     <Native0Rows colors={rowColors} heights={heights} width={Math.max(header.width, line.width)} />
                     {items.map((item, index) =>
                         item.kind === 'header' ? (
-                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height }}>
+                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height, overflow: 'hidden' }}>
                                 <div style={{ position: 'absolute', left: label.x, top: label.y, width: header.width - action2.x, height: label.height, overflow: 'hidden', fontSize: 0, lineHeight: 0 }}>
                                     <NativeText
                                         background={FRAME_COLOR}

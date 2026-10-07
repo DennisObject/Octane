@@ -72,7 +72,7 @@ export const UserInfoPanel: FC<UserInfoPanelProps> = ({ userId, settings, onOpen
             <Native0Border {...box} x={0} y={0}>
                 {!data && <Native0Text background={0xffffff} bold text={nativeCaption(findNativeNode(frame, 'loading_txt'))} width={70} x={120} y={45} />}
                 {data && (
-                    <div style={{ position: 'absolute', left: fieldsAt.x, top: fieldsAt.y, width: fieldsAt.width, height: fieldsAt.height }}>
+                    <div style={{ position: 'absolute', left: fieldsAt.x, top: fieldsAt.y, width: fieldsAt.width, height: fieldsAt.height, overflow: 'hidden' }}>
                         {[0, 26, 52, 78, 104, 130, 156, 182].map((top) => (
                             <div key={top} style={{ position: 'absolute', left: 0, top, width: 187, height: 13, backgroundColor: `#${SHADE.toString(16)}` }} />
                         ))}
