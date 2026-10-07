@@ -50,6 +50,7 @@ import {
     GameLobbyPlayerData,
     GetSnowWarGameTokensOfferComposer,
     LeaderboardEntry,
+    OctaneEventType,
     PurchaseSnowWarGameTokensOfferComposer,
     SnowWarGameTokensMessageEvent
 } from '@octane/renderer';
@@ -78,7 +79,7 @@ import {
     SnowWarResults,
     SnowWarTokenOffer
 } from '../../api/snowwar';
-import { useMessageEvent } from '../events';
+import { useMessageEvent, useOctaneEvent } from '../events';
 
 const SNOWSTORM_GAME_TYPE = 0;
 const MAX_CHAT_MESSAGES = 50;
@@ -227,15 +228,31 @@ const useSnowWarState = (): SnowWarHookState =>
     }, []);
 
     /** `SnowWarEngine.resetSession` (game cancelled, results closed). */
-    const resetSession = useCallback(() =>
+    const clearSession = useCallback(() =>
     {
-        SendMessageComposer(new Game2GetAccountGameStatusMessageComposer(SNOWSTORM_GAME_TYPE));
         SNOWWAR_ENGINE.reset();
         rematchRequestedRef.current = false;
         setResults(() => null);
         setLoading(null);
         setLobby(null);
+        setArenaViewId(0);
     }, [ setResults ]);
+
+    const resetSession = useCallback(() =>
+    {
+        SendMessageComposer(new Game2GetAccountGameStatusMessageComposer(SNOWSTORM_GAME_TYPE));
+        clearSession();
+    }, [ clearSession ]);
+
+    // The server drops the player from lobby and game when the socket goes, so no message ends this session:
+    // clear it on close, and after the reconnect go back to the room the arena replaced.
+    useOctaneEvent(OctaneEventType.SOCKET_CLOSED, useCallback(() => clearSession(), [ clearSession ]));
+
+    useOctaneEvent(OctaneEventType.SOCKET_REAUTHENTICATED, useCallback(() =>
+    {
+        clearSession();
+        returnToRoom();
+    }, [ clearSession, returnToRoom ]));
 
     // ---- directory / account ----
 

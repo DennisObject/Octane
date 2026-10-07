@@ -320,7 +320,7 @@ export class SnowWarEngine implements ISnowWarEngine
 
     private emit(event: SnowWarEngineEvent): void
     {
-        for(const listener of [ ...this._listeners ]) listener(event);
+        for(const listener of this._listeners) listener(event);
     }
 
     private onSimulationNotification = (notification: SnowWarSimNotification): void =>
@@ -365,7 +365,9 @@ export class SnowWarEngine implements ISnowWarEngine
     /** `initArena` + `class_2527.initialize` (EnterArena). */
     public enterArena(gameType: number, fieldType: number, numberOfTeams: number, players: SnowWarArenaPlayer[], level: SnowWarLevel): void
     {
-        if(this._stage) return;
+        // A stage left over from a game that never ended (e.g. the socket dropped) is replaced, not reused.
+        this.stopTicker();
+        this._stage = null;
 
         this._gameType = gameType;
         this._fieldType = fieldType;
