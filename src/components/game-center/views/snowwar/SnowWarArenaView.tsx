@@ -21,8 +21,8 @@ const getViewportSize = () =>
 // AIR RoomDesktop listens to every canvas click in a game session; DispatchMouseEvent would turn quick repeat throws into double clicks.
 const dispatchArenaMouseEvent = (event: MouseEvent) => GetRoomEngine().dispatchMouseEvent(CANVAS_ID, event.clientX, event.clientY, event.type, event.altKey, (event.ctrlKey || event.metaKey), event.shiftKey, false);
 
-/** AIR shows the game room from StageStarting until the game is over (`SnowWarEngine.startStage` / `gameOver`). */
-const isArenaState = (state: number) => (state >= SnowWarEngineState.STAGE_LOADING) && (state <= SnowWarEngineState.STAGE_ENDING);
+/** AIR builds the game room on StageLoad, right after EnterArena, and keeps it until the game is over (`initView` / `gameOver`). */
+const isArenaState = (state: number) => (state >= SnowWarEngineState.GAME_STARTING) && (state <= SnowWarEngineState.STAGE_ENDING);
 
 export const SnowWarArenaView: FC<{}> = () =>
 {
@@ -30,7 +30,8 @@ export const SnowWarArenaView: FC<{}> = () =>
 
     if(!engine || !engine.level || !isArenaState(state)) return null;
 
-    return <SnowWarArenaStageView engine={ engine } chatMessages={ chatMessages } visible={ state !== SnowWarEngineState.STAGE_LOADING } />;
+    // The room UI only becomes visible on StageStarting (`SnowWarEngine.startStage`); the loading view covers it before.
+    return <SnowWarArenaStageView engine={ engine } chatMessages={ chatMessages } visible={ state >= SnowWarEngineState.STAGE_STARTING } />;
 };
 
 export const SnowWarArenaStageView: FC<{ engine: ISnowWarEngine; chatMessages: readonly SnowWarChatMessage[]; visible: boolean }> = ({ engine, chatMessages, visible }) =>
