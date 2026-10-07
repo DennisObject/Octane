@@ -128,7 +128,8 @@ const toLevel = (level: GameLevelData): SnowWarLevel => ({
         direction: fuse.direction,
         altitude: fuse.altitude,
         canStandOn: fuse.canStandOn,
-        state: fuse.stuffData?.getLegacyString() ?? ''
+        state: fuse.stuffData?.getLegacyString() ?? '',
+        stuffData: fuse.stuffData
     }))
 });
 
