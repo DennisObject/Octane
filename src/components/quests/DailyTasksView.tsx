@@ -66,6 +66,7 @@ const DailyTaskRewardView: FC<{ reward: DailyTaskData['rewards'][number]; card: 
     const type = reward.rewardTypeId.toLowerCase();
     const amountText = `x${reward.amount}`;
     const fieldWidth = useAirFieldWidth(amountText, 11, true, 'u_regular');
+    // reward_amount_border starts as 28 wide at x = 8 and grows around its centre by half the width change, truncated.
     const badgeWidth = fieldWidth === undefined ? 28 : fieldWidth + 5;
 
     return (
@@ -75,7 +76,7 @@ const DailyTaskRewardView: FC<{ reward: DailyTaskData['rewards'][number]; card: 
                 {type === 'badge' && <LayoutBadgeImageView badgeCode={reward.extraParams} />}
             </div>
             {reward.amount > 1 && (
-                <div className="air-dt-reward-amount" style={{ width: badgeWidth, left: Math.round((44 - badgeWidth) / 2), background: `#${blend(card, 0x7c7c7c, 231 / 255).toString(16).padStart(6, '0')}` }}>
+                <div className="air-dt-reward-amount" style={{ width: badgeWidth, left: 8 - Math.trunc((badgeWidth - 28) / 2), background: `#${blend(card, 0x7c7c7c, 231 / 255).toString(16).padStart(6, '0')}` }}>
                     <AchievementText background={blend(card, 0x7c7c7c, 231 / 255)} bold color={0xffffff} size={11} text={amountText} textStyle="u_regular" x={3} y={-1} />
                 </div>
             )}
