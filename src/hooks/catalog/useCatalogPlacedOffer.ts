@@ -13,6 +13,7 @@ interface PlacedPurchaseAttempt {
     data: PlacedObjectPurchaseData;
     answered: boolean;
     bought: boolean;
+    placed: boolean;
     // Started after an attempt was dropped unanswered; its answers cannot be told apart.
     ambiguous: boolean;
     unseenIds: Set<number>;
@@ -25,8 +26,9 @@ interface PlacedPurchaseAttempt {
 }
 
 let attempt: PlacedPurchaseAttempt = null;
-// Set once an attempt is dropped before its answer came. Purchase answers carry no request id, so
-// for the rest of the session no bought item is placed automatically.
+// Set once an attempt is dropped before its answer came, or bought but never placed while no new
+// item was announced for it. Purchase answers and item notices carry no request id, so its answer
+// or item may still arrive; for the rest of the session no bought item is placed automatically.
 let placementTainted = false;
 
 /** The catalog offer dropped in the room and waiting for its purchase confirmation. */
@@ -48,7 +50,7 @@ const syncAttempt = () => {
 
     if (placedObjectPurchaseData === attempt.data && placedObjectPurchaseSent) return;
 
-    if (!attempt.answered) placementTainted = true;
+    if (!attempt.answered || (attempt.bought && !attempt.placed && !attempt.unseenIds.size)) placementTainted = true;
 
     clearTimeout(attempt.timer);
     attempt = null;
@@ -73,6 +75,7 @@ export const claimPlacedOfferPurchase = (placedObjectPurchaseData: PlacedObjectP
         data: placedObjectPurchaseData,
         answered: false,
         bought: false,
+        placed: false,
         ambiguous: placementTainted,
         unseenIds: new Set(),
         spriteIds: new Map(),
@@ -267,6 +270,8 @@ const placeBoughtItem = (current: PlacedPurchaseAttempt, itemId: number) => {
             SendMessageComposer(new FurniturePlaceComposer(itemId, placed.category, placed.wallLocation, placed.x, placed.y, placed.direction));
             break;
     }
+
+    current.placed = true;
 
     if (state.catalogPlaceMultipleObjects) state.setPlacedObjectPurchaseSent(false);
     else state.resetPlacedOfferData();
