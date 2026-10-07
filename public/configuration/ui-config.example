@@ -140,6 +140,7 @@
     "catalog.tab.icons": false,
     "catalog.headers": false,
     "chat.input.maxlength": 100,
+    "zoom.enabled": false,
     "chat.styles": [
         {
             "styleId": 0
