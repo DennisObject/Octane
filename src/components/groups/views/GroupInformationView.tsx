@@ -1,4 +1,4 @@
-import { GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
+import { GroupConfirmMemberRemoveEvent, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     CatalogPageName,
@@ -19,7 +19,7 @@ import typeIconRegular from '../../../assets/images/groups/native/grouptype_icon
 import typeIconExclusive from '../../../assets/images/groups/native/grouptype_icon_1.png';
 import typeIconPrivate from '../../../assets/images/groups/native/grouptype_icon_2.png';
 import { LayoutBadgeImageView } from '../../../common';
-import { useMessageEvent, useNotification } from '../../../hooks';
+import { useGroupMemberRemoval, useMessageEvent, useNotification } from '../../../hooks';
 import { flatText, GroupBox, GroupButton, GroupText } from './GroupNativeLayout';
 
 const TYPE_ICONS: string[] = [typeIconRegular, typeIconExclusive, typeIconPrivate];
@@ -28,42 +28,6 @@ const TYPE_HELP: string[] = ['regular', 'exclusive', 'private'];
 // groups_info_window: group_cont is the style 0 border at (10,10) below the 33px frame margin, 343x214; every rectangle below is its layout rectangle.
 const BASE_X = 10;
 const BASE_Y = 43;
-
-// Outstanding GroupConfirmRemoveMember requests in the order they were sent. Entries expire so an answer that never comes cannot
-// block later requests or be matched much later to the wrong click.
-const LEAVE_REQUEST_TTL_MS = 10000;
-let leaveRequests: { groupId: number; userId: number; at: number }[] = [];
-
-const pruneLeaveRequests = () => {
-    const now = Date.now();
-
-    leaveRequests = leaveRequests.filter((request) => now - request.at < LEAVE_REQUEST_TTL_MS);
-};
-
-const hasLiveLeaveRequest = (groupId: number) => {
-    pruneLeaveRequests();
-
-    return leaveRequests.some((request) => request.groupId === groupId);
-};
-
-const queueLeaveRequest = (groupId: number, userId: number) => {
-    pruneLeaveRequests();
-    leaveRequests.push({ groupId, userId, at: Date.now() });
-    SendMessageComposer(new GroupConfirmRemoveMemberComposer(groupId, userId));
-};
-
-/** The oldest outstanding request, if it was made for this user. */
-const takeLeaveRequest = (userId: number) => {
-    pruneLeaveRequests();
-
-    const request = leaveRequests[0];
-
-    if (!request || request.userId !== userId) return null;
-
-    leaveRequests.shift();
-
-    return request;
-};
 
 interface GroupInformationViewProps {
     groupInformation: GroupInformationParser;
@@ -88,14 +52,14 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
         shownGroupIdRef.current = 0;
     }, []);
 
-    // GroupConfirmMemberRemove carries only userId and furnitureCount, so the answer cannot name its group. The server answers in
-    // request order; each request therefore waits in a queue and the next answer belongs to the oldest one still in it.
+    const { request: requestMemberRemoval, claimReply } = useGroupMemberRemoval();
+
+    // The reply names no group (see useGroupMemberRemoval): it is shown only when this window owns the one outstanding request for the group still on screen.
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
         const parser = event.getParser();
-        const request = takeLeaveRequest(parser.userId);
+        const removal = claimReply(parser.userId);
 
-        // Answers to requests made for a group that is no longer shown are swallowed, never attributed to the current one.
-        if (!request || request.groupId !== shownGroupIdRef.current) return;
+        if (!removal || removal.groupId !== shownGroupIdRef.current) return;
 
         let isSent = false;
 
@@ -106,10 +70,10 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 confirmOpenRef.current = false;
 
                 // One removal per confirmation, whatever re-renders or repeated callback invocations happen, and only while that group is shown.
-                if (isSent || request.groupId !== shownGroupIdRef.current) return;
+                if (isSent || removal.groupId !== shownGroupIdRef.current) return;
 
                 isSent = true;
-                SendMessageComposer(new GroupRemoveMemberComposer(request.groupId, request.userId));
+                SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));
             },
             () => {
                 confirmOpenRef.current = false;
@@ -129,10 +93,9 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
     const nameX = BASE_X + 125 + (groupInformation.canMembersDecorate ? 15 : 0);
 
     const leaveGroup = () => {
-        // One live request at a time: a second click waits for the first answer (or its expiry) and while its confirmation is open.
-        if (confirmOpenRef.current || hasLiveLeaveRequest(groupInformation.id)) return;
+        if (confirmOpenRef.current) return;
 
-        queueLeaveRequest(groupInformation.id, userId);
+        requestMemberRemoval(groupInformation.id, userId);
     };
 
     const handleAction = (action: string) => {

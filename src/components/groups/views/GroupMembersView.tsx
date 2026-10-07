@@ -4,7 +4,6 @@ import {
     GroupAdminGiveComposer,
     GroupAdminTakeComposer,
     GroupConfirmMemberRemoveEvent,
-    GroupConfirmRemoveMemberComposer,
     GroupInformationComposer,
     GroupInformationEvent,
     GroupMemberParser,
@@ -36,7 +35,7 @@ import {
     OctaneCardView,
     Text
 } from '../../../common';
-import { useMessageEvent, useNotification } from '../../../hooks';
+import { useGroupMemberRemoval, useMessageEvent, useNotification } from '../../../hooks';
 import { classNames } from '../../../layout';
 
 export const GroupMembersView: FC<{}> = (props) => {
@@ -49,6 +48,7 @@ export const GroupMembersView: FC<{}> = (props) => {
     const [isOwner, setIsOwner] = useState(false);
     const pendingRemoval = useRef<{ groupId: number; userId: number; name: string }>(null);
     const { showConfirm = null } = useNotification();
+    const { request: requestMemberRemoval, claimReply } = useGroupMemberRemoval();
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
     const getRankDescription = (member: GroupMemberParser) => {
@@ -106,8 +106,8 @@ export const GroupMembersView: FC<{}> = (props) => {
             return;
         }
 
-        pendingRemoval.current = { groupId: membersData.groupId, userId: member.id, name: member.name };
-        SendMessageComposer(new GroupConfirmRemoveMemberComposer(membersData.groupId, member.id));
+        // One outstanding GroupConfirmRemoveMember for all group windows; when another is still unresolved nothing is sent.
+        if (requestMemberRemoval(membersData.groupId, member.id)) pendingRemoval.current = { groupId: membersData.groupId, userId: member.id, name: member.name };
     };
 
     useMessageEvent<GroupMembersEvent>(GroupMembersEvent, (event) => {
@@ -142,11 +142,14 @@ export const GroupMembersView: FC<{}> = (props) => {
 
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
         const parser = event.getParser();
+        const owned = claimReply(parser.userId);
         const removal = pendingRemoval.current;
 
-        if (!removal || removal.groupId !== groupId || removal.userId !== parser.userId) return;
+        if (!owned || !removal || removal.groupId !== owned.groupId || removal.groupId !== groupId || removal.userId !== owned.userId) return;
 
         pendingRemoval.current = null;
+
+        let isSent = false;
 
         showConfirm(
             LocalizeText(
@@ -155,6 +158,9 @@ export const GroupMembersView: FC<{}> = (props) => {
                 [removal.name, parser.furnitureCount.toString()]
             ),
             () => {
+                if (isSent) return;
+
+                isSent = true;
                 SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));
             },
             null

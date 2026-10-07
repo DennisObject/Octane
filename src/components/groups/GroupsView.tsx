@@ -1,7 +1,7 @@
 import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetGroupInformation, SendMessageComposer, TryVisitRoom } from '../../api';
-import { useGroup, useMessageEvent } from '../../hooks';
+import { useGroup, useGroupMemberRemovalSink, useMessageEvent } from '../../hooks';
 import { GroupCreatedView } from './views/GroupCreatedView';
 import { GroupCreatorView } from './views/GroupCreatorView';
 import { GroupInformationStandaloneView } from './views/GroupInformationStandaloneView';
@@ -12,6 +12,8 @@ export const GroupsView: FC<{}> = (props) => {
     const [isCreatorVisible, setCreatorVisible] = useState<boolean>(false);
     const [isCreatedVisible, setCreatedVisible] = useState<boolean>(false);
     const {} = useGroup();
+
+    useGroupMemberRemovalSink();
 
     useMessageEvent<GroupPurchasedEvent>(GroupPurchasedEvent, (event) => {
         const parser = event.getParser();
