@@ -1,7 +1,8 @@
 import { GetConfiguration } from '@octane/renderer';
 import { getAccessToken } from '../auth';
 
-export type BadgeRarityKey = 'common' | 'rare' | 'epic' | 'legendary' | 'mythical' | 'unique';
+// WIN63 badge rarity ids 0..6 in order; uncommon only appears when the hotel enables it.
+export type BadgeRarityKey = 'common' | 'uncommon' | 'rare' | 'epic' | 'mythical' | 'legendary' | 'unique';
 
 export interface BadgeLeaderboardStat {
     badgeCode: string;
@@ -26,18 +27,14 @@ export interface BadgeLeaderboardBoard {
 export interface BadgeLeaderboardResponse {
     viewerUserId: number;
     badgeStats: BadgeLeaderboardStat[];
-    thresholds: {
-        commonMinOwners: number;
-        rareMinOwners: number;
-        epicMinOwners: number;
-        legendaryMinOwners: number;
-        mythicalMinOwners: number;
-        uniqueOwners: number;
-    };
+    /** Active players the tier ceilings are scaled to. */
+    population: number;
+    /** Highest owner count per tier; common has no ceiling. */
+    thresholds: Partial<Record<BadgeRarityKey, number>>;
     leaderboards: {
         totalBadges: BadgeLeaderboardBoard;
         achievementLevel: BadgeLeaderboardBoard;
-        rarity: Record<BadgeRarityKey, BadgeLeaderboardBoard>;
+        rarity: Partial<Record<BadgeRarityKey, BadgeLeaderboardBoard>>;
     };
 }
 

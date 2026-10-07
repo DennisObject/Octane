@@ -38,16 +38,20 @@ type LeaderboardPage =
           option: () => string;
       };
 
-const RARITY_ASSETS: Record<BadgeRarityKey, { frame: string; emblem: string }> = {
-    common: { frame: frameLeaderboardRarityCommon, emblem: badgeEmblemCommon },
+type LeaderboardRarity = Exclude<BadgeRarityKey, 'common'>;
+
+// The uncommon emblem is not in the extracted client assets, so it borrows the lowest-tier art.
+const RARITY_ASSETS: Record<LeaderboardRarity, { frame: string; emblem: string }> = {
+    uncommon: { frame: frameLeaderboardRarityCommon, emblem: badgeEmblemCommon },
     rare: { frame: frameLeaderboardRarityRare, emblem: badgeEmblemRare },
     epic: { frame: frameLeaderboardRarityEpic, emblem: badgeEmblemEpic },
-    legendary: { frame: frameLeaderboardRarityLegendary, emblem: badgeEmblemLegendary },
     mythical: { frame: frameLeaderboardRarityMythical, emblem: badgeEmblemMythical },
+    legendary: { frame: frameLeaderboardRarityLegendary, emblem: badgeEmblemLegendary },
     unique: { frame: frameLeaderboardRarityUnique, emblem: badgeEmblemUnique }
 };
 
-const RARITY_ORDER: BadgeRarityKey[] = ['common', 'rare', 'epic', 'legendary', 'mythical', 'unique'];
+// WIN63 BadgeLeaderboardController: uncommon (when enabled), rare, epic, mythical, legendary, unique. No common board.
+const RARITY_ORDER: LeaderboardRarity[] = ['uncommon', 'rare', 'epic', 'mythical', 'legendary', 'unique'];
 const PAGE_SIZE = 10;
 
 export const BadgeLeaderboardView: FC<{}> = (props) => {

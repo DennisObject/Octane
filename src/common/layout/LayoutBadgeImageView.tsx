@@ -3,6 +3,7 @@ import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
     BadgeLeaderboardStat,
+    BadgeRarityKey,
     ensureBadgeLeaderboardLoaded,
     GetConfigurationValue,
     getCachedBadgeRarityStat,
@@ -24,8 +25,9 @@ export interface LayoutBadgeImageViewProps extends BaseProps<HTMLDivElement> {
     highlightRarity?: boolean;
 }
 
-const BADGE_RARITY_COLORS: Record<string, { glow: string; pillBackground: string; pillBorder: string; pillText: string }> = {
+const BADGE_RARITY_COLORS: Record<BadgeRarityKey, { glow: string; pillBackground: string; pillBorder: string; pillText: string }> = {
     common: { glow: 'rgba(148, 163, 184, 0.55)', pillBackground: 'rgba(71, 85, 105, 0.16)', pillBorder: 'rgba(100, 116, 139, 0.45)', pillText: '#475569' },
+    uncommon: { glow: 'rgba(255, 183, 77, 0.72)', pillBackground: 'rgba(255, 183, 77, 0.16)', pillBorder: 'rgba(179, 110, 7, 0.4)', pillText: '#b36e07' },
     rare: { glow: 'rgba(59, 130, 246, 0.7)', pillBackground: 'rgba(59, 130, 246, 0.12)', pillBorder: 'rgba(37, 99, 235, 0.38)', pillText: '#1d4ed8' },
     epic: { glow: 'rgba(168, 85, 247, 0.72)', pillBackground: 'rgba(168, 85, 247, 0.14)', pillBorder: 'rgba(147, 51, 234, 0.4)', pillText: '#7e22ce' },
     legendary: { glow: 'rgba(249, 115, 22, 0.76)', pillBackground: 'rgba(249, 115, 22, 0.16)', pillBorder: 'rgba(234, 88, 12, 0.4)', pillText: '#c2410c' },
