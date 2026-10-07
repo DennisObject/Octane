@@ -832,7 +832,7 @@
 
 .octane-navigator-air__usercount img {
     position: relative;
-    top: 1px;
+    top: 0;
     flex: 0 0 13px;
     width: 13px;
     height: 14px;
