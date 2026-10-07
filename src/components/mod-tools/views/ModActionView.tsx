@@ -7,7 +7,6 @@ import {
     ModKickMessageComposer,
     ModMessageMessageComposer,
     ModMuteMessageComposer,
-    ModToolSanctionComposer,
     ModTradingLockMessageComposer,
     ModeratorInitData
 } from '@octane/renderer';
@@ -24,6 +23,10 @@ import { NativeWindowShell } from '../native/NativeWindowShell';
 const rectOf = (node: NativeNode) => ({ x: nativeNumber(node, 'x'), y: nativeNumber(node, 'y'), width: nativeNumber(node, 'width'), height: nativeNumber(node, 'height') });
 const FRAME_COLOR = 0x418db0;
 const NO_ISSUE_ID = -1;
+// The classic composers for the default sanction (hF, outgoing 8), the caution (vF, 3033) and the kick (wF, 1529) always write the issue id as the last field, -1 included;
+// the SDK composers (DefaultSanctionMessageComposer, ModAlertMessageComposer, ModKickMessageComposer) leave it out when it is -1. Until that serialization contract is settled
+// those three actions stay unavailable instead of sending a different field layout. Mute, ban, trade lock and message match the classic layouts.
+const DEFAULT_SANCTION_CONTRACT_SETTLED = false;
 
 enum ActionType {
     ALERT = 1,
@@ -33,6 +36,8 @@ enum ActionType {
     TRADE_LOCK = 5,
     MESSAGE = 6
 }
+
+const HELD_ACTIONS = new Set<ActionType>([ActionType.ALERT, ActionType.KICK]);
 
 interface Sanction {
     id: number;
@@ -140,12 +145,12 @@ export const ModActionView: FC<ModActionProps> = ({ userId, userName, settings, 
         setTopicIndex(index);
         setOpenMenu(null);
         setSanctionIndex(sanctionId ? SANCTIONS.findIndex((sanction) => sanction.id === sanctionId) : -1);
-        // the default sanction of the topic is asked for (My(-1, userId, topic) in the classic client)
-        SendMessageComposer(new ModToolSanctionComposer(userId, NO_ISSUE_ID, topicId));
+        // The classic client now asks for the default sanction of the topic with My(-1, userId, topic) (outgoing 275). The SDK has no composer with that field layout
+        // (ModToolSanctionComposer is (userId, sanctionLevelId, categoryId)), so nothing is sent: "Default sanction" stays unavailable until that contract is settled.
     };
 
     const onDefault = () => {
-        if (sentRef.current) return;
+        if (sentRef.current || !DEFAULT_SANCTION_CONTRACT_SETTLED) return;
 
         if (topicIndex < 0) {
             showModAlert('Please select a topic.');
@@ -159,7 +164,7 @@ export const ModActionView: FC<ModActionProps> = ({ userId, userName, settings, 
     };
 
     const onCustom = () => {
-        if (sentRef.current) return;
+        if (sentRef.current || (sanctionIndex >= 0 && HELD_ACTIONS.has(SANCTIONS[sanctionIndex].action))) return;
 
         if (topicIndex < 0) {
             showModAlert('Please select a topic.');
@@ -226,11 +231,11 @@ export const ModActionView: FC<ModActionProps> = ({ userId, userName, settings, 
                     <NativeText background={FRAME_COLOR} maxWidth={info.width} overrides={{ color: 0xffffff, size: 11 }} text={nativeCaption(findNativeNode(root, 'message_info'))} textStyle="u_regular" />
                 </div>
                 <Native0Input active={inputActive} height={input.height} value={message} width={input.width} x={input.x} y={input.y} onChange={setMessage} onFocus={() => setInputActive(true)} />
-                <Native0Button enabled={defaultAvailable} height={21} label={nativeCaption(defaultButton)} width={100} x={nativeNumber(defaultButton, 'x')} y={nativeNumber(defaultButton, 'y')} onClick={onDefault} />
+                <Native0Button enabled={defaultAvailable && DEFAULT_SANCTION_CONTRACT_SETTLED} height={21} label={nativeCaption(defaultButton)} width={100} x={nativeNumber(defaultButton, 'x')} y={nativeNumber(defaultButton, 'y')} onClick={onDefault} />
                 <div style={{ position: 'absolute', left: label.x, top: label.y, width: label.width, height: label.height, fontSize: 0, lineHeight: 0 }}>
                     <NativeText background={FRAME_COLOR} maxWidth={label.width} overrides={{ color: 0xffffff, size: 11 }} text={defaultLabel} textStyle="u_regular" />
                 </div>
-                <Native0Button height={21} label={nativeCaption(customButton)} width={100} x={nativeNumber(customButton, 'x')} y={nativeNumber(customButton, 'y')} onClick={onCustom} />
+                <Native0Button enabled={sanctionIndex < 0 || !HELD_ACTIONS.has(SANCTIONS[sanctionIndex].action)} height={21} label={nativeCaption(customButton)} width={100} x={nativeNumber(customButton, 'x')} y={nativeNumber(customButton, 'y')} onClick={onCustom} />
                 <Native100Dropmenu
                     caption={sanctionIndex >= 0 ? SANCTIONS[sanctionIndex].name : nativeCaption(findNativeNode(root, 'sanction_type'))}
                     height={sanctionMenu.height}
