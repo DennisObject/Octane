@@ -100,6 +100,12 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
         SendMessageComposer(new GetMessagesMessageComposer(groupId, threadId, pageIndex * FORUM_PAGE_SIZE, FORUM_PAGE_SIZE));
     }, [groupId, threadId, pageIndex]);
 
+    // The v75 quote: "<age> <author> wrote:" and the message under a "> " marker.
+    const quoteOf = (message: MessageData) =>
+        LocalizeText('groupforum.compose.reply_template', ['CREATION_TIME', 'AUTHOR_NAME', 'creation_time', 'author_name'], [forumAge(message.creationTime), message.authorName, forumAge(message.creationTime), message.authorName]) +
+        '\n> ' +
+        message.messageText;
+
     const moderate = (message: MessageData) => {
         SendMessageComposer(new ModerateMessageMessageComposer(groupId, threadId, message.messageId, message.state === MESSAGE_HIDDEN_BY_ADMIN ? MESSAGE_VISIBLE : MESSAGE_HIDDEN_BY_ADMIN));
     };
@@ -152,7 +158,7 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
                                                 <img alt="" draggable={false} src={reportIcon} style={{ left: 2, top: 6 }} />
                                             </button>
                                         )}
-                                        <button className="octane-forum__action is-reply" disabled={!canPost} type="button" onClick={() => onReply(subject, message.messageText)}>
+                                        <button className="octane-forum__action is-reply" disabled={!canPost} type="button" onClick={() => onReply(subject, quoteOf(message))}>
                                             <img alt="" draggable={false} src={replyIcon} style={{ left: 2, top: 6 }} />
                                         </button>
                                     </div>

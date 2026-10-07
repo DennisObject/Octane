@@ -1,5 +1,5 @@
 import { ExtendedForumData, GuildForumThread, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent } from '@octane/renderer';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
@@ -9,7 +9,7 @@ import { FORUM_HEADER, FORUM_SURFACE, ForumButton, ForumFrame, stripTags } from 
 const MIN_LENGTH = 10;
 
 interface GroupForumComposeViewProps {
-    compose: { kind: 'thread' } | { kind: 'reply'; threadId: number; subject: string; quote?: string };
+    compose: { kind: 'thread' } | { kind: 'reply'; threadId: number; subject: string; quote?: string; quoteSeq: number };
     forumData: ExtendedForumData;
     groupId: number;
     initialPosition: { x: number; y: number };
@@ -21,8 +21,16 @@ interface GroupForumComposeViewProps {
 export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose, forumData, groupId, initialPosition, onClose, onThreadCreated }) => {
     const isReply = compose.kind === 'reply';
     const [subject, setSubject] = useState<string>('');
-    const [message, setMessage] = useState<string>('');
+    const [message, setMessage] = useState<string>(isReply && compose.quote ? compose.quote : '');
     const [isPosting, setIsPosting] = useState<boolean>(false);
+    // Replying to another message while the composer is open adds its quote under the text so far.
+    const quote = isReply ? compose.quote : undefined;
+    const quoteSeq = isReply ? compose.quoteSeq : 0;
+
+    useEffect(() => {
+        if (quote && quoteSeq > 0) setMessage((previous) => (previous ? previous + '\n\n' + quote : quote));
+    }, [quote, quoteSeq]);
+
     const subjectOk = isReply || subject.trim().length >= MIN_LENGTH;
     const messageOk = message.trim().length >= MIN_LENGTH;
 

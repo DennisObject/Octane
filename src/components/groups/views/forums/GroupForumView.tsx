@@ -25,7 +25,7 @@ import { GroupForumThreadListView } from './GroupForumThreadListView';
 import { GroupForumThreadView } from './GroupForumThreadView';
 
 type ForumMode = 'threads' | 'thread' | 'list';
-type ForumCompose = { kind: 'thread' } | { kind: 'reply'; threadId: number; subject: string; quote?: string };
+type ForumCompose = { kind: 'thread' } | { kind: 'reply'; threadId: number; subject: string; quote?: string; quoteSeq: number };
 
 // forum_forum_list0..2: most active, most viewed, my forums.
 const LIST_ICONS = [listActive, listViewed, listMine];
@@ -200,7 +200,7 @@ export const GroupForumView: FC<{}> = () => {
                         initialThread={currentThread}
                         threadId={threadId}
                         onBack={backToThreads}
-                        onReply={(subject, quote) => setCompose({ kind: 'reply', threadId, subject, quote })}
+                        onReply={(subject, quote) => setCompose((previous) => ({ kind: 'reply', threadId, subject, quote, quoteSeq: previous && previous.kind === 'reply' && previous.threadId === threadId ? previous.quoteSeq + 1 : 0 }))}
                     />
                 )}
             </ForumFrame>

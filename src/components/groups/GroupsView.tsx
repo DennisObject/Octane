@@ -1,19 +1,26 @@
-import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, HabboGroupJoinFailedMessageEvent, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { GetGroupInformation, SendMessageComposer, TryVisitRoom } from '../../api';
+import { GetGroupInformation, LocalizeText, SendMessageComposer, TryVisitRoom } from '../../api';
 import { useGroup, useGroupMemberRemovalSink, useMessageEvent } from '../../hooks';
 import { GroupCreatedView } from './views/GroupCreatedView';
 import { GroupCreatorView } from './views/GroupCreatorView';
 import { GroupInformationStandaloneView } from './views/GroupInformationStandaloneView';
 import { GroupManagerView } from './views/GroupManagerView';
+import { GroupAlert, GroupNativeAlertView } from './views/GroupNativeAlertView';
 import { GroupMembersView } from './views/GroupMembersView';
 
 export const GroupsView: FC<{}> = (props) => {
     const [isCreatorVisible, setCreatorVisible] = useState<boolean>(false);
     const [isCreatedVisible, setCreatedVisible] = useState<boolean>(false);
+    const [joinFailure, setJoinFailure] = useState<GroupAlert>(null);
     const {} = useGroup();
 
     useGroupMemberRemovalSink();
+
+    // The server refuses a join with a reason code; the v75 client explains it in its plain alert.
+    useMessageEvent<HabboGroupJoinFailedMessageEvent>(HabboGroupJoinFailedMessageEvent, (event) => {
+        setJoinFailure({ title: LocalizeText('group.joinfail.title'), message: LocalizeText(`group.joinfail.${event.getParser().reason}`) });
+    });
 
     useMessageEvent<GroupPurchasedEvent>(GroupPurchasedEvent, (event) => {
         const parser = event.getParser();
@@ -71,6 +78,7 @@ export const GroupsView: FC<{}> = (props) => {
             {!isCreatorVisible && <GroupManagerView />}
             <GroupMembersView />
             <GroupInformationStandaloneView />
+            {joinFailure && <GroupNativeAlertView alert={joinFailure} onClose={() => setJoinFailure(null)} />}
         </>
     );
 };

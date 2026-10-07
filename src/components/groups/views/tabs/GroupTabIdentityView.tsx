@@ -1,9 +1,8 @@
-import { CreateLinkEvent, GroupDeleteComposer, GroupSaveInformationComposer } from '@octane/renderer';
+import { CreateLinkEvent, GroupSaveInformationComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { GetGroupMembers, IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
-import { useNotification } from '../../../../hooks';
 import { useGroupAlert } from '../GroupNativeAlertView';
 import { flatText, GroupBox, GroupInput, GroupText } from '../GroupNativeLayout';
 
@@ -23,23 +22,7 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
     const [groupName, setGroupName] = useState<string>('');
     const [groupDescription, setGroupDescription] = useState<string>('');
     const [groupHomeroomId, setGroupHomeroomId] = useState<number>(-1);
-    const { showConfirm = null } = useNotification();
     const showAlert = useGroupAlert();
-
-    const deleteGroup = () => {
-        if (!groupData || groupData.groupId <= 0) return;
-
-        showConfirm(
-            LocalizeText('group.deleteconfirm.desc'),
-            () => {
-                SendMessageComposer(new GroupDeleteComposer(groupData.groupId));
-            },
-            null,
-            null,
-            null,
-            LocalizeText('group.deleteconfirm.title')
-        );
-    };
 
     const saveIdentity = useCallback(() => {
         if (!groupData) return false;
@@ -117,17 +100,6 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
                         onClick={() => {
                             if (saveIdentity()) GetGroupMembers(groupData.groupId);
                         }}
-                    />
-                    {/* The v75 client offers delete from the group information window; kept here until that window carries it. */}
-                    <GroupText
-                        align="center"
-                        className="is-link"
-                        overrides={{ underline: true }}
-                        text={LocalizeText('group.delete')}
-                        width={94}
-                        x={17}
-                        y={130}
-                        onClick={deleteGroup}
                     />
                 </>
             )}

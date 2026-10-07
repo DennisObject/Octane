@@ -1,4 +1,4 @@
-import { GroupConfirmMemberRemoveEvent, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
+import { GroupConfirmMemberRemoveEvent, GroupDeleteComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     CatalogPageName,
@@ -86,7 +86,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
 
     if (!groupInformation) return null;
 
-    const isRealOwner = groupInformation.ownerName === GetSessionDataManager().userName;
+    const isRealOwner = groupInformation.isOwner;
     const isMember = groupInformation.membershipType === GroupMembershipType.MEMBER;
     const isPending = groupInformation.membershipType === GroupMembershipType.REQUEST_PENDING;
     const isNotMember = groupInformation.membershipType === GroupMembershipType.NOT_MEMBER;
@@ -96,6 +96,29 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
         if (confirmOpenRef.current) return;
 
         requestMemberRemoval(groupInformation.id, userId);
+    };
+
+    // Below the Members line the owner's Manage and Delete links follow, one line lower while a Pending line is shown.
+    const hasPendingLine = groupInformation.pendingRequestsCount > 0 && (groupInformation.isOwner || groupInformation.isAdmin);
+    const leftLinksY = hasPendingLine ? 137 : 121;
+
+    const deleteGroup = () => {
+        let isSent = false;
+
+        showConfirm(
+            LocalizeText('group.deleteconfirm.desc'),
+            () => {
+                // One deletion per confirmation, and only while that group is the one shown.
+                if (isSent || groupInformation.id !== shownGroupIdRef.current) return;
+
+                isSent = true;
+                SendMessageComposer(new GroupDeleteComposer(groupInformation.id));
+            },
+            null,
+            null,
+            null,
+            LocalizeText('group.deleteconfirm.title')
+        );
     };
 
     const handleAction = (action: string) => {
@@ -154,7 +177,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 y={BASE_Y + 103}
                 onClick={() => handleAction('members')}
             />
-            {groupInformation.pendingRequestsCount > 0 && (groupInformation.isOwner || groupInformation.isAdmin) && (
+            {hasPendingLine && (
                 <GroupText
                     align="center"
                     background={0xcccccc}
@@ -163,7 +186,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                     text={LocalizeText('group.pendingmembercount', ['amount'], [groupInformation.pendingRequestsCount.toString()])}
                     textStyle="u_bold"
                     width={97}
-                    x={BASE_X + 5}
+                    x={BASE_X + 4}
                     y={BASE_Y + 121}
                     onClick={() => handleAction('members_pending')}
                 />
@@ -175,7 +198,10 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 <GroupText background={0xcccccc} className="is-link" overrides={flatText(12, { underline: true })} text={LocalizeText('group.showforum')} x={BASE_X + 103} y={BASE_Y + 157} onClick={() => handleAction('forum')} />
             )}
             {groupInformation.isOwner && (
-                <GroupText background={0xcccccc} className="is-link" overrides={flatText(12, { underline: true })} text={LocalizeText('group.manage')} x={BASE_X + 5} y={BASE_Y + 121} onClick={() => handleAction('manage')} />
+                <>
+                    <GroupText align="center" background={0xcccccc} className="is-link" overrides={flatText(12, { underline: true })} text={LocalizeText('group.manage')} width={97} x={BASE_X - 1} y={BASE_Y + leftLinksY} onClick={() => handleAction('manage')} />
+                    <GroupText align="center" background={0xcccccc} className="is-link" overrides={flatText(12, { underline: true })} text={LocalizeText('group.delete')} width={97} x={BASE_X - 1} y={BASE_Y + leftLinksY + 16} onClick={deleteGroup} />
+                </>
             )}
             {isMember && !isRealOwner && (
                 <>
