@@ -764,40 +764,69 @@ export const OctaneVersion = stubManager();
 // failing tests pinpoint what behavior they actually rely on.
 
 // ---------------------------------------------------------------------------
-// SnowWar (SnowStorm) — events consumed by useSnowWar, composers sent by it.
+// SnowWar (SnowStorm) — events consumed by useSnowWar, composers sent by it and the engine.
 // ---------------------------------------------------------------------------
 
-export class SnowWarQueuePositionEvent extends MessageEvent {}
-export class SnowWarStartLobbyCounterEvent extends MessageEvent {}
-export class SnowWarGameEndedEvent extends MessageEvent {}
-export class SnowWarGamesLeftEvent extends MessageEvent {}
-export class SnowWarGamesInformationEvent extends MessageEvent {}
-export class SnowWarGameStatusEvent extends MessageEvent {}
-export class SnowWarFullGameStatusEvent extends MessageEvent {}
-export class SnowWarOnStageStartEvent extends MessageEvent {}
-export class SnowWarInitArenaEvent extends MessageEvent {}
-export class SnowWarRejoinPreviousRoomEvent extends MessageEvent {}
-export class SnowWarLevelDataEvent extends MessageEvent {}
-export class SnowWarOnGameEndingEvent extends MessageEvent {}
-export class SnowWarUserChatEvent extends MessageEvent {}
-export class SnowWarOnStageRunningEvent extends MessageEvent {}
-export class SnowWarOnStageEndingEvent extends MessageEvent {}
-export class SnowWarPlayerExitedArenaEvent extends MessageEvent {}
-export class SnowWarGenericErrorEvent extends MessageEvent {}
-export class SnowWarUserRematchedEvent extends MessageEvent {}
+export class Game2AccountGameStatusMessageEvent extends MessageEvent {}
+export class Game2EnterArenaFailedMessageEvent extends MessageEvent {}
+export class Game2EnterArenaMessageEvent extends MessageEvent {}
+export class Game2FriendsLeaderboardEvent extends MessageEvent {}
+export class Game2FullGameStatusMessageEvent extends MessageEvent {}
+export class Game2GameCancelledMessageEvent extends MessageEvent {}
+export class Game2GameChatMessageEvent extends MessageEvent {}
+export class Game2GameCreatedMessageEvent extends MessageEvent {}
+export class Game2GameDirectoryStatusMessageEvent extends MessageEvent {}
+export class Game2GameEndingMessageEvent extends MessageEvent {}
+export class Game2GameLongDataMessageEvent extends MessageEvent {}
+export class Game2GameStartedMessageEvent extends MessageEvent {}
+export class Game2GameStatusMessageEvent extends MessageEvent {}
+export class Game2InArenaQueueMessageEvent extends MessageEvent {}
+export class Game2JoiningGameFailedMessageEvent extends MessageEvent {}
+export class Game2PlayerRematchesMessageEvent extends MessageEvent {}
+export class Game2RejoinPreviousRoomMessageEvent extends MessageEvent {}
+export class Game2StageEndingMessageEvent extends MessageEvent {}
+export class Game2StageLoadMessageEvent extends MessageEvent {}
+export class Game2StageRunningMessageEvent extends MessageEvent {}
+export class Game2StageStartingMessageEvent extends MessageEvent {}
+export class Game2StageStillLoadingMessageEvent extends MessageEvent {}
+export class Game2StartCounterMessageEvent extends MessageEvent {}
+export class Game2StartingGameFailedMessageEvent extends MessageEvent {}
+export class Game2StopCounterMessageEvent extends MessageEvent {}
+export class Game2TotalGroupLeaderboardEvent extends MessageEvent {}
+export class Game2TotalLeaderboardEvent extends MessageEvent {}
+export class Game2UserBlockedMessageEvent extends MessageEvent {}
+export class Game2UserJoinedGameMessageEvent extends MessageEvent {}
+export class Game2UserLeftGameMessageEvent extends MessageEvent {}
+export class Game2WeeklyFriendsLeaderboardEvent extends MessageEvent {}
+export class Game2WeeklyGroupLeaderboardEvent extends MessageEvent {}
+export class Game2WeeklyLeaderboardEvent extends MessageEvent {}
+export class SnowWarGameTokensMessageEvent extends MessageEvent {}
 
-export class SnowWarLoadStageReadyComposer extends StubClass {}
-export class SnowWarEditRoomComposer extends StubClass {}
-export class SnowWarExitGameComposer extends StubClass {}
-export class SnowWarWalkComposer extends StubClass {}
-export class SnowWarThrowAtLocationComposer extends StubClass {}
-export class SnowWarThrowAtPlayerComposer extends StubClass {}
-export class SnowWarCreateSnowballComposer extends StubClass {}
-export class SnowWarRequestFullGameStatusComposer extends StubClass {}
-export class SnowWarPlayAgainComposer extends StubClass {}
-export class SnowWarGameChatComposer extends StubClass {}
-export class SnowWarJoinQueueComposer extends StubClass {}
-export class SnowWarLeaveQueueComposer extends StubClass {}
+export class Game2CheckGameDirectoryStatusMessageComposer extends StubClass {}
+export class Game2ExitGameMessageComposer extends StubClass {}
+export class Game2GameChatMessageComposer extends StubClass {}
+export class Game2GetAccountGameStatusMessageComposer extends StubClass {}
+export class Game2GetFriendsLeaderboardComposer extends StubClass {}
+export class Game2GetTotalGroupLeaderboardComposer extends StubClass {}
+export class Game2GetTotalLeaderboardComposer extends StubClass {}
+export class Game2GetWeeklyFriendsLeaderboardComposer extends StubClass {}
+export class Game2GetWeeklyGroupLeaderboardComposer extends StubClass {}
+export class Game2GetWeeklyLeaderboardComposer extends StubClass {}
+export class Game2LeaveLobbyMessageComposer extends StubClass {}
+export class Game2LoadStageReadyMessageComposer extends StubClass {}
+export class Game2MakeSnowballMessageComposer extends StubClass {}
+export class Game2PlayAgainMessageComposer extends StubClass {}
+export class Game2QuickJoinMessageComposer extends StubClass {}
+export class Game2RequestFullStatusUpdateMessageComposer extends StubClass {}
+export class Game2SetUserMoveTargetMessageComposer extends StubClass {}
+export class Game2ThrowSnowballAtHumanMessageComposer extends StubClass {}
+export class Game2ThrowSnowballAtPositionMessageComposer extends StubClass {}
+export class GetSnowWarGameTokensOfferComposer extends StubClass {}
+export class PurchaseSnowWarGameTokensOfferComposer extends StubClass {}
+export class GameLevelData extends StubClass {}
+export class GameLobbyData extends StubClass {}
+export class GameLobbyPlayerData extends StubClass {}
+export class LeaderboardEntry extends StubClass {}
 
 // ---------------------------------------------------------------------------
 // Habbicons and inventory unseen tracking. useHabbiconCatalog and

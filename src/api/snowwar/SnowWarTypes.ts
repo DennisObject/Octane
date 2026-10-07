@@ -1,3 +1,5 @@
+import type { IObjectData } from '@octane/renderer';
+
 // Public contract of the SnowStorm engine (AIR `SnowWarEngine`) and of `useSnowWar`.
 // Views read these shapes; the engine owns the deterministic lockstep simulation.
 
@@ -143,7 +145,10 @@ export interface SnowWarFuseObject
     direction: number;
     altitude: number;
     canStandOn: boolean;
+    /** Legacy string of the stuff data (furni state). */
     state: string;
+    /** The parsed stuff data, for creating the furni like room furni (e.g. MapStuffData branding). */
+    stuffData: IObjectData;
 }
 
 /** AIR `GameLevelData`; heightMap rows are split by `\r`. */
@@ -257,6 +262,7 @@ export interface SnowWarLobbyState
 {
     data: SnowWarLobbyData;
     players: SnowWarLobbyPlayer[];
+    /** -1 until Game2InArenaQueue arrives (AIR GameLobbyWindowCtrl shows "waiting for more players" then). */
     queuePosition: number;
     /** Wall-clock deadline (ms) of `Game2StartCounter`; null while waiting for players. */
     countdownDeadline: number | null;
