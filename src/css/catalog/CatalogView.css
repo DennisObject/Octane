@@ -2140,76 +2140,10 @@
     text-overflow: ellipsis;
 }
 
-/* The active AIR Ubuntu layout hides its legacy stacked spinner buttons.
-   Polaris intentionally keeps quantity controls visible, using the existing
-   Habbo +/- sprite family without increasing AIR's 25px purchase row. */
-.octane-catalog-window button.octane-catalog-standard-spinner-button {
-    appearance: none;
-    position: absolute;
-    top: 1px;
-    z-index: 3;
-    width: 22px !important;
-    min-width: 22px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    border-image: none !important;
-    outline: 0;
-    background-color: transparent !important;
-    background-position: 0 0 !important;
-    background-repeat: no-repeat !important;
-    background-size: 22px 22px !important;
-    box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
-    touch-action: none;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button:focus-visible {
-    outline: 1px dotted #000000;
-    outline-offset: -2px;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less {
-    left: 54px;
-    background-image: var(--habbo-stepper-minus) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:hover {
-    background-image: var(--habbo-stepper-minus-hover) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:active {
-    background-image: var(--habbo-stepper-minus-pressed) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:disabled {
-    background-image: var(--habbo-stepper-minus-disabled) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more {
-    left: 110px;
-    background-image: var(--habbo-stepper-plus) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:hover {
-    background-image: var(--habbo-stepper-plus-hover) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:active {
-    background-image: var(--habbo-stepper-plus-pressed) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:disabled {
-    background-image: var(--habbo-stepper-plus-disabled) !important;
-}
-
 .octane-catalog-standard-spinner-input-frame {
     position: absolute;
     top: 0;
-    left: 78px;
+    left: 54px;
     width: 30px;
     height: 25px;
     z-index: 2;
