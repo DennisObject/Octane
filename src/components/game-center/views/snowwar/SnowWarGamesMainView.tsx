@@ -44,16 +44,14 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
     const [ instructionsVisible, setInstructionsVisible ] = useState(false);
     const [ page, setPage ] = useState(0);
     const [ hoveredOffer, setHoveredOffer ] = useState<string>(null);
-    const [ blockSeconds, setBlockSeconds ] = useState(0);
-
     // changeBlockStatus: a one-second Timer counts the block down on the Play button.
+    const [ blockTicks, setBlockTicks ] = useState<{ length: number; ticks: number }>({ length: 0, ticks: 0 });
+
     useEffect(() =>
     {
         if(blockLength <= 0) return;
 
-        setBlockSeconds(blockLength);
-
-        const timer = setInterval(() => setBlockSeconds(value => Math.max(0, value - 1)), 1000);
+        const timer = setInterval(() => setBlockTicks(value => ({ length: blockLength, ticks: value.length === blockLength ? value.ticks + 1 : 1 })), 1000);
         const stop = setTimeout(() => clearInterval(timer), blockLength * 1000);
 
         return () =>
@@ -62,6 +60,8 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
             clearTimeout(stop);
         };
     }, [ blockLength ]);
+
+    const blockSeconds = blockLength > 0 ? Math.max(0, blockLength - (blockTicks.length === blockLength ? blockTicks.ticks : 0)) : 0;
 
     // updateGameStartingStatus → checkGameAmountStatus / checkBlockStatus.
     const gamesLeftVisible = !hasUnlimitedGames && freeGamesLeft !== -1;

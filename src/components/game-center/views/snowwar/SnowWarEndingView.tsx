@@ -55,7 +55,7 @@ interface EndingFrameProps
     team1Score?: number;
     team2Score?: number;
     rows: SnowWarPlayerRow[];
-    /** Rematch lobby: rows use snowwar_lobby_player_team_N and alternate team columns by join order. */
+    /** Rematch lobby: rows use snowwar_lobby_player_team_N (callers pass the join-order team as teamId). */
     lobbyRows?: boolean;
     onLeave: () => void;
     children?: ReactNode;

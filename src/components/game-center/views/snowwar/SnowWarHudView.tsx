@@ -71,8 +71,6 @@ const SnowWarCountdownView: FC<{ startedAt: number; desktop: { width: number; he
         let last = performance.now();
         let request = 0;
 
-        setFrame(1);
-
         const tick = (now: number) =>
         {
             elapsed += now - last;
@@ -146,7 +144,7 @@ export const SnowWarHudView: FC<SnowWarHudViewProps> = ({ engine, onExit }) =>
     const [ waiting, setWaiting ] = useState(false);
     const [ pressed, setPressed ] = useState(false);
     const [ flash, setFlash ] = useState<{ prefix: string; frame: number }>(null);
-    const [ timeVisible, setTimeVisible ] = useState(true);
+    const [ hiddenSecond, setHiddenSecond ] = useState(-1);
     const [ countdownAt, setCountdownAt ] = useState<number>(() => (engine.state === 3 ? performance.now() : 0));
     const pressedRef = useRef(false);
 
@@ -225,16 +223,17 @@ export const SnowWarHudView: FC<SnowWarHudViewProps> = ({ engine, onExit }) =>
     // set timer: every new second in 1..5 beeps and hides the time after 500 ms.
     useEffect(() =>
     {
-        setTimeVisible(true);
-
         if(hud.seconds > 5 || hud.seconds <= 0) return;
 
         PlaySound(CALL_FOR_HELP);
 
-        const timer = setTimeout(() => setTimeVisible(false), 500);
+        const second = hud.seconds;
+        const timer = setTimeout(() => setHiddenSecond(second), 500);
 
         return () => clearTimeout(timer);
     }, [ hud.seconds ]);
+
+    const timeVisible = hiddenSecond !== hud.seconds;
 
     const makeSnowball = (down: boolean) =>
     {
@@ -291,7 +290,7 @@ export const SnowWarHudView: FC<SnowWarHudViewProps> = ({ engine, onExit }) =>
                 {timeVisible && <SnowWarStrokeText name="time_left" size={25} strokeColor={0x1077ac} text={`${ minutes }:${ seconds }`} x={16} y={6} width={80} height={31} style={{ width: 'auto', minWidth: 80 }} />}
             </SnowWarBox>
 
-            {countdownAt > 0 && <SnowWarCountdownView desktop={desktop} startedAt={countdownAt} />}
+            {countdownAt > 0 && <SnowWarCountdownView key={countdownAt} desktop={desktop} startedAt={countdownAt} />}
 
             {confirmVisible && <SnowWarExitConfirmationView onNo={() => setConfirmVisible(false)} onYes={onExit} />}
         </div>
