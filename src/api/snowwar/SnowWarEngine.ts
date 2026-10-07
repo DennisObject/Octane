@@ -57,6 +57,7 @@ export class SnowWarEngine implements ISnowWarEngine
     private _stage: SnowWarStage = null;
     private _stageLength = 0;
     private _version = 0;
+    private _arenaId = 0;
 
     private _timeSinceLastUpdate = 0;
     private _currentSubTurn = 0;
@@ -155,6 +156,11 @@ export class SnowWarEngine implements ISnowWarEngine
     public get version(): number
     {
         return this._version;
+    }
+
+    public get arenaId(): number
+    {
+        return this._arenaId;
     }
 
     public get subturnFraction(): number
@@ -371,6 +377,7 @@ export class SnowWarEngine implements ISnowWarEngine
         this._stageLoadReceived = false;
         this._stageLoadedPending = false;
         this._stageReadySent = false;
+        this._arenaId++;
         this._stage = new SnowWarStage(numberOfTeams, this.onSimulationNotification);
         this._stage.initialize(level);
         this._timeSinceLastUpdate = 0;
