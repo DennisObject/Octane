@@ -384,8 +384,8 @@
 .air-quest-button-seam {
     position: absolute;
     top: 14px;
-    right: 5px;
-    left: 5px;
+    right: 2px;
+    left: 2px;
     height: 1px;
     pointer-events: none;
 }
@@ -405,7 +405,7 @@
 .air-quest-cancel {
     position: absolute;
     top: 81px;
-    left: 271px;
+    left: 275px;
     width: 100px;
     height: 18px;
     margin: 0;
@@ -507,10 +507,6 @@
 .air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
     bottom: 0;
     background-position: 0 -22px;
-}
-
-.octane-quest-details-air .air-quest-cancel {
-    left: 275px;
 }
 
 .octane-quest-details-air .air-quests-native-title {
