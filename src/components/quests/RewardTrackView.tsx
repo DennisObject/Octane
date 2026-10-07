@@ -46,8 +46,10 @@ import rewardGift from '../../assets/images/reward-track/air/reward-gift.png';
 import rewardGiftPremium from '../../assets/images/reward-track/air/reward-gift-premium.png';
 import taskListIcon from '../../assets/images/reward-track/air/task-list.png';
 import { DraggableWindowPosition, LayoutAvatarImageView, LayoutBadgeImageView, LayoutCurrencyIcon, LayoutFurniIconImageView } from '../../common';
+import { nativeTextStyles } from '../../common/native-text/NativeTextStyles';
 import { useHasPermission, useNotification, useRewardTracks } from '../../hooks';
 import { OctaneCard } from '../../layout';
+import { useAirFieldWidth } from '../achievements/AchievementText';
 import { RewardTrackAdminView } from './RewardTrackAdminView';
 
 const CURRENCY_TYPES: Record<string, number> = { credits: -1, duckets: 0, diamonds: 5 };
@@ -222,6 +224,21 @@ const RewardTrackPrizeView: FC<{
             )}
             {state === 'claimed' && <img src={checkIcon} alt="" width={17} height={15} draggable={false} className="octane-reward-track-prize-check" />}
         </div>
+    );
+};
+
+// task_hint_button (471,16,109 wide): the official shiny button is as wide as its label field plus 15 and keeps the right edge of its layout rect.
+const HINT_BUTTON_RIGHT = 580;
+const HINT_LABEL_SIZE = nativeTextStyles.button_shiny_regular.size;
+
+const RewardTrackHintButton: FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => {
+    const fieldWidth = useAirFieldWidth(label, HINT_LABEL_SIZE, false, 'button_shiny_regular');
+    const width = fieldWidth === undefined ? 109 : fieldWidth + 15;
+
+    return (
+        <button type="button" className="octane-reward-track-btn" style={{ left: HINT_BUTTON_RIGHT - width, width }} onClick={onClick}>
+            {label}
+        </button>
     );
 };
 
@@ -818,9 +835,10 @@ export const RewardTrackView: FC<{}> = () => {
                                                 {getRewardTrackTaskText(track.id, selectedTask.id, 'hint.desc', '')}
                                             </div>
                                             {hintLink && (
-                                                <button type="button" className="octane-reward-track-btn" onClick={() => CreateLinkEvent(hintLink.link)}>
-                                                    {getRewardTrackTaskText(track.id, selectedTask.id, 'hint.button_text', hintLink.fallbackText)}
-                                                </button>
+                                                <RewardTrackHintButton
+                                                    label={getRewardTrackTaskText(track.id, selectedTask.id, 'hint.button_text', hintLink.fallbackText)}
+                                                    onClick={() => CreateLinkEvent(hintLink.link)}
+                                                />
                                             )}
                                         </div>
                                     </div>
