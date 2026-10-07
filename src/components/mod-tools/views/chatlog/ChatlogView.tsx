@@ -50,7 +50,6 @@ export const filterChatlogRecords = (records: ChatlogRecord[], query: string): C
 
 export const ChatlogView: FC<ChatlogViewProps> = (props) => {
     const { records = null, initialQuery = '' } = props;
-    const { openRoomInfo = null } = useModTools();
     const [query, setQuery] = useState(initialQuery);
 
     const allRecords = useMemo(() => {
@@ -113,7 +112,7 @@ export const ChatlogView: FC<ChatlogViewProps> = (props) => {
                 </button>
                 <button
                     className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-white border border-sky-200 text-sky-700 hover:bg-sky-100 transition-colors"
-                    onClick={() => openRoomInfo(props.roomId)}
+                    onClick={() => CreateLinkEvent(`mod-tools/toggle-room-info/${props.roomId}`)}
                 >
                     <FaTools size={10} /> {LocalizeText('modtools.chatlog.tools')}
                 </button>

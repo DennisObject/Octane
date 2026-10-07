@@ -1,13 +1,17 @@
 import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
-import { useModTools, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
 import { RoomToolView } from './views/RoomToolView';
 import { StartPanelView } from './views/StartPanelView';
+import { UserInfoView } from './views/UserInfoView';
 import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
 import { ModToolsUserChatlogView } from './views/user/ModToolsUserChatlogView';
-import { ModToolsUserView } from './views/user/ModToolsUserView';
+
+const START_PANEL = { x: 120, y: 64, width: 170, height: 170 };
+const ROOM_TOOL_SIZE = { width: 240, height: 437 };
+const USER_INFO_SIZE = { width: 292, height: 225 };
 
 // Classic v75 ModerationManager / StartPanelCtrl (fme): the panel opens when the moderator init message arrives, the room and chatlog buttons follow the
 // room entered / left events, the user button follows the last selected avatar and stays enabled after the room is left.
@@ -23,21 +27,16 @@ export const ModToolsView: FC<{}> = () => {
     const settingsRef = useRef<typeof settings>(null);
     const [selectedUser, setSelectedUser] = useState<ISelectedUser>(null);
     const [isTicketsVisible, setIsTicketsVisible] = useState(false);
+    const windows = useModWindowTrackerStore((state) => state.windows);
+    const showWindow = useModWindowTrackerStore((state) => state.show);
+    const closeWindow = useModWindowTrackerStore((state) => state.close);
     const {
         settings = null,
-        openRooms = [],
         openRoomChatlogs = [],
         openUserChatlogs = [],
-        openUserInfos = [],
-        openRoomInfo = null,
-        closeRoomInfo = null,
-        toggleRoomInfo = null,
         openRoomChatlog = null,
         closeRoomChatlog = null,
         toggleRoomChatlog = null,
-        openUserInfo = null,
-        closeUserInfo = null,
-        toggleUserInfo = null,
         openUserChatlog = null,
         closeUserChatlog = null,
         toggleUserChatlog = null
@@ -89,13 +88,11 @@ export const ModToolsView: FC<{}> = () => {
 
                 switch (parts[1]) {
                     case 'open-room-info':
-                        openRoomInfo(Number(parts[2]));
+                    case 'toggle-room-info':
+                        showWindow({ type: 'roomTool', key: parts[2], ...ROOM_TOOL_SIZE, parent: START_PANEL, toggle: parts[1] === 'toggle-room-info' });
                         return;
                     case 'close-room-info':
-                        closeRoomInfo(Number(parts[2]));
-                        return;
-                    case 'toggle-room-info':
-                        toggleRoomInfo(Number(parts[2]));
+                        closeWindow('roomTool', parts[2]);
                         return;
                     case 'open-room-chatlog':
                         openRoomChatlog(Number(parts[2]));
@@ -107,13 +104,11 @@ export const ModToolsView: FC<{}> = () => {
                         toggleRoomChatlog(Number(parts[2]));
                         return;
                     case 'open-user-info':
-                        openUserInfo(Number(parts[2]));
+                    case 'toggle-user-info':
+                        showWindow({ type: 'userInfo', key: parts[2], ...USER_INFO_SIZE, parent: START_PANEL, toggle: parts[1] === 'toggle-user-info' });
                         return;
                     case 'close-user-info':
-                        closeUserInfo(Number(parts[2]));
-                        return;
-                    case 'toggle-user-info':
-                        toggleUserInfo(Number(parts[2]));
+                        closeWindow('userInfo', parts[2]);
                         return;
                     case 'open-user-chatlog':
                         openUserChatlog(Number(parts[2]));
@@ -133,15 +128,11 @@ export const ModToolsView: FC<{}> = () => {
 
         return () => RemoveLinkEventTracker(linkTracker);
     }, [
-        openRoomInfo,
-        closeRoomInfo,
-        toggleRoomInfo,
+        showWindow,
+        closeWindow,
         openRoomChatlog,
         closeRoomChatlog,
         toggleRoomChatlog,
-        openUserInfo,
-        closeUserInfo,
-        toggleUserInfo,
         openUserChatlog,
         closeUserChatlog,
         toggleUserChatlog
@@ -165,24 +156,46 @@ export const ModToolsView: FC<{}> = () => {
                     onUserInfo={() => CreateLinkEvent(`mod-tools/toggle-user-info/${selectedUser.userId}`)}
                 />
             )}
-            {openRooms.map((roomId) => (
-                <RoomToolView
-                    key={roomId}
-                    currentRoomId={isInRoom ? currentRoomId : 0}
-                    roomId={roomId}
-                    settings={settings}
-                    x={295}
-                    y={64}
-                    onClose={() => CreateLinkEvent(`mod-tools/close-room-info/${roomId}`)}
-                    onOpenChatlog={(id) => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${id}`)}
-                    onOpenUserInfo={(id) => CreateLinkEvent(`mod-tools/toggle-user-info/${id}`)}
-                />
-            ))}
+            {windows.map((entry) => {
+                const key = `${entry.type}:${entry.key}:${entry.revision}`;
+
+                if (entry.type === 'roomTool') {
+                    return (
+                        <RoomToolView
+                            key={key}
+                            currentRoomId={isInRoom ? currentRoomId : 0}
+                            roomId={Number(entry.key)}
+                            settings={settings}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('roomTool', entry.key)}
+                            onOpenChatlog={(id) => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${id}`)}
+                            onOpenUserInfo={(id) => CreateLinkEvent(`mod-tools/toggle-user-info/${id}`)}
+                        />
+                    );
+                }
+
+                if (entry.type === 'userInfo') {
+                    return (
+                        <UserInfoView
+                            key={key}
+                            settings={settings}
+                            userId={Number(entry.key)}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('userInfo', entry.key)}
+                            onOpenChatlog={() => CreateLinkEvent(`mod-tools/toggle-user-chatlog/${entry.key}`)}
+                            onOpenModAction={() => CreateLinkEvent(`mod-tools/toggle-user-mod-action/${entry.key}`)}
+                            onOpenRoomVisits={() => CreateLinkEvent(`mod-tools/toggle-user-room-visits/${entry.key}`)}
+                            onOpenSendMessage={() => CreateLinkEvent(`mod-tools/toggle-user-send-message/${entry.key}`)}
+                        />
+                    );
+                }
+
+                return null;
+            })}
             {openRoomChatlogs.map((roomId) => (
                 <ModToolsChatlogView key={roomId} roomId={roomId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-room-chatlog/${roomId}`)} />
-            ))}
-            {openUserInfos.map((userId) => (
-                <ModToolsUserView key={userId} userId={userId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-user-info/${userId}`)} />
             ))}
             {openUserChatlogs.map((userId) => (
                 <ModToolsUserChatlogView key={userId} userId={userId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-user-chatlog/${userId}`)} />

@@ -2,9 +2,11 @@
 .native0-frame { position: relative; margin: 0; padding: 0; pointer-events: auto; filter: drop-shadow(3px 3px 2px rgb(0 0 0 / 35%)); }
 .native0-frame *, .native0-frame *::before, .native0-frame *::after { box-sizing: border-box; }
 .native0-frame > .native-skin { position: absolute; left: 0; top: 0; }
-.native0-header, .native0-close, .native0-box, .native0-text, .native0-client { position: absolute; }
+.native0-header, .native0-close, .native0-text__background, .native0-box, .native0-text, .native0-client { position: absolute; }
 .native0-header > .native-skin { position: absolute; left: 0; top: 0; }
-.native0-header__caption { position: absolute; display: flex; align-items: center; padding: 0 8px; background: #418db0; pointer-events: none; }
+.native0-header__caption { position: absolute; display: flex; align-items: center; padding: 0 9px 0 10px; pointer-events: none; }
+/* the caption box is drawn apart from its text: text on an opaque background is set with LCD subpixel fringes */
+.native0-header__caption-bg { position: absolute; background: #418db0; pointer-events: none; }
 .native0-header { cursor: move; user-select: none; }
 .native0-close { cursor: pointer; }
 .native0-box > .native-skin { position: absolute; left: 0; top: 0; }
@@ -20,7 +22,7 @@
 .native0-text__line { position: relative; left: 1px; font: 400 9px/10px Volter, monospace; white-space: nowrap; font-synthesis: none; }
 .native0-text__line.is-bold { font-weight: 700; }
 .native0-text__line.is-wrap { white-space: normal; overflow-wrap: break-word; display: block; }
-.native0-text__line.is-underline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.native0-text__line.is-underline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 1px; padding: 0 1px; margin: 0 -1px; }
 .native0-header__caption .native0-text__line { color: #fff; }
 
 .native0-input { position: absolute; margin: 0; padding: 1px 1px 1px 2px; border: 1px solid #000; border-radius: 0; background: transparent; color: #000; font: 400 9px/10px Volter, monospace; resize: none; outline: none; overflow: hidden; caret-color: #000; }

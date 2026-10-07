@@ -1,0 +1,76 @@
+import { createOctaneStore } from '../../state/createOctaneStore';
+
+export type ModWindowType = 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits';
+
+export interface ModWindowRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export interface ModWindow extends ModWindowRect {
+    type: ModWindowType;
+    key: string;
+    /** Bumped when the window is shown again while open: the replacement instance starts over (and asks for its data again). */
+    revision: number;
+}
+
+export interface ModWindowShowRequest {
+    type: ModWindowType;
+    key: string;
+    width: number;
+    height: number;
+    /** The frame the new window is placed next to; without one the window is centred on the desktop. */
+    parent?: ModWindowRect | null;
+    /** Place the window under its parent (parent.y + parent.height + 5) instead of to its right (parent.x + parent.width + 5). */
+    below?: boolean;
+    /** Show nothing when no window of that type and key is open (used for refreshes). */
+    silent?: boolean;
+    /** Close the window instead when one of that type and key is open already. */
+    toggle?: boolean;
+}
+
+interface ModWindowTrackerState {
+    windows: ModWindow[];
+    show: (request: ModWindowShowRequest) => void;
+    close: (type: ModWindowType, key: string) => void;
+    move: (type: ModWindowType, key: string, x: number, y: number) => void;
+    resize: (type: ModWindowType, key: string, width: number, height: number) => void;
+    get: (type: ModWindowType, key: string) => ModWindow | null;
+}
+
+const clampToDesktop = (rect: ModWindowRect): ModWindowRect => ({
+    ...rect,
+    x: Math.max(0, Math.min(rect.x, window.innerWidth - rect.width)),
+    y: Math.max(0, Math.min(rect.y, window.innerHeight - rect.height))
+});
+
+// Classic v75 WindowTracker (qn): one window per type and key. Showing an open window again closes it when `toggle` is set and otherwise replaces it in place;
+// a new window goes right of (or below) its parent frame, centred on the desktop without a parent, and is kept inside the desktop.
+export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>()((set, get) => ({
+    windows: [],
+    get: (type, key) => get().windows.find((entry) => entry.type === type && entry.key === key) ?? null,
+    show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false }) => {
+        const existing = get().windows.find((entry) => entry.type === type && entry.key === key);
+
+        if (existing) {
+            set((state) => ({ windows: toggle ? state.windows.filter((entry) => entry !== existing) : state.windows.map((entry) => (entry === existing ? { ...entry, revision: entry.revision + 1 } : entry)) }));
+
+            return;
+        }
+
+        if (silent) return;
+
+        const placed = parent
+            ? below
+                ? { x: parent.x, y: parent.y + parent.height + 5 }
+                : { x: parent.x + parent.width + 5, y: parent.y }
+            : { x: window.innerWidth / 2 - width / 2, y: window.innerHeight / 2 - height / 2 };
+
+        set((state) => ({ windows: [...state.windows, { type, key, width, height, revision: 0, ...clampToDesktop({ ...placed, width, height }) }] }));
+    },
+    close: (type, key) => set((state) => ({ windows: state.windows.filter((entry) => entry.type !== type || entry.key !== key) })),
+    move: (type, key, x, y) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, x, y } : entry)) })),
+    resize: (type, key, width, height) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, width, height } : entry)) }))
+}));

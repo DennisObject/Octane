@@ -55,7 +55,7 @@ interface Native0TextProps {
  * A `text` window set in Volter: the field's own 2px gutter puts the first glyph at (2, 2) and a line is 10px high, so a field is `lines * 10 + 4` high
  * (AS textHeight + 5, which `onSize` reports). The shared NativeText raster smears Volter glyphs across pixels, so the Volter web font draws the pixel glyphs.
  */
-export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, bold, color = 0, underline, wrap, textStyle, onClick, style, onSize }) => {
+export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, bold, color = 0, underline, wrap, background, textStyle, onClick, style, onSize }) => {
     const ref = useRef<HTMLDivElement>(null);
     const white = textStyle === 'frame_title';
 
@@ -72,14 +72,20 @@ export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, b
     }, [onSize]);
 
     return (
-        <div
-            ref={ref}
-            className="native0-text"
-            style={{ left: x, top: y, width: wrap ? width : undefined, height: height === undefined ? undefined : height, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...style }}
-            onClick={onClick}
-        >
-            <span className={`native0-text__line${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}>{text}</span>
-        </div>
+        <>
+            {background !== undefined && (
+                // drawn apart from the text: text on an opaque background is set with LCD subpixel fringes
+                <div className="native0-text__background" style={{ left: x, top: y, width, height: height ?? 13, backgroundColor: `#${background.toString(16).padStart(6, '0')}` }} />
+            )}
+            <div
+                ref={ref}
+                className="native0-text"
+                style={{ left: x, top: y, width: wrap ? width : undefined, height: height === undefined ? undefined : height, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...style }}
+                onClick={onClick}
+            >
+                <span className={`native0-text__line${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}>{text}</span>
+            </div>
+        </>
     );
 };
 
@@ -116,13 +122,14 @@ export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, lab
     const labelRef = useRef<HTMLSpanElement>(null);
     const [labelOffset, setLabelOffset] = useState({ left: 0, top: 0 });
 
-    // The label is centred on whole pixels (flex centring lands on half pixels and blurs the pixel glyphs).
+    // The label is centred on whole pixels (flex centring lands on half pixels and blurs the pixel glyphs); a label wider than the face minus 5px of padding on both sides
+    // starts 10px in and runs under the right edge (the native "Send Message" button).
     useLayoutEffect(() => {
         const element = labelRef.current;
 
         if (!element) return;
 
-        const place = () => setLabelOffset({ left: Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - element.offsetHeight) / 2) });
+        const place = () => setLabelOffset({ left: element.offsetWidth > width - 10 ? 10 : Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - element.offsetHeight) / 2) });
 
         place();
 
@@ -261,6 +268,7 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
             <NativeSkinView atlas={blueAtlas} color={FRAME_COLOR} height={height} layout="frame" skin={SKINS.frame} width={width} />
             <div className="native0-header" style={rect(6, 6, headerWidth, 15)}>
                 <NativeSkinView atlas={blueAtlas} color={FRAME_COLOR} height={15} layout="header" skin={SKINS.header} width={headerWidth} />
+                <div className="native0-header__caption-bg" style={{ left: Math.floor((headerWidth - captionWidth) / 2), top: 0, width: captionWidth, height: 15 }} />
                 <div ref={captionRef} className="native0-header__caption" style={{ left: Math.floor((headerWidth - captionWidth) / 2), top: 0, height: 15 }}>
                     <span className="native0-text__line is-bold">{caption}</span>
                 </div>

@@ -1,4 +1,4 @@
-import { CloseIssuesMessageComposer, ReleaseIssuesMessageComposer } from '@octane/renderer';
+import { CloseIssuesMessageComposer, CreateLinkEvent, ReleaseIssuesMessageComposer } from '@octane/renderer';
 import { FC, useState } from 'react';
 import { FaBan, FaCheck, FaCommentDots, FaExternalLinkAlt, FaSignOutAlt, FaTrashAlt } from 'react-icons/fa';
 import { GetIssueCategoryName, LocalizeText, SendMessageComposer } from '../../../../api';
@@ -21,7 +21,7 @@ const Field: FC<{ label: string; children: React.ReactNode }> = ({ label, childr
 export const ModToolsIssueInfoView: FC<IssueInfoViewProps> = (props) => {
     const { issueId = null, onIssueInfoClosed = null } = props;
     const [cfhChatlogOpen, setCfhChatlogOpen] = useState(false);
-    const { tickets = [], openUserInfo = null } = useModTools();
+    const { tickets = [] } = useModTools();
     const ticket = tickets.find((issue) => issue.issueId === issueId);
 
     const releaseIssue = () => {
@@ -76,7 +76,7 @@ export const ModToolsIssueInfoView: FC<IssueInfoViewProps> = (props) => {
                             <Field label={LocalizeText('modtools.tickets.issue.field.caller')}>
                                 <button
                                     className="font-semibold text-sky-700 hover:text-sky-900 hover:underline inline-flex items-center gap-1"
-                                    onClick={() => openUserInfo(ticket.reporterUserId)}
+                                    onClick={() => CreateLinkEvent(`mod-tools/toggle-user-info/${ticket.reporterUserId}`)}
                                 >
                                     {ticket.reporterUserName} <FaExternalLinkAlt size={8} className="opacity-60" />
                                 </button>
@@ -84,7 +84,7 @@ export const ModToolsIssueInfoView: FC<IssueInfoViewProps> = (props) => {
                             <Field label={LocalizeText('modtools.tickets.issue.field.reported')}>
                                 <button
                                     className="font-semibold text-sky-700 hover:text-sky-900 hover:underline inline-flex items-center gap-1"
-                                    onClick={() => openUserInfo(ticket.reportedUserId)}
+                                    onClick={() => CreateLinkEvent(`mod-tools/toggle-user-info/${ticket.reportedUserId}`)}
                                 >
                                     {ticket.reportedUserName} <FaExternalLinkAlt size={8} className="opacity-60" />
                                 </button>
