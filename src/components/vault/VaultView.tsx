@@ -4,9 +4,12 @@ import {
     ClaimEarningsRewardComposer,
     EarningsCenterEvent,
     EarningsClaimResultEvent,
+    GetCommunication,
+    GetSessionDataManager,
     IEarningsEntry,
     IEarningsReward,
     ILinkEventTracker,
+    OctaneEventType,
     RemoveLinkEventTracker,
     RequestEarningsCenterComposer
 } from '@octane/renderer';
@@ -27,7 +30,7 @@ import imgMarketplace from '../../assets/images/vault/marketplace.png';
 import imgSurprise from '../../assets/images/vault/surprise.png';
 import { LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
-import { useMessageEvent, useNotification, usePurse } from '../../hooks';
+import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../hooks';
 
 const localizeWithFallback = (key: string, fallback: string) => {
     const text = LocalizeText(key);
@@ -190,7 +193,9 @@ export const VaultView: FC<{}> = () => {
     const allExpectedRef = useRef<Set<string>>(new Set());
     const { getCurrencyAmount } = usePurse();
     const { showConfirm = null } = useNotification();
+    const getCurrencyRef = useRef(getCurrencyAmount);
 
+    getCurrencyRef.current = getCurrencyAmount;
     pendingRef.current = pending;
     entriesRef.current = entries;
 
@@ -224,6 +229,29 @@ export const VaultView: FC<{}> = () => {
         setPending(next);
     }, []);
 
+    // Every way of opening or closing goes through here so the refs a captured callback reads change in the same task as the click, not after the next commit.
+    const changeVisibility = useCallback((next: boolean | ((current: boolean) => boolean)) => {
+        const value = typeof next === 'function' ? next(isVisibleRef.current) : next;
+
+        if (value === isVisibleRef.current) return;
+
+        isVisibleRef.current = value;
+        openIdRef.current += 1;
+        setIsVisible(value);
+    }, []);
+
+    // A dropped connection ends every dialog that was asked before it, even when the same user comes back.
+    useOctaneEvent(
+        OctaneEventType.CONNECTION_STATE_CHANGED,
+        useCallback(() => {
+            if (GetCommunication().connection.connectionState.phase === 'connected') return;
+
+            openIdRef.current += 1;
+            allExpectedRef.current = new Set();
+            commitPending(new Set());
+        }, [commitPending])
+    );
+
     // A claim result releases the buttons it covers: a refused claim re-enables them, a successful one zeroes the entry (the server's refreshed entry wins).
     useMessageEvent<EarningsClaimResultEvent>(
         EarningsClaimResultEvent,
@@ -250,18 +278,15 @@ export const VaultView: FC<{}> = () => {
             });
 
             const next = new Set(pendingRef.current);
-            const known = new Set<string>([...CATEGORIES.map((category) => category.key), ...entriesRef.current.map((entry) => entry.categoryKey)]);
-            let namesNoCategory = false;
 
             for (const result of parser.results) {
-                if (!known.has(result.categoryKey)) namesNoCategory = true;
-
                 next.delete(result.categoryKey);
                 allExpectedRef.current.delete(result.categoryKey);
             }
 
-            // A claim-all is released by the answers for the categories it covered (or by an answer that names none), never by one unrelated category result.
-            if (next.has('*') && (namesNoCategory || allExpectedRef.current.size === 0)) next.delete('*');
+            // A claim-all is released only by the answers for every category it covered; the packet contract has no aggregate marker, so a result
+            // for a category it did not cover (or for no known category) never releases it. A window close/reopen or a dropped connection does.
+            if (next.has('*') && allExpectedRef.current.size === 0) next.delete('*');
 
             commitPending(next);
         }, [])
@@ -277,13 +302,13 @@ export const VaultView: FC<{}> = () => {
 
                 switch (parts[1]) {
                     case 'open':
-                        setIsVisible(true);
+                        changeVisibility(true);
                         return;
                     case 'close':
-                        setIsVisible(false);
+                        changeVisibility(false);
                         return;
                     case 'toggle':
-                        setIsVisible((prevValue) => !prevValue);
+                        changeVisibility((current) => !current);
                         return;
                 }
             },
@@ -293,13 +318,10 @@ export const VaultView: FC<{}> = () => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+    }, [changeVisibility]);
 
     // Ask the server for fresh earnings every time the window opens; a closed window forgets claims that were in flight.
     useEffect(() => {
-        isVisibleRef.current = isVisible;
-        openIdRef.current += 1;
-
         if (!isVisible) {
             allExpectedRef.current = new Set();
             commitPending(new Set());
@@ -310,37 +332,63 @@ export const VaultView: FC<{}> = () => {
         SendMessageComposer(new RequestEarningsCenterComposer());
     }, [isVisible, commitPending]);
 
-    // v75 asks before a claim that would push the duckets over the soft limit (earning.exceeding_limit).
+    // What a claim asked for: it only counts while the window is still the same opening, the same signed-in user and the same connection.
+    const captureAsk = useCallback(() => {
+        const openId = openIdRef.current;
+        const userId = GetSessionDataManager().userId;
+
+        return () => isVisibleRef.current && openIdRef.current === openId && GetSessionDataManager().userId === userId;
+    }, []);
+
+    // v75 asks before a claim that would push the duckets over the soft limit (earning.exceeding_limit). The approval is for the numbers shown when it was
+    // asked: if the earnings or the purse changed while the dialog was open, the claim asks again instead of sending under the old approval.
     const confirmDucketLimit = useCallback(
-        (ducketsToClaim: number, perform: () => void) => {
-            const softLimit = GetConfigurationValue<number>('duckets.soft_limit', 2147483647);
+        (isCurrent: () => boolean, readDuckets: () => number, perform: () => void) => {
+            const ask = () => {
+                if (!isCurrent()) return;
 
-            if (ducketsToClaim > 0 && ducketsToClaim + getCurrencyAmount(0) > softLimit) {
-                let isDone = false;
+                const softLimit = GetConfigurationValue<number>('duckets.soft_limit', 2147483647);
+                const amount = readDuckets();
+                const purse = getCurrencyRef.current(0);
 
-                showConfirm(
-                    localizeWithFallback(
-                        'earning.exceeding_limit',
-                        'You are exceeding the ducket limit by claiming these earnings. This means some duckets will be lost, are you sure you want to continue?'
-                    ),
-                    () => {
-                        if (isDone) return;
+                if (amount > 0 && amount + purse > softLimit) {
+                    let isDone = false;
 
-                        isDone = true;
-                        perform();
-                    },
-                    null,
-                    null,
-                    null,
-                    LocalizeText('generic.alert.title')
-                );
+                    showConfirm(
+                        localizeWithFallback(
+                            'earning.exceeding_limit',
+                            'You are exceeding the ducket limit by claiming these earnings. This means some duckets will be lost, are you sure you want to continue?'
+                        ),
+                        () => {
+                            if (isDone) return;
 
-                return;
-            }
+                            isDone = true;
 
-            perform();
+                            if (!isCurrent()) return;
+
+                            if (readDuckets() !== amount || getCurrencyRef.current(0) !== purse) {
+                                ask();
+
+                                return;
+                            }
+
+                            perform();
+                        },
+                        null,
+                        null,
+                        null,
+                        LocalizeText('generic.alert.title')
+                    );
+
+                    return;
+                }
+
+                perform();
+            };
+
+            ask();
         },
-        [getCurrencyAmount, showConfirm]
+        [showConfirm]
     );
 
     // The button is disabled the moment the claim is sent; the result (or closing the window) releases it. One claim-all or any row claim in flight blocks the others.
@@ -357,39 +405,45 @@ export const VaultView: FC<{}> = () => {
         return true;
     };
 
-    // A confirmed claim runs later than the click: it only counts if the window is still the one it was asked in and the entry is still claimable.
+    // A confirmed claim runs later than the click: it only counts if it is still the asking opening/user/connection and the entry is still claimable.
     const claimOne = useCallback(
         (categoryKey: string) => {
-            const openId = openIdRef.current;
+            const isCurrent = captureAsk();
+            const find = () => entriesRef.current.find((entry) => entry.categoryKey === categoryKey);
 
-            confirmDucketLimit(ducketsOf(entriesByKey.get(categoryKey) ?? null), () => {
-                if (!isVisibleRef.current || openIdRef.current !== openId) return;
-                if (!claimable(entriesRef.current.find((entry) => entry.categoryKey === categoryKey))) return;
-                if (!startPending(categoryKey)) return;
+            confirmDucketLimit(
+                isCurrent,
+                () => ducketsOf(find() ?? null),
+                () => {
+                    if (!isCurrent() || !claimable(find())) return;
+                    if (!startPending(categoryKey)) return;
 
-                SendMessageComposer(new ClaimEarningsRewardComposer(categoryKey));
-            });
+                    SendMessageComposer(new ClaimEarningsRewardComposer(categoryKey));
+                }
+            );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [confirmDucketLimit, entriesByKey, claimable]
+        [captureAsk, confirmDucketLimit, claimable]
     );
 
     const claimAll = useCallback(() => {
-        const openId = openIdRef.current;
-        const total = entries.filter((entry) => claimable(entry)).reduce((sum, entry) => sum + ducketsOf(entry), 0);
+        const isCurrent = captureAsk();
+        const covered = () => entriesRef.current.filter((entry) => claimable(entry));
 
-        confirmDucketLimit(total, () => {
-            if (!isVisibleRef.current || openIdRef.current !== openId) return;
+        confirmDucketLimit(
+            isCurrent,
+            () => covered().reduce((sum, entry) => sum + ducketsOf(entry), 0),
+            () => {
+                const keys = covered().map((entry) => entry.categoryKey);
 
-            const covered = entriesRef.current.filter((entry) => claimable(entry)).map((entry) => entry.categoryKey);
+                if (!isCurrent() || !keys.length || !startPending('*')) return;
 
-            if (!covered.length || !startPending('*')) return;
-
-            allExpectedRef.current = new Set(covered);
-            SendMessageComposer(new ClaimAllEarningsRewardsComposer());
-        });
+                allExpectedRef.current = new Set(keys);
+                SendMessageComposer(new ClaimAllEarningsRewardsComposer());
+            }
+        );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [confirmDucketLimit, entries, claimable]);
+    }, [captureAsk, confirmDucketLimit, claimable]);
 
     if (!isVisible) return null;
 
@@ -406,7 +460,7 @@ export const VaultView: FC<{}> = () => {
             style={{ '--vault-width': WINDOW_WIDTH + 'px', '--vault-height': height + 'px' } as CSSProperties}
             uniqueKey="vault"
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
+            <OctaneCardHeaderView headerText="" onCloseClick={() => changeVisibility(false)}>
                 <NativeText
                     background={0x377998}
                     className="octane-vault__title"
