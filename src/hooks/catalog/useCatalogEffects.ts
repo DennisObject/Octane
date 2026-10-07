@@ -32,6 +32,7 @@ import {
     CatalogPage,
     CatalogType,
     DispatchUiEvent,
+    GetRoomSession,
     ICatalogNode,
     LocalizeText,
     NotificationAlertType,
@@ -552,8 +553,9 @@ const placeBoughtItem = (placed: PlacedObjectPurchaseData, itemId: number) => {
 
     if (state.placedObjectPurchaseData !== placed) return;
 
-    // The room was left; the item stays in the inventory.
-    if (placed.roomId !== roomEngine.activeRoomId) {
+    // The room was left; the item stays in the inventory. The engine keeps its last room id on
+    // the hotel view, so the room session decides.
+    if (placed.roomId !== roomEngine.activeRoomId || GetRoomSession()?.roomId !== placed.roomId) {
         state.resetPlacedOfferData();
 
         return;
