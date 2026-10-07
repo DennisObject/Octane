@@ -1,4 +1,4 @@
-import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, LegacyDataType, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomId, RoomPlaneParser, Vector3d } from '@octane/renderer';
+import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomId, RoomPlaneParser, Vector3d } from '@octane/renderer';
 import { GetConfigurationValue, ISnowWarEngine, ISnowWarHuman, ISnowWarSnowball, SnowWarEngineEvent, SnowWarObjectType } from '../../../../api';
 
 /** The arena is a client-only room (AIR game room id 1); a previewer-range id keeps the normal room UI away from it. */
@@ -86,12 +86,9 @@ export class SnowWarArenaRoom implements IRoomGameInputHandler
 
         for(const fuseObject of level.fuseObjects)
         {
-            const stuffData = new LegacyDataType();
             const state = parseInt(fuseObject.state);
 
-            stuffData.setString(fuseObject.state);
-
-            roomEngine.addFurnitureFloorByTypeName(SNOWWAR_ROOM_ID, fuseObject.id, fuseObject.name, new Vector3d(fuseObject.x, fuseObject.y, (fuseObject.altitude / TILE_HALFWIDTH)), new Vector3d(fuseObject.direction * 45), (isNaN(state) ? 0 : state), stuffData);
+            roomEngine.addFurnitureFloorByTypeName(SNOWWAR_ROOM_ID, fuseObject.id, fuseObject.name, new Vector3d(fuseObject.x, fuseObject.y, (fuseObject.altitude / TILE_HALFWIDTH)), new Vector3d(fuseObject.direction * 45), (isNaN(state) ? 0 : state), fuseObject.stuffData);
         }
 
         if(!level.fuseObjects.length) this.notifyStageLoaded();
