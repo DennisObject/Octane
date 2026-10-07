@@ -231,6 +231,7 @@ export class SnowWarEngine implements ISnowWarEngine
     {
         if(this._state !== SnowWarEngineState.STAGE_RUNNING || !this.ownHuman()) return;
 
+        this.tick();
         this._dependencies.send(new Game2SetUserMoveTargetMessageComposer(tileX * TILE_WIDTH, tileY * TILE_WIDTH, this.turn, this.subturn));
     }
 
@@ -238,6 +239,7 @@ export class SnowWarEngine implements ISnowWarEngine
     {
         if(!this.canThrow()) return;
 
+        this.tick();
         this._dependencies.send(new Game2ThrowSnowballAtPositionMessageComposer(tileX * TILE_WIDTH, tileY * TILE_WIDTH, trajectory, this.turn, this.subturn));
     }
 
@@ -245,6 +247,7 @@ export class SnowWarEngine implements ISnowWarEngine
     {
         if(!this.canThrow() || !this.isOpponent(humanId)) return;
 
+        this.tick();
         this._dependencies.send(new Game2ThrowSnowballAtHumanMessageComposer(humanId, trajectory, this.turn, this.subturn));
     }
 
@@ -252,6 +255,7 @@ export class SnowWarEngine implements ISnowWarEngine
     {
         if(!this.canMakeSnowball()) return false;
 
+        this.tick();
         this._dependencies.send(new Game2MakeSnowballMessageComposer(this.turn, this.subturn));
         this.emit({ type: 'makeStart', humanId: this._ownId });
 
@@ -432,6 +436,7 @@ export class SnowWarEngine implements ISnowWarEngine
 
         this._stage.queueGameStatus(turn, events);
         this.nextTurn(turn, checksum, false);
+        this.tick();
     }
 
     /** `onFullGameStatus`: rebuild the objects and seek to the server turn. */
@@ -445,6 +450,7 @@ export class SnowWarEngine implements ISnowWarEngine
         this._stage.queueGameStatus(turn, events);
         this.nextTurn(turn, checksum, true);
         this.emit({ type: 'fullStatus', turn });
+        this.tick();
     }
 
     /** StageEnding(0) / exit: `resetGameSession` — stops the simulation and refreshes the games left. */
@@ -504,14 +510,21 @@ export class SnowWarEngine implements ISnowWarEngine
     {
         this.stopTicker();
         this._lastTickAt = performance.now();
-        this._ticker = setInterval(() =>
-        {
-            const now = performance.now();
-            const delta = now - this._lastTickAt;
+        this._ticker = setInterval(() => this.tick(), TICK_MS);
+    }
 
-            this._lastTickAt = now;
-            this.update(delta);
-        }, TICK_MS);
+    /**
+     * One AIR `update` frame with the real elapsed time. Besides the interval it runs when a GameStatus
+     * arrives and before an input is stamped: browsers throttle timers in background or busy tabs, and
+     * the stamps must carry the turn the client has actually reached.
+     */
+    private tick(): void
+    {
+        const now = performance.now();
+        const delta = now - this._lastTickAt;
+
+        this._lastTickAt = now;
+        this.update(delta);
     }
 
     private stopTicker(): void
@@ -529,21 +542,32 @@ export class SnowWarEngine implements ISnowWarEngine
 
         this._timeSinceLastUpdate += delta;
 
-        if(this._waitingForFullStatus || this._timeSinceLastUpdate <= SUBTURN_MS || this._currentSubTurn >= this._maxSubTurn) return;
+        if(this._waitingForFullStatus) return;
 
-        stage.pulse();
-        this._timeSinceLastUpdate -= SUBTURN_MS;
-        this._currentSubTurn++;
+        let pulsed = false;
 
-        if(this._timeSinceLastUpdate > SUBTURN_MS) this._timeSinceLastUpdate = 0;
+        if(this._timeSinceLastUpdate > SUBTURN_MS && this._currentSubTurn < this._maxSubTurn)
+        {
+            stage.pulse();
+            this._timeSinceLastUpdate -= SUBTURN_MS;
+            this._currentSubTurn++;
+            pulsed = true;
 
+            if(this._timeSinceLastUpdate > SUBTURN_MS) this._timeSinceLastUpdate = 0;
+        }
+
+        // AIR catches up only after a timed pulse; here it also runs when a burst of GameStatus messages lands
+        // in one frame (busy or throttled tab), so the stamps never trail the newest turn by more than one.
         let behind = this._maxSubTurn - this._currentSubTurn;
 
         while(behind-- > SUBTURNS_PER_TURN)
         {
             stage.pulse();
             this._currentSubTurn++;
+            pulsed = true;
         }
+
+        if(!pulsed) return;
 
         this.invalidate();
 
