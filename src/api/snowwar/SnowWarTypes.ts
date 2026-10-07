@@ -257,6 +257,7 @@ export interface SnowWarLobbyState
 {
     data: SnowWarLobbyData;
     players: SnowWarLobbyPlayer[];
+    /** -1 until Game2InArenaQueue arrives (AIR GameLobbyWindowCtrl shows "waiting for more players" then). */
     queuePosition: number;
     /** Wall-clock deadline (ms) of `Game2StartCounter`; null while waiting for players. */
     countdownDeadline: number | null;
