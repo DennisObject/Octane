@@ -10,8 +10,9 @@ import {
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { OpenUrl, SendMessageComposer } from '../../../api';
-import { showModAlert, useMessageEvent } from '../../../hooks';
+import { showModAlert, useMessageEvent, useModWindowTrackerStore } from '../../../hooks';
 import roomToolXml from '../../../assets/mod-tools/xml/roomtool_frame.xml?raw';
+import { NativeWindowShell } from '../native/NativeWindowShell';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Border, Native0Button, Native0Checkbox, Native0Dropmenu, Native0Frame, Native0Input, Native0Text } from '../native/NativeWindow0';
 
@@ -52,6 +53,7 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
     const [lock, setLock] = useState(false);
     const [changeName, setChangeName] = useState(false);
 
+    const resizeWindow = useModWindowTrackerStore((state) => state.resize);
     const requestedRef = useRef(false);
 
     useEffect(() => {
@@ -107,10 +109,18 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
     }
 
     const frameHeight = cursor + 32;
+
+    // the tracker places the windows opened from this one by its current frame
+    useEffect(() => resizeWindow('roomTool', `${roomId}`, nativeNumber(root, 'width'), frameHeight), [resizeWindow, roomId, root, frameHeight]);
     const canAct = data ? data.flatId === currentRoomId && settings.roomAlertPermission : true;
     const templates = settings.roomMessageTemplates ?? [];
 
+    // the window is disposed by its first send: a second click before it is gone must not send again
+    const sentRef = useRef(false);
+
     const send = (caution: boolean) => {
+        if (sentRef.current) return;
+
         if (isPlaceholder || message === '') {
             showModAlert('You must input a message to the user');
 
@@ -125,6 +135,7 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
               ? ModeratorActionMessageComposer.ACTION_ALERT
               : ModeratorActionMessageComposer.ACTION_MESSAGE;
 
+        sentRef.current = true;
         SendMessageComposer(new ModeratorActionMessageComposer(type, message, ''));
 
         if (data && (lock || changeName || kick)) SendMessageComposer(new ModerateRoomMessageComposer(data.flatId, lock ? 1 : 0, changeName ? 1 : 0, kick ? 1 : 0));
@@ -133,7 +144,7 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
     };
 
     return (
-        <div className="native0-window" style={{ position: 'absolute', left: x, top: y }}>
+        <NativeWindowShell type="roomTool" windowKey={`${roomId}`} x={x} y={y}>
             <Native0Frame caption={nativeCaption(root)} height={frameHeight} width={nativeNumber(root, 'width')} onClose={onClose}>
                 {(!data || exists) && (
                     <Native0Border {...roomCont} height={roomContHeight} y={row.room}>
@@ -225,6 +236,6 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
                     onToggle={() => setMenuOpen((value) => !value)}
                 />
             </Native0Frame>
-        </div>
+        </NativeWindowShell>
     );
 };

@@ -3,7 +3,7 @@
 .native3-frame *, .native3-frame *::before, .native3-frame *::after { box-sizing: border-box; }
 .native3-frame > .native-skin { position: absolute; left: 0; top: 0; }
 .native3-title, .native3-close, .native3-client, .native3-box { position: absolute; }
-.native3-title { display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.native3-title { display: flex; align-items: center; justify-content: center; cursor: move; user-select: none; }
 .native3-title > canvas, .native3-button__label > canvas { display: block; }
 .native3-close { cursor: pointer; }
 .native3-box > .native-skin { position: absolute; left: 0; top: 0; }

@@ -43,6 +43,9 @@ export interface ModWindowShowRequest {
 }
 
 interface ModWindowTrackerState {
+    /** The start panel frame (the parent of the first tool windows); follows the panel when it is dragged. */
+    startPanel: ModWindowRect;
+    setStartPanel: (rect: ModWindowRect) => void;
     windows: ModWindow[];
     show: (request: ModWindowShowRequest) => void;
     close: (type: ModWindowType, key: string) => void;
@@ -60,6 +63,8 @@ const clampToDesktop = (rect: ModWindowRect): ModWindowRect => ({
 // Classic v75 WindowTracker (qn): one window per type and key. Showing an open window again closes it when `toggle` is set and otherwise replaces it in place;
 // a new window goes right of (or below) its parent frame, centred on the desktop without a parent, and is kept inside the desktop.
 export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>()((set, get) => ({
+    startPanel: { x: 120, y: 64, width: 170, height: 170 },
+    setStartPanel: (rect) => set({ startPanel: rect }),
     windows: [],
     get: (type, key) => get().windows.find((entry) => entry.type === type && entry.key === key) ?? null,
     show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false, params = {} }) => {

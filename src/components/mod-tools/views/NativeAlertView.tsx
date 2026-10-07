@@ -1,4 +1,5 @@
 import { FC, useLayoutEffect, useRef, useState } from 'react';
+import { DraggableWindow } from '../../../common/draggable-window';
 import { NativeText } from '../../../common/native-text/NativeText';
 import { useModAlertStore } from '../../../hooks';
 import { Native3Frame, Native3ThickButton } from '../native/NativeWindow3';
@@ -32,14 +33,14 @@ const AlertWindow: FC<{ id: number; title: string; message: string }> = ({ id, t
     const height = 141 + (summaryHeight - 57);
 
     return (
-        <div className="native3-window" style={{ position: 'fixed', left: Math.round((window.innerWidth - width) / 2), top: Math.round((window.innerHeight - height) / 2) }}>
+        <DraggableWindow handleSelector=".native3-title" initialPosition={{ x: Math.round((window.innerWidth - width) / 2), y: Math.round((window.innerHeight - height) / 2) }}>
             <Native3Frame height={height} title={title} width={width} onClose={() => close(id)}>
                 <div ref={summaryRef} style={{ position: 'absolute', left: 27, top: 14, width: 210 }}>
                     <NativeText background={BODY_COLOR} maxWidth={210} text={message} textStyle="u_regular" />
                 </div>
                 <Native3ThickButton height={24} label="Ok" width={50} x={26 + Math.floor((215 - 50) / 2)} y={81 + (summaryHeight - 57)} onClick={() => close(id)} />
             </Native3Frame>
-        </div>
+        </DraggableWindow>
     );
 };
 

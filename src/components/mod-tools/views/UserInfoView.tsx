@@ -4,6 +4,7 @@ import { OpenUrl, SendMessageComposer } from '../../../api';
 import { useMessageEvent } from '../../../hooks';
 import userInfoFrameXml from '../../../assets/mod-tools/xml/user_info_frame.xml?raw';
 import userInfoXml from '../../../assets/mod-tools/xml/user_info.xml?raw';
+import { NativeWindowShell } from '../native/NativeWindowShell';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Border, Native0Button, Native0Frame, Native0Text } from '../native/NativeWindow0';
 
@@ -74,7 +75,7 @@ export const UserInfoView: FC<UserInfoProps> = ({ userId, settings, x, y, onClos
     );
 
     return (
-        <div className="native0-window" style={{ position: 'absolute', left: x, top: y }}>
+        <NativeWindowShell type="userInfo" windowKey={`${userId}`} x={x} y={y}>
         <Native0Frame caption="User Info" height={nativeNumber(root, 'height')} width={nativeNumber(root, 'width')} onClose={onClose}>
             <Native0Border {...box} x={0} y={0}>
                 {!data && <Native0Text background={0xffffff} bold text={nativeCaption(findNativeNode(frame, 'loading_txt'))} width={70} x={120} y={45} />}
@@ -122,7 +123,7 @@ export const UserInfoView: FC<UserInfoProps> = ({ userId, settings, x, y, onClos
                 )}
             </Native0Border>
         </Native0Frame>
-        </div>
+        </NativeWindowShell>
     );
 };
 

@@ -1,8 +1,9 @@
 import { ModeratorInitData, ModMessageMessageComposer } from '@octane/renderer';
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import { showModAlert } from '../../../hooks';
 import sendMessagesXml from '../../../assets/mod-tools/xml/send_msgs.xml?raw';
+import { NativeWindowShell } from '../native/NativeWindowShell';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Button, Native0Dropmenu, Native0Frame, Native0Input } from '../native/NativeWindow0';
 
@@ -33,19 +34,25 @@ export const SendMessageView: FC<SendMessageProps> = ({ userId, userName, settin
     const [selectedTemplate, setSelectedTemplate] = useState(-1);
     const templates = settings.messageTemplates ?? [];
 
+    // the window is disposed by its first send: a second click before it is gone must not send again
+    const sentRef = useRef(false);
+
     const onSend = () => {
+        if (sentRef.current) return;
+
         if (isHint || message === '') {
             showModAlert('You must input a message to the user');
 
             return;
         }
 
+        sentRef.current = true;
         SendMessageComposer(new ModMessageMessageComposer(userId, message, SEND_MESSAGE_TOPIC));
         onClose();
     };
 
     return (
-        <div className="native0-window" style={{ position: 'absolute', left: x, top: y }}>
+        <NativeWindowShell type="sendMessage" windowKey={userName} x={x} y={y}>
             <Native0Frame caption={`Msg To: ${userName}`} height={nativeNumber(root, 'height')} width={nativeNumber(root, 'width')} onClose={onClose}>
                 <Native0Input
                     active={inputActive}
@@ -83,6 +90,6 @@ export const SendMessageView: FC<SendMessageProps> = ({ userId, userName, settin
                     onToggle={() => setMenuOpen((value) => !value)}
                 />
             </Native0Frame>
-        </div>
+        </NativeWindowShell>
     );
 };

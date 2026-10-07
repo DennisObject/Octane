@@ -38,10 +38,16 @@ export interface NativeSkin {
 }
 
 const scale = (value: string | null): NativeSkinScale => (value === 'move' || value === 'strech' || value === 'tiled' || value === 'center' ? value : 'fixed');
-const rectOf = (element: Element): NativeSkinRect => {
+// Rectangle attributes may name a skin variable ("$width"); the variable table of the skin gives its value.
+const rectOf = (element: Element, variables: Record<string, string>): NativeSkinRect => {
     const rectangle = element.querySelector('region > Rectangle');
+    const value = (name: string) => {
+        const raw = rectangle.getAttribute(name);
 
-    return { x: Number(rectangle.getAttribute('x')), y: Number(rectangle.getAttribute('y')), width: Number(rectangle.getAttribute('width')), height: Number(rectangle.getAttribute('height')) };
+        return Number(raw.startsWith('$') ? variables[raw.slice(1)] : raw);
+    };
+
+    return { x: value('x'), y: value('y'), width: value('width'), height: value('height') };
 };
 
 export const parseNativeSkin = (xml: string): NativeSkin => {
@@ -54,10 +60,10 @@ export const parseNativeSkin = (xml: string): NativeSkin => {
     const templates: Record<string, NativeSkinTemplate> = {};
 
     for (const template of Array.from(document.querySelectorAll('skin > templates > template'))) {
-        const asset = template.getAttribute('asset');
+        const asset = template.getAttribute('asset') ?? '$asset';
         const entities: Record<string, NativeSkinRect> = {};
 
-        for (const entity of Array.from(template.querySelectorAll('entity'))) entities[entity.getAttribute('name')] = rectOf(entity);
+        for (const entity of Array.from(template.querySelectorAll('entity'))) entities[entity.getAttribute('name')] = rectOf(entity, variables);
 
         templates[template.getAttribute('name')] = { asset: asset.startsWith('$') ? variables[asset.slice(1)] : asset, entities };
     }
@@ -71,7 +77,7 @@ export const parseNativeSkin = (xml: string): NativeSkin => {
             return {
                 name: entity.getAttribute('name'),
                 colorize: entity.getAttribute('colorize') !== 'false',
-                region: rectOf(entity),
+                region: rectOf(entity, variables),
                 scaleH: scale(scaleElement?.getAttribute('horizontal') ?? null),
                 scaleV: scale(scaleElement?.getAttribute('vertical') ?? null)
             };

@@ -5,13 +5,13 @@ import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelect
 import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
 import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
+import { RoomVisitsView } from './views/RoomVisitsView';
 import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
 import { UserInfoView } from './views/UserInfoView';
 import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
 import { ModToolsUserChatlogView } from './views/user/ModToolsUserChatlogView';
 
-const START_PANEL = { x: 120, y: 64, width: 170, height: 170 };
 
 // Classic v75 ModerationManager / StartPanelCtrl (fme): the panel opens when the moderator init message arrives, the room and chatlog buttons follow the
 // room entered / left events, the user button follows the last selected avatar and stays enabled after the room is left.
@@ -30,6 +30,9 @@ export const ModToolsView: FC<{}> = () => {
     const windows = useModWindowTrackerStore((state) => state.windows);
     const showWindow = useModWindowTrackerStore((state) => state.show);
     const closeWindow = useModWindowTrackerStore((state) => state.close);
+    const resizeWindow = useModWindowTrackerStore((state) => state.resize);
+    const startPanel = useModWindowTrackerStore((state) => state.startPanel);
+    const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
     const {
         settings = null,
         openRoomChatlogs = [],
@@ -89,7 +92,7 @@ export const ModToolsView: FC<{}> = () => {
                 switch (parts[1]) {
                     case 'open-room-info':
                     case 'toggle-room-info':
-                        showWindow({ type: 'roomTool', key: parts[2], ...MOD_WINDOW_SIZE.roomTool, parent: START_PANEL, toggle: parts[1] === 'toggle-room-info' });
+                        showWindow({ type: 'roomTool', key: parts[2], ...MOD_WINDOW_SIZE.roomTool, parent: useModWindowTrackerStore.getState().startPanel, toggle: parts[1] === 'toggle-room-info' });
                         return;
                     case 'close-room-info':
                         closeWindow('roomTool', parts[2]);
@@ -105,7 +108,7 @@ export const ModToolsView: FC<{}> = () => {
                         return;
                     case 'open-user-info':
                     case 'toggle-user-info':
-                        showWindow({ type: 'userInfo', key: parts[2], ...MOD_WINDOW_SIZE.userInfo, parent: START_PANEL, toggle: parts[1] === 'toggle-user-info' });
+                        showWindow({ type: 'userInfo', key: parts[2], ...MOD_WINDOW_SIZE.userInfo, parent: useModWindowTrackerStore.getState().startPanel, toggle: parts[1] === 'toggle-user-info' });
                         return;
                     case 'close-user-info':
                         closeWindow('userInfo', parts[2]);
@@ -152,6 +155,9 @@ export const ModToolsView: FC<{}> = () => {
                     onChatlog={() => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${currentRoomId}`)}
                     onClose={() => setIsVisible(false)}
                     onRoomTool={() => CreateLinkEvent(`mod-tools/toggle-room-info/${currentRoomId}`)}
+                    x={startPanel.x}
+                    y={startPanel.y}
+                    onMove={(x, y) => setStartPanel({ ...startPanel, x, y })}
                     onTicketQueue={() => setIsTicketsVisible(true)}
                     onUserInfo={() => CreateLinkEvent(`mod-tools/toggle-user-info/${selectedUser.userId}`)}
                 />
@@ -170,7 +176,7 @@ export const ModToolsView: FC<{}> = () => {
                             y={entry.y}
                             onClose={() => closeWindow('roomTool', entry.key)}
                             onOpenChatlog={(id) => CreateLinkEvent(`mod-tools/toggle-room-chatlog/${id}`)}
-                            onOpenUserInfo={(id) => CreateLinkEvent(`mod-tools/toggle-user-info/${id}`)}
+                            onOpenUserInfo={(id) => showWindow({ type: 'userInfo', key: `${id}`, ...MOD_WINDOW_SIZE.userInfo, parent: entry, toggle: true })}
                         />
                     );
                 }
@@ -186,10 +192,27 @@ export const ModToolsView: FC<{}> = () => {
                             onClose={() => closeWindow('userInfo', entry.key)}
                             onOpenChatlog={() => CreateLinkEvent(`mod-tools/toggle-user-chatlog/${entry.key}`)}
                             onOpenModAction={() => CreateLinkEvent(`mod-tools/toggle-user-mod-action/${entry.key}`)}
-                            onOpenRoomVisits={() => CreateLinkEvent(`mod-tools/toggle-user-room-visits/${entry.key}`)}
+                            onOpenRoomVisits={() => showWindow({ type: 'roomVisits', key: entry.key, ...MOD_WINDOW_SIZE.roomVisits, parent: entry, below: true, toggle: true })}
                             onOpenSendMessage={(userName) =>
                                 showWindow({ type: 'sendMessage', key: userName, ...MOD_WINDOW_SIZE.sendMessage, parent: entry, below: true, toggle: true, params: { userId: Number(entry.key) } })
                             }
+                        />
+                    );
+                }
+
+                if (entry.type === 'roomVisits') {
+                    return (
+                        <RoomVisitsView
+                            key={key}
+                            height={entry.height}
+                            userId={Number(entry.key)}
+                            width={entry.width}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('roomVisits', entry.key)}
+                            onEnterRoom={(roomId) => CreateLinkEvent(`navigator/goto/${roomId}`)}
+                            onOpenRoomTool={(roomId) => showWindow({ type: 'roomTool', key: `${roomId}`, ...MOD_WINDOW_SIZE.roomTool, parent: entry, toggle: true })}
+                            onResize={(width, height) => resizeWindow('roomVisits', entry.key, width, height)}
                         />
                     );
                 }

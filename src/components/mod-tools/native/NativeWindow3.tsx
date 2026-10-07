@@ -37,7 +37,9 @@ export const Native3Frame: FC<Native3FrameProps> = ({ width, height, title, onCl
                 <NativeText background={FRAME3_TITLE_COLOR} overrides={{ color: 0xffffff }} text={title} textStyle="u_frame_title" />
             </div>
             <div
+                aria-label="Close"
                 className="native3-close"
+                role="button"
                 style={rect(width - 29, 8, 19, 20)}
                 onClick={onClose}
                 onPointerDown={() => setCloseState('pressed')}
