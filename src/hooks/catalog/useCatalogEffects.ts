@@ -251,13 +251,19 @@ export const useCatalogEffects = (): void => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
 
         const purchase = event.getParser().offer;
-        const forPlacedOffer = takePlacedPurchaseAnswer(purchase?.offerId ?? -1);
+        const offerId = purchase?.offerId ?? 0;
+        // A PurchaseOK without an offer answers a sold-out limited edition: nothing was bought.
+        const soldOut = offerId <= 0;
+        const forPlacedOffer = takePlacedPurchaseAnswer(soldOut ? null : offerId);
 
         DispatchUiEvent(new CatalogPurchasedEvent(purchase));
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
 
-        if (forPlacedOffer) markPlacedPurchaseBought();
+        if (!forPlacedOffer) return;
+
+        if (soldOut) useCatalogStore.getState().resetPlacedOfferData();
+        else markPlacedPurchaseBought();
     });
 
     // A dropped offer's purchase failed: PurchaseConfirmationDialog closes and the temporary object goes.
