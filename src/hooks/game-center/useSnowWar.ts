@@ -128,7 +128,8 @@ const toLevel = (level: GameLevelData): SnowWarLevel => ({
         direction: fuse.direction,
         altitude: fuse.altitude,
         canStandOn: fuse.canStandOn,
-        state: fuse.stuffData?.getLegacyString() ?? ''
+        state: fuse.stuffData?.getLegacyString() ?? '',
+        stuffData: fuse.stuffData
     }))
 });
 
@@ -302,7 +303,7 @@ const useSnowWarState = (): SnowWarHookState =>
         }
 
         SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
-        setLobby({ data, players: [ ...data.players ], queuePosition: 0, countdownDeadline: null });
+        setLobby({ data, players: [ ...data.players ], queuePosition: -1, countdownDeadline: null });
     }, [ setResults ]);
 
     useMessageEvent<Game2GameCreatedMessageEvent>(Game2GameCreatedMessageEvent, useCallback(event => createLobby(event.getParser().gameLobbyData), [ createLobby ]));
