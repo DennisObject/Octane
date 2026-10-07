@@ -2,7 +2,7 @@ import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '
 import { useEffect, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, GetGroupInformation, GetSessionDataManager, GetUserProfile } from '../../api';
 import { SnowWarEngineState, SnowWarHookState } from '../../api/snowwar';
-import { useNotificationActions, useSnowWar } from '../../hooks';
+import { useGameCenter, useNotificationActions, useSnowWar } from '../../hooks';
 import { SnowWarGamesMainView } from './views/snowwar/SnowWarGamesMainView';
 import { SnowWarLeaderboardView } from './views/snowwar/SnowWarLeaderboardView';
 import { buySnowWarTokens } from './views/snowwar/SnowWarTokenPurchase';
@@ -16,7 +16,7 @@ export const GameCenterView = () =>
     const snowWar: SnowWarHookState = useSnowWar();
     const { state, account, blockLength, lobby, loading, results, leaderboard, refreshStatus, requestTokenOffers, play, leaveLobby, requestLeaderboard, closeLeaderboard } = snowWar;
     const { showConfirm } = useNotificationActions();
-    const [ mainVisible, setMainVisible ] = useState(false);
+    const { isVisible: mainVisible, setIsVisible: setMainVisible } = useGameCenter();
     const [ leaderboardVisible, setLeaderboardVisible ] = useState(false);
     const lobbyVisible = !!lobby && !loading && !results;
 
@@ -35,7 +35,7 @@ export const GameCenterView = () =>
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+    }, [ setMainVisible ]);
 
     // Opening the window checks the directory and the account's games (Game2CheckGameDirectoryStatus + GetAccountGameStatus).
     useEffect(() =>
@@ -50,12 +50,12 @@ export const GameCenterView = () =>
     useEffect(() =>
     {
         if(lobbyVisible) setMainVisible(true);
-    }, [ lobbyVisible ]);
+    }, [ lobbyVisible, setMainVisible ]);
 
     useEffect(() =>
     {
         if(state !== SnowWarEngineState.INACTIVE) setMainVisible(false);
-    }, [ state ]);
+    }, [ state, setMainVisible ]);
 
     const closeMain = () =>
     {

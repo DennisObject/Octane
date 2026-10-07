@@ -1,8 +1,7 @@
-// AUTO-EXTRACTED from Upgrade/README.md §12.1 — do not hand-edit the tables.
-// These MUST stay byte-identical to the server's SnowWarMath tables or the
-// client-side simulation (and checksums) will diverge.
+// Copied verbatim from the AIR client (com/sulake/habbo/game/snowwar/utils). The server simulation
+// uses the same tables; any drift breaks the per-turn checksum.
 
-/** Fast integer sqrt lookup (256 entries). */
+/** `class_4035.table` (fast_sqrt). */
 export const SQRT_TABLE: readonly number[] = [
     0, 16, 22, 27, 32, 35, 39, 42, 45, 48, 50, 53, 55, 57, 59, 61, 64, 65, 67, 69, 71, 73, 75, 76, 78,
     80, 81, 83, 84, 86, 87, 89, 90, 91, 93, 94, 96, 97, 98, 99, 101, 102, 103, 104, 106, 107, 108, 109, 110, 112,
@@ -17,8 +16,8 @@ export const SQRT_TABLE: readonly number[] = [
     252, 253, 253, 254, 254, 255
 ];
 
-/** Angle component lookup (256 entries). */
-export const ANGLE_COMPONENT: readonly number[] = [
+/** `Direction360.componentToAngleArray` (atan in degrees for |minor / major| * 256). */
+export const COMPONENT_TO_ANGLE: readonly number[] = [
     0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5,
     6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 11, 11,
     11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 15, 16, 16, 16, 16,
@@ -32,8 +31,8 @@ export const ANGLE_COMPONENT: readonly number[] = [
     44, 45, 45, 45, 45, 45
 ];
 
-/** X velocity per direction degree (0-359). */
-export const BASE_VEL_X: readonly number[] = [
+/** `Direction360` base vector x component per degree (0 = N). */
+export const BASE_VECTOR_X: readonly number[] = [
     0, 4, 8, 13, 17, 22, 26, 31, 35, 40, 44, 48, 53, 57, 61, 66, 70, 74, 79, 83, 87, 91, 95, 100, 104,
     108, 112, 116, 120, 124, 127, 131, 135, 139, 143, 146, 150, 154, 157, 161, 164, 167, 171, 174, 177, 181, 184, 187, 190, 193,
     196, 198, 201, 204, 207, 209, 212, 214, 217, 219, 221, 223, 226, 228, 230, 232, 233, 235, 237, 238, 240, 242, 243, 244, 246,
@@ -51,8 +50,8 @@ export const BASE_VEL_X: readonly number[] = [
     -44, -40, -35, -31, -26, -22, -17, -13, -8, -4
 ];
 
-/** Y velocity per direction degree (0-359). */
-export const BASE_VEL_Y: readonly number[] = [
+/** `Direction360` base vector y component per degree (0 = N = -y). */
+export const BASE_VECTOR_Y: readonly number[] = [
     -256, -255, -255, -255, -255, -255, -254, -254, -253, -252, -252, -251, -250, -249, -248, -247, -246, -244, -243, -242, -240, -238, -237, -235, -233,
     -232, -230, -228, -226, -223, -221, -219, -217, -214, -212, -209, -207, -204, -201, -198, -196, -193, -190, -187, -184, -181, -177, -174, -171, -167,
     -164, -161, -157, -154, -150, -146, -143, -139, -135, -131, -128, -124, -120, -116, -112, -108, -104, -100, -95, -91, -87, -83, -79, -74, -70,
