@@ -75,7 +75,9 @@ interface Slot {
     icon: ReactElement;
 }
 
-const nativeIcon = (src: string, size: number, className = '') => <img alt="" className={`octane-vault__icon ${className}`} draggable={false} height={size} src={src} width={size} />;
+const nativeIcon = (src: string, size: number, className = '') => (
+    <img alt="" className={`octane-vault__icon ${className}`} draggable={false} height={size} src={src} width={size} />
+);
 
 // A reward that a native slot does not cover (diamonds, HC days, a currency the v75 row has no slot for) keeps its own slot, so nothing earned is hidden.
 const extraRewardIcon = (reward: IEarningsReward): ReactElement | null => {
@@ -95,10 +97,24 @@ const extraRewardIcon = (reward: IEarningsReward): ReactElement | null => {
 
 const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot[] => {
     const slots: Slot[] = category.slots.map((kind) => {
-        if (kind === 'pixels') return { id: kind, amount: rewards.filter((reward) => reward.type === 'pixels').reduce((sum, reward) => sum + reward.amount, 0), icon: nativeIcon(imgDucket, 22) };
-        if (kind === 'credits') return { id: kind, amount: rewards.filter((reward) => reward.type === 'credits').reduce((sum, reward) => sum + reward.amount, 0), icon: nativeIcon(imgCredit, 22) };
+        if (kind === 'pixels')
+            return {
+                id: kind,
+                amount: rewards.filter((reward) => reward.type === 'pixels').reduce((sum, reward) => sum + reward.amount, 0),
+                icon: nativeIcon(imgDucket, 22)
+            };
+        if (kind === 'credits')
+            return {
+                id: kind,
+                amount: rewards.filter((reward) => reward.type === 'credits').reduce((sum, reward) => sum + reward.amount, 0),
+                icon: nativeIcon(imgCredit, 22)
+            };
 
-        return { id: kind, amount: rewards.filter((reward) => reward.type === 'badge' || reward.type === 'item').length, icon: nativeIcon(imgPresent, 24, 'is-product') };
+        return {
+            id: kind,
+            amount: rewards.filter((reward) => reward.type === 'badge' || reward.type === 'item').length,
+            icon: nativeIcon(imgPresent, 24, 'is-product')
+        };
     });
     const covered = new Set<string>(category.slots.flatMap((kind) => (kind === 'product' ? ['badge', 'item'] : [kind])));
     const extra = new Map<string, Slot>();
@@ -116,7 +132,8 @@ const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot
     return [...slots, ...extra.values()];
 };
 
-const ducketsOf = (entry: IEarningsEntry | null) => (entry?.rewards ?? []).filter((reward) => reward.type === 'pixels').reduce((sum, reward) => sum + reward.amount, 0);
+const ducketsOf = (entry: IEarningsEntry | null) =>
+    (entry?.rewards ?? []).filter((reward) => reward.type === 'pixels').reduce((sum, reward) => sum + reward.amount, 0);
 
 const WINDOW_WIDTH = 422;
 const ROW_PITCH = 37;
@@ -150,7 +167,13 @@ interface VaultButtonProps {
 /** button (shiny, 60x28) and button_thick (shiny thick, 73x30): the label is a v75 raster over the skin. */
 const VaultButton: FC<VaultButtonProps> = ({ label, disabled, kind, style, onClick }) => (
     <button className={`octane-vault__button is-${kind}`} disabled={disabled} style={style} type="button" onClick={onClick}>
-        <NativeText background={0xffffff} className="octane-vault__button-label" overrides={disabled ? { color: 0x777777 } : undefined} text={label} textStyle={kind === 'claim' ? 'u_regular' : 'u_bold'} />
+        <NativeText
+            background={0xffffff}
+            className="octane-vault__button-label"
+            overrides={disabled ? { color: 0x777777 } : undefined}
+            text={label}
+            textStyle={kind === 'claim' ? 'u_regular' : 'u_bold'}
+        />
     </button>
 );
 
@@ -159,10 +182,17 @@ export const VaultView: FC<{}> = () => {
     const [entries, setEntries] = useState<IEarningsEntry[]>([]);
     const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
     const pendingRef = useRef<ReadonlySet<string>>(pending);
+    const entriesRef = useRef<IEarningsEntry[]>(entries);
+    const isVisibleRef = useRef(isVisible);
+    // Bumped whenever the window opens or closes: a confirm dialog or a captured callback from an earlier opening must not send anything.
+    const openIdRef = useRef(0);
+    // The categories a claim-all covers; it is released once every one of them answered.
+    const allExpectedRef = useRef<Set<string>>(new Set());
     const { getCurrencyAmount } = usePurse();
     const { showConfirm = null } = useNotification();
 
     pendingRef.current = pending;
+    entriesRef.current = entries;
 
     const entriesByKey = useMemo(() => {
         const map = new Map<string, IEarningsEntry>();
@@ -189,6 +219,11 @@ export const VaultView: FC<{}> = () => {
         }, [])
     );
 
+    const commitPending = useCallback((next: ReadonlySet<string>) => {
+        pendingRef.current = next;
+        setPending(next);
+    }, []);
+
     // A claim result releases the buttons it covers: a refused claim re-enables them, a successful one zeroes the entry (the server's refreshed entry wins).
     useMessageEvent<EarningsClaimResultEvent>(
         EarningsClaimResultEvent,
@@ -214,14 +249,21 @@ export const VaultView: FC<{}> = () => {
                 return next;
             });
 
-            setPending((prev) => {
-                const next = new Set(prev);
+            const next = new Set(pendingRef.current);
+            const known = new Set<string>([...CATEGORIES.map((category) => category.key), ...entriesRef.current.map((entry) => entry.categoryKey)]);
+            let namesNoCategory = false;
 
-                for (const result of parser.results) next.delete(result.categoryKey);
-                next.delete('*');
+            for (const result of parser.results) {
+                if (!known.has(result.categoryKey)) namesNoCategory = true;
 
-                return next;
-            });
+                next.delete(result.categoryKey);
+                allExpectedRef.current.delete(result.categoryKey);
+            }
+
+            // A claim-all is released by the answers for the categories it covered (or by an answer that names none), never by one unrelated category result.
+            if (next.has('*') && (namesNoCategory || allExpectedRef.current.size === 0)) next.delete('*');
+
+            commitPending(next);
         }, [])
     );
 
@@ -255,14 +297,18 @@ export const VaultView: FC<{}> = () => {
 
     // Ask the server for fresh earnings every time the window opens; a closed window forgets claims that were in flight.
     useEffect(() => {
+        isVisibleRef.current = isVisible;
+        openIdRef.current += 1;
+
         if (!isVisible) {
-            setPending(new Set());
+            allExpectedRef.current = new Set();
+            commitPending(new Set());
 
             return;
         }
 
         SendMessageComposer(new RequestEarningsCenterComposer());
-    }, [isVisible]);
+    }, [isVisible, commitPending]);
 
     // v75 asks before a claim that would push the duckets over the soft limit (earning.exceeding_limit).
     const confirmDucketLimit = useCallback(
@@ -273,7 +319,10 @@ export const VaultView: FC<{}> = () => {
                 let isDone = false;
 
                 showConfirm(
-                    LocalizeText('earning.exceeding_limit'),
+                    localizeWithFallback(
+                        'earning.exceeding_limit',
+                        'You are exceeding the ducket limit by claiming these earnings. This means some duckets will be lost, are you sure you want to continue?'
+                    ),
                     () => {
                         if (isDone) return;
 
@@ -294,37 +343,49 @@ export const VaultView: FC<{}> = () => {
         [getCurrencyAmount, showConfirm]
     );
 
-    // The button is disabled the moment the claim is sent; the result (or closing the window) releases it.
+    // The button is disabled the moment the claim is sent; the result (or closing the window) releases it. One claim-all or any row claim in flight blocks the others.
     const startPending = (key: string) => {
-        if (pendingRef.current.has(key)) return false;
+        const current = pendingRef.current;
 
-        const next = new Set(pendingRef.current);
+        if (key === '*' ? current.size > 0 : current.has(key) || current.has('*')) return false;
+
+        const next = new Set(current);
 
         next.add(key);
-        pendingRef.current = next;
-        setPending(next);
+        commitPending(next);
 
         return true;
     };
 
+    // A confirmed claim runs later than the click: it only counts if the window is still the one it was asked in and the entry is still claimable.
     const claimOne = useCallback(
         (categoryKey: string) => {
+            const openId = openIdRef.current;
+
             confirmDucketLimit(ducketsOf(entriesByKey.get(categoryKey) ?? null), () => {
+                if (!isVisibleRef.current || openIdRef.current !== openId) return;
+                if (!claimable(entriesRef.current.find((entry) => entry.categoryKey === categoryKey))) return;
                 if (!startPending(categoryKey)) return;
 
                 SendMessageComposer(new ClaimEarningsRewardComposer(categoryKey));
             });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [confirmDucketLimit, entriesByKey]
+        [confirmDucketLimit, entriesByKey, claimable]
     );
 
     const claimAll = useCallback(() => {
+        const openId = openIdRef.current;
         const total = entries.filter((entry) => claimable(entry)).reduce((sum, entry) => sum + ducketsOf(entry), 0);
 
         confirmDucketLimit(total, () => {
-            if (!startPending('*')) return;
+            if (!isVisibleRef.current || openIdRef.current !== openId) return;
 
+            const covered = entriesRef.current.filter((entry) => claimable(entry)).map((entry) => entry.categoryKey);
+
+            if (!covered.length || !startPending('*')) return;
+
+            allExpectedRef.current = new Set(covered);
             SendMessageComposer(new ClaimAllEarningsRewardsComposer());
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -346,7 +407,13 @@ export const VaultView: FC<{}> = () => {
             uniqueKey="vault"
         >
             <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
-                <NativeText background={0x377998} className="octane-vault__title" overrides={{ color: 0xffffff }} text={localizeWithFallback('earnings.title', 'Earnings')} textStyle="u_frame_title" />
+                <NativeText
+                    background={0x377998}
+                    className="octane-vault__title"
+                    overrides={{ color: 0xffffff }}
+                    text={localizeWithFallback('earnings.title', 'Earnings')}
+                    textStyle="u_frame_title"
+                />
             </OctaneCardHeaderView>
             <div className="octane-vault-content">
                 {visibleCategories.map((category, index) => {
@@ -373,17 +440,28 @@ export const VaultView: FC<{}> = () => {
                                     <div key={slot.id} className="octane-vault__slot" style={{ left: 179 + x }}>
                                         <span className="octane-vault__slot-icon">{slot.icon}</span>
                                         <div className="octane-vault__value" style={{ left: 25 }}>
-                                            <NativeText background={0xbec3c1} overrides={{ size: 14, sharpness: 0, thickness: 0 }} text={String(slot.amount)} textStyle="u_bold" />
+                                            <NativeText
+                                                background={0xbec3c1}
+                                                overrides={{ size: 14, sharpness: 0, thickness: 0 }}
+                                                text={String(slot.amount)}
+                                                textStyle="u_bold"
+                                            />
                                         </div>
                                     </div>
                                 );
                             })}
-                            <VaultButton disabled={!canClaim} kind="claim" label={localizeWithFallback('earnings.claim.button', 'Claim')} style={{ left: 339, top: 4, width: 60, height: 28 }} onClick={() => claimOne(category.key)} />
+                            <VaultButton
+                                disabled={!canClaim}
+                                kind="claim"
+                                label={localizeWithFallback('earnings.claim.button', 'Claim')}
+                                style={{ left: 339, top: 4, width: 60, height: 28 }}
+                                onClick={() => claimOne(category.key)}
+                            />
                         </div>
                     );
                 })}
                 <VaultButton
-                    disabled={!anyClaimable || pending.has('*')}
+                    disabled={!anyClaimable || pending.size > 0}
                     kind="claim-all"
                     label={localizeWithFallback('earning.claim_all', 'Claim All')}
                     style={{ left: 154, top: rowCount * ROW_PITCH + 8, width: 73, height: 30 }}
