@@ -118,6 +118,19 @@ export const SnowWarView: FC = () =>
     }, [ error, simpleAlert, clearError ]);
 
     const inGame = state >= SnowWarEngineState.GAME_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
+    // GameLoadingViewController / SnowWarUI / GameEndingViewController hide window desktop 1 (games_main,
+    // the leaderboard and every other window) from GameStarted until the results close, then restore it.
+    const desktopHidden = !!loading || !!results || state !== SnowWarEngineState.INACTIVE;
+
+    useEffect(() =>
+    {
+        if(!desktopHidden) return;
+
+        document.body.classList.add('snowwar-desktop-hidden');
+
+        return () => document.body.classList.remove('snowwar-desktop-hidden');
+    }, [ desktopHidden ]);
+
     const loadingVisible = !!loading && !results && (state === SnowWarEngineState.GAME_STARTING || state === SnowWarEngineState.STAGE_LOADING);
     const hudVisible = !results && state >= SnowWarEngineState.STAGE_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
 

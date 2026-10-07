@@ -117,7 +117,7 @@ const SnowWarCountdownView: FC<{ startedAt: number; desktop: { width: number; he
 
 /** `snowwar_exit_confirmation` frame (270x163) at the layout's own (0, 0). */
 const SnowWarExitConfirmationView: FC<{ onYes: () => void; onNo: () => void }> = ({ onYes, onNo }) => (
-    <OctaneCardView className="snowwar-window snowwar-exit-confirmation" frameStyle={3} initialPosition={{ x: 0, y: 0 }} isResizable={false} uniqueKey="snowwar-exit-confirmation" style={{ width: 270, height: 163 }}>
+    <OctaneCardView className="snowwar-window snowwar-game-window snowwar-exit-confirmation" frameStyle={3} initialPosition={{ x: 0, y: 0 }} isResizable={false} uniqueKey="snowwar-exit-confirmation" style={{ width: 270, height: 163 }}>
         <OctaneCardHeaderView headerText={LocalizeText('snowwar.exit.title')} onCloseClick={onNo} />
         <div className="snowwar-frame-content" style={{ width: 264, height: 124 }}>
             <SnowWarText align="center" bold size={13} text={LocalizeText('snowwar.exit.confirmation')} wrap x={12} y={12} width={238} height={18} />

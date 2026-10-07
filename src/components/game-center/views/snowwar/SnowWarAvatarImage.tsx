@@ -11,6 +11,8 @@ interface AvatarBitmap
 
 const CACHE: Map<string, AvatarBitmap> = new Map();
 const CACHE_MAX = 128;
+const RETRY_MS = 500;
+const RETRY_LIMIT = 40;
 
 /** Team uniform like AIR getAvatarFigure: team 2 wears ch-20001, everyone else ch-20000; cc removed. */
 export const getSnowWarUniformFigure = (figure: string, teamId: number) =>
@@ -73,16 +75,38 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
         if(CACHE.has(key)) return;
 
         let disposed = false;
+        let attempts = 0;
+        let retryTimer: ReturnType<typeof setTimeout> = null;
+
+        // The renderer may not be ready yet (null image) or, while the arena room is being built,
+        // hand back an empty crop; try again shortly instead of leaving the bitmap window blank.
+        const retry = (renderFigure: string) =>
+        {
+            if(disposed || attempts >= RETRY_LIMIT) return;
+
+            attempts++;
+            clearTimeout(retryTimer);
+            retryTimer = setTimeout(() => render(renderFigure), RETRY_MS);
+        };
 
         const render = (renderFigure: string) =>
         {
             if(disposed) return;
 
+            // resetFigure fires once the figure's parts are downloaded (same path as LayoutAvatarImageView).
             const image = GetAvatarRenderManager().createAvatarImage(renderFigure, AvatarScaleType.LARGE, gender, {
                 resetFigure: (nextFigure: string) => render(nextFigure),
                 dispose: null,
                 disposed: false
             });
+
+            if(!image)
+            {
+                retry(renderFigure);
+
+                return;
+            }
+
             const avatarSetType = setType === 'head' ? AvatarSetType.HEAD : AvatarSetType.FULL;
 
             image.setDirection(avatarSetType, direction);
@@ -92,12 +116,24 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
 
             image.dispose();
 
-            if(!url) return;
+            if(!url)
+            {
+                retry(renderFigure);
+
+                return;
+            }
 
             (half ? halve(url) : loadImage(url).then(loaded => ({ url, width: loaded.width, height: loaded.height })))
                 .then(result =>
                 {
                     if(disposed) return;
+
+                    if(result.width <= 2 || result.height <= 2)
+                    {
+                        retry(renderFigure);
+
+                        return;
+                    }
 
                     if(!placeholder)
                     {
@@ -107,7 +143,7 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
 
                     setRendered({ key, bitmap: result });
                 })
-                .catch(() => null);
+                .catch(() => retry(renderFigure));
         };
 
         render(figure);
@@ -115,6 +151,7 @@ export const SnowWarAvatarImage: FC<SnowWarAvatarImageProps> = ({ figure, gender
         return () =>
         {
             disposed = true;
+            clearTimeout(retryTimer);
         };
     }, [ key, figure, gender, setType, direction, half ]);
 

@@ -196,6 +196,11 @@
     white-space: nowrap;
 }
 
+/* Window desktop 1 is hidden during a game; the game's own layer-2 windows and alerts stay. */
+body.snowwar-desktop-hidden #draggable-windows-container > .draggable-window:not(:has(.snowwar-game-window, .octane-alert)) {
+    display: none !important;
+}
+
 /* The arena room canvas and the HUD; inert until a game runs so the room underneath keeps its input. */
 .snowwar-arena-layer {
     position: fixed;
