@@ -1,5 +1,5 @@
 import { GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
-import { FC, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import {
     CatalogPageName,
     GetGroupManager,
@@ -29,6 +29,42 @@ const TYPE_HELP: string[] = ['regular', 'exclusive', 'private'];
 const BASE_X = 10;
 const BASE_Y = 43;
 
+// Outstanding GroupConfirmRemoveMember requests in the order they were sent. Entries expire so an answer that never comes cannot
+// block later requests or be matched much later to the wrong click.
+const LEAVE_REQUEST_TTL_MS = 10000;
+let leaveRequests: { groupId: number; userId: number; at: number }[] = [];
+
+const pruneLeaveRequests = () => {
+    const now = Date.now();
+
+    leaveRequests = leaveRequests.filter((request) => now - request.at < LEAVE_REQUEST_TTL_MS);
+};
+
+const hasLiveLeaveRequest = (groupId: number) => {
+    pruneLeaveRequests();
+
+    return leaveRequests.some((request) => request.groupId === groupId);
+};
+
+const queueLeaveRequest = (groupId: number, userId: number) => {
+    pruneLeaveRequests();
+    leaveRequests.push({ groupId, userId, at: Date.now() });
+    SendMessageComposer(new GroupConfirmRemoveMemberComposer(groupId, userId));
+};
+
+/** The oldest outstanding request, if it was made for this user. */
+const takeLeaveRequest = (userId: number) => {
+    pruneLeaveRequests();
+
+    const request = leaveRequests[0];
+
+    if (!request || request.userId !== userId) return null;
+
+    leaveRequests.shift();
+
+    return request;
+};
+
 interface GroupInformationViewProps {
     groupInformation: GroupInformationParser;
 }
@@ -36,22 +72,48 @@ interface GroupInformationViewProps {
 export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
     const { groupInformation = null } = props;
     const { showConfirm = null } = useNotification();
-    const leavingGroupRef = useRef<number>(0);
     const userId = GetSessionDataManager().userId;
+    const shownGroupId = groupInformation?.id ?? 0;
+    const shownGroupIdRef = useRef<number>(shownGroupId);
+    const confirmOpenRef = useRef<boolean>(false);
 
-    // Leaving first asks the server what it would cost (GroupConfirmRemoveMember); the answer opens the v75 confirmation.
+    shownGroupIdRef.current = shownGroupId;
+
+    // A confirmation belongs to the group it was asked for: showing another group (or closing the window) retires it.
+    useEffect(() => {
+        confirmOpenRef.current = false;
+    }, [shownGroupId]);
+
+    useEffect(() => () => {
+        shownGroupIdRef.current = 0;
+    }, []);
+
+    // GroupConfirmMemberRemove carries only userId and furnitureCount, so the answer cannot name its group. The server answers in
+    // request order; each request therefore waits in a queue and the next answer belongs to the oldest one still in it.
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
         const parser = event.getParser();
-        const groupId = leavingGroupRef.current;
+        const request = takeLeaveRequest(parser.userId);
 
-        if (!groupId || parser.userId !== userId) return;
+        // Answers to requests made for a group that is no longer shown are swallowed, never attributed to the current one.
+        if (!request || request.groupId !== shownGroupIdRef.current) return;
 
-        leavingGroupRef.current = 0;
+        let isSent = false;
 
+        confirmOpenRef.current = true;
         showConfirm(
             LocalizeText(parser.furnitureCount > 0 ? 'group.leaveconfirm.desc' : 'group.leaveconfirm_nofurni.desc', ['amount'], [parser.furnitureCount.toString()]),
-            () => SendMessageComposer(new GroupRemoveMemberComposer(groupId, userId)),
-            null,
+            () => {
+                confirmOpenRef.current = false;
+
+                // One removal per confirmation, whatever re-renders or repeated callback invocations happen, and only while that group is shown.
+                if (isSent || request.groupId !== shownGroupIdRef.current) return;
+
+                isSent = true;
+                SendMessageComposer(new GroupRemoveMemberComposer(request.groupId, request.userId));
+            },
+            () => {
+                confirmOpenRef.current = false;
+            },
             LocalizeText('generic.ok'),
             LocalizeText('generic.cancel'),
             LocalizeText('group.leaveconfirm.title')
@@ -67,8 +129,10 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
     const nameX = BASE_X + 125 + (groupInformation.canMembersDecorate ? 15 : 0);
 
     const leaveGroup = () => {
-        leavingGroupRef.current = groupInformation.id;
-        SendMessageComposer(new GroupConfirmRemoveMemberComposer(groupInformation.id, userId));
+        // One live request at a time: a second click waits for the first answer (or its expiry) and while its confirmation is open.
+        if (confirmOpenRef.current || hasLiveLeaveRequest(groupInformation.id)) return;
+
+        queueLeaveRequest(groupInformation.id, userId);
     };
 
     const handleAction = (action: string) => {
