@@ -450,7 +450,8 @@ export const RewardTrackView: FC<{}> = () => {
     const onClaim = (prize: RewardTrackPrizeData) => track && claimPrize && claimPrize(track.id, prize.id);
     const onPremium = () => track && track.hasPremiumConfig && !track.premium && setPremiumConfirm(true);
     const progressX = track ? layout.xForPoints(track.points, safePage) : 0;
-    const progressFill = Math.max(0, Math.min(MAIN_BAR_WIDTH, Math.round(MAIN_BAR_WIDTH * Math.max(0, Math.min(1, progressX / MAIN_BAR_WIDTH)))));
+    // the official loading bar truncates the x position (Math.trunc(x) / width) before scaling it back to the bar width
+    const progressFill = Math.max(0, Math.min(MAIN_BAR_WIDTH, Math.trunc(progressX)));
     const progressShape = progressFill >= MAIN_BAR_WIDTH - 4 ? MAIN_BAR_WIDTH : progressFill + 4;
     let unclaimedBefore = 0;
     let unclaimedAfter = 0;
@@ -482,7 +483,7 @@ export const RewardTrackView: FC<{}> = () => {
             <OctaneCard
                 className="octane-reward-track resize-none"
                 uniqueKey="reward-track"
-                windowPosition={DraggableWindowPosition.TOP_CENTER}
+                windowPosition={DraggableWindowPosition.CENTER}
                 style={themeStyle}
                 data-theme={themeKey}
             >
