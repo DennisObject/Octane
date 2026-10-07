@@ -155,24 +155,14 @@
 .octane-furni-gift .fnd-gift-avatar {
     position: absolute;
     top: 2px;
-    left: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    left: 6px;
     width: 60px;
     height: 140px;
     overflow: hidden;
 }
 
-.octane-furni-gift .fnd-gift-avatar .avatar-image {
-    position: static !important;
-    inset: auto !important;
-    flex: 0 0 auto;
-    width: auto !important;
-    height: auto !important;
-}
-
 .octane-furni-gift .fnd-gift-avatar img {
+    position: absolute;
     display: block;
     max-width: none;
     image-rendering: var(--octane-pixel-art, pixelated);
