@@ -49,3 +49,7 @@
 .native100-dropmenu__region { position: absolute; inset: 0; cursor: pointer; }
 .native100-dropmenu__list { position: absolute; z-index: 5; }
 .native100-dropmenu__item { position: absolute; cursor: pointer; }
+
+.native0-tab { cursor: pointer; }
+.native0-tab > .native-skin { position: absolute; left: 0; top: 0; }
+.native0-tab__label { position: absolute; display: block; pointer-events: none; color: #000; white-space: nowrap; }

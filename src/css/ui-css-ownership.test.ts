@@ -56,7 +56,6 @@ describe('UI CSS ownership', () =>
         const roomSettingsCss = readSource('src/css/room/NavigatorRoomSettings.css');
         const indexCss = readSource('src/css/index.css');
         const wiredCss = readSource('src/css/WiredView.css');
-        const modToolsTicketsView = readSource('src/components/mod-tools/views/tickets/ModToolsTicketsView.tsx');
         const inventoryView = readSource('src/components/inventory/InventoryView.tsx');
         const inventoryCategoryFilterView = readSource('src/components/inventory/views/InventoryCategoryFilterView.tsx');
         const navigatorView = readSource('src/components/navigator/NavigatorView.tsx');
@@ -116,7 +115,6 @@ describe('UI CSS ownership', () =>
         expect(indexCss).toContain('[class*="octane-mod-tools-"] :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-white\\/70)');
         expect(wiredCss).toContain('.octane-wired__body');
         expect(wiredCss).toContain('overflow-y: auto');
-        expect(modToolsTicketsView).toContain('max-w-[calc(100vw-16px)]');
         expect(inventoryView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorRoomSettingsView).toContain('max-w-[calc(100vw-16px)]');

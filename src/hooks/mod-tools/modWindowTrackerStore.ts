@@ -1,6 +1,6 @@
 import { createOctaneStore } from '../../state/createOctaneStore';
 
-export type ModWindowType = 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits' | 'userChatlog' | 'roomChatlog' | 'cfhChatlog';
+export type ModWindowType = 'issueBrowser' | 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits' | 'userChatlog' | 'roomChatlog' | 'cfhChatlog';
 
 export const MOD_WINDOW_SIZE: Record<ModWindowType, { width: number; height: number }> = {
     roomTool: { width: 240, height: 437 },
@@ -10,7 +10,8 @@ export const MOD_WINDOW_SIZE: Record<ModWindowType, { width: number; height: num
     roomVisits: { width: 292, height: 224 },
     userChatlog: { width: 480, height: 565 },
     roomChatlog: { width: 480, height: 565 },
-    cfhChatlog: { width: 480, height: 565 }
+    cfhChatlog: { width: 480, height: 565 },
+    issueBrowser: { width: 585, height: 273 }
 };
 
 export interface ModWindowRect {
@@ -25,6 +26,8 @@ export interface ModWindow extends ModWindowRect {
     key: string;
     /** Bumped when the window is shown again while open: the replacement instance starts over (and asks for its data again). */
     revision: number;
+    /** The window was closed with its close button but keeps its frame (the issue browser is only hidden): showing it again puts it back where it was. */
+    hidden?: boolean;
     /** What the window needs besides its key (the user a message goes to, ...). */
     params: Record<string, string | number>;
 }
@@ -52,6 +55,7 @@ interface ModWindowTrackerState {
     windows: ModWindow[];
     show: (request: ModWindowShowRequest) => void;
     close: (type: ModWindowType, key: string) => void;
+    hide: (type: ModWindowType, key: string) => void;
     move: (type: ModWindowType, key: string, x: number, y: number) => void;
     resize: (type: ModWindowType, key: string, width: number, height: number) => void;
     get: (type: ModWindowType, key: string) => ModWindow | null;
@@ -74,7 +78,9 @@ export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>
         const existing = get().windows.find((entry) => entry.type === type && entry.key === key);
 
         if (existing) {
-            set((state) => ({ windows: toggle ? state.windows.filter((entry) => entry !== existing) : state.windows.map((entry) => (entry === existing ? { ...entry, revision: entry.revision + 1 } : entry)) }));
+            set((state) => ({
+                windows: toggle ? state.windows.filter((entry) => entry !== existing) : state.windows.map((entry) => (entry === existing ? { ...entry, hidden: false, revision: entry.revision + 1 } : entry))
+            }));
 
             return;
         }
@@ -85,10 +91,11 @@ export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>
             ? below
                 ? { x: parent.x, y: parent.y + parent.height + 5 }
                 : { x: parent.x + parent.width + 5, y: parent.y }
-            : { x: window.innerWidth / 2 - width / 2, y: window.innerHeight / 2 - height / 2 };
+            : { x: Math.floor(window.innerWidth / 2 - width / 2), y: Math.floor(window.innerHeight / 2 - height / 2) };
 
         set((state) => ({ windows: [...state.windows, { type, key, width, height, revision: 0, params, ...clampToDesktop({ ...placed, width, height }) }] }));
     },
+    hide: (type, key) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, hidden: true } : entry)) })),
     close: (type, key) => set((state) => ({ windows: state.windows.filter((entry) => entry.type !== type || entry.key !== key) })),
     move: (type, key, x, y) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, x, y } : entry)) })),
     resize: (type, key, width, height) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, width, height } : entry)) }))

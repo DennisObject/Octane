@@ -1,8 +1,9 @@
 import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import { GetRoomSession, ISelectedUser } from '../../api';
-import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { GetRoomSession, ISelectedUser, LocalizeText } from '../../api';
+import { MOD_WINDOW_SIZE, useIssueManager, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
+import { IssueBrowserView } from './views/IssueBrowserView';
 import { ModActionView } from './views/ModActionView';
 import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
@@ -10,7 +11,6 @@ import { RoomVisitsView } from './views/RoomVisitsView';
 import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
 import { UserInfoView } from './views/UserInfoView';
-import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
 
 
 // Classic v75 ModerationManager / StartPanelCtrl (fme): the panel opens when the moderator init message arrives, the room and chatlog buttons follow the
@@ -26,14 +26,15 @@ export const ModToolsView: FC<{}> = () => {
     const panelCreatedRef = useRef(false);
     const settingsRef = useRef<typeof settings>(null);
     const [selectedUser, setSelectedUser] = useState<ISelectedUser>(null);
-    const [isTicketsVisible, setIsTicketsVisible] = useState(false);
     const windows = useModWindowTrackerStore((state) => state.windows);
     const showWindow = useModWindowTrackerStore((state) => state.show);
     const closeWindow = useModWindowTrackerStore((state) => state.close);
+    const hideWindow = useModWindowTrackerStore((state) => state.hide);
     const resizeWindow = useModWindowTrackerStore((state) => state.resize);
     const startPanel = useModWindowTrackerStore((state) => state.startPanel);
     const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
     const { settings = null } = useModTools();
+    const issueContext = useIssueManager();
 
     useEffect(() => {
         settingsRef.current = settings;
@@ -135,11 +136,13 @@ export const ModToolsView: FC<{}> = () => {
                     x={startPanel.x}
                     y={startPanel.y}
                     onMove={(x, y) => setStartPanel({ ...startPanel, x, y })}
-                    onTicketQueue={() => setIsTicketsVisible(true)}
+                    onTicketQueue={() => showWindow({ type: 'issueBrowser', key: 'main', ...MOD_WINDOW_SIZE.issueBrowser, parent: null })}
                     onUserInfo={() => CreateLinkEvent(`mod-tools/toggle-user-info/${selectedUser.userId}`)}
                 />
             )}
             {windows.map((entry) => {
+                if (entry.hidden) return null;
+
                 const key = `${entry.type}:${entry.key}:${entry.revision}`;
 
                 if (entry.type === 'roomTool') {
@@ -215,6 +218,22 @@ export const ModToolsView: FC<{}> = () => {
                     );
                 }
 
+                if (entry.type === 'issueBrowser') {
+                    return (
+                        <IssueBrowserView
+                            key={key}
+                            context={issueContext}
+                            height={entry.height}
+                            localize={LocalizeText}
+                            width={entry.width}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => hideWindow('issueBrowser', entry.key)}
+                            onResize={(width, height) => resizeWindow('issueBrowser', entry.key, width, height)}
+                        />
+                    );
+                }
+
                 if (entry.type === 'modAction') {
                     return <ModActionView key={key} settings={settings} userId={Number(entry.params.userId)} userName={entry.key} x={entry.x} y={entry.y} onClose={() => closeWindow('modAction', entry.key)} />;
                 }
@@ -236,7 +255,6 @@ export const ModToolsView: FC<{}> = () => {
                 return null;
             })}
             <NativeAlertView />
-            {isTicketsVisible && <ModToolsTicketsView onCloseClick={() => setIsTicketsVisible(false)} />}
         </>
     );
 };
