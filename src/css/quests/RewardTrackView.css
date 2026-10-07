@@ -1699,11 +1699,15 @@
     top: 0;
     width: 132px;
     height: calc(208px - var(--rt-shrink, 0px));
+    /* the official panel clips its children when the window shrinks (0 to 2 visible benefit rows) */
+    overflow: hidden;
     --rt-border: url("../../assets/images/reward-track/air/border-15-f5def8.png");
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-frame {
     position: absolute;
+    /* drawn above the name and info texts, which the shrunk panel hides behind it */
+    z-index: 1;
     left: 13px;
     top: 13px;
     width: 106px;
