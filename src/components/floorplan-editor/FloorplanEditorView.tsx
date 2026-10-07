@@ -13,7 +13,7 @@ import {
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { GetRoomSession, LocalizeText, Permission, SendMessageComposer } from '../../api';
+import { GetRoomSession, LocalizeText, localizeWithFallback, Permission, SendMessageComposer } from '../../api';
 import { OctaneCardContentView, OctaneCardView } from '../../common';
 import { useHasPermission, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
 import { AIR_FLOOR_ASSETS } from './air/airAssets';
@@ -309,7 +309,7 @@ const OfficialFloorplanEditor: FC = () => {
                             <div className="fp-bc-banner">
                                 <img className="fp-bc-logo" src={AIR_FLOOR_ASSETS.logo} alt="" />
                                 <span className="fp-bc-subtitle">
-                                    <FloorplanNativeText background={0x2d2724} color={0xffffff} text={LocalizeText('floor.plan.editor.subtitle')} textStyle="u_small" />
+                                    <FloorplanNativeText background={0x2d2724} color={0xffffff} text={localizeWithFallback('floor.plan.editor.banner', "Change the shape of your room's floor.")} textStyle="u_small" />
                                 </span>
                             </div>
                             <section className="fp-bc-heightmap" data-testid="floorplan-plan-panel">

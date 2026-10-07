@@ -1573,6 +1573,7 @@
     "discord.settings.preview.hidden_activity": "Activity hidden",
     "discord.settings.preview.not_sharing": "Not sharing on Discord",
     "floor.plan.editor.area": "Area: %total% (%walkable% tiles)",
+    "floor.plan.editor.banner": "Change the shape of your room's floor.",
     "floor.plan.editor.preview.2d.title": "Flat preview (light, works on every device)",
     "floor.plan.editor.preview.3d.title": "3D preview (WebGL, editable, heavier)",
     "floor.plan.editor.preview.mode": "Preview",
