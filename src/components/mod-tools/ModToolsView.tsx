@@ -3,6 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
 import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
+import { ModActionView } from './views/ModActionView';
 import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
 import { RoomVisitsView } from './views/RoomVisitsView';
@@ -167,7 +168,9 @@ export const ModToolsView: FC<{}> = () => {
                             y={entry.y}
                             onClose={() => closeWindow('userInfo', entry.key)}
                             onOpenChatlog={() => showWindow({ type: 'userChatlog', key: entry.key, ...MOD_WINDOW_SIZE.userChatlog, parent: entry, below: true, toggle: true })}
-                            onOpenModAction={() => CreateLinkEvent(`mod-tools/toggle-user-mod-action/${entry.key}`)}
+                            onOpenModAction={(userName) =>
+                                showWindow({ type: 'modAction', key: userName, ...MOD_WINDOW_SIZE.modAction, parent: entry, below: true, toggle: true, params: { userId: Number(entry.key) } })
+                            }
                             onOpenRoomVisits={() => showWindow({ type: 'roomVisits', key: entry.key, ...MOD_WINDOW_SIZE.roomVisits, parent: entry, below: true, toggle: true })}
                             onOpenSendMessage={(userName) =>
                                 showWindow({ type: 'sendMessage', key: userName, ...MOD_WINDOW_SIZE.sendMessage, parent: entry, below: true, toggle: true, params: { userId: Number(entry.key) } })
@@ -210,6 +213,10 @@ export const ModToolsView: FC<{}> = () => {
                             onResize={(width, height) => resizeWindow('roomVisits', entry.key, width, height)}
                         />
                     );
+                }
+
+                if (entry.type === 'modAction') {
+                    return <ModActionView key={key} settings={settings} userId={Number(entry.params.userId)} userName={entry.key} x={entry.x} y={entry.y} onClose={() => closeWindow('modAction', entry.key)} />;
                 }
 
                 if (entry.type === 'sendMessage') {

@@ -40,3 +40,12 @@
 .native0-scrollbar__part { position: absolute; }
 .native0-scrollbar__part > .native-skin { position: absolute; left: 0; top: 0; }
 .native0-list { position: absolute; overflow: hidden; }
+
+/* dropmenu style 100 (Illumina light) inside style 0 windows */
+.native100-dropmenu { position: absolute; }
+.native100-dropmenu > .native-skin, .native100-dropmenu__list > .native-skin, .native100-dropmenu__item > .native-skin { position: absolute; left: 0; top: 0; }
+.native100-dropmenu__caption, .native100-dropmenu__text { position: absolute; overflow: hidden; font-size: 0; line-height: 0; pointer-events: none; }
+.native100-dropmenu__caption > canvas, .native100-dropmenu__text > canvas { display: block; }
+.native100-dropmenu__region { position: absolute; inset: 0; cursor: pointer; }
+.native100-dropmenu__list { position: absolute; z-index: 5; }
+.native100-dropmenu__item { position: absolute; cursor: pointer; }

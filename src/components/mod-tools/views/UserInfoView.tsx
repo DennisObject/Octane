@@ -29,7 +29,7 @@ export interface UserInfoProps {
     onClose: () => void;
     onOpenChatlog: () => void;
     onOpenSendMessage: (userName: string) => void;
-    onOpenModAction: () => void;
+    onOpenModAction: (userName: string) => void;
     onOpenRoomVisits: () => void;
 }
 
@@ -117,7 +117,7 @@ export const UserInfoView: FC<UserInfoProps> = ({ userId, settings, x, y, onClos
                                 y={button('habboinfotool_but').y}
                                 onClick={() => OpenModeratorTool('habboinfotool.url', data.userName)}
                             />
-                            <Native0Button enabled={canModAction} height={21} label={text(findNativeNode(buttons, 'modaction_but'))} width={80} x={button('modaction_but').x} y={button('modaction_but').y} onClick={() => onOpenModAction()} />
+                            <Native0Button enabled={canModAction} height={21} label={text(findNativeNode(buttons, 'modaction_but'))} width={80} x={button('modaction_but').x} y={button('modaction_but').y} onClick={() => onOpenModAction(data.userName)} />
                         </div>
                     </div>
                 )}
