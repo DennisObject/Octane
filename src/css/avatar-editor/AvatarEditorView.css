@@ -815,6 +815,8 @@
 }
 
 .octane-avatar-editor-wardrobe {
+    position: relative;
+    z-index: 3;
     box-sizing: border-box;
     width: 182px;
     height: 490px;
@@ -1005,7 +1007,7 @@
     border-image-slice: 33 10 10 10 fill;
     border-image-width: 33px 10px 10px;
     border-image-repeat: stretch;
-    mask: linear-gradient(transparent 33px, black 33px) left / 2px 100% no-repeat,
+    mask: linear-gradient(transparent 33px, black 33px) left / 1px 100% no-repeat,
         linear-gradient(transparent 33px, black 33px) right / 2px 100% no-repeat,
         linear-gradient(black, black) bottom / 100% 4px no-repeat;
     pointer-events: none;
