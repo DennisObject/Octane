@@ -4,3 +4,4 @@ export * from './SnowWarProjectileAssets';
 export * from './SnowWarSimulation';
 export * from './SnowWarTables';
 export * from './snowWarReturnRoom';
+export * from './SnowWarTypes';
