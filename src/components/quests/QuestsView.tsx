@@ -75,7 +75,8 @@ export const QuestsView: FC<{}> = () => {
                         });
                         return;
                     case 'details':
-                        setDetailsQuest(trackedQuest);
+                        // The tracker's Details link toggles the window: a second click hides it.
+                        setDetailsQuest((prevValue) => (prevValue ? null : trackedQuest));
                         return;
                 }
             },
@@ -120,21 +121,21 @@ export const QuestsView: FC<{}> = () => {
         if (current && current !== detailsQuest) setDetailsQuest(current);
     }, [quests, detailsQuest]);
 
-    const onAccept = useCallback(
+    /** List entry: the official list sends the accept and stays open. */
+    const onAccept = useCallback((quest: QuestMessageData) => acceptQuest && acceptQuest(quest.id), [acceptQuest]);
+
+    /** QuestDetails: accepting hides the details window and closes the quests list. */
+    const onDetailsAccept = useCallback(
         (quest: QuestMessageData) => {
             acceptQuest && acceptQuest(quest.id);
             setDetailsQuest(null);
+            setIsVisible(false);
         },
         [acceptQuest]
     );
 
-    const onReject = useCallback(
-        (quest: QuestMessageData) => {
-            rejectQuest && rejectQuest(quest.id);
-            setDetailsQuest(null);
-        },
-        [rejectQuest]
-    );
+    /** Cancelling only sends the reject; neither window closes until the server answers. */
+    const onReject = useCallback((quest: QuestMessageData) => rejectQuest && rejectQuest(quest.id), [rejectQuest]);
 
     const sorted = [...quests].sort((a, b) => a.sortOrder - b.sortOrder);
 
@@ -198,7 +199,7 @@ export const QuestsView: FC<{}> = () => {
                         <FrameTitle text={localizeWithFallback('quests.details.caption', 'Quest')} />
                     </OctaneCardHeaderView>
                     <div className="air-quest-details-content octane-card-content-shell">
-                        <QuestEntryView quest={detailsQuest} showHint onAccept={onAccept} onReject={onReject} onBlockHeight={setDetailsBlockHeight} />
+                        <QuestEntryView quest={detailsQuest} showHint onAccept={onDetailsAccept} onReject={onReject} onBlockHeight={setDetailsBlockHeight} />
                     </div>
                 </OctaneCardView>
             )}
