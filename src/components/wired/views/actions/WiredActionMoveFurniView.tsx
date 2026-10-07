@@ -1,45 +1,35 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import iconWiredDirE from '../../../../assets/images/wired/icon_wired_dir_e.png';
-import iconWiredDirHorizontalRandom from '../../../../assets/images/wired/icon_wired_dir_horizontal_random.png';
-import iconWiredDirN from '../../../../assets/images/wired/icon_wired_dir_n.png';
-import iconWiredDirNe from '../../../../assets/images/wired/icon_wired_dir_ne.png';
-import iconWiredDirNw from '../../../../assets/images/wired/icon_wired_dir_nw.png';
-import iconWiredDirRandom from '../../../../assets/images/wired/icon_wired_dir_random.png';
-import iconWiredDirS from '../../../../assets/images/wired/icon_wired_dir_s.png';
-import iconWiredDirSe from '../../../../assets/images/wired/icon_wired_dir_se.png';
-import iconWiredDirSw from '../../../../assets/images/wired/icon_wired_dir_sw.png';
-import iconWiredDirVerticalRandom from '../../../../assets/images/wired/icon_wired_dir_vertical_random.png';
-import iconWiredDirW from '../../../../assets/images/wired/icon_wired_dir_w.png';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { WIRED_DIRECTION_GRID, WiredDirectionIcon } from '../WiredDirectionIcon';
+import { WIRED_DIRECTION_GRID, WiredDirectionIcon, WiredMoveIconName } from '../WiredDirectionIcon';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-const NORMAL_DIRECTION_VALUE_MAP: Record<number, { value: number; icon: string }> = {
-    0: { value: 6, icon: iconWiredDirN },
-    1: { value: 8, icon: iconWiredDirNe },
-    2: { value: 5, icon: iconWiredDirE },
-    3: { value: 9, icon: iconWiredDirSe },
-    4: { value: 4, icon: iconWiredDirS },
-    5: { value: 10, icon: iconWiredDirSw },
-    6: { value: 7, icon: iconWiredDirW },
-    7: { value: 11, icon: iconWiredDirNw }
+// AIR wf_act_move_rotate: the radio showing move_<direction> sends this value.
+const NORMAL_DIRECTION_VALUE_MAP: Record<number, number> = {
+    0: 4,
+    1: 8,
+    2: 5,
+    3: 9,
+    4: 6,
+    5: 10,
+    6: 7,
+    7: 11
 };
 
-const extraDirectionOptions: { value: number; icon: string }[] = [
+const extraDirectionOptions: { value: number; icon: WiredMoveIconName }[] = [
     {
         value: 1,
-        icon: iconWiredDirRandom
+        icon: 'rnd'
     },
     {
         value: 2,
-        icon: iconWiredDirHorizontalRandom
+        icon: 'diag'
     },
     {
         value: 3,
-        icon: iconWiredDirVerticalRandom
+        icon: 'vrt'
     }
 ];
 
@@ -100,20 +90,20 @@ export const WiredActionMoveFurniView: FC<{}> = (props) => {
                                 return <div key={`move-furni-empty-${rowIndex}-${columnIndex}`} />;
                             }
 
-                            const option = NORMAL_DIRECTION_VALUE_MAP[direction];
+                            const value = NORMAL_DIRECTION_VALUE_MAP[direction];
 
                             return (
                                 <label key={`move-furni-${direction}`} className="flex items-center justify-center gap-[2px] cursor-pointer">
                                     <input
-                                        checked={movement === option.value}
+                                        checked={movement === value}
                                         className="form-check-input"
-                                        id={`movement${option.value}`}
+                                        id={`movement${value}`}
                                         name="movement"
                                         type="radio"
-                                        onChange={(event) => setMovement(option.value)}
+                                        onChange={(event) => setMovement(value)}
                                     />
                                     <span className="inline-flex items-center justify-center">
-                                        <WiredDirectionIcon direction={option.value} iconSrc={option.icon} selected={movement === option.value} />
+                                        <WiredDirectionIcon direction={direction} selected={movement === value} />
                                     </span>
                                 </label>
                             );
@@ -133,7 +123,7 @@ export const WiredActionMoveFurniView: FC<{}> = (props) => {
                                     onChange={(event) => setMovement(option.value)}
                                 />
                                 <span className="inline-flex items-center justify-center">
-                                    <WiredDirectionIcon direction={option.value} iconSrc={option.icon} selected={movement === option.value} />
+                                    <WiredDirectionIcon direction={option.value} icon={option.icon} selected={movement === option.value} />
                                 </span>
                             </label>
                         );
