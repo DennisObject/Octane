@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetAssetBundleUrl, GetConfiguration } from '@octane/renderer';
 
 export type AssetPresence = 'present' | 'missing' | 'unknown';
 
@@ -23,7 +23,10 @@ export const assetUrlsFor = (classname: string): { iconUrl: string; bundleUrl: s
 
     const fill = (template: string) => (template && libname ? template.replace(/%libname%/gi, libname).replace(/%param%/gi, '') : '');
 
-    return { iconUrl: fill(read('furni.asset.icon.url')), bundleUrl: fill(read('furni.asset.url')) };
+    // The renderer downloads the bundle in the configured format (asset.bundle.format), whatever extension the template has.
+    const bundleUrl = fill(read('furni.asset.url'));
+
+    return { iconUrl: fill(read('furni.asset.icon.url')), bundleUrl: typeof GetAssetBundleUrl === 'function' ? GetAssetBundleUrl(bundleUrl) : bundleUrl };
 };
 
 const probe = async (url: string, signal: AbortSignal): Promise<AssetPresence> => {
