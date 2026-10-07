@@ -205,6 +205,7 @@ const UnclaimedButtonView: FC<{ onClick: () => void }> = ({ onClick }) => {
             height={30}
             style={{ left: 412 - width, width }}
             textStyle="u_regular"
+            thin
             title={localizeWithFallback('dailytasks.unclaimed.tooltip', '')}
             width={width}
             onClick={onClick}

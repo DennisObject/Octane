@@ -11,7 +11,7 @@ const BANDS: Record<'default' | 'hover' | 'pressed', { from: number; to: number;
     ],
     hover: [
         { from: 0, to: 15, background: 0xffffff },
-        { from: 15, to: 29, background: 0xeeeeee }
+        { from: 15, to: 29, background: 0xebebeb }
     ],
     pressed: [
         { from: 0, to: 15, background: 0xe1e1e1 },
@@ -36,6 +36,8 @@ interface QuestButtonProps {
     textStyle?: NativeTextStyleName;
     style?: CSSProperties;
     tint?: boolean;
+    /** The thin shiny skin (the unclaimed button) has a lighter lower band when hovered than the thick skin. */
+    thin?: boolean;
     /** Label colour; coloured (tinted) buttons draw a white label. */
     labelColor?: number;
     /** The button height of the layout; the label bands split the face at row 15 and the lower band runs to the bottom. */
@@ -43,9 +45,13 @@ interface QuestButtonProps {
     children?: ReactNode;
 }
 
-export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onClick, title, textStyle = 'button_shiny_bold', style, height = 29, tint = false, labelColor = 0x000000 }) => {
+export const QuestButton: FC<QuestButtonProps> = ({ className, label, width, onClick, title, textStyle = 'button_shiny_bold', style, height = 29, tint = false, thin = false, labelColor = 0x000000 }) => {
     const [state, setState] = useState<'default' | 'hover' | 'pressed'>('default');
-    const bands = BANDS[state].map((band) => (tint ? { ...band, background: tintBand(band.background) } : band));
+    const bands = BANDS[state].map((band) => {
+        const background = thin && state === 'hover' && band.from > 0 ? 0xeeeeee : band.background;
+
+        return tint ? { ...band, background: tintBand(background) } : { ...band, background };
+    });
 
     return (
         <button
