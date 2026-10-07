@@ -191,35 +191,15 @@
     position: absolute;
     top: 51px;
     left: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 60px;
     height: 149px;
     overflow: hidden;
 }
 
-.octane-catalog-gift-avatar .octane-catalog-gift-avatar-image {
-    position: static !important;
-    inset: auto !important;
-    flex: 0 0 auto;
-    width: auto !important;
-    height: auto !important;
-}
-
-.octane-catalog-gift-avatar .octane-catalog-gift-avatar-image img {
+.octane-catalog-gift-avatar img {
+    position: absolute;
     display: block;
-    width: auto;
     max-width: none;
-    height: auto;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
-}
-
-.octane-catalog-gift-incognito {
-    position: static;
-    flex: 0 0 auto;
-    width: 37px;
-    height: 48px;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 

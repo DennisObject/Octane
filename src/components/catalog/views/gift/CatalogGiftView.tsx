@@ -25,7 +25,7 @@ import giftPaletteBorderImage from '../../../../assets/images/catalog/air/gift/p
 import giftPaletteSelectionImage from '../../../../assets/images/catalog/air/gift/palette-selection.png';
 import giftSmallCoinImage from '../../../../assets/images/catalog/air/gift/small-coin.png';
 import giftSmallPenImage from '../../../../assets/images/catalog/air/gift/small-pen.png';
-import { LayoutAvatarImageView, LayoutFurniImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { LayoutFurniImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import {
     CatalogEvent,
     CatalogInitGiftEvent,
@@ -43,6 +43,7 @@ import {
     resolveGiftWrappingSelection,
     wrapGiftSelectionIndex
 } from './CatalogGiftView.helpers';
+import { CatalogGiftAvatar } from './CatalogGiftAvatar';
 
 interface GiftPaletteColor {
     id: number;
@@ -521,19 +522,10 @@ export const CatalogGiftView: FC = () => {
                 )}
 
                 <img alt="" className="octane-catalog-gift-card" draggable={false} src={giftCardImage} />
-                <div className="octane-catalog-gift-avatar">
-                    {showPurchaserIdentity ? (
-                        <LayoutAvatarImageView
-                            headOnly
-                            classNames={['octane-catalog-gift-avatar-image']}
-                            direction={2}
-                            figure={sessionDataManager.figure}
-                            nativeCroppedHead
-                        />
-                    ) : (
-                        <img alt="" className="octane-catalog-gift-incognito" draggable={false} src={giftIncognitoImage} />
-                    )}
-                </div>
+                <CatalogGiftAvatar
+                    figure={showPurchaserIdentity ? sessionDataManager.figure : null}
+                    imageUrl={showPurchaserIdentity ? null : giftIncognitoImage}
+                />
                 <textarea
                     aria-label={LocalizeText('catalog.gift_wrapping_new.message_hint')}
                     className={`octane-catalog-gift-message${isAutocompleteVisible && suggestions.length >= 2 ? ' is-concealed' : ''}`}
