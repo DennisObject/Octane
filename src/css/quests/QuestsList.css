@@ -384,8 +384,8 @@
 .air-quest-button-seam {
     position: absolute;
     top: 14px;
-    right: 2px;
-    left: 2px;
+    right: 4px;
+    left: 4px;
     height: 1px;
     pointer-events: none;
 }
