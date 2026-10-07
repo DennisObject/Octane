@@ -1,4 +1,5 @@
 @charset "UTF-8";
+@import "./SnowStorm.css";
 /* Game center overlay + SnowWar arena styles.
    Loaded via src/index.tsx like every other stylesheet — note that
    src/components/index.scss is NOT part of the build (dead file). */
@@ -357,7 +358,8 @@
 .snowwar-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1500;
+  /* Below the draggable windows (400+) so the exit confirmation and alerts open over the arena. */
+  z-index: 300;
   background: radial-gradient(ellipse at center, #2c4a63 0%, #16283a 100%);
   display: flex;
   flex-direction: column;
