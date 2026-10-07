@@ -17,7 +17,7 @@
 .octane-extended-profile__top { position: relative; width: 500px; height: 207px; }
 .octane-extended-profile__left { position: absolute; left: 0; top: 16px; width: 257px; height: 192px; }
 .octane-extended-profile__avatar-shell { position: absolute; left: 10px; top: 0; width: 34px; height: 84px; }
-.octane-extended-profile__avatar-image { position: static !important; width: auto !important; height: auto !important; }
+.octane-extended-profile__avatar-shell .octane-extended-profile__avatar-image { display: block; max-width: none; image-rendering: pixelated; pointer-events: none; }
 .octane-extended-profile__identity-copy { position: absolute; left: 56px; top: -4px; width: 200px; height: 118px; }
 .octane-extended-profile__username { position: absolute; left: 0; top: 0; height: 16px; font-size: 12px; font-weight: 700; line-height: 16px; }
 .octane-extended-profile__motto { position: absolute; left: 0; top: 16px; width: 200px; height: 30px; font-size: 11px; font-style: italic; line-height: 15px; overflow: hidden; overflow-wrap: anywhere; }
@@ -33,7 +33,8 @@
 .octane-extended-profile__status-copy .icon-pf-tick { position: absolute; left: 0; top: 5px; width: 16px; height: 16px; background-position: center; background-repeat: no-repeat; }
 .octane-extended-profile__status-text { position: absolute; left: 16px; top: 4px; height: 17px; font-weight: 700; line-height: 17px; white-space: nowrap; }
 .octane-extended-profile__request-sent { position: absolute; left: 0; top: 4px; height: 17px; font-style: italic; line-height: 17px; white-space: nowrap; }
-.octane-extended-profile__friend-button { position: absolute; left: 12px; top: 0; width: 105px; height: 23px; white-space: nowrap; }
+.octane-extended-profile__friend-button { position: absolute; left: 12px; top: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 105px; height: 23px; white-space: nowrap; }
+.octane-extended-profile__friend-label { position: relative; top: -1px; mix-blend-mode: multiply; }
 .octane-extended-profile__actions { position: absolute; left: 0; top: 117px; width: 257px; height: 15px; }
 .octane-extended-profile__link { position: absolute; top: 0; left: 0; height: 16px; border: 0; background: none; font-size: 11px !important; line-height: 16px; text-decoration: underline; }
 .octane-extended-profile__link + .octane-extended-profile__link { left: 85px; }

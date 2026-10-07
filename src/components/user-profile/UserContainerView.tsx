@@ -7,8 +7,10 @@ import { block as profileBlockIcon, level as profileLevelIcon, rooms as profileR
 import hiddenIcon from '../../assets/images/user-profile/swf/hidden_icon.png';
 import offlineIcon from '../../assets/images/user-profile/swf/offline_icon.png';
 import onlineIcon from '../../assets/images/user-profile/swf/online_icon.png';
-import { LayoutAvatarImageView, LayoutBadgeImageView, UserIdentityView } from '../../common';
+import { LayoutBadgeImageView, UserIdentityView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useFriendsActions, useFriendsState } from '../../hooks';
+import { ProfileAvatarImage } from './ProfileAvatarImage';
 import { RelationshipsContainerView } from './RelationshipsContainerView';
 
 interface UserContainerViewProps {
@@ -96,7 +98,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                 <div className="octane-extended-profile__left">
                     <div className="octane-extended-profile__identity">
                         <div className="octane-extended-profile__avatar-shell">
-                            <LayoutAvatarImageView figure={userProfile.figure} direction={2} nativeCroppedHead classNames={['octane-extended-profile__avatar-image']} />
+                            <ProfileAvatarImage figure={userProfile.figure} />
                         </div>
                         <div className="octane-extended-profile__identity-copy">
                             <UserIdentityView
@@ -132,7 +134,7 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                                 <div className="octane-extended-profile__status-copy">
                                     {canSendFriendRequest && (
                                         <button className="octane-extended-profile__friend-button" type="button" onClick={addFriend}>
-                                            {LocalizeText('extendedprofile.addasafriend')}
+                                            <NativeText background={0xffffff} className="octane-extended-profile__friend-label" text={LocalizeText('extendedprofile.addasafriend')} textStyle="u_regular" />
                                         </button>
                                     )}
                                     {(isOwnProfile || userProfile.isMyFriend) && (

@@ -1,12 +1,20 @@
-import { CreateLinkEvent, GetExtendedProfileByNameMessageComposer, GetRoomEngine, GetSessionDataManager, RoomObjectCategory, RoomObjectOperationType } from '@octane/renderer';
+import {
+    CreateLinkEvent,
+    GetExtendedProfileByNameMessageComposer,
+    GetRoomEngine,
+    GetSessionDataManager,
+    RoomObjectCategory,
+    RoomObjectOperationType
+} from '@octane/renderer';
 import { FC } from 'react';
 import { attemptItemPlacement, CatalogPageName, ProductTypeEnum, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import giftCardImage from '../../../../assets/images/catalog/air/gift/gift-card-blank.png';
 import giftIncognitoImage from '../../../../assets/images/catalog/air/gift/incognito.png';
 import warningAlertImage from '../../../../assets/images/room-widgets/present-widget/warning-alert.png';
 import giftIconBackgroundImage from '../../../../assets/images/room-widgets/present-widget/gift-icon-background.png';
-import { LayoutAvatarImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useCatalogUiState, useFurniturePresentWidget, useInventoryFurni } from '../../../../hooks';
+import { FurnitureGiftAvatar } from './FurnitureGiftAvatar';
 
 // v75 packagecard_new (unopened) and packagecard_new_opened (the gift's contents) in the style 3 frame. The unopened
 // frame is a 306px element_list at x=10 with 10px spacing; the opened one is a 336px container.
@@ -60,17 +68,18 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
     const openSenderProfile = () => hasSender && SendMessageComposer(new GetExtendedProfileByNameMessageComposer(senderName));
 
     const avatar = hasSender ? (
-        <div className="fnd-gift-avatar" onClick={openSenderProfile}>
-            <LayoutAvatarImageView headOnly nativeCroppedHead direction={2} figure={senderFigure} />
-        </div>
+        <FurnitureGiftAvatar figure={senderFigure} onClick={openSenderProfile} />
     ) : (
-        <div className="fnd-gift-avatar">
-            <img alt="" draggable={false} src={giftIncognitoImage} />
-        </div>
+        <FurnitureGiftAvatar imageUrl={giftIncognitoImage} />
     );
 
     return (
-        <OctaneCardView className={'octane-furni-gift ' + (isOpened ? 'is-opened' : 'is-closed')} frameStyle={3} isResizable={false} uniqueKey="octane-furni-gift">
+        <OctaneCardView
+            className={'octane-furni-gift ' + (isOpened ? 'is-opened' : 'is-closed')}
+            frameStyle={3}
+            isResizable={false}
+            uniqueKey="octane-furni-gift"
+        >
             <OctaneCardHeaderView
                 headerText={LocalizeText(hasSender ? 'widget.furni.present.window.title_from' : 'widget.furni.present.window.title', ['name'], [senderName])}
                 onCloseClick={onClose}
@@ -120,7 +129,14 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
                             {imageUrl && <img alt="" className="fnd-gift-image-product" draggable={false} src={imageUrl} />}
                         </div>
                         <div className="fnd-gift-opened-text">
-                            {text && (isClubItem ? text : LocalizeText(isSpacesItem ? 'widget.furni.present.spaces.message_opened' : 'widget.furni.present.message_opened', ['product'], [text]))}
+                            {text &&
+                                (isClubItem
+                                    ? text
+                                    : LocalizeText(
+                                          isSpacesItem ? 'widget.furni.present.spaces.message_opened' : 'widget.furni.present.message_opened',
+                                          ['product'],
+                                          [text]
+                                      ))}
                         </div>
                     </div>
                     <div className="fnd-gift-opened-buttons">
