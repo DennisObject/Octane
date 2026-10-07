@@ -1,8 +1,9 @@
-import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomId, RoomPlaneParser, Vector3d } from '@octane/renderer';
-import { GetConfigurationValue, ISnowWarEngine, ISnowWarHuman, ISnowWarSnowball, SnowWarEngineEvent, SnowWarObjectType } from '../../../../api';
+import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomPlaneParser, Vector3d } from '@octane/renderer';
+import { GetConfigurationValue } from '../octane/GetConfigurationValue';
+import { ISnowWarEngine, ISnowWarHuman, ISnowWarSnowball, SnowWarEngineEvent, SnowWarObjectType } from './SnowWarTypes';
 
-/** The arena is a client-only room (AIR game room id 1); a previewer-range id keeps the normal room UI away from it. */
-export const SNOWWAR_ROOM_ID = RoomId.makeRoomPreviewerId(0x5357);
+/** The arena is a client-only room (AIR game room id 1); an id in RoomId's previewer range (>= 0x7FFF0000) keeps the normal room UI away from it. */
+export const SNOWWAR_ROOM_ID = 0x7FFF5357;
 
 const TILE_WIDTH = 3200;
 const TILE_HALFWIDTH = 1600;

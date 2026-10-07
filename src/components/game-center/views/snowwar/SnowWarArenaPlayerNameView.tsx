@@ -1,7 +1,6 @@
 import { RoomObjectCategory } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import { AddAnimationTickerCallback, GetRoomObjectBounds, GetRoomObjectScreenLocation } from '../../../../api';
-import { SnowWarArenaPlayerName, SNOWWAR_ROOM_ID } from './SnowWarArenaRoom';
+import { AddAnimationTickerCallback, GetRoomObjectBounds, GetRoomObjectScreenLocation, SnowWarArenaPlayerName, SNOWWAR_ROOM_ID } from '../../../../api';
 
 // AIR UserNameView in game room mode: blend 0.75, fades out over 500 ms once its 500 ms timer completes.
 const MAXIMUM_BLEND = 0.75;

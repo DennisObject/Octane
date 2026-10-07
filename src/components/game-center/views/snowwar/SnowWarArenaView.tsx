@@ -1,9 +1,8 @@
 import { GetDesiredResolution, GetRenderer, GetRoomEngine, GetStage, OctaneSprite, OctaneTexture, RoomGeometry, RoomVariableEnum, Vector3d } from '@octane/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { AddAnimationTickerCallback, ISnowWarEngine, SetActiveRoomId, SnowWarChatMessage, SnowWarEngineState } from '../../../../api';
+import { AddAnimationTickerCallback, ISnowWarEngine, SetActiveRoomId, SnowWarArenaPlayerName, SnowWarArenaRoom, SnowWarChatMessage, SnowWarEngineState, SNOWWAR_ROOM_ID } from '../../../../api';
 import { useSnowWar } from '../../../../hooks';
 import { SnowWarArenaChatView } from './SnowWarArenaChatView';
-import { SnowWarArenaPlayerName, SnowWarArenaRoom, SNOWWAR_ROOM_ID } from './SnowWarArenaRoom';
 import { SnowWarArenaPlayerNameView } from './SnowWarArenaPlayerNameView';
 
 const CANVAS_ID = 1;
@@ -24,7 +23,7 @@ const dispatchArenaMouseEvent = (event: MouseEvent) => GetRoomEngine().dispatchM
 /** AIR builds the game room on StageLoad, right after EnterArena, and keeps it until the game is over (`initView` / `gameOver`). */
 const isArenaState = (state: number) => (state >= SnowWarEngineState.GAME_STARTING) && (state <= SnowWarEngineState.STAGE_ENDING);
 
-export const SnowWarArenaView: FC<{}> = () =>
+export const SnowWarArenaView: FC = () =>
 {
     const { engine, state, chatMessages, arenaViewId } = useSnowWar();
 
@@ -80,6 +79,8 @@ export const SnowWarArenaStageView: FC<{ engine: ISnowWarEngine; chatMessages: r
             geometry.location = new Vector3d((((minX + maxX) / 2) + (offset - 1)), (((minY + maxY) / 2) + (offset - 1)), (Math.sqrt((offset * offset) + (offset * offset)) * Math.tan((30 / 180) * Math.PI)));
         }
 
+        const previousActiveRoomId = roomEngine.activeRoomId;
+
         GetStage().addChild(displayObject);
         SetActiveRoomId(SNOWWAR_ROOM_ID);
 
@@ -128,6 +129,7 @@ export const SnowWarArenaStageView: FC<{ engine: ISnowWarEngine; chatMessages: r
             if(displayObject.parent) displayObject.parent.removeChild(displayObject);
 
             room.dispose();
+            SetActiveRoomId(previousActiveRoomId);
         };
     }, [ engine, showPlayerName ]);
 
