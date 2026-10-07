@@ -783,6 +783,7 @@ export class Game2GameStatusMessageEvent extends MessageEvent {}
 export class Game2InArenaQueueMessageEvent extends MessageEvent {}
 export class Game2JoiningGameFailedMessageEvent extends MessageEvent {}
 export class Game2PlayerRematchesMessageEvent extends MessageEvent {}
+export class SnowStormArenaVotesMessageEvent extends MessageEvent {}
 export class Game2RejoinPreviousRoomMessageEvent extends MessageEvent {}
 export class Game2StageEndingMessageEvent extends MessageEvent {}
 export class Game2StageLoadMessageEvent extends MessageEvent {}
@@ -813,6 +814,7 @@ export class Game2GetWeeklyFriendsLeaderboardComposer extends StubClass {}
 export class Game2GetWeeklyGroupLeaderboardComposer extends StubClass {}
 export class Game2GetWeeklyLeaderboardComposer extends StubClass {}
 export class Game2LeaveLobbyMessageComposer extends StubClass {}
+export class Game2VoteArenaMessageComposer extends StubClass {}
 export class Game2LoadStageReadyMessageComposer extends StubClass {}
 export class Game2MakeSnowballMessageComposer extends StubClass {}
 export class Game2PlayAgainMessageComposer extends StubClass {}

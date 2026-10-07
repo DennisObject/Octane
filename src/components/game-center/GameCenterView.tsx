@@ -13,7 +13,7 @@ import { SnowWarLeaderboardView } from './views/snowwar/SnowWarLeaderboardView';
 export const GameCenterView = () =>
 {
     const snowWar: SnowWarHookState = useSnowWar();
-    const { state, account, blockLength, lobby, loading, results, leaderboard, refreshStatus, requestTokenOffers, play, leaveLobby, requestLeaderboard, closeLeaderboard } = snowWar;
+    const { state, account, blockLength, lobby, loading, results, leaderboard, refreshStatus, requestTokenOffers, play, leaveLobby, voteArena, requestLeaderboard, closeLeaderboard } = snowWar;
     const { showConfirm } = useNotificationActions();
     const [ mainVisible, setMainVisible ] = useState(false);
     const [ leaderboardVisible, setLeaderboardVisible ] = useState(false);
@@ -79,9 +79,10 @@ export const GameCenterView = () =>
                     freeGamesLeft={account?.freeGamesLeft ?? -1}
                     hasUnlimitedGames={account?.hasUnlimitedGames ?? false}
                     leaderboardEnabled={GetConfigurationValue<boolean>('games.highscores.enabled', true)}
-                    lobby={lobbyVisible ? { players: lobby.players, maxPlayers: lobby.data.maximumPlayers, queuePosition: lobby.queuePosition, countdownDeadline: lobby.countdownDeadline } : null}
+                    lobby={lobbyVisible ? { players: lobby.players, maxPlayers: lobby.data.maximumPlayers, queuePosition: lobby.queuePosition, countdownDeadline: lobby.countdownDeadline, arenaVotes: lobby.arenaVotes } : null}
                     onBuyTokens={offer => buySnowWarTokens(snowWar, showConfirm, offer)}
                     onCancelLobby={leaveLobby}
+                    onVoteArena={voteArena}
                     onClose={closeMain}
                     onOpenClubCenter={() => CreateLinkEvent('habboUI/open/hccenter')}
                     onPlay={play}
