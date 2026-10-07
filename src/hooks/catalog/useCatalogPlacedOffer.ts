@@ -86,8 +86,9 @@ export const claimPlacedOfferPurchase = (placedObjectPurchaseData: PlacedObjectP
 /**
  * Takes one purchase answer (ok, error, not allowed, sold out or not enough balance). Answers owed
  * to dropped attempts come first; true when the answer belongs to the current drop's purchase.
+ * Only a PurchaseOK names its offer; one for another offer is not this drop's answer.
  */
-export const takePlacedPurchaseAnswer = () => {
+export const takePlacedPurchaseAnswer = (offerId: number = null) => {
     syncAttempt();
 
     if (answersOwedElsewhere > 0) {
@@ -97,6 +98,8 @@ export const takePlacedPurchaseAnswer = () => {
     }
 
     if (!attempt || attempt.answered) return false;
+
+    if (offerId !== null && offerId !== attempt.data.offerId) return false;
 
     attempt.answered = true;
 
@@ -110,14 +113,14 @@ export const releasePlacedOfferPurchase = () => {
 };
 
 /** The current drop's purchase went through; the bought item is placed once it is known. */
-export const markPlacedPurchaseBought = (offerId: number) => {
+export const markPlacedPurchaseBought = () => {
     const current = getSentAttempt();
 
     if (!current) return;
 
     useCatalogStore.getState().setPlacedObjectPurchaseBought(true);
 
-    if (current.ambiguous || offerId !== current.data.offerId) {
+    if (current.ambiguous) {
         retirePlacedOffer();
 
         return;
