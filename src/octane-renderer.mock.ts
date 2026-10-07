@@ -256,6 +256,9 @@ export class ThumbnailStatusMessageEvent extends MessageEvent {}
 // Shared hooks mounted by the registry subscribe even when their feature is
 // disabled. Keep these on the same dispatchable event bus as the room events.
 export class UnseenItemsEvent extends MessageEvent {}
+export class FurnitureListEvent extends MessageEvent {}
+export class FurnitureListAddOrUpdateEvent extends MessageEvent {}
+export class FurnitureListInvalidateEvent extends MessageEvent {}
 export class AuthenticatedEvent extends MessageEvent {}
 export class GoToBreedingNestFailureEvent extends MessageEvent {}
 export class UserHabbiconsEvent extends MessageEvent {}
@@ -424,6 +427,7 @@ export class FriendParser extends StubClass {}
 export class FriendCategoryData extends StubClass {}
 export class FriendRequestData extends StubClass {}
 export class FurnitureListItemParser extends StubClass {}
+export class FurnitureListComposer extends StubClass {}
 export class BotData extends StubClass {}
 export class AchievementData extends StubClass {}
 export class CatalogPageMessageProductData extends StubClass {}

@@ -50,6 +50,7 @@ export interface CatalogUiState {
     objectMoverRequested: boolean;
     purchasableOffer: IPurchasableOffer | null;
     placedObjectPurchaseData: PlacedObjectPurchaseData | null;
+    placedObjectPurchaseSent: boolean;
 }
 
 export interface CatalogActions {
@@ -81,6 +82,7 @@ export interface CatalogActions {
     cancelObjectMover: () => void;
     resetObjectMover: (flag?: boolean) => void;
     setPlacedObjectPurchaseData: (data: PlacedObjectPurchaseData | null) => void;
+    setPlacedObjectPurchaseSent: (sent: boolean) => void;
     resetPlacedOfferData: (flag?: boolean) => void;
     resetRoomPaint: (planeType: string, type: string) => void;
     refreshIndex: () => void;
@@ -111,7 +113,8 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     roomPreviewer: null,
     objectMoverRequested: false,
     purchasableOffer: null,
-    placedObjectPurchaseData: null
+    placedObjectPurchaseData: null,
+    placedObjectPurchaseSent: false
 };
 
 const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
@@ -426,7 +429,9 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({ objectMoverRequested: false });
     },
 
-    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData }),
+    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData, placedObjectPurchaseSent: false }),
+
+    setPlacedObjectPurchaseSent: (placedObjectPurchaseSent) => set({ placedObjectPurchaseSent }),
 
     resetRoomPaint: (planeType, type) => {
         const roomEngine = GetRoomEngine();
@@ -483,7 +488,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             }
         }
 
-        set({ placedObjectPurchaseData: null });
+        set({ placedObjectPurchaseData: null, placedObjectPurchaseSent: false });
     },
 
     refreshIndex: () => invalidateCatalogIndex(get().currentType),

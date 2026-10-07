@@ -1,5 +1,10 @@
 import {
     CatalogPublishedMessageEvent,
+    FurnitureListAddOrUpdateEvent,
+    FurnitureListComposer,
+    FurnitureListEvent,
+    FurnitureListInvalidateEvent,
+    FurnitureListItemParser,
     FurniturePlaceComposer,
     FurniturePlacePaintComposer,
     GetConfiguration,
@@ -17,6 +22,7 @@ import {
     RoomEngineObjectPlacedEvent,
     RoomObjectVariable,
     RoomPreviewer,
+    UnseenItemsEvent,
     UserPermissionsEvent,
     Vector3d
 } from '@octane/renderer';
@@ -26,7 +32,6 @@ import {
     CatalogPage,
     CatalogType,
     DispatchUiEvent,
-    FurniCategory,
     ICatalogNode,
     LocalizeText,
     NotificationAlertType,
@@ -34,19 +39,20 @@ import {
     PlacedObjectPurchaseData,
     PlaySound,
     SendMessageComposer,
-    SoundNames
+    SoundNames,
+    UnseenItemCategory
 } from '../../api';
 import {
     CatalogPurchasedEvent,
     CatalogPurchaseFailureEvent,
     CatalogPurchaseNotAllowedEvent,
-    CatalogPurchaseSoldOutEvent,
-    InventoryFurniAddedEvent
+    CatalogPurchaseSoldOutEvent
 } from '../../events';
 import { useConnectionState, useMessageEvent, useOctaneEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
 import { useCatalogStore } from './catalogStore';
 import { getNodesByOfferIdFromMap, restoreCatalogActivePath, RoomObjectCategory } from './useCatalog.helpers';
+import { claimPlacedOfferPurchase } from './useCatalogPlacedOffer';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import {
     bindCatalogQueryClient,
@@ -234,9 +240,19 @@ export const useCatalogEffects = (): void => {
     useMessageEvent<PurchaseOKMessageEvent>(PurchaseOKMessageEvent, (event) => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
 
-        DispatchUiEvent(new CatalogPurchasedEvent(event.getParser().offer));
+        const purchase = event.getParser().offer;
+
+        DispatchUiEvent(new CatalogPurchasedEvent(purchase));
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
+
+        const { placedObjectPurchaseData, placedObjectPurchaseSent } = useCatalogStore.getState();
+
+        if (!placedObjectPurchaseSent || !placedObjectPurchaseData || purchase?.offerId !== placedObjectPurchaseData.offerId) return;
+
+        getPlacedPurchaseState(placedObjectPurchaseData).bought = true;
+
+        resolvePlacedPurchase();
     });
 
     useMessageEvent<PurchaseErrorMessageEvent>(PurchaseErrorMessageEvent, (event) => {
@@ -317,6 +333,9 @@ export const useCatalogEffects = (): void => {
 
         if (!state.objectMoverRequested || event.type !== RoomEngineObjectPlacedEvent.PLACED) return;
 
+        // The catalog mover runs as -offerId; anything else was not placed from the catalog.
+        if (state.purchasableOffer && event.objectId !== -state.purchasableOffer.offerId) return;
+
         state.resetPlacedOfferData(true);
 
         const purchasableOffer = state.purchasableOffer;
@@ -352,7 +371,7 @@ export const useCatalogEffects = (): void => {
         }
 
         state.setPlacedObjectPurchaseData(
-            new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer)
+            new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer, state.pageId)
         );
 
         switch (state.currentType) {
@@ -397,7 +416,9 @@ export const useCatalogEffects = (): void => {
                 if (roomObject) roomObject.model.setValue(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER, 0.5);
 
                 if (catalogSkipPurchaseConfirmation && !(product && product.isUniqueLimitedItem)) {
-                    SendMessageComposer(new PurchaseFromCatalogComposer(state.pageId, purchasableOffer.offerId, product.extraParam, 1));
+                    const placed = useCatalogStore.getState().placedObjectPurchaseData;
+
+                    if (claimPlacedOfferPurchase(placed)) SendMessageComposer(new PurchaseFromCatalogComposer(placed.pageId, purchasableOffer.offerId, product.extraParam, 1));
                 }
 
                 if (state.catalogPlaceMultipleObjects) state.requestOfferToMover(purchasableOffer);
@@ -406,47 +427,159 @@ export const useCatalogEffects = (): void => {
         }
     });
 
-    useUiEvent<InventoryFurniAddedEvent>(InventoryFurniAddedEvent.FURNI_ADDED, (event) => {
-        const state = useCatalogStore.getState();
-        const placedObjectPurchaseData = state.placedObjectPurchaseData;
-        const roomEngine = GetRoomEngine();
+    // HabboCatalog.itemAddedToInventory places the bought item on the dropped spot. Here the item
+    // must be one the server announced as new after Buy and whose inventory data shows this drop's
+    // product; it is placed once, after this drop's own PurchaseOK.
+    useMessageEvent<UnseenItemsEvent>(UnseenItemsEvent, (event) => {
+        const purchaseState = getSentPurchaseState();
 
-        if (!placedObjectPurchaseData || placedObjectPurchaseData.productClassId !== event.spriteId || placedObjectPurchaseData.roomId !== roomEngine.activeRoomId) return;
+        if (!purchaseState) return;
 
-        switch (event.category) {
-            case FurniCategory.FLOOR: {
-                const floorType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_FLOOR_TYPE);
+        for (const itemId of event.getParser().getItemsByCategory(UnseenItemCategory.FURNI) ?? []) purchaseState.unseenIds.add(itemId);
 
-                if (placedObjectPurchaseData.extraParam !== floorType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            case FurniCategory.WALL_PAPER: {
-                const wallType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_WALL_TYPE);
-
-                if (placedObjectPurchaseData.extraParam !== wallType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            case FurniCategory.LANDSCAPE: {
-                const landscapeType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE);
-
-                if (placedObjectPurchaseData.extraParam !== landscapeType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            default:
-                SendMessageComposer(
-                    new FurniturePlaceComposer(
-                        event.id,
-                        placedObjectPurchaseData.category,
-                        placedObjectPurchaseData.wallLocation,
-                        placedObjectPurchaseData.x,
-                        placedObjectPurchaseData.y,
-                        placedObjectPurchaseData.direction
-                    )
-                );
-        }
-
-        if (!state.catalogPlaceMultipleObjects) state.resetPlacedOfferData();
+        resolvePlacedPurchase();
     });
+
+    useMessageEvent<FurnitureListAddOrUpdateEvent>(FurnitureListAddOrUpdateEvent, (event) => {
+        const purchaseState = getSentPurchaseState();
+
+        if (!purchaseState) return;
+
+        recordInventoryItems(purchaseState, event.getParser().items);
+        resolvePlacedPurchase();
+    });
+
+    useMessageEvent<FurnitureListEvent>(FurnitureListEvent, (event) => {
+        const purchaseState = getSentPurchaseState();
+
+        if (!purchaseState) return;
+
+        const parser = event.getParser();
+
+        recordInventoryItems(purchaseState, parser.fragment.values());
+
+        if (purchaseState.listRequested && parser.fragmentNumber === parser.totalFragments - 1) purchaseState.listLoaded = true;
+
+        resolvePlacedPurchase();
+    });
+
+    useMessageEvent<FurnitureListInvalidateEvent>(FurnitureListInvalidateEvent, () => {
+        const purchaseState = getSentPurchaseState();
+
+        if (!purchaseState) return;
+
+        purchaseState.invalidated = true;
+
+        resolvePlacedPurchase();
+    });
+};
+
+interface PlacedPurchaseState {
+    data: PlacedObjectPurchaseData;
+    bought: boolean;
+    unseenIds: Set<number>;
+    spriteIds: Map<number, number>;
+    listRequested: boolean;
+    listLoaded: boolean;
+    invalidated: boolean;
+}
+
+let placedPurchaseState: PlacedPurchaseState = null;
+
+const getPlacedPurchaseState = (data: PlacedObjectPurchaseData): PlacedPurchaseState => {
+    if (!placedPurchaseState || placedPurchaseState.data !== data)
+        placedPurchaseState = { data, bought: false, unseenIds: new Set(), spriteIds: new Map(), listRequested: false, listLoaded: false, invalidated: false };
+
+    return placedPurchaseState;
+};
+
+// Packets only count while this drop's purchase is in flight.
+const getSentPurchaseState = (): PlacedPurchaseState => {
+    const { placedObjectPurchaseData, placedObjectPurchaseSent } = useCatalogStore.getState();
+
+    if (!placedObjectPurchaseSent || !placedObjectPurchaseData) return null;
+
+    return getPlacedPurchaseState(placedObjectPurchaseData);
+};
+
+const recordInventoryItems = (purchaseState: PlacedPurchaseState, items: Iterable<FurnitureListItemParser>) => {
+    // Owned items are recorded too; only ids announced as new are ever matched.
+    for (const item of items) purchaseState.spriteIds.set(item.itemId, item.spriteId);
+};
+
+// The bought item is placed when exactly one announced item is this product. When the announced
+// items are unknown the inventory list is asked for once; anything still unresolved, or two
+// matching items, leaves the item in the inventory and retires the temporary object.
+const resolvePlacedPurchase = () => {
+    const purchaseState = getSentPurchaseState();
+
+    if (!purchaseState || !purchaseState.bought) return;
+
+    const placed = purchaseState.data;
+    const announced = [...purchaseState.unseenIds];
+    const matches = announced.filter((itemId) => purchaseState.spriteIds.get(itemId) === placed.productClassId);
+    const unknown = announced.filter((itemId) => !purchaseState.spriteIds.has(itemId));
+
+    if (matches.length > 1) {
+        useCatalogStore.getState().resetPlacedOfferData();
+
+        return;
+    }
+
+    // An announced item missing from the loaded inventory cannot be the product.
+    if (matches.length === 1 && (!unknown.length || purchaseState.listLoaded)) {
+        placeBoughtItem(placed, matches[0]);
+
+        return;
+    }
+
+    if (unknown.length && !purchaseState.listRequested) {
+        purchaseState.listRequested = true;
+
+        SendMessageComposer(new FurnitureListComposer());
+
+        return;
+    }
+
+    const exhausted = announced.length ? !unknown.length || purchaseState.listLoaded : purchaseState.invalidated;
+
+    if (exhausted) useCatalogStore.getState().resetPlacedOfferData();
+};
+
+const placeBoughtItem = (placed: PlacedObjectPurchaseData, itemId: number) => {
+    const state = useCatalogStore.getState();
+    const roomEngine = GetRoomEngine();
+
+    if (state.placedObjectPurchaseData !== placed) return;
+
+    // The room was left; the item stays in the inventory.
+    if (placed.roomId !== roomEngine.activeRoomId) {
+        state.resetPlacedOfferData();
+
+        return;
+    }
+
+    const roomId = roomEngine.activeRoomId;
+
+    switch (placed.furniData?.className) {
+        case 'floor':
+            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_FLOOR_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
+            break;
+        case 'wallpaper':
+            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_WALL_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
+            break;
+        case 'landscape':
+            if (placed.extraParam !== roomEngine.getRoomInstanceVariable(roomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE)) SendMessageComposer(new FurniturePlacePaintComposer(itemId));
+            break;
+        default:
+            SendMessageComposer(new FurniturePlaceComposer(itemId, placed.category, placed.wallLocation, placed.x, placed.y, placed.direction));
+            break;
+    }
+
+    placedPurchaseState = null;
+
+    if (state.catalogPlaceMultipleObjects) state.setPlacedObjectPurchaseSent(false);
+    else state.resetPlacedOfferData();
 };
 
 const isNodeInTree = (node: ICatalogNode | null, root: ICatalogNode): boolean => {
