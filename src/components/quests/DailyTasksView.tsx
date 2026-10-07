@@ -7,6 +7,7 @@ import { useDailyTasks } from '../../hooks';
 import { AchievementText, useAirFieldWidth } from '../achievements/AchievementText';
 import { AirAchievementProgressBar } from '../achievements/AirAchievementProgressBar';
 import { useAirScrollInput } from '../achievements/useAirScrollInput';
+import { GetHcButton } from './GetHcButton';
 import { QuestButton } from './QuestButton';
 import taskCompletedUrl from '../../assets/images/quests/task-completed.png';
 import '../../css/quests/DailyTasks.css';
@@ -343,7 +344,7 @@ export const DailyTasksView: FC<{}> = () => {
                             y={6}
                         />
                         {!hasClub && (
-                            <QuestButton className="air-dt-get-hc" label={localizeWithFallback('generic.get_hc', 'Get HC')} width={107} onClick={() => CreateLinkEvent('catalog/open/hc_membership')} />
+                            <GetHcButton className="air-dt-get-hc" right={412} onClick={() => CreateLinkEvent('catalog/open/hc_membership')} />
                         )}
                     </div>
                 </div>

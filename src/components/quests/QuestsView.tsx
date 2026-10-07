@@ -13,7 +13,7 @@ import { NativeText } from '../../common/native-text/NativeText';
 import { useQuests } from '../../hooks';
 import { AchievementText } from '../achievements/AchievementText';
 import { useAirScrollInput } from '../achievements/useAirScrollInput';
-import { QuestButton } from './QuestButton';
+import { GetHcButton } from './GetHcButton';
 import { QuestEntryView } from './QuestEntryView';
 import '../../css/quests/QuestsList.css';
 
@@ -177,7 +177,7 @@ export const QuestsView: FC<{}> = () => {
                                 y={385}
                             />
                             {!hasClub && (
-                                <QuestButton className="air-quest-get-hc" label={localizeWithFallback('generic.get_hc', 'Get HC')} width={107} onClick={() => CreateLinkEvent('catalog/open/hc_membership')} />
+                                <GetHcButton className="air-quests-get-hc" right={485} onClick={() => CreateLinkEvent('catalog/open/hc_membership')} />
                             )}
                         </div>
                     </div>

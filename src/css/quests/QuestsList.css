@@ -373,6 +373,19 @@
     border-image-source: var(--habbo-skin-shiny-thick-pressed);
 }
 
+/* get_hc_btn is coloured 0x01a101: the thick skin multiplied by that colour. */
+.air-quest-get-hc.air-quest-get-hc-green {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-default.png');
+}
+
+.air-quest-get-hc.air-quest-get-hc-green:hover {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-hover.png');
+}
+
+.air-quest-get-hc.air-quest-get-hc-green:active {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-pressed.png');
+}
+
 .air-quest-accept {
     top: 76px;
     left: 246px;
