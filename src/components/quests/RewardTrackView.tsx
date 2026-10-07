@@ -225,6 +225,10 @@ const RewardTrackPrizeView: FC<{
     );
 };
 
+// the official list collapses every hidden benefit row (24px + 5px gap) and the window shrinks with it
+const countHiddenPremiumBenefits = (track: RewardTrackData): number =>
+    5 - [track.taskPointsBoost > 1, track.hasPremiumPrizes, track.instantPoints > 0, track.hasPremiumTasks, track.hasPremiumLevels].filter(Boolean).length;
+
 const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boolean; onConfirm: () => void; onCancel: () => void }> = ({
     track,
     pending,
@@ -235,6 +239,7 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
         className={`octane-reward-track-premium resize-none${pending ? ' is-pending' : ''}`}
         uniqueKey="reward-track-premium"
         windowPosition={DraggableWindowPosition.CENTER}
+        data-hidden-benefits={countHiddenPremiumBenefits(track)}
     >
         <OctaneCard.Header headerText={rewardText('reward_track.premium.confirm.title', 'Unlock Premium Track')} onCloseClick={() => !pending && onCancel()} />
         <OctaneCard.Content className="octane-reward-track-premium-content">

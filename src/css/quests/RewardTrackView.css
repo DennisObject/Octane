@@ -1633,11 +1633,18 @@
 
 /* ---- premium purchase confirmation (390x352, margins 1/25/1/7) ---- */
 
+/* each hidden benefit row takes 29px (24px + 5px gap) off the window, the panel and everything under the list */
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="1"]) { --rt-shrink: 29px; --rt-name-nudge: 1px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="2"]) { --rt-shrink: 58px; --rt-name-nudge: 1px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="3"]) { --rt-shrink: 87px; --rt-name-nudge: 1px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="4"]) { --rt-shrink: 116px; --rt-name-nudge: 1px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="5"]) { --rt-shrink: 145px; --rt-name-nudge: 1px; }
+
 .draggable-window:has(> .octane-reward-track-premium) {
     width: 390px;
     min-width: 390px;
     max-width: 390px;
-    height: 352px;
+    height: calc(352px - var(--rt-shrink, 0px));
 }
 
 .octane-card-shell.octane-reward-track-premium {
@@ -1645,9 +1652,9 @@
     width: 390px !important;
     min-width: 390px !important;
     max-width: 390px !important;
-    height: 352px !important;
-    min-height: 352px !important;
-    max-height: 352px !important;
+    height: calc(352px - var(--rt-shrink, 0px)) !important;
+    min-height: calc(352px - var(--rt-shrink, 0px)) !important;
+    max-height: calc(352px - var(--rt-shrink, 0px)) !important;
     color: #000;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     --octane-card-text: #000;
@@ -1669,7 +1676,7 @@
     position: relative;
     display: block;
     width: 384px;
-    height: 313px;
+    height: calc(313px - var(--rt-shrink, 0px));
     min-height: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -1684,7 +1691,7 @@
     left: 10px;
     top: 9px;
     width: 366px;
-    height: 268px;
+    height: calc(268px - var(--rt-shrink, 0px));
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel {
@@ -1692,7 +1699,7 @@
     left: 0;
     top: 0;
     width: 132px;
-    height: 208px;
+    height: calc(208px - var(--rt-shrink, 0px));
     --rt-border: url("../../assets/images/reward-track/air/border-15-f5def8.png");
 }
 
@@ -1724,7 +1731,7 @@
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel-name {
-    top: 138px;
+    top: calc(138px - var(--rt-shrink, 0px) / 2 + var(--rt-name-nudge, 0px));
     height: 19px;
     color: #5d2c82;
     font-size: 14px;
@@ -1733,7 +1740,7 @@
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel-info {
-    top: 157px;
+    top: calc(157px - var(--rt-shrink, 0px) / 2);
     height: 16px;
     color: #4d3559;
     font-size: 11px;
@@ -1797,7 +1804,7 @@
 .octane-reward-track-premium .octane-reward-track-premium-cost {
     position: absolute;
     left: 0;
-    top: 220px;
+    top: calc(220px - var(--rt-shrink, 0px));
     width: 366px;
     height: 38px;
     --rt-border: url("../../assets/images/reward-track/air/border-15-f7e7ff.png");
@@ -1846,7 +1853,7 @@
 .octane-reward-track-premium .octane-reward-track-premium-buttons {
     position: absolute;
     left: 10px;
-    top: 278px;
+    top: calc(278px - var(--rt-shrink, 0px));
     display: flex;
     justify-content: space-between;
     width: 366px;
