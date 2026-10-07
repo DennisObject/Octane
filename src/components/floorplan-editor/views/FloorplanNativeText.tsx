@@ -25,20 +25,23 @@ export const FloorplanNativeText: FC<FloorplanNativeTextProps> = ({ text, textSt
 };
 
 // auto_size="center": the TextField sits at floor((width - fieldWidth) / 2) inside its window, never on a half pixel.
-export const FloorplanCenteredText: FC<FloorplanNativeTextProps & { width: number }> = ({ width, ...props }) => {
+// Without an explicit width the field follows the width of the element that holds it, so a resized window keeps the title centred.
+export const FloorplanCenteredText: FC<FloorplanNativeTextProps & { width?: number }> = ({ width, ...props }) => {
     const fieldRef = useRef<HTMLSpanElement>(null);
     const [left, setLeft] = useState(0);
 
     useLayoutEffect(() => {
         const field = fieldRef.current;
+        const holder = field?.parentElement;
 
-        if (!field) return;
+        if (!field || !holder) return;
 
-        const place = () => setLeft(Math.floor((width - field.offsetWidth) / 2));
+        const place = () => setLeft(Math.floor(((width ?? holder.clientWidth) - field.offsetWidth) / 2));
         const observer = new ResizeObserver(place);
 
         place();
         observer.observe(field);
+        if (width === undefined) observer.observe(holder);
 
         return () => observer.disconnect();
     }, [width]);

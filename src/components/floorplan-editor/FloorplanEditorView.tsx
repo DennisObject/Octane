@@ -326,7 +326,7 @@ const OfficialFloorplanEditor: FC = () => {
                 <OctaneCardView uniqueKey="floorpan-editor" frameStyle={3} className="w-[662px] h-[600px]" classNames={['octane-floorplan-window']} theme="primary" isResizable>
                     <div className="octane-card-header-shell">
                         <span className="octane-card-title">
-                            <FloorplanCenteredText background={0xd77900} color={0xffffff} text={LocalizeText('floor.plan.editor.title')} textStyle="u_frame_title" width={662} />
+                            <FloorplanCenteredText background={0xd77900} color={0xffffff} text={LocalizeText('floor.plan.editor.title')} textStyle="u_frame_title" />
                         </span>
                         <button aria-label={LocalizeText('generic.help')} className="octane-floorplan-help" type="button" onClick={() => CreateLinkEvent('habbopages/builders-club/info')} />
                         <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => setRoomVisible(false)} />
@@ -388,7 +388,7 @@ const OfficialFloorplanEditor: FC = () => {
                                         <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.editor.wall.height')} />
                                     </span>
                                     <span className="fp-bc-wall-number" data-testid="wall-height-badge">
-                                        <FloorplanNativeText background={0xbdbdb5} text={String(displayedWall)} />
+                                        <FloorplanCenteredText background={0xbdbdb5} color={0x5f5f5f} text={String(displayedWall)} textStyle="u_bold" width={25} />
                                     </span>
                                     <FloorplanWallHeightSlider value={displayedWall} disabled={!wallsFixed} official onChange={(value) => dispatch({ type: 'SET_WALL_HEIGHT', value, source: 'local' })} />
                                 </div>

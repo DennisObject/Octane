@@ -19,6 +19,26 @@ const OFFICIAL_GHOST_FIGURE = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
 
 const rotateDir = (dir: EntryDir, step: 1 | -1): EntryDir => ((dir + step + 8) & 7) as EntryDir;
 
+// avatar_image:scale="sh": the widget takes the large figure and scales it by 0.5 with bitmap smoothing.
+const halve = (source: string): Promise<string> => new Promise((resolve) => {
+    const image = new Image();
+
+    image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        if (!context) return resolve(source);
+
+        canvas.width = Math.max(1, Math.round(image.width / 2));
+        canvas.height = Math.max(1, Math.round(image.height / 2));
+        context.imageSmoothingEnabled = true;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+    };
+    image.onerror = () => resolve(source);
+    image.src = source;
+});
+
 const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
     const [url, setUrl] = useState('');
 
@@ -30,7 +50,7 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
             resetFigure: (figure: string) => {
                 if (cancelled || listener.disposed) return;
 
-                const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.SMALL, 'M', listener);
+                const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, 'M', listener);
 
                 if (!avatar) return;
 
@@ -40,7 +60,7 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
                     const image = avatar.processAsImageUrl(AvatarSetType.FULL);
                     const placeholder = typeof avatar.isPlaceholder === 'function' && avatar.isPlaceholder();
 
-                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) setUrl(image);
+                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) halve(image).then((half) => { if (!cancelled) setUrl(half); });
                 } catch {
                     if (!cancelled) setUrl('');
                 } finally {

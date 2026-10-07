@@ -49,8 +49,8 @@ export const FloorplanImportExport: FC<Props> = ({ state, dispatch, onClose, onS
                 <textarea ref={dataRef} className="fp-bc-import-data" name="data" value={raw} spellCheck={false} onChange={(event) => setRaw(event.target.value)} />
                 {!showLoad && (
                     <>
-                        <FloorplanSkinScrollbar scrollerRef={dataRef} axis="vertical" slot={17} className="fp-bc-import-vbar" testId="import-scroll-vertical" />
-                        <FloorplanSkinScrollbar scrollerRef={dataRef} axis="horizontal" slot={17} className="fp-bc-import-hbar" testId="import-scroll-horizontal" />
+                        <FloorplanSkinScrollbar scrollerRef={dataRef} axis="vertical" slot={17} className="fp-bc-import-vbar" testId="import-scroll-vertical" revision={raw} />
+                        <FloorplanSkinScrollbar scrollerRef={dataRef} axis="horizontal" slot={17} className="fp-bc-import-hbar" testId="import-scroll-horizontal" revision={raw} />
                     </>
                 )}
                 <button type="button" className="fp-bc-btn fp-bc-import-revert" data-testid="import-revert" onClick={() => setRaw(onRevertText())}>
