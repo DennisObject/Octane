@@ -1062,18 +1062,17 @@
     height: 60px;
     padding: 0;
     cursor: pointer;
-    border: 2px solid transparent;
-    border-image: var(--habbo-skin-button) 2 fill / 2px stretch;
-    background: transparent;
+    border: 0;
+    background: url('@/assets/images/avatareditor/air/outfit-button-default.png') 0 0 / 35px 60px no-repeat;
 }
 
-.octane-avatar-editor-hotlook:hover { border-image-source: var(--habbo-skin-button-hover); }
-.octane-avatar-editor-hotlook:active { border-image-source: var(--habbo-skin-button-pressed); }
+.octane-avatar-editor-hotlook:hover { background-image: url('@/assets/images/avatareditor/air/outfit-button-hover.png'); }
+.octane-avatar-editor-hotlook:active { background-image: url('@/assets/images/avatareditor/air/outfit-button-pressed.png'); }
 
 .octane-avatar-editor-hotlook-bitmap {
     position: absolute;
-    left: -2px;
-    top: -2px;
+    left: 0;
+    top: 0;
     width: 35px;
     max-width: none;
     height: 60px;
