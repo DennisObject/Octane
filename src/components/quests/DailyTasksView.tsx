@@ -1,9 +1,9 @@
-import { AddLinkEventTracker, CreateLinkEvent, DailyTaskData, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, CreateLinkEvent, DailyTaskData, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { getDailyTaskImageUrl, getDailyTasksWindowCaption, localizeWithFallback } from '../../api';
 import { ClassicScrollAreaView, LayoutBadgeImageView, LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
-import { useDailyTasks } from '../../hooks';
+import { useDailyTasks, usePurse } from '../../hooks';
 import { AchievementText, useAirFieldWidth } from '../achievements/AchievementText';
 import { AirAchievementProgressBar } from '../achievements/AirAchievementProgressBar';
 import { useAirScrollInput } from '../achievements/useAirScrollInput';
@@ -239,7 +239,9 @@ export const DailyTasksView: FC<{}> = () => {
     const [tick, setTick] = useState(0);
     const { activeTasks = [], unclaimedTasks = [], requestTasks = null, claimTask = null } = useDailyTasks();
 
-    const hasClub = GetSessionDataManager().clubLevel > 0;
+    // The official quest windows read the purse's days to the end of the subscription period (sessionDataManager.hasClub).
+    const { purse = null } = usePurse();
+    const hasClub = (purse?.clubDays ?? 0) > 0;
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
