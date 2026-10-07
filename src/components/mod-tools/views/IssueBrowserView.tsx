@@ -2,7 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import issueBrowserXml from '../../../assets/mod-tools/xml/issue_browser.xml?raw';
 import roomIcon from '../../../assets/mod-tools/images/room_icon.png';
 import userIcon from '../../../assets/mod-tools/images/user_icon.png';
-import { bundlesFor, IssueBundle, IssueManagerContext, IssueTab, pickBundle, pickNext, releaseAll, releaseBundle, sortBundles, useIssueManagerStore } from '../../../hooks';
+import { bundlesFor, IssueBundle, IssueManagerContext, IssueTab, isBundleWriteHeld, nextOpenBundle, pickBundle, pickNext, releaseAll, releaseBundle, sortBundles, useIssueManagerStore } from '../../../hooks';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Border, Native0Button, Native0Frame, Native0Rows, Native0Scrollbar, Native0Tab, Native0Text } from '../native/NativeWindow0';
 import { NativeWindowShell } from '../native/NativeWindowShell';
@@ -135,7 +135,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                                         {tab === 'picked' && <Native0Text clip height={19} text={bundle.pickerName} width={field('picker').width} x={field('picker').x} y={field('picker').y} />}
                                     </div>
                                     {tab === 'open' && (
-                                        <Native0Button height={rectOf(buttonOf('pick_button')).height} label={label(buttonOf('pick_button'))} width={60} x={rectOf(buttonOf('pick_button')).x + stretchX} y={rectOf(buttonOf('pick_button')).y} onClick={() => pickBundle(bundle.id, 'pick button', context)} />
+                                        <Native0Button enabled={!isBundleWriteHeld(bundle)} height={rectOf(buttonOf('pick_button')).height} label={label(buttonOf('pick_button'))} width={60} x={rectOf(buttonOf('pick_button')).x + stretchX} y={rectOf(buttonOf('pick_button')).y} onClick={() => pickBundle(bundle.id, 'pick button', context)} />
                                     )}
                                     {tab === 'my' && (
                                         <>
@@ -152,7 +152,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                         <Native0Button height={rectOf(releaseAllNode).height} label={label(releaseAllNode)} width={rectOf(releaseAllNode).width} x={rectOf(releaseAllNode).x + stretchX} y={rectOf(releaseAllNode).y + stretchY} onClick={() => releaseAll(context)} />
                     )}
                 </div>
-                <Native0Button height={rectOf(autoPick).height} label={label(autoPick)} width={rectOf(autoPick).width} x={rectOf(autoPick).x} y={rectOf(autoPick).y} onClick={() => pickNext('issue browser pick next', context)} />
+                <Native0Button enabled={!isBundleWriteHeld(nextOpenBundle())} height={rectOf(autoPick).height} label={label(autoPick)} width={rectOf(autoPick).width} x={rectOf(autoPick).x} y={rectOf(autoPick).y} onClick={() => pickNext('issue browser pick next', context)} />
             </Native0Frame>
         </NativeWindowShell>
     );

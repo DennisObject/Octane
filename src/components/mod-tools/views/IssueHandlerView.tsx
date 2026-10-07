@@ -1,8 +1,8 @@
 import { CallForHelpCategoryData, CloseIssuesMessageComposer, ModeratorInitData } from '@octane/renderer';
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import issueHandlerXml from '../../../assets/mod-tools/xml/issue_handler.xml?raw';
-import { IssueManagerContext, issueOpenTime, pickNext, releaseBundle, useIssueManagerStore } from '../../../hooks';
+import { IssueManagerContext, isBundleWriteHeld, issueOpenTime, nextOpenBundle, pickNext, releaseBundle, useIssueManagerStore } from '../../../hooks';
 import { Native100Dropmenu } from '../native/NativeDropmenu100';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Button, Native0Checkbox, Native0Frame, Native0Rows, Native0Scrollbar, Native0Text } from '../native/NativeWindow0';
@@ -75,6 +75,8 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const bundle = useIssueManagerStore((state) => state.bundles.get(bundleId)) ?? null;
     const [selectedIssueId, setSelectedIssueId] = useState<number>(null);
     const [autoNext, setAutoNext] = useState(true);
+    // the handler is disposed by its first close or release: a second call of a captured callback before it is gone must not send (or pick) again
+    const finishedRef = useRef(false);
     const [chosenTopic, setChosenTopic] = useState(-1);
     const [menuOpen, setMenuOpen] = useState(false);
     const [messageOffset, setMessageOffset] = useState(0);
@@ -139,11 +141,16 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     // closing, releasing: the next open bundle is picked when the checkbox is on, and the handler goes away (_r05ad52a6ed9ad8)
     const finish = () => {
-        if (autoNext) pickNext('issue handler pick next', context);
+        finishedRef.current = true;
+
+        if (autoNext && !isBundleWriteHeld(nextOpenBundle())) pickNext('issue handler pick next', context);
 
         onClose();
     };
+    const closeHeld = isBundleWriteHeld(bundle);
     const closeAs = (resolution: number) => {
+        if (closeHeld || finishedRef.current) return;
+
         SendMessageComposer(new CloseIssuesMessageComposer(bundle.issueIds, resolution));
         finish();
     };
@@ -212,6 +219,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                 <div style={{ position: 'absolute', left: buttons.x, top: buttons.y, width: buttons.width, height: buttons.height }}>
                     <Native0Button
                         color={0xff9090}
+                        enabled={!closeHeld}
                         height={22}
                         label={nativeCaption(buttonNode('close_useless'))}
                         width={110}
@@ -219,7 +227,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         y={itemX(buttonNode('buttons'), 'close_useless').y}
                         onClick={() => closeAs(CLOSE_USELESS)}
                     />
-                    <Native0Button height={22} label={nativeCaption(buttonNode('close_resolved'))} width={110} x={itemX(buttonNode('buttons'), 'close_resolved').x} y={itemX(buttonNode('buttons'), 'close_resolved').y} onClick={() => closeAs(CLOSE_RESOLVED)} />
+                    <Native0Button enabled={!closeHeld} height={22} label={nativeCaption(buttonNode('close_resolved'))} width={110} x={itemX(buttonNode('buttons'), 'close_resolved').x} y={itemX(buttonNode('buttons'), 'close_resolved').y} onClick={() => closeAs(CLOSE_RESOLVED)} />
                     <Native0Button
                         height={22}
                         label={nativeCaption(buttonNode('release'))}
@@ -227,6 +235,8 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         x={itemX(buttonNode('buttons'), 'release').x}
                         y={itemX(buttonNode('buttons'), 'release').y}
                         onClick={() => {
+                            if (finishedRef.current) return;
+
                             releaseBundle(bundle.id, context);
                             finish();
                         }}

@@ -329,19 +329,25 @@ export const pickIssues = (issueIds: number[], retry: boolean, retryCount: numbe
     context.pick(issueIds, retry, retryCount, reason);
 };
 
+/**
+ * Held: the classic client picks and closes every issue of a bundle in one message, but the server only reads the first issue id of those two messages. A bundle of
+ * several issues therefore cannot be picked or closed faithfully yet (the UI does not split it into one write per issue); single-issue bundles and releases are unaffected.
+ */
+export const isBundleWriteHeld = (bundle: IssueBundle | null): boolean => bundle != null && bundle.count > 1;
+
 /** Classic GI `_r9dc4e0be4fb276`: picks a bundle's issues and remembers them so their answer opens the handler. */
 export const pickBundle = (bundleId: number, reason: string, context: IssueManagerContext, retry = false, retryCount = 0): void => {
     const state = useIssueManagerStore.getState();
     const bundle = state.bundles.get(bundleId) ?? null;
 
-    if (bundle == null) return;
+    if (bundle == null || isBundleWriteHeld(bundle)) return;
 
     pickIssues(bundle.issueIds, retry, retryCount, reason, context);
     useIssueManagerStore.setState({ pendingPick: state.pendingPick.concat(bundle.issueIds) });
 };
 
-/** Classic GI `_r331af738c24783`: picks the open bundle with the lowest priority (the lowest age among equals). */
-export const pickNext = (reason: string, context: IssueManagerContext, retry = false, retryCount = 0): void => {
+/** Classic GI `_r331af738c24783`'s choice: the open bundle with the lowest priority (the lowest age among equals). */
+export const nextOpenBundle = (): IssueBundle | null => {
     let best: IssueBundle = null;
 
     for (const bundle of useIssueManagerStore.getState().bundles.values()) {
@@ -349,6 +355,13 @@ export const pickNext = (reason: string, context: IssueManagerContext, retry = f
 
         if (best == null || bundle.priority < best.priority || (bundle.priority === best.priority && bundle.age < best.age)) best = bundle;
     }
+
+    return best;
+};
+
+/** Classic GI `_r331af738c24783`: picks the best open bundle; nothing is picked while that bundle is held (several issues). */
+export const pickNext = (reason: string, context: IssueManagerContext, retry = false, retryCount = 0): void => {
+    const best = nextOpenBundle();
 
     if (best != null) pickBundle(best.id, reason, context, retry, retryCount);
 };
