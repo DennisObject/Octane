@@ -17,6 +17,7 @@ import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { NotificationAlertType, PlaySound, SendMessageComposer, SoundNames } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
+import { showModAlert } from './modAlertStore';
 
 const useModToolsState = () => {
     const [settings, setSettings] = useState<ModeratorInitData>(null);
@@ -126,7 +127,7 @@ const useModToolsState = () => {
         const parser = event.getParser();
 
         if (parser.success) SendMessageComposer(new GetModeratorUserInfoMessageComposer(parser.userId));
-        else simpleAlert('Moderation action failed. If you tried to ban a user, please check if the user is already banned.', NotificationAlertType.DEFAULT, null, null, 'Alert');
+        else showModAlert('Moderation action failed. If you tried to ban a user, please check if the user is already banned.');
     });
 
     useMessageEvent<CfhTopicsInitEvent>(CfhTopicsInitEvent, (event) => {

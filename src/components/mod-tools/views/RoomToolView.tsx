@@ -9,8 +9,8 @@ import {
     RoomModerationData
 } from '@octane/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { NotificationAlertType, OpenUrl, SendMessageComposer } from '../../../api';
-import { useMessageEvent, useNotification } from '../../../hooks';
+import { OpenUrl, SendMessageComposer } from '../../../api';
+import { showModAlert, useMessageEvent } from '../../../hooks';
 import roomToolXml from '../../../assets/mod-tools/xml/roomtool_frame.xml?raw';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Border, Native0Button, Native0Checkbox, Native0Dropmenu, Native0Frame, Native0Input, Native0Text } from '../native/NativeWindow0';
@@ -39,7 +39,6 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
     const placeholder = nativeCaption(findNativeNode(root, 'message_input'));
     const menuCaption = nativeCaption(findNativeNode(root, 'msgTemplatesSelect'));
     const act = findNativeNode(root, 'act_cont');
-    const { simpleAlert } = useNotification();
     const [data, setData] = useState<RoomModerationData>(null);
     const [nameHeight, setNameHeight] = useState(0);
     const [descHeight, setDescHeight] = useState(0);
@@ -113,7 +112,7 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
 
     const send = (caution: boolean) => {
         if (isPlaceholder || message === '') {
-            simpleAlert('You must input a message to the user', NotificationAlertType.DEFAULT, null, null, 'Alert');
+            showModAlert('You must input a message to the user');
 
             return;
         }

@@ -3,6 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
 import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
+import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
 import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
@@ -215,6 +216,7 @@ export const ModToolsView: FC<{}> = () => {
             {openUserChatlogs.map((userId) => (
                 <ModToolsUserChatlogView key={userId} userId={userId} onCloseClick={() => CreateLinkEvent(`mod-tools/close-user-chatlog/${userId}`)} />
             ))}
+            <NativeAlertView />
             {isTicketsVisible && <ModToolsTicketsView onCloseClick={() => setIsTicketsVisible(false)} />}
         </>
     );

@@ -1,7 +1,7 @@
 import { ModeratorInitData, ModMessageMessageComposer } from '@octane/renderer';
 import { FC, useMemo, useState } from 'react';
-import { NotificationAlertType, SendMessageComposer } from '../../../api';
-import { useNotification } from '../../../hooks';
+import { SendMessageComposer } from '../../../api';
+import { showModAlert } from '../../../hooks';
 import sendMessagesXml from '../../../assets/mod-tools/xml/send_msgs.xml?raw';
 import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Button, Native0Dropmenu, Native0Frame, Native0Input } from '../native/NativeWindow0';
@@ -26,7 +26,6 @@ export const SendMessageView: FC<SendMessageProps> = ({ userId, userName, settin
     const menu = rectOf(findNativeNode(root, 'msgTemplatesSelect'));
     const input = findNativeNode(root, 'message_input');
     const send = findNativeNode(root, 'send_message_but');
-    const { simpleAlert } = useNotification();
     const [message, setMessage] = useState(nativeCaption(input));
     const [isHint, setIsHint] = useState(true);
     const [inputActive, setInputActive] = useState(false);
@@ -36,7 +35,7 @@ export const SendMessageView: FC<SendMessageProps> = ({ userId, userName, settin
 
     const onSend = () => {
         if (isHint || message === '') {
-            simpleAlert('You must input a message to the user', NotificationAlertType.DEFAULT, null, null, 'Alert');
+            showModAlert('You must input a message to the user');
 
             return;
         }
