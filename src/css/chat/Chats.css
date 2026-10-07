@@ -1882,6 +1882,46 @@
     min-height: 24px;
 }
 
+/* SnowStorm game chat: chatstyles 120 snowstorm_red / 121 snowstorm_blue, style_snowstorm_*_regpoints. */
+.bubble-container.native-room-bubble .bubble-120,
+.bubble-container.native-room-bubble .bubble-121 {
+    border-image-slice: 29 18 5 34 fill;
+    border-image-width: 29px 18px 5px 34px;
+    border-image-outset: 0;
+    border-image-repeat: stretch;
+    min-width: 53px;
+    min-height: 35px;
+}
+
+.bubble-container.native-room-bubble .bubble-120 {
+    border-image-source: url('@/assets/images/chat/chatbubbles/bubble_120.png');
+}
+
+.bubble-container.native-room-bubble .bubble-121 {
+    border-image-source: url('@/assets/images/chat/chatbubbles/bubble_121.png');
+}
+
+.bubble-container.native-room-bubble .bubble-120 .chat-content,
+.bubble-container.native-room-bubble .bubble-121 .chat-content {
+    padding: 16px 15px 9px 32px;
+    margin: 0;
+    min-height: 0;
+    color: #000;
+}
+
+.bubble-container.native-room-bubble .bubble-120 .user-container,
+.bubble-container.native-room-bubble .bubble-121 .user-container {
+    transform: translate(4px, 12px);
+}
+
+.bubble-container.native-room-bubble .bubble-120 .pointer {
+    background: url('@/assets/images/chat/chatbubbles/bubble_120_pointer.png');
+}
+
+.bubble-container.native-room-bubble .bubble-121 .pointer {
+    background: url('@/assets/images/chat/chatbubbles/bubble_121_pointer.png');
+}
+
 .bubble-container.native-room-bubble .bubble-0 .chat-content,
 .bubble-container.native-room-bubble .bubble-1 .chat-content {
     padding: 4px 12px 7px 28px;
