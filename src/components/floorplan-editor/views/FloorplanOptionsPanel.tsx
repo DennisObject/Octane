@@ -20,22 +20,27 @@ const OFFICIAL_GHOST_FIGURE = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
 const rotateDir = (dir: EntryDir, step: 1 | -1): EntryDir => ((dir + step + 8) & 7) as EntryDir;
 
 // avatar_image:scale="sh": the widget takes the large figure and scales it by 0.5 with bitmap smoothing.
-const halve = (source: string): Promise<string> => new Promise((resolve) => {
+// Resolves null when the image cannot be decoded or drawn, so the caller never waits on a promise that stays pending.
+const halve = (source: string): Promise<string | null> => new Promise((resolve) => {
     const image = new Image();
 
     image.onload = () => {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
+        try {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
-        if (!context) return resolve(source);
+            if (!context) return resolve(null);
 
-        canvas.width = Math.max(1, Math.round(image.width / 2));
-        canvas.height = Math.max(1, Math.round(image.height / 2));
-        context.imageSmoothingEnabled = true;
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/png'));
+            canvas.width = Math.max(1, Math.round(image.width / 2));
+            canvas.height = Math.max(1, Math.round(image.height / 2));
+            context.imageSmoothingEnabled = true;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/png'));
+        } catch {
+            resolve(null);
+        }
     };
-    image.onerror = () => resolve(source);
+    image.onerror = () => resolve(null);
     image.src = source;
 });
 
@@ -44,6 +49,8 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
 
     useEffect(() => {
         let cancelled = false;
+        // The library calls resetFigure again as parts finish downloading; only the newest call may set the image.
+        let latest = 0;
         const listener = {
             disposed: false,
             dispose: null as (() => void) | null,
@@ -60,7 +67,13 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
                     const image = avatar.processAsImageUrl(AvatarSetType.FULL);
                     const placeholder = typeof avatar.isPlaceholder === 'function' && avatar.isPlaceholder();
 
-                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) halve(image).then((half) => { if (!cancelled) setUrl(half); });
+                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) {
+                        const request = ++latest;
+
+                        halve(image).then((half) => {
+                            if (!cancelled && request === latest) setUrl(half ?? '');
+                        });
+                    }
                 } catch {
                     if (!cancelled) setUrl('');
                 } finally {

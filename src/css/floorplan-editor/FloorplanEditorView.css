@@ -1,5 +1,9 @@
 .octane-floorplan-window {
     --fp-text: #2b2b2b;
+    /* two pixel then one pixel step on every corner, the cut of the running client's bordered boxes */
+    --fp-stair-corners: polygon(2px 0, calc(100% - 2px) 0, calc(100% - 2px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 1px) calc(100% - 2px), calc(100% - 1px) calc(100% - 1px), calc(100% - 2px) calc(100% - 1px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 2px), 0 calc(100% - 2px), 0 2px, 1px 2px, 1px 1px, 2px 1px);
+    /* the outer panels only lose their right corners */
+    --fp-stair-right: polygon(0 0, calc(100% - 2px) 0, calc(100% - 2px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 1px) calc(100% - 2px), calc(100% - 1px) calc(100% - 1px), calc(100% - 2px) calc(100% - 1px), calc(100% - 2px) 100%, 0 100%);
 
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     color: #111111;
@@ -683,6 +687,7 @@
     content: "";
     position: absolute;
     inset: 0;
+    clip-path: var(--fp-stair-right);
     border: 3px solid transparent;
     border-image: url("../../assets/images/floorplan-editor/air/panel-border.png") 3 fill / 3px stretch;
     pointer-events: none;
@@ -852,14 +857,27 @@
     top: 132px;
     right: 0;
     bottom: 12px;
+    background: transparent;
+}
+
+/* the black map is one column wider than the scroll area and has stepped corners */
+.fp-bc-map::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(100% - 12px);
     background: #000000;
+    clip-path: var(--fp-stair-corners);
 }
 
 .fp-bc-scroll {
+    position: relative;
     width: calc(100% - 13px);
     height: 100%;
     overflow: auto;
-    background: #000000;
+    background: transparent;
     scrollbar-width: none;
 }
 
@@ -1092,7 +1110,9 @@
 
 .fp-bc-wall-row.is-off .fp-bc-wall-label,
 .fp-bc-wall-row.is-off .fp-bc-wall-number,
-.fp-bc-wall-row.is-off .fp-bc-wall-slider {
+.fp-bc-wall-row.is-off .fp-bc-wall-slider-track,
+.fp-bc-wall-row.is-off .fp-bc-wall-slider-thumb {
+    /* disabled controls are each blended at 0.6 in the running client, so the thumb is drawn over the already faded track */
     opacity: 0.6;
 }
 
@@ -1198,8 +1218,8 @@
     width: 275px;
     overflow: hidden;
     background: #ffffff;
-    /* the white border box has its top left corner cut in two pixel steps */
-    clip-path: polygon(2px 0, 100% 0, 100% 100%, 0 100%, 0 2px, 1px 2px, 1px 1px, 2px 1px);
+    /* the white border box has all four corners cut in two pixel steps */
+    clip-path: var(--fp-stair-corners);
 }
 
 .fp-bc-preview-scroll {
@@ -1868,6 +1888,6 @@
 
 /* the heightmap bar sits over the black map, the track colour has to come from the bar itself */
 .fp-bc-map-vbar {
-    /* first column is the translucent edge of the art over the black map */
-    background: linear-gradient(90deg, #000000 1px, #bdbdb5 1px);
+    /* first column is the translucent edge of the art over the black map, which runs under it */
+    background: linear-gradient(90deg, transparent 1px, #bdbdb5 1px);
 }
