@@ -130,17 +130,18 @@ export class ChatBubbleUtilities {
                 listenerResolve = resolve;
             });
 
+            // Pet bundles only carry 64 sprites, so a smaller scale is rendered at 64 and shrunk afterwards.
             const imageResult = GetRoomEngine().getRoomObjectPetImage(
                 typeId,
                 figureData.paletteId,
                 figureData.color,
                 new Vector3d(direction * 45),
-                scale,
+                64,
                 {
                     imageReady: async (result) => listenerResolve(await getImageUrl(result)),
                     imageFailed: () => listenerResolve(null)
                 },
-                false,
+                typeId === 35,
                 0,
                 figureData.customParts,
                 posture
@@ -153,6 +154,8 @@ export class ChatBubbleUtilities {
             }
 
             if (!resolvedImage) resolvedImage = await getImageUrl(imageResult);
+
+            if (resolvedImage && scale < 64) resolvedImage = await this.scaleImage(resolvedImage, scale / 64);
 
             if (resolvedImage) {
                 this.PET_IMAGE_CACHE.set(cacheKey, resolvedImage);
@@ -171,6 +174,23 @@ export class ChatBubbleUtilities {
         }
 
         return existing;
+    }
+
+    private static async scaleImage(sourceUrl: string, ratio: number): Promise<string> {
+        const source = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = sourceUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(source.width * ratio));
+        canvas.height = Math.max(1, Math.round(source.height * ratio));
+        const context = canvas.getContext('2d');
+        context.imageSmoothingEnabled = true;
+        context.drawImage(source, 0, 0, canvas.width, canvas.height);
+
+        return canvas.toDataURL('image/png');
     }
 
     private static getAvatarImageCacheKey(figure: string, zoom: boolean): string {
