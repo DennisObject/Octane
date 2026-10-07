@@ -74,7 +74,6 @@ const TASK_ICON_SIZE: Record<string, { w: number; h: number }> = {
     pet_eat: { w: 42, h: 49 },
     pet_level: { w: 46, h: 45 },
     pet_respect: { w: 46, h: 45 },
-    place_builders_club_furni: { w: 24, h: 50 },
     place_item: { w: 24, h: 50 },
     publish_picture: { w: 52, h: 50 },
     replenish_respect: { w: 42, h: 45 },

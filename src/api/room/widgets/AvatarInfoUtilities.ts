@@ -128,7 +128,6 @@ export class AvatarInfoUtilities {
                 furniInfo.purchaseCouldBeUsedForBuyout = furnitureData.purchaseCouldBeUsedForBuyout;
                 furniInfo.rentOfferId = furnitureData.rentOfferId;
                 furniInfo.rentCouldBeUsedForBuyout = furnitureData.rentCouldBeUsedForBuyout;
-                furniInfo.availableForBuildersClub = furnitureData.availableForBuildersClub;
                 furniInfo.tileSizeX = furnitureData.tileSizeX;
                 furniInfo.tileSizeY = furnitureData.tileSizeY;
             }

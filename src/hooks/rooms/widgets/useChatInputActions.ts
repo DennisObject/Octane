@@ -203,7 +203,6 @@ export const useChatInputActions = () => {
                         CreateLinkEvent('user-chooser/');
                         return null;
                     case ':floor':
-                    case ':bcfloor':
                         if ((roomSession?.controllerLevel ?? 0) >= RoomControllerLevel.ROOM_OWNER) CreateLinkEvent('floor-editor/show');
 
                         return null;

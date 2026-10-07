@@ -12,7 +12,6 @@ Special chat commands
 <p class="bullet-item">·&nbsp;<b>:sign &lt;number 0-10&gt;</b> Show a number sign</p>
 <p class="bullet-item">·&nbsp;<b>:sign &lt;number 11-17&gt;</b> Show a special sign</p>
 <p class="bullet-item">·&nbsp;<b>:pickall</b> Pick all your furniture up from the room</p>
-<p class="bullet-item">·&nbsp;<b>:pickallbc</b> Pick all builders club furniture up from the room</p>
 <p class="bullet-item">·&nbsp;<b>:ejectall</b> Eject all furniture in a group room</p>
 <p class="bullet-item">·&nbsp;<b>:sit</b> Sit down</p>
 <p class="bullet-item">·&nbsp;<b>:stand</b> Stand up</p>
@@ -24,10 +23,7 @@ Special chat commands
 <p class="bullet-item">·&nbsp;<b>:furni</b> Open the furniture chooser tool</p>
 <p class="bullet-item">·&nbsp;<b>:kick &lt;username&gt;</b> Kick username from room if you are admin</p>
 <p class="bullet-item">·&nbsp;<b>:kickall</b> Kick everybody from the room if you are admin</p>
-<span class="padding-bottom"><br></span>
-<span class="padding-top"><br></span><h2>For Builders Club members only</h2><span class="padding-bottom"><br></span>
-<span class="padding-top"><br></span><p class="bullet-item">·&nbsp;<b>:floor</b> Edit the floor plan</p>
-<p class="bullet-item">·&nbsp;<b>:bcfloor</b> Edit the floor plan</p>
+<p class="bullet-item">·&nbsp;<b>:floor</b> Edit the floor plan</p>
 <span class="padding-bottom"><br></span>
 <span class="padding-top"><br></span><h2>Special characters with alt-codes!</h2><span class="padding-bottom"><br></span>
 <span class="padding-top"><br></span><p>For extra fun you can trigger special characters by holding down the alt-key on your keyboard and entering the following codes on the numeric keyboard!</p><span class="padding-bottom"><br></span>

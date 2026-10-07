@@ -53,7 +53,6 @@ const KNOWN_SENTENCES: ReadonlyArray<readonly [template: string, key: string]> =
     ['Use up to 128 letters, digits, \'_\', \'-\' or \'.\'.', 'catalog.admin.server.message.field.link'],
     ['Unknown layout.', 'catalog.admin.server.message.field.layout'],
     ['Minimum rank must be between 1 and your rank ({rank}).', 'catalog.admin.server.message.field.rank'],
-    ['Pages belong to the normal or the builders club catalog.', 'catalog.admin.server.message.field.catalog'],
     ['A page cannot move to the other catalog.', 'catalog.admin.server.message.field.catalog.move'],
     ['Parent page not found.', 'catalog.admin.server.message.field.parent.missing'],
     ['You cannot use a page above your rank as parent.', 'catalog.admin.server.message.field.parent.rank'],

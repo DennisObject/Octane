@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { CatalogType, GetConfigurationValue, LocalizeText } from '../../../../../api';
+import { GetConfigurationValue, LocalizeText } from '../../../../../api';
 import { getCatalogBundleDiscountFlatPriceSteps, getCatalogBundleDiscountItemCount } from '../../../../../api/catalog/CatalogBundleDiscount';
 import { useCatalogBundleDiscountRuleset, useCatalogData, useCatalogUiState } from '../../../../../hooks';
 
@@ -29,7 +29,7 @@ export const stepCatalogPurchaseQuantity = (
 
 export const CatalogSpinnerWidgetView: FC<{}> = () => {
     const { currentOffer = null } = useCatalogData();
-    const { currentType = CatalogType.NORMAL, purchaseOptions = null, setPurchaseOptions = null } = useCatalogUiState();
+    const { purchaseOptions = null, setPurchaseOptions = null } = useCatalogUiState();
     const { data: bundleDiscountRuleset = null } = useCatalogBundleDiscountRuleset();
     const quantityInputId = useId();
     const quantity = purchaseOptions?.quantity ?? MIN_VALUE;
@@ -102,7 +102,6 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
 
     if (
         !currentOffer?.bundlePurchaseAllowed ||
-        currentType === CatalogType.BUILDER ||
         !GetConfigurationValue<boolean>('catalog.multiple.purchase.enabled', true)
     )
         return null;

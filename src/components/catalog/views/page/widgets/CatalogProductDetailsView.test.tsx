@@ -4,7 +4,6 @@ import { useCatalogProductMetadata, useCatalogUiState } from '../../../../../hoo
 import { CatalogProductDetailsView } from './CatalogProductDetailsView';
 
 vi.mock('../../../../../api', () => ({
-    CatalogType: { BUILDER: 'BUILDERS_CLUB' },
     LocalizeText: (key: string) => key,
     ProductTypeEnum: { FLOOR: 's', WALL: 'i' }
 }));
