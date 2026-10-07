@@ -156,6 +156,10 @@ interface GroupInputProps {
     width: number;
     height: number;
     multiline?: boolean;
+    /** The forum compose fields have no border, a larger face and their own text margin. */
+    plain?: boolean;
+    fontSize?: number;
+    inset?: number;
     onChange: (value: string) => void;
 }
 
@@ -164,7 +168,7 @@ interface GroupInputProps {
  * sit inside the field (overflow, unsupported glyphs), so caret, selection, scrolling and IME stay the browser's; at rest the
  * v75 raster is drawn over the input.
  */
-export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, onChange }) => {
+export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, plain = false, fontSize = 13, inset = 1, onChange }) => {
     const overlayRef = useRef<HTMLDivElement>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [rasterFits, setRasterFits] = useState(false);
@@ -199,20 +203,21 @@ export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y,
         'aria-label': label,
         className: 'octane-group-native__input' + (showRaster ? ' is-raster' : ''),
         maxLength,
+        style: plain ? { fontSize, lineHeight: Math.round(fontSize * 1.25) + 'px', paddingLeft: inset, paddingRight: inset } : undefined,
         value,
         onBlur: () => setIsEditing(false),
         onFocus: () => setIsEditing(true)
     };
 
     return (
-        <div className={`octane-group-native__field${multiline ? ' is-multiline' : ''}`} style={{ left: x, top: y, width, height }}>
+        <div className={`octane-group-native__field${multiline ? ' is-multiline' : ''}${plain ? ' is-plain' : ''}${plain && value.length === 0 ? ' is-empty' : ''}`} style={{ left: x, top: y, width, height }}>
             {multiline ? (
                 <textarea {...inputProps} onChange={(event) => onChange(event.target.value)} />
             ) : (
                 <input {...inputProps} type="text" onChange={(event) => onChange(event.target.value)} />
             )}
-            <div ref={overlayRef} aria-hidden="true" className={`octane-group-native__field-text${showRaster ? '' : ' is-hidden'}`}>
-                <NativeText background={0xffffff} maxWidth={multiline ? width : undefined} overrides={flatText(13)} text={value} textStyle="u_regular" />
+            <div ref={overlayRef} aria-hidden="true" className={`octane-group-native__field-text${showRaster ? '' : ' is-hidden'}`} style={plain ? { top: 0, left: inset - 1 } : undefined}>
+                <NativeText background={0xffffff} maxWidth={multiline ? width - (plain ? 2 * (inset - 1) : 0) : undefined} overrides={flatText(fontSize)} text={value} textStyle="u_regular" />
             </div>
         </div>
     );

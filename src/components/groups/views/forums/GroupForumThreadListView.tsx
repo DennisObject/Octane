@@ -4,260 +4,196 @@ import {
     GuildForumThread,
     GuildForumThreadsEvent,
     ModerateThreadMessageComposer,
-    PostThreadMessageEvent
+    PostThreadMessageEvent,
+    UpdateForumReadMarkerEntry,
+    UpdateForumReadMarkerMessageComposer,
+    UpdateThreadMessageComposer,
+    UpdateThreadMessageEvent
 } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, LayoutBadgeImageView, Text } from '../../../../common';
-import { useMessageEvent } from '../../../../hooks';
+import { LocalizeText, ReportType, SendMessageComposer } from '../../../../api';
+import lockedIcon from '../../../../assets/images/groups/native/forum_forum_locked.png';
+import unlockedIcon from '../../../../assets/images/groups/native/forum_forum_unlocked.png';
+import hideIcon from '../../../../assets/images/groups/native/forum_forum_hide.png';
+import pinnedIcon from '../../../../assets/images/groups/native/forum_forum_pinned.png';
+import unpinnedIcon from '../../../../assets/images/groups/native/forum_forum_unpinned.png';
+import reportIcon from '../../../../assets/images/groups/native/forum_forum_report.png';
+import unhideIcon from '../../../../assets/images/groups/native/forum_forum_unhide.png';
+import { ClassicScrollAreaView } from '../../../../common';
+import { useHelp, useMessageEvent } from '../../../../hooks';
+import { flatText, GroupText } from '../GroupNativeLayout';
+import { FORUM_PAGE_SIZE, FORUM_SURFACE, stripTags, ForumButton, forumAge, ForumPager } from './GroupForumLayout';
 
-const THREADS_PER_PAGE = 20;
+// Thread states: 1 visible, 10 hidden by a group administrator, 20 deleted by Hotel staff.
+export const THREAD_HIDDEN_BY_ADMIN = 10;
+export const THREAD_DELETED_BY_STAFF = 20;
+export const THREAD_VISIBLE = 1;
+
+const ROW_WIDTH = 532;
+const BUTTON_WIDTH = 25;
+
+/** Maps the error code of a permission to the text of that refusal ("Only group owner can start new threads."). */
+export const forumPermissionText = (code: string, operationKey: string): string => {
+    const operation = LocalizeText(`groupforum.view.error.${operationKey}`);
+
+    return LocalizeText(`groupforum.view.error.${code}`, ['operation', 'OPERATION'], [operation, operation]);
+};
 
 interface GroupForumThreadListViewProps {
-    groupId: number;
     forumData: ExtendedForumData;
-    onOpenThread: (groupId: number, threadId: number, thread?: GuildForumThread) => void;
+    groupId: number;
     onNewThread: () => void;
-    onOpenSettings: () => void;
-    onBack: () => void;
+    onOpenThread: (thread: GuildForumThread) => void;
 }
 
-export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = (props) => {
-    const { groupId = 0, forumData = null, onOpenThread = null, onNewThread = null, onOpenSettings = null, onBack = null } = props;
-    const effectiveGroupId = forumData?.groupId || groupId;
+
+export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ forumData, groupId, onNewThread, onOpenThread }) => {
     const [threads, setThreads] = useState<GuildForumThread[]>([]);
-    const [startIndex, setStartIndex] = useState<number>(0);
-    const [totalThreads, setTotalThreads] = useState<number>(0);
+    const [pageIndex, setPageIndex] = useState<number>(0);
+    const { report = null } = useHelp();
+    const canModerate = forumData.hasModeratePermissionError;
+    const canReport = forumData.canReport;
+    const canPostThread = forumData.hasPostThreadPermissionError;
+    const pageCount = Math.max(1, Math.ceil(forumData.totalThreads / FORUM_PAGE_SIZE));
 
     useMessageEvent<GuildForumThreadsEvent>(GuildForumThreadsEvent, (event) => {
         const parser = event.getParser();
 
-        if (parser.groupId !== effectiveGroupId) return;
+        if (parser.groupId !== groupId || parser.startIndex !== pageIndex * FORUM_PAGE_SIZE) return;
 
-        setTotalThreads(parser.amount);
-
-        if (parser.startIndex === 0) {
-            setThreads(parser.threads);
-        } else {
-            setThreads((prev) => [...prev, ...parser.threads]);
-        }
+        setThreads(parser.threads);
     });
 
     useMessageEvent<PostThreadMessageEvent>(PostThreadMessageEvent, (event) => {
         const parser = event.getParser();
 
-        if (parser.groupId !== effectiveGroupId) return;
+        if (parser.groupId !== groupId || pageIndex !== 0) return;
 
-        setThreads((prev) => [parser.thread, ...prev]);
+        setThreads((previous) => [parser.thread, ...previous.filter((thread) => thread.threadId !== parser.thread.threadId)]);
+    });
+
+    useMessageEvent<UpdateThreadMessageEvent>(UpdateThreadMessageEvent, (event) => {
+        const parser = event.getParser();
+
+        if (parser.groupId !== groupId) return;
+
+        setThreads((previous) => previous.map((thread) => (thread.threadId === parser.thread.threadId ? parser.thread : thread)));
     });
 
     useEffect(() => {
-        if (!effectiveGroupId) return;
+        if (!groupId) return;
 
-        setThreads([]);
-        setStartIndex(0);
-        SendMessageComposer(new GetThreadsMessageComposer(effectiveGroupId, 0, THREADS_PER_PAGE));
-    }, [effectiveGroupId]);
+        SendMessageComposer(new GetThreadsMessageComposer(groupId, pageIndex * FORUM_PAGE_SIZE, FORUM_PAGE_SIZE));
+    }, [groupId, pageIndex]);
 
-    const formatTimeAgo = (seconds: number): string => {
-        if (seconds < 60) return `${seconds}s ${LocalizeText('messageboard.time.ago')}`;
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${LocalizeText('messageboard.time.ago')}`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ${LocalizeText('messageboard.time.ago')}`;
-
-        return `${Math.floor(seconds / 86400)}d ${LocalizeText('messageboard.time.ago')}`;
+    const moderate = (thread: GuildForumThread) => {
+        SendMessageComposer(new ModerateThreadMessageComposer(groupId, thread.threadId, thread.state === THREAD_HIDDEN_BY_ADMIN ? THREAD_VISIBLE : THREAD_HIDDEN_BY_ADMIN));
     };
 
-    const getThreadStateText = (thread: GuildForumThread): string => {
-        if (thread.state === 10) return LocalizeText('messageboard.thread.hidden.by.admin');
-        if (thread.state === 20) return LocalizeText('messageboard.thread.permanently.deleted.by.moderator');
-
-        return null;
+    const markAsRead = () => {
+        if (forumData.lastMessageId > 0) SendMessageComposer(new UpdateForumReadMarkerMessageComposer(new UpdateForumReadMarkerEntry(groupId, forumData.lastMessageId, true)));
     };
 
-    const canModerate = forumData && forumData.hasModeratePermissionError;
+    const buttonCount = (canModerate ? 1 : 0) + (canReport ? 1 : 0);
+    const buttonsWidth = buttonCount * BUTTON_WIDTH;
+    const textsWidth = ROW_WIDTH - 20 - 1 - 1 - 140 - (buttonCount ? 1 + buttonsWidth : 0);
+    const sorted = [...threads.filter((thread) => thread.isPinned), ...threads.filter((thread) => !thread.isPinned)];
 
-    const pinnedThreads = threads.filter((t) => t.isPinned);
-    const normalThreads = threads.filter((t) => !t.isPinned);
-    const sortedThreads = [...pinnedThreads, ...normalThreads];
-
-    const restoreThread = (thread: GuildForumThread) => {
-        SendMessageComposer(new ModerateThreadMessageComposer(effectiveGroupId, thread.threadId, 1));
-    };
+    const statusKey = !canPostThread ? forumData.postThreadPermissionError : '';
 
     return (
-        <Column className="h-full" gap={0}>
-            <Flex className="bg-muted p-2 border-b" gap={2} alignItems="center" justifyContent="between">
-                <Flex gap={2} alignItems="center">
-                    <Text pointer bold onClick={onBack}>
-                        <span className="inline-block w-[7px] h-[7px] border-l-2 border-b-2 border-current rotate-45 mr-1 align-middle" />{' '}
-                        {LocalizeText('groupforum.view.back')}
-                    </Text>
-                </Flex>
-                <Flex gap={1} alignItems="center">
-                    {forumData && forumData.canChangeSettings && (
-                        <Button variant="link" className="btn-sm" onClick={onOpenSettings}>
-                            {LocalizeText('groupforum.view.settings.header')}
-                        </Button>
-                    )}
-                    {forumData && forumData.hasReadPermissionError && forumData.hasPostThreadPermissionError && (
-                        <Button variant="primary" className="btn-sm" onClick={onNewThread}>
-                            {LocalizeText('messageboard.new.thread.button')}
-                        </Button>
-                    )}
-                </Flex>
-            </Flex>
-            {forumData && (
-                <Flex className="bg-light p-2 border-b" gap={2} alignItems="center">
-                    <LayoutBadgeImageView badgeCode={forumData.icon} isGroup={true} />
-                    <Column className="flex-1" gap={0}>
-                        <Text bold>{forumData.name}</Text>
-                        <Text small variant="muted">
-                            {forumData.description}
-                        </Text>
-                    </Column>
-                    <Column className="text-end" gap={0}>
-                        <Text small>
-                            {forumData.totalThreads} {LocalizeText('groupforum.view.threads')}
-                        </Text>
-                        <Text small>
-                            {forumData.totalMessages} {LocalizeText('messageboard.messages')}
-                        </Text>
-                    </Column>
-                </Flex>
-            )}
-            {forumData && !forumData.hasReadPermissionError && (
-                <Flex className="flex-1 p-4" justifyContent="center" alignItems="center">
-                    <Column alignItems="center" gap={2}>
-                        <Text bold>{LocalizeText('groupforum.view.error.operation_read')}</Text>
-                        <Text small variant="muted">
-                            {LocalizeText('groupforum.view.error.' + forumData.readPermissionError)}
-                        </Text>
-                    </Column>
-                </Flex>
-            )}
-            {(!forumData || forumData.hasReadPermissionError) && (
-                <Column className="overflow-auto flex-1" gap={0}>
-                    {sortedThreads.map((thread, index) => {
-                        const stateText = getThreadStateText(thread);
-
-                        if (stateText) {
-                            return (
-                                <Flex key={thread.threadId} className="p-2 border-b bg-danger bg-opacity-10" alignItems="center" justifyContent="between">
-                                    <Column gap={0}>
-                                        <Text small variant="muted">
-                                            {stateText}
-                                        </Text>
-                                        {canModerate && (
-                                            <Text small variant="muted">
-                                                {thread.header}
-                                            </Text>
-                                        )}
-                                    </Column>
-                                    {canModerate && (
-                                        <Button variant="outline-success" className="btn-sm" onClick={() => restoreThread(thread)}>
-                                            {LocalizeText('groupforum.thread.restore')}
-                                        </Button>
-                                    )}
-                                </Flex>
-                            );
-                        }
+        <>
+            <GroupText background={FORUM_SURFACE} height={25} overrides={flatText(16, { bold: true, color: 0xa6a6a2 })} text={LocalizeText('groupforum.view.all_threads')} width={541} x={0} y={115} />
+            <div className="octane-forum__list">
+                <ClassicScrollAreaView className="octane-forum__scroll" contentClassName="octane-forum__scroll-content" minThumbSize={26} scrollStep={41}>
+                    {sorted.map((thread, rowIndex) => {
+                        const isHidden = thread.state === THREAD_HIDDEN_BY_ADMIN || thread.state === THREAD_DELETED_BY_STAFF;
+                        const isUnread = thread.unreadMessagesCount > 0;
+                        // The rows alternate: the even ones are tinted blue; a hidden thread is grey.
+                        const background = isHidden ? 0xaaaaaa : rowIndex % 2 === 1 ? 0xb2e6fa : 0xeefeff;
+                        const rowColor = '#' + background.toString(16).padStart(6, '0');
+                        const header = isHidden && !canModerate
+                            ? LocalizeText(thread.state === THREAD_DELETED_BY_STAFF ? 'groupforum.view.thread_hidden_by_staff' : 'groupforum.view.thread_hidden_by_admin', ['ADMIN_NAME', 'admin_name'], [thread.adminName, thread.adminName])
+                            : thread.header;
+                        const details = stripTags(
+                            LocalizeText(
+                                'groupforum.view.thread_details',
+                                ['THREAD_AUTHOR_NAME', 'CREATION_TIME', 'LAST_AUTHOR_NAME', 'UPDATE_TIME'],
+                                [thread.authorName, forumAge(thread.creationTimeAsSecondsAgo), thread.lastUserName, forumAge(thread.lastCommentTime)]
+                            )
+                        );
 
                         return (
-                            <Flex
-                                key={thread.threadId}
-                                className={`p-2 border-b hover:bg-muted cursor-pointer ${thread.isPinned ? 'bg-warning bg-opacity-10' : ''} ${thread.unreadMessagesCount > 0 ? 'fw-bold' : ''}`}
-                                gap={2}
-                                alignItems="center"
-                                onClick={() => onOpenThread(effectiveGroupId, thread.threadId, thread)}
-                            >
-                                <Column className="flex-1 overflow-hidden" gap={0}>
-                                    <Flex gap={1} alignItems="center">
-                                        {thread.isPinned && <i className="fas fa-thumbtack text-warning" />}
-                                        {thread.isLocked && <i className="fas fa-lock text-muted" />}
-                                        <Text bold={thread.unreadMessagesCount > 0} className="truncate">
-                                            {thread.header}
-                                        </Text>
-                                    </Flex>
-                                    <Flex gap={1}>
-                                        <Text small variant="muted">
-                                            {LocalizeText('messageboard.started.by')}
-                                        </Text>
-                                        <Text
-                                            small
-                                            pointer
-                                            underline
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                GetUserProfile(thread.authorId);
-                                            }}
-                                        >
-                                            {thread.authorName}
-                                        </Text>
-                                        <Text small variant="muted">
-                                            - {formatTimeAgo(thread.creationTimeAsSecondsAgo)}
-                                        </Text>
-                                    </Flex>
-                                </Column>
-                                <Column className="flex-shrink-0 text-center min-w-[60px]" gap={0}>
-                                    <Text small>{thread.totalMessages}</Text>
-                                    <Text small variant="muted">
-                                        {LocalizeText('messageboard.messages')}
-                                    </Text>
-                                </Column>
-                                {thread.unreadMessagesCount > 0 && (
-                                    <Column className="flex-shrink-0 text-center min-w-[60px]" gap={0}>
-                                        <Text small bold variant="danger">
-                                            {thread.unreadMessagesCount}
-                                        </Text>
-                                        <Text small variant="danger">
-                                            {LocalizeText('messageboard.unread')}
-                                        </Text>
-                                    </Column>
-                                )}
-                                <Column className="flex-shrink-0 text-end min-w-[100px]" gap={0}>
-                                    <Text small variant="muted">
-                                        {LocalizeText('messageboard.last.message')}
-                                    </Text>
-                                    <Text
-                                        small
-                                        pointer
-                                        underline
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            GetUserProfile(thread.lastUserId);
-                                        }}
+                            <div key={thread.threadId} className="octane-forum__thread">
+                                <div className="octane-forum__thread-flags" style={{ background: rowColor }}>
+                                    <button
+                                        className="octane-forum__flag"
+                                        disabled={!canModerate}
+                                        style={{ top: 0 }}
+                                        type="button"
+                                        onClick={() => SendMessageComposer(new UpdateThreadMessageComposer(groupId, thread.threadId, !thread.isLocked, thread.isPinned))}
                                     >
-                                        {thread.lastUserName}
-                                    </Text>
-                                    <Text small variant="muted">
-                                        {formatTimeAgo(thread.lastCommentTime)}
-                                    </Text>
-                                </Column>
-                            </Flex>
+                                        <img alt="" draggable={false} src={thread.isLocked ? lockedIcon : unlockedIcon} style={{ left: 3, top: 1 }} />
+                                    </button>
+                                    <button
+                                        className="octane-forum__flag"
+                                        disabled={!canModerate}
+                                        style={{ top: 20 }}
+                                        type="button"
+                                        onClick={() => SendMessageComposer(new UpdateThreadMessageComposer(groupId, thread.threadId, thread.isLocked, !thread.isPinned))}
+                                    >
+                                        <img alt="" draggable={false} src={thread.isPinned ? pinnedIcon : unpinnedIcon} style={{ left: 3, top: 2 }} />
+                                    </button>
+                                </div>
+                                <div className="octane-forum__thread-body" style={{ left: 21, width: textsWidth, background: rowColor }} onClick={() => !isHidden || canModerate ? onOpenThread(thread) : undefined}>
+                                    <GroupText background={background} overrides={isUnread ? { bold: true } : undefined} text={header} x={0} y={0} />
+                                    <GroupText background={background} overrides={flatText(10)} text={details} x={0} y={16} />
+                                </div>
+                                <div className="octane-forum__thread-counts" style={{ left: 21 + textsWidth + 1, background: rowColor }}>
+                                    <GroupText
+                                        background={background}
+                                        overrides={flatText(10, { bold: isUnread })}
+                                        text={LocalizeText('groupforum.view.thread_details1', ['TOTAL_MESSAGES', 'total_messages'], [String(thread.totalMessages), String(thread.totalMessages)])}
+                                        x={0}
+                                        y={0}
+                                    />
+                                    <GroupText
+                                        background={background}
+                                        overrides={flatText(10, { bold: isUnread })}
+                                        text={LocalizeText('groupforum.view.thread_details2', ['NEW_MESSAGES', 'new_messages'], [String(thread.unreadMessagesCount), String(thread.unreadMessagesCount)])}
+                                        x={0}
+                                        y={15}
+                                    />
+                                </div>
+                                {buttonCount > 0 && (
+                                    <div className="octane-forum__thread-actions" style={{ left: ROW_WIDTH - buttonsWidth, width: buttonsWidth }}>
+                                        {canModerate && (
+                                            <button className="octane-forum__action is-hide" type="button" onClick={() => moderate(thread)}>
+                                                <img alt="" draggable={false} src={thread.state === THREAD_HIDDEN_BY_ADMIN ? unhideIcon : hideIcon} style={{ left: 5, top: 11 }} />
+                                            </button>
+                                        )}
+                                        {canReport && (
+                                            <button className="octane-forum__action is-report" style={{ left: canModerate ? BUTTON_WIDTH : 0 }} type="button" onClick={() => report(ReportType.THREAD, { groupId, threadId: thread.threadId })}>
+                                                <img alt="" draggable={false} src={reportIcon} style={{ left: 4, top: 12 }} />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         );
                     })}
-                    {sortedThreads.length === 0 && (
-                        <Flex className="p-4" justifyContent="center">
-                            <Text variant="muted">{LocalizeText('groupforum.view.no_threads')}</Text>
-                        </Flex>
-                    )}
-                    {threads.length < totalThreads && (
-                        <Flex justifyContent="center" className="p-2">
-                            <Text
-                                pointer
-                                underline
-                                onClick={() => {
-                                    const nextIndex = threads.length;
-                                    setStartIndex(nextIndex);
-                                    SendMessageComposer(new GetThreadsMessageComposer(effectiveGroupId, nextIndex, THREADS_PER_PAGE));
-                                }}
-                            >
-                                {LocalizeText('groupforum.list.load_more')}
-                            </Text>
-                        </Flex>
-                    )}
-                </Column>
+                </ClassicScrollAreaView>
+            </div>
+            <div className="octane-forum__footer">
+                <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={markAsRead} />
+                <ForumButton disabled={!canPostThread} label={LocalizeText('groupforum.view.start_thread')} right={178} tint="blue" width={95} onClick={onNewThread} />
+                <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={setPageIndex} />
+            </div>
+            {statusKey && (
+                <div className="octane-forum__status">
+                    <GroupText align="center" background={FORUM_SURFACE} overrides={flatText(11)} text={forumPermissionText(statusKey, 'operation_post_thread')} width={300} x={3} y={3} />
+                </div>
             )}
-        </Column>
+        </>
     );
 };

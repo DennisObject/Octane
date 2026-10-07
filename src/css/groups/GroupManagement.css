@@ -220,6 +220,15 @@
     overflow: hidden;
 }
 
+.octane-group-native__field.is-plain {
+    border: 0;
+}
+
+/* The forum compose fields only draw their white field once they hold text. */
+.octane-group-native__field.is-plain.is-empty {
+    background: transparent;
+}
+
 .octane-group-native__input {
     position: absolute;
     inset: 0;
