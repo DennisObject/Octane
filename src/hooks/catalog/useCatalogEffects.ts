@@ -57,6 +57,7 @@ import {
     recordPlacedPurchaseListFragment,
     recordPlacedPurchaseUnseen,
     releasePlacedOfferPurchase,
+    resetPlacedPurchaseSession,
     takePlacedPurchaseAnswer
 } from './useCatalogPlacedOffer';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
@@ -177,7 +178,10 @@ export const useCatalogEffects = (): void => {
             return;
         }
 
-        if (was) dropCatalogCache();
+        if (!was) return;
+
+        dropCatalogCache();
+        resetPlacedPurchaseSession();
     }, [connectionState.authenticated]);
 
     // Opening the catalog: imported furnidata.

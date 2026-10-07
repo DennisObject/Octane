@@ -3,7 +3,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { GetRoomSession, PlacedObjectPurchaseData, SendMessageComposer } from '../../api';
 import { useCatalogStore } from './catalogStore';
 
-// How long a bought item may stay unidentified before the temporary object is retired.
+// How long a purchase may stay unanswered, and a bought item unidentified, before the temporary
+// object is retired. A bought item stays in the inventory either way.
+const PURCHASE_ANSWER_WAIT_MS = 30000;
 const BOUGHT_ITEM_WAIT_MS = 10000;
 
 /** One Buy of a dropped offer, from the purchase request to the placement of the bought item. */
@@ -11,7 +13,7 @@ interface PlacedPurchaseAttempt {
     data: PlacedObjectPurchaseData;
     answered: boolean;
     bought: boolean;
-    // An earlier attempt was dropped before its answer came, so answers cannot be told apart.
+    // Started after an attempt was dropped unanswered; its answers cannot be told apart.
     ambiguous: boolean;
     unseenIds: Set<number>;
     spriteIds: Map<number, number>;
@@ -23,8 +25,9 @@ interface PlacedPurchaseAttempt {
 }
 
 let attempt: PlacedPurchaseAttempt = null;
-// Purchase answers still owed to attempts that were dropped unanswered; the server answers in order.
-let answersOwedElsewhere = 0;
+// Set once an attempt is dropped before its answer came. Purchase answers carry no request id, so
+// for the rest of the session no bought item is placed automatically.
+let placementTainted = false;
 
 /** The catalog offer dropped in the room and waiting for its purchase confirmation. */
 export const useCatalogPlacedOffer = () =>
@@ -45,7 +48,7 @@ const syncAttempt = () => {
 
     if (placedObjectPurchaseData === attempt.data && placedObjectPurchaseSent) return;
 
-    if (!attempt.answered) answersOwedElsewhere++;
+    if (!attempt.answered) placementTainted = true;
 
     clearTimeout(attempt.timer);
     attempt = null;
@@ -70,7 +73,7 @@ export const claimPlacedOfferPurchase = (placedObjectPurchaseData: PlacedObjectP
         data: placedObjectPurchaseData,
         answered: false,
         bought: false,
-        ambiguous: answersOwedElsewhere > 0,
+        ambiguous: placementTainted,
         unseenIds: new Set(),
         spriteIds: new Map(),
         listRequested: false,
@@ -80,28 +83,39 @@ export const claimPlacedOfferPurchase = (placedObjectPurchaseData: PlacedObjectP
         timer: null
     };
 
+    const current = attempt;
+
+    current.timer = setTimeout(() => {
+        if (getSentAttempt() === current && !current.answered) retirePlacedOffer();
+    }, PURCHASE_ANSWER_WAIT_MS);
+
     return true;
 };
 
+/** A new connection starts a new session: nothing is owed and placement is trusted again. */
+export const resetPlacedPurchaseSession = () => {
+    if (attempt) clearTimeout(attempt.timer);
+
+    attempt = null;
+    placementTainted = false;
+
+    if (useCatalogStore.getState().placedObjectPurchaseData) useCatalogStore.getState().resetPlacedOfferData(true);
+};
+
 /**
- * Takes one purchase answer (ok, error, not allowed, sold out or not enough balance). Answers owed
- * to dropped attempts come first; true when the answer belongs to the current drop's purchase.
- * Only a PurchaseOK names its offer; one for another offer is not this drop's answer.
+ * Takes one purchase answer (ok, error, not allowed, sold out or not enough balance); true when
+ * it is taken as the current drop's answer. Only a PurchaseOK names its offer; one for another
+ * offer is not this drop's answer.
  */
 export const takePlacedPurchaseAnswer = (offerId: number = null) => {
-    syncAttempt();
+    const current = getSentAttempt();
 
-    if (answersOwedElsewhere > 0) {
-        answersOwedElsewhere--;
+    if (!current || current.answered) return false;
 
-        return false;
-    }
+    if (offerId !== null && offerId !== current.data.offerId) return false;
 
-    if (!attempt || attempt.answered) return false;
-
-    if (offerId !== null && offerId !== attempt.data.offerId) return false;
-
-    attempt.answered = true;
+    current.answered = true;
+    clearTimeout(current.timer);
 
     return true;
 };
@@ -128,7 +142,7 @@ export const markPlacedPurchaseBought = () => {
 
     current.bought = true;
     current.timer = setTimeout(() => {
-        if (attempt === current) retirePlacedOffer();
+        if (getSentAttempt() === current) retirePlacedOffer();
     }, BOUGHT_ITEM_WAIT_MS);
 
     resolvePlacedPurchase();
@@ -179,7 +193,10 @@ export const recordPlacedPurchaseInvalidated = () => {
 };
 
 // The item stays in the inventory; only the temporary object goes.
-const retirePlacedOffer = () => useCatalogStore.getState().resetPlacedOfferData();
+const retirePlacedOffer = () => {
+    useCatalogStore.getState().resetPlacedOfferData();
+    syncAttempt();
+};
 
 // The bought item is placed when exactly one announced item is this product. When the announced
 // items are unknown the inventory list is asked for once; anything still unresolved, or two
