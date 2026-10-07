@@ -1521,5 +1521,19 @@
     "housekeeping.roles.saved": "Change saved. Online permissions updated.",
     "housekeeping.roles.manage_user": "Manage this user’s roles",
     "housekeeping.tab.roles": "Roles",
-    "housekeeping.error.stale_revision": "Permissions changed. The view has been refreshed; review your edit and try again."
+    "housekeeping.error.stale_revision": "Permissions changed. The view has been refreshed; review your edit and try again.",
+    // Official daily tasks window and quest completed texts (classic v75 external_flash_texts, verbatim).
+    "dailytasks.claim": "Claim",
+    "dailytasks.claimed": "Claimed",
+    "dailytasks.refreshes": "Refresh in %time%",
+    "dailytasks.reward": "Reward",
+    "dailytasks.task.complete": "Task complete",
+    "dailytasks.title": "Daily tasks",
+    "dailytasks.unclaimed": "Unclaimed tasks",
+    "dailytasks.unclaimed.tooltip": "You haven't claimed some completed tasks from previous days, click here to see them!",
+    "generic.get_hc": "Get HC",
+    "hc.get.double_duckets.info": "Get HC membership to gain double duckets!",
+    "hc.has.double_duckets.info": "You get double duckets as you are an HC member!",
+    "quests.completed.cataloglink": "Go shopping with %currencyname%",
+    "quests.completed.reward": "You have been rewarded <b><font size=\"30\" color=\"#7adde9\">%amount%</font></b> %currencyname%"
 }
