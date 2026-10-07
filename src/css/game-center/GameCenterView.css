@@ -272,3 +272,11 @@ body.snowwar-desktop-hidden #draggable-windows-container > .draggable-window:not
     opacity: 0.5;
     image-rendering: pixelated;
 }
+
+/* Game-session chat input (chatinput_window_new bubble) over the arena. */
+.snowwar-chat-input {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+}
