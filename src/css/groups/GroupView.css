@@ -2,19 +2,16 @@
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     color: #111111;
 }
-
 .octane-groups-window .octane-card-content,
 .octane-groups-window .octane-card-content-shell,
 .octane-groups-content {
     background: #eeeee7 !important;
     color: #111111;
 }
-
 .octane-groups-window .octane-card-tabs {
     background: #d6d5cc;
     border-bottom: 1px solid #77776f;
 }
-
 .octane-groups-window .octane-card-tabs-item {
     min-height: 25px;
     border: 1px solid #111111;
@@ -24,12 +21,10 @@
     color: #111111;
     text-shadow: none;
 }
-
 .octane-groups-window .octane-card-tabs-item.active,
 .octane-groups-window .octane-card-tabs-item:hover {
     background: #eeeee7;
 }
-
 .octane-groups-window input,
 .octane-groups-window textarea,
 .octane-groups-window select,
@@ -42,13 +37,11 @@
     box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.08);
     font-size: 12px;
 }
-
 .octane-groups-footer {
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px solid #c7c7bf;
 }
-
 .octane-groups-button,
 .octane-groups-window button:not(.octane-card-header-close),
 .octane-group-room-info .octane-groups-button {
@@ -66,20 +59,17 @@
     font-size: 12px;
     font-weight: 700;
 }
-
 .octane-groups-button:hover,
 .octane-groups-window button:not(.octane-card-header-close):hover,
 .octane-group-room-info .octane-groups-button:hover {
     border-image-source: var(--habbo-skin-button-hover) !important;
     filter: none !important;
 }
-
 .octane-groups-button:active,
 .octane-groups-window button:not(.octane-card-header-close):active,
 .octane-group-room-info .octane-groups-button:active {
     border-image-source: var(--habbo-skin-button-pressed) !important;
 }
-
 .octane-groups-button:disabled,
 .octane-groups-window button:disabled,
 .octane-group-room-info .octane-groups-button:disabled {
@@ -87,248 +77,12 @@
     color: #777777 !important;
     opacity: 1 !important;
 }
-
-.octane-group-information-standalone {
-    width: 363px !important;
-    height: 268px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    box-sizing: border-box !important;
-    resize: none !important;
-}
-
-.octane-group-information-standalone .octane-card-content-shell,
-.octane-group-information-standalone .octane-groups-content {
-    width: 100% !important;
-    height: auto !important;
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: transparent !important;
-    box-sizing: border-box !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info {
-    position: relative;
-    display: block !important;
-    width: 343px !important;
-    height: 214px !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    box-sizing: border-box !important;
-    margin: 7px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    color: #000000;
-    font-size: 12px;
-    overflow: hidden !important;
-    clip-path: none !important;
-}
-
 /* AIR 1192/1197: group_cont at (10,43), border style 0, 343 x 214. */
-.octane-group-information-standalone .octane-extended-profile-group-info::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border: 6px solid transparent;
-    border-image-source: var(--habbo-skin-border-white);
-    border-image-slice: 6 fill;
-    border-image-width: 6px;
-    border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__badge-column {
-    position: absolute;
-    left: 14px !important;
-    top: 16px !important;
-    width: 105px !important;
-    height: 134px !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__badge-wrap {
-    position: absolute;
-    left: 0 !important;
-    top: 0 !important;
-    width: 80px !important;
-    height: 80px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__badge-wrap .group-badge {
-    flex: 0 0 auto;
-    min-width: 80px;
-    min-height: 80px;
-    background-size: auto !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__badge-wrap img {
-    width: auto;
-    height: auto;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__meta {
-    position: absolute;
-    left: 0 !important;
-    top: 85px !important;
-    width: 82px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__member-link {
-    display: block;
-    width: 82px !important;
-    height: 17px;
-    padding: 0 !important;
-    border: 0 !important;
-    border-image: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: #000000 !important;
-    font-weight: 700;
-    font-size: 12px;
-    text-align: center;
-    text-decoration: underline;
-    line-height: 17px;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__role {
-    display: block !important;
-    position: absolute !important;
-    left: 30px !important;
-    top: 118px !important;
-    width: 20px !important;
-    height: 20px !important;
-    z-index: 2;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__content {
-    position: absolute;
-    left: 116px !important;
-    top: 11px !important;
-    width: 196px !important;
-    height: 190px !important;
-    display: block;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy {
-    position: absolute;
-    left: 0 !important;
-    top: 0 !important;
-    width: 196px !important;
-    height: 47px !important;
-    display: block;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy > .flex {
-    display: block !important;
-    width: 196px !important;
-    height: 16px !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy > .flex > .flex {
-    display: none !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy .text-bold,
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy b,
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy .fw-bold {
-    display: block !important;
-    width: 196px !important;
-    height: 16px !important;
-    color: #111111 !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 16px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__header-copy > .text {
-    display: block !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 16px !important;
-    width: 196px !important;
-    height: 15px !important;
-    color: #111111 !important;
-    font-size: 11px !important;
-    line-height: 15px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__description {
-    position: absolute;
-    left: 0;
-    top: 32px !important;
-    width: 194px !important;
-    height: 31px !important;
-    padding: 0;
-    color: #000000 !important;
-    font-size: 12px !important;
-    line-height: 15px !important;
-    overflow: hidden !important;
-    word-break: normal;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__links {
-    position: absolute;
-    left: 0;
-    top: 84px !important;
-    width: 190px !important;
-    height: 58px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__links .text,
-.octane-group-information-standalone .octane-extended-profile-group-info__links span {
-    color: #000000 !important;
-    font-size: 12px;
-    line-height: 16px;
-    text-decoration: underline;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__button {
-    position: absolute;
-    left: -2px !important;
-    top: 168px !important;
-    width: 160px !important;
-    height: 29px !important;
-    min-height: 29px !important;
-    box-sizing: border-box !important;
-}
-
-.octane-group-information-standalone .octane-extended-profile-group-info__button .text-white,
-.octane-group-information-standalone .octane-extended-profile-group-info__button span {
-    color: #111111 !important;
-    text-shadow: none !important;
-}
-
 .octane-group-members {
     width: 332px;
     height: 431px;
     resize: none !important;
 }
-
 .octane-group-members .octane-card-content-shell,
 .octane-group-members .octane-groups-content {
     position: relative;
@@ -338,7 +92,6 @@
     overflow: hidden !important;
     background: #eeeee7 !important;
 }
-
 .octane-group-members-search {
     position: absolute;
     left: 6px;
@@ -350,7 +103,6 @@
     border-radius: 0;
     background: transparent;
 }
-
 .octane-group-members-search__badge {
     position: absolute;
     left: 17px;
@@ -364,7 +116,6 @@
     background-repeat: no-repeat !important;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
-
 .octane-group-members-search .flex-column,
 .octane-group-members-search .d-flex.flex-column,
 .octane-group-members-search > .column {
@@ -375,7 +126,6 @@
     height: 59px;
     gap: 9px !important;
 }
-
 .octane-group-members-search input {
     width: 214px !important;
     height: 25px !important;
@@ -383,7 +133,6 @@
     padding: 2px 6px !important;
     font-size: 13px !important;
 }
-
 .octane-group-members-search select {
     width: 230px !important;
     height: 25px !important;
@@ -391,7 +140,6 @@
     padding: 2px 6px !important;
     font-size: 13px !important;
 }
-
 .octane-group-members-list-grid {
     position: absolute;
     left: 4px;
@@ -409,7 +157,6 @@
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-
 .octane-group-member-row {
     position: relative;
     width: 164px !important;
@@ -423,11 +170,9 @@
     box-shadow: none !important;
     color: #000000;
 }
-
 .octane-group-member-row:hover {
     background: rgba(255, 255, 255, .35) !important;
 }
-
 .octane-group-member-row__avatar {
     position: absolute;
     left: -3px;
@@ -436,7 +181,6 @@
     height: 34px;
     overflow: hidden;
 }
-
 .octane-group-member-row__head {
     position: absolute;
     left: 50%;
@@ -446,7 +190,6 @@
     transform: translateX(-50%);
     image-rendering: var(--octane-pixel-art, pixelated);
 }
-
 .octane-group-member-row__copy {
     position: absolute;
     left: 33px;
@@ -455,7 +198,6 @@
     height: 31px;
     overflow: hidden;
 }
-
 .octane-group-member-row__name {
     display: block;
     width: 77px;
@@ -468,7 +210,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .octane-group-member-row__since {
     display: block;
     position: absolute;
@@ -484,7 +225,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .octane-group-member-row__actions {
     position: absolute;
     right: 1px;
@@ -496,13 +236,11 @@
     gap: 0;
     align-items: center;
 }
-
 .octane-group-member-row__actions .octane-icon,
 .octane-group-member-row__actions .octane-friends-spritesheet {
     margin: 0 !important;
     flex: 0 0 auto;
 }
-
 .octane-group-members .octane-groups-footer {
     position: absolute;
     left: 4px;
@@ -513,21 +251,18 @@
     padding: 0;
     border: 0;
 }
-
 .octane-group-members .octane-groups-button--pager {
     width: 50px !important;
     height: 25px !important;
     min-height: 25px !important;
     padding: 0 !important;
 }
-
 .octane-group-members .octane-groups-footer .text {
     width: 178px;
     text-align: center;
     color: rgba(0, 0, 0, .7) !important;
     font-size: 12px;
 }
-
 .octane-group-room-info {
     margin-left: auto;
     margin-right: 0;
@@ -546,11 +281,9 @@
     image-rendering: var(--octane-pixel-art, pixelated);
     transition: height 0.18s ease;
 }
-
 .octane-group-room-info.is-closed {
     height: 22px;
 }
-
 .octane-group-room-info__contracted {
     position: relative;
     display: flex;
@@ -563,14 +296,12 @@
     border-bottom: 1px solid #000000;
     border-radius: 3px 3px 0 0;
 }
-
 .octane-group-room-info__base-icon {
     width: auto;
     height: auto;
     flex: 0 0 auto;
     margin-right: 3px;
 }
-
 .octane-group-room-info__toggle {
     position: absolute;
     top: 2px;
@@ -583,7 +314,6 @@
     box-shadow: none;
     transform: none;
 }
-
 .octane-group-room-info__toggle::after {
     content: "";
     position: absolute;
@@ -596,15 +326,12 @@
     border-top: 5px solid #d7d7d7;
     filter: drop-shadow(1px 1px 0 #000000);
 }
-
 .octane-group-room-info.is-closed .octane-group-room-info__toggle {
     transform: none;
 }
-
 .octane-group-room-info.is-closed .octane-group-room-info__toggle::after {
     transform: rotate(180deg);
 }
-
 .octane-group-room-info__title,
 .octane-group-room-info .text-white {
     color: #ffffff !important;
@@ -614,25 +341,21 @@
     letter-spacing: -0.2px;
     text-shadow: 1px 1px 0 #000000;
 }
-
 .octane-group-room-info__content {
     height: 90px;
     overflow: hidden;
     transition: opacity 0.14s ease;
     background: rgba(27, 27, 27, 0.94);
 }
-
 .octane-group-room-info.is-closed .octane-group-room-info__content {
     opacity: 0;
     pointer-events: none;
 }
-
 .octane-group-room-info__main {
     height: 57px;
     padding: 7px 8px 0 10px;
     gap: 7px;
 }
-
 .octane-group-room-info__badge {
     display: flex;
     align-items: center;
@@ -642,7 +365,6 @@
     flex: 0 0 39px;
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.75));
 }
-
 .octane-group-room-info__badge .layout-badge-image,
 .octane-group-room-info__badge .badge-image {
     width: 39px !important;
@@ -650,7 +372,6 @@
     background-size: contain !important;
     background-position: center !important;
 }
-
 .octane-group-room-info__group-name {
     display: -webkit-box;
     width: 124px;
@@ -665,17 +386,14 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
-
 .octane-group-room-info__button-wrap {
     padding: 3px 8px 0;
 }
-
 .octane-group-room-info__button {
     width: 170px;
     height: 27px;
     min-height: 27px;
 }
-
 /* SWF group_room_info.xml coordinates. */
 .octane-group-room-info {
     width: 195px !important;
@@ -684,17 +402,14 @@
     margin-left: auto !important;
     border-radius: 4px !important;
 }
-
 .octane-group-room-info.is-closed {
     height: 25px !important;
 }
-
 .octane-group-room-info__contracted {
     width: 195px !important;
     height: 25px !important;
     padding: 0 24px 0 5px !important;
 }
-
 .octane-group-room-info__base-icon {
     width: 21px !important;
     max-width: 21px !important;
@@ -702,47 +417,39 @@
     max-height: 16px !important;
     margin: 0 -11px 0 0 !important;
 }
-
 .octane-group-room-info__title,
 .octane-group-room-info .text-white {
     font-size: 13px !important;
     line-height: 18px !important;
     letter-spacing: -0.4px !important;
 }
-
 .octane-group-room-info__content {
     height: 94px !important;
 }
-
 .octane-group-room-info__main {
     height: 51px !important;
     padding: 7px 11px 0 12px !important;
     gap: 8px !important;
 }
-
 .octane-group-room-info__badge {
     width: 39px !important;
     height: 39px !important;
     flex: 0 0 39px !important;
 }
-
 .octane-group-room-info__group-name {
     width: 125px !important;
     height: 50px !important;
     font-size: 13px !important;
     line-height: 14px !important;
 }
-
 .octane-group-room-info__button-wrap {
     padding: 1px 10px 0 !important;
 }
-
 .octane-group-room-info__button {
     width: 175px !important;
     height: 29px !important;
     min-height: 29px !important;
 }
-
 /* group_room_info.xml: guilds/group_bg.png 195x119, contracted Events/event_bg_contracted.png 195x25. */
 .octane-group-room-info {
     position: relative !important;
@@ -752,12 +459,10 @@
     background: url("../../assets/images/groups/swf/group_bg.png") 0 0 / 195px 119px no-repeat !important;
     box-shadow: none !important;
 }
-
 .octane-group-room-info.is-closed {
     background-image: url("../../assets/images/groups/swf/event_bg_contracted.png") !important;
     background-size: 195px 25px !important;
 }
-
 .octane-group-room-info__contracted {
     position: relative !important;
     width: 195px !important;
@@ -767,13 +472,11 @@
     border-radius: 0 !important;
     background: transparent !important;
 }
-
 .octane-group-room-info__toggle::after,
 .octane-group-room-info.is-closed .octane-group-room-info__toggle::after {
     content: none !important;
     border: 0 !important;
 }
-
 .octane-group-room-info__base-icon {
     position: absolute !important;
     top: 3px !important;
@@ -782,7 +485,6 @@
     height: 16px !important;
     margin: 0 !important;
 }
-
 .octane-group-room-info__title {
     position: absolute !important;
     top: 2px !important;
@@ -793,12 +495,10 @@
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
 }
-
 .octane-group-room-info__toggle {
     top: 4px !important;
     right: 5px !important;
 }
-
 .octane-group-room-info__content {
     position: relative !important;
     width: 195px !important;
@@ -806,7 +506,6 @@
     overflow: hidden !important;
     background: transparent !important;
 }
-
 .octane-group-room-info__main {
     position: absolute !important;
     inset: 0 !important;
@@ -815,13 +514,11 @@
     height: 54px !important;
     padding: 0 !important;
 }
-
 .octane-group-room-info__badge {
     position: absolute !important;
     top: 7px !important;
     left: 12px !important;
 }
-
 .octane-group-room-info__group-name {
     position: absolute !important;
     top: 7px !important;
@@ -831,7 +528,6 @@
     margin: 0 !important;
     color: #ffffff !important;
 }
-
 .octane-group-room-info__button-wrap {
     position: absolute !important;
     top: 54px !important;
@@ -840,7 +536,6 @@
     height: 29px !important;
     padding: 0 !important;
 }
-
 .octane-group-room-info .octane-group-room-info__button {
     width: 175px !important;
     height: 29px !important;
@@ -851,30 +546,25 @@
     justify-content: center !important;
     text-align: center !important;
 }
-
 .octane-group-room-info__button .text-white {
     color: #111111 !important;
 }
-
 /* SWF guild_members_window/member_entry layout */
 .octane-group-members {
     width: 351px !important;
     height: 431px !important;
     resize: none !important;
 }
-
 .octane-group-members .octane-card-header,
 .octane-group-members .octane-card-header-shell {
     height: 32px !important;
 }
-
 .octane-group-members .octane-card-header-text {
     font-size: 13px !important;
     font-weight: 700 !important;
     line-height: 30px !important;
     text-align: center !important;
 }
-
 .octane-group-members .octane-card-content-shell,
 .octane-group-members .octane-groups-content {
     position: relative !important;
@@ -884,7 +574,6 @@
     overflow: hidden !important;
     background: #eeeee7 !important;
 }
-
 .octane-group-members-search {
     position: absolute !important;
     left: 7px !important;
@@ -895,7 +584,6 @@
     border: 0 !important;
     background: transparent !important;
 }
-
 .octane-group-members-search__badge {
     position: absolute !important;
     left: 19px !important;
@@ -905,7 +593,6 @@
     min-width: 39px !important;
     min-height: 39px !important;
 }
-
 .octane-group-members-search__controls,
 .octane-group-members-search .flex-column,
 .octane-group-members-search .d-flex.flex-column,
@@ -919,7 +606,6 @@
     display: flex !important;
     flex-direction: column !important;
 }
-
 .octane-group-members-search input {
     position: relative !important;
     left: 0 !important;
@@ -935,7 +621,6 @@
     color: #222222 !important;
     font-size: 13px !important;
 }
-
 .octane-group-members-search select {
     position: relative !important;
     left: 0 !important;
@@ -951,7 +636,6 @@
     color: #222222 !important;
     font-size: 13px !important;
 }
-
 .octane-group-members-list-grid {
     position: absolute !important;
     left: 6px !important;
@@ -968,7 +652,6 @@
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-
 .octane-group-member-row {
     position: relative !important;
     width: 168px !important;
@@ -983,11 +666,9 @@
     box-shadow: inset 0 1px 0 #ffffff !important;
     overflow: hidden !important;
 }
-
 .octane-group-member-row:hover {
     background: #ffffff !important;
 }
-
 .octane-group-member-row__avatar {
     position: absolute !important;
     left: -5px !important;
@@ -996,7 +677,6 @@
     height: 45px !important;
     overflow: hidden !important;
 }
-
 .octane-group-member-row__head {
     position: absolute !important;
     left: 0 !important;
@@ -1006,7 +686,6 @@
     transform: none !important;
     image-rendering: var(--octane-pixel-art, pixelated) !important;
 }
-
 .octane-group-member-row__copy {
     position: absolute !important;
     left: 38px !important;
@@ -1015,7 +694,6 @@
     height: 32px !important;
     overflow: hidden !important;
 }
-
 .octane-group-member-row__name {
     display: block !important;
     width: 93px !important;
@@ -1028,7 +706,6 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
-
 .octane-group-member-row__since {
     display: block !important;
     position: absolute !important;
@@ -1044,7 +721,6 @@
     overflow: hidden !important;
     text-overflow: clip !important;
 }
-
 .octane-group-member-row__actions {
     position: absolute !important;
     right: 3px !important;
@@ -1056,13 +732,11 @@
     align-items: center !important;
     gap: 1px !important;
 }
-
 .octane-group-member-row__actions .octane-icon,
 .octane-group-member-row__actions .octane-friends-spritesheet {
     margin: 0 !important;
     flex: 0 0 auto !important;
 }
-
 .octane-group-members-footer {
     position: absolute !important;
     left: 8px !important;
@@ -1073,18 +747,15 @@
     padding: 0 !important;
     border: 0 !important;
 }
-
 .octane-group-members-footer .octane-groups-button--pager {
     width: 51px !important;
     height: 29px !important;
     min-height: 29px !important;
     padding: 0 !important;
 }
-
 .octane-group-members-footer .octane-groups-button--pager:first-child {
     visibility: hidden;
 }
-
 .octane-group-members-footer__page {
     position: absolute;
     left: 73px;
@@ -1097,7 +768,6 @@
     gap: 5px;
     color: #5d5d58;
 }
-
 .octane-group-members-footer__label,
 .octane-group-members-footer__total {
     color: #5d5d58 !important;
@@ -1105,7 +775,6 @@
     line-height: 20px !important;
     white-space: nowrap !important;
 }
-
 .octane-group-members-footer__input {
     width: 22px !important;
     height: 22px !important;
@@ -1120,16 +789,13 @@
     box-shadow: none !important;
     appearance: textfield !important;
 }
-
 .octane-group-members-footer__input::-webkit-outer-spin-button,
 .octane-group-members-footer__input::-webkit-inner-spin-button {
     appearance: none;
     margin: 0;
 }
-
 /* button_thick style 3: neutral shiny skin shared by group controls. */
 .octane-groups-window .octane-groups-button--primary,
-.octane-group-information-standalone .octane-extended-profile-group-info__button,
 .octane-group-room-info .octane-group-room-info__button {
     border: 5px solid transparent !important;
     border-image-source: var(--habbo-skin-shiny-thick) !important;
@@ -1149,30 +815,22 @@
     box-shadow: none !important;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
-
 .octane-groups-window .octane-groups-button--primary:hover,
-.octane-group-information-standalone .octane-extended-profile-group-info__button:hover,
 .octane-group-room-info .octane-group-room-info__button:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover) !important;
     opacity: 1 !important;
 }
-
 .octane-groups-window .octane-groups-button--primary:active,
-.octane-group-information-standalone .octane-extended-profile-group-info__button:active,
 .octane-group-room-info .octane-group-room-info__button:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed) !important;
     opacity: 1 !important;
 }
-
 .octane-groups-window .octane-groups-button--primary.pointer-events-none,
-.octane-group-information-standalone .octane-extended-profile-group-info__button.pointer-events-none,
 .octane-group-room-info .octane-group-room-info__button.pointer-events-none {
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;
 }
-
 .octane-groups-window .octane-groups-button--primary:disabled,
-.octane-group-information-standalone .octane-extended-profile-group-info__button:disabled,
 .octane-group-room-info .octane-group-room-info__button:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;

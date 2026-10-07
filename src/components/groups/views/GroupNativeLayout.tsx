@@ -97,7 +97,7 @@ export const GroupText: FC<GroupTextProps> = ({
 export const flatText = (size: number, extra: Partial<NativeFontStyle> = {}): Partial<NativeFontStyle> => ({ size, sharpness: 0, thickness: 0, ...extra });
 
 interface GroupBoxProps {
-    kind: 'white' | 'outline' | 'yellow' | 'red' | 'gray' | 'slot' | 'tan' | 'dark';
+    kind: 'white' | 'outline' | 'yellow' | 'red' | 'gray' | 'cc' | 'slot' | 'tan' | 'dark';
     onClick?: () => void;
     x: number;
     y: number;

@@ -1,6 +1,6 @@
 import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { SendMessageComposer, TryVisitRoom } from '../../api';
+import { GetGroupInformation, SendMessageComposer, TryVisitRoom } from '../../api';
 import { useGroup, useMessageEvent } from '../../hooks';
 import { GroupCreatedView } from './views/GroupCreatedView';
 import { GroupCreatorView } from './views/GroupCreatorView';
@@ -43,9 +43,23 @@ export const GroupsView: FC<{}> = (props) => {
             eventUrlPrefix: 'groups/'
         };
 
-        AddLinkEventTracker(linkTracker);
+        // The v75 link router opens a group's information window with group/<id>.
+        const infoTracker: ILinkEventTracker = {
+            linkReceived: (url: string) => {
+                const groupId = Number(url.split('/')[1]);
 
-        return () => RemoveLinkEventTracker(linkTracker);
+                if (groupId > 0) GetGroupInformation(groupId);
+            },
+            eventUrlPrefix: 'group/'
+        };
+
+        AddLinkEventTracker(linkTracker);
+        AddLinkEventTracker(infoTracker);
+
+        return () => {
+            RemoveLinkEventTracker(linkTracker);
+            RemoveLinkEventTracker(infoTracker);
+        };
     }, []);
 
     return (

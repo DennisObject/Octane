@@ -132,6 +132,11 @@
     border-image: url('../../assets/images/groups/native/border-white-cc0000.png') 6 fill / 6px stretch;
 }
 
+.octane-group-native__box.is-cc::before {
+    border-width: 6px;
+    border-image: url('../../assets/images/groups/native/border-white-cccccc.png') 6 fill / 6px stretch;
+}
+
 .octane-group-native__box.is-gray::before {
     border-width: 6px;
     border-image: url('../../assets/images/groups/native/border-white-aaaaaa.png') 6 fill / 6px stretch;
@@ -650,5 +655,49 @@ textarea.octane-group-native__input::-webkit-scrollbar {
 
 .octane-group-native__type-icon {
     position: absolute;
+    display: block;
+}
+
+/* groups_info_window */
+.octane-group-info.octane-card-shell.octane-card-frame-3 {
+    box-sizing: border-box;
+    width: 363px !important;
+    min-width: 363px !important;
+    max-width: 363px !important;
+    height: 268px !important;
+    min-height: 268px !important;
+    max-height: 268px !important;
+    padding: 0 !important;
+    line-height: 1;
+    image-rendering: pixelated;
+}
+
+.octane-group-info.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-group-info .octane-group-native__box,
+.octane-group-info .octane-group-native__text:not(.is-static),
+.octane-group-info .octane-group-native__button,
+.octane-group-info__badge,
+.octane-group-info__icon {
+    position: absolute;
+    z-index: 1;
+}
+
+.octane-group-info .octane-group-native__button {
+    z-index: 2;
+}
+
+.octane-group-info__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 85px;
+    height: 85px;
+}
+
+.octane-group-info__icon {
+    max-width: none;
     display: block;
 }
