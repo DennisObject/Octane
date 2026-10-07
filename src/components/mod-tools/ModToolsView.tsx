@@ -1,17 +1,16 @@
 import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser } from '../../api';
-import { useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { MOD_WINDOW_SIZE, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { ModToolsChatlogView } from './views/room/ModToolsChatlogView';
 import { RoomToolView } from './views/RoomToolView';
+import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
 import { UserInfoView } from './views/UserInfoView';
 import { ModToolsTicketsView } from './views/tickets/ModToolsTicketsView';
 import { ModToolsUserChatlogView } from './views/user/ModToolsUserChatlogView';
 
 const START_PANEL = { x: 120, y: 64, width: 170, height: 170 };
-const ROOM_TOOL_SIZE = { width: 240, height: 437 };
-const USER_INFO_SIZE = { width: 292, height: 225 };
 
 // Classic v75 ModerationManager / StartPanelCtrl (fme): the panel opens when the moderator init message arrives, the room and chatlog buttons follow the
 // room entered / left events, the user button follows the last selected avatar and stays enabled after the room is left.
@@ -89,7 +88,7 @@ export const ModToolsView: FC<{}> = () => {
                 switch (parts[1]) {
                     case 'open-room-info':
                     case 'toggle-room-info':
-                        showWindow({ type: 'roomTool', key: parts[2], ...ROOM_TOOL_SIZE, parent: START_PANEL, toggle: parts[1] === 'toggle-room-info' });
+                        showWindow({ type: 'roomTool', key: parts[2], ...MOD_WINDOW_SIZE.roomTool, parent: START_PANEL, toggle: parts[1] === 'toggle-room-info' });
                         return;
                     case 'close-room-info':
                         closeWindow('roomTool', parts[2]);
@@ -105,7 +104,7 @@ export const ModToolsView: FC<{}> = () => {
                         return;
                     case 'open-user-info':
                     case 'toggle-user-info':
-                        showWindow({ type: 'userInfo', key: parts[2], ...USER_INFO_SIZE, parent: START_PANEL, toggle: parts[1] === 'toggle-user-info' });
+                        showWindow({ type: 'userInfo', key: parts[2], ...MOD_WINDOW_SIZE.userInfo, parent: START_PANEL, toggle: parts[1] === 'toggle-user-info' });
                         return;
                     case 'close-user-info':
                         closeWindow('userInfo', parts[2]);
@@ -187,7 +186,23 @@ export const ModToolsView: FC<{}> = () => {
                             onOpenChatlog={() => CreateLinkEvent(`mod-tools/toggle-user-chatlog/${entry.key}`)}
                             onOpenModAction={() => CreateLinkEvent(`mod-tools/toggle-user-mod-action/${entry.key}`)}
                             onOpenRoomVisits={() => CreateLinkEvent(`mod-tools/toggle-user-room-visits/${entry.key}`)}
-                            onOpenSendMessage={() => CreateLinkEvent(`mod-tools/toggle-user-send-message/${entry.key}`)}
+                            onOpenSendMessage={(userName) =>
+                                showWindow({ type: 'sendMessage', key: userName, ...MOD_WINDOW_SIZE.sendMessage, parent: entry, below: true, toggle: true, params: { userId: Number(entry.key) } })
+                            }
+                        />
+                    );
+                }
+
+                if (entry.type === 'sendMessage') {
+                    return (
+                        <SendMessageView
+                            key={key}
+                            settings={settings}
+                            userId={Number(entry.params.userId)}
+                            userName={entry.key}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('sendMessage', entry.key)}
                         />
                     );
                 }

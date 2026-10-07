@@ -27,7 +27,7 @@ export interface UserInfoProps {
     y: number;
     onClose: () => void;
     onOpenChatlog: () => void;
-    onOpenSendMessage: () => void;
+    onOpenSendMessage: (userName: string) => void;
     onOpenModAction: () => void;
     onOpenRoomVisits: () => void;
 }
@@ -106,7 +106,7 @@ export const UserInfoView: FC<UserInfoProps> = ({ userId, settings, x, y, onClos
                         <Native0Text text={data.userClassification || '-'} width={at('user_class_txt').width} x={at('user_class_txt').x} y={at('user_class_txt').y} />
                         <div style={{ position: 'absolute', left: rectOf(buttons).x, top: rectOf(buttons).y, width: rectOf(buttons).width, height: rectOf(buttons).height }}>
                             <Native0Button enabled={settings.chatlogsPermission} height={21} label={text(findNativeNode(buttons, 'chatlog_but'))} width={80} x={button('chatlog_but').x} y={button('chatlog_but').y} onClick={onOpenChatlog} />
-                            <Native0Button enabled={canMessage} height={21} label={text(findNativeNode(buttons, 'message_but'))} width={80} x={button('message_but').x} y={button('message_but').y} onClick={() => onOpenSendMessage()} />
+                            <Native0Button enabled={canMessage} height={21} label={text(findNativeNode(buttons, 'message_but'))} width={80} x={button('message_but').x} y={button('message_but').y} onClick={() => onOpenSendMessage(data.userName)} />
                             <Native0Button height={21} label={text(findNativeNode(buttons, 'roomvisits_but'))} width={80} x={button('roomvisits_but').x} y={button('roomvisits_but').y} onClick={onOpenRoomVisits} />
                             <Native0Button
                                 height={21}

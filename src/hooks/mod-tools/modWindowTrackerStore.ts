@@ -2,6 +2,14 @@ import { createOctaneStore } from '../../state/createOctaneStore';
 
 export type ModWindowType = 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits';
 
+export const MOD_WINDOW_SIZE: Record<ModWindowType, { width: number; height: number }> = {
+    roomTool: { width: 240, height: 437 },
+    userInfo: { width: 292, height: 225 },
+    sendMessage: { width: 212, height: 168 },
+    modAction: { width: 383, height: 295 },
+    roomVisits: { width: 292, height: 224 }
+};
+
 export interface ModWindowRect {
     x: number;
     y: number;
@@ -14,6 +22,8 @@ export interface ModWindow extends ModWindowRect {
     key: string;
     /** Bumped when the window is shown again while open: the replacement instance starts over (and asks for its data again). */
     revision: number;
+    /** What the window needs besides its key (the user a message goes to, ...). */
+    params: Record<string, string | number>;
 }
 
 export interface ModWindowShowRequest {
@@ -29,6 +39,7 @@ export interface ModWindowShowRequest {
     silent?: boolean;
     /** Close the window instead when one of that type and key is open already. */
     toggle?: boolean;
+    params?: Record<string, string | number>;
 }
 
 interface ModWindowTrackerState {
@@ -51,7 +62,7 @@ const clampToDesktop = (rect: ModWindowRect): ModWindowRect => ({
 export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>()((set, get) => ({
     windows: [],
     get: (type, key) => get().windows.find((entry) => entry.type === type && entry.key === key) ?? null,
-    show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false }) => {
+    show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false, params = {} }) => {
         const existing = get().windows.find((entry) => entry.type === type && entry.key === key);
 
         if (existing) {
@@ -68,7 +79,7 @@ export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>
                 : { x: parent.x + parent.width + 5, y: parent.y }
             : { x: window.innerWidth / 2 - width / 2, y: window.innerHeight / 2 - height / 2 };
 
-        set((state) => ({ windows: [...state.windows, { type, key, width, height, revision: 0, ...clampToDesktop({ ...placed, width, height }) }] }));
+        set((state) => ({ windows: [...state.windows, { type, key, width, height, revision: 0, params, ...clampToDesktop({ ...placed, width, height }) }] }));
     },
     close: (type, key) => set((state) => ({ windows: state.windows.filter((entry) => entry.type !== type || entry.key !== key) })),
     move: (type, key, x, y) => set((state) => ({ windows: state.windows.map((entry) => (entry.type === type && entry.key === key ? { ...entry, x, y } : entry)) })),
