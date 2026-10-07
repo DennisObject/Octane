@@ -1,5 +1,5 @@
 import { AddLinkEventTracker, CreateLinkEvent, DailyTaskData, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { CSSProperties, FC, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { getDailyTaskImageUrl, getDailyTasksWindowCaption, localizeWithFallback } from '../../api';
 import { ClassicScrollAreaView, LayoutBadgeImageView, LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
@@ -87,12 +87,16 @@ const DailyTaskRewardView: FC<{ reward: DailyTaskData['rewards'][number]; card: 
 /** One row of the official daily tasks list (task_template 402x119). */
 const DailyTaskRowView: FC<{ task: DailyTaskData; onClaim: (task: DailyTaskData) => void }> = ({ task, onClaim }) => {
     const [claiming, setClaiming] = useState(false);
+    const sentRef = useRef(false);
     const [buttonState, setButtonState] = useState<'default' | 'hover' | 'pressed'>('default');
     const inProgress = task.status === DailyTaskData.STATUS_IN_PROGRESS;
     const claimed = task.status === DailyTaskData.STATUS_CLAIMED;
     const [card, bar, rewardBar] = PALETTE[task.isBonus ? 'yellow' : inProgress ? 'orange' : 'green'];
 
-    useEffect(() => setClaiming(false), [task.status]);
+    useEffect(() => {
+        sentRef.current = false;
+        setClaiming(false);
+    }, [task.status]);
 
     return (
         <div className="air-dt-task" style={{ '--air-dt-card': `#${card.toString(16)}`, '--air-dt-bar': `#${bar.toString(16)}`, '--air-dt-reward-bar': `#${rewardBar.toString(16)}` } as CSSProperties}>
@@ -154,6 +158,10 @@ const DailyTaskRowView: FC<{ task: DailyTaskData; onClaim: (task: DailyTaskData)
                             onPointerDown={() => setButtonState('pressed')}
                             onPointerUp={() => setButtonState('hover')}
                             onClick={() => {
+                                // The official button disables itself as it is pressed; state alone would let a second callback in before the render.
+                                if (sentRef.current) return;
+
+                                sentRef.current = true;
                                 setClaiming(true);
                                 onClaim(task);
                             }}
@@ -228,7 +236,7 @@ export const DailyTasksView: FC<{}> = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [showUnclaimed, setShowUnclaimed] = useState(false);
     const [position, setPosition] = useState<{ x: number; y: number }>(null);
-    const [, setTick] = useState(0);
+    const [tick, setTick] = useState(0);
     const { activeTasks = [], unclaimedTasks = [], requestTasks = null, claimTask = null } = useDailyTasks();
 
     const hasClub = GetSessionDataManager().clubLevel > 0;
@@ -271,7 +279,8 @@ export const DailyTasksView: FC<{}> = () => {
         return () => window.clearInterval(interval);
     }, [isVisible, requestTasks]);
 
-    const maxSecondsLeft = useMemo(() => activeTasks.reduce((max, task) => Math.max(max, task.secondsLeft), 0), [activeTasks]);
+    // DailyTaskData.secondsLeft counts down against Date.now(), so the one second tick has to invalidate this.
+    const maxSecondsLeft = useMemo(() => activeTasks.reduce((max, task) => Math.max(max, task.secondsLeft), 0), [activeTasks, tick]);
 
     useEffect(() => {
         if (!isVisible || !requestTasks) return;
