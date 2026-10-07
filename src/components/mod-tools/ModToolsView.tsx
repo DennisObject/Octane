@@ -1,7 +1,7 @@
-import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType } from '@octane/renderer';
+import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType, UserClassificationMessageEvent } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser, LocalizeText } from '../../api';
-import { MOD_WINDOW_SIZE, useIssueManager, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { MOD_WINDOW_SIZE, useIssueManager, useModTools, useMessageEvent, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
 import { IssueBrowserView } from './views/IssueBrowserView';
 import { IssueHandlerView } from './views/IssueHandlerView';
@@ -11,6 +11,7 @@ import { RoomToolView } from './views/RoomToolView';
 import { RoomVisitsView } from './views/RoomVisitsView';
 import { SendMessageView } from './views/SendMessageView';
 import { StartPanelView } from './views/StartPanelView';
+import { UserClassificationEntry, UserClassificationView } from './views/UserClassificationView';
 import { UserInfoView } from './views/UserInfoView';
 
 
@@ -26,6 +27,7 @@ export const ModToolsView: FC<{}> = () => {
     const [ticketQueueEnabled, setTicketQueueEnabled] = useState(false);
     const panelCreatedRef = useRef(false);
     const settingsRef = useRef<typeof settings>(null);
+    const [classifications, setClassifications] = useState<UserClassificationEntry[]>([]);
     const [selectedUser, setSelectedUser] = useState<ISelectedUser>(null);
     const windows = useModWindowTrackerStore((state) => state.windows);
     const showWindow = useModWindowTrackerStore((state) => state.show);
@@ -62,6 +64,25 @@ export const ModToolsView: FC<{}> = () => {
         setCurrentRoomId(entered ? event.roomId : -1);
         setRoomEntered(entered && panelCreatedRef.current);
         setChatlogEnabled(entered && panelCreatedRef.current && !!settingsRef.current?.chatlogsPermission);
+    });
+
+    // AIR ModerationMessageHandler.onRoomUserClassification: a new classification window opens (and replaces the one open) with the users of the message
+    useMessageEvent<UserClassificationMessageEvent>(UserClassificationMessageEvent, (event) => {
+        if (!settingsRef.current) return;
+
+        const parser = event.getParser();
+        const names = parser?.classifiedUsernameMap;
+        const types = parser?.classifiedUserTypeMap;
+
+        if (!names || !types) return;
+
+        const entries: UserClassificationEntry[] = [];
+
+        for (const [userId, userName] of names) entries.push({ userId, userName, classType: types.get(userId) ?? '' });
+
+        setClassifications(entries);
+        closeWindow('userClassification', '1');
+        showWindow({ type: 'userClassification', key: '1', ...MOD_WINDOW_SIZE.userClassification, parent: null });
     });
 
     useObjectSelectedEvent((event) => {
@@ -198,6 +219,22 @@ export const ModToolsView: FC<{}> = () => {
                             onOpenRoomTool={(roomId) => showWindow({ type: 'roomTool', key: `${roomId}`, ...MOD_WINDOW_SIZE.roomTool, parent: entry, toggle: true })}
                             onOpenUserInfo={(userId) => showWindow({ type: 'userInfo', key: `${userId}`, ...MOD_WINDOW_SIZE.userInfo, parent: entry, toggle: true })}
                             onResize={(width, height) => resizeWindow(entry.type, entry.key, width, height)}
+                        />
+                    );
+                }
+
+                if (entry.type === 'userClassification') {
+                    return (
+                        <UserClassificationView
+                            key={key}
+                            entries={classifications}
+                            height={entry.height}
+                            width={entry.width}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('userClassification', entry.key)}
+                            onOpenUserInfo={(userId) => showWindow({ type: 'userInfo', key: `${userId}`, ...MOD_WINDOW_SIZE.userInfo, parent: entry, toggle: true })}
+                            onResize={(width, height) => resizeWindow('userClassification', entry.key, width, height)}
                         />
                     );
                 }
