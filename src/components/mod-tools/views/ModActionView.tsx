@@ -23,11 +23,6 @@ import { NativeWindowShell } from '../native/NativeWindowShell';
 const rectOf = (node: NativeNode) => ({ x: nativeNumber(node, 'x'), y: nativeNumber(node, 'y'), width: nativeNumber(node, 'width'), height: nativeNumber(node, 'height') });
 const FRAME_COLOR = 0x418db0;
 const NO_ISSUE_ID = -1;
-// The classic composers for the default sanction (hF, outgoing 8), the caution (vF, 3033) and the kick (wF, 1529) always write the issue id as the last field, -1 included;
-// the SDK composers (DefaultSanctionMessageComposer, ModAlertMessageComposer, ModKickMessageComposer) leave it out when it is -1. Until that serialization contract is settled
-// those three actions stay unavailable instead of sending a different field layout. Mute, ban, trade lock and message match the classic layouts.
-const DEFAULT_SANCTION_CONTRACT_SETTLED = false;
-
 enum ActionType {
     ALERT = 1,
     MUTE = 2,
@@ -37,7 +32,14 @@ enum ActionType {
     MESSAGE = 6
 }
 
-const HELD_ACTIONS = new Set<ActionType>([ActionType.ALERT, ActionType.KICK]);
+// Held actions: no packet is sent for them and "Custom sanction" is disabled while one is selected.
+// - Default sanction (hF, outgoing 8), caution (vF, 3033) and kick (wF, 1529): the classic composers always write the issue id as the last field (-1 included); the SDK composers
+//   (DefaultSanctionMessageComposer, ModAlertMessageComposer, ModKickMessageComposer) leave it out when it is -1. The sanction lookup (My, 275) has no SDK composer at all.
+// - Mute (yF), ban (Ou) and trade lock (xF): PlusEMU's handlers for revision OCTANE-3-6-0-FLOOR-20260909 read a different layout than the classic client and the SDK send
+//   (minutes plus two strings for mute and trade lock; hours, two strings and two booleans for ban), so the native payload would be misread or throw.
+// Message (bp, 2568) matches the server's reader and stays available. Native payloads are not adapted to the legacy server layouts here.
+const DEFAULT_SANCTION_CONTRACT_SETTLED = false;
+const HELD_ACTIONS = new Set<ActionType>([ActionType.ALERT, ActionType.MUTE, ActionType.BAN, ActionType.KICK, ActionType.TRADE_LOCK]);
 
 interface Sanction {
     id: number;
