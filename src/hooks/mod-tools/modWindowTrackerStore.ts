@@ -1,6 +1,6 @@
 import { createOctaneStore } from '../../state/createOctaneStore';
 
-export type ModWindowType = 'issueBrowser' | 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits' | 'userChatlog' | 'roomChatlog' | 'cfhChatlog';
+export type ModWindowType = 'issueHandler' | 'issueBrowser' | 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits' | 'userChatlog' | 'roomChatlog' | 'cfhChatlog';
 
 export const MOD_WINDOW_SIZE: Record<ModWindowType, { width: number; height: number }> = {
     roomTool: { width: 240, height: 437 },
@@ -11,7 +11,8 @@ export const MOD_WINDOW_SIZE: Record<ModWindowType, { width: number; height: num
     userChatlog: { width: 480, height: 565 },
     roomChatlog: { width: 480, height: 565 },
     cfhChatlog: { width: 480, height: 565 },
-    issueBrowser: { width: 585, height: 273 }
+    issueBrowser: { width: 585, height: 273 },
+    issueHandler: { width: 750, height: 650 }
 };
 
 export interface ModWindowRect {
@@ -45,6 +46,8 @@ export interface ModWindowShowRequest {
     silent?: boolean;
     /** Close the window instead when one of that type and key is open already. */
     toggle?: boolean;
+    /** An explicit position (the classic show() with its "explicit position" flag): the window is placed there instead of next to a parent. */
+    at?: { x: number; y: number };
     params?: Record<string, string | number>;
 }
 
@@ -74,7 +77,7 @@ export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>
     setStartPanel: (rect) => set({ startPanel: rect }),
     windows: [],
     get: (type, key) => get().windows.find((entry) => entry.type === type && entry.key === key) ?? null,
-    show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false, params = {} }) => {
+    show: ({ type, key, width, height, parent = null, below = false, silent = false, toggle = false, at = null, params = {} }) => {
         const existing = get().windows.find((entry) => entry.type === type && entry.key === key);
 
         if (existing) {
@@ -87,7 +90,9 @@ export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>
 
         if (silent) return;
 
-        const placed = parent
+        const placed = at
+            ? at
+            : parent
             ? below
                 ? { x: parent.x, y: parent.y + parent.height + 5 }
                 : { x: parent.x + parent.width + 5, y: parent.y }

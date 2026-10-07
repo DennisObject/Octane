@@ -4,6 +4,7 @@ import { GetRoomSession, ISelectedUser, LocalizeText } from '../../api';
 import { MOD_WINDOW_SIZE, useIssueManager, useModTools, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
 import { IssueBrowserView } from './views/IssueBrowserView';
+import { IssueHandlerView } from './views/IssueHandlerView';
 import { ModActionView } from './views/ModActionView';
 import { NativeAlertView } from './views/NativeAlertView';
 import { RoomToolView } from './views/RoomToolView';
@@ -33,7 +34,7 @@ export const ModToolsView: FC<{}> = () => {
     const resizeWindow = useModWindowTrackerStore((state) => state.resize);
     const startPanel = useModWindowTrackerStore((state) => state.startPanel);
     const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
-    const { settings = null } = useModTools();
+    const { settings = null, cfhCategories = [] } = useModTools();
     const issueContext = useIssueManager();
 
     useEffect(() => {
@@ -230,6 +231,32 @@ export const ModToolsView: FC<{}> = () => {
                             y={entry.y}
                             onClose={() => hideWindow('issueBrowser', entry.key)}
                             onResize={(width, height) => resizeWindow('issueBrowser', entry.key, width, height)}
+                        />
+                    );
+                }
+
+                if (entry.type === 'issueHandler') {
+                    return (
+                        <IssueHandlerView
+                            key={key}
+                            bundleId={Number(entry.key)}
+                            categories={cfhCategories}
+                            context={issueContext}
+                            height={entry.height}
+                            localize={LocalizeText}
+                            settings={settings}
+                            width={entry.width}
+                            x={entry.x}
+                            y={entry.y}
+                            onClose={() => closeWindow('issueHandler', entry.key)}
+                            onEnterRoom={(roomId) => CreateLinkEvent(`navigator/goto/${roomId}`)}
+                            onOpenChatlog={(userId) => showWindow({ type: 'userChatlog', key: `${userId}`, ...MOD_WINDOW_SIZE.userChatlog, parent: entry, toggle: true })}
+                            onOpenModAction={(userId, userName) => showWindow({ type: 'modAction', key: userName, ...MOD_WINDOW_SIZE.modAction, parent: entry, toggle: true, params: { userId } })}
+                            onOpenRoomTool={(roomId) => showWindow({ type: 'roomTool', key: `${roomId}`, ...MOD_WINDOW_SIZE.roomTool, parent: null, toggle: true })}
+                            onOpenRoomVisits={(userId) => showWindow({ type: 'roomVisits', key: `${userId}`, ...MOD_WINDOW_SIZE.roomVisits, parent: entry, toggle: true })}
+                            onOpenSendMessage={(userId, userName) => showWindow({ type: 'sendMessage', key: userName, ...MOD_WINDOW_SIZE.sendMessage, parent: entry, toggle: true, params: { userId } })}
+                            onOpenUserInfo={(userId, parent) => showWindow({ type: 'userInfo', key: `${userId}`, ...MOD_WINDOW_SIZE.userInfo, parent, toggle: true })}
+                            onResize={(width, height) => resizeWindow('issueHandler', entry.key, width, height)}
                         />
                     );
                 }

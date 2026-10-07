@@ -4,6 +4,7 @@ import {
     IssueInfoMessageEvent,
     IssuePickFailedMessageEvent,
     ModeratorInitMessageEvent,
+    ModeratorToolPreferencesEvent,
     PickIssuesMessageComposer,
     ReleaseIssuesMessageComposer
 } from '@octane/renderer';
@@ -21,7 +22,7 @@ import {
     releaseBundle,
     useIssueManagerStore
 } from './issueManagerStore';
-import { useModWindowTrackerStore } from './modWindowTrackerStore';
+import { MOD_WINDOW_SIZE, useModWindowTrackerStore } from './modWindowTrackerStore';
 
 /** Classic GI.update: the browser re-reads its lists every 15 seconds (`_rd13dc7dad9d4b9`). */
 const UPDATE_INTERVAL = 15000;
@@ -38,8 +39,13 @@ export const useIssueManager = (): IssueManagerContext => {
             },
             pick: (issueIds, retry, retryCount, reason) => SendMessageComposer(new PickIssuesMessageComposer(issueIds, retry, retryCount, reason)),
             release: (issueIds) => SendMessageComposer(new ReleaseIssuesMessageComposer(issueIds)),
-            openHandler: () => undefined,
-            closeHandler: () => undefined,
+            // GI._rf0cee18d10867c: the handler of a bundle opens at the saved position (explicit position flag), replacing one that is already open
+            openHandler: (bundleId) => {
+                const { preferences } = useIssueManagerStore.getState();
+
+                useModWindowTrackerStore.getState().show({ type: 'issueHandler', key: `${bundleId}`, ...MOD_WINDOW_SIZE.issueHandler, parent: null, at: { x: preferences.x, y: preferences.y } });
+            },
+            closeHandler: (bundleId) => useModWindowTrackerStore.getState().close('issueHandler', `${bundleId}`),
             refreshHandler: () => undefined,
             notifyNewIssue: () => PlaySound(SoundNames.MODTOOLS_NEW_TICKET),
             isBrowserOpen: () => {
@@ -53,6 +59,13 @@ export const useIssueManager = (): IssueManagerContext => {
 
     useMessageEvent<ModeratorInitMessageEvent>(ModeratorInitMessageEvent, (event) => {
         for (const issue of event.getParser()?.data?.issues ?? []) onIssueInfo(issue, context);
+    });
+
+    // vT: the handler window's saved geometry (_r5a5d3ab441458f)
+    useMessageEvent<ModeratorToolPreferencesEvent>(ModeratorToolPreferencesEvent, (event) => {
+        const parser = event.getParser();
+
+        if (parser) useIssueManagerStore.setState({ preferences: { x: parser.windowX, y: parser.windowY, width: parser.windowWidth, height: parser.windowHeight } });
     });
 
     useMessageEvent<IssueInfoMessageEvent>(IssueInfoMessageEvent, (event) => {

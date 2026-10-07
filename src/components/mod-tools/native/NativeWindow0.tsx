@@ -10,6 +10,8 @@ import dropmenuXml from '../../../assets/mod-tools/skins/skin-dropmenu.xml?raw';
 import frameXml from '../../../assets/mod-tools/skins/skin-frame.xml?raw';
 import scalerXml from '../../../assets/mod-tools/skins/skin-scaler.xml?raw';
 import scrollbarXml from '../../../assets/mod-tools/skins/skin-scrollbar.xml?raw';
+import scrollbar3Xml from '../../../assets/mod-tools/skins/skin-scrollbar_3.xml?raw';
+import ubuntuAtlas from '../../../assets/mod-tools/skins/habbo-ubuntu-skin.png';
 import tabXml from '../../../assets/mod-tools/skins/skin-button_tab.xml?raw';
 import headerXml from '../../../assets/mod-tools/skins/skin-header.xml?raw';
 import { NativeSkin, parseNativeSkin } from './NativeSkin';
@@ -26,6 +28,7 @@ const SKINS = {
     dropmenu: parseNativeSkin(dropmenuXml),
     scaler: parseNativeSkin(scalerXml),
     scrollbar: parseNativeSkin(scrollbarXml),
+    scrollbar3: parseNativeSkin(scrollbar3Xml),
     tab: parseNativeSkin(tabXml)
 };
 
@@ -119,11 +122,13 @@ interface Native0ButtonProps {
     height: number;
     label: string;
     enabled?: boolean;
+    /** The button's own colour (RGB, multiplied over the skin like a window colour): the pink "Close as useless". */
+    color?: number;
     onClick?: () => void;
     name?: string;
 }
 
-export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, label, enabled = true, onClick, name }) => {
+export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, label, enabled = true, color, onClick, name }) => {
     const [over, setOver] = useState(false);
     const [down, setDown] = useState(false);
     const state = !enabled ? 'disabled' : down ? 'pressed' : over ? 'hovering' : 'default';
@@ -165,7 +170,7 @@ export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, lab
             }}
             onPointerUp={() => setDown(false)}
         >
-            <NativeSkinView atlas={blueAtlas} height={height} layout="button" skin={SKINS.button} state={state} width={width} />
+            <NativeSkinView atlas={blueAtlas} color={color} height={height} layout="button" skin={SKINS.button} state={state} width={width} />
             <div className="native0-button__label" style={{ width, height, color: enabled ? '#000' : '#808080' }}>
                 <span ref={labelRef} className="native0-text__line" style={{ display: 'block', position: 'absolute', whiteSpace: 'nowrap', left: labelOffset.left + 1, top: labelOffset.top }}>
                     {label}
@@ -418,6 +423,10 @@ interface Native0ScrollbarProps {
     contentHeight: number;
     offset: number;
     onOffset: (offset: number) => void;
+    /** 0: the style 0 scrollbar (blue skin); 3: the style 3 scrollbar (Ubuntu skin, with a hover state). */
+    variant?: 0 | 3;
+    /** The opacity the scrollbar is drawn with over its surroundings (the style 3 scrollbar in the issue handler is 40% over the frame). */
+    blend?: number;
 }
 
 const SCROLL_LINE = 15;
@@ -427,8 +436,13 @@ const SCROLL_WHEEL = 0.75;
  * The style 0 vertical scrollbar (habbo_skin_scrollbar): a 17px column with a 16px arrow button at each end, a track between them and a lift whose height is the track
  * times view / content (at least 12px). The arrows scroll 15px (repeating while held), the track a page less 16px, the wheel 75px per notch (deltaY 100).
  */
-export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, viewHeight, contentHeight, offset, onOffset }) => {
+export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, viewHeight, contentHeight, offset, onOffset, variant = 0, blend }) => {
     const [pressed, setPressed] = useState<'up' | 'down' | 'lift' | null>(null);
+    const [hover, setHover] = useState<'up' | 'down' | 'lift' | null>(null);
+    const skin = variant === 3 ? SKINS.scrollbar3 : SKINS.scrollbar;
+    const atlas = variant === 3 ? ubuntuAtlas : blueAtlas;
+    const suffix = variant === 3 ? '_3' : '';
+    const stateOf = (part: 'up' | 'down' | 'lift', idle: string) => (pressed === part ? 'pressed' : variant === 3 && hover === part ? 'hovering' : idle);
     const track = height - 32;
     const range = Math.max(0, contentHeight - viewHeight);
     const liftHeight = Math.min(track, Math.max(12, Math.floor((track * viewHeight) / contentHeight)));
@@ -459,10 +473,10 @@ export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, view
     };
 
     return (
-        <div className="native0-box native0-scrollbar" style={rect(x, y, 17, height)} onWheel={(event) => onOffset(clamp(offset + event.deltaY * SCROLL_WHEEL))}>
-            <NativeSkinView atlas={blueAtlas} height={height} layout="scrollbar_vertical" skin={SKINS.scrollbar} width={17} />
-            <div className="native0-scrollbar__part" style={rect(0, 0, 17, 16)} onPointerDown={() => hold(-1, 'up')}>
-                <NativeSkinView atlas={blueAtlas} height={16} layout="scrollbar_button_up" skin={SKINS.scrollbar} state={range === 0 ? 'disabled' : pressed === 'up' ? 'pressed' : 'default'} width={17} />
+        <div className="native0-box native0-scrollbar" style={{ ...rect(x, y, 17, height), opacity: blend }} onWheel={(event) => onOffset(clamp(offset + event.deltaY * SCROLL_WHEEL))}>
+            <NativeSkinView atlas={atlas} height={height} layout={`scrollbar_vertical${suffix}`} skin={skin} width={17} />
+            <div className="native0-scrollbar__part" style={rect(0, 0, 17, 16)} onPointerDown={() => hold(-1, 'up')} onPointerEnter={() => setHover('up')} onPointerLeave={() => setHover(null)}>
+                <NativeSkinView atlas={atlas} height={16} layout={`scrollbar_button_up${suffix}`} skin={skin} state={range === 0 ? 'disabled' : stateOf('up', 'default')} width={17} />
             </div>
             <div className="native0-scrollbar__part" style={rect(0, 16, 17, track)} onPointerDown={(event) => {
                 const bounds = event.currentTarget.getBoundingClientRect();
@@ -471,11 +485,13 @@ export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, view
                 if (at < liftTop) onOffset(clamp(offset - (viewHeight - 16)));
                 else if (at >= liftTop + liftHeight) onOffset(clamp(offset + (viewHeight - 16)));
             }}>
-                <NativeSkinView atlas={blueAtlas} height={track} layout="scrollbar_track_vertical" skin={SKINS.scrollbar} width={17} />
+                <NativeSkinView atlas={atlas} height={track} layout={`scrollbar_track_vertical${suffix}`} skin={skin} width={17} />
                 {range > 0 && (
                 <div
                     className="native0-scrollbar__part"
                     style={rect(0, liftTop, 17, liftHeight)}
+                    onPointerEnter={() => setHover('lift')}
+                    onPointerLeave={() => setHover(null)}
                     onPointerDown={(event) => {
                         const startY = event.clientY;
                         const startOffset = offset;
@@ -492,12 +508,12 @@ export const Native0Scrollbar: FC<Native0ScrollbarProps> = ({ x, y, height, view
                         window.addEventListener('pointerup', up);
                     }}
                 >
-                    <NativeSkinView atlas={blueAtlas} height={liftHeight} layout="scrollbar_lift_vertical" skin={SKINS.scrollbar} state={pressed === 'lift' ? 'pressed' : 'default'} width={17} />
+                    <NativeSkinView atlas={atlas} height={liftHeight} layout={`scrollbar_lift_vertical${suffix}`} skin={skin} state={stateOf('lift', 'default')} width={17} />
                 </div>
                 )}
             </div>
-            <div className="native0-scrollbar__part" style={rect(0, height - 16, 17, 16)} onPointerDown={() => hold(1, 'down')}>
-                <NativeSkinView atlas={blueAtlas} height={16} layout="scrollbar_button_down" skin={SKINS.scrollbar} state={range === 0 ? 'disabled' : pressed === 'down' ? 'pressed' : 'default'} width={17} />
+            <div className="native0-scrollbar__part" style={rect(0, height - 16, 17, 16)} onPointerDown={() => hold(1, 'down')} onPointerEnter={() => setHover('down')} onPointerLeave={() => setHover(null)}>
+                <NativeSkinView atlas={atlas} height={16} layout={`scrollbar_button_down${suffix}`} skin={skin} state={range === 0 ? 'disabled' : stateOf('down', 'default')} width={17} />
             </div>
         </div>
     );

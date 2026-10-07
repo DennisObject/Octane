@@ -13,6 +13,15 @@ export interface TrackedIssue {
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
+/** Classic `qc._ra5299c27b0a858`: how long one issue has been open, "hh:mm". */
+export const issueOpenTime = (tracked: TrackedIssue, clock = now()): string => {
+    const minutes = Math.floor(Math.floor((tracked.issue.issueAgeInMilliseconds + clock - tracked.receivedAt) / 1000) / 60);
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+
+    return `${hours < 10 ? '0' : ''}${hours}:${rest < 10 ? '0' : ''}${rest}`;
+};
+
 /** Classic `ame` (issue bundle): issues about the same subject (grouping id and reported user) in the same state and picker are shown as one row. */
 export class IssueBundle {
     public readonly issues = new Map<number, TrackedIssue>();
@@ -148,6 +157,8 @@ interface IssueManagerState {
     pendingPick: number[];
     /** Issues the moderator asked to release (`_r65a92c25921a0c`). */
     pendingRelease: number[];
+    /** The saved position of the issue handler window (ModeratorToolPreferences): the handler opens at x, y (0, 0 until the server says otherwise). */
+    preferences: { x: number; y: number; width: number; height: number };
     /** Bumped on every change: the views re-read the manager. */
     version: number;
 }
@@ -159,6 +170,7 @@ export const useIssueManagerStore = createOctaneStore<IssueManagerState>()(() =>
     nextBundleId: 1,
     pendingPick: [],
     pendingRelease: [],
+    preferences: { x: 0, y: 0, width: 0, height: 0 },
     version: 0
 }));
 

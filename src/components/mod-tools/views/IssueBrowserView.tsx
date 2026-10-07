@@ -139,8 +139,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                                     )}
                                     {tab === 'my' && (
                                         <>
-                                            {/* the handler window is not ported yet: handling stays unavailable */}
-                                            <Native0Button enabled={false} height={rectOf(buttonOf('handle_button')).height} label={label(buttonOf('handle_button'))} width={60} x={rectOf(buttonOf('handle_button')).x + stretchX} y={rectOf(buttonOf('handle_button')).y} />
+                                            <Native0Button height={rectOf(buttonOf('handle_button')).height} label={label(buttonOf('handle_button'))} width={60} x={rectOf(buttonOf('handle_button')).x + stretchX} y={rectOf(buttonOf('handle_button')).y} onClick={() => context.openHandler(bundle.id)} />
                                             <Native0Button height={rectOf(buttonOf('release_button')).height} label={label(buttonOf('release_button'))} width={60} x={rectOf(buttonOf('release_button')).x + stretchX} y={rectOf(buttonOf('release_button')).y} onClick={() => releaseBundle(bundle.id, context)} />
                                         </>
                                     )}
