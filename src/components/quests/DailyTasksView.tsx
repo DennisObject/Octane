@@ -106,10 +106,11 @@ const DailyTaskRowView: FC<{ task: DailyTaskData; onClaim: (task: DailyTaskData)
     const claimed = task.status === DailyTaskData.STATUS_CLAIMED;
     const [card, bar, rewardBar] = PALETTE[task.isBonus ? 'yellow' : inProgress ? 'orange' : 'green'];
 
+    // The official list refresh re-enables the button; a new task object (a list packet) or a status change does the same here.
     useEffect(() => {
         sentRef.current = false;
         setClaiming(false);
-    }, [task.status]);
+    }, [task, task.status]);
 
     return (
         <div className="air-dt-task" style={{ '--air-dt-card': `#${card.toString(16)}`, '--air-dt-bar': `#${bar.toString(16)}`, '--air-dt-reward-bar': `#${rewardBar.toString(16)}` } as CSSProperties}>
