@@ -2,8 +2,10 @@ import { AddLinkEventTracker, GetSessionDataManager, ILinkEventTracker, RemoveLi
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatEntryType, LocalizeText, ReportState, ReportType } from '../../api';
 import { DraggableWindow, LayoutAvatarImageView } from '../../common';
-import { useChatHistory, useFriendsState, useHelp, useMessenger, useNotification } from '../../hooks';
+import { useChatHistory, useFriendsState, useHelp, useMessenger } from '../../hooks';
 import { DescribeReportView } from './views/DescribeReportView';
+import { HelpAlertContext, HelpAlertView } from './views/HelpAlertView';
+import { HELP_USER_HEADER_COLOR, HelpFrameTitle, HelpText } from './views/HelpText';
 import { createHelpReportDraft, HELP_INDEX_STEP, HelpIndexView } from './views/HelpIndexView';
 import { NameChangeView } from './views/name-change/NameChangeView';
 import { ReportSummaryView } from './views/ReportSummaryView';
@@ -26,13 +28,14 @@ export const HelpView: FC = () => {
     const { chatHistory } = useChatHistory();
     const { friends } = useFriendsState();
     const { messageThreads } = useMessenger();
-    const { simpleAlert } = useNotification();
+    const [alertKey, setAlertKey] = useState<string>(null);
     const modalRef = useRef<HTMLElement>(null);
     const hasActiveReport = activeReport !== null;
     const isOpen = isVisible || hasActiveReport;
     const onClose = useCallback(() => {
         setActiveReport(null);
         setIsVisible(false);
+        setAlertKey(null);
     }, [setActiveReport]);
 
     useEffect(() => {
@@ -154,7 +157,7 @@ export const HelpView: FC = () => {
                 (entry) => entry.type === ChatEntryType.TYPE_CHAT && entry.entityType === RoomObjectType.USER && entry.webId !== GetSessionDataManager().userId
             )
         ) {
-            simpleAlert(LocalizeText('help.cfh.error.nochathistory'), null, null, null, LocalizeText('generic.alert.title'));
+            setAlertKey('help.cfh.error.nochathistory');
             return;
         }
         setActiveReport((previous) => ({ ...previous, currentStep: ReportState.SELECT_USER }));
@@ -184,7 +187,7 @@ export const HelpView: FC = () => {
     }
 
     return (
-        <>
+        <HelpAlertContext.Provider value={setAlertKey}>
             {isOpen && (
                 <DraggableWindow disableDrag initialPosition={MODAL_ORIGIN} unconstrainedPosition>
                     <div className="octane-help-modal">
@@ -199,7 +202,7 @@ export const HelpView: FC = () => {
                         >
                             <div className="octane-card-header-shell">
                                 <span id="octane-help-title" className="octane-card-title">
-                                    {LocalizeText('help.button.cfh')}
+                                    <HelpFrameTitle text={LocalizeText('help.button.cfh')} width={448} />
                                 </span>
                                 <button type="button" className="octane-card-close-button" aria-label={LocalizeText('generic.close')} onClick={onClose} />
                             </div>
@@ -227,16 +230,23 @@ export const HelpView: FC = () => {
                                                         figure={selectedUser.look}
                                                         headOnly
                                                         nativeCroppedHead
+                                                        trimmed
                                                         direction={2}
                                                     />
                                                 )}
-                                                <span className="help-reported-title">{LocalizeText('help.cfh.selected_user.title')}</span>
+                                                <span className="help-reported-title">
+                                                    <HelpText text={LocalizeText('help.cfh.selected_user.title')} textStyle="u_bold" color={0xefefef} background={HELP_USER_HEADER_COLOR} maxWidth={160} />
+                                                </span>
                                             </>
                                         )}
-                                        {!isForum && <span className="help-reported-name">{isRoom ? activeReport.roomName : selectedUser?.name}</span>}
+                                        {!isForum && (
+                                            <span className="help-reported-name">
+                                                <HelpText plain text={(isRoom ? activeReport.roomName : selectedUser?.name) ?? ''} textStyle="u_headline_big" color={0xffffff} background={HELP_USER_HEADER_COLOR} />
+                                            </span>
+                                        )}
                                         {(activeReport.reportType === ReportType.BULLY || activeReport.reportType === ReportType.EMERGENCY) && (
                                             <button type="button" className="help-change-user" onClick={changeUser}>
-                                                {LocalizeText('help.cfh.selected_user.change')}
+                                                <HelpText text={LocalizeText('help.cfh.selected_user.change')} textStyle="id_link_strong" background={HELP_USER_HEADER_COLOR} color={0xefefef} underline maxWidth={256} />
                                             </button>
                                         )}
                                     </div>
@@ -247,8 +257,9 @@ export const HelpView: FC = () => {
                     </div>
                 </DraggableWindow>
             )}
+            {isOpen && alertKey && <HelpAlertView message={LocalizeText(alertKey)} onClose={() => setAlertKey(null)} />}
             <SanctionSatusView />
             <NameChangeView />
-        </>
+        </HelpAlertContext.Provider>
     );
 };

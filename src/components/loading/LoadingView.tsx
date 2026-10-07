@@ -32,13 +32,14 @@ const BOOTSTRAP_PROGRESS = 0.6;
 const randomBetween = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 interface LoadingViewProps {
+    backToHotelUrl?: string;
     isError?: boolean;
     message?: string;
     progress?: number;
 }
 
 export const LoadingView: FC<LoadingViewProps> = (props) => {
-    const { isError = false, message = '', progress = 0 } = props;
+    const { backToHotelUrl, isError = false, message = '', progress = 0 } = props;
     const [photo] = useState(() => USER_PHOTOS[randomBetween(0, USER_PHOTOS.length - 1)]);
     const [firstMessageIndex] = useState(() => randomBetween(0, REVOLVING_MESSAGES.length - 1));
     const [messageIndex, setMessageIndex] = useState(firstMessageIndex);
@@ -80,7 +81,9 @@ export const LoadingView: FC<LoadingViewProps> = (props) => {
     const fillHeight = BAR_HEIGHT - BAR_INSET * 2;
 
     return (
-        <div className={isError ? 'classic-loading-screen classic-loading-screen--error' : 'classic-loading-screen'}>
+        <div className={isError
+            ? `classic-loading-screen classic-loading-screen--error${backToHotelUrl ? ' classic-loading-screen--recoverable' : ''}`
+            : 'classic-loading-screen'}>
             <div className="classic-loading-screen__photo">
                 <img src={splashBackground} alt="" draggable={false} />
                 <img src={photo} alt="" draggable={false} className="classic-loading-screen__userphoto" />
@@ -98,6 +101,9 @@ export const LoadingView: FC<LoadingViewProps> = (props) => {
             </div>
             {!isError && <div className="classic-loading-screen__percent">{percent}%</div>}
             {isError && <div className="classic-loading-screen__error">{message}</div>}
+            {isError && backToHotelUrl && (
+                <a className="classic-loading-screen__back" href={backToHotelUrl}>Back to Hotel</a>
+            )}
         </div>
     );
 };

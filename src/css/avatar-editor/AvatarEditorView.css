@@ -1,10 +1,10 @@
 .octane-avatar-editor {
-    width: 490px;
-    min-width: 490px;
-    max-width: 490px;
-    height: 523px;
-    min-height: 523px;
-    max-height: 523px;
+    width: 488px;
+    min-width: 488px;
+    max-width: 488px;
+    height: 525px;
+    min-height: 525px;
+    max-height: 525px;
     resize: none !important;
 }
 
@@ -26,7 +26,7 @@
     top: 33px;
     z-index: 1;
     display: flex;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 490px;
     max-height: 490px !important;
     min-height: 0;
@@ -71,22 +71,24 @@
     background: #0e3f52;
 }
 
-.octane-avatar-editor .octane-avatar-editor-nameplate span {
+.octane-avatar-editor-name-text {
     position: absolute;
     left: 40px;
     top: 15px;
+    display: flex;
     width: 400px;
-    height: 35px;
+    height: 17px;
+    justify-content: center;
     overflow: hidden;
-    color: #fff !important;
-    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
-    font-size: 28px !important;
-    font-weight: 700 !important;
-    line-height: 35px !important;
-    text-align: center;
-    text-overflow: ellipsis;
-    text-shadow: none !important;
-    white-space: nowrap;
+}
+
+.octane-avatar-editor-name-text > span { flex: none; }
+
+.octane-avatar-editor-title {
+    position: absolute !important;
+    top: 2px;
+    left: calc(50% - 2px);
+    transform: translateX(-50%);
 }
 
 .octane-avatar-editor-tab-row {
@@ -237,8 +239,6 @@
 .octane-avatar-editor-wardrobe-toggle:focus-visible,
 .octane-avatar-editor .category-item:focus-visible,
 .octane-avatar-editor-rotate:focus-visible,
-.octane-avatar-editor-advanced-color:focus-visible,
-.octane-avatar-editor-secondary-actions > button:focus-visible,
 .octane-avatar-editor-save:focus-visible {
     outline: 2px solid var(--octane-card-focus, #ffd95a);
     outline-offset: 1px;
@@ -363,18 +363,10 @@
     left: 6px;
 }
 
-.octane-avatar-editor .gender-category-item > span {
-    position: absolute;
+.octane-avatar-editor .octane-avatar-editor-gender-text {
+    position: absolute !important;
     left: 50px;
     top: 10px;
-    width: 143px;
-    overflow: hidden;
-    color: #151515 !important;
-    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 17px;
-    text-overflow: ellipsis;
 }
 
 .octane-avatar-editor .avatar-editor-icon {
@@ -392,6 +384,17 @@
     max-height: 35px;
     object-fit: none;
     image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-avatar-editor .avatar-editor-get-more {
+    position: absolute !important;
+    left: 3px;
+    top: 3px;
+    display: block;
+    width: 43px;
+    height: 44px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+    pointer-events: none;
 }
 
 .octane-avatar-editor-parts-grid {
@@ -705,42 +708,6 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor .octane-avatar-editor-advanced-color {
-    appearance: none;
-    position: absolute;
-    left: 357px;
-    top: 126px;
-    z-index: 3;
-    display: flex;
-    box-sizing: border-box;
-    width: 122px;
-    height: 24px;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    margin: 0;
-    padding: 0 4px;
-    cursor: pointer;
-    border: 3px solid transparent;
-    border-image-source: var(--habbo-skin-button);
-    border-image-slice: 3 fill;
-    border-image-width: 3px;
-    color: #151515;
-    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
-    font-size: 12px !important;
-    line-height: 18px !important;
-    white-space: nowrap;
-}
-
-.octane-avatar-editor-advanced-color:hover {
-    border-image-source: var(--habbo-skin-button-hover);
-}
-
-.octane-avatar-editor-advanced-color:active,
-.octane-avatar-editor-advanced-color.is-active {
-    border-image-source: var(--habbo-skin-button-pressed);
-}
-
 .octane-avatar-editor-preview-shell {
     position: absolute;
     left: 352px;
@@ -755,29 +722,26 @@
     width: 125px;
     height: 210px;
     overflow: hidden;
-    background: #677181;
+    background: transparent;
 }
 
-.octane-avatar-editor .figure-preview-container::after {
-    content: '';
+.octane-avatar-editor-preview-shadow {
     position: absolute;
-    top: 75%;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    border-radius: 50%;
-    background: #677181;
-    box-shadow: 0 0 8px 2px rgb(255 255 255 / 0.6);
-    transform: scale(2);
+    left: 25px;
+    top: 166px;
+    z-index: 1;
+    width: 68px;
+    height: 34px;
+    opacity: 0.196078;
+    image-rendering: var(--octane-pixel-art, pixelated);
     pointer-events: none;
 }
 
 .octane-avatar-editor .figure-preview-container .avatar-image {
     position: absolute;
-    left: 18px;
+    left: 15px;
     right: auto;
-    bottom: 38px;
+    bottom: 46px;
     z-index: 2;
     width: 90px;
     height: 130px;
@@ -807,63 +771,14 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor-secondary-actions {
-    position: absolute;
-    left: 357px;
-    top: 405px;
-    z-index: 2;
-    display: flex;
-    width: 122px;
-    height: 28px;
-    gap: 2px;
-}
-
-.octane-avatar-editor-secondary-actions > button {
-    appearance: none;
-    display: flex;
-    box-sizing: border-box;
-    min-width: 0;
-    height: 28px;
-    min-height: 28px;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 0;
-    margin: 0;
-    padding: 0 !important;
-    cursor: pointer;
-    border: 5px solid transparent;
-    border-image-source: var(--habbo-skin-shiny);
-    border-image-slice: 5 fill;
-    border-image-width: 5px;
-    border-image-repeat: stretch;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    color: #111 !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
-}
-
-.octane-avatar-editor-secondary-actions > button:hover {
-    border-image-source: var(--habbo-skin-shiny-hover);
-}
-
-.octane-avatar-editor-secondary-actions > button:active {
-    border-image-source: var(--habbo-skin-shiny-pressed);
-}
-
-.octane-avatar-editor-secondary-actions > button .fa-icon {
-    width: 14px;
-    height: 14px;
-}
-
 .octane-avatar-editor .octane-avatar-editor-save {
     appearance: none;
     position: absolute;
-    left: 357px;
+    left: 368px;
     top: 443px;
     z-index: 2;
-    width: 122px;
-    min-width: 122px;
+    width: 100px;
+    min-width: 100px;
     height: 28px;
     min-height: 28px;
     display: flex;
@@ -887,6 +802,7 @@
     font-weight: 700 !important;
     line-height: 15px !important;
     text-shadow: none !important;
+    white-space: nowrap;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
@@ -914,9 +830,11 @@
     display: flex;
     box-sizing: border-box;
     width: 168px;
-    height: 23px;
-    align-items: center;
+    height: 17px;
+    align-items: flex-start;
     gap: 10px;
+    position: relative;
+    left: 31px;
     margin-top: 19px;
 }
 
@@ -946,7 +864,7 @@
     width: 139px;
     height: 418px;
     gap: 4px;
-    margin: 11px 0 0 15px;
+    margin: 17px 0 0 15px;
     padding: 3px 3px 0 4px;
     overflow: hidden;
     border: 0;
@@ -988,7 +906,7 @@
     top: 3px;
     width: 24px;
     height: 50px;
-    background: rgb(102 102 102 / 0.3);
+    background: url('@/assets/images/avatareditor/air/wardrobe-slot-shade.png') no-repeat;
     pointer-events: none;
 }
 
@@ -1063,4 +981,48 @@
     margin: 2px auto 0;
     image-rendering: var(--octane-pixel-art, pixelated);
     pointer-events: none;
+}
+
+.octane-avatar-editor-save > .octane-avatar-editor-save-label {
+    position: relative;
+    left: 1px;
+    mix-blend-mode: multiply;
+}
+
+.octane-avatar-editor .octane-avatar-editor-save:disabled {
+    cursor: default;
+    border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
+}
+
+.octane-avatar-editor.octane-card-frame-3::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border: solid transparent;
+    border-width: 33px 10px 10px;
+    border-image-source: var(--octane-card-frame-3);
+    border-image-slice: 33 10 10 10 fill;
+    border-image-width: 33px 10px 10px;
+    border-image-repeat: stretch;
+    mask: linear-gradient(transparent 33px, black 33px) left / 2px 100% no-repeat,
+        linear-gradient(transparent 33px, black 33px) right / 2px 100% no-repeat,
+        linear-gradient(black, black) bottom / 100% 4px no-repeat;
+    pointer-events: none;
+}
+
+.octane-avatar-editor.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-avatar-editor-save-label-disabled,
+.octane-avatar-editor-save:disabled > .octane-avatar-editor-save-label {
+    display: none !important;
+}
+
+.octane-avatar-editor-save:disabled > .octane-avatar-editor-save-label-disabled {
+    position: relative;
+    left: 1px;
+    display: inline-block !important;
+    opacity: 0.5;
 }

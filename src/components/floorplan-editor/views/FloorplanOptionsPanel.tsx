@@ -5,6 +5,7 @@ import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { FloorplanThicknessMenu } from './FloorplanThicknessMenu';
 import { THICKNESS_NAMES } from '../state/constants';
 import { EntryDir, FloorplanAction, FloorplanState, ThicknessLevel } from '../state/types';
+import { FloorplanNativeText } from './FloorplanNativeText';
 
 type Props = {
     state: FloorplanState;
@@ -18,18 +19,45 @@ const OFFICIAL_GHOST_FIGURE = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
 
 const rotateDir = (dir: EntryDir, step: 1 | -1): EntryDir => ((dir + step + 8) & 7) as EntryDir;
 
+// avatar_image:scale="sh": the widget takes the large figure and scales it by 0.5 with bitmap smoothing.
+// Resolves null when the image cannot be decoded or drawn, so the caller never waits on a promise that stays pending.
+const halve = (source: string): Promise<string | null> => new Promise((resolve) => {
+    const image = new Image();
+
+    image.onload = () => {
+        try {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            if (!context) return resolve(null);
+
+            canvas.width = Math.max(1, Math.round(image.width / 2));
+            canvas.height = Math.max(1, Math.round(image.height / 2));
+            context.imageSmoothingEnabled = true;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/png'));
+        } catch {
+            resolve(null);
+        }
+    };
+    image.onerror = () => resolve(null);
+    image.src = source;
+});
+
 const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
     const [url, setUrl] = useState('');
 
     useEffect(() => {
         let cancelled = false;
+        // The library calls resetFigure again as parts finish downloading; only the newest call may set the image.
+        let latest = 0;
         const listener = {
             disposed: false,
             dispose: null as (() => void) | null,
             resetFigure: (figure: string) => {
                 if (cancelled || listener.disposed) return;
 
-                const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.SMALL, 'M', listener);
+                const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, 'M', listener);
 
                 if (!avatar) return;
 
@@ -39,7 +67,13 @@ const GhostAvatar: FC<{ direction: number }> = ({ direction }) => {
                     const image = avatar.processAsImageUrl(AvatarSetType.FULL);
                     const placeholder = typeof avatar.isPlaceholder === 'function' && avatar.isPlaceholder();
 
-                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) setUrl(image);
+                    if (!cancelled && !placeholder && typeof image === 'string' && image.length > 0) {
+                        const request = ++latest;
+
+                        halve(image).then((half) => {
+                            if (!cancelled && request === latest) setUrl(half ?? '');
+                        });
+                    }
                 } catch {
                     if (!cancelled) setUrl('');
                 } finally {
@@ -76,7 +110,9 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch, official = f
     return (
         <div className="fp-bc-room-controls" data-testid="floorplan-room-controls">
             <div className="fp-bc-direction" data-testid="floorplan-orientation">
-                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.enter.direction')}</div>
+                <div className="fp-bc-direction-label">
+                    {official ? <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.enter.direction')} /> : LocalizeText('floor.plan.editor.enter.direction')}
+                </div>
                 <button type="button" className="fp-bc-dir-btn" data-testid="entry-dir-prev" title="Rotate door" onClick={() => setDir(rotateDir(state.door.dir, 1))}>
                     <img src={AIR_FLOOR_ASSETS.arrowLeft} alt="" />
                 </button>
@@ -94,7 +130,9 @@ export const FloorplanOptionsPanel: FC<Props> = ({ state, dispatch, official = f
             </div>
             <img className="fp-bc-vdivider" src={AIR_FLOOR_ASSETS.receptionDivider} alt="" />
             <div className="fp-bc-thickness" data-testid="floorplan-appearance">
-                <div className="fp-bc-direction-label">{LocalizeText('floor.plan.editor.room.options')}</div>
+                <div className="fp-bc-direction-label">
+                    {official ? <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.room.options')} /> : LocalizeText('floor.plan.editor.room.options')}
+                </div>
                 <Menu value={state.thickness.wall} onChange={setWall} testId="wall-thickness" labelKeyPrefix="navigator.roomsettings.wall_thickness" />
                 <Menu value={state.thickness.floor} onChange={setFloor} testId="floor-thickness" labelKeyPrefix="navigator.roomsettings.floor_thickness" />
             </div>

@@ -124,3 +124,16 @@
     line-height: 19px;
     white-space: pre-wrap;
 }
+
+.classic-loading-screen--recoverable .classic-loading-screen__error {
+    top: min(calc(var(--loading-top) + 585px), calc(100% - 100px));
+}
+
+.classic-loading-screen__back {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #7ecaee;
+    font-size: 16px;
+}

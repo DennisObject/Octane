@@ -3,6 +3,7 @@ import DOMPurify from 'dompurify';
 import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, OpenUrl } from '../../api';
 import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { NativeHabbopageContent } from './NativeHabbopageContent';
 
 const NEW_LINE_REGEX = /\n\r|\n|\r/gm;
@@ -113,8 +114,16 @@ export const OctanepediaView: FC<{}> = () => {
             uniqueKey="octanepedia"
             unconstrainedPosition
         >
-            <OctaneCardHeaderView headerText={page.header} onCloseClick={closePage} />
-            <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" scrollStep={42}>
+            <OctaneCardHeaderView headerText="" onCloseClick={closePage}>
+                <NativeText
+                    background={0x578ca5}
+                    className="octanepedia__native-title"
+                    overrides={{ color: 0xffffff }}
+                    text={page.header}
+                    textStyle="u_frame_title"
+                />
+            </OctaneCardHeaderView>
+            <ClassicScrollAreaView className="octanepedia__viewport" contentClassName="octanepedia__content" minThumbSize={26} scrollStep={42} thumbSizeAdjustment={2}>
                 <div className="octanepedia__native-container" onClick={handleContentClick}>
                     <NativeHabbopageContent fieldWidth={fieldWidth} markup={markup} onLinkClick={openMarkupLink} />
                 </div>

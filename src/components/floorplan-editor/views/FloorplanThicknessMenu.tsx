@@ -2,6 +2,7 @@ import { FC, KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { LocalizeText } from '../../../api';
 import { THICKNESS_NAMES } from '../state/constants';
 import { ThicknessLevel } from '../state/types';
+import { FloorplanNativeText } from './FloorplanNativeText';
 
 
 type Props = {
@@ -87,7 +88,9 @@ export const FloorplanThicknessMenu: FC<Props> = ({ value, onChange, testId, lab
                 }}
                 onKeyDown={onKeyDown}
             >
-                <span>{labels[value]}</span>
+                <span>
+                    <FloorplanNativeText background={0xffffff} text={labels[value]} />
+                </span>
             </button>
             {open && (
                 <div id={`${id}-list`} role="listbox" aria-label={testId} className="fp-bc-drop-list">
@@ -100,14 +103,13 @@ export const FloorplanThicknessMenu: FC<Props> = ({ value, onChange, testId, lab
                             aria-selected={index === value}
                             tabIndex={-1}
                             className={`fp-bc-drop-item ${index === highlight ? 'is-highlighted' : ''}`}
-                            onPointerEnter={() => setHighlight(index as ThicknessLevel)}
                             onPointerDown={event => {
                                 if (event.button !== 0) return;
                                 event.preventDefault();
                                 choose(index as ThicknessLevel);
                             }}
                         >
-                            {label}
+                            <FloorplanNativeText background={index === value ? 0xdddddd : index === highlight ? 0xebebeb : 0xffffff} text={label} />
                         </button>
                     ))}
                 </div>

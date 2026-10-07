@@ -201,7 +201,7 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 149px !important;
+    width: 81px !important;
     height: 51px !important;
     min-height: 51px !important;
     /* v75 button style 3: shiny skin and regular caption, even at 51px high. */

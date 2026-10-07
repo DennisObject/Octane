@@ -1,20 +1,20 @@
 import { AvatarEditorFigureCategory, AvatarFigurePartType, FigureDataContainer } from '@octane/renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { CreateLinkEvent, GetClubMemberLevel, IAvatarEditorCategory, LocalizeText } from '../../api';
-import { LayoutCurrencyIcon } from '../../common';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IAvatarEditorCategory, LocalizeText } from '../../api';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorIcon } from './AvatarEditorIcon';
 import { AvatarEditorFigureSetView } from './figure-set';
-import { AvatarEditorAdvancedColorView, AvatarEditorPaletteSetView } from './palette-set';
+import { AvatarEditorPaletteSetView } from './palette-set';
+import { useAvatarEditorGridWheel } from '../../hooks/avatar-editor/useAvatarEditorGridWheel';
 
 export const AvatarEditorModelView: FC<{
     name: string;
     categories: IAvatarEditorCategory[];
 }> = (props) => {
     const { name = '', categories = [] } = props;
+    const container = useRef<HTMLDivElement>(null);
     const [activeSetType, setActiveSetType] = useState<string>(() => categories[0]?.setType ?? '');
-    const [advancedColorMode, setAdvancedColorMode] = useState<boolean>(false);
-    const hasHC = GetClubMemberLevel() > 0;
     const {
         maxPaletteCount = 1,
         gender = null,
@@ -33,6 +33,8 @@ export const AvatarEditorModelView: FC<{
     const activeCategory = useMemo(() => {
         return categories.find((category) => category.setType === resolvedSetType) ?? null;
     }, [categories, resolvedSetType]);
+
+    useAvatarEditorGridWheel(container, !!activeCategory);
 
     const selectSet = useCallback(
         (setType: string) => {
@@ -58,17 +60,17 @@ export const AvatarEditorModelView: FC<{
     if (!activeCategory) return null;
 
     return (
-        <div className="octane-avatar-editor-model">
+        <div ref={container} className="octane-avatar-editor-model">
             <div className={`octane-avatar-editor-subcategories${name === AvatarEditorFigureCategory.GENERIC ? ' is-gender' : ''}`}>
                 {name === AvatarEditorFigureCategory.GENERIC && (
                     <>
                         <button type="button" className="category-item gender-category-item" onClick={() => setGender(AvatarFigurePartType.MALE)}>
                             <AvatarEditorIcon icon="male" selected={gender === FigureDataContainer.MALE} />
-                            <span>{LocalizeText('avatareditor.generic.boy')}</span>
+                            <NativeText className="octane-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.boy')} textStyle="u_bold" background={0xe9e9e1} />
                         </button>
                         <button type="button" className="category-item gender-category-item" onClick={() => setGender(AvatarFigurePartType.FEMALE)}>
                             <AvatarEditorIcon icon="female" selected={gender === FigureDataContainer.FEMALE} />
-                            <span>{LocalizeText('avatareditor.generic.girl')}</span>
+                            <NativeText className="octane-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.girl')} textStyle="u_bold" background={0xe9e9e1} />
                         </button>
                     </>
                 )}
@@ -90,32 +92,15 @@ export const AvatarEditorModelView: FC<{
                 <AvatarEditorFigureSetView category={activeCategory} columnCount={6} />
             </div>
 
-            <button
-                type="button"
-                className={`octane-avatar-editor-advanced-color${advancedColorMode ? ' is-active' : ''}`}
-                onClick={() => (hasHC ? setAdvancedColorMode((prev) => !prev) : CreateLinkEvent('habboUI/open/hccenter'))}
-            >
-                Advanced Color
-                <LayoutCurrencyIcon type="hc" />
-            </button>
-
             <div className={`octane-avatar-editor-palettes${maxPaletteCount === 2 ? ' dual-palette' : ''}`}>
                 {maxPaletteCount >= 1 && (
                     <div className="avatar-editor-palette-set-view">
-                        {advancedColorMode ? (
-                            <AvatarEditorAdvancedColorView category={activeCategory} paletteIndex={0} />
-                        ) : (
-                            <AvatarEditorPaletteSetView category={activeCategory} columnCount={maxPaletteCount === 2 ? 9 : 20} paletteIndex={0} />
-                        )}
+                        <AvatarEditorPaletteSetView category={activeCategory} columnCount={maxPaletteCount === 2 ? 9 : 20} paletteIndex={0} />
                     </div>
                 )}
                 {maxPaletteCount === 2 && (
                     <div className="avatar-editor-palette-set-view">
-                        {advancedColorMode ? (
-                            <AvatarEditorAdvancedColorView category={activeCategory} paletteIndex={1} />
-                        ) : (
-                            <AvatarEditorPaletteSetView category={activeCategory} columnCount={9} paletteIndex={1} />
-                        )}
+                        <AvatarEditorPaletteSetView category={activeCategory} columnCount={9} paletteIndex={1} />
                     </div>
                 )}
             </div>

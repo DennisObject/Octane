@@ -34,7 +34,7 @@ export const InventoryBotView: FC<{
     }, []);
 
     if (!botItems || !botItems.length) {
-        return <InventoryCategoryEmptyView desc={LocalizeText('inventory.empty.bots.desc')} title={LocalizeText('inventory.empty.bots.title')} />;
+        return <InventoryCategoryEmptyView desc={LocalizeText('inventory.empty.desc')} title={LocalizeText('inventory.empty.title')} />;
     }
 
     return (

@@ -1,8 +1,4 @@
 .octanepedia.octane-card-shell.octane-card-frame-3 {
-    --octane-card-close-3: url("../../assets/images/octanepedia/native/close-default.png");
-    --octane-card-close-3-hover: url("../../assets/images/octanepedia/native/close-hover.png");
-    --octane-card-close-3-pressed: url("../../assets/images/octanepedia/native/close-pressed.png");
-
     box-sizing: border-box;
     width: 418px;
     height: 398px;
@@ -13,63 +9,69 @@
     line-height: 14px;
 }
 
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
-    top: 0 !important;
-    right: 0 !important;
-    width: 15px !important;
-    height: 15px !important;
-    background: #d2392b var(--octane-card-close-3) 0 0 / 15px 15px no-repeat !important;
-}
-
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:hover {
-    background-image: var(--octane-card-close-3-hover) !important;
-}
-
-.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button:active {
-    background-image: var(--octane-card-close-3-pressed) !important;
-}
-
 .octanepedia.octane-card-shell.octane-card-frame-3::after {
     position: absolute;
     top: 0;
     right: 0;
     left: 0;
     z-index: 1;
-    height: 32px;
+    height: 33px;
     border-radius: 6px 6px 0 0;
-    background: #578ca5;
-    box-shadow: inset 0 2px #67a3bf, inset 0 -1px #05121a;
+    background: linear-gradient(#578ca5 0 31px, #05121a 31px 32px, #e9e9e1 32px 33px);
+    box-shadow: inset 0 2px #67a3bf;
     content: '';
     pointer-events: none;
 }
 
-.octanepedia > .octane-card-header-shell { cursor: move; }
+.octanepedia > .octane-card-header-shell { border-bottom-color: #e9e9e1; cursor: move; }
+.octanepedia__native-title { position: absolute !important; top: 2px; left: 50%; transform: translateX(-50%); }
+.octanepedia.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button { top: 1px !important; right: 2px !important; }
 
 .octanepedia__viewport {
     position: relative;
     box-sizing: border-box;
     width: calc(100% - 1px);
-    height: calc(100% - 22px);
-    margin: 2px 0 0 1px;
+    height: calc(100% - 23px);
+    margin: 3px 0 0 1px;
     overflow: hidden;
     border: 0;
-    background: #fff;
+    background: #e9e9e1;
 }
 
 .octanepedia__viewport > .octane-classic-scroll-area-viewport {
     box-sizing: border-box;
+    height: calc(100% - 1px);
     padding-right: 17px;
+    background: #fff;
     scrollbar-width: none !important;
 }
 
 .octanepedia__viewport > .octane-classic-scroll-area-viewport::-webkit-scrollbar { display: none !important; }
 
+.octanepedia__viewport > .octane-classic-scrollbar { top: -1px; }
+
 .octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
     background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-default.png");
 }
 
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-hover.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-pressed.png");
+}
+
 .octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
     background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-default.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-hover.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-pressed.png");
 }
 
 .octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-track {
@@ -77,11 +79,21 @@
 }
 
 .octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
-    min-height: 26px;
+    min-height: 0;
+    box-sizing: border-box;
     border: 0 solid transparent;
     border-image: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png") 5 0 / 5px 0 stretch;
-    background: url("../../assets/images/habbo-skin/slices/scroll-grip-3-default.png") center no-repeat,
-        url("../../assets/images/habbo-skin/slices/scroll-mid-3-default.png") repeat-y;
+    background: url("../../assets/images/habbo-skin/slices/scroll-grip-3-default.png") repeat-y;
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:hover {
+    border-image-source: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-hover.png");
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-grip-3-hover.png");
+}
+
+.octanepedia__viewport > .octane-classic-scrollbar .octane-classic-scrollbar-thumb:active {
+    border-image-source: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-pressed.png");
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-grip-3-pressed.png");
 }
 
 .octanepedia__content > div {
@@ -93,7 +105,7 @@
     background: #fff;
 }
 
-.octanepedia__content > .octanepedia__native-container { padding: 0; }
+.octanepedia__content > .octanepedia__native-container { margin-left: 1px; padding: 0; }
 
 .octanepedia__native-page { position: relative; min-height: 100%; }
 .octanepedia__native-page > canvas { image-rendering: pixelated; }

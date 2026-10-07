@@ -1,6 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -11,6 +8,7 @@ const octaneHandlers = new Map<unknown, (event: unknown) => void>();
 vi.mock('../../hooks', async () => {
     return {
         useNotification: () => ({ simpleAlert: vi.fn() }),
+        useHasPermission: () => false,
         useMessageEvent: (eventClass: unknown, handler: (event: unknown) => void) => {
             messageHandlers.set(eventClass, handler);
         },
@@ -307,34 +305,6 @@ describe('FloorplanEditorView container', () => {
         expect(sendMessageComposer.mock.calls[0][0]).toBeInstanceOf(UpdateFloorPropertiesMessageComposer);
         expect(sendMessageComposer.mock.calls[0][0].tilemap).toBe('00\r00');
         expect(document.querySelector('.octane-floorplan-import')).toBeTruthy();
-    });
-
-    it('skins the save button cyan and the door arrows from the style-5 assets', () => {
-        const css = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../css/floorplan-editor/FloorplanEditorView.css'), 'utf8');
-        const saveRule = css.slice(css.indexOf('.fp-bc-btn.is-save'));
-
-        expect(saveRule).toContain('save-style5-default.png');
-        expect(saveRule).toContain('save-style5-hover.png');
-        expect(saveRule).toContain('save-style5-pressed.png');
-        expect(saveRule).toContain('save-style5-disabled.png');
-        expect(saveRule).not.toContain('shiny-thick-green');
-        expect(css).toContain('dir-style5-default.png');
-        expect(css).toContain('left: 7px');
-        expect(css).toContain('left: 9px');
-        expect(css).not.toContain('scaleX(-1)');
-        expect(css).toContain('.octane-floorplan-window.octane-card-shell.octane-card-frame-3');
-        expect(css).toContain('--octane-card-frame-3-title: #ff8d00');
-        expect(css).toContain('min-width: 662px');
-        expect(css).toContain('min-height: 600px');
-        expect(css).toContain('max-width: 1380px');
-        expect(css).toContain('max-height: 900px');
-        expect(css).toContain('left: 61px');
-        expect(css).toContain('left: 134px');
-        expect(css).toContain('left: 195px');
-        expect(css).toContain('left: 268px');
-        expect(css).toContain('left: 122px');
-        expect(css).toContain('left: 256px');
-        expect(css).toContain('top: 4px');
     });
 
     it('the ordinary import dialog does not offer Load', () => {

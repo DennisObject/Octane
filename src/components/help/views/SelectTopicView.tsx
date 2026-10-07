@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { LocalizeText, ReportState, ReportType } from '../../../api';
 import { useHelp, useModTools } from '../../../hooks';
 import { HelpActionButton } from './HelpIndexView';
+import { HelpText } from './HelpText';
 
 export const SelectTopicView: FC = () => {
     const { activeReport, setActiveReport } = useHelp();
@@ -22,15 +23,17 @@ export const SelectTopicView: FC = () => {
     return (
         <>
             <div className="help-topics-panel">
-                <p className="help-pick-topic">{LocalizeText('help.cfh.pick.topic')}</p>
+                <p className="help-pick-topic">
+                    <HelpText text={LocalizeText('help.cfh.pick.topic')} maxWidth={405} />
+                </p>
                 <div className="help-topic-list help-scroll">
                     {isRoom ? (
-                        <HelpActionButton tone="red" className="help-topic" onClick={() => submitTopic(roomTopic?.id ?? -1)}>
+                        <HelpActionButton tone="red" className="help-topic" textStyle="u_bold" textSize={14} textWidth={335} onClick={() => submitTopic(roomTopic?.id ?? -1)}>
                             {LocalizeText('help.cfh.topic.34', ['name'], [activeReport.roomName])}
                         </HelpActionButton>
                     ) : category ? (
                         category.topics.map((topic) => (
-                            <HelpActionButton key={topic.id} tone="red" className="help-topic" onClick={() => submitTopic(topic.id)}>
+                            <HelpActionButton key={topic.id} tone="red" className="help-topic" textStyle="u_bold" textSize={14} textWidth={335} onClick={() => submitTopic(topic.id)}>
                                 {LocalizeText('help.cfh.topic.' + topic.id)}
                             </HelpActionButton>
                         ))
@@ -40,6 +43,8 @@ export const SelectTopicView: FC = () => {
                                 key={item.name}
                                 tone="red"
                                 className="help-topic"
+                                textStyle="u_bold" textSize={14}
+                                textWidth={335}
                                 onClick={() => {
                                     if (item.topics.length) setActiveReport((previous) => ({ ...previous, cfhCategory: index }));
                                 }}

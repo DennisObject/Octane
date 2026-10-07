@@ -1,4 +1,4 @@
-import { GetRenderer, OctaneTexture } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, OctaneTexture } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -8,13 +8,15 @@ import {
     getTrustedCameraViewport,
     getViewfinderRoomFrame,
     LocalizeText,
+    NotificationAlertType,
     PlaySound,
     SoundNames,
     snapshotViewfinder
 } from '../../../api';
-import { Button, Column, DraggableWindow } from '../../../common';
+import { Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
 import { getNextEmptyCameraSlot, willFillLastCameraSlot } from '../CameraAirUtilities';
+import { CameraCenteredText } from './CameraNativeText';
 
 export interface CameraWidgetCaptureViewProps {
     onClose: () => void;
@@ -150,7 +152,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         if (pendingShouldShowFullAlertRef.current && !hasShownFullRollAlert) {
             hasShownFullRollAlert = true;
-            simpleAlert(LocalizeText('camera.full.body'), null, null, null, LocalizeText('camera.full.header'));
+            simpleAlert(LocalizeText('camera.full.body'), NotificationAlertType.WINDOW, null, null, LocalizeText('camera.full.header'));
         }
 
         pendingShouldShowFullAlertRef.current = false;
@@ -167,7 +169,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         const frame = getViewfinderRoomFrame(elementRef.current, 320, 320);
 
         if (!frame) {
-            simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
+            simpleAlert(LocalizeText('camera.alert.too_much_stuff'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             return;
         }
 
@@ -272,7 +274,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
             }
 
             if (isMountedRef.current) {
-                simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
+                simpleAlert(LocalizeText('camera.alert.too_much_stuff'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             }
         } finally {
             isTakingPictureRef.current = false;
@@ -286,7 +288,16 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         <DraggableWindow>
             <Column center className="octane-camera-capture" gap={0}>
                 <div className="octane-camera-capture__body drag-handler">
-                    <div className="octane-camera-capture__title">{LocalizeText('camera.interface.title')}</div>
+                    <div className="octane-camera-capture__title">
+                        <CameraCenteredText
+                            background={0x000000}
+                            color={0xffffff}
+                            text={LocalizeText('camera.interface.title')}
+                            textStyle="u_frame_title"
+                            width={340}
+                        />
+                    </div>
+                    <button type="button" className="octane-camera-capture__help" aria-label={LocalizeText('generic.help')} onClick={() => CreateLinkEvent('habbopages/camera')} />
                     <button type="button" className="octane-camera-capture__close" aria-label={LocalizeText('generic.close')} onClick={onClose} />
                     <div className="octane-camera-viewfinder">
                         {!selectedPicture && (
@@ -301,14 +312,21 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
                     {selectedPicture?.draftId && (
                         <div className="octane-camera-capture__preview-actions">
-                            <Button
-                                className="octane-camera-capture__editor-button"
+                            <button
+                                className="habbo-btn-primary octane-camera-capture__editor-button"
                                 title={LocalizeText('camera.editor.button.tooltip')}
-                                variant="success"
+                                type="button"
                                 onClick={onEdit}
                             >
-                                {LocalizeText('camera.editor.button.text')}
-                            </Button>
+                                <CameraCenteredText
+                                    background={0x000000}
+                                    color={0xffffff}
+                                    style={{ mixBlendMode: 'screen' }}
+                                    text={LocalizeText('camera.editor.button.text')}
+                                    textStyle="button_shiny_bold"
+                                    width={38}
+                                />
+                            </button>
                         </div>
                     )}
                     <button

@@ -7,17 +7,19 @@ import {
 } from '@octane/renderer';
 import { FC } from 'react';
 import { LocalizeText, ReportState, ReportType, SendMessageComposer } from '../../../api';
-import { useHelp, useNotification } from '../../../hooks';
+import { useHelp } from '../../../hooks';
+import { useHelpAlert } from './HelpAlertView';
 import { HelpActionButton } from './HelpIndexView';
+import { HelpText } from './HelpText';
 
 export const ReportSummaryView: FC<{ onClose: () => void }> = ({ onClose }) => {
     const { activeReport = null, setActiveReport = null } = useHelp();
 
-    const { simpleAlert } = useNotification();
+    const showAlert = useHelpAlert();
 
     const submitReport = () => {
         if (activeReport.cfhTopic < 0) {
-            simpleAlert(LocalizeText('help.cfh.error.notopic'), null, null, null, LocalizeText('generic.alert.title'));
+            showAlert('help.cfh.error.notopic');
             return;
         }
         const chats: (string | number)[] = [];
@@ -28,7 +30,7 @@ export const ReportSummaryView: FC<{ onClose: () => void }> = ({ onClose }) => {
             case ReportType.ROOM: {
                 const reportedRoomId = activeReport.roomId > 0 ? activeReport.roomId : activeReport.reportedChats[0]?.roomId;
                 if (reportedRoomId === undefined) {
-                    simpleAlert(LocalizeText('help.cfh.error.chatmissing'), null, null, null, LocalizeText('generic.alert.title'));
+                    showAlert('help.cfh.error.chatmissing');
                     return;
                 }
 
@@ -79,8 +81,12 @@ export const ReportSummaryView: FC<{ onClose: () => void }> = ({ onClose }) => {
     return (
         <>
             <div className="help-report-panel help-summary-panel">
-                <h2 className="help-report-title">{LocalizeText('help.cfh.button.send')}</h2>
-                <p className="help-summary-description">{LocalizeText('help.main.summary')}</p>
+                <h2 className="help-report-title">
+                    <HelpText text={LocalizeText('help.cfh.button.send')} textStyle="u_headline_medium" maxWidth={164} />
+                </h2>
+                <p className="help-summary-description">
+                    <HelpText text={LocalizeText('help.main.summary')} maxWidth={390} />
+                </p>
             </div>
             <HelpActionButton
                 tone="gray"

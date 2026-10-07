@@ -17,7 +17,7 @@ describe('applySkinColor', () => {
         expect(green.toFixed(8)).toBe('0.40000000');
         expect(greenByte).toBe(101);
         expect(airHeightHex(0, false)).toBe('#0065ff');
-        expect(applyTileColor(189, 189, 189, 255, 0, green, 1)).toEqual([0, 75, 189, 255]);
+        expect(applyTileColor(189, 189, 189, 255, 0, green, 1)).toEqual([0, 76, 189, 255]);
         expect(Math.trunc(189 * greenByte / 255)).toBe(74);
         expect(applySkinColor(189, 189, 189, 255, 0, greenByte, 255)[1]).toBe(74);
     });

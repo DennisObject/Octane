@@ -120,7 +120,7 @@
 .octane-help .help-index-duck {
     position: absolute;
     left: 32px;
-    top: 59px;
+    top: 58px;
     width: 124px;
     height: 126px;
     display: flex;
@@ -188,6 +188,7 @@
     top: 9px;
     width: 169px;
     min-height: 21px;
+    text-align: left;
 }
 
 .octane-help .help-action--thick {
@@ -251,7 +252,7 @@
     background: #8899a2;
     border-bottom: 1px solid #000;
 }
-.octane-help .help-reported-avatar { position: absolute; left: 50px; top: 23px; width: 33px; height: 34px; }
+.octane-help .help-reported-avatar { position: absolute; left: 51px; top: 24px; width: 33px; height: 34px; }
 .octane-help .help-reported-title { position: absolute; left: 110px; top: 10px; width: 160px; height: 17px; font-weight: 700; color: #efefef; }
 .octane-help .help-reported-name { position: absolute; left: 110px; top: 30px; height: 24px; font-size: 18px; line-height: 24px; font-weight: 700; color: #fff; }
 .octane-help .help-change-user { position: absolute; left: 110px; top: 60px; width: 256px; height: 16px; padding: 0; border: 0; background: transparent; color: #efefef; font-size: 11px; font-weight: 700; line-height: 16px; text-align: left; text-decoration: underline; }
@@ -279,7 +280,9 @@
 .octane-help .help-chat-text { display: block; width: 336px; min-height: 17px; line-height: 17px; overflow-wrap: anywhere; white-space: pre-wrap; }
 .octane-help .help-chat-check { appearance: none; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url("../../assets/images/floorplan-editor/air/checkbox-default.png") 0 0 / 15px 15px no-repeat; box-shadow: none; cursor: pointer; image-rendering: pixelated; }
 .octane-help .help-chat-check:checked { background-image: url("../../assets/images/floorplan-editor/air/checkbox-selected.png"); background-color: transparent; }
-.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #000; resize: none; outline: none; font-size: 11px; line-height: 16px; }
+.octane-help .help-message-input textarea { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; outline: none; font-size: 11px; line-height: 16px; color: #000; }
+.octane-help .help-message-input.is-native-text textarea { color: transparent; }
+.octane-help .help-message-text { position: absolute; left: 5px; top: 5px; width: 380px; height: 209px; overflow: hidden; color: #000; pointer-events: none; }
 .octane-help .help-message-placeholder { position: absolute; left: 6px; top: 5px; height: 16px; color: #888; font-size: 11px; line-height: 16px; pointer-events: none; }
 
 .octane-help .help-topics-panel { position: absolute; left: 0; top: 90px; width: 445px; height: 340px; }
@@ -340,3 +343,58 @@
 }
 
 .octane-help *, .octane-help *::before, .octane-help *::after { box-sizing: border-box; }
+
+/* HabboWindowManagerCom/habbo_window_alert_xml, used by the Help flow's windowManager.alert notices. */
+.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-help-alert {
+    width: 278px;
+    height: 141px;
+    padding: 0;
+}
+
+.octane-help-alert .octane-help-alert-body {
+    position: absolute;
+    left: 6px;
+    top: 25px;
+    width: 266px;
+    height: 109px;
+}
+
+.octane-help-alert .octane-help-alert-text {
+    position: absolute;
+    left: 27px;
+    top: 14px;
+    width: 210px;
+    min-height: 57px;
+}
+
+.octane-help-alert .octane-native-button.is-thick.octane-help-alert-ok {
+    position: absolute;
+    left: 107px;
+    top: 81px;
+    bottom: auto;
+    width: 50px;
+    height: 24px;
+    min-width: 50px;
+    padding: 0;
+    filter: none;
+    -webkit-text-stroke: 0;
+}
+
+/* Help frame header: the close button sits 3px further left than the shared frame-3 default. */
+.octane-help.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button,
+.octane-help-alert.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button { right: 3px !important; }
+
+.octane-help-alert .octane-help-alert-ok-label {
+    position: absolute;
+    left: -6px;
+    top: -3px;
+    width: 50px;
+    height: 24px;
+    text-align: left;
+}
+
+/* The caption is a native TextField (HelpFrameTitle) one pixel above the shared frame-3 title strip. */
+.octane-help.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title,
+.octane-help-alert.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title { top: 3px !important; line-height: 0 !important; letter-spacing: 0 !important; text-align: left; }
+
+.octane-help-alert.octane-native-confirm.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title { top: 3px !important; }

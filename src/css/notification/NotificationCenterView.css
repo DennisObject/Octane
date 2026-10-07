@@ -1595,3 +1595,61 @@
     top: 0;
     padding: 0 0 4px;
 }
+
+/* habbo_window_alert_xml: content origin (6,25); text (27,14) 210x57 min; thick Ok button (108,81) 50x24 */
+.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert {
+    width: 278px;
+    padding: 25px 6px 7px;
+}
+
+.octane-native-window-alert-body {
+    position: relative;
+    box-sizing: border-box;
+    width: 266px;
+    padding: 14px 0 4px 27px;
+}
+
+.octane-native-window-alert-text {
+    box-sizing: border-box;
+    width: 210px;
+    min-height: 57px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+}
+
+.octane-native-window-alert-ok.octane-native-button.is-thick {
+    position: relative;
+    display: block;
+    width: 50px;
+    min-width: 50px;
+    height: 24px;
+    margin: 0 0 0 81px;
+    padding: 0;
+    filter: none;
+    -webkit-text-stroke: 0;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: 278px !important;
+    height: 18px !important;
+    letter-spacing: 0;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+/* the header close button sits 3px further left than the shared frame-3 default */
+.octane-card-shell.octane-card-frame-3.octane-native-window-alert > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-native-window-alert-ok-label {
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    line-height: 0;
+}

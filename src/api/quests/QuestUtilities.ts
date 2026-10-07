@@ -1,6 +1,6 @@
 import type { DailyTaskData, QuestMessageData, RewardTrackData, RewardTrackPrizeData } from '@octane/renderer';
 import { GetConfigurationValue } from '../octane';
-import { LocalizeText, localizeWithFallback } from '../utils';
+import { FriendlyTime, LocalizeText, localizeWithFallback } from '../utils';
 
 /** The official quest engine texts and image rules (HabboQuestEngine / QuestsList / QuestCompleted). */
 
@@ -15,7 +15,7 @@ export const getQuestingImageBaseUrl = (): string => {
 
     if (configured && configured.length) return configured;
 
-    return `${GetConfigurationValue<string>('image.library.url', '')}questing/`;
+    return `${GetConfigurationValue<string>('image.library.url', '')}Quests/`;
 };
 
 export const getQuestingImageUrl = (name: string): string => `${getQuestingImageBaseUrl()}${name}.png`;
@@ -28,6 +28,16 @@ export const getQuestImageName = (campaignCode: string, localizationCode: string
 
     return `${campaignCode}_${localizationCode}${imageVersion || ''}${prompt}`.toLowerCase();
 };
+
+/** The quests list shows the plain `<campaign>_<code><imageVersion>` bitmap; only the tracker animates the prompt frames. */
+export const getQuestListImageUrl = (quest: QuestMessageData): string =>
+    getQuestingImageUrl(
+        quest.waitPeriodSeconds > 0 ? QUEST_TIMER_IMAGE : `${quest.campaignCode}_${quest.localizationCode}${quest.imageVersion || ''}`.toLowerCase()
+    );
+
+/** The tracker's prompt animation cycles `<campaign>_<code><imageVersion>_a` to `_d`. */
+export const getQuestPromptFrameUrl = (quest: QuestMessageData, frame: 'a' | 'b' | 'c' | 'd'): string =>
+    getQuestingImageUrl(`${quest.campaignCode}_${quest.localizationCode}${quest.imageVersion || ''}_${frame}`.toLowerCase());
 
 export const getQuestImageUrl = (quest: QuestMessageData): string =>
     getQuestingImageUrl(getQuestImageName(quest.campaignCode, quest.localizationCode, quest.imageVersion, quest.waitPeriodSeconds > 0));
@@ -114,26 +124,9 @@ export const getDailyTasksWindowCaption = (maxSecondsLeft: number): string => {
 
     if (maxSecondsLeft <= 0) return title;
 
-    const refresh = localizeWithFallback('dailytasks.refreshes', 'Refresh in %time%', ['time'], [formatFriendlySeconds(maxSecondsLeft)]);
+    const refresh = localizeWithFallback('dailytasks.refreshes', 'Refresh in %time%', ['time'], [FriendlyTime.format(maxSecondsLeft)]);
 
     return `${title} - ${refresh}`;
-};
-
-/** "2h 5m" style countdowns; the official client uses FriendlyTime, this keeps it self-contained. */
-export const formatFriendlySeconds = (seconds: number): string => {
-    const total = Math.max(0, Math.floor(seconds));
-    const days = Math.floor(total / 86400);
-    const hours = Math.floor((total % 86400) / 3600);
-    const minutes = Math.floor((total % 3600) / 60);
-    const secs = total % 60;
-
-    if (days > 0) return `${days}d ${hours}h`;
-
-    if (hours > 0) return `${hours}h ${minutes}m`;
-
-    if (minutes > 0) return `${minutes}m ${secs}s`;
-
-    return `${secs}s`;
 };
 
 // ---------------------------------------------------------------- reward track

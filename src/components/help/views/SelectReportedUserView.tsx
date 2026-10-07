@@ -3,8 +3,10 @@ import { FC, useMemo, useState } from 'react';
 import { ChatEntryType, LocalizeText, ReportState } from '../../../api';
 import nativeBlueAtlas from '../../../assets/images/habbo-skin/2249_habbo_skin_blue_png$87fbbf84559e7bad0222a9c697b1104d-1406111769.png';
 import { LayoutAvatarImageView } from '../../../common';
-import { useChatHistory, useHelp, useNotification } from '../../../hooks';
+import { useChatHistory, useHelp } from '../../../hooks';
+import { useHelpAlert } from './HelpAlertView';
 import { HelpActionButton } from './HelpIndexView';
+import { HELP_PANEL_COLOR, HELP_WHITE_COLOR, HelpText } from './HelpText';
 
 const BORDER_REGIONS = [
     [0, 0, 6, 6, 0, 229, 6, 6],
@@ -21,7 +23,7 @@ const BORDER_REGIONS = [
 export const SelectReportedUserView: FC<{ onBack: () => void }> = ({ onBack }) => {
     const { chatHistory, roomHistory } = useChatHistory();
     const { activeReport, setActiveReport } = useHelp();
-    const { simpleAlert } = useNotification();
+    const showAlert = useHelpAlert();
     const [pinnedUserId] = useState(activeReport.reportedUserId);
     const availableUsers = useMemo(() => {
         const users = new Map<number, { id: number; username: string; figure: string; roomId: number; roomName: string }>();
@@ -42,7 +44,7 @@ export const SelectReportedUserView: FC<{ onBack: () => void }> = ({ onBack }) =
     }, [chatHistory, roomHistory, pinnedUserId]);
     const submitUser = () => {
         if (activeReport.reportedUserId <= 0) {
-            simpleAlert(LocalizeText('guide.bully.request.usermissing'), null, null, null, LocalizeText('generic.alert.title'));
+            showAlert('guide.bully.request.usermissing');
             return;
         }
         setActiveReport((previous) => ({ ...previous, currentStep: ReportState.SELECT_CHATS }));
@@ -50,7 +52,9 @@ export const SelectReportedUserView: FC<{ onBack: () => void }> = ({ onBack }) =
     return (
         <>
             <div className="help-users-panel">
-                <h2 className="help-users-title">{LocalizeText('help.emergency.main.step.two.title')}</h2>
+                <h2 className="help-users-title">
+                    <HelpText text={LocalizeText('help.emergency.main.step.two.title')} textStyle="u_headline_medium" maxWidth={278} />
+                </h2>
                 <div className="help-user-list help-scroll">
                     {availableUsers.map((user) => (
                         <button
@@ -93,9 +97,20 @@ export const SelectReportedUserView: FC<{ onBack: () => void }> = ({ onBack }) =
                                     style={{ backgroundSize: 'auto', backgroundPosition: '0 0' }}
                                 />
                             )}
-                            <span className="help-user-name">{user.username}</span>
+                            <span className="help-user-name">
+                                <HelpText plain text={user.username} textStyle="il_border" background={activeReport.reportedUserId === user.id ? HELP_WHITE_COLOR : HELP_PANEL_COLOR} />
+                            </span>
                             <span className="help-user-room">
-                                {user.roomName ? LocalizeText('help.emergency.main.step.two.room.name', ['room_name'], [user.roomName]) : ''}
+                                {user.roomName && (
+                                    <HelpText
+                                        plain
+                                        text={LocalizeText('help.emergency.main.step.two.room.name', ['ROOM_NAME'], [user.roomName])}
+                                        textStyle="il_regular"
+                                        color={0x444444}
+                                        maxWidth={218}
+                                        background={activeReport.reportedUserId === user.id ? HELP_WHITE_COLOR : HELP_PANEL_COLOR}
+                                    />
+                                )}
                             </span>
                         </button>
                     ))}
