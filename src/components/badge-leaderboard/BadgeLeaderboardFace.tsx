@@ -16,18 +16,23 @@ const cropFace = (imageUrl: string): Promise<string> =>
         const image = new Image();
 
         image.onload = () => {
-            const canvas = document.createElement('canvas');
+            try {
+                const canvas = document.createElement('canvas');
 
-            canvas.width = FACE_SIZE;
-            canvas.height = FACE_SIZE;
+                canvas.width = FACE_SIZE;
+                canvas.height = FACE_SIZE;
 
-            const context = canvas.getContext('2d');
+                const context = canvas.getContext('2d');
 
-            if (!context) return resolve(null);
+                if (!context) return resolve(null);
 
-            context.imageSmoothingEnabled = false;
-            context.drawImage(image, FACE_X, FACE_Y, FACE_SIZE, FACE_SIZE, 0, 0, FACE_SIZE, FACE_SIZE);
-            resolve(canvas.toDataURL('image/png'));
+                context.imageSmoothingEnabled = false;
+                context.drawImage(image, FACE_X, FACE_Y, FACE_SIZE, FACE_SIZE, 0, 0, FACE_SIZE, FACE_SIZE);
+                resolve(canvas.toDataURL('image/png'));
+            } catch {
+                // A rejected draw must not leave the render waiting for a crop that never comes.
+                resolve(null);
+            }
         };
         image.onerror = () => resolve(null);
         image.src = imageUrl;
@@ -42,8 +47,11 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
     useEffect(() => {
         const requestId = ++requestRef.current;
         let isDisposed = false;
-        const show = (blob: Blob) => {
-            if (isDisposed || requestRef.current !== requestId) return;
+        // Every render of this figure (the first one and each resetFigure redraw) takes a number; only the newest may show its result,
+        // however long its crop takes.
+        let latestRender = 0;
+        const show = (blob: Blob, renderId: number) => {
+            if (isDisposed || requestRef.current !== requestId || renderId !== latestRender) return;
 
             if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
 
@@ -56,7 +64,7 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
         const cached = FACE_CACHE.get(figure);
 
         if (cached) {
-            show(cached);
+            show(cached, ++latestRender);
 
             return () => {
                 isDisposed = true;
@@ -66,6 +74,7 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
         const render = async (currentFigure: string) => {
             if (isDisposed || requestRef.current !== requestId) return;
 
+            const renderId = ++latestRender;
             const image = GetAvatarRenderManager().createAvatarImage(currentFigure, AvatarScaleType.LARGE, 'M', {
                 resetFigure: (nextFigure: string) => render(nextFigure),
                 dispose: null,
@@ -95,7 +104,7 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
                 FACE_CACHE.set(currentFigure, blob);
             }
 
-            show(blob);
+            show(blob, renderId);
         };
 
         void render(figure);
