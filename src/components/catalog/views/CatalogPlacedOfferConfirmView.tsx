@@ -1,6 +1,6 @@
 import { PurchaseFromCatalogComposer } from '@octane/renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
-import { CatalogType, GetConfigurationValue, LocalizeText, PlacedObjectPurchaseData, SendMessageComposer } from '../../../api';
+import { FC, useCallback, useEffect } from 'react';
+import { CatalogType, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { claimPlacedOfferPurchase, useCatalogActions, useCatalogPlacedOffer, useCatalogSkipPurchaseConfirmation, useNotification, usePurse } from '../../../hooks';
 import { CatalogPurchaseConfirmView } from './CatalogPurchaseConfirmView';
 
@@ -21,19 +21,16 @@ export const CatalogPlacedOfferConfirmView: FC = () => {
     const [catalogSkipPurchaseConfirmation] = useCatalogSkipPurchaseConfirmation();
     const { simpleAlert = null } = useNotification();
     const { getCurrencyAmount = null } = usePurse();
-    const [closedFor, setClosedFor] = useState<PlacedObjectPurchaseData>(null);
 
     const offer = placedObjectPurchaseData?.offer ?? null;
     const confirmationRequired =
         !!offer && currentType === CatalogType.NORMAL && !(catalogSkipPurchaseConfirmation && !offer.product?.isUniqueLimitedItem);
     // The temporary object stays after the purchase until the bought item is placed.
-    const isOpen = confirmationRequired && placedObjectPurchaseData !== closedFor && !placedObjectPurchaseBought;
+    const isOpen = confirmationRequired && !placedObjectPurchaseBought;
     const isSubmitting = isOpen && placedObjectPurchaseSent;
 
-    const rollBack = useCallback(() => {
-        setClosedFor(placedObjectPurchaseData);
-        resetPlacedOfferData?.();
-    }, [placedObjectPurchaseData, resetPlacedOfferData]);
+    // Rolling back clears the dropped offer, which closes the dialog.
+    const rollBack = useCallback(() => resetPlacedOfferData?.(), [resetPlacedOfferData]);
 
     // showPurchaseConfirmation checks the purse before it builds the dialog.
     useEffect(() => {
