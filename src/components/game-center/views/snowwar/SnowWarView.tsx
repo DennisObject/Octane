@@ -4,6 +4,7 @@ import { buySnowWarTokens, SnowWarEngineState, SnowWarHookState, SnowWarResults 
 import { useFriendsActions, useFriendsState, useNotificationActions, useSnowWar } from '../../../../hooks';
 import { NativeSimpleAlertView } from '../../../notification-center/views/native/NativeSimpleAlertView';
 import { SnowWarArenaView } from './SnowWarArenaView';
+import { SnowWarChatInputView } from './SnowWarChatInputView';
 import { SnowWarLoadingView, SnowWarResultsView } from './SnowWarEndingView';
 import { SnowWarHudView } from './SnowWarHudView';
 import { SnowWarPlayerRow } from './SnowWarPlayerRowView';
@@ -104,7 +105,7 @@ const SnowWarResultsContainer: FC<{ snowWar: SnowWarHookState; results: SnowWarR
 export const SnowWarView: FC = () =>
 {
     const snowWar: SnowWarHookState = useSnowWar();
-    const { engine, state, loading, results, error, clearError, exitGame } = snowWar;
+    const { engine, state, loading, results, error, clearError, exitGame, sendChat } = snowWar;
     const ownUserId = GetSessionDataManager().userId;
 
     const inGame = state >= SnowWarEngineState.GAME_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
@@ -130,6 +131,8 @@ export const SnowWarView: FC = () =>
             <div className={`snowwar-arena-layer ${ inGame ? 'snowwar-arena-layer--active' : '' }`}>
                 <SnowWarArenaView />
                 {hudVisible && <SnowWarHudView engine={engine} onExit={exitGame} />}
+                {/* SnowWarEngine.startStage shows the room UI again; its chat input sends Game2GameChat. */}
+                {hudVisible && <SnowWarChatInputView onSend={sendChat} />}
             </div>
             {loadingVisible && (
                 <SnowWarLoadingView
