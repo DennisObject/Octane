@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, PlaySound, SoundNames } from '../../../../api';
-import { ISnowWarEngine } from '../../../../api/snowwar';
+import { ISnowWarEngine, SnowWarEngineState } from '../../../../api/snowwar';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useUserDataSnapshot } from '../../../../hooks';
 import { SnowWarAvatarImage } from './SnowWarAvatarImage';
@@ -145,7 +145,7 @@ export const SnowWarHudView: FC<SnowWarHudViewProps> = ({ engine, onExit }) =>
     const [ pressed, setPressed ] = useState(false);
     const [ flash, setFlash ] = useState<{ prefix: string; frame: number }>(null);
     const [ hiddenSecond, setHiddenSecond ] = useState(-1);
-    const [ countdownAt, setCountdownAt ] = useState<number>(() => (engine.state === 3 ? performance.now() : 0));
+    const [ countdownAt, setCountdownAt ] = useState<number>(() => (engine.state === SnowWarEngineState.STAGE_STARTING ? performance.now() : 0));
     const pressedRef = useRef(false);
 
     // GameArenaView.update feeds timer / ownScore / snowballs / hitPoints / team scores every frame.

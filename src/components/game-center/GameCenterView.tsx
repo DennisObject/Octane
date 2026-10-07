@@ -1,11 +1,10 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, GetGroupInformation, GetSessionDataManager, GetUserProfile } from '../../api';
-import { SnowWarEngineState, SnowWarHookState } from '../../api/snowwar';
-import { useGameCenter, useNotificationActions, useSnowWar } from '../../hooks';
+import { buySnowWarTokens, SnowWarEngineState, SnowWarHookState } from '../../api/snowwar';
+import { useNotificationActions, useSnowWar } from '../../hooks';
 import { SnowWarGamesMainView } from './views/snowwar/SnowWarGamesMainView';
 import { SnowWarLeaderboardView } from './views/snowwar/SnowWarLeaderboardView';
-import { buySnowWarTokens } from './views/snowwar/SnowWarTokenPurchase';
 
 /**
  * Toolbar games entry: AIR opens the SnowStorm `games_main` window (GamesMainViewController)
@@ -16,18 +15,40 @@ export const GameCenterView = () =>
     const snowWar: SnowWarHookState = useSnowWar();
     const { state, account, blockLength, lobby, loading, results, leaderboard, refreshStatus, requestTokenOffers, play, leaveLobby, requestLeaderboard, closeLeaderboard } = snowWar;
     const { showConfirm } = useNotificationActions();
-    const { isVisible: mainVisible, setIsVisible: setMainVisible } = useGameCenter();
+    const [ mainVisible, setMainVisible ] = useState(false);
     const [ leaderboardVisible, setLeaderboardVisible ] = useState(false);
     const lobbyVisible = !!lobby && !loading && !results;
+    const inGame = state !== SnowWarEngineState.INACTIVE || !!loading || !!results;
+    const [ phase, setPhase ] = useState({ lobbyVisible, inGame });
+
+    // createLobby opens the window on the lobby; gameStarted / gameOver close it (adjusted while rendering).
+    if(phase.lobbyVisible !== lobbyVisible || phase.inGame !== inGame)
+    {
+        setPhase({ lobbyVisible, inGame });
+
+        if(inGame && !phase.inGame) setMainVisible(false);
+        else if(lobbyVisible && !phase.lobbyVisible) setMainVisible(true);
+    }
+
+    // toggleVisibility; opening checks the directory and the account's games
+    // (Game2CheckGameDirectoryStatus + Game2GetAccountGameStatus) and fetches the token offers.
+    const toggleMain = useEffectEvent(() =>
+    {
+        if(!mainVisible)
+        {
+            refreshStatus();
+            requestTokenOffers();
+        }
+
+        setMainVisible(!mainVisible);
+    });
 
     useEffect(() =>
     {
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) =>
             {
-                const parts = url.split('/');
-
-                if(parts[1] === 'toggle') setMainVisible(value => !value);
+                if(url.split('/')[1] === 'toggle') toggleMain();
             },
             eventUrlPrefix: 'games/'
         };
@@ -35,28 +56,7 @@ export const GameCenterView = () =>
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [ setMainVisible ]);
-
-    // Opening the window checks the directory and the account's games (Game2CheckGameDirectoryStatus + GetAccountGameStatus).
-    useEffect(() =>
-    {
-        if(!mainVisible) return;
-
-        refreshStatus();
-        requestTokenOffers();
-    }, [ mainVisible, refreshStatus, requestTokenOffers ]);
-
-    // createLobby opens the window on the lobby; gameStarted closes it.
-    useEffect(() =>
-    {
-        if(lobbyVisible) setMainVisible(true);
-    }, [ lobbyVisible, setMainVisible ]);
-
-    useEffect(() =>
-    {
-        // gameStarted / gameOver close games_main.
-        if(state !== SnowWarEngineState.INACTIVE || loading || results) setMainVisible(false);
-    }, [ state, loading, results, setMainVisible ]);
+    }, []);
 
     const closeMain = () =>
     {
@@ -73,7 +73,7 @@ export const GameCenterView = () =>
 
     return (
         <>
-            {mainVisible && (
+            {mainVisible && !inGame && (
                 <SnowWarGamesMainView
                     blockLength={blockLength}
                     freeGamesLeft={account?.freeGamesLeft ?? -1}

@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, LocalizeText } from '../../../../api';
 import { SnowWarLeaderboard, SnowWarLeaderboardEntry, SnowWarLeaderboardKind, SnowWarLeaderboardRequest } from '../../../../api/snowwar';
 import { LayoutBadgeImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
@@ -20,6 +20,10 @@ interface TableState
     index: number;
     /** var_501: a request is in flight. */
     waiting: boolean;
+    /** Response the visible window was derived from. */
+    applied: SnowWarLeaderboard | null;
+    /** Response that was already there when the table was reverted; never applied. */
+    stale: SnowWarLeaderboard | null;
 }
 
 export interface SnowWarLeaderboardViewProps
@@ -41,50 +45,40 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
     const windowSize = GetConfigurationValue<number>('games.highscores.windowSize', 50);
     const scrolling = GetConfigurationValue<boolean>('games.highscores.scrolling.enabled', true);
     // showLeaderboard → showFriendsAllTime.
-    const [ table, setTable ] = useState<TableState>({ state: 0, weekOffset: 0, index: -1, waiting: true });
+    const [ table, setTable ] = useState<TableState>({ state: 0, weekOffset: 0, index: -1, waiting: true, applied: null, stale: leaderboard });
     const [ scrollImages, setScrollImages ] = useState({ up: 'normal', down: 'normal' });
     const [ resetMinutes, setResetMinutes ] = useState(0);
-    const appliedRef = useRef<SnowWarLeaderboard>(null);
 
     const show = (state: number, weekOffset = 0) =>
     {
         // revertToDefaultView: drop the table and ask for the rows around me.
-        appliedRef.current = null;
-        setTable({ state, weekOffset, index: -1, waiting: true });
+        setTable({ state, weekOffset, index: -1, waiting: true, applied: null, stale: leaderboard });
         onRequest({ kind: STATE_KINDS[state], startRank: -1, direction: 0, weekOffset, viewSize, windowSize });
     };
 
     // showLeaderboard → showFriendsAllTime: the initial table state is already state 0.
     useEffect(() => onRequest({ kind: STATE_KINDS[0], startRank: -1, direction: 0, weekOffset: 0, viewSize, windowSize }), [ onRequest, viewSize, windowSize ]);
 
-    const current = leaderboard && leaderboard.kind === STATE_KINDS[table.state] ? leaderboard : null;
+    const current = leaderboard && leaderboard !== table.stale && leaderboard.kind === STATE_KINDS[table.state] ? leaderboard : null;
     const entries = current?.entries ?? [];
 
-    // addEntries: first response → initializeList, later windows → updateCurrentIndex.
-    useEffect(() =>
+    // addEntries, applied while rendering: first response → initializeList, later windows → updateCurrentIndex.
+    if(current && table.applied !== current)
     {
-        if(!current || appliedRef.current === current) return;
+        let index = table.index;
 
-        const first = appliedRef.current === null;
-
-        appliedRef.current = current;
-        setTable(previous =>
+        if(table.applied === null)
         {
-            let index = previous.index;
+            const own = current.entries.findIndex(entry => (entry.gender === 'g' ? entry.userId === current.favouriteGroupId : entry.userId === ownUserId));
 
-            if(first)
-            {
-                const own = current.entries.findIndex(entry => (entry.gender === 'g' ? entry.userId === current.favouriteGroupId : entry.userId === ownUserId));
+            index = own >= viewSize ? own - (viewSize / 2) : 0;
+        }
+        else index = index < 0 ? index + windowSize : index - windowSize;
 
-                index = own >= viewSize ? own - (viewSize / 2) : 0;
-            }
-            else index = index < 0 ? index + windowSize : index - windowSize;
-
-            return { ...previous, index, waiting: false };
-        });
+        setTable({ ...table, index, waiting: false, applied: current });
 
         if(isWeekly(table.state)) setResetMinutes(current.minutesUntilReset);
-    }, [ current, ownUserId, table.state, viewSize, windowSize ]);
+    }
 
     // startWeeklyResetTimer: one tick per minute.
     useEffect(() =>

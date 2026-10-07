@@ -1,12 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { GetSessionDataManager, LocalizeText } from '../../../../api';
-import { SnowWarEngineState, SnowWarHookState, SnowWarResults } from '../../../../api/snowwar';
+import { buySnowWarTokens, SnowWarEngineState, SnowWarHookState, SnowWarResults } from '../../../../api/snowwar';
 import { useFriendsActions, useFriendsState, useNotificationActions, useSnowWar } from '../../../../hooks';
+import { NativeSimpleAlertView } from '../../../notification-center/views/native/NativeSimpleAlertView';
 import { SnowWarArenaView } from './SnowWarArenaView';
 import { SnowWarLoadingView, SnowWarResultsView } from './SnowWarEndingView';
 import { SnowWarHudView } from './SnowWarHudView';
 import { SnowWarPlayerRow } from './SnowWarPlayerRowView';
-import { buySnowWarTokens } from './SnowWarTokenPurchase';
 
 /** One-second countdown text for GameEndingViewController's Timer. */
 const useCountdown = (deadline: number | null) =>
@@ -105,17 +105,7 @@ export const SnowWarView: FC = () =>
 {
     const snowWar: SnowWarHookState = useSnowWar();
     const { engine, state, loading, results, error, clearError, exitGame } = snowWar;
-    const { simpleAlert } = useNotificationActions();
     const ownUserId = GetSessionDataManager().userId;
-
-    // SnowWarEngine.alert: one "SnowWar Alert" window per error.
-    useEffect(() =>
-    {
-        if(!error) return;
-
-        simpleAlert(LocalizeText(error), null, null, null, 'SnowWar Alert');
-        clearError();
-    }, [ error, simpleAlert, clearError ]);
 
     const inGame = state >= SnowWarEngineState.GAME_STARTING && state <= SnowWarEngineState.STAGE_ENDING;
     // GameLoadingViewController / SnowWarUI / GameEndingViewController hide window desktop 1 (games_main,
@@ -161,6 +151,8 @@ export const SnowWarView: FC = () =>
                 />
             )}
             {results && <SnowWarResultsContainer results={results} snowWar={snowWar} />}
+            {/* SnowWarEngine.alert: one "SnowWar Alert" at a time; closing it clears the error. */}
+            {error && <NativeSimpleAlertView caption="SnowWar Alert" message={LocalizeText(error)} onClose={clearError} />}
         </>
     );
 };
