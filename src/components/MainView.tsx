@@ -42,7 +42,7 @@ import { NavigatorView } from './navigator/NavigatorView';
 import { OctanebubbleHiddenView } from './octanebubblehidden/OctanebubbleHiddenView';
 import { OctanepediaView } from './octanepedia/OctanepediaView';
 import { ExternalPluginLoader } from './plugins/ExternalPluginLoader';
-import { DailyTasksView, QuestCompletedView, QuestsView, QuestTrackerView, RewardTrackView } from './quests';
+import { DailyTasksView, QuestCompletedView, QuestsView, RewardTrackView } from './quests';
 import { RadioView } from './radio/RadioView';
 import { RareValuesView } from './rare-values/RareValuesView';
 import { RightSideView } from './right-side/RightSideView';
@@ -173,7 +173,6 @@ export const MainView: FC<{}> = (props) =>
             <DiscordSettingsView />
             <VaultView />
             <QuestsView />
-            <QuestTrackerView />
             <QuestCompletedView />
             <DailyTasksView />
             <RewardTrackView />

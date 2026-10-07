@@ -537,7 +537,7 @@
     left: 115px;
 }
 
-.octane-achievements-air .air-achievement-progress {
+.air-achievement-progress {
     position: relative;
     height: 23px;
     overflow: hidden;
@@ -546,19 +546,19 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-achievements-air .air-achievement-progress__left,
-.octane-achievements-air .air-achievement-progress__track,
-.octane-achievements-air .air-achievement-progress__right,
-.octane-achievements-air .air-achievement-progress__fill-background,
-.octane-achievements-air .air-achievement-progress__fill,
-.octane-achievements-air .air-achievement-progress__fill-cap {
+.air-achievement-progress__left,
+.air-achievement-progress__track,
+.air-achievement-progress__right,
+.air-achievement-progress__fill-background,
+.air-achievement-progress__fill,
+.air-achievement-progress__fill-cap {
     position: absolute;
     display: block;
     background-repeat: no-repeat;
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-achievements-air .air-achievement-progress__left {
+.air-achievement-progress__left {
     top: 0;
     left: 0;
     width: 4px;
@@ -566,7 +566,7 @@
     background-image: var(--air-achievement-progress-left);
 }
 
-.octane-achievements-air .air-achievement-progress__track {
+.air-achievement-progress__track {
     top: 0;
     left: 4px;
     height: 23px;
@@ -574,14 +574,14 @@
     background-repeat: repeat-x;
 }
 
-.octane-achievements-air .air-achievement-progress__right {
+.air-achievement-progress__right {
     top: 0;
     width: 4px;
     height: 23px;
     background-image: var(--air-achievement-progress-right);
 }
 
-.octane-achievements-air .air-achievement-progress__fill {
+.air-achievement-progress__fill {
     top: 3px;
     left: 4px;
     height: 17px;
@@ -589,14 +589,14 @@
     background-repeat: repeat-x;
 }
 
-.octane-achievements-air .air-achievement-progress__fill-background {
+.air-achievement-progress__fill-background {
     top: 3px;
     left: 4px;
     height: 17px;
     background: #ffff00;
 }
 
-.octane-achievements-air .air-achievement-progress__fill-cap {
+.air-achievement-progress__fill-cap {
     top: 3px;
     width: 1px;
     height: 17px;

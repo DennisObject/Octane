@@ -9,6 +9,8 @@ interface AirAchievementProgressBarProps {
     localizationKey?: string;
     width: number;
     scoreAtStartOfLevel?: number;
+    /** The left/centre/right track frame; the quest tracker draws its track in its own bitmap and shows only the fill. */
+    hasFrame?: boolean;
     className?: string;
 }
 
@@ -19,6 +21,7 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
     localizationKey,
     width,
     scoreAtStartOfLevel = 0,
+    hasFrame = true,
     className = ''
 }) => {
     const targetWidth = maxProgress > 0 ? Math.max(0, Math.round((width * progress) / maxProgress)) : 0;
@@ -79,9 +82,13 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
             aria-valuemin={0}
             aria-valuemax={maxProgress}
         >
-            <span className="air-achievement-progress__left" aria-hidden="true" />
-            <span className="air-achievement-progress__track" style={{ width }} aria-hidden="true" />
-            <span className="air-achievement-progress__right" style={{ left: width + 4 }} aria-hidden="true" />
+            {hasFrame && (
+                <>
+                    <span className="air-achievement-progress__left" aria-hidden="true" />
+                    <span className="air-achievement-progress__track" style={{ width }} aria-hidden="true" />
+                    <span className="air-achievement-progress__right" style={{ left: width + 4 }} aria-hidden="true" />
+                </>
+            )}
             <span className="air-achievement-progress__fill-background" style={{ width: animation.width + 1 }} aria-hidden="true" />
             <span className="air-achievement-progress__fill" style={{ width: animation.width, opacity: animation.opacity }} aria-hidden="true" />
             <span className="air-achievement-progress__fill-cap" style={{ left: animation.width + 4 }} aria-hidden="true" />
