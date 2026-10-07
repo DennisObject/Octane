@@ -30,3 +30,8 @@ export { default as leaderboardEntrySelf } from './leaderboard_entry_self.png';
 export { default as leaderboardEntryUneven } from './leaderboard_entry_uneven.png';
 export { default as leaderboardHighlighter } from './leaderboard_highlighter.png';
 export { default as leaderboardIconProgress } from './leaderboard_icon_progress.png';
+export { default as leaderboardHeader } from './leaderboard_header.png';
+export { default as leaderboardRankDefault } from './leaderboard_rank_default.png';
+export { default as leaderboardRankFirst } from './leaderboard_rank_first.png';
+export { default as leaderboardRankSecond } from './leaderboard_rank_second.png';
+export { default as leaderboardRankThird } from './leaderboard_rank_third.png';
