@@ -30,6 +30,9 @@ export const fetchReconnectTicket = async (): Promise<string> =>
 
             const { session } = redeemed;
 
+            // Logged out or switched Habbo while the grant was redeemed.
+            if (getAuthSession().generation !== current.generation) return '';
+
             if (isSameOwner({ userId: session.userId, name: session.username }, current.owner)) return adoptTicket(session, current);
         }
     }
