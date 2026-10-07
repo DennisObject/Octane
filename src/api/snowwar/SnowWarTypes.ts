@@ -383,6 +383,9 @@ export type SnowWarEngineEvent =
     | { type: 'makeEnd'; humanId: number }
     | { type: 'scoreChange'; humanId: number; team: number; delta: number; score: number; teamScores: readonly number[] }
     | { type: 'humanLeft'; humanId: number }
+    /** Object entered/left the stage (CreateSnowball, full status rebuild, delete list). */
+    | { type: 'objectAdded'; objectId: number; objectType: number }
+    | { type: 'objectRemoved'; objectId: number; objectType: number }
     /** Whole seconds left changed; warning = 0 < seconds <= 5 (beep + blink). */
     | { type: 'timer'; secondsLeft: number; warning: boolean }
     | { type: 'resync'; reason: number; turn: number }
@@ -417,6 +420,8 @@ export interface ISnowWarEngine
     readonly teamScores: readonly number[];
     /** Increments after every simulated subturn and every object rebuild; cheap change detector for render loops. */
     readonly version: number;
+    /** 0..1 progress towards the next simulated subturn, for interpolating positions between pulses. */
+    readonly subturnFraction: number;
 
     getObjects(): readonly ISnowWarObject[];
     getObject(id: number): ISnowWarObject | null;
@@ -428,6 +433,12 @@ export interface ISnowWarEngine
     clickTile(tileX: number, tileY: number, modifiers: SnowWarClickModifiers): void;
     /** Human click: own = make snowball, opponent = throw (plain = default), teammates ignored. */
     clickHuman(humanId: number, modifiers: SnowWarClickModifiers): void;
+    /** Plain tile click (Game2SetUserMoveTarget at tile * 3200). */
+    moveTo(tileX: number, tileY: number): void;
+    /** Throw at a tile (Game2ThrowSnowballAtPosition at tile * 3200); ignored when the own human cannot throw. */
+    throwAtPosition(tileX: number, tileY: number, trajectory: number): void;
+    /** Throw at an opponent (Game2ThrowSnowballAtHuman); ignored when the own human cannot throw. */
+    throwAtHuman(humanId: number, trajectory: number): void;
     makeSnowball(): boolean;
     canThrow(): boolean;
     canMakeSnowball(): boolean;
