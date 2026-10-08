@@ -260,7 +260,7 @@ interface Native0FrameProps {
     className?: string;
     /** A resizable frame (params 98305) shows the scaler in its corner; the new size is reported while it is dragged (minimum 150 x 100). */
     onResize?: (width: number, height: number) => void;
-    /** Opacity of the glow around the caption letters (0.38 unless the window says otherwise). */
+    /** Opacity of the glow around the caption letters (0.16, the native halo, unless the window says otherwise). */
     glow?: number;
 }
 

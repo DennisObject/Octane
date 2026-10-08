@@ -23,7 +23,7 @@
 .native0-text__line.is-bold { font-weight: 700; }
 .native0-text__line.is-wrap { white-space: normal; overflow-wrap: break-word; display: block; }
 .native0-text__line.is-underline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 1px; padding: 0 1px; margin: 0 -1px; }
-.native0-header__caption .native0-text__line, .native0-text__line.has-glow { color: #fff; text-shadow: 1px 0 rgba(255, 255, 255, var(--native0-glow, 0.38)), -1px 0 rgba(255, 255, 255, var(--native0-glow, 0.38)), 0 1px rgba(255, 255, 255, var(--native0-glow, 0.38)), 0 -1px rgba(255, 255, 255, var(--native0-glow, 0.38)); }
+.native0-header__caption .native0-text__line, .native0-text__line.has-glow { color: #fff; text-shadow: 1px 0 rgba(255, 255, 255, var(--native0-glow, 0.16)), -1px 0 rgba(255, 255, 255, var(--native0-glow, 0.16)), 0 1px rgba(255, 255, 255, var(--native0-glow, 0.16)), 0 -1px rgba(255, 255, 255, var(--native0-glow, 0.16)); }
 .native0-text__line.has-glow { color: inherit; }
 
 .native0-input { position: absolute; margin: 0; padding: 1px 1px 1px 2px; border: 1px solid #000; border-radius: 0; background: transparent; color: #000; font: 400 9px/10px Volter, monospace; resize: none; outline: none; overflow: hidden; caret-color: #000; }

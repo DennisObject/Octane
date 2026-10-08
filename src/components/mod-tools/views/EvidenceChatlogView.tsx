@@ -28,14 +28,15 @@ export const EvidenceChatlogView: FC<EvidenceChatlogProps> = ({ kind, id, x, y, 
 
     if (!evidence) return null;
 
-    // the list is 443 wide at the default 480 (22px wider while the scroller is hidden) and its scroller sits at 451
+    // the list is 420 wide at the default 480 while its scroller (at 451) shows, 22px wider (443) while the scroller is hidden
     return (
         <NativeWindowShell type={`${kind}Chatlog` as 'userChatlog'} windowKey={`${id}`} x={x} y={y}>
             <Native0Frame caption={evidence.caption} height={height} width={width} onClose={onClose} onResize={onResize}>
-                <div className="native0-box" style={{ left: 0, top: 0, width: width - 12 + 2, height: height - 32, backgroundColor: '#4184b0' }} />
+                {/* the scroller column sits on a slightly darker blue that reaches 8px to its left; the rest of the frame is the plain frame blue */}
+                <div className="native0-box" style={{ left: width - 37, top: 0, width: 25, height: height - 32, backgroundColor: '#4184b0' }} />
                 <EvidenceChatlogList
                     evidence={evidence}
-                    listWidth={width - 37}
+                    listWidth={width - 60}
                     scrollbarHeight={height - 32}
                     scrollbarX={width - 29}
                     viewHeight={height - 35}

@@ -23,7 +23,7 @@ const CATEGORY_NO_TOPIC = 27;
 const CLOSE_USELESS = 1;
 const CLOSE_RESOLVED = 3;
 
-// the classic handler sets its white bold headings with a fainter glow than the other windows (about 16% against 37%)
+// the white bold headings on the frame blue carry the same faint glow as the frame captions (about 16%)
 const HANDLER_GLOW = 0.16;
 
 export interface IssueHandlerProps {
@@ -178,7 +178,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     return (
         <NativeWindowShell type="issueHandler" windowKey={`${bundleId}`} x={x} y={y}>
-            <Native0Frame caption={nativeCaption(root)} glow={HANDLER_GLOW} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
+            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
                 {/* text on an opaque background is set with LCD subpixel fringes: the backgrounds are drawn apart and the texts get a layer of their own */}
