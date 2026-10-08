@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRenderer, OctaneTexture } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, OctaneLogger, OctaneTexture } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -169,7 +169,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         const frame = getViewfinderRoomFrame(elementRef.current, 320, 320);
 
         if (!frame) {
-            simpleAlert(LocalizeText('camera.alert.too_much_stuff'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
+            simpleAlert(LocalizeText('camera.error.creation'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             return;
         }
 
@@ -262,7 +262,8 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
             if (preview) setSlot(picture);
             else fillSlot(picture);
-        } catch {
+        } catch (error) {
+            OctaneLogger.error('Failed to capture camera photo', error);
             isSettled = true;
 
             if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
@@ -274,7 +275,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
             }
 
             if (isMountedRef.current) {
-                simpleAlert(LocalizeText('camera.alert.too_much_stuff'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
+                simpleAlert(LocalizeText('camera.error.creation'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             }
         } finally {
             isTakingPictureRef.current = false;
