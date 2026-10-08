@@ -8,7 +8,7 @@ import {
     RoomChatlogEvent,
     UserChatlogEvent
 } from '@octane/renderer';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import { NativeText } from '../../../common/native-text/NativeText';
 import { useMessageEvent } from '../../../hooks';
@@ -117,6 +117,12 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     const [offset, setOffset] = useState(0);
     // wrapped line count of each message, by item index
     const [messageHeights, setMessageHeights] = useState<Record<number, number>>({});
+    // The row heights of the list as it was laid out before its first resize. The classic list sets the chatter and time fields to the row's height when it fills the row and only the message
+    // field and the row follow a later resize (launcher.pretty.js:281473-281485 against 281513-281526; no scale bit of those fields follows the height), so the chatter's white stays as tall as
+    // the row was then (OBSERVED: native shrink -90/-100 and the reverse to the pristine size; a snapshot, not a delay).
+    const heightsRef = useRef<number[]>([]);
+    const firstSizeRef = useRef<{ listWidth: number; viewHeight: number }>({ listWidth, viewHeight });
+    const [createdHeights, setCreatedHeights] = useState<number[]>(null);
 
     const items = useMemo<Item[]>(() => {
         if (!evidence) return [];
@@ -151,12 +157,22 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     });
 
     const overflow = contentHeight > viewHeight;
-    const width = listWidth + (overflow ? 0 : hiddenExtra);
+    // the window's own list starts with its scroller shown (the XML's state) and only the first resize's timer re-reads whether the rows overflow (classic Q5 `_r8b94a8d2d60957`)
+    const scrollerShown = overflow || (lineFollowsList && createdHeights === null);
+    const width = listWidth + (scrollerShown ? 0 : hiddenExtra);
     const viewport = viewportWidth ?? width;
     const range = Math.max(0, contentHeight - viewHeight);
     const clamped = Math.max(0, Math.min(range, offset));
     const rowColors = items.map((item) => (item.kind === 'header' ? FRAME_COLOR : item.color));
     const heights = items.map((item, index) => rowHeight(index, item));
+
+    // the snapshot is taken when the list's size first changes, from the layout of the commit before (the effects run in this order)
+    useLayoutEffect(() => {
+        if (createdHeights === null && (listWidth !== firstSizeRef.current.listWidth || viewHeight !== firstSizeRef.current.viewHeight)) setCreatedHeights(heightsRef.current);
+    }, [createdHeights, listWidth, viewHeight]);
+    useLayoutEffect(() => {
+        heightsRef.current = heights;
+    });
     // the chat line follows the width of the list (scale bits 144: it stretches) and its message field is what is left of it, so a narrower window wraps the messages onto more lines;
     // the handler's embedded list keeps the XML's line
     const lineWidth = lineFollowsList ? width : line.width;
@@ -191,7 +207,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                                     <NativeText background={item.color} text={item.line.timestamp} textStyle="u_bold" />
                                 </div>
                                 {/* the chatter field keeps the white of a text window behind its row coloured text, over the whole height of the row */}
-                                <div style={{ position: 'absolute', left: chatter.x, top: chatter.y, width: chatter.width, height: heights[index], backgroundColor: '#fff' }} />
+                                <div style={{ position: 'absolute', left: chatter.x, top: chatter.y, width: chatter.width, height: Math.min(createdHeights?.[index] ?? heights[index], heights[index]), backgroundColor: '#fff' }} />
                                 <div style={{ position: 'absolute', left: chatter.x, top: chatter.y, width: chatter.width, height: heights[index], overflow: 'hidden', fontSize: 0, lineHeight: 0, cursor: item.line.userId > 0 ? 'pointer' : undefined }} onClick={item.line.userId > 0 ? () => onOpenUserInfo(item.line.userId) : undefined}>
                                     <NativeText
                                         background={WHITE}
@@ -213,7 +229,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                     )}
                 </div>
             </div>
-            {overflow && <Native0Scrollbar contentHeight={contentHeight} height={scrollbarHeight} offset={clamped} blend={scrollbarBlend} variant={scrollbarVariant} viewHeight={viewHeight} x={scrollbarX} y={0} onOffset={setOffset} />}
+            {scrollerShown && <Native0Scrollbar contentHeight={contentHeight} height={scrollbarHeight} offset={clamped} blend={scrollbarBlend} variant={scrollbarVariant} viewHeight={viewHeight} x={scrollbarX} y={0} onOffset={setOffset} />}
         </>
     );
 };
@@ -231,7 +247,8 @@ const MessageText: FC<{ text: string; background: number; width: number; x: numb
         const measure = () => {
             const canvas = element.querySelector('canvas');
 
-            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
+            // (a canvas that is not shown yet is still the browser's 300 x 150 default, not the field)
+            if (canvas && canvas.style.display !== 'none' && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
         };
 
         measure();
@@ -252,7 +269,8 @@ const MessageText: FC<{ text: string; background: number; width: number; x: numb
         const observer = new MutationObserver(() => {
             const canvas = element.querySelector('canvas');
 
-            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
+            // (a canvas that is not shown yet is still the browser's 300 x 150 default, not the field)
+            if (canvas && canvas.style.display !== 'none' && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
         });
 
         observer.observe(element, { attributes: true, childList: true, subtree: true });
