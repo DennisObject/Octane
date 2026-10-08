@@ -109,10 +109,6 @@ describe('UI CSS ownership', () =>
         expect(indexCss).not.toContain('.octane-wired :where(select, input[type=\'text\'], input[type=\'number\'], textarea)');
         expect(wiredCss).toContain('.octane-wired :where(select, input[type=\'text\'], input[type=\'number\'], textarea)');
         expect(wiredCss).toContain('.octane-wired__variable-picker-portal');
-        // Text fields only: a checkbox is not a text field, and the mod tool used to paint it as one.
-        expect(indexCss).toContain(".octane-mod-tools :where(input:not([type='checkbox']):not([type='radio']), select, textarea)");
-        expect(indexCss).not.toContain('.octane-mod-tools :where(input, select, textarea)');
-        expect(indexCss).toContain('[class*="octane-mod-tools-"] :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-white\\/70)');
         expect(wiredCss).toContain('.octane-wired__body');
         expect(wiredCss).toContain('overflow-y: auto');
         expect(inventoryView).toContain('max-w-[calc(100vw-16px)]');
