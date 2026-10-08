@@ -81,6 +81,10 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const [autoNext, setAutoNext] = useState(true);
     // the handler is disposed by its first close or release: a second call of a captured callback before it is gone must not send (or pick) again
     const finishedRef = useRef(false);
+    // the layout is the XML's own (70px lists) until the window has been resized once; after that it is the classic handler's resize rule
+    const [resized, setResized] = useState(false);
+    // the last list height (>= 1) a resize left the messages list with: its first row stays where that height put it
+    const [messagesLatch, setMessagesLatch] = useState<number>(null);
     const [chosenTopic, setChosenTopic] = useState(-1);
     const [menuOpen, setMenuOpen] = useState(false);
     const [messageOffset, setMessageOffset] = useState(0);
@@ -111,15 +115,17 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const reportedShown = bundle.reportedUserId > 0;
     const itemX = (node: NativeNode, name: string) => rectOf(findNativeNode(node, name));
 
-    // the left column is a vertical item list with 3px between its items. Measured against the classic client over its whole height (sweep of 30 sizes, 390 to 650): once the window has been
-    // resized the two lists share what is left, each ceil((height - 515) / 2) tall (54px at 623) and it goes on below zero (-62px at 390: the items overlap and the header and captions are covered
-    // by the panels); the XML's own 70px lists only exist until then. Without the reported user's panel (223px less) the same rule holds with 292 (inferred, not captured).
-    const columnBase = reportedShown ? 515 : 292;
-    const listRaw = height === HANDLER_HEIGHT ? 70 : Math.ceil((height - columnBase) / 2);
+    // the left column is a vertical item list with 3px between its items. The classic handler (cme, launcher.pretty.js:283340-283352) answers every resize of that list by giving both lists
+    // (height - content + both lists) * 0.5, which is (window height - 514) / 2 once the fixed items are counted (223px less without the reported user's panel: inferred, not captured), cut
+    // toward zero by the integer height it is stored in (68 at 650, 54 at 623, -62 at 390, -1 and 0 around 513). The XML's own 70px lists only exist until the first resize. A negative list
+    // moves the items below it up all the same: the panels overlap and cover the headings.
+    const columnBase = reportedShown ? 514 : 291;
+    const listRaw = resized || height !== HANDLER_HEIGHT ? Math.trunc((height - columnBase) / 2) : 70;
     const listHeights = Math.max(0, listRaw);
     const rows = { issues: listHeights, messages: listHeights };
-    // the messages list does not go up past the place it has at a height of 3: its first row stays there and the panel below covers it (12px of the row are left at -2, 2px at -7)
-    const msgShift = Math.max(0, 3 - listRaw);
+    // the messages list's first row sits where the list was while it still had a height; below 1px the row stays at the place of the last height a resize left it with (none: no row, as after
+    // a jump from the XML size) and the panel below covers it
+    const msgShift = listRaw >= 1 ? 0 : messagesLatch === null ? null : Math.max(0, messagesLatch - listRaw);
     let cursor = 0;
     const place = (itemHeight: number) => {
         const at = cursor;
@@ -181,7 +187,15 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     return (
         <NativeWindowShell type="issueHandler" windowKey={`${bundleId}`} x={x} y={y}>
-            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} minHeight={390} minWidth={750} onResize={(_, h) => onResize(750, h)}>
+            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} minHeight={390} minWidth={750} onResize={(_, h) => {
+                    const next = Math.trunc((h - columnBase) / 2);
+
+                    setResized(true);
+
+                    if (next >= 1) setMessagesLatch(next);
+
+                    onResize(750, h);
+                }}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
                 {/* the column is not clipped: below 515 its content is taller than the window and runs up over the frame's header like the classic client's */}
@@ -213,7 +227,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                     <UserInfoPanel key={callerId} settings={settings} userId={callerId} {...panelHandlers(callerId)} />
                 </div>
                 <div className="native0-box" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, backgroundColor: '#fff' }} />
-                <div className="native0-list" style={{ left: 0, top: yMessages + msgShift, width: 280, height: msgView, willChange: 'transform' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - msgView), clampedMessages + event.deltaY * 0.75)))}>
+                <div className="native0-list" style={{ left: 0, top: yMessages + (msgShift ?? 0), width: 280, height: msgShift === null ? 0 : msgView, willChange: 'transform' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - msgView), clampedMessages + event.deltaY * 0.75)))}>
                     <div style={{ position: 'absolute', left: 0, top: -clampedMessages, width: msgOverflow ? 263 : 280, height: messagesHeight }}>
                         <Native0Rows colors={messageRows.map((row) => row.color)} heights={messageRows.map((row) => row.height)} width={msgOverflow ? 263 : 280} />
                         {messageRows.map((row, index) => (
