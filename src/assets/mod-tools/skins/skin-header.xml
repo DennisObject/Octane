@@ -2,19 +2,19 @@
 <skin name="header_skin" version="0.0">
 
 	<!-- shared variables -->
-	
+
 	<variables>
 		<variable key="asset" value="habbo_blue_skin_png" type="String" />
 	</variables>
-	
+
 	<!-- the following maps layouts for render states -->
-	
+
 	<states>
 		<state name="default" layout="header" template="default_header_mode" />
 	</states>
-	
+
 	<!-- templates defines regions in bitmap asset -->
-	
+
 	<templates>
 		<template name="default_header_mode" asset="$asset">
 			<entities>
@@ -22,7 +22,7 @@
                 <entity name="header_shine" type="bitmap"><region><Rectangle x="401" y="16" width="6" height="15" /></region></entity>
 			</entities>
 		</template>
-		
+
 		<template name="passive_header_mode" asset="$asset">
 			<entities>
 				<entity name="header_center" type="bitmap"><region><Rectangle x="401" y="0" width="6" height="15" /></region></entity>
@@ -30,9 +30,9 @@
 			</entities>
 		</template>
 	</templates>
-	
+
 	<!-- markup for layout drawer -->
-	
+
 	<layouts>
 		<layout name="header" transparent="false">
 			<entities>

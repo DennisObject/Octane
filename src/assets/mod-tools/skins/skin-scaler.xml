@@ -2,11 +2,11 @@
 <skin name="default_scaler_skin" version="0.0">
 
 	<!-- shared variables -->
-	
+
 	<variables>
 		<variable key="asset" value="habbo_blue_skin_png" type="String" />
 	</variables>
-	
+
 	<!-- the following maps layouts for render states -->
 
 	<states>
@@ -14,7 +14,7 @@
 	</states>
 
 	<!-- templates defines regions in bitmap asset -->
-	
+
 	<templates>
 		<template name="default_scaler" asset="$asset">
 			<entities>
@@ -23,9 +23,9 @@
 			</entities>
 		</template>
 	</templates>
-	
+
 	<!-- markup for layout drawer -->
-	
+
 	<layouts>
 		<layout name="scaler" transparent="true">
 			<entities>

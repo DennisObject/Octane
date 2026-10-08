@@ -2,35 +2,35 @@
 <skin name="close_button_skin_3" version="0.0">
 
 	<!-- shared variables -->
-	
+
 	<variables>
 		<variable key="asset"	value="habbo_skin_ubuntu_png"	type="String" />
 	</variables>
-	
+
 	<!-- the following maps layouts for render states -->
-	
+
 	<states>
 		<state name="default"  layout="button_close_3" template="default_button_mode_3" />
 		<state name="hovering" layout="button_close_3" template="hovering_button_mode_3" />
 		<state name="pressed"  layout="button_close_3" template="pressed_button_mode_3" />
 	</states>
-	
+
 	<!-- templates defines regions in bitmap asset -->
-	
+
 	<templates>
-	
+
 		<template name="default_button_mode_3" asset="$asset">
 			<entities>
 				<entity name="button_close" type="bitmap"><region><Rectangle x="140" y= "10" width="19" height="20" /></region></entity>
 			</entities>
 		</template>
-		
+
 		<template name="hovering_button_mode_3" asset="$asset">
 			<entities>
 				<entity name="button_close" type="bitmap"><region><Rectangle x="200" y= "10" width="19" height="20" /></region></entity>
 			</entities>
 		</template>
-		
+
 		<template name="pressed_button_mode_3" asset="$asset">
 			<entities>
 				<entity name="button_close" type="bitmap"><region><Rectangle x="170" y= "10" width="19" height="20" /></region></entity>
@@ -38,9 +38,9 @@
 		</template>
 
 	</templates>
-	
+
 	<!-- markup for layout drawer -->
-	
+
 	<layouts>
 		<layout name="button_close_3" transparent="true">
 			<entities>
