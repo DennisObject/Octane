@@ -1,61 +1,81 @@
 import { EditEventMessageComposer } from '@octane/renderer';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../../common';
-import { OctaneInput } from '../../../../../layout';
+import { OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
+import { NativeText } from '../../../../../common/native-text/NativeText';
+import { RoomPromoteField } from '../RoomPromoteField';
 
 interface RoomPromoteEditWidgetViewProps {
     eventId: number;
     eventName: string;
     eventDescription: string;
-    setIsEditingPromote: (value: boolean) => void;
+    onClose: () => void;
 }
 
-export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = (props) => {
-    const { eventId = -1, eventName = '', eventDescription = '', setIsEditingPromote = null } = props;
-    const [newEventName, setNewEventName] = useState<string>(eventName);
-    const [newEventDescription, setNewEventDescription] = useState<string>(eventDescription);
+// RoomEventViewCtrl (iro_event_settings_xml): a 241x191 frame with the event name (25 characters) and description (100 characters).
+// The window has no save button: leaving a field saves the event, and an event name of 2 characters or fewer is refused.
+const NAME_LENGTH = 25;
+const DESCRIPTION_LENGTH = 100;
+const MIN_NAME_LENGTH = 3;
 
-    const updatePromote = () => {
-        SendMessageComposer(new EditEventMessageComposer(eventId, newEventName, newEventDescription));
-        setIsEditingPromote(false);
+export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ eventId, eventName, eventDescription, onClose }) => {
+    const [name, setName] = useState<string>(eventName);
+    const [description, setDescription] = useState<string>(eventDescription);
+    const [hasNameError, setHasNameError] = useState<boolean>(false);
+    const lastSaved = useRef<string>(JSON.stringify([eventName, eventDescription]));
+
+    const save = (nextName: string, nextDescription: string) => {
+        if (nextName.trim().length < MIN_NAME_LENGTH) {
+            setHasNameError(true);
+
+            return;
+        }
+
+        setHasNameError(false);
+
+        // The server answers an edit with the updated event; an unchanged pair of fields is not sent again.
+        const key = JSON.stringify([nextName, nextDescription]);
+
+        if (key === lastSaved.current) return;
+
+        lastSaved.current = key;
+        SendMessageComposer(new EditEventMessageComposer(eventId, nextName, nextDescription));
     };
 
     return (
-        <OctaneCardView className="octane-guide-tool octane-room-promote-edit min-w-0 w-[min(340px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('navigator.eventsettings.editcaption')} onCloseClick={() => setIsEditingPromote(false)} />
-            <OctaneCardContentView className="text-black">
-                <div className="flex flex-col">
-                    <Text bold>{LocalizeText('navigator.eventsettings.name')}</Text>
-                    <OctaneInput
-                        maxLength={64}
-                        placeholder={LocalizeText('navigator.eventsettings.name')}
-                        type="text"
-                        value={newEventName}
-                        onChange={(event) => setNewEventName(event.target.value)}
-                    />
+        <OctaneCardView aria-label={LocalizeText('navigator.eventsettings.editcaption')} className="octane-room-promote-edit" frameStyle={3} isResizable={false} role="dialog" uniqueKey="room-promote-edit">
+            <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
+                <NativeText background={0x377998} className="octane-room-promote-edit__title" overrides={{ color: 0xffffff }} text={LocalizeText('navigator.eventsettings.editcaption')} textStyle="u_frame_title" />
+            </OctaneCardHeaderView>
+            <div className="octane-room-promote-edit__client">
+                <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
+                    <NativeText background={0xe9e9e1} overrides={{ sharpness: 0, thickness: 0 }} text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
                 </div>
-                <div className="flex flex-col">
-                    <Text bold>{LocalizeText('navigator.eventsettings.desc')}</Text>
-                    <textarea
-                        className="min-h-[calc(1.5em+ .5rem+2px)] px-[.5rem] py-[.25rem] rounded-[.2rem] form-control-sm"
-                        maxLength={64}
-                        placeholder={LocalizeText('navigator.eventsettings.desc')}
-                        value={newEventDescription}
-                        onChange={(event) => setNewEventDescription(event.target.value)}
-                    ></textarea>
+                {hasNameError && <div className="octane-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
+                <RoomPromoteField
+                    isError={hasNameError}
+                    label={LocalizeText('navigator.eventsettings.name')}
+                    maxLength={NAME_LENGTH}
+                    value={name}
+                    y={20}
+                    height={15}
+                    onBlur={() => save(name, description)}
+                    onChange={setName}
+                />
+                <div className="octane-room-promote-edit__label" style={{ top: 40 }}>
+                    <NativeText background={0xe9e9e1} overrides={{ sharpness: 0, thickness: 0 }} text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
                 </div>
-                <div className="flex flex-col">
-                    <Button
-                        fullWidth
-                        disabled={!newEventName || !newEventDescription}
-                        variant={!newEventName || !newEventDescription ? 'danger' : 'success'}
-                        onClick={(event) => updatePromote()}
-                    >
-                        {LocalizeText('navigator.eventsettings.edit')}
-                    </Button>
-                </div>
-            </OctaneCardContentView>
+                <RoomPromoteField
+                    height={88}
+                    label={LocalizeText('navigator.eventsettings.desc')}
+                    maxLength={DESCRIPTION_LENGTH}
+                    multiline
+                    value={description}
+                    y={56}
+                    onBlur={() => save(name, description)}
+                    onChange={setDescription}
+                />
+            </div>
         </OctaneCardView>
     );
 };
