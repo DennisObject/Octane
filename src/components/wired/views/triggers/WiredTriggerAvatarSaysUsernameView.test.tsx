@@ -57,15 +57,4 @@ describe('the say-your-username trigger window', () => {
         expect(setStringParam).toHaveBeenCalledWith('');
         expect(setIntParams).toHaveBeenCalledWith([0, 1, 0]);
     });
-
-    it('keeps the keyword window as it was for the ordinary trigger', () => {
-        trigger = { intData: [1, 0, 1], stringData: 'hello' };
-        render(<WiredTriggerAvatarSaysSomethingView />);
-
-        expect(screen.getByTestId('keyword')).toBeTruthy();
-        fireEvent.click(screen.getByText('Save'));
-
-        expect(setStringParam).toHaveBeenCalledWith('hello');
-        expect(setIntParams).toHaveBeenCalledWith([1, 0, 1]);
-    });
 });

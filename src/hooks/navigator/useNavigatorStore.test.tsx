@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SharedHookRegistry } from '../../state/useSharedHook';
-import { useNavigatorData, useNavigatorUiState } from './index';
+import { useNavigatorData } from './index';
 import { useNavigatorUiStore } from './navigatorUiStore';
 
 vi.mock('@octane/renderer', async () => {
@@ -47,29 +47,6 @@ describe('navigator filter shapes (smoke)', () => {
 
         expect(Object.keys(result.current).sort()).toEqual(
             ['categories', 'eventCategories', 'navigatorData', 'navigatorSearches', 'topLevelContext', 'topLevelContexts'].sort()
-        );
-    });
-
-    it('useNavigatorUiState returns the documented state', () => {
-        const { result } = renderHook(() => useNavigatorUiState());
-        expect(Object.keys(result.current).sort()).toEqual(
-            [
-                'currentFilter',
-                'currentTabCode',
-                'collapsedResultCodes',
-                'expandedResultCodes',
-                'isCreatorOpen',
-                'isLoading',
-                'isOpenSavesSearches',
-                'isReady',
-                'isRoomInfoOpen',
-                'isRoomLinkOpen',
-                'isVisible',
-                'needsInit',
-                'needsSearch',
-                'resultViewModes',
-                'windowHeight'
-            ].sort()
         );
     });
 

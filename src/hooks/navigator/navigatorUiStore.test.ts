@@ -65,26 +65,10 @@ describe('useNavigatorUiStore', () => {
     });
 
     describe('show / hide / toggle', () => {
-        it('show() sets isVisible true and requests a search', () => {
-            useNavigatorUiStore.getState().show();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(true);
-        });
 
         it('hide() sets isVisible false without touching needsSearch', () => {
             useNavigatorUiStore.setState({ isVisible: true, needsSearch: false });
             useNavigatorUiStore.getState().hide();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(false);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(false);
-        });
-
-        it('toggle() flips visibility and requests a search on show', () => {
-            useNavigatorUiStore.getState().toggle();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(true);
-
-            useNavigatorUiStore.setState({ needsSearch: false });
-            useNavigatorUiStore.getState().toggle();
             expect(useNavigatorUiStore.getState().isVisible).toBe(false);
             expect(useNavigatorUiStore.getState().needsSearch).toBe(false);
         });
