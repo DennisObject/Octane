@@ -35,6 +35,8 @@
     <script type="application/json" id="octane-boot-renderer-config"><!--# include virtual="configuration/renderer-config.json" --></script>
     <script type="application/json" id="octane-boot-ui-config"><!--# include virtual="configuration/ui-config.json" --></script>
     <script type="application/json" id="octane-boot-pets"><!--# include virtual="configuration/pets.json" --></script>
+    <!-- {"version": "<sha1>"} of the furnidata the server generates; the client then boots with that exact version. -->
+    <script type="application/json" id="octane-boot-furnidata-version"><!--# include virtual="configuration/furnidata-version.json" --></script>
     <script type="module" src="/src/bootstrap.ts"></script>
 </body>
 </html>

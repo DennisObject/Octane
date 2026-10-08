@@ -3,6 +3,7 @@ import {
     GetAvatarRenderManager,
     GetCommunication,
     GetConfiguration,
+    GetFurnitureDataUrl,
     GetDesiredResolution,
     GetLocalizationManager,
     GetRoomEngine,
@@ -339,11 +340,12 @@ export const App: FC<{}> = (props) => {
                 const interpolate = (value: string) => GetConfiguration().interpolate(value);
                 const assetUrls = asStringArray(GetConfiguration().getValue<unknown>('preload.assets.urls')).map(interpolate);
                 // LocalizationManager downloads external.texts.url itself, all at once, below.
+                // Furnidata is warmed at the exact URL the session loads it from (its boot version, if known).
                 const gamedataUrls = [
-                    ...['furnidata.url', 'productdata.url', 'avatar.actions.url', 'avatar.figuredata.url', 'avatar.figuremap.url', 'avatar.effectmap.url']
+                    interpolate(GetFurnitureDataUrl(true)),
+                    ...['productdata.url', 'avatar.actions.url', 'avatar.figuredata.url', 'avatar.figuremap.url', 'avatar.effectmap.url']
                         .map((key) => interpolate(GetConfiguration().getValue<string>(key, '')))
-                        .filter(Boolean)
-                ];
+                ].filter(Boolean);
                 const loginImages = (GetConfiguration().getValue<Record<string, unknown>>('loginview', {})?.images as Record<string, string>) ?? {};
                 const loginImageUrls = [
                     loginImages.background,

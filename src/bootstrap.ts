@@ -168,8 +168,21 @@ for (const [name, url] of [['renderer-config', rendererConfigUrl], ['ui-config',
     if (inline !== null) GetConfiguration().preloadDocument(url, inline);
 }
 
+// The furnidata version (when the entry page carries it) lets the boot load ask for exactly that
+// furnidata, which browsers and the edge then cache for good.
+const furnidataVersion = (() => {
+    const text = inlineConfigDocument('furnidata-version');
+
+    if (text === null) return null;
+
+    const version = (parseJsonDocument(text, resolveJsonMode(), 'furnidata-version.json') as { version?: unknown })?.version;
+
+    return typeof version === 'string' && /^[0-9a-f]{8,64}$/i.test(version) ? version : null;
+})();
+
 (window as any).OctaneConfig = {
     'config.urls': [rendererConfigUrl, uiConfigUrl],
+    ...(furnidataVersion ? { 'furnidata.version': furnidataVersion } : {}),
     'sso.ticket': launchCredentials.ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
