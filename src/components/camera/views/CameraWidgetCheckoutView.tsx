@@ -12,7 +12,7 @@ import {
     ToolbarIconEnum
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CameraEffectSelection, CameraPicture, GetConfigurationValue, LocalizeText, NotificationAlertType, OpenUrl, renderTrustedCamera, SendMessageComposer } from '../../../api';
+import { CameraEffectSelection, CameraPicture, GetConfigurationValue, loadTrustedCameraImage, LocalizeText, NotificationAlertType, OpenUrl, renderTrustedCamera, SendMessageComposer } from '../../../api';
 import creditIcon from '../../../assets/images/camera/checkout/credit.png';
 import ducketIcon from '../../../assets/images/camera/checkout/ducket.png';
 import { OctaneCardView } from '../../../common';
@@ -273,9 +273,13 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
         }
 
         renderTrustedCamera(picture.draftId, effects, zoom)
-            .then((capture) => {
+            .then(async (capture) => {
+                if (!active) return;
+
+                const image = await loadTrustedCameraImage(capture);
+
                 if (active) {
-                    setPictureUrl(capture.url);
+                    setPictureUrl(image.src);
                     setCheckoutId(capture.url.slice('/camera/'.length, -'.png'.length));
                 }
             })

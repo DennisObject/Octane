@@ -41,7 +41,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
     const [effectsThumbnails, setEffectsThumbnails] = useState<CameraPictureThumbnail[]>([]);
     const [isZoomed, setIsZoomed] = useState(false);
     const [isRendering, setIsRendering] = useState(false);
-    const [currentPictureUrl, setCurrentPictureUrl] = useState<string>(picture?.imageUrl ?? '');
+    const [currentPictureUrl, setCurrentPictureUrl] = useState<string>(picture?.displayUrl ?? '');
     const requestIdRef = useRef<number>(0);
     const stableTexture = picture?.texture ?? null;
 
@@ -224,7 +224,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
         const debounceTimer = setTimeout(() => {
             if (!selectedEffects.length && !isZoomed) {
                 if (requestId === requestIdRef.current) {
-                    setCurrentPictureUrl(picture.imageUrl);
+                    setCurrentPictureUrl(picture.displayUrl);
                     setIsRendering(false);
                 }
 

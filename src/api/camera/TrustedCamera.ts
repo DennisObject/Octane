@@ -29,6 +29,7 @@ export interface CameraCaptureResult {
     draftId: string;
     url: string;
     stage: 'capture' | 'render';
+    png?: ArrayBuffer;
 }
 
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -129,7 +130,7 @@ export const deleteTrustedCamera = (draftId: string): void => {
     if (draftId) sendTrustedCameraRequest({ v: 1, action: 'delete', draftId });
 };
 
-export const completeTrustedCameraRequest = (payload: string): void => {
+export const completeTrustedCameraRequest = (payload: string, png?: ArrayBuffer): void => {
     let result: CameraCaptureResult;
 
     try {
@@ -157,7 +158,20 @@ export const completeTrustedCameraRequest = (payload: string): void => {
         return;
     }
 
-    pending.resolve(result);
+    pending.resolve({ ...result, png });
+};
+
+const getTrustedCameraImageSource = (capture: CameraCaptureResult): Promise<string> => {
+    if (!capture.png) return Promise.resolve(capture.url);
+
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : capture.url);
+        reader.onerror = () => resolve(capture.url);
+        reader.onabort = () => resolve(capture.url);
+        reader.readAsDataURL(new Blob([capture.png], { type: 'image/png' }));
+    });
 };
 
 export const cancelTrustedCameraRequests = (): void => {
@@ -166,4 +180,37 @@ export const cancelTrustedCameraRequests = (): void => {
         pending.reject(new Error('Camera session ended'));
     }
     pendingRequests.clear();
+};
+
+export const loadTrustedCameraImage = async (capture: CameraCaptureResult): Promise<HTMLImageElement> => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    const imageSource = await getTrustedCameraImageSource(capture);
+    await new Promise<void>((resolve, reject) => {
+        const timeout = window.setTimeout(() => reject(new Error('Camera image timed out')), 30_000);
+        let loadingInline = imageSource !== capture.url;
+        const failed = () => {
+            if (loadingInline) {
+                loadingInline = false;
+                image.src = capture.url;
+                return;
+            }
+
+            window.clearTimeout(timeout);
+            reject(new Error('Camera image could not be loaded'));
+        };
+        image.onload = () => {
+            if (image.naturalWidth !== 320 || image.naturalHeight !== 320) {
+                failed();
+                return;
+            }
+
+            window.clearTimeout(timeout);
+            resolve();
+        };
+        image.onerror = failed;
+        image.src = imageSource;
+    });
+
+    return image;
 };

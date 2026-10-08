@@ -31,7 +31,9 @@ const useCameraState = () => {
     });
 
     useMessageEvent<CameraStorageUrlMessageEvent>(CameraStorageUrlMessageEvent, (event) => {
-        completeTrustedCameraRequest(event.getParser().url);
+        const parser = event.getParser();
+
+        completeTrustedCameraRequest(parser.url, parser.png);
     });
 
     useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
