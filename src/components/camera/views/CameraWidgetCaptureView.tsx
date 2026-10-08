@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRenderer, OctaneLogger, OctaneTexture } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, OctaneLogger, OctaneTexture } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -7,11 +7,11 @@ import {
     deleteTrustedCamera,
     getTrustedCameraViewport,
     getViewfinderRoomFrame,
+    loadTrustedCameraImage,
     LocalizeText,
     NotificationAlertType,
     PlaySound,
-    SoundNames,
-    snapshotViewfinder
+    SoundNames
 } from '../../../api';
 import { Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
@@ -176,10 +176,9 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         isTakingPictureRef.current = true;
 
         const targetSlot = activePictureSlotIndex >= 0 && activePictureSlotIndex < CAMERA_ROLL_LIMIT ? activePictureSlotIndex : 0;
+        const captureSession = GetRoomSessionManager().getSession(-1);
         let texture: OctaneTexture = null;
         let capturedDraftId: string = null;
-        let preview: CameraPicture = null;
-        let isSettled = false;
 
         const setSlot = (picture: CameraPicture | null) => {
             const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => (index === targetSlot ? picture : (cameraRollRef.current[index] ?? null)));
@@ -212,67 +211,30 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                 setSlot(null);
             }
 
-            const pendingCapture = captureTrustedCamera(viewport);
-
-            pendingCapture.catch(() => {});
-
-            // The trusted capture is still the only photograph that can be edited or
-            // bought. Until it arrives the slot shows the user's own view of the frame.
-            const streamIsReady = videoRef.current?.classList.contains('octane-camera-viewfinder__stream--ready');
-
-            void snapshotViewfinder(elementRef.current, streamIsReady ? videoRef.current : null, 320, 320).then((previewUrl) => {
-                if (!previewUrl || isSettled || cameraRollRef.current[targetSlot]) return;
-
-                preview = new CameraPicture(null, previewUrl);
-                fillSlot(preview);
-            });
-
-            const capture = await pendingCapture;
+            // Encoding a temporary PNG can block the persisted reply on the main thread.
+            const capture = await captureTrustedCamera(viewport);
             capturedDraftId = capture.draftId;
 
-            const image = new Image();
-            image.crossOrigin = 'anonymous';
-            await new Promise<void>((resolve, reject) => {
-                const timeout = window.setTimeout(() => reject(new Error('Camera image timed out')), 30_000);
-                image.onload = () => {
-                    window.clearTimeout(timeout);
-                    resolve();
-                };
-                image.onerror = () => {
-                    window.clearTimeout(timeout);
-                    reject(new Error('Camera image could not be loaded'));
-                };
-                image.src = capture.url;
-            });
+            const image = await loadTrustedCameraImage(capture);
 
-            isSettled = true;
-
-            // The slot was deleted, reused or cleared with the room session meanwhile.
-            if (cameraRollRef.current[targetSlot] !== preview || (!preview && !isMountedRef.current)) {
+            // Loading can finish after closing the camera or leaving the captured room.
+            if (cameraRollRef.current[targetSlot] || !isMountedRef.current || GetRoomSessionManager().getSession(-1) !== captureSession) {
                 deleteTrustedCamera(capture.draftId);
                 return;
             }
 
             texture = OctaneTexture.from(image);
 
-            const picture = new CameraPicture(texture, capture.url, capture.draftId);
+            const picture = new CameraPicture(texture, capture.url, capture.draftId, image.src);
 
             texture = null;
             capturedDraftId = null;
 
-            if (preview) setSlot(picture);
-            else fillSlot(picture);
+            fillSlot(picture);
         } catch (error) {
             OctaneLogger.error('Failed to capture camera photo', error);
-            isSettled = true;
-
             if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
             texture?.destroy?.(true);
-
-            if (preview && cameraRollRef.current[targetSlot] === preview) {
-                setSlot(null);
-                setActivePictureSlotIndex(targetSlot);
-            }
 
             if (isMountedRef.current) {
                 simpleAlert(LocalizeText('camera.error.creation'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
@@ -307,7 +269,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                 <video ref={videoRef} className="octane-camera-viewfinder__stream" aria-hidden="true" muted playsInline />
                             </>
                         )}
-                        {selectedPicture && <img alt="" className="octane-camera-viewfinder__photo" src={selectedPicture.imageUrl} />}
+                        {selectedPicture && <img alt="" className="octane-camera-viewfinder__photo" src={selectedPicture.displayUrl} />}
                     </div>
                     {!selectedPicture && <div className="octane-camera-capture__crosshair" aria-hidden="true" />}
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
@@ -356,7 +318,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                         setSelectedPictureIndex(picture ? index : -1);
                                     }}
                                 >
-                                    {picture && <img alt="" src={picture.imageUrl} />}
+                                    {picture && <img alt="" src={picture.displayUrl} />}
                                 </button>
                                 {picture && selectedPictureIndex === index && (
                                     <button
