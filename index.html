@@ -28,6 +28,13 @@
             </div>
         </div>
     </div>
+    <!-- With nginx SSI on for this page ("ssi on; ssi_silent_errors on;"), the boot configuration ships
+         inside it instead of costing round trips; without SSI these stay comments and the client fetches
+         the files from configuration/. -->
+    <script type="application/json" id="octane-boot-client-mode"><!--# include virtual="configuration/client-mode.json" --></script>
+    <script type="application/json" id="octane-boot-renderer-config"><!--# include virtual="configuration/renderer-config.json" --></script>
+    <script type="application/json" id="octane-boot-ui-config"><!--# include virtual="configuration/ui-config.json" --></script>
+    <script type="application/json" id="octane-boot-pets"><!--# include virtual="configuration/pets.json" --></script>
     <script type="module" src="/src/bootstrap.ts"></script>
 </body>
 </html>
