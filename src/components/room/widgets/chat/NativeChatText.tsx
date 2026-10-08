@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from '../../../../common/native-text/Air32NativeTextRenderer';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from '../../../../common/native-text/NativeFont';
+import { useNativeTextScale } from '../../../../common/native-text/NativeTextScale';
 import { nativeTextStyles } from '../../../../common/native-text/NativeTextStyles';
 
 type ChatRun = {
@@ -92,6 +93,7 @@ const parseMessageRuns = (html: string, baseStyle: NativeFontStyle): ChatRun[] =
 export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, anonymous, maxWidth, className, onClick }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [size, setSize] = useState<{ width: number; height: number }>(null);
+    const scale = useNativeTextScale();
     const runs = useMemo(() => {
         const messageStyle = {
             ...nativeTextStyles[type === 1 ? 'u_chat_whisper' : type === 2 ? 'u_chat_shout' : 'u_chat_speak'],
@@ -179,12 +181,17 @@ export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, 
             const fieldWidth = Math.ceil(Math.max(0, ...widths)) + 4;
             const fieldHeight = Math.ceil(lines.length * lineHeight) + 4;
             if (fieldWidth * fieldHeight > 2 * 1024 * 1024) return;
-            const pixels = new Uint8ClampedArray(fieldWidth * fieldHeight * 4);
+            // Line breaks follow the 1x layout; the raster is drawn at the display scale (see NativeTextScale),
+            // with runs placed by their width at that size so a bold name never runs into the message.
+            const scaledWidth = (run: (typeof loadedRuns)[number], text: string) => measureNativeText(run.loaded.font, text, { ...run.style, size: 12 * scale });
+            const pixelWidth = Math.max(fieldWidth * scale, ...lines.map((line) => Math.ceil(line.reduce((width, run) => width + scaledWidth(run, run.text), 0)) + 4 * scale));
+            const pixelHeight = fieldHeight * scale;
+            const pixels = new Uint8ClampedArray(pixelWidth * pixelHeight * 4);
             lines.forEach((line, lineIndex) => {
                 let x = 0;
                 line.forEach((run) => {
                     run.loaded.renderer.render(run.text, {
-                        size: 12,
+                        size: 12 * scale,
                         color: run.style.color ?? 0,
                         antiAliasType: 'advanced',
                         gridFitType: 'pixel',
@@ -197,28 +204,31 @@ export const NativeChatText: FC<NativeChatTextProps> = ({ username, html, type, 
                         textDecoration: run.style.underline ? 'underline' : null,
                         target: {
                             pixels,
-                            width: fieldWidth,
-                            height: fieldHeight,
+                            width: pixelWidth,
+                            height: pixelHeight,
                             offsetX: Math.round(x),
-                            offsetY: Math.round(lineIndex * lineHeight)
+                            offsetY: Math.round(lineIndex * lineHeight) * scale
                         }
                     });
-                    x += measureNativeText(run.loaded.font, run.text, run.style);
+                    x += scaledWidth(run, run.text);
                 });
             });
             if (disposed || !canvasRef.current) return;
             const canvas = canvasRef.current;
-            canvas.width = fieldWidth;
-            canvas.height = fieldHeight;
+            canvas.width = pixelWidth;
+            canvas.height = pixelHeight;
+            canvas.style.width = `${pixelWidth / scale}px`;
+            canvas.style.height = `${fieldHeight}px`;
+            canvas.style.imageRendering = scale > 1 ? 'auto' : '';
             const composited = compositeAir32RetainedToOpaque(pixels, [219, 219, 219, 255]);
-            canvas.getContext('2d').putImageData(new ImageData(composited, fieldWidth, fieldHeight), 0, 0);
-            setSize({ width: fieldWidth, height: fieldHeight });
+            canvas.getContext('2d').putImageData(new ImageData(composited, pixelWidth, pixelHeight), 0, 0);
+            setSize({ width: pixelWidth / scale, height: fieldHeight });
         };
         if (runs.length) render().catch((error) => !disposed && console.warn('Native chat text rendering failed', error));
         return () => {
             disposed = true;
         };
-    }, [maxWidth, runs]);
+    }, [maxWidth, runs, scale]);
 
     return (
         <span className={`native-chat-text ${className ?? ''}`} data-native-chat-text={size ? 'rendered' : 'fallback'} style={size}>
