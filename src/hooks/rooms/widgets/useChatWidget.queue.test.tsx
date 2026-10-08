@@ -47,7 +47,6 @@ vi.mock('../../../api', async () => ({
     GetRoomObjectScreenLocation: () => ({ x: 100, y: 100 }),
     RoomChatFormatter: mocks.format,
     LocalizeText: (key: string) => key,
-    loadEmojiShortcodes: vi.fn(),
     PlaySound: vi.fn()
 }));
 vi.mock('../../chat-history', () => ({ useChatHistory: () => ({ addChatEntry: mocks.addChatEntry, updateChatEntry: mocks.updateChatEntry }) }));

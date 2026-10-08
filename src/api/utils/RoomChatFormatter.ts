@@ -1,4 +1,3 @@
-import { convertEmojiShortcodes } from './emojiShortcodes';
 import { LocalizeText } from './LocalizeText';
 
 const allowedColours: Map<string, string> = new Map();
@@ -165,7 +164,6 @@ const applyFontMarkup = (content: string) => {
 export const RoomChatFormatter = (content: string) => {
     let result = '';
 
-    content = convertEmojiShortcodes(content);
     content = encodeHTML(content);
     content = applyFontMarkup(content);
     content = applyWiredTextMarkup(content);
