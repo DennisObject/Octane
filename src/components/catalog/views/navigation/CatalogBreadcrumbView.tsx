@@ -17,7 +17,7 @@ export const CatalogBreadcrumbView: FC<{}> = () => {
     return (
         <div className="octane-catalog-breadcrumb">
             {activeNodes.map((node, index) => (
-                <span key={node.pageId} className="octane-catalog-breadcrumb-segment">
+                <span key={node.id} className="octane-catalog-breadcrumb-segment">
                     <span className="octane-catalog-breadcrumb-separator">&rsaquo;</span>
                     <span
                         className={`truncate ${index === activeNodes.length - 1 ? 'font-semibold' : 'cursor-pointer hover:underline'}`}

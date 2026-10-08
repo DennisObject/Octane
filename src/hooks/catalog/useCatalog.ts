@@ -1,4 +1,5 @@
 import { useShallow } from 'zustand/react/shallow';
+import { ICatalogNode } from '../../api';
 import { useCatalogStore } from './catalogStore';
 import { useCatalogIndexQuery, useCatalogPageQuery } from './useCatalogQueries';
 
@@ -57,6 +58,7 @@ export const useCatalogUiState = () =>
             pageId: state.pageId,
             previousPageId: state.previousPageId,
             currentType: state.currentType,
+            currentTab: state.currentTab,
             activeNodes: state.activeNodes,
             navigationHidden: state.navigationHidden,
             setNavigationHidden: state.setNavigationHidden,
@@ -83,6 +85,7 @@ export const useCatalogActions = () =>
             openCatalogByType: state.openCatalogByType,
             toggleCatalogByType: state.toggleCatalogByType,
             activateNode: state.activateNode,
+            showTab: state.showTab,
             openPageById: state.openPageById,
             openPageByName: state.openPageByName,
             openPageByOfferId: state.openPageByOfferId,
@@ -95,5 +98,17 @@ export const useCatalogActions = () =>
             retryCurrentPage: state.retryCurrentPage,
             refreshIndex: state.refreshIndex,
             refreshCurrentPage: state.refreshCurrentPage
+        }))
+    );
+
+/**
+ * Navigation state of one tree node. Read from the store rather than the
+ * node so a memoized row re-renders whenever the active path changes.
+ */
+export const useCatalogNodeState = (node: ICatalogNode) =>
+    useCatalogStore(
+        useShallow((state) => ({
+            isActive: state.activeNodes.at(-1) === node,
+            isOpen: state.openNodes.includes(node)
         }))
     );
