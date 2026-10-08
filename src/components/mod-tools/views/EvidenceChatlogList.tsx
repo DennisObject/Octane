@@ -33,6 +33,8 @@ const NO_LINES: Record<number, number> = {};
 export interface Evidence {
     /** Which delivery this is: a record that replaces another in the same window starts its rows (and what they remember of their first layout) afresh. */
     serial: number;
+    /** What it was asked for (`kind:id`): the answer only shows while that is still the window's subject. */
+    subject: string;
     caption: string;
     records: ChatRecordData[];
     highlights: Map<number, number>;
@@ -62,29 +64,39 @@ export interface EvidenceChatlogListProps {
 
 let evidenceSerial = 0;
 
-/** Asks for the subject of a chatlog and returns the answer once it arrives (classic Q5.show and its message handlers). */
+/**
+ * Asks for the subject of a chatlog and returns the answer once it arrives (classic Q5.show and its message handlers). A new subject (the handler's selected issue, classic cme
+ * `_r09b0702aa5e34c` -> `Ey(issueId)` + `Q5._rfe4d5878f91c65(issueId)`, launcher.pretty.js:283314-283338) is requested once and an answer is only taken for the current subject (Q5
+ * `_rd036c119a942fb`, 281236: `type === this._type && id === this._id`). The answer of another subject is never returned, so a list switching subject has no content (not the old
+ * subject's) until its own answer arrives. A subject of 0 asks for nothing.
+ */
 export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => {
     const [evidence, setEvidence] = useState<Evidence>(null);
-    const requestedRef = useRef(false);
+    const requestedRef = useRef<string>(null);
+    const subject = id > 0 ? `${kind}:${id}` : null;
 
     useEffect(() => {
-        // one request per opened window (a development double effect run must not send it twice)
-        if (requestedRef.current) return;
+        // one request per subject (a development double effect run must not send it twice); a subject asked for again after another one is asked for again
+        if (subject === null || requestedRef.current === subject) {
+            if (subject === null) requestedRef.current = null;
 
-        requestedRef.current = true;
+            return;
+        }
+
+        requestedRef.current = subject;
         SendMessageComposer(kind === 'user' ? new GetUserChatlogMessageComposer(id) : kind === 'room' ? new GetRoomChatlogMessageComposer(id) : new GetCfhChatlogMessageComposer(id));
-    }, [kind, id]);
+    }, [kind, id, subject]);
 
     useMessageEvent<UserChatlogEvent>(UserChatlogEvent, (event) => {
         const data = event.getParser()?.data;
 
-        if (kind === 'user' && data?.userId === id) setEvidence({ serial: ++evidenceSerial, caption: `User Chatlog: ${data.username}`, records: data.roomChatlogs, highlights: new Map([[data.userId, 0]]) });
+        if (kind === 'user' && data?.userId === id) setEvidence({ serial: ++evidenceSerial, subject: `user:${id}`, caption: `User Chatlog: ${data.username}`, records: data.roomChatlogs, highlights: new Map([[data.userId, 0]]) });
     });
 
     useMessageEvent<RoomChatlogEvent>(RoomChatlogEvent, (event) => {
         const data = event.getParser()?.data;
 
-        if (kind === 'room' && data?.roomId === id) setEvidence({ serial: ++evidenceSerial, caption: `Room Chatlog: ${data.roomName}`, records: [data], highlights: new Map() });
+        if (kind === 'room' && data?.roomId === id) setEvidence({ serial: ++evidenceSerial, subject: `room:${id}`, caption: `Room Chatlog: ${data.roomName}`, records: [data], highlights: new Map() });
     });
 
     useMessageEvent<CfhChatlogEvent>(CfhChatlogEvent, (event) => {
@@ -93,6 +105,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
         if (kind === 'cfh' && data?.issueId === id) {
             setEvidence({
                 serial: ++evidenceSerial,
+                subject: `cfh:${id}`,
                 caption: `Call For Help Evidence #${data.chatRecordId}`,
                 records: [data.chatRecord],
                 highlights: new Map([
@@ -103,7 +116,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
         }
     });
 
-    return evidence;
+    return evidence !== null && evidence.subject === subject ? evidence : null;
 };
 
 // The rows of a chatlog window (Q5 populate): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per line; the rows

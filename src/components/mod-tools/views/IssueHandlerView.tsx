@@ -78,6 +78,8 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     const bundle = useIssueManagerStore((state) => state.bundles.get(bundleId)) ?? null;
     const [selectedIssueId, setSelectedIssueId] = useState<number>(null);
+    // the issue the evidence chatlog is of: the primary one until a row with a reporter is selected (cme `_r09b0702aa5e34c` only switches it when the issue has a caller, 283319-283333)
+    const [evidenceIssueId, setEvidenceIssueId] = useState<number>(null);
     const [autoNext, setAutoNext] = useState(true);
     // the handler is disposed by its first close or release: a second call of a captured callback before it is gone must not send (or pick) again
     const finishedRef = useRef(false);
@@ -96,7 +98,8 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const categoryId = primary?.issue.reportedCategoryId ?? 0;
     // the menu starts on the topic of the issue's category (cme._r1c8a7de5be5589)
     const topicIndex = chosenTopic >= 0 ? chosenTopic : topics.findIndex((topic) => topic.id === categoryId);
-    const evidence = useEvidence('cfh', current?.issue.issueId ?? 0);
+    const evidenceIssue = issues.find((tracked) => tracked.issue.issueId === evidenceIssueId) ?? primary;
+    const evidence = useEvidence('cfh', evidenceIssue?.issue.issueId ?? 0);
 
     if (!bundle || !current) return null;
 
@@ -214,7 +217,11 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                 <div className="native0-list" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, willChange: 'transform' }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, width: 280, height: Math.max(rows.issues, issues.length * 16) }}>
                         {issues.map((tracked, index) => (
-                            <div key={tracked.issue.issueId} style={{ position: 'absolute', left: 0, top: index * 16, width: 280, height: 16, cursor: 'pointer' }} onClick={() => setSelectedIssueId(tracked.issue.issueId)}>
+                            <div key={tracked.issue.issueId} style={{ position: 'absolute', left: 0, top: index * 16, width: 280, height: 16, cursor: 'pointer' }} onClick={() => {
+                                setSelectedIssueId(tracked.issue.issueId);
+
+                                if (tracked.issue.reporterUserId !== 0) setEvidenceIssueId(tracked.issue.issueId);
+                            }}>
                                 <Native0Text clip height={13} text={tracked.issue.reporterUserName ?? ''} width={78} x={itemX(region, 'reporter').x} y={0} />
                                 <Native0Text bold={tracked.issue.issueId === primary?.issue.issueId && issues.length > 1} clip height={13} text={categoryOf(tracked.issue.reportedCategoryId)} width={110} x={itemX(region, 'category').x} y={0} />
                                 <Native0Text clip height={13} text={sourceOf(tracked)} width={60} x={itemX(region, 'type').x} y={0} />
