@@ -1,4 +1,4 @@
-import { CSSProperties, FC, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, Fragment, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { NativeTextStyleName } from '../../../common/native-text/NativeTextStyles';
 import '../../../css/mod-tools/NativeWindow0.css';
 import blueAtlas from '../../../assets/mod-tools/skins/habbo-blue-skin.png';
@@ -45,7 +45,7 @@ const rect = (x: number, y: number, width: number, height: number): CSSPropertie
 
 // the native bitmap font sets a string that starts with one of these glyphs one pixel further left than the web font does (the first glyph only; the same glyphs inside a string sit where the
 // font puts them); measured on "1", "4", "no" and "yes" in the captures
-const LEADING_ONE_OR_FOUR = /^[14ny]/;
+const LEADING_ONE_OR_FOUR = /^[14nymr(]/;
 
 interface Native0TextProps {
     text: string;
@@ -75,6 +75,27 @@ interface Native0TextProps {
 export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, bold, color = 0, underline, wrap, background, glow, clip, textStyle, onClick, style, onSize }) => {
     const ref = useRef<HTMLDivElement>(null);
     const white = textStyle === 'frame_title';
+    const lineRef = useRef<HTMLSpanElement>(null);
+    const [lineStarts, setLineStarts] = useState('');
+    const words = wrap ? text.split(' ') : null;
+
+    // a wrapped text: the words that start a line are found from the layout, since each line start follows the leading-glyph rule
+    useLayoutEffect(() => {
+        const element = lineRef.current;
+
+        if (!wrap || !element) return;
+
+        const starts: number[] = [];
+        let top = -1;
+
+        element.querySelectorAll<HTMLElement>('[data-word]').forEach((word, index) => {
+            if (word.offsetTop !== top) starts.push(index);
+
+            top = word.offsetTop;
+        });
+
+        setLineStarts(starts.join(','));
+    }, [text, width, wrap]);
 
     useEffect(() => {
         const element = ref.current;
@@ -100,7 +121,22 @@ export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, b
                 style={{ left: x, top: y, width: wrap || clip ? width : undefined, height: height === undefined ? undefined : height, overflow: clip ? 'hidden' : undefined, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...(glow === undefined ? {} : { ['--native0-glow' as string]: glow }), ...style }}
                 onClick={onClick}
             >
-                <span className={`native0-text__line${glow === undefined ? '' : ' has-glow'}${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`} style={LEADING_ONE_OR_FOUR.test(text) ? { marginLeft: -1 } : undefined}>{text}</span>
+                <span
+                    ref={lineRef}
+                    className={`native0-text__line${glow === undefined ? '' : ' has-glow'}${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}
+                    style={!wrap && LEADING_ONE_OR_FOUR.test(text) ? { marginLeft: -1 } : undefined}
+                >
+                    {words
+                        ? words.map((word, index) => (
+                              <Fragment key={index}>
+                                  {index > 0 && ' '}
+                                  <span data-word style={LEADING_ONE_OR_FOUR.test(word) && (index === 0 || lineStarts.split(',').includes(`${index}`)) ? { marginLeft: -1 } : undefined}>
+                                      {word}
+                                  </span>
+                              </Fragment>
+                          ))
+                        : text}
+                </span>
             </div>
         </>
     );
@@ -179,7 +215,7 @@ export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, lab
         >
             <NativeSkinView atlas={blueAtlas} color={color} height={height} layout="button" skin={SKINS.button} state={state} width={width} />
             <div className="native0-button__label" style={{ width, height, color: enabled ? '#000' : '#808080' }}>
-                <span ref={labelRef} className="native0-text__line" style={{ display: 'block', position: 'absolute', whiteSpace: 'nowrap', left: labelOffset.left + 1, top: labelOffset.top }}>
+                <span ref={labelRef} className="native0-text__line" style={{ display: 'block', position: 'absolute', whiteSpace: 'nowrap', left: labelOffset.left + 1 + (LEADING_ONE_OR_FOUR.test(label) ? -1 : 0), top: labelOffset.top }}>
                     {label}
                 </span>
             </div>
