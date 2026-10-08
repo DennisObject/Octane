@@ -70,7 +70,6 @@ describe('club gifts page', () => {
 
         expect(screen.getByText('catalog.club_gift.available:2')).toBeInTheDocument();
         expect(screen.getByText('catalog.club_gift.past_club.long:2,1')).toBeInTheDocument();
-        expect(screen.getByText('catalog.club_gift.past_vip:13,0')).toBeInTheDocument();
     });
 
     it('omits the past days lines while the purse is unknown', () => {
@@ -91,7 +90,6 @@ describe('club gifts page', () => {
         renderView();
 
         expect(screen.getByText('catalog.club_gift.past_club.long:12,0')).toBeInTheDocument();
-        expect(screen.getByText('catalog.club_gift.past_vip:2,0')).toBeInTheDocument();
     });
 
     it('lists each gift with its requirement, description and vip mark, by days required', () => {

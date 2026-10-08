@@ -924,3 +924,124 @@
     border-image-source: var(--habbo-skin-shiny-thick-green-disabled);
     cursor: default;
 }
+
+/*
+ * Club gifts page, after the official clubGiftWidget: the info line (35 px, wrapping), the gift
+ * list (1 px apart) and the past HC length centred below it. Rows follow club_gift_list_item:
+ * 58 px, a 52x46 image at 7,6, name / description / requirement from x 58 (y 8, 22, 36), the
+ * Select button in the bottom right corner and the VIP mark at 5,5.
+ */
+.octane-catalog-club-gifts {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
+}
+
+.octane-catalog-club-gifts-info {
+    flex: 0 0 auto;
+    min-height: 35px;
+    font-size: 11px;
+    font-style: italic;
+    line-height: 14px;
+    overflow-wrap: anywhere;
+}
+
+.octane-catalog-club-gifts-list {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.octane-catalog-club-gifts-list-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.octane-catalog-club-gifts-past {
+    flex: 0 0 15px;
+    margin-top: 1px;
+    font-size: 9px;
+    line-height: 15px;
+    text-align: center;
+}
+
+.octane-catalog-club-gift {
+    position: relative;
+    flex: 0 0 58px;
+    height: 58px;
+    overflow: hidden;
+    background: #e3e3e3;
+}
+
+.octane-catalog-club-gift-image {
+    position: absolute;
+    top: 6px;
+    left: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 46px;
+    overflow: hidden;
+}
+
+.octane-catalog-club-gift-image > img {
+    max-width: 52px;
+    max-height: 46px;
+    image-rendering: pixelated;
+}
+
+.octane-catalog-club-gift .octane-catalog-club-gift-vip {
+    position: absolute !important;
+    top: 5px !important;
+    left: 5px !important;
+}
+
+.octane-catalog-club-gift-name,
+.octane-catalog-club-gift-desc,
+.octane-catalog-club-gift-requirement {
+    position: absolute;
+    left: 58px;
+    right: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.octane-catalog-club-gift-name {
+    top: 8px;
+    height: 17px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 14px;
+}
+
+.octane-catalog-club-gift-desc,
+.octane-catalog-club-gift-requirement {
+    height: 15px;
+    font-size: 9px;
+    line-height: 12px;
+}
+
+.octane-catalog-club-gift-desc {
+    top: 22px;
+}
+
+/* Shares the bottom line with the Select button, so it stops short of it. */
+.octane-catalog-club-gift-requirement {
+    top: 36px;
+    right: 76px;
+}
+
+.octane-catalog-window .octane-catalog-club-gift .octane-catalog-club-gift-select {
+    position: absolute;
+    right: 5px;
+    bottom: 4px;
+    min-width: 64px;
+    height: 22px;
+    min-height: 22px;
+    line-height: 16px !important;
+}
