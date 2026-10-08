@@ -3,7 +3,7 @@ import issueBrowserXml from '../../../assets/mod-tools/xml/issue_browser.xml?raw
 import roomIcon from '../../../assets/mod-tools/images/room_icon.png';
 import userIcon from '../../../assets/mod-tools/images/user_icon.png';
 import { bundlesFor, IssueBundle, IssueManagerContext, IssueTab, isBundleWriteHeld, nextOpenBundle, pickBundle, pickNext, releaseAll, releaseBundle, sortBundles, useIssueManagerStore } from '../../../hooks';
-import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
+import { findNativeNode, nativeCaption, nativeFollow, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Border, Native0Button, Native0Frame, Native0Rows, Native0Scrollbar, Native0Tab, Native0Text } from '../native/NativeWindow0';
 import { NativeWindowShell } from '../native/NativeWindowShell';
 
@@ -56,8 +56,12 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
     const scroller = inner.children.find((node) => node.tag === 'scrollbar_vertical');
     // the tab's container resizes the prototype to its own size when it shows it (566 x 184 against the 557 x 177 of the XML): the list stretches, the scroller and the
     // buttons on the right move with the new right edge, the scroller and the list follow the new height
-    const stretchX = context0.width - protoRect0.width;
-    const stretchY = context0.height - 20 - protoRect0.height;
+    // and the window's own size change from the XML's (585 x 273) reaches the tab container, the prototype and everything in it through their scale bits (AIR WindowController
+    // .updateScaleRelativeToParent): stretch both ways down to the list, stretch the width of the header, the row and its fields marked so, move the right-hand fields and buttons
+    const frameChangeX = width - nativeNumber(root, 'width');
+    const frameChangeY = height - nativeNumber(root, 'height');
+    const stretchX = context0.width - protoRect0.width + frameChangeX;
+    const stretchY = context0.height - 20 - protoRect0.height + frameChangeY;
     const listRect = { ...rectOf(list), width: rectOf(list).width + stretchX, height: rectOf(list).height + stretchY };
     const innerRect = rectOf(inner);
     const protoRect = rectOf(prototype);
@@ -72,12 +76,14 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
         const node = findNativeNode(texts, name);
         const rect = rectOf(node);
 
-        return movesRight(node) ? { ...rect, x: rect.x + stretchX } : rect;
+        const follow = nativeFollow(node, 'x');
+
+        return follow === 'stretch' ? { ...rect, width: rect.width + stretchX } : movesRight(node) ? { ...rect, x: rect.x + stretchX } : rect;
     };
     const buttonOf = (name: string) => findNativeNode(prototypeRow, name);
     const releaseAllNode = findNativeNode(prototype, 'release_all');
     const autoPick = findNativeNode(root, 'auto_pick');
-    const panel = { x: context0.x, y: context0.y + 20, width: context0.width, height: context0.height - 20 };
+    const panel = { x: context0.x, y: context0.y + 20, width: context0.width + frameChangeX, height: context0.height - 20 + frameChangeY };
 
     const sourceOf = (bundle: IssueBundle) => SOURCES[bundle.primary?.issue.categoryId] ?? 'Unknown';
     const categoryOf = (bundle: IssueBundle) => {
@@ -123,7 +129,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                             <Native0Rows colors={rowColors} height={contentHeight} rowHeight={ROW_HEIGHT} width={listRect.width} />
                             {bundles.map((bundle, index) => (
                                 <div key={bundle.id} style={{ position: 'absolute', left: 0, top: index * ROW_HEIGHT, width: listRect.width, height: ROW_HEIGHT }}>
-                                    <div style={{ position: 'absolute', left: rectOf(texts).x, top: rectOf(texts).y, width: rectOf(texts).width, height: rectOf(texts).height, overflow: 'hidden' }}>
+                                    <div style={{ position: 'absolute', left: rectOf(texts).x, top: rectOf(texts).y, width: rectOf(texts).width + (nativeFollow(texts, 'x') === 'stretch' ? stretchX : 0), height: rectOf(texts).height, overflow: 'hidden' }}>
                                         <Native0Text clip height={17} text={`${bundle.priority}`} width={field('score').width} x={field('score').x} y={field('score').y} />
                                         <Native0Text clip height={17} text={categoryOf(bundle)} width={field('category').width} x={field('category').x} y={field('category').y} />
                                         <Native0Text clip height={19} text={sourceOf(bundle)} width={field('source').width} x={field('source').x} y={field('source').y} />
@@ -153,7 +159,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                         <Native0Button height={rectOf(releaseAllNode).height} label={label(releaseAllNode)} width={rectOf(releaseAllNode).width} x={rectOf(releaseAllNode).x + stretchX} y={rectOf(releaseAllNode).y + stretchY} onClick={() => releaseAll(context)} />
                     )}
                 </div>
-                <Native0Button enabled={!isBundleWriteHeld(nextOpenBundle())} height={rectOf(autoPick).height} label={label(autoPick)} width={rectOf(autoPick).width} x={rectOf(autoPick).x} y={rectOf(autoPick).y} onClick={() => pickNext('issue browser pick next', context)} />
+                <Native0Button enabled={!isBundleWriteHeld(nextOpenBundle())} height={rectOf(autoPick).height} label={label(autoPick)} width={rectOf(autoPick).width} x={rectOf(autoPick).x} y={rectOf(autoPick).y + frameChangeY} onClick={() => pickNext('issue browser pick next', context)} />
             </Native0Frame>
         </NativeWindowShell>
     );
