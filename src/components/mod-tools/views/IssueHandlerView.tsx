@@ -13,6 +13,7 @@ import { UserInfoPanel } from './UserInfoPanel';
 const rectOf = (node: NativeNode) => ({ x: nativeNumber(node, 'x'), y: nativeNumber(node, 'y'), width: nativeNumber(node, 'width'), height: nativeNumber(node, 'height') });
 const SHADE = 0xa2d6ea;
 const GAP = 3;
+const HANDLER_HEIGHT = 650;
 const SOURCES: Record<number, string> = { 1: 'Normal', 2: 'Normal', 3: 'Automatic', 4: 'Automatic IM', 5: 'Guide System', 6: 'IM', 7: 'Room', 8: 'Panic', 9: 'Guardian', 10: 'Automatic Helper', 11: 'Discussion', 12: 'Selfie', 14: 'Photo', 15: 'Ambassador' };
 const CATEGORIES: Record<number, string> = {
     0: 'Automatic', 101: 'Sex', 102: 'PII', 103: 'Scam', 104: 'Bullying', 105: 'Disruption', 106: 'Other', 111: 'Sex', 112: 'Scam', 113: 'Disruption', 114: 'Other', 121: 'Sex', 122: 'PII',
@@ -110,15 +111,16 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const reportedShown = bundle.reportedUserId > 0;
     const itemX = (node: NativeNode, name: string) => rectOf(findNativeNode(node, name));
 
-    // the left column is a vertical item list with 3px between its items; with the window taller or shorter than its default the two lists share what is left
-    const listHeights = (() => {
-        const fixed = 13 + 13 + 207 + 14 + 13 + (reportedShown ? 207 : 0) - (reportedShown ? 0 : 13) + (reportedShown ? 3 * 7 : 3 * 5);
-        const visible = left.height + stretch;
-
-        return stretch === 0 ? 70 : Math.max(16, (visible - fixed - 70 - 70 + 140) * 0.5 + 0);
-    })();
+    // the left column is a vertical item list with 3px between its items. Measured against the classic client over its whole height (sweep of 30 sizes, 390 to 650): once the window has been
+    // resized the two lists share what is left, each (height - 515) / 2 rounded up and at least 0 (54px at 623, none from 517 down); the XML's own 70px lists only exist until then. Below 515 the
+    // content is taller than the column and is centred in it (shifted up by half the overflow, rounded toward zero), so the header and captions leave through the top. Without the reported
+    // user's panel (223px less) the same rule holds with 292 (inferred, not captured).
+    const columnBase = reportedShown ? 515 : 292;
+    const resized = height !== HANDLER_HEIGHT;
+    const listHeights = resized ? Math.max(0, Math.ceil((height - columnBase) / 2)) : 70;
+    const columnShift = resized ? Math.trunc(Math.min(0, (height - columnBase) / 2)) : 0;
     const rows = { issues: listHeights, messages: listHeights };
-    let cursor = 0;
+    let cursor = columnShift;
     const place = (itemHeight: number) => {
         const at = cursor;
 
@@ -181,6 +183,8 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
             <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
+                {/* the column is clipped to its own box (the content may be taller than the window leaves room for) */}
+                <div style={{ position: 'absolute', left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), overflow: 'hidden' }}>
                 {/* text on an opaque background is set with LCD subpixel fringes: the backgrounds are drawn apart and the texts get a layer of their own */}
                 <div style={{ position: 'absolute', left: 0, top: 0, width: 280, height: yHeader + 20, willChange: 'transform', pointerEvents: 'none' }}>
                     {header.children.map((node, index) => (
@@ -223,6 +227,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         </div>
                     </>
                 )}
+                </div>
                 {/* right column */}
                 <div style={{ position: 'absolute', left: buttons.x, top: buttons.y, width: buttons.width, height: buttons.height }}>
                     <Native0Button
