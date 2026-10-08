@@ -1,7 +1,8 @@
 import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType, UserClassificationMessageEvent } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser, LocalizeText } from '../../api';
-import { MOD_WINDOW_SIZE, useIssueManager, useModTools, useMessageEvent, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { Permission } from '../../api/permissions';
+import { MOD_WINDOW_SIZE, useHasPermission, useIssueManager, useModTools, useMessageEvent, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
 import { IssueBrowserView } from './views/IssueBrowserView';
 import { IssueHandlerView } from './views/IssueHandlerView';
@@ -38,6 +39,13 @@ export const ModToolsView: FC<{}> = () => {
     const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
     const { settings = null, cfhCategories = [] } = useModTools();
     const issueContext = useIssueManager();
+    // the toolbar's moderator button (and anything else linking `mod-tools/show|hide|toggle`) only reaches the start panel for a moderator
+    const canUseModTools = useHasPermission(Permission.ModerationTool);
+    const canUseModToolsRef = useRef(false);
+
+    useEffect(() => {
+        canUseModToolsRef.current = canUseModTools;
+    }, [canUseModTools]);
 
     useEffect(() => {
         settingsRef.current = settings;
@@ -103,6 +111,18 @@ export const ModToolsView: FC<{}> = () => {
                 if (parts.length < 2) return;
 
                 switch (parts[1]) {
+                    case 'show':
+                        if (canUseModToolsRef.current) setIsVisible(true);
+
+                        return;
+                    case 'hide':
+                        if (canUseModToolsRef.current) setIsVisible(false);
+
+                        return;
+                    case 'toggle':
+                        if (canUseModToolsRef.current) setIsVisible((visible) => !visible);
+
+                        return;
                     case 'open-room-info':
                     case 'toggle-room-info':
                         showWindow({ type: 'roomTool', key: parts[2], ...MOD_WINDOW_SIZE.roomTool, parent: useModWindowTrackerStore.getState().startPanel, toggle: parts[1] === 'toggle-room-info' });
