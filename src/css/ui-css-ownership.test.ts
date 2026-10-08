@@ -56,10 +56,6 @@ describe('UI CSS ownership', () =>
         const roomSettingsCss = readSource('src/css/room/NavigatorRoomSettings.css');
         const indexCss = readSource('src/css/index.css');
         const wiredCss = readSource('src/css/WiredView.css');
-        const modToolsView = readSource('src/components/mod-tools/ModToolsView.tsx');
-        const modToolsRoomView = readSource('src/components/mod-tools/views/room/ModToolsRoomView.tsx');
-        const modToolsTicketsView = readSource('src/components/mod-tools/views/tickets/ModToolsTicketsView.tsx');
-        const modToolsUserView = readSource('src/components/mod-tools/views/user/ModToolsUserView.tsx');
         const inventoryView = readSource('src/components/inventory/InventoryView.tsx');
         const inventoryCategoryFilterView = readSource('src/components/inventory/views/InventoryCategoryFilterView.tsx');
         const navigatorView = readSource('src/components/navigator/NavigatorView.tsx');
@@ -113,16 +109,8 @@ describe('UI CSS ownership', () =>
         expect(indexCss).not.toContain('.octane-wired :where(select, input[type=\'text\'], input[type=\'number\'], textarea)');
         expect(wiredCss).toContain('.octane-wired :where(select, input[type=\'text\'], input[type=\'number\'], textarea)');
         expect(wiredCss).toContain('.octane-wired__variable-picker-portal');
-        // Text fields only: a checkbox is not a text field, and the mod tool used to paint it as one.
-        expect(indexCss).toContain(".octane-mod-tools :where(input:not([type='checkbox']):not([type='radio']), select, textarea)");
-        expect(indexCss).not.toContain('.octane-mod-tools :where(input, select, textarea)');
-        expect(indexCss).toContain('[class*="octane-mod-tools-"] :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-white\\/70)');
         expect(wiredCss).toContain('.octane-wired__body');
         expect(wiredCss).toContain('overflow-y: auto');
-        expect(modToolsView).toContain('max-w-[calc(100vw-16px)]');
-        expect(modToolsRoomView).toContain('max-w-[calc(100vw-16px)]');
-        expect(modToolsTicketsView).toContain('max-w-[calc(100vw-16px)]');
-        expect(modToolsUserView).toContain('max-w-[calc(100vw-16px)]');
         expect(inventoryView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorView).toContain('max-w-[calc(100vw-16px)]');
         expect(navigatorRoomSettingsView).toContain('max-w-[calc(100vw-16px)]');

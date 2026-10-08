@@ -1,0 +1,48 @@
+/* classic v75 window manager look for the moderator windows (layout geometry comes from the pinned XML). */
+.native-frame {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    color: #000;
+    font: 400 12px/14px sans-serif;
+    pointer-events: auto;
+    filter: drop-shadow(0 0 10px rgb(0 0 0 / 35%));
+}
+
+.native-frame *, .native-frame *::before, .native-frame *::after { box-sizing: border-box; }
+
+.native-frame__chrome {
+    position: absolute;
+    inset: 0;
+    border-image: url('../../assets/images/friends/swf/illumina_light_border_frame.png') 4 4 7 4 fill / 4px 4px 7px 4px stretch;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.native-frame__titlebar { position: absolute; inset: 0 0 auto; height: 30px; cursor: move; user-select: none; }
+.native-frame__title { position: absolute; left: 8px; top: 11px; margin: 0; padding: 0; line-height: 0; white-space: nowrap; }
+
+.native-frame__close {
+    position: absolute;
+    right: 8px;
+    top: 9px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: url('../../assets/images/friends/swf/illumina_light_button_frame_close.png') 0 0 no-repeat;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+
+.native-frame__close:hover { background-position: -52px 0; }
+.native-frame__close:active { background-position: -26px 0; }
+
+.native-frame__client { position: absolute; }
+.native-itemlist, .native-region, .native-label, .native-bitmap, .native-border { position: absolute; }
+.native-region { cursor: pointer; }
+.native-region[data-native-enabled='false'] { cursor: default; }
+.native-bitmap img { position: absolute; image-rendering: pixelated; }
+.native-border { pointer-events: none; }
+.native-skin { position: relative; }
