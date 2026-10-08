@@ -25,6 +25,9 @@ const WHITE = 0xffffff;
 /** Q5._r6c80a12d5cc1f7 / _r0ddfbe3e000602: the rows of the chatters the window was opened for (the reported user: 0, the caller: 1). */
 const HIGHLIGHT = [0xf0d6a3, 0xa3bdf0];
 const MIN_LINE_HEIGHT = 17;
+// A message row is the message field's textHeight + 5 (classic Q5 `_r9b26f640bf0ca4` / `_r56f7b643e3bd62`, launcher.pretty.js:281473-281530) and the field's textHeight is its line count times the
+// 13.4px line of Ubuntu 12 (the shared NativeText metrics: ascent 11.15 + descent 2.25), cut to a whole pixel: 31 for 2 lines, 45 for 3, 58 for 4, 72 for 5 (not lines * 13.33)
+const MESSAGE_LINE_HEIGHT = 13.4;
 
 export interface Evidence {
     caption: string;
@@ -138,7 +141,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
         return result;
     }, [evidence]);
 
-    const rowHeight = (index: number, item: Item) => (item.kind === 'header' ? header.height : Math.max(MIN_LINE_HEIGHT, Math.floor(((messageHeights[index] ?? 0) * 40) / 3 + 5)));
+    const rowHeight = (index: number, item: Item) => (item.kind === 'header' ? header.height : Math.max(MIN_LINE_HEIGHT, Math.trunc((messageHeights[index] ?? 0) * MESSAGE_LINE_HEIGHT + 5)));
     const tops: number[] = [];
     let contentHeight = 0;
 
@@ -228,7 +231,7 @@ const MessageText: FC<{ text: string; background: number; width: number; x: numb
         const measure = () => {
             const canvas = element.querySelector('canvas');
 
-            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / (40 / 3))));
+            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
         };
 
         measure();
@@ -249,7 +252,7 @@ const MessageText: FC<{ text: string; background: number; width: number; x: numb
         const observer = new MutationObserver(() => {
             const canvas = element.querySelector('canvas');
 
-            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / (40 / 3))));
+            if (canvas && canvas.height > 4) onHeight(Math.max(1, Math.round((canvas.height - 4) / MESSAGE_LINE_HEIGHT)));
         });
 
         observer.observe(element, { attributes: true, childList: true, subtree: true });
