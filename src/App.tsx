@@ -21,7 +21,7 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, fetchReconnectTicket, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -108,6 +108,7 @@ export const App: FC<{}> = (props) => {
     const warmupPromiseRef = useRef<Promise<void>>(null);
     const rendererPromiseRef = useRef<Promise<any>>(null);
     const gameInitPromiseRef = useRef<Promise<void> | null>(null);
+    const communicationInitRef = useRef<Promise<void> | null>(null);
     const bootstrapDoneRef = useRef(false);
     const lastPrepareTriggerRef = useRef<number | null>(null);
     const tickersStartedRef = useRef(false);
@@ -337,8 +338,8 @@ export const App: FC<{}> = (props) => {
 
                 const interpolate = (value: string) => GetConfiguration().interpolate(value);
                 const assetUrls = asStringArray(GetConfiguration().getValue<unknown>('preload.assets.urls')).map(interpolate);
+                // LocalizationManager downloads external.texts.url itself, all at once, below.
                 const gamedataUrls = [
-                    ...asStringArray(GetConfiguration().getValue<unknown>('external.texts.url')).map(interpolate),
                     ...['furnidata.url', 'productdata.url', 'avatar.actions.url', 'avatar.figuredata.url', 'avatar.figuremap.url', 'avatar.effectmap.url']
                         .map((key) => interpolate(GetConfiguration().getValue<string>(key, '')))
                         .filter(Boolean)
@@ -501,6 +502,17 @@ export const App: FC<{}> = (props) => {
                     }
                 }
 
+                // Connect and log in while the gamedata loads, as the official client does. The
+                // connection holds incoming messages until MainView calls ready(), so the managers
+                // below still register their handlers first.
+                if (!communicationInitRef.current) {
+                    listenForPerkAllowances();
+                    // Without the auth API a dropped session cannot get a new ticket; it ends instead.
+                    GetCommunication().setReconnectTicketProvider(authEnabled ? fetchReconnectTicket : async () => '');
+                    communicationInitRef.current = GetCommunication().init();
+                    communicationInitRef.current.catch(() => {});
+                }
+
                 const renderer = await startRenderer(width, height);
                 bumpProgress(20);
 
@@ -515,8 +527,7 @@ export const App: FC<{}> = (props) => {
                         bumpProgress(85);
                         await GetRoomEngine().init();
                         bumpProgress(92);
-                        listenForPerkAllowances();
-                        await GetCommunication().init();
+                        await communicationInitRef.current;
                         bumpProgress(98);
                     })();
                 }

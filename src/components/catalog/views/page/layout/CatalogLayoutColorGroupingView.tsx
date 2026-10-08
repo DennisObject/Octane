@@ -3,7 +3,7 @@ import { FC, useMemo, useState } from 'react';
 import { FaFillDrip } from 'react-icons/fa';
 import { IPurchasableOffer, SanitizeHtml } from '../../../../../api';
 import { AutoGrid, Button, Column, LayoutGridItem, Text } from '../../../../../common';
-import { useCatalogData, useCatalogUiState, useInventoryFurni } from '../../../../../hooks';
+import { useCatalogData, useCatalogUiState } from '../../../../../hooks';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { CatalogAddOnBadgeWidgetView } from '../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogLimitedItemWidgetView } from '../widgets/CatalogLimitedItemWidgetView';
@@ -21,7 +21,6 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
     const [colorableItems, setColorableItems] = useState<Map<string, number[]>>(new Map<string, number[]>());
     const { currentOffer = null, roomPreviewer = null } = useCatalogData();
     const { setCurrentOffer = null } = useCatalogUiState();
-    const { isVisible: inventoryVisible = false } = useInventoryFurni();
     const [colorsShowing, setColorsShowing] = useState<boolean>(false);
 
     const sortByColorIndex = (a: IPurchasableOffer, b: IPurchasableOffer) => {
@@ -127,7 +126,6 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
                                 }
                                 offer={offer}
                                 selectOffer={selectOffer}
-                                inventoryVisible={inventoryVisible}
                             />
                         ))}
                     </AutoGrid>
@@ -162,7 +160,7 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
                 <div className="octane-catalog-offer-panel flex flex-col items-center grow overflow-hidden gap-2">
                     <div className="octane-catalog-offer-preview relative flex items-center justify-center overflow-hidden">
                         <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
-                        <CatalogViewProductWidgetView height={348} />
+                        <CatalogViewProductWidgetView height={240} />
                         <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 inset-e-1" position="absolute" />
                         {currentOffer.product.furnitureData.hasIndexedColor && (
                             <Button className="bottom-1 inset-s-1" position="absolute" onClick={(event) => setColorsShowing((prev) => !prev)}>

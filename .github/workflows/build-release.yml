@@ -1,5 +1,7 @@
 name: Build & Publish Client Release
 
+# Every push to main publishes the built client. The hotel installers download
+# octane-client.zip from the latest release, so servers never build it.
 on:
   push:
     branches: [main]
@@ -8,97 +10,56 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: client-release
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-  OCTANE_SINGLE_BUNDLE: '1'
-  OCTANE_JSON_MODE: 'legacy'
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
 
 jobs:
-  # The renderer lives in a private repo, so this workflow can only run where
-  # DUCKET_REPO_TOKEN is available. Without this gate actions/checkout fails with
-  # an opaque "Input required and not supplied: token" and turns the run red on
-  # every fork and on any repo that has not been given the secret.
-  check-access:
-    runs-on: ubuntu-latest
-    outputs:
-      has-token: ${{ steps.check.outputs.has-token }}
-    steps:
-      - name: Check for renderer access token
-        id: check
-        env:
-          DUCKET_REPO_TOKEN: ${{ secrets.DUCKET_REPO_TOKEN }}
-        run: |
-          if [ -n "$DUCKET_REPO_TOKEN" ]; then
-            echo "has-token=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has-token=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::DUCKET_REPO_TOKEN is not set — skipping the client release build."
-          fi
-
   build-release:
-    needs: check-access
-    if: needs.check-access.outputs.has-token == 'true'
     runs-on: ubuntu-latest
-
     steps:
+      # vite.config.mjs reads the renderer source from ../Octane-Renderer.
       - name: Checkout client
         uses: actions/checkout@v7
         with:
-          path: octane
+          path: Octane
 
       - name: Checkout renderer
         uses: actions/checkout@v7
         with:
-          repository: duckethotel/ducket-render
+          repository: ${{ github.repository_owner }}/Octane-Renderer
           ref: main
-          path: octane-renderer
-          token: ${{ secrets.DUCKET_REPO_TOKEN }}
+          path: Octane-Renderer
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: 'octane/.nvmrc'
+          node-version-file: Octane/.nvmrc
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install renderer dependencies
-        working-directory: octane-renderer
-        run: yarn install --frozen-lockfile
-
-      - name: Install client dependencies
-        env:
-          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
-        working-directory: octane
-        run: corepack yarn install --immutable
-
-      - name: Link renderer into client
+      - name: Install dependencies
         run: |
-          mkdir -p octane/node_modules/@octane
-          ln -sfn "${{ github.workspace }}/octane-renderer" octane/node_modules/@octane/renderer
+          corepack enable
+          (cd Octane-Renderer && corepack yarn install --immutable)
+          (cd Octane && corepack yarn install --immutable)
 
+      # A plain Vite build, the same output the live hotel serves.
       - name: Build client
-        working-directory: octane
-        run: yarn build
-
-      - name: Read package version
-        id: version
-        working-directory: octane
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          SHORT_SHA=${GITHUB_SHA::7}
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+        working-directory: Octane
+        run: corepack yarn vite build
 
       - name: Package dist
-        working-directory: octane
-        run: |
-          zip -r "../ducket-client-dist-${{ steps.version.outputs.short_sha }}.zip" dist
+        run: (cd Octane/dist && zip -qr ../../octane-client.zip .)
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: client-v${{ steps.version.outputs.version }}-${{ steps.version.outputs.short_sha }}
-          name: Ducket Client ${{ steps.version.outputs.version }} (${{ steps.version.outputs.short_sha }})
-          generate_release_notes: true
-          files: ducket-client-dist-${{ steps.version.outputs.short_sha }}.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: Octane
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="client-v$version-${GITHUB_SHA::7}"
+          if gh release view "$tag" > /dev/null 2>&1; then echo "$tag is already released"; exit 0; fi
+          gh release create "$tag" ../octane-client.zip --target "$GITHUB_SHA" --title "Octane client $version (${GITHUB_SHA::7})" --generate-notes --latest

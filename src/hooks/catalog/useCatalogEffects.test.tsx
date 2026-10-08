@@ -1,6 +1,5 @@
 /* @vitest-environment jsdom */
 import {
-    BuildersClubFurniCountMessageEvent,
     CatalogPublishedMessageEvent,
     LimitedEditionSoldOutEvent,
     ProductOfferEvent,
@@ -141,14 +140,6 @@ describe('useCatalogEffects', () => {
         const { currentOffer } = useCatalogStore.getState();
         expect(currentOffer.offerId).toBe(100);
         expect(currentOffer.page.pageId).toBe(2);
-    });
-
-    it('builders club counters land in the store', () => {
-        renderHook(() => useCatalogEffects(), { wrapper });
-
-        act(() => mockEventDispatcher.dispatchEvent(makeEvent(BuildersClubFurniCountMessageEvent, { furniCount: 7 })));
-
-        expect(useCatalogStore.getState().furniCount).toBe(7);
     });
 
     it('a pending request resolves once the index is in cache', async () => {

@@ -821,9 +821,6 @@
 
     // --- custom hardcoded-string fixes (2026-06-23) ---
     "toolbar.icons.toggle": "Mostra/Nascondi icone",
-    "catalog.bc.member.full": "Membro Completo",
-    "catalog.bc.member.trial": "Prova Gratuita",
-    "catalog.bc.logo.hint": "Logo — imposta l'immagine headline da Gestione",
     "wiredfurni.sendsignal.users": "Utenti da mandare avanti:",
     "wiredfurni.condition.room.active": "Mentre la stanza è attiva",
     "wiredfurni.sendsignal.furni": "Furni da mandare avanti:",

@@ -13,10 +13,7 @@ const LAYOUT_TEXT_FIELDS: Record<string, string[]> = {
     info_loyalty: ['ctlg_description'],
     trophies: ['trophy.description', 'trophy.enscription'],
     frontpage4: ['ctlg_txt1', 'ctlg_txt2'],
-    frontpage_featured: ['ctlg_txt1', 'ctlg_txt2'],
-    builders_club_frontpage: ['ctlg_description'],
-    builders_club_addons: ['ctlg_description'],
-    builders_club_loyalty: ['ctlg_description']
+    frontpage_featured: ['ctlg_txt1', 'ctlg_txt2']
 };
 
 export const getCatalogTextElementName = (index: number, layoutCode: string): string => {

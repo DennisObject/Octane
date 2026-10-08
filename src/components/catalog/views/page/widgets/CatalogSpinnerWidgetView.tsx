@@ -1,12 +1,10 @@
 import { FC, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { CatalogType, GetConfigurationValue, LocalizeText } from '../../../../../api';
+import { GetConfigurationValue, LocalizeText } from '../../../../../api';
 import { getCatalogBundleDiscountFlatPriceSteps, getCatalogBundleDiscountItemCount } from '../../../../../api/catalog/CatalogBundleDiscount';
 import { useCatalogBundleDiscountRuleset, useCatalogData, useCatalogUiState } from '../../../../../hooks';
 
 const MIN_VALUE: number = 1;
 const MAX_VALUE: number = 100;
-const HOLD_STEP_DELAY_MS: number = 75;
-const HOLD_ACCELERATION_DISTANCE: number = 35;
 
 type QuantityStepDirection = -1 | 1;
 
@@ -31,7 +29,7 @@ export const stepCatalogPurchaseQuantity = (
 
 export const CatalogSpinnerWidgetView: FC<{}> = () => {
     const { currentOffer = null } = useCatalogData();
-    const { currentType = CatalogType.NORMAL, purchaseOptions = null, setPurchaseOptions = null } = useCatalogUiState();
+    const { purchaseOptions = null, setPurchaseOptions = null } = useCatalogUiState();
     const { data: bundleDiscountRuleset = null } = useCatalogBundleDiscountRuleset();
     const quantityInputId = useId();
     const quantity = purchaseOptions?.quantity ?? MIN_VALUE;
@@ -43,31 +41,13 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
     );
     const [quantityDraft, setQuantityDraft] = useState(() => quantity.toString());
     const quantityRef = useRef(quantity);
-    const holdStartQuantityRef = useRef(quantity);
-    const holdDidRepeatRef = useRef(false);
-    const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const stopStepping = useCallback(() => {
-        if (holdTimerRef.current === null) return;
-
-        clearInterval(holdTimerRef.current);
-        holdTimerRef.current = null;
-    }, []);
-
     useEffect(() => {
-        stopStepping();
         setQuantityDraft(MIN_VALUE.toString());
-    }, [currentOffer, stopStepping]);
+    }, [currentOffer]);
 
     useEffect(() => {
         quantityRef.current = quantity;
     }, [quantity]);
-
-    useEffect(() => () => stopStepping(), [stopStepping]);
-
-    useEffect(() => {
-        stopStepping();
-    }, [maxPurchaseSize, skippedQuantities, stopStepping]);
 
     useEffect(() => {
         if (quantity <= maxPurchaseSize) return;
@@ -105,33 +85,6 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
         [maxPurchaseSize, skippedQuantities, updateQuantity]
     );
 
-    const startStepping = useCallback(
-        (direction: QuantityStepDirection) => {
-            stopStepping();
-            holdStartQuantityRef.current = quantityRef.current;
-            holdDidRepeatRef.current = false;
-            holdTimerRef.current = setInterval(() => {
-                holdDidRepeatRef.current = true;
-
-                if (!stepQuantity(direction)) {
-                    stopStepping();
-                    return;
-                }
-
-                if (Math.abs(quantityRef.current - holdStartQuantityRef.current) > HOLD_ACCELERATION_DISTANCE) {
-                    stepQuantity(direction);
-                }
-            }, HOLD_STEP_DELAY_MS);
-        },
-        [stepQuantity, stopStepping]
-    );
-
-    const finishStepClick = (direction: QuantityStepDirection, mouseClickCount: number) => {
-        if (mouseClickCount === 0 || !holdDidRepeatRef.current) stepQuantity(direction);
-
-        holdDidRepeatRef.current = false;
-    };
-
     const updateQuantityDraft = (value: string) => {
         if (value.length && !/^\d+$/.test(value)) return;
 
@@ -149,7 +102,6 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
 
     if (
         !currentOffer?.bundlePurchaseAllowed ||
-        currentType === CatalogType.BUILDER ||
         !GetConfigurationValue<boolean>('catalog.multiple.purchase.enabled', true)
     )
         return null;
@@ -167,24 +119,6 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
                     <span aria-hidden="true" className="octane-catalog-standard-spinner-discount-star" />
                 </div>
             )}
-            <button
-                type="button"
-                className="octane-catalog-standard-spinner-button octane-catalog-standard-spinner-button-less"
-                aria-controls={quantityInputId}
-                aria-label={`${LocalizeText('catalog.bundlewidget.quantity')} −`}
-                disabled={quantity <= MIN_VALUE}
-                onBlur={stopStepping}
-                onClick={(event) => finishStepClick(-1, event.detail)}
-                onLostPointerCapture={stopStepping}
-                onPointerCancel={stopStepping}
-                onPointerDown={(event) => {
-                    if (event.button !== 0) return;
-
-                    event.currentTarget.setPointerCapture(event.pointerId);
-                    startStepping(-1);
-                }}
-                onPointerUp={stopStepping}
-            />
             <div className="octane-catalog-standard-spinner-input-frame">
                 <input
                     id={quantityInputId}
@@ -203,24 +137,6 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
                     }}
                 />
             </div>
-            <button
-                type="button"
-                className="octane-catalog-standard-spinner-button octane-catalog-standard-spinner-button-more"
-                aria-controls={quantityInputId}
-                aria-label={`${LocalizeText('catalog.bundlewidget.quantity')} +`}
-                disabled={quantity >= maxPurchaseSize}
-                onBlur={stopStepping}
-                onClick={(event) => finishStepClick(1, event.detail)}
-                onLostPointerCapture={stopStepping}
-                onPointerCancel={stopStepping}
-                onPointerDown={(event) => {
-                    if (event.button !== 0) return;
-
-                    event.currentTarget.setPointerCapture(event.pointerId);
-                    startStepping(1);
-                }}
-                onPointerUp={stopStepping}
-            />
         </div>
     );
 };

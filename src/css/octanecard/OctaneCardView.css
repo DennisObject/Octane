@@ -234,12 +234,6 @@
     display: none !important;
 }
 
-.octane-card-header-shell.builders-club-card-header {
-    border-color: #d79d2e;
-    border-bottom-color: var(--octane-card-border);
-    background: linear-gradient(180deg, #d89f2d 0%, #c68515 100%);
-}
-
 .octane-card-tabs,
 .octane-card-tabs-shell {
     display: flex;
@@ -338,17 +332,6 @@
     border-radius: 0 0 calc(var(--octane-card-radius) - 2px) calc(var(--octane-card-radius) - 2px);
     font-family: Ubuntu, sans-serif;
     color: var(--octane-card-text);
-}
-
-.builders-club-status-shell {
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-bottom: 2px solid var(--octane-card-border);
-    background: linear-gradient(180deg, rgba(84, 62, 46, 0.95) 0%, rgba(50, 38, 29, 0.97) 100%);
-}
-
-.builders-club-status-icon-shell {
-    background: rgba(255, 193, 70, 0.12);
-    border: 1px solid rgba(255, 193, 70, 0.26);
 }
 
 .octane-card-panel {
@@ -527,10 +510,6 @@
         button {
             font-size: 11.5px;
         }
-    }
-
-    .builders-club-status-shell {
-        padding: 10px 12px;
     }
 }
 

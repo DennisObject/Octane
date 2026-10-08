@@ -1,20 +1,16 @@
 import {
-    BuildersClubFurniCountMessageEvent,
-    BuildersClubPlaceRoomItemMessageComposer,
-    BuildersClubPlaceWallItemMessageComposer,
-    BuildersClubQueryFurniCountMessageComposer,
-    BuildersClubSubscriptionStatusMessageEvent,
     CatalogPublishedMessageEvent,
-    FurniturePlaceComposer,
-    FurniturePlacePaintComposer,
+    FurnitureListAddOrUpdateEvent,
+    FurnitureListEvent,
+    FurnitureListInvalidateEvent,
     GetConfiguration,
     GetRoomContentLoader,
     GetRoomEngine,
     GetSessionDataManager,
-    GetTickerTime,
     LegacyDataType,
     LimitedEditionSoldOutEvent,
     MarketplaceMakeOfferResult,
+    NotEnoughBalanceMessageEvent,
     ProductOfferEvent,
     PurchaseErrorMessageEvent,
     PurchaseFromCatalogComposer,
@@ -23,6 +19,7 @@ import {
     RoomEngineObjectPlacedEvent,
     RoomObjectVariable,
     RoomPreviewer,
+    UnseenItemsEvent,
     UserPermissionsEvent,
     Vector3d
 } from '@octane/renderer';
@@ -32,7 +29,6 @@ import {
     CatalogPage,
     CatalogType,
     DispatchUiEvent,
-    FurniCategory,
     ICatalogNode,
     LocalizeText,
     NotificationAlertType,
@@ -40,19 +36,30 @@ import {
     PlacedObjectPurchaseData,
     PlaySound,
     SendMessageComposer,
-    SoundNames
+    SoundNames,
+    UnseenItemCategory
 } from '../../api';
 import {
     CatalogPurchasedEvent,
     CatalogPurchaseFailureEvent,
     CatalogPurchaseNotAllowedEvent,
-    CatalogPurchaseSoldOutEvent,
-    InventoryFurniAddedEvent
+    CatalogPurchaseSoldOutEvent
 } from '../../events';
 import { useConnectionState, useMessageEvent, useOctaneEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
-import { DUMMY_PAGE_ID_FOR_OFFER_SEARCH, useCatalogStore } from './catalogStore';
+import { useCatalogStore } from './catalogStore';
 import { getNodesByOfferIdFromMap, restoreCatalogActivePath, RoomObjectCategory } from './useCatalog.helpers';
+import {
+    claimPlacedOfferPurchase,
+    markPlacedPurchaseBought,
+    recordPlacedPurchaseInvalidated,
+    recordPlacedPurchaseItems,
+    recordPlacedPurchaseListFragment,
+    recordPlacedPurchaseUnseen,
+    releasePlacedOfferPurchase,
+    resetPlacedPurchaseSession,
+    takePlacedPurchaseAnswer
+} from './useCatalogPlacedOffer';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import {
     bindCatalogQueryClient,
@@ -65,8 +72,7 @@ import {
     prefetchCatalogIndex,
     readCatalogIndex,
     useCatalogIndexQuery,
-    useCatalogPageQuery,
-    isOfferAllowedInCatalogType
+    useCatalogPageQuery
 } from './useCatalogQueries';
 import { useCatalogSkipPurchaseConfirmation } from './useCatalogSkipPurchaseConfirmation';
 
@@ -101,7 +107,7 @@ const refreshImportedFurnidata = (mergedRef: { current: boolean }, force: boolea
 export const useCatalogEffects = (): void => {
     const queryClient = useQueryClient();
     const connectionState = useConnectionState();
-    const { simpleAlert = null, showConfirm = null } = useNotification();
+    const { simpleAlert = null } = useNotification();
     const [catalogSkipPurchaseConfirmation] = useCatalogSkipPurchaseConfirmation();
     const [catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjectsPreference] = useCatalogPlaceMultipleItems();
     const importedFurnidataMerged = useRef(false);
@@ -172,15 +178,17 @@ export const useCatalogEffects = (): void => {
             return;
         }
 
-        if (was) dropCatalogCache();
+        if (!was) return;
+
+        dropCatalogCache();
+        resetPlacedPurchaseSession();
     }, [connectionState.authenticated]);
 
-    // Opening the catalog: imported furnidata and the Builders Club counters.
+    // Opening the catalog: imported furnidata.
     useEffect(() => {
         if (!isVisible) return;
 
         refreshImportedFurnidata(importedFurnidataMerged);
-        SendMessageComposer(new BuildersClubQueryFurniCountMessageComposer());
     }, [isVisible, currentType]);
 
     // Pending deep link and default first page, once the index is in cache.
@@ -242,25 +250,79 @@ export const useCatalogEffects = (): void => {
     useMessageEvent<PurchaseOKMessageEvent>(PurchaseOKMessageEvent, (event) => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
 
-        DispatchUiEvent(new CatalogPurchasedEvent(event.getParser().offer));
+        const purchase = event.getParser().offer;
+        const offerId = purchase?.offerId ?? 0;
+        // A PurchaseOK without an offer answers a sold-out limited edition: nothing was bought.
+        const soldOut = offerId <= 0;
+        const forPlacedOffer = takePlacedPurchaseAnswer(soldOut ? null : offerId);
+
+        DispatchUiEvent(new CatalogPurchasedEvent(purchase));
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
+
+        if (!forPlacedOffer) return;
+
+        if (soldOut) useCatalogStore.getState().resetPlacedOfferData();
+        else markPlacedPurchaseBought();
     });
 
+    // A dropped offer's purchase failed: PurchaseConfirmationDialog closes and the temporary object goes.
+    const rollBackPlacedOffer = (message: string, title: string) => {
+        simpleAlert?.(message, null, null, null, title);
+        useCatalogStore.getState().resetPlacedOfferData();
+    };
+
     useMessageEvent<PurchaseErrorMessageEvent>(PurchaseErrorMessageEvent, (event) => {
-        DispatchUiEvent(new CatalogPurchaseFailureEvent(event.getParser().code));
+        const code = event.getParser().code;
+        const forPlacedOffer = takePlacedPurchaseAnswer();
+
+        DispatchUiEvent(new CatalogPurchaseFailureEvent(code));
+
+        if (forPlacedOffer)
+            rollBackPlacedOffer(
+                LocalizeText(code > 0 ? `catalog.alert.purchaseerror.description.${code}` : 'catalog.alert.purchaseerror.description'),
+                LocalizeText('catalog.alert.purchaseerror.title')
+            );
     });
 
     useMessageEvent<PurchaseNotAllowedMessageEvent>(PurchaseNotAllowedMessageEvent, (event) => {
-        DispatchUiEvent(new CatalogPurchaseNotAllowedEvent(event.getParser().code));
+        const code = event.getParser().code;
+        const forPlacedOffer = takePlacedPurchaseAnswer();
+
+        DispatchUiEvent(new CatalogPurchaseNotAllowedEvent(code));
+
+        if (forPlacedOffer)
+            rollBackPlacedOffer(
+                LocalizeText(code === 1 ? 'catalog.alert.purchasenotallowed.hc.description' : 'catalog.alert.purchasenotallowed.unknown.description'),
+                LocalizeText('catalog.alert.purchasenotallowed.title')
+            );
     });
 
     useMessageEvent<LimitedEditionSoldOutEvent>(LimitedEditionSoldOutEvent, () => {
         const { currentType: type, pageId: activePageId } = useCatalogStore.getState();
+        const forPlacedOffer = takePlacedPurchaseAnswer();
 
         DispatchUiEvent(new CatalogPurchaseSoldOutEvent());
 
         if (activePageId > -1) invalidateCatalogPage(type, activePageId);
+
+        if (forPlacedOffer) rollBackPlacedOffer(LocalizeText('catalog.alert.limited_edition_sold_out.message'), LocalizeText('catalog.alert.limited_edition_sold_out.title'));
+    });
+
+    // PurchaseConfirmationDialog.notEnoughCredits: the dialog stays and Buy works again.
+    useMessageEvent<NotEnoughBalanceMessageEvent>(NotEnoughBalanceMessageEvent, (event) => {
+        if (!takePlacedPurchaseAnswer()) return;
+
+        const parser = event.getParser();
+
+        releasePlacedOfferPurchase();
+        simpleAlert?.(
+            LocalizeText(parser.notEnoughCredits ? 'catalog.alert.notenough.credits.description' : 'catalog.alert.notenough.activitypoints.description'),
+            null,
+            null,
+            null,
+            LocalizeText(parser.notEnoughCredits ? 'catalog.alert.notenough.title' : 'catalog.alert.notenough.activitypoints.title')
+        );
     });
 
     useMessageEvent<ProductOfferEvent>(ProductOfferEvent, (event) => {
@@ -273,9 +335,6 @@ export const useCatalogEffects = (): void => {
         if (!offer) return;
 
         const state = useCatalogStore.getState();
-
-        if (!isOfferAllowedInCatalogType(offer, state.currentType)) return;
-
         const index = readCatalogIndex(state.currentType);
         const matchingNodes = getNodesByOfferIdFromMap(offer.offerId, index?.offersToNodes, true) || getNodesByOfferIdFromMap(offer.offerId, index?.offersToNodes);
         const referencePage = state.pageOverride ?? pageQuery.data?.page ?? null;
@@ -318,26 +377,7 @@ export const useCatalogEffects = (): void => {
     useMessageEvent<UserPermissionsEvent>(UserPermissionsEvent, () =>
     {
         invalidateCatalogIndex(CatalogType.NORMAL);
-        invalidateCatalogIndex(CatalogType.BUILDER);
         invalidateCatalogPages();
-    });
-
-    useMessageEvent<BuildersClubFurniCountMessageEvent>(BuildersClubFurniCountMessageEvent, (event) => {
-        useCatalogStore.getState().setBuildersClubFurniCount(event.getParser().furniCount);
-    });
-
-    useMessageEvent<BuildersClubSubscriptionStatusMessageEvent>(BuildersClubSubscriptionStatusMessageEvent, (event) => {
-        const parser = event.getParser();
-
-        useCatalogStore.getState().setBuildersClubSubscription({
-            furniLimit: parser.furniLimit,
-            maxFurniLimit: parser.maxFurniLimit,
-            secondsLeft: parser.secondsLeft,
-            updateTime: GetTickerTime(),
-            secondsLeftWithGrace: parser.secondsLeftWithGrace,
-            placementBlockedByVisitors: parser.placementBlockedByVisitors,
-            placementAllowedInCurrentRoom: parser.placementAllowedInCurrentRoom
-        });
     });
 
     useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, () => PlaySound(SoundNames.CREDITS));
@@ -346,6 +386,9 @@ export const useCatalogEffects = (): void => {
         const state = useCatalogStore.getState();
 
         if (!state.objectMoverRequested || event.type !== RoomEngineObjectPlacedEvent.PLACED) return;
+
+        // The catalog mover runs as -offerId; anything else was not placed from the catalog.
+        if (state.purchasableOffer && event.objectId !== -state.purchasableOffer.offerId) return;
 
         state.resetPlacedOfferData(true);
 
@@ -382,7 +425,7 @@ export const useCatalogEffects = (): void => {
         }
 
         state.setPlacedObjectPurchaseData(
-            new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer)
+            new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer, state.pageId)
         );
 
         switch (state.currentType) {
@@ -427,92 +470,31 @@ export const useCatalogEffects = (): void => {
                 if (roomObject) roomObject.model.setValue(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER, 0.5);
 
                 if (catalogSkipPurchaseConfirmation && !(product && product.isUniqueLimitedItem)) {
-                    SendMessageComposer(new PurchaseFromCatalogComposer(state.pageId, purchasableOffer.offerId, product.extraParam, 1));
+                    const placed = useCatalogStore.getState().placedObjectPurchaseData;
+
+                    if (claimPlacedOfferPurchase(placed)) SendMessageComposer(new PurchaseFromCatalogComposer(placed.pageId, purchasableOffer.offerId, product.extraParam, 1));
                 }
 
                 if (state.catalogPlaceMultipleObjects) state.requestOfferToMover(purchasableOffer);
                 break;
             }
-            case CatalogType.BUILDER: {
-                const placeBuilderItem = () => {
-                    let builderPageId = purchasableOffer.page.pageId;
-
-                    if (builderPageId === DUMMY_PAGE_ID_FOR_OFFER_SEARCH) builderPageId = -1;
-
-                    switch (event.category) {
-                        case RoomObjectCategory.FLOOR:
-                            SendMessageComposer(
-                                new BuildersClubPlaceRoomItemMessageComposer(builderPageId, purchasableOffer.offerId, product.extraParam, event.x, event.y, event.direction)
-                            );
-                            break;
-                        case RoomObjectCategory.WALL:
-                            SendMessageComposer(new BuildersClubPlaceWallItemMessageComposer(builderPageId, purchasableOffer.offerId, product.extraParam, event.wallLocation));
-                            break;
-                    }
-
-                    const latest = useCatalogStore.getState();
-
-                    if (latest.catalogPlaceMultipleObjects && latest.furniCount + 1 < latest.furniLimit) latest.requestOfferToMover(purchasableOffer);
-                };
-
-                if (state.secondsLeft <= 0 && state.furniCount <= 0 && !state.builderTrialRoomHideConfirmed && showConfirm) {
-                    showConfirm(
-                        LocalizeText('room.confirm.hide_room'),
-                        () => {
-                            useCatalogStore.getState().setBuilderTrialRoomHideConfirmed(true);
-                            placeBuilderItem();
-                        },
-                        () => useCatalogStore.getState().resetPlacedOfferData()
-                    );
-                } else {
-                    placeBuilderItem();
-                }
-                break;
-            }
         }
     });
 
-    useUiEvent<InventoryFurniAddedEvent>(InventoryFurniAddedEvent.FURNI_ADDED, (event) => {
-        const state = useCatalogStore.getState();
-        const placedObjectPurchaseData = state.placedObjectPurchaseData;
-        const roomEngine = GetRoomEngine();
+    // HabboCatalog.itemAddedToInventory places the bought item on the dropped spot. Here the item
+    // must be one the server announced as new during this attempt and whose inventory data shows
+    // the drop's product; see useCatalogPlacedOffer.
+    useMessageEvent<UnseenItemsEvent>(UnseenItemsEvent, (event) => recordPlacedPurchaseUnseen(event.getParser().getItemsByCategory(UnseenItemCategory.FURNI)));
 
-        if (!placedObjectPurchaseData || placedObjectPurchaseData.productClassId !== event.spriteId || placedObjectPurchaseData.roomId !== roomEngine.activeRoomId) return;
+    useMessageEvent<FurnitureListAddOrUpdateEvent>(FurnitureListAddOrUpdateEvent, (event) => recordPlacedPurchaseItems(event.getParser().items));
 
-        switch (event.category) {
-            case FurniCategory.FLOOR: {
-                const floorType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_FLOOR_TYPE);
+    useMessageEvent<FurnitureListEvent>(FurnitureListEvent, (event) => {
+        const parser = event.getParser();
 
-                if (placedObjectPurchaseData.extraParam !== floorType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            case FurniCategory.WALL_PAPER: {
-                const wallType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_WALL_TYPE);
-
-                if (placedObjectPurchaseData.extraParam !== wallType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            case FurniCategory.LANDSCAPE: {
-                const landscapeType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE);
-
-                if (placedObjectPurchaseData.extraParam !== landscapeType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
-                break;
-            }
-            default:
-                SendMessageComposer(
-                    new FurniturePlaceComposer(
-                        event.id,
-                        placedObjectPurchaseData.category,
-                        placedObjectPurchaseData.wallLocation,
-                        placedObjectPurchaseData.x,
-                        placedObjectPurchaseData.y,
-                        placedObjectPurchaseData.direction
-                    )
-                );
-        }
-
-        if (!state.catalogPlaceMultipleObjects) state.resetPlacedOfferData();
+        recordPlacedPurchaseListFragment(parser.totalFragments, parser.fragmentNumber, parser.fragment.values());
     });
+
+    useMessageEvent<FurnitureListInvalidateEvent>(FurnitureListInvalidateEvent, () => recordPlacedPurchaseInvalidated());
 };
 
 const isNodeInTree = (node: ICatalogNode | null, root: ICatalogNode): boolean => {

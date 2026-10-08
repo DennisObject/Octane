@@ -26,7 +26,6 @@ const CLIENT_COMMANDS: { key: string; descriptionKey: string }[] = [
     { key: 'furni', descriptionKey: 'chatcmd.client.furni' },
     { key: 'chooser', descriptionKey: 'chatcmd.client.chooser' },
     { key: 'floor', descriptionKey: 'chatcmd.client.floor' },
-    { key: 'bcfloor', descriptionKey: 'chatcmd.client.floor' },
     { key: 'pickall', descriptionKey: 'chatcmd.client.pickall' },
     { key: 'ejectall', descriptionKey: 'chatcmd.client.ejectall' },
     { key: 'settings', descriptionKey: 'chatcmd.client.settings' },

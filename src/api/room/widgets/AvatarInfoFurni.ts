@@ -27,7 +27,6 @@ export class AvatarInfoFurni implements IAvatarInfo {
     public rentOfferId: number = -1;
     public purchaseCouldBeUsedForBuyout: boolean = false;
     public rentCouldBeUsedForBuyout: boolean = false;
-    public availableForBuildersClub: boolean = false;
     public tileSizeX: number = 1;
     public tileSizeY: number = 1;
     public allowStack: boolean = false;

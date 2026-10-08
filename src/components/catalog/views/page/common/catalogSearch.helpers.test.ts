@@ -19,7 +19,6 @@ const furniture = (overrides: Record<string, unknown> = {}) =>
         furniLine: 'Classic',
         purchaseOfferId: 42,
         rentOfferId: -1,
-        availableForBuildersClub: true,
         excludeDynamic: false,
         ...overrides
     }) as any;
@@ -54,14 +53,13 @@ describe('catalog search behavior', () => {
         expect(findCatalogFurnitureMatches(source, 'neon', CatalogType.NORMAL).furniture.map((item) => item.id)).toEqual([2]);
     });
 
-    it('respects normal and Builders Club visibility rules', () => {
+    it('respects normal catalog visibility rules', () => {
         const source = [
             furniture({ id: 1, excludeDynamic: true }),
-            furniture({ id: 2, availableForBuildersClub: false, purchaseOfferId: 43 }),
+            furniture({ id: 2, purchaseOfferId: 43 }),
             furniture({ id: 3, purchaseOfferId: 44 })
         ];
 
         expect(findCatalogFurnitureMatches(source, 'sedia', CatalogType.NORMAL).furniture.map((item) => item.id)).toEqual([2, 3]);
-        expect(findCatalogFurnitureMatches(source, 'sedia', CatalogType.BUILDER).furniture.map((item) => item.id)).toEqual([1, 3]);
     });
 });

@@ -1,6 +1,5 @@
 export type CatalogLayoutRenderer =
     | 'badgeDisplay'
-    | 'buildersClubBuy'
     | 'clubGifts'
     | 'colorGrouping'
     | 'default'
@@ -54,9 +53,6 @@ export const CATALOG_LAYOUT_REGISTRY = [
     { studioCode: 'guild_forum', runtimeCodes: ['guild_forum'], renderer: 'guildForum', availability: 'ready' },
     { studioCode: 'guild_furni', runtimeCodes: ['guild_custom_furni', 'guild_furni'], renderer: 'guildCustomFurni', availability: 'ready' },
     { studioCode: 'vip_buy', runtimeCodes: ['vip_buy'], renderer: 'vipBuy', availability: 'ready' },
-    { studioCode: 'builders_club_frontpage', runtimeCodes: ['builders_club_frontpage'], renderer: 'buildersClubBuy', availability: 'ready' },
-    { studioCode: 'builders_club_addons', runtimeCodes: ['builders_club_addons'], renderer: 'buildersClubBuy', availability: 'ready' },
-    { studioCode: 'builders_club_loyalty', runtimeCodes: ['builders_club_loyalty'], renderer: 'buildersClubBuy', availability: 'ready' },
     { studioCode: 'marketplace', runtimeCodes: ['marketplace'], renderer: 'marketplacePublicItems', availability: 'ready' },
     { studioCode: 'marketplace_own_items', runtimeCodes: ['marketplace_own_items'], renderer: 'marketplaceOwnItems', availability: 'ready' },
     { studioCode: 'recycler', runtimeCodes: ['recycler'], renderer: 'recycler', availability: 'ready' },

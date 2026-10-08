@@ -79,7 +79,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const unseenProgMenuCount = getTotalUnseen + unseenDailyTaskCount + unseenRewardTrackCount;
     const { requests = [] } = useFriends();
     const { iconState = MessengerIconState.HIDDEN } = useMessenger();
-    const buildersClubEnabled = useMemo(() => GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true)), []);
     const { openMonitor, showToolbarButton } = useWiredTools();
     const { available: buildHeightAvailable, toggle: toggleBuildHeight } = useBuildHeight();
     const isHk = useHasPermission(Permission.HousekeepingAccess);
@@ -402,11 +401,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <motion.div variants={itemVariants} className="tb-slot">
                         <ToolbarItemView icon="catalog" onClick={() => CreateLinkEvent('catalog/toggle/normal')} className="tb-icon" />
                     </motion.div>
-                    {buildersClubEnabled && (
-                        <motion.div variants={itemVariants} className="tb-slot">
-                            <ToolbarItemView icon="buildersclub" onClick={() => CreateLinkEvent('catalog/toggle/builder')} className="tb-icon" />
-                        </motion.div>
-                    )}
                     {isInRoom && (
                         <motion.div variants={itemVariants} className="relative tb-slot tb-slot-inventory">
                             <ToolbarItemView icon="inventory" onClick={() => CreateLinkEvent('inventory/toggle')} className="tb-icon" />
@@ -610,8 +604,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
             </motion.div>
             {/* Mobile side tools — moved out of the bottom bar into a
                  vertical pill stack on the left edge so the bottom bar has
-                 room. Optional Builders Club, plus camera in-room
-                 and the staff-only tools when permitted. */}
+                 room. Camera in-room and the staff-only tools when
+                 permitted. */}
             <motion.div
                 initial="visible"
                 animate={visibilityVariant}
@@ -620,11 +614,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 style={staffStackBottom != null ? { top: 'auto', bottom: `${staffStackBottom}px` } : undefined}
                 className={`absolute left-1 z-[71] flex flex-col items-center gap-[2px] bg-[#55534e] px-[2px] py-[4px] ${staffStackBottom == null ? 'top-1/2 -translate-y-1/2' : ''} ${sideStackClasses}`}
             >
-                {touchLayout && buildersClubEnabled && (
-                    <motion.div variants={itemVariants}>
-                        <ToolbarItemView icon="buildersclub" onClick={() => CreateLinkEvent('catalog/toggle/builder')} className="tb-icon" />
-                    </motion.div>
-                )}
                 {cameraAvailable && (
                     <motion.div variants={itemVariants}>
                         <ToolbarItemView icon="camera" onClick={() => CreateLinkEvent('camera/toggle')} className="tb-icon" />

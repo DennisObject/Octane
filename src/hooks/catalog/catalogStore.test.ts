@@ -143,17 +143,6 @@ describe('catalogStore visibility and type', () => {
         expect(useCatalogStore.getState().isVisible).toBe(false);
     });
 
-    it('switching type resets the visible state', () => {
-        useCatalogStore.setState({ isVisible: true, currentType: CatalogType.NORMAL, pageId: 2, activeNodes: [{} as any] });
-        useCatalogStore.getState().openCatalogByType(CatalogType.BUILDER);
-
-        const state = useCatalogStore.getState();
-        expect(state.currentType).toBe(CatalogType.BUILDER);
-        expect(state.pageId).toBe(-1);
-        expect(state.activeNodes).toEqual([]);
-        expect(state.isVisible).toBe(true);
-    });
-
     it('an unknown type normalises to NORMAL', () => {
         useCatalogStore.getState().openCatalogByType('nonsense');
         expect(useCatalogStore.getState().currentType).toBe(CatalogType.NORMAL);

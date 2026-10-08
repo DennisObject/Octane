@@ -1,7 +1,5 @@
-// SnowWar leaves the player's room when the game center opens (VisitDesktop ->
-// removeSession), and the server's rejoin-previous-room packet carries no room
-// id, so the client has to remember which room to return to itself. We capture
-// it just before the room is dropped and consume it when SnowWar exits.
+// SnowStorm leaves the player's room when the arena opens (EnterArena -> VisitDesktop). The room is
+// remembered then, as a fallback for RejoinPreviousRoom's roomBeforeGame when the player goes back.
 let previousRoomId: number | null = null;
 
 export const setSnowWarReturnRoom = (roomId: number | null): void =>

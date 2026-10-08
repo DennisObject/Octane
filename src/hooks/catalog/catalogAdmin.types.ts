@@ -53,7 +53,7 @@ interface CatalogAdminEditorIdentity {
     key: string;
     /** The stored row being edited: set on open for edits, after the first save for creates. */
     entityId: number | null;
-    /** Captured when the editor opens, so switching between the normal and Builders Club catalog never redirects a save. */
+    /** Captured when the editor opens, so a later catalog type change never redirects a save. */
     catalogType: string;
 }
 

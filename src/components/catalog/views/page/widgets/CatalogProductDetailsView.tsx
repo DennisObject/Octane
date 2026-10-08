@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { CatalogType, IPurchasableOffer, LocalizeText, ProductTypeEnum } from '../../../../../api';
+import { IPurchasableOffer, LocalizeText, ProductTypeEnum } from '../../../../../api';
 import noRecycleIcon from '../../../../../assets/images/catalog/air/inventory-furni-no-recycle.png';
 import noTradeIcon from '../../../../../assets/images/catalog/air/inventory-furni-no-trade.png';
 import { useCatalogProductMetadata, useCatalogUiState } from '../../../../../hooks';
@@ -18,7 +18,7 @@ export const CatalogProductDetailsView: FC<{ offer: IPurchasableOffer }> = ({ of
     const productMetadata =
         offerMetadata.find((entry) => entry.itemBaseId === product?.furnitureData?.id) ??
         offerMetadata.find((entry) => entry.productClassId === product?.productClassId);
-    const hasMetadata = currentType !== CatalogType.BUILDER && isFurniture && !!productMetadata;
+    const hasMetadata = isFurniture && !!productMetadata;
     const tradeable = hasMetadata && productMetadata.tradeable;
     const recyclable = hasMetadata && productMetadata.recyclable;
     const showNoTrade = hasMetadata && !tradeable;

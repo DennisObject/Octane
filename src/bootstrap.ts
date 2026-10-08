@@ -112,15 +112,19 @@ await loadClientMode();
 installSecureFetch();
 setBootDebug('boot: secure fetch installed');
 
+// Download and evaluate the app bundle while the configuration loads; it only mounts once that is done.
+const appModule = import('./index');
+// Don't let a failed import surface as an unhandled rejection before it is awaited below.
+appModule.catch(() => {});
+
 const search = new URLSearchParams(window.location.search);
 const clientMode = getClientMode();
-const petConfig = await loadPetConfig();
+const petConfigLoad = loadPetConfig();
 
 (window as any).OctaneSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
 (window as any).OctaneClientMode = clientMode;
 (window as any).OctaneConfig = {
     'config.urls': [configFileUrl('renderer-config.json', true), configFileUrl('ui-config.json', true)],
-    ...(petConfig ?? {}),
     'sso.ticket': launchCredentials.ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
@@ -139,15 +143,25 @@ setBootDebug('boot: OctaneConfig assigned');
 // every key components read synchronously (asset.url, login.endpoint, …) until
 // prepare()'s deferred init() finally lands. Doing it here makes the config
 // already populated by the time index.tsx mounts <App/>.
-try {
-    await GetConfiguration().init();
-    setBootDebug('boot: configuration init done');
-} catch (error) {
-    setBootDebug(`boot: configuration init failed ${error?.message || error}`);
+const configurationLoad = GetConfiguration().init().then(
+    () => setBootDebug('boot: configuration init done'),
+    (error) => setBootDebug(`boot: configuration init failed ${error?.message || error}`)
+);
+
+const [petConfig] = await Promise.all([petConfigLoad, configurationLoad]);
+
+// pets.json loads alongside the configuration. Its keys override the config files, as the
+// OctaneConfig defaults do, and stay on OctaneConfig for any later configuration reload.
+if (petConfig) {
+    Object.assign((window as any).OctaneConfig, petConfig);
+    GetConfiguration().parseConfiguration(petConfig, true);
 }
 
-import('./index')
-    .then(() => setBootDebug('boot: app bundle imported'))
+appModule
+    .then(({ mountApp }) => {
+        mountApp();
+        setBootDebug('boot: app mounted');
+    })
     .catch((error) => {
         setBootDebug(`boot: import failed ${error?.message || error}`);
         throw error;

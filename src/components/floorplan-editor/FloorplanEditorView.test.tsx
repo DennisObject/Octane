@@ -26,7 +26,8 @@ vi.mock('../../api', async (importOriginal) => {
     return {
         ...actual,
         SendMessageComposer: (...args: unknown[]) => sendMessageComposer(...args),
-        LocalizeText: (key: string) => key
+        LocalizeText: (key: string) => key,
+        GetRoomSession: () => ({ isRoomOwner: true })
     };
 });
 
@@ -39,7 +40,6 @@ import {
     RoomEngineEvent,
     RoomEntryTileMessageEvent,
     RoomOccupiedTilesMessageEvent,
-    BuildersClubSubscriptionStatusMessageEvent,
     RoomVisualizationSettingsEvent,
     UpdateFloorPropertiesMessageComposer
 } from '@octane/renderer';
@@ -51,13 +51,6 @@ import { FloorplanEditorView } from './FloorplanEditorView';
 const findByExactText = (text: string): Element | undefined => {
     const container = document.getElementById('draggable-windows-container') ?? document.body;
     return Array.from(container.querySelectorAll('button, div')).find((el: Element) => el.textContent?.trim() === text);
-};
-
-const allowSave = () => {
-    const handler = messageHandlers.get(BuildersClubSubscriptionStatusMessageEvent);
-    expect(handler).toBeTruthy();
-    act(() => handler!({ getParser: () => ({ secondsLeft: 120 }) }));
-    act(() => vi.advanceTimersByTime(10000));
 };
 
 describe('FloorplanEditorView container', () => {
@@ -112,7 +105,6 @@ describe('FloorplanEditorView container', () => {
         act(() => rvsHandler!({ getParser: () => ({ thicknessWall: 1, thicknessFloor: 1 }) }));
         // With LocalizeText mocked to identity, the button text is literally the i18n key.
         // Button renders as <div> (not <button>) — use findByExactText.
-        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -130,7 +122,6 @@ describe('FloorplanEditorView container', () => {
         const fhmHandler = messageHandlers.get(FloorHeightMapEvent);
         // parser.wallHeight = 4 → state.wallHeight = 4 + 1 = 5 → Save sends 5 - 1 = 4
         act(() => fhmHandler!({ getParser: () => ({ model: '0', wallHeight: 4 }) }));
-        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -148,7 +139,6 @@ describe('FloorplanEditorView container', () => {
         // server sends 2 for both; convertSettingToNumber(2) = 3; reducer stores thickness=3
         // Save applies convertNumbersForSaving(3) = 1
         act(() => rvsHandler!({ getParser: () => ({ thicknessWall: 2, thicknessFloor: 2 }) }));
-        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -172,7 +162,6 @@ describe('FloorplanEditorView container', () => {
             [false, false]
         ];
         act(() => occHandler!({ getParser: () => ({ blockedTilesMap }) }));
-        allowSave();
         const saveBtn = findByExactText('floor.plan.editor.save');
         expect(saveBtn).toBeTruthy();
         sendMessageComposer.mockClear();
@@ -283,28 +272,6 @@ describe('FloorplanEditorView container', () => {
         act(() => handler({ getParser: () => ({ model: '00\r00\r', wallHeight: -1 }) }));
         fireEvent.click(fixed);
         expect(document.querySelector('[data-testid="wall-height-badge"]')?.textContent).toBe('5');
-    });
-
-    it('updates main Save on BC ticks but snapshots the import gate on opening', () => {
-        openEditor();
-        const handler = messageHandlers.get(BuildersClubSubscriptionStatusMessageEvent)!;
-        const main = document.querySelector('[data-testid="floorplan-save"]') as HTMLButtonElement;
-        act(() => handler({ getParser: () => ({ secondsLeft: 15 }) }));
-        expect(main.disabled).toBe(true);
-        act(() => vi.advanceTimersByTime(10000));
-        expect(main.disabled).toBe(false);
-        fireEvent.click(document.querySelector('[data-testid="floorplan-import-export"]')!);
-        const imported = document.querySelector('[data-testid="import-save"]') as HTMLButtonElement;
-        expect(imported.disabled).toBe(false);
-        act(() => vi.advanceTimersByTime(10000));
-        expect(main.disabled).toBe(true);
-        expect(imported.disabled).toBe(false);
-        sendMessageComposer.mockClear();
-        fireEvent.change(document.querySelector('textarea')!, { target: { value: '00\n00' } });
-        fireEvent.click(imported);
-        expect(sendMessageComposer.mock.calls[0][0]).toBeInstanceOf(UpdateFloorPropertiesMessageComposer);
-        expect(sendMessageComposer.mock.calls[0][0].tilemap).toBe('00\r00');
-        expect(document.querySelector('.octane-floorplan-import')).toBeTruthy();
     });
 
     it('the ordinary import dialog does not offer Load', () => {
