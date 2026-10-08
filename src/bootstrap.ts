@@ -64,9 +64,38 @@ const deployBaseUrl = (): string => {
     return `${window.location.origin}/`;
 };
 
+// The entry HTML can carry the boot configuration (nginx SSI includes it into the
+// <script type="application/json" id="octane-boot-*"> blocks of index.html), which saves
+// the round trips to fetch it. Without SSI the blocks still hold the include comment.
+// A missing file makes nginx include its error page, so only a block that parses counts.
+const readBootDocument = (name: string): string | null => {
+    const text = document.getElementById(`octane-boot-${name}`)?.textContent?.trim();
+
+    if (!text || text.startsWith('<!--')) return null;
+
+    try {
+        parseJsonDocument(text, resolveJsonMode(), `${name}.json`);
+
+        return text;
+    } catch {
+        setBootDebug(`boot: inline ${name} unusable, fetching it`);
+
+        return null;
+    }
+};
+
 const loadClientMode = async () => {
     try {
         if ((window as any).__octaneClientMode) return;
+
+        const inline = readBootDocument('client-mode');
+
+        if (inline) {
+            (window as any).__octaneClientMode = parseJsonDocument(inline, resolveJsonMode(), 'client-mode.json');
+            setBootDebug('boot: client-mode inline');
+
+            return;
+        }
 
         const url = new URL('configuration/client-mode.json', deployBaseUrl());
         url.searchParams.set('v', Date.now().toString(36));
@@ -85,14 +114,21 @@ const loadClientMode = async () => {
     }
 };
 
+// Boot documents are plain files; a secure-assets deploy serves its configuration encrypted instead.
+const inlineConfigDocument = (name: string): string | null => (getClientMode().secureAssetsEnabled ? null : readBootDocument(name));
+
 const loadPetConfig = async (): Promise<DerivedPetConfig | null> => {
     try {
         const url = configFileUrl('pets.json', true);
-        const response = await fetch(url);
+        let text = inlineConfigDocument('pets');
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (text === null) {
+            const response = await fetch(url);
 
-        const text = await response.text();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            text = await response.text();
+        }
         const parsed = parseJsonDocument(text, resolveJsonMode(), url) as { pets?: unknown } | unknown[];
         const list = Array.isArray(parsed) ? parsed : (parsed as { pets?: unknown })?.pets;
         const derived = derivePetConfig(list as PetDefinition[]);
@@ -123,8 +159,17 @@ const petConfigLoad = loadPetConfig();
 
 (window as any).OctaneSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
 (window as any).OctaneClientMode = clientMode;
+const rendererConfigUrl = configFileUrl('renderer-config.json', true);
+const uiConfigUrl = configFileUrl('ui-config.json', true);
+
+for (const [name, url] of [['renderer-config', rendererConfigUrl], ['ui-config', uiConfigUrl]]) {
+    const inline = inlineConfigDocument(name);
+
+    if (inline !== null) GetConfiguration().preloadDocument(url, inline);
+}
+
 (window as any).OctaneConfig = {
-    'config.urls': [configFileUrl('renderer-config.json', true), configFileUrl('ui-config.json', true)],
+    'config.urls': [rendererConfigUrl, uiConfigUrl],
     'sso.ticket': launchCredentials.ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
@@ -149,6 +194,32 @@ const configurationLoad = GetConfiguration().init().then(
 );
 
 const [petConfig] = await Promise.all([petConfigLoad, configurationLoad]);
+
+// Open the connections to the asset and gamedata hosts now, so the first gamedata requests
+// don't each wait for DNS + TLS once the app starts loading.
+const preconnectOrigins = () => {
+    const origins = new Set<string>();
+
+    for (const key of ['asset.url', 'gamedata.url', 'image.library.url', 'images.url', 'furnidata.url', 'api.url']) {
+        try {
+            const value = GetConfiguration().getValue<string>(key, '');
+            const origin = value ? new URL(GetConfiguration().interpolate(value), window.location.href).origin : '';
+
+            if (origin && origin !== window.location.origin && origin.startsWith('http')) origins.add(origin);
+        } catch {}
+    }
+
+    for (const origin of origins) {
+        const link = document.createElement('link');
+
+        link.rel = 'preconnect';
+        link.href = origin;
+        link.crossOrigin = 'anonymous';
+        document.head.appendChild(link);
+    }
+};
+
+preconnectOrigins();
 
 // pets.json loads alongside the configuration. Its keys override the config files, as the
 // OctaneConfig defaults do, and stay on OctaneConfig for any later configuration reload.
