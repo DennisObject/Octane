@@ -314,6 +314,12 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
     const [closeState, setCloseState] = useState<'default' | 'hovering' | 'pressed'>('default');
     const captionRef = useRef<HTMLDivElement>(null);
     const [captionWidth, setCaptionWidth] = useState(0);
+    // the size the parent last gave the frame (a resize it clamped shows up here after the render)
+    const sizeRef = useRef({ width, height });
+
+    useLayoutEffect(() => {
+        sizeRef.current = { width, height };
+    }, [width, height]);
 
     useEffect(() => {
         const element = captionRef.current;
@@ -358,11 +364,18 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
                     className="native0-scaler"
                     style={rect(width - 15, height - 15, 15, 15)}
                     onPointerDown={(event) => {
-                        const startX = event.clientX;
-                        const startY = event.clientY;
-                        const startWidth = width;
-                        const startHeight = height;
-                        const move = (moveEvent: PointerEvent) => onResize(Math.max(150, startWidth + moveEvent.clientX - startX), Math.max(100, startHeight + moveEvent.clientY - startY));
+                        // like the classic window manager the size follows the pointer by what it moved since the last event, so a size the window refused (its minimum) is not owed back when the pointer returns
+                        let lastX = event.clientX;
+                        let lastY = event.clientY;
+                        const move = (moveEvent: PointerEvent) => {
+                            const nextWidth = Math.max(150, sizeRef.current.width + moveEvent.clientX - lastX);
+                            const nextHeight = Math.max(100, sizeRef.current.height + moveEvent.clientY - lastY);
+
+                            lastX = moveEvent.clientX;
+                            lastY = moveEvent.clientY;
+                            sizeRef.current = { width: nextWidth, height: nextHeight };
+                            onResize(nextWidth, nextHeight);
+                        };
                         const up = () => {
                             window.removeEventListener('pointermove', move);
                             window.removeEventListener('pointerup', up);
