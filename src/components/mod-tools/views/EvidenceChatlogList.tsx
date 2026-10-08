@@ -68,12 +68,21 @@ let evidenceSerial = 0;
  * Asks for the subject of a chatlog and returns the answer once it arrives (classic Q5.show and its message handlers). A new subject (the handler's selected issue, classic cme
  * `_r09b0702aa5e34c` -> `Ey(issueId)` + `Q5._rfe4d5878f91c65(issueId)`, launcher.pretty.js:283314-283338) is requested once and an answer is only taken for the current subject (Q5
  * `_rd036c119a942fb`, 281236: `type === this._type && id === this._id`). The answer of another subject is never returned, so a list switching subject has no content (not the old
- * subject's) until its own answer arrives. A subject of 0 asks for nothing.
+ * subject's) until its own answer arrives, also when it returns to a subject whose earlier answer is still held (A, B asked and unanswered, A again: the held A is dropped when the
+ * subject changes, in the render of the change). The protocol carries no request id, so a delayed answer of an earlier request for the same subject cannot be told from the one asked
+ * for last: the first answer of the subject is taken, a later one replaces it. A subject of 0 asks for nothing.
  */
 export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => {
     const [evidence, setEvidence] = useState<Evidence>(null);
     const requestedRef = useRef<string>(null);
     const subject = id > 0 ? `${kind}:${id}` : null;
+    // the subject the held answer belongs to; when the subject changes the held answer is dropped in this render, not in an effect (no frame shows it)
+    const [heldFor, setHeldFor] = useState<string>(subject);
+
+    if (heldFor !== subject) {
+        setHeldFor(subject);
+        setEvidence(null);
+    }
 
     useEffect(() => {
         // one request per subject (a development double effect run must not send it twice); a subject asked for again after another one is asked for again
@@ -116,7 +125,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
         }
     });
 
-    return evidence !== null && evidence.subject === subject ? evidence : null;
+    return evidence !== null && heldFor === subject && evidence.subject === subject ? evidence : null;
 };
 
 // The rows of a chatlog window (Q5 populate): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per line; the rows
