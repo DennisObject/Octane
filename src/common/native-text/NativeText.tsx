@@ -1,5 +1,6 @@
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from './Air32NativeTextRenderer';
+import { renderCanvasSpacedText, supportsCanvasSpacedText } from './CanvasSpacedText';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from './NativeFont';
 import { useNativeTextScale } from './NativeTextScale';
 import { NativeTextStyleName, nativeTextStyles } from './NativeTextStyles';
@@ -73,6 +74,44 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             // Bound work before tokenisation or native layout. Oversized messages
             // retain the existing DOM text rather than being truncated.
             if (text.length > 8192 || !Number.isInteger(fontStyle.size) || fontStyle.size < 1 || fontStyle.size > 256) return;
+
+            // An explicit letter spacing is drawn like the official client does it (its glyph renderer refuses spacing): the browser canvas, squeezed to the laid-out width.
+            // Only the proven combination takes this branch (see supportsCanvasSpacedText); everything else keeps the native renderer below, spacing ignored as before.
+            const spacedStyle = {
+                family: fontStyle.family,
+                size: fontStyle.size,
+                bold: fontStyle.bold,
+                italic: fontStyle.italic,
+                color: fontStyle.color,
+                letterSpacing: fontStyle.letterSpacing ?? 0
+            };
+
+            if (
+                fontStyle.letterSpacing &&
+                supportsCanvasSpacedText(spacedStyle, {
+                    background,
+                    maxWidth,
+                    leading,
+                    underline: fontStyle.underline,
+                    etched: fontStyle.etchingColor !== undefined || fontStyle.etchingPosition !== undefined
+                })
+            ) {
+                const spaced = await renderCanvasSpacedText(text, spacedStyle, scale).catch(() => null);
+
+                if (disposed || !canvasRef.current) return;
+
+                if (spaced) {
+                    const canvas = canvasRef.current;
+
+                    canvas.width = spaced.canvas.width;
+                    canvas.height = spaced.canvas.height;
+                    canvas.getContext('2d').drawImage(spaced.canvas as CanvasImageSource, 0, 0);
+                    setSize({ width: spaced.width, height: spaced.height });
+
+                    return;
+                }
+            }
+
             const loaded = await loadNativeFont(fontStyle);
             if (disposed || !supportsNativeText(loaded.font, text.replace(/[\r\n]/g, ''))) return;
             const measure = (value: string) => measureNativeText(loaded.font, value, fontStyle);

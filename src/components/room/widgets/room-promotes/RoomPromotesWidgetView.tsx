@@ -75,7 +75,7 @@ export const RoomPromotesWidgetView: FC<{}> = () => {
             <div className={`octane-event-info${isExpanded ? ' is-expanded' : ''}`}>
                 <img alt="" className="octane-event-info__bg" draggable={false} src={isExpanded ? (isOwner ? ownerBackground : visitorBackground) : contractedBackground} />
                 <div className="octane-event-info__region" onClick={onBackgroundClick} />
-                {hasEvent && <RoomPromoteText alignCenter bold size={13} text={eventData.eventName} width={67} x={61} y={2} />}
+                {hasEvent && <RoomPromoteText alignCenter bold size={13} spacing={-0.4} text={eventData.eventName} width={67} x={61} y={2} />}
                 {!hasEvent && canManage && <RoomPromoteText className="is-link" height={17} text={LocalizeText('roomad.get.event')} underline width={126} x={31} y={3} onClick={onBackgroundClick} />}
                 {isExpanded && <RoomPromoteText height={90} text={eventData.eventDescription} width={175} wrap x={10} y={27} />}
                 {showInProgress && <RoomPromoteText alignCenter bold text={LocalizeText('navigator.eventinprogress')} width={156} x={18} y={107} />}
