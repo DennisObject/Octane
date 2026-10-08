@@ -138,14 +138,14 @@ export const Native0Button: FC<Native0ButtonProps> = ({ x, y, width, height, lab
     const [labelOffset, setLabelOffset] = useState({ left: 0, top: 0 });
 
     // The label is centred on whole pixels (flex centring lands on half pixels and blurs the pixel glyphs): the native text field is 13px high and its first glyph row is 2px in, so a
-    // 22px button sets its label one row lower than a 21px one; a label wider than the face minus 5px of padding on both sides
-    // starts 10px in and runs under the right edge (the native "Send Message" button).
+    // 22px button sets its label one row lower than a 21px one; a label wider than the face minus 10px of padding on both sides
+    // starts 10px in and runs under the right edge (the native "Send Message", "Enter room" and "Default sanction" buttons; "Chatlog" and "Edit in HK" stay centred).
     useLayoutEffect(() => {
         const element = labelRef.current;
 
         if (!element) return;
 
-        const place = () => setLabelOffset({ left: element.offsetWidth > width - 10 ? 10 : Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - 13) / 2) + 2 });
+        const place = () => setLabelOffset({ left: element.offsetWidth > width - 20 ? 10 : Math.ceil((width - element.offsetWidth) / 2), top: Math.ceil((height - 13) / 2) + 2 });
 
         place();
 
@@ -204,15 +204,19 @@ interface Native0InputProps {
 
 /** `input` window with border=true: a 1px black outline, Volter text inside the 2px gutter, white background once active. */
 export const Native0Input: FC<Native0InputProps> = ({ x, y, width, height, value, active, onChange, onFocus, name }) => (
-    <textarea
-        className={`native0-input${active ? ' is-active' : ''}`}
-        data-native-name={name}
-        spellCheck={false}
-        style={rect(x, y, width, height)}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onFocus={onFocus}
-    />
+    <>
+        {/* the white of the active field is drawn apart from its text: text on an opaque background is set with LCD subpixel fringes */}
+        {active && <div className="native0-box native0-input-bg" style={rect(x + 1, y + 1, width - 2, height - 2)} />}
+        <textarea
+            className={`native0-input${active ? ' is-active' : ''}`}
+            data-native-name={name}
+            spellCheck={false}
+            style={rect(x, y, width, height)}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            onFocus={onFocus}
+        />
+    </>
 );
 
 interface Native0DropmenuProps {

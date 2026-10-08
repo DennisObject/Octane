@@ -36,8 +36,12 @@ type Item = { kind: 'header'; record: ChatRecordData } | { kind: 'line'; line: C
 
 export interface EvidenceChatlogListProps {
     evidence: Evidence;
-    /** The width of the rows' viewport while the scroller shows (it grows by 22px while the rows fit) and where the scroller sits. */
+    /** The width of the rows while the scroller shows (they grow by `hiddenExtra` while the rows fit). */
     listWidth: number;
+    /** How much wider the rows are while the scroller is hidden (22px, 23px in the chatlog window). */
+    hiddenExtra?: number;
+    /** The width of the clipped viewport the rows and the header buttons are drawn in (the rows' width unless the window says otherwise: the header buttons reach past the shorter rows). */
+    viewportWidth?: number;
     scrollbarX: number;
     scrollbarHeight: number;
     viewHeight: number;
@@ -94,7 +98,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
 // The rows of a chatlog window (Q5 populate): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per line; the rows
 // alternate between a pale blue and white and the chatters the window was opened for take 0xf0d6a3 (the reported user) or 0xa3bdf0 (the caller). A line is 17px at least and
 // as high as its wrapped message plus 5px. Names, messages and the chatter column are set in the row colour (the classic client paints them with the row's own colour value).
-export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, listWidth, scrollbarX, scrollbarHeight, viewHeight, scrollbarVariant = 0, scrollbarBlend, onOpenUserInfo, onOpenRoomTool, onEnterRoom }) => {
+export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, listWidth, hiddenExtra = 22, viewportWidth, scrollbarX, scrollbarHeight, viewHeight, scrollbarVariant = 0, scrollbarBlend, onOpenUserInfo, onOpenRoomTool, onEnterRoom }) => {
     const root = useMemo(() => parseNativeLayout(evidenceXml), []);
     const list = findNativeNode(root, 'evidence_list');
     const header = rectOf(list.children[0]);
@@ -142,7 +146,8 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     });
 
     const overflow = contentHeight > viewHeight;
-    const width = listWidth + (overflow ? 0 : 22);
+    const width = listWidth + (overflow ? 0 : hiddenExtra);
+    const viewport = viewportWidth ?? width;
     const range = Math.max(0, contentHeight - viewHeight);
     const clamped = Math.max(0, Math.min(range, offset));
     const rowColors = items.map((item) => (item.kind === 'header' ? FRAME_COLOR : item.color));
@@ -151,9 +156,9 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
 
     return (
         <>
-            <div className="native0-list" style={{ left: 0, top: 0, width, height: viewHeight }} onWheel={(event) => setOffset(Math.max(0, Math.min(range, clamped + event.deltaY * 0.75)))}>
-                <div style={{ position: 'absolute', left: 0, top: -clamped, width, height: contentHeight }}>
-                    <Native0Rows colors={rowColors} heights={heights} width={Math.max(header.width, line.width)} />
+            <div className="native0-list" style={{ left: 0, top: 0, width: viewport, height: viewHeight }} onWheel={(event) => setOffset(Math.max(0, Math.min(range, clamped + event.deltaY * 0.75)))}>
+                <div style={{ position: 'absolute', left: 0, top: -clamped, width: viewport, height: contentHeight }}>
+                    <Native0Rows colors={rowColors} heights={heights} width={Math.min(width, Math.max(header.width, line.width))} />
                     {items.map((item, index) =>
                         item.kind === 'header' ? (
                             <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height, overflow: 'hidden' }}>

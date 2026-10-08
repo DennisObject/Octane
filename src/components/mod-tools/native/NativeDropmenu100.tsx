@@ -27,12 +27,10 @@ interface Native100DropmenuProps {
     open: boolean;
     onToggle: () => void;
     onSelect: (index: number) => void;
-    /** Rows the open list is taller than its items (the classic handler's 20px menu draws a list one row longer than the 19px ones). */
-    listExtra?: number;
 }
 
 /** dropmenu style 100 (Illumina light): a white rounded face with the caption at (10, 3) and a grey arrow; the open list covers it with the items 19px apart from (6, 2). */
-export const Native100Dropmenu: FC<Native100DropmenuProps> = ({ x, y, width, height, caption, items, selectedIndex = -1, open, onToggle, onSelect, listExtra = 0 }) => {
+export const Native100Dropmenu: FC<Native100DropmenuProps> = ({ x, y, width, height, caption, items, selectedIndex = -1, open, onToggle, onSelect }) => {
     const [over, setOver] = useState(false);
     const [hover, setHover] = useState(-1);
 
@@ -44,8 +42,8 @@ export const Native100Dropmenu: FC<Native100DropmenuProps> = ({ x, y, width, hei
             </div>
             <div className="native100-dropmenu__region" onClick={onToggle} />
             {open && (
-                <div className="native100-dropmenu__list" style={{ left: 0, top: 0, width, height: items.length * ITEM_HEIGHT + 6 + listExtra }} onPointerLeave={() => setHover(-1)}>
-                    <NativeSkinView atlas={illuminaAtlas} height={items.length * ITEM_HEIGHT + 6 + listExtra} layout="illumina_light_dropmenu_frame" skin={LIST_SKIN} width={width} />
+                <div className="native100-dropmenu__list" style={{ left: 0, top: 0, width, height: items.length * ITEM_HEIGHT + 7 }} onPointerLeave={() => setHover(-1)}>
+                    <NativeSkinView atlas={illuminaAtlas} height={items.length * ITEM_HEIGHT + 7} layout="illumina_light_dropmenu_frame" skin={LIST_SKIN} width={width} />
                     {items.map((item, index) => (
                         <div key={index} className="native100-dropmenu__item" style={rect(6, 2 + index * ITEM_HEIGHT, width - 12, ITEM_HEIGHT)} onClick={() => onSelect(index)} onPointerMove={() => setHover(index)}>
                             <NativeSkinView atlas={illuminaAtlas} height={ITEM_HEIGHT} layout="illumina_light_dropmenu_item" skin={SKIN} state={hover === index ? 'hovering' : selectedIndex === index ? 'selected' : 'default'} width={width - 12} />

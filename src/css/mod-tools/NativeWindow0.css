@@ -27,7 +27,8 @@
 .native0-text__line.has-glow { color: inherit; }
 
 .native0-input { position: absolute; margin: 0; padding: 1px 1px 1px 2px; border: 1px solid #000; border-radius: 0; background: transparent; color: #000; font: 400 9px/10px Volter, monospace; resize: none; outline: none; overflow: hidden; caret-color: #000; }
-.native0-input.is-active { background: #fff; }
+.native0-input-bg { background: #fff; pointer-events: none; }
+.native0-input { will-change: transform; }
 .native0-input:focus, .native0-input:focus-visible { border-color: #000; box-shadow: none; outline: none; }
 .native0-dropmenu__region { position: absolute; inset: 0; cursor: pointer; }
 .native0-dropmenu__list { position: absolute; left: 0; z-index: 5; }

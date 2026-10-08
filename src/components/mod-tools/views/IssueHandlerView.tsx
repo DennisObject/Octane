@@ -279,7 +279,6 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                     caption={topicIndex >= 0 ? topicNames[topicIndex] : nativeCaption(findNativeNode(root, 'cfh_topics'))}
                     height={menu.height}
                     items={topicNames}
-                    listExtra={1}
                     open={menuOpen && categoryId !== CATEGORY_NO_TOPIC}
                     selectedIndex={topicIndex}
                     width={menu.width}

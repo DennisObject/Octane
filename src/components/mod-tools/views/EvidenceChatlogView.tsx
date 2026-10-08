@@ -36,7 +36,9 @@ export const EvidenceChatlogView: FC<EvidenceChatlogProps> = ({ kind, id, x, y, 
                 <div className="native0-box" style={{ left: width - 37, top: 0, width: 25, height: height - 32, backgroundColor: '#4184b0' }} />
                 <EvidenceChatlogList
                     evidence={evidence}
+                    hiddenExtra={23}
                     listWidth={width - 60}
+                    viewportWidth={width - 37}
                     scrollbarHeight={height - 32}
                     scrollbarX={width - 29}
                     viewHeight={height - 35}

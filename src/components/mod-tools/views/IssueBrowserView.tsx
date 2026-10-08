@@ -113,7 +113,8 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                         />
                     );
                 })}
-                <div style={{ position: 'absolute', left: base.x, top: base.y }}>
+                {/* the tab's content is clipped by the panel's inner edge (the bottom "release all" button loses its lower border row) */}
+                <div style={{ position: 'absolute', left: base.x, top: base.y, width: panel.x + panel.width - 1 - base.x, height: panel.y + panel.height - 1 - base.y, overflow: 'hidden' }}>
                     {header.children.map((node, index) => (
                         <Native0Text key={index} bold text={label(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x') + (movesRight(node) ? stretchX : 0)} y={nativeNumber(node, 'y')} />
                     ))}
