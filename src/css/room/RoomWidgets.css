@@ -1637,6 +1637,7 @@ textarea.octane-room-promote-edit__input {
 .octane-room-promote-edit__raster {
     position: absolute;
     left: 0;
+    overflow: hidden;
     pointer-events: none;
 }
 
