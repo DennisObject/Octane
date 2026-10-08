@@ -23,8 +23,6 @@ import {
     Game2GetWeeklyGroupLeaderboardComposer,
     Game2GetWeeklyLeaderboardComposer,
     Game2InArenaQueueMessageEvent,
-    Game2VoteArenaMessageComposer,
-    SnowStormArenaVotesMessageEvent,
     Game2JoiningGameFailedMessageEvent,
     Game2LeaveLobbyMessageComposer,
     Game2PlayAgainMessageComposer,
@@ -85,8 +83,6 @@ import {
 } from '../../api/snowwar';
 import { useMessageEvent, useOctaneEvent } from '../events';
 
-// SnowStormManager.VoteArena drops votes within 750 ms; the margin absorbs network jitter.
-const VOTE_INTERVAL_MS = 1000;
 const SNOWSTORM_GAME_TYPE = 0;
 const CONNECTION_LOST_PHASES: readonly ConnectionStatePhase[] = [ 'disconnected', 'reconnecting', 'reauthenticating', 'failed' ];
 const MAX_CHAT_MESSAGES = 50;
@@ -200,7 +196,6 @@ const useSnowWarState = (): SnowWarHookState =>
 
     // AIR `var_475`: the player asked for a rematch (or the server opened the rematch lobby).
     const rematchRequestedRef = useRef(false);
-    const lastVoteRef = useRef<{ fieldType: number; at: number }>(null);
     const resultsRef = useRef<SnowWarResults>(null);
     const roomBeforeGameRef = useRef(-1);
     const returnedToRoomRef = useRef(true);
@@ -344,8 +339,7 @@ const useSnowWarState = (): SnowWarHookState =>
         }
 
         SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
-        lastVoteRef.current = null;
-        setLobby({ data, players: [ ...data.players ], queuePosition: -1, countdownDeadline: null, arenaVotes: null });
+        setLobby({ data, players: [ ...data.players ], queuePosition: -1, countdownDeadline: null });
     }, [ setResults ]);
 
     useMessageEvent<Game2GameCreatedMessageEvent>(Game2GameCreatedMessageEvent, useCallback(event => createLobby(event.getParser().gameLobbyData), [ createLobby ]));
@@ -382,17 +376,6 @@ const useSnowWarState = (): SnowWarHookState =>
         SNOWWAR_ENGINE.setState(SnowWarEngineState.INACTIVE);
         setLobby(current => current && { ...current, players: current.players.filter(player => player.userId !== userId) });
     }, [ setResults ]));
-
-    useMessageEvent<SnowStormArenaVotesMessageEvent>(SnowStormArenaVotesMessageEvent, useCallback(event =>
-    {
-        const parser = event.getParser();
-        const arenas = parser.arenas.map(arena => ({ fieldType: arena.fieldType, votes: arena.votes }));
-
-        setLobby(current => current && {
-            ...current,
-            arenaVotes: { arenas, leadingFieldType: parser.leadingFieldType, ownVote: current.arenaVotes?.ownVote ?? 0 }
-        });
-    }, []));
 
     useMessageEvent<Game2InArenaQueueMessageEvent>(Game2InArenaQueueMessageEvent, useCallback(event =>
     {
@@ -663,20 +646,6 @@ const useSnowWarState = (): SnowWarHookState =>
         setLobby(null);
     }, []);
 
-    const voteArena = useCallback((fieldType: number) =>
-    {
-        const now = Date.now();
-        const last = lastVoteRef.current;
-
-        // The server ignores a vote within 750 ms of the previous one; only send votes it will apply,
-        // so the own-vote outline never moves to an arena the server did not count.
-        if(last && ((last.fieldType === fieldType) || ((now - last.at) < VOTE_INTERVAL_MS))) return;
-
-        lastVoteRef.current = { fieldType, at: now };
-        SendMessageComposer(new Game2VoteArenaMessageComposer(fieldType));
-        setLobby(current => current?.arenaVotes ? { ...current, arenaVotes: { ...current.arenaVotes, ownVote: fieldType } } : current);
-    }, []);
-
     /** `GameEndingViewController.onJoinRematch`. */
     const rematch = useCallback(() =>
     {
@@ -810,7 +779,6 @@ const useSnowWarState = (): SnowWarHookState =>
         refreshStatus,
         play,
         leaveLobby,
-        voteArena,
         rematch,
         playAgain,
         exitGame,
