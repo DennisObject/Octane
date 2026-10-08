@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, OctaneLogger, OctaneTexture } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, OctaneLogger, OctaneTexture, RequestCameraConfigurationComposer } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -11,6 +11,7 @@ import {
     LocalizeText,
     NotificationAlertType,
     PlaySound,
+    SendMessageComposer,
     SoundNames
 } from '../../../api';
 import { Column, DraggableWindow } from '../../../common';
@@ -45,6 +46,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
     const videoRef = useRef<HTMLVideoElement>(null);
     const flashRef = useRef<HTMLDivElement>(null);
     const isTakingPictureRef = useRef(false);
+    const hasRequestedPreparationRef = useRef(false);
     const isMountedRef = useRef(true);
     const pendingCapturedSlotRef = useRef(-1);
     const pendingShouldShowFullAlertRef = useRef(false);
@@ -107,6 +109,22 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     video.style.width = `${sourceBounds.width}px`;
                     video.style.height = `${sourceBounds.height}px`;
                     video.style.transform = `translate3d(${sourceBounds.left - targetBounds.left}px, ${sourceBounds.top - targetBounds.top}px, 0)`;
+                }
+            }
+
+            if (!hasRequestedPreparationRef.current) {
+                const roomFrame = getViewfinderRoomFrame(target, 320, 320);
+
+                if (roomFrame) {
+                    try {
+                        const viewport = getTrustedCameraViewport(roomFrame);
+
+                        // Preparation is best effort and sends the same geometry as the shutter.
+                        hasRequestedPreparationRef.current = true;
+                        SendMessageComposer(new RequestCameraConfigurationComposer(JSON.stringify(viewport)));
+                    } catch {
+                        // The room geometry may not be ready on the first animation frame.
+                    }
                 }
             }
 
