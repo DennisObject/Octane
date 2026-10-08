@@ -112,15 +112,15 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
     const itemX = (node: NativeNode, name: string) => rectOf(findNativeNode(node, name));
 
     // the left column is a vertical item list with 3px between its items. Measured against the classic client over its whole height (sweep of 30 sizes, 390 to 650): once the window has been
-    // resized the two lists share what is left, each (height - 515) / 2 rounded up and at least 0 (54px at 623, none from 517 down); the XML's own 70px lists only exist until then. Below 515 the
-    // content is taller than the column and is centred in it (shifted up by half the overflow, rounded toward zero), so the header and captions leave through the top. Without the reported
-    // user's panel (223px less) the same rule holds with 292 (inferred, not captured).
+    // resized the two lists share what is left, each ceil((height - 515) / 2) tall (54px at 623) and it goes on below zero (-62px at 390: the items overlap and the header and captions are covered
+    // by the panels); the XML's own 70px lists only exist until then. Without the reported user's panel (223px less) the same rule holds with 292 (inferred, not captured).
     const columnBase = reportedShown ? 515 : 292;
-    const resized = height !== HANDLER_HEIGHT;
-    const listHeights = resized ? Math.max(0, Math.ceil((height - columnBase) / 2)) : 70;
-    const columnShift = resized ? Math.trunc(Math.min(0, (height - columnBase) / 2)) : 0;
+    const listRaw = height === HANDLER_HEIGHT ? 70 : Math.ceil((height - columnBase) / 2);
+    const listHeights = Math.max(0, listRaw);
     const rows = { issues: listHeights, messages: listHeights };
-    let cursor = columnShift;
+    // the messages list does not go up past the place it has at a height of 3: its first row stays there and the panel below covers it (12px of the row are left at -2, 2px at -7)
+    const msgShift = Math.max(0, 3 - listRaw);
+    let cursor = 0;
     const place = (itemHeight: number) => {
         const at = cursor;
 
@@ -129,11 +129,11 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
         return at;
     };
     const yHeader = place(13);
-    const yIssues = place(rows.issues);
+    const yIssues = place(listRaw);
     const yCallerCaption = place(13);
     const yCaller = place(207);
     const yMessagesCaption = place(14);
-    const yMessages = place(rows.messages);
+    const yMessages = place(listRaw);
     const yReportedCaption = reportedShown ? place(13) : 0;
     const yReported = reportedShown ? place(207) : 0;
 
@@ -166,8 +166,9 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
         return { text, color: index % 2 === 0 ? SHADE : 0xffffff, height: 19 };
     });
     const messagesHeight = messageRows.reduce((sum, row) => sum + row.height, 0);
-    const msgOverflow = messagesHeight > rows.messages;
-    const clampedMessages = Math.max(0, Math.min(Math.max(0, messagesHeight - rows.messages), messageOffset));
+    const msgView = Math.max(rows.messages, 19);
+    const msgOverflow = messagesHeight > msgView;
+    const clampedMessages = Math.max(0, Math.min(Math.max(0, messagesHeight - msgView), messageOffset));
 
     const callerId = current.issue.reporterUserId;
     const chatRect = { x: chatCont.x, y: chatCont.y, width: chatCont.width, height: chatCont.height };
@@ -183,13 +184,17 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
             <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
-                {/* the column is clipped to its own box (the content may be taller than the window leaves room for) */}
-                <div style={{ position: 'absolute', left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), overflow: 'hidden' }}>
-                {/* text on an opaque background is set with LCD subpixel fringes: the backgrounds are drawn apart and the texts get a layer of their own */}
-                <div style={{ position: 'absolute', left: 0, top: 0, width: 280, height: yHeader + 20, willChange: 'transform', pointerEvents: 'none' }}>
-                    {header.children.map((node, index) => (
-                        <Native0Text key={index} bold color={0xffffff} glow={HANDLER_GLOW} text={nativeCaption(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x')} y={yHeader + nativeNumber(node, 'y')} />
-                    ))}
+                {/* the column is not clipped: below 515 its content is taller than the window and runs up over the frame's header like the classic client's */}
+                <div style={{ position: 'absolute', left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32) }}>
+                <div style={{ position: 'absolute', left: 0, top: 0, width: 285, height: 1200, willChange: 'transform', pointerEvents: 'none', clipPath: 'polygon(0 -4px, 100% -4px, 100% 100%, 0 100%)' }}>
+                    {/* the headings sit under the lists and panels and under the frame's header (the 4px above the client): when the window is small they are covered (the messages row hides most of "Reported User Info") */}
+                    <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Caller User Info" width={100} x={95} y={yCallerCaption} />
+                    <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Messages" width={60} x={110} y={yMessagesCaption} />
+                    {reportedShown && <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Reported User Info" width={120} x={80} y={yReportedCaption} />}
+                    {/* text on an opaque background is set with LCD subpixel fringes: the backgrounds are drawn apart and the texts get a layer of their own */}
+                        {header.children.map((node, index) => (
+                            <Native0Text key={index} bold color={0xffffff} glow={HANDLER_GLOW} text={nativeCaption(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x')} y={yHeader + nativeNumber(node, 'y')} />
+                        ))}
                 </div>
                 <div className="native0-box" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, backgroundColor: '#fff' }} />
                 <div className="native0-list" style={{ left: 0, top: yIssues, width: 280, height: rows.issues, willChange: 'transform' }}>
@@ -204,13 +209,11 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         ))}
                     </div>
                 </div>
-                <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Caller User Info" width={100} x={95} y={yCallerCaption} />
                 <div style={{ position: 'absolute', left: 0, top: yCaller, width: 280, height: 207 }}>
                     <UserInfoPanel key={callerId} settings={settings} userId={callerId} {...panelHandlers(callerId)} />
                 </div>
-                <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Messages" width={60} x={110} y={yMessagesCaption} />
                 <div className="native0-box" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, backgroundColor: '#fff' }} />
-                <div className="native0-list" style={{ left: 0, top: yMessages, width: 280, height: rows.messages, willChange: 'transform' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - rows.messages), clampedMessages + event.deltaY * 0.75)))}>
+                <div className="native0-list" style={{ left: 0, top: yMessages + msgShift, width: 280, height: msgView, willChange: 'transform' }} onWheel={(event) => setMessageOffset(Math.max(0, Math.min(Math.max(0, messagesHeight - msgView), clampedMessages + event.deltaY * 0.75)))}>
                     <div style={{ position: 'absolute', left: 0, top: -clampedMessages, width: msgOverflow ? 263 : 280, height: messagesHeight }}>
                         <Native0Rows colors={messageRows.map((row) => row.color)} heights={messageRows.map((row) => row.height)} width={msgOverflow ? 263 : 280} />
                         {messageRows.map((row, index) => (
@@ -218,10 +221,9 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
                         ))}
                     </div>
                 </div>
-                {msgOverflow && <Native0Scrollbar contentHeight={messagesHeight} height={rows.messages} offset={clampedMessages} viewHeight={rows.messages} x={263} y={yMessages} onOffset={setMessageOffset} />}
+                {msgOverflow && <Native0Scrollbar contentHeight={messagesHeight} height={msgView} offset={clampedMessages} viewHeight={msgView} x={263} y={yMessages} onOffset={setMessageOffset} />}
                 {reportedShown && (
                     <>
-                        <Native0Text bold color={0xffffff} glow={HANDLER_GLOW} text="Reported User Info" width={120} x={80} y={yReportedCaption} />
                         <div style={{ position: 'absolute', left: 0, top: yReported, width: 280, height: 207 }}>
                             <UserInfoPanel key={bundle.reportedUserId} settings={settings} userId={bundle.reportedUserId} {...panelHandlers(bundle.reportedUserId)} />
                         </div>
