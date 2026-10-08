@@ -130,7 +130,7 @@ export const CatalogPurchaseConfirmView: FC<CatalogPurchaseConfirmViewProps> = (
                             {hasActivityPoints && (
                                 <span className="octane-catalog-purchase-confirm-price" data-currency-type={offer.activityPointType}>
                                     <strong>{hasCredits ? `+ ${activityPoints}` : activityPoints}</strong>
-                                    <LayoutCurrencyIcon type={offer.activityPointType} />
+                                    <LayoutCurrencyIcon big type={offer.activityPointType} />
                                 </span>
                             )}
                             {!hasCredits && !hasActivityPoints && (

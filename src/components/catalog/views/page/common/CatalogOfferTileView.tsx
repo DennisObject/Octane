@@ -1,7 +1,14 @@
 import { MouseEventType } from '@octane/renderer';
 import { FC, KeyboardEvent, MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, GetProductIconUrl, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
-import { LayoutAvatarImageView, LayoutGridItem, LayoutGridItemProps, LayoutHabbiconImageView } from '../../../../../common';
+import {
+    LayoutActivityPointIcon,
+    LayoutAvatarImageView,
+    LayoutGridItem,
+    LayoutGridItemProps,
+    LayoutHabbiconImageView,
+    UsesActivityPointIcon
+} from '../../../../../common';
 import { isAirBaseCatalogOffer } from './catalogAirGrid.helpers';
 
 export interface CatalogOfferTileViewProps extends LayoutGridItemProps {
@@ -146,8 +153,12 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                             <span key={`${price.type}-${index}`} className="octane-catalog-grid-price-entry">
                                 {index > 0 && <span className="octane-catalog-grid-price-plus">+</span>}
                                 <span className="octane-catalog-grid-price-amount">{price.amount}</span>
-                                {!!getCurrencyIconUrl(price.type) && (
-                                    <img className="octane-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
+                                {UsesActivityPointIcon(price.type) ? (
+                                    <LayoutActivityPointIcon type={price.type} />
+                                ) : (
+                                    !!getCurrencyIconUrl(price.type) && (
+                                        <img className="octane-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
+                                    )
                                 )}
                             </span>
                         ))}

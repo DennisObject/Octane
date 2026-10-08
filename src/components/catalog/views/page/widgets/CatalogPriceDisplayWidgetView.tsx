@@ -7,10 +7,11 @@ import { useCatalogBundleDiscountRuleset, useCatalogUiState } from '../../../../
 interface CatalogPriceDisplayWidgetViewProps {
     offer: IPurchasableOffer;
     separator?: boolean;
+    bigIcons?: boolean;
 }
 
 export const CatalogPriceDisplayWidgetView: FC<CatalogPriceDisplayWidgetViewProps> = (props) => {
-    const { offer = null, separator = false } = props;
+    const { offer = null, separator = false, bigIcons = false } = props;
     const { purchaseOptions = null } = useCatalogUiState();
     const { data: bundleDiscountRuleset = null } = useCatalogBundleDiscountRuleset();
     const { quantity = 1 } = purchaseOptions;
@@ -39,7 +40,7 @@ export const CatalogPriceDisplayWidgetView: FC<CatalogPriceDisplayWidgetViewProp
             {offer.priceInActivityPoints > 0 && (
                 <div className="octane-catalog-standard-price-pill is-activity-points" data-currency-type={offer.activityPointType}>
                     <Price price={activityPoints} />
-                    <LayoutCurrencyIcon type={offer.activityPointType} />
+                    <LayoutCurrencyIcon big={bigIcons} type={offer.activityPointType} />
                 </div>
             )}
         </div>

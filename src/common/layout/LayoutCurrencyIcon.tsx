@@ -1,13 +1,16 @@
 import { CSSProperties, FC, useMemo } from 'react';
 import { GetConfigurationValue } from '../../api';
 import { Base, BaseProps } from '../Base';
+import { LayoutActivityPointIcon, UsesActivityPointIcon } from './LayoutActivityPointIcon';
 
 export interface CurrencyIconProps extends BaseProps<HTMLDivElement> {
     type: number | string;
+    big?: boolean;
 }
 
 export const LayoutCurrencyIcon: FC<CurrencyIconProps> = (props) => {
-    const { type = '', classNames = [], style = {}, ...rest } = props;
+    const { type = '', big = false, classNames = [], style = {}, ...rest } = props;
+    const activityPointType = typeof type === 'number' ? type : Number.NaN;
 
     const getClassNames = useMemo(() => {
         const newClassNames: string[] = ['octane-currency-icon', 'bg-center bg-no-repeat w-[15px] h-[15px]'];
@@ -34,6 +37,8 @@ export const LayoutCurrencyIcon: FC<CurrencyIconProps> = (props) => {
 
         return newStyle;
     }, [style, urlString]);
+
+    if (UsesActivityPointIcon(activityPointType, big)) return <LayoutActivityPointIcon big={big} type={activityPointType} />;
 
     return <Base classNames={getClassNames} style={getStyle} {...rest} />;
 };
