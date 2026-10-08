@@ -1,6 +1,6 @@
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from './Air32NativeTextRenderer';
-import { renderCanvasSpacedText } from './CanvasSpacedText';
+import { renderCanvasSpacedText, supportsCanvasSpacedText } from './CanvasSpacedText';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from './NativeFont';
 import { useNativeTextScale } from './NativeTextScale';
 import { NativeTextStyleName, nativeTextStyles } from './NativeTextStyles';
@@ -76,19 +76,27 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             if (text.length > 8192 || !Number.isInteger(fontStyle.size) || fontStyle.size < 1 || fontStyle.size > 256) return;
 
             // An explicit letter spacing is drawn like the official client does it (its glyph renderer refuses spacing): the browser canvas, squeezed to the laid-out width.
-            if (fontStyle.letterSpacing && fontStyle.family === 'Ubuntu' && maxWidth === undefined) {
-                const spaced = await renderCanvasSpacedText(
-                    text,
-                    {
-                        family: 'Ubuntu',
-                        size: fontStyle.size,
-                        bold: fontStyle.bold,
-                        italic: fontStyle.italic,
-                        color: fontStyle.color,
-                        letterSpacing: fontStyle.letterSpacing
-                    },
-                    scale
-                ).catch(() => null);
+            // Only the proven combination takes this branch (see supportsCanvasSpacedText); everything else keeps the native renderer below, spacing ignored as before.
+            const spacedStyle = {
+                family: fontStyle.family,
+                size: fontStyle.size,
+                bold: fontStyle.bold,
+                italic: fontStyle.italic,
+                color: fontStyle.color,
+                letterSpacing: fontStyle.letterSpacing ?? 0
+            };
+
+            if (
+                fontStyle.letterSpacing &&
+                supportsCanvasSpacedText(spacedStyle, {
+                    background,
+                    maxWidth,
+                    leading,
+                    underline: fontStyle.underline,
+                    etched: fontStyle.etchingColor !== undefined || fontStyle.etchingPosition !== undefined
+                })
+            ) {
+                const spaced = await renderCanvasSpacedText(text, spacedStyle, scale).catch(() => null);
 
                 if (disposed || !canvasRef.current) return;
 

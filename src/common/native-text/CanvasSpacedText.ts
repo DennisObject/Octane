@@ -4,6 +4,10 @@
 // with smoothing "high". Measuring, field size, baseline and the calibration below follow the client's TextField (HabboAirLauncher.app.js:
 // _r121392d1d01cef, _r64aca03d869337, _r7b5b881a01c0c8, _rdfb691d66bce08, _ref22c5ac98e5b8) and its vertical calibrator (class uZ).
 // The pixels come from the browser's own text rasteriser, so they match the client only in the same browser and platform. Real AIR output is not proven.
+//
+// Options the client's canvas fallback ignores on purpose, so they are ignored here too (changing the raster for them would diverge from the client):
+// sharpness, thickness, kerning (the canvas kerns with fontKerning "auto"; the layout's kerning=false only parametrises its AIR32 renderer), antiAliasType and
+// gridFitType. Options it does not draw this way (underline, etching, leading, italic, another colour or surface) are declined by supportsCanvasSpacedText.
 
 const FONT_URLS = {
     regular: new URL('../../assets/webfonts/Ubuntu.ttf', import.meta.url).href,
@@ -20,7 +24,7 @@ const SUPERSAMPLE = 2;
 const HIGH_RESOLUTION = 6;
 
 export interface CanvasSpacedTextStyle {
-    family: 'Ubuntu';
+    family: string;
     size: number;
     bold?: boolean;
     italic?: boolean;
@@ -44,9 +48,20 @@ interface VerticalMetrics {
 type Canvas = HTMLCanvasElement | OffscreenCanvas;
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
+/** The native text renderer's own field limit (NativeText skips a field above 2 MP); every canvas here, large or probe, is held to it before it is created. */
+const MAX_CANVAS_PIXELS = 2 * 1024 * 1024;
+const MAX_CANVAS_SIDE = 16384;
+const MAX_FONT_SIZE = 256;
+const MAX_LETTER_SPACING = 64;
+const MAX_SCALE = 4;
+
 const createCanvas = (width: number, height: number): Canvas | null => {
+    if (!Number.isFinite(width) || !Number.isFinite(height)) return null;
+
     const w = Math.max(1, Math.ceil(width));
     const h = Math.max(1, Math.ceil(height));
+
+    if (w > MAX_CANVAS_SIDE || h > MAX_CANVAS_SIDE || w * h > MAX_CANVAS_PIXELS) return null;
 
     if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
 
@@ -78,6 +93,35 @@ const getMeasureContext = () => {
     return measureContext;
 };
 
+export interface CanvasSpacedTextSurface {
+    /** The surface colour NativeText was asked to composite against. */
+    background: number;
+    maxWidth?: number;
+    leading?: number;
+    underline?: boolean;
+    etched?: boolean;
+}
+
+/**
+ * The only combination proven against the client: white text on a black surface (the promo's screen-blended composition), one line, no
+ * underline/etching/leading/italic, a finite integer size and a finite spacing. Anything else keeps the existing native renderer.
+ */
+export const supportsCanvasSpacedText = (style: CanvasSpacedTextStyle, surface: CanvasSpacedTextSurface): boolean =>
+    style.family === 'Ubuntu' &&
+    Number.isInteger(style.size) &&
+    style.size >= 1 &&
+    style.size <= MAX_FONT_SIZE &&
+    Number.isFinite(style.letterSpacing) &&
+    style.letterSpacing !== 0 &&
+    Math.abs(style.letterSpacing) <= MAX_LETTER_SPACING &&
+    !style.italic &&
+    (style.color ?? 0) === 0xffffff &&
+    surface.background === 0x000000 &&
+    surface.maxWidth === undefined &&
+    !surface.leading &&
+    !surface.underline &&
+    !surface.etched;
+
 /** The client measures a line with the 2D context (kerning auto) and adds the spacing between UTF-16 units: ceil(width + letterSpacing * (length - 1)). */
 export const measureCanvasSpacedText = (text: string, style: CanvasSpacedTextStyle): number | null => {
     if (text.length === 0) return 0;
@@ -89,8 +133,9 @@ export const measureCanvasSpacedText = (text: string, style: CanvasSpacedTextSty
     context.font = fontString(style);
 
     const spacing = style.letterSpacing !== 0 && text.length > 1 ? style.letterSpacing * (text.length - 1) : 0;
+    const width = Math.max(0, Math.ceil(context.measureText(text).width + spacing));
 
-    return Math.max(0, Math.ceil(context.measureText(text).width + spacing));
+    return Number.isFinite(width) ? width : null;
 };
 
 // Ascender / descender / line gap of the font file: OS/2 typo values when USE_TYPO_METRICS is set, else hhea with a line gap of 0 (the client's H0r).
@@ -434,7 +479,7 @@ interface Calibration {
 const calibrations = new Map<string, Calibration>();
 
 /** The client's per-font vertical scale (1 / resolution when nothing better is found) and the baseline offset the draw subtracts. */
-const calibrate = (spec: CalibrationSpec): Calibration => {
+const calibrate = (spec: CalibrationSpec): Calibration | null => {
     const cached = calibrations.get(spec.key);
 
     if (cached) return cached;
@@ -446,6 +491,10 @@ const calibrate = (spec: CalibrationSpec): Calibration => {
         return image === null ? null : probeInk(image);
     };
     const initial = probeAt(base, 0);
+
+    // Without a probe (an allocation above the limit, an unreadable canvas) there is nothing to calibrate against: decline instead of drawing uncalibrated.
+    if (initial === null) return null;
+
     const baselineOffset = baselineOffsetFor(spec, initial);
     const memo = new Map<number, InkProbe | null>();
     const evaluate = (scale: number) => {
@@ -475,7 +524,11 @@ const calibrate = (spec: CalibrationSpec): Calibration => {
 
 /** The supersampled canvas and the downscale to layout pixels (times `scale`); null when the browser cannot draw it. */
 export const renderCanvasSpacedText = async (text: string, style: CanvasSpacedTextStyle, scale = 1): Promise<CanvasSpacedTextRaster | null> => {
-    if (style.family !== 'Ubuntu' || text.length === 0 || /[\r\n]/.test(text) || typeof document === 'undefined' || !document.fonts) return null;
+    if (!supportsCanvasSpacedText(style, { background: 0x000000 })) return null;
+
+    if (text.length === 0 || /[\r\n]/.test(text) || typeof document === 'undefined' || !document.fonts) return null;
+
+    if (!Number.isInteger(scale) || scale < 1 || scale > MAX_SCALE) return null;
 
     const font = fontString(style);
 
@@ -496,7 +549,11 @@ export const renderCanvasSpacedText = async (text: string, style: CanvasSpacedTe
     const height = Math.ceil(vertical.lineHeight + TOP_MARGIN + BOTTOM_MARGIN);
     const resolution = SUPERSAMPLE * Math.max(1, scale);
     const spec: CalibrationSpec = { key: `${font}|${resolution}`, font, size: style.size, resolution, highResolution: Math.max(resolution, HIGH_RESOLUTION) };
-    const { scaleY, baselineOffset } = calibrate(spec);
+    const calibration = calibrate(spec);
+
+    if (calibration === null) return null;
+
+    const { scaleY, baselineOffset } = calibration;
     const largeCanvas = createCanvas(width * resolution, height * resolution);
     const largeContext = contextOf(largeCanvas);
     const outputCanvas = createCanvas(width * scale, height * scale);
