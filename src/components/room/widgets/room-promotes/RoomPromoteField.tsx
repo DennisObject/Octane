@@ -15,7 +15,8 @@ interface RoomPromoteFieldProps {
 
 /**
  * An iro_event_settings input TextField (217px wide, 1px border). While it is focused, or whenever the v75 raster would not fit, the browser
- * draws the text so caret, selection and IME stay the browser's; at rest the v75 raster is drawn over the field.
+ * draws the text so caret, selection and IME stay the browser's; at rest the v75 raster is drawn inside the field's border, clipped to its
+ * 215px interior like the native field (a single line is clipped vertically, a wrapped description must fit).
  */
 export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxLength, y, height, multiline = false, isError = false, onChange, onBlur }) => {
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -23,11 +24,11 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
     const [rasterFits, setRasterFits] = useState(false);
 
     useLayoutEffect(() => {
-        const field = overlayRef.current?.firstElementChild as HTMLElement | null;
+        const field = overlayRef.current?.firstElementChild?.firstElementChild as HTMLElement | null;
 
         if (!field) return;
 
-        const measure = () => setRasterFits(field.dataset.nativeText !== 'fallback' && field.offsetWidth <= 215 && field.offsetHeight <= height - 2);
+        const measure = () => setRasterFits(field.dataset.nativeText !== 'fallback' && field.offsetWidth <= 215 && (!multiline || field.offsetHeight <= height - 2));
         const observer = new ResizeObserver(measure);
         const mutations = new MutationObserver(measure);
 
@@ -39,7 +40,7 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
             observer.disconnect();
             mutations.disconnect();
         };
-    }, [value, height]);
+    }, [value, height, multiline]);
 
     const showRaster = !isEditing && rasterFits && value.length > 0;
     const props = {
@@ -58,8 +59,10 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
     return (
         <>
             {multiline ? <textarea {...props} onChange={(event) => onChange(event.target.value)} /> : <input {...props} type="text" onChange={(event) => onChange(event.target.value)} />}
-            <div ref={overlayRef} aria-hidden="true" className={`octane-room-promote-edit__raster${showRaster ? '' : ' is-hidden'}`} style={{ top: y }}>
-                <NativeText background={isError ? 0xffe91b : 0xffffff} maxWidth={multiline ? 217 : undefined} overrides={{ sharpness: 0, thickness: 0 }} text={value} textStyle="u_regular" />
+            <div ref={overlayRef} aria-hidden="true" className={`octane-room-promote-edit__raster${showRaster ? '' : ' is-hidden'}`} style={{ top: y + 1, left: 1, width: 215, height: height - 2 }}>
+                <div style={{ position: 'absolute', left: -1, top: -1 }}>
+                    <NativeText background={isError ? 0xffe91b : 0xffffff} maxWidth={multiline ? 217 : undefined} overrides={{ sharpness: 0, thickness: 0 }} text={value} textStyle="u_regular" />
+                </div>
             </div>
         </>
     );

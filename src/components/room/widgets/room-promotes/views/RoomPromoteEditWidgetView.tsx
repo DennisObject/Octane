@@ -3,6 +3,7 @@ import { FC, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
 import { NativeText } from '../../../../../common/native-text/NativeText';
+import { useAirFieldWidth } from '../../../../achievements/AchievementText';
 import { RoomPromoteField } from '../RoomPromoteField';
 
 interface RoomPromoteEditWidgetViewProps {
@@ -17,12 +18,16 @@ interface RoomPromoteEditWidgetViewProps {
 const NAME_LENGTH = 25;
 const DESCRIPTION_LENGTH = 100;
 const MIN_NAME_LENGTH = 3;
+const FRAME_WIDTH = 241;
 
 export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ eventId, eventName, eventDescription, onClose }) => {
     const [name, setName] = useState<string>(eventName);
     const [description, setDescription] = useState<string>(eventDescription);
     const [hasNameError, setHasNameError] = useState<boolean>(false);
     const lastSaved = useRef<string>(JSON.stringify([eventName, eventDescription]));
+    const caption = LocalizeText('navigator.eventsettings.editcaption');
+    // The official caption sits at floor((frame - field) / 2) with the AIR field width (floor(textWidth) + 5), one pixel left of CSS centring for this frame.
+    const captionWidth = useAirFieldWidth(caption, 12, true, 'u_frame_title');
 
     const save = (nextName: string, nextDescription: string) => {
         if (nextName.trim().length < MIN_NAME_LENGTH) {
@@ -43,9 +48,16 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     };
 
     return (
-        <OctaneCardView aria-label={LocalizeText('navigator.eventsettings.editcaption')} className="octane-room-promote-edit" frameStyle={3} isResizable={false} role="dialog" uniqueKey="room-promote-edit">
+        <OctaneCardView aria-label={caption} className="octane-room-promote-edit" frameStyle={3} isResizable={false} role="dialog" uniqueKey="room-promote-edit">
             <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
-                <NativeText background={0x377998} className="octane-room-promote-edit__title" overrides={{ color: 0xffffff }} text={LocalizeText('navigator.eventsettings.editcaption')} textStyle="u_frame_title" />
+                <NativeText
+                    background={0x377998}
+                    className="octane-room-promote-edit__title"
+                    overrides={{ color: 0xffffff }}
+                    style={captionWidth === undefined ? undefined : { left: Math.floor((FRAME_WIDTH - captionWidth) / 2), transform: 'none' }}
+                    text={caption}
+                    textStyle="u_frame_title"
+                />
             </OctaneCardHeaderView>
             <div className="octane-room-promote-edit__client">
                 <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
