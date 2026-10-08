@@ -132,6 +132,20 @@ const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
     return nodes.reverse();
 };
 
+// The first visible page under a tab, through page-less headings (official getPathToNodeWithLayout).
+const findTabLandingNode = (node: ICatalogNode): ICatalogNode | null => {
+    for (const child of node.children) {
+        if (!child.isVisible) continue;
+        if (child.pageId > -1) return child;
+
+        const landing = child.isBranch ? findTabLandingNode(child) : null;
+
+        if (landing) return landing;
+    }
+
+    return null;
+};
+
 export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) => ({
     ...INITIAL_CATALOG_UI_STATE,
 
@@ -178,14 +192,12 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
     activateNode: (targetNode, offerId = -1) => {
         get().cancelObjectMover();
 
-        if (targetNode.parent && targetNode.parent.pageName === 'root' && targetNode.children.length) {
-            for (const child of targetNode.children) {
-                if (!child.isVisible) continue;
+        // A tab shows its content like the official client (CatalogNavigator.showNodeContent): it lands on
+        // the first page under it, walking down through page-less headings, and selecting it again resets to
+        // that page instead of toggling it closed.
+        const isTab = !!(targetNode.parent && targetNode.parent.pageName === 'root' && targetNode.children.length);
 
-                targetNode = child;
-                break;
-            }
-        }
+        if (isTab) targetNode = findTabLandingNode(targetNode) ?? targetNode;
 
         const nodes = pathToRoot(targetNode);
         const previous = get().activeNodes;
@@ -206,7 +218,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             if (node === targetNode.parent && node.children.length) node.open();
         }
 
-        if (wasActive && wasOpen) targetNode.close();
+        if (wasActive && wasOpen && !isTab) targetNode.close();
         else targetNode.open();
 
         const pageId = targetNode.pageId;
