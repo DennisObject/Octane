@@ -28,8 +28,11 @@ const MIN_LINE_HEIGHT = 17;
 // A message row is the message field's textHeight + 5 (classic Q5 `_r9b26f640bf0ca4` / `_r56f7b643e3bd62`, launcher.pretty.js:281473-281530) and the field's textHeight is its line count times the
 // 13.4px line of Ubuntu 12 (the shared NativeText metrics: ascent 11.15 + descent 2.25), cut to a whole pixel: 31 for 2 lines, 45 for 3, 58 for 4, 72 for 5 (not lines * 13.33)
 const MESSAGE_LINE_HEIGHT = 13.4;
+const NO_LINES: Record<number, number> = {};
 
 export interface Evidence {
+    /** Which delivery this is: a record that replaces another in the same window starts its rows (and what they remember of their first layout) afresh. */
+    serial: number;
     caption: string;
     records: ChatRecordData[];
     highlights: Map<number, number>;
@@ -57,6 +60,8 @@ export interface EvidenceChatlogListProps {
     onEnterRoom: (roomId: number) => void;
 }
 
+let evidenceSerial = 0;
+
 /** Asks for the subject of a chatlog and returns the answer once it arrives (classic Q5.show and its message handlers). */
 export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => {
     const [evidence, setEvidence] = useState<Evidence>(null);
@@ -73,13 +78,13 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
     useMessageEvent<UserChatlogEvent>(UserChatlogEvent, (event) => {
         const data = event.getParser()?.data;
 
-        if (kind === 'user' && data?.userId === id) setEvidence({ caption: `User Chatlog: ${data.username}`, records: data.roomChatlogs, highlights: new Map([[data.userId, 0]]) });
+        if (kind === 'user' && data?.userId === id) setEvidence({ serial: ++evidenceSerial, caption: `User Chatlog: ${data.username}`, records: data.roomChatlogs, highlights: new Map([[data.userId, 0]]) });
     });
 
     useMessageEvent<RoomChatlogEvent>(RoomChatlogEvent, (event) => {
         const data = event.getParser()?.data;
 
-        if (kind === 'room' && data?.roomId === id) setEvidence({ caption: `Room Chatlog: ${data.roomName}`, records: [data], highlights: new Map() });
+        if (kind === 'room' && data?.roomId === id) setEvidence({ serial: ++evidenceSerial, caption: `Room Chatlog: ${data.roomName}`, records: [data], highlights: new Map() });
     });
 
     useMessageEvent<CfhChatlogEvent>(CfhChatlogEvent, (event) => {
@@ -87,6 +92,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
 
         if (kind === 'cfh' && data?.issueId === id) {
             setEvidence({
+                serial: ++evidenceSerial,
                 caption: `Call For Help Evidence #${data.chatRecordId}`,
                 records: [data.chatRecord],
                 highlights: new Map([
@@ -115,14 +121,17 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     const chatter = rectOf(findNativeNode(root, 'chatter_txt'));
     const message = rectOf(findNativeNode(root, 'msg_txt'));
     const [offset, setOffset] = useState(0);
-    // wrapped line count of each message, by item index
-    const [messageHeights, setMessageHeights] = useState<Record<number, number>>({});
+    // wrapped line count of each message, by item index, of the evidence they were measured for
+    const [measured, setMeasured] = useState<{ serial: number; lines: Record<number, number> }>({ serial: -1, lines: {} });
+    const messageHeights = measured.serial === evidence?.serial ? measured.lines : NO_LINES;
     // The row heights of the list as it was laid out before its first resize. The classic list sets the chatter and time fields to the row's height when it fills the row and only the message
     // field and the row follow a later resize (launcher.pretty.js:281473-281485 against 281513-281526; no scale bit of those fields follows the height), so the chatter's white stays as tall as
-    // the row was then (OBSERVED: native shrink -90/-100 and the reverse to the pristine size; a snapshot, not a delay).
-    const heightsRef = useRef<number[]>([]);
-    const firstSizeRef = useRef<{ listWidth: number; viewHeight: number }>({ listWidth, viewHeight });
-    const [createdHeights, setCreatedHeights] = useState<number[]>(null);
+    // the row was then (OBSERVED: native shrink -90/-100 and the reverse to the pristine size; a snapshot, not a delay). The snapshot belongs to the evidence it was taken of, and it is
+    // only taken from a layout whose messages were all measured (before that the rows are the 17px of an unmeasured line, which the classic list never has).
+    const layoutRef = useRef<{ serial: number; heights: number[]; complete: boolean; listWidth: number; viewHeight: number; snapshotDone: boolean }>({ serial: -1, heights: [], complete: false, listWidth, viewHeight, snapshotDone: false });
+    const [created, setCreated] = useState<{ serial: number; heights: number[] }>(null);
+    const [sizeChanged, setSizeChanged] = useState(false);
+    const createdHeights = created !== null && created.serial === evidence?.serial ? created.heights : null;
 
     const items = useMemo<Item[]>(() => {
         if (!evidence) return [];
@@ -158,7 +167,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
 
     const overflow = contentHeight > viewHeight;
     // the window's own list starts with its scroller shown (the XML's state) and only the first resize's timer re-reads whether the rows overflow (classic Q5 `_r8b94a8d2d60957`)
-    const scrollerShown = overflow || (lineFollowsList && createdHeights === null);
+    const scrollerShown = overflow || (lineFollowsList && !sizeChanged);
     const width = listWidth + (scrollerShown ? 0 : hiddenExtra);
     const viewport = viewportWidth ?? width;
     const range = Math.max(0, contentHeight - viewHeight);
@@ -166,13 +175,25 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     const rowColors = items.map((item) => (item.kind === 'header' ? FRAME_COLOR : item.color));
     const heights = items.map((item, index) => rowHeight(index, item));
 
-    // the snapshot is taken when the list's size first changes, from the layout of the commit before (the effects run in this order)
+    // the snapshot is taken when the list's size first changes for this evidence, from the layout of the commit before (this effect runs after every commit and records it last)
     useLayoutEffect(() => {
-        if (createdHeights === null && (listWidth !== firstSizeRef.current.listWidth || viewHeight !== firstSizeRef.current.viewHeight)) setCreatedHeights(heightsRef.current);
-    }, [createdHeights, listWidth, viewHeight]);
-    useLayoutEffect(() => {
-        heightsRef.current = heights;
-    });
+        const previous = layoutRef.current;
+        const serial = evidence?.serial ?? -1;
+        const sameEvidence = previous.serial === serial;
+        let snapshotDone = sameEvidence && previous.snapshotDone;
+
+        if (listWidth !== previous.listWidth || viewHeight !== previous.viewHeight) {
+            setSizeChanged(true);
+
+            if (sameEvidence && !snapshotDone) {
+                snapshotDone = true;
+
+                if (previous.complete) setCreated({ serial, heights: previous.heights });
+            }
+        }
+
+        layoutRef.current = { serial, heights, complete: items.every((item, index) => item.kind === 'header' || messageHeights[index] !== undefined), listWidth, viewHeight, snapshotDone };
+    }, [evidence, heights, items, listWidth, messageHeights, viewHeight]);
     // the chat line follows the width of the list (scale bits 144: it stretches) and its message field is what is left of it, so a narrower window wraps the messages onto more lines;
     // the handler's embedded list keeps the XML's line
     const lineWidth = lineFollowsList ? width : line.width;
@@ -185,7 +206,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                     <Native0Rows colors={rowColors} heights={heights} width={lineFollowsList ? width : Math.min(width, Math.max(header.width, line.width))} />
                     {items.map((item, index) =>
                         item.kind === 'header' ? (
-                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height, overflow: 'hidden' }}>
+                            <div key={`${evidence.serial}:${index}`} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height, overflow: 'hidden' }}>
                                 <div style={{ position: 'absolute', left: label.x, top: label.y, width: header.width - action2.x, height: label.height, overflow: 'hidden', fontSize: 0, lineHeight: 0 }}>
                                     <NativeText
                                         background={FRAME_COLOR}
@@ -202,7 +223,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                                 )}
                             </div>
                         ) : (
-                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: lineWidth, height: heights[index] }}>
+                            <div key={`${evidence.serial}:${index}`} style={{ position: 'absolute', left: 0, top: tops[index], width: lineWidth, height: heights[index] }}>
                                 <div style={{ position: 'absolute', left: time.x, top: time.y, width: time.width, height: heights[index], overflow: 'hidden', fontSize: 0, lineHeight: 0 }}>
                                     <NativeText background={item.color} text={item.line.timestamp} textStyle="u_bold" />
                                 </div>
@@ -222,7 +243,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                                     width={messageWidth}
                                     x={message.x}
                                     y={message.y}
-                                    onHeight={(value) => setMessageHeights((previous) => (previous[index] === value ? previous : { ...previous, [index]: value }))}
+                                    onHeight={(value) => setMeasured((previous) => (previous.serial === evidence.serial ? (previous.lines[index] === value ? previous : { serial: previous.serial, lines: { ...previous.lines, [index]: value } }) : { serial: evidence.serial, lines: { [index]: value } }))}
                                 />
                             </div>
                         )
