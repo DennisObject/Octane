@@ -40,7 +40,7 @@ export interface Evidence {
     highlights: Map<number, number>;
 }
 
-type Item = { kind: 'header'; record: ChatRecordData } | { kind: 'line'; line: ChatlineData; color: number; chatterColor: number };
+type Item = { kind: 'header'; record: ChatRecordData } | { kind: 'line'; line: ChatlineData; color: number };
 
 export interface EvidenceChatlogListProps {
     evidence: Evidence;
@@ -128,9 +128,11 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
     return evidence !== null && heldFor === subject && evidence.subject === subject ? evidence : null;
 };
 
-// The rows of a chatlog window (Q5 populate): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per line; the rows
-// alternate between a pale blue and white and the chatters the window was opened for take 0xf0d6a3 (the reported user) or 0xa3bdf0 (the caller). A line is 17px at least and
-// as high as its wrapped message plus 5px. Names, messages and the chatter column are set in the row colour (the classic client paints them with the row's own colour value).
+// The rows of a chatlog window (AIR ChatlogCtrl.populateContentLine): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per
+// line; the rows alternate between a pale blue and white and the chatters the window was opened for take 0xf0d6a3 (the reported user) or 0xa3bdf0 (the caller). A line is 17px at
+// least and as high as its wrapped message plus 5px. The row colour is the BACKGROUND of the line and of its time, chatter and message windows (AIR sets their `color`); the texts keep
+// their own black. (The classic JS client sets `textColor` to the row colour there, which draws every name and message in the colour of its own background: unreadable.) A line of the
+// chatters of the log (the highlight flag) has its message in bold.
 export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, listWidth, hiddenExtra = 22, viewportWidth, lineFollowsList = false, scrollbarX, scrollbarHeight, viewHeight, scrollbarVariant = 0, scrollbarBlend, onOpenUserInfo, onOpenRoomTool, onEnterRoom }) => {
     const root = useMemo(() => parseNativeLayout(evidenceXml), []);
     const list = findNativeNode(root, 'evidence_list');
@@ -146,14 +148,9 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     // wrapped line count of each message, by item index, of the evidence they were measured for
     const [measured, setMeasured] = useState<{ serial: number; lines: Record<number, number> }>({ serial: -1, lines: {} });
     const messageHeights = measured.serial === evidence?.serial ? measured.lines : NO_LINES;
-    // The row heights of the list as it was laid out before its first resize. The classic list sets the chatter and time fields to the row's height when it fills the row and only the message
-    // field and the row follow a later resize (launcher.pretty.js:281473-281485 against 281513-281526; no scale bit of those fields follows the height), so the chatter's white stays as tall as
-    // the row was then (OBSERVED: native shrink -90/-100 and the reverse to the pristine size; a snapshot, not a delay). The snapshot belongs to the evidence it was taken of, and it is
-    // only taken from a layout whose messages were all measured (before that the rows are the 17px of an unmeasured line, which the classic list never has).
-    const layoutRef = useRef<{ serial: number; heights: number[]; complete: boolean; listWidth: number; viewHeight: number; snapshotDone: boolean }>({ serial: -1, heights: [], complete: false, listWidth, viewHeight, snapshotDone: false });
-    const [created, setCreated] = useState<{ serial: number; heights: number[] }>(null);
+    // set by the first change of the list's size: only then does the window re-read whether its rows overflow (classic Q5 `_r8b94a8d2d60957`)
     const [sizeChanged, setSizeChanged] = useState(false);
-    const createdHeights = created !== null && created.serial === evidence?.serial ? created.heights : null;
+    const sizeRef = useRef({ listWidth, viewHeight });
 
     const items = useMemo<Item[]>(() => {
         if (!evidence) return [];
@@ -170,7 +167,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                 const highlight = evidence.highlights.get(chatLine.userId);
                 const color = highlight !== undefined ? HIGHLIGHT[highlight] : zebra ? ZEBRA : WHITE;
 
-                result.push({ kind: 'line', line: chatLine, color, chatterColor: color });
+                result.push({ kind: 'line', line: chatLine, color });
                 zebra = !zebra;
             }
         }
@@ -197,25 +194,11 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     const rowColors = items.map((item) => (item.kind === 'header' ? FRAME_COLOR : item.color));
     const heights = items.map((item, index) => rowHeight(index, item));
 
-    // the snapshot is taken when the list's size first changes for this evidence, from the layout of the commit before (this effect runs after every commit and records it last)
     useLayoutEffect(() => {
-        const previous = layoutRef.current;
-        const serial = evidence?.serial ?? -1;
-        const sameEvidence = previous.serial === serial;
-        let snapshotDone = sameEvidence && previous.snapshotDone;
+        if (listWidth !== sizeRef.current.listWidth || viewHeight !== sizeRef.current.viewHeight) setSizeChanged(true);
 
-        if (listWidth !== previous.listWidth || viewHeight !== previous.viewHeight) {
-            setSizeChanged(true);
-
-            if (sameEvidence && !snapshotDone) {
-                snapshotDone = true;
-
-                if (previous.complete) setCreated({ serial, heights: previous.heights });
-            }
-        }
-
-        layoutRef.current = { serial, heights, complete: items.every((item, index) => item.kind === 'header' || messageHeights[index] !== undefined), listWidth, viewHeight, snapshotDone };
-    }, [evidence, heights, items, listWidth, messageHeights, viewHeight]);
+        sizeRef.current = { listWidth, viewHeight };
+    }, [listWidth, viewHeight]);
     // the chat line follows the width of the list (scale bits 144: it stretches) and its message field is what is left of it, so a narrower window wraps the messages onto more lines;
     // the handler's embedded list keeps the XML's line
     const lineWidth = lineFollowsList ? width : line.width;
@@ -249,18 +232,17 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                                 <div style={{ position: 'absolute', left: time.x, top: time.y, width: time.width, height: heights[index], overflow: 'hidden', fontSize: 0, lineHeight: 0 }}>
                                     <NativeText background={item.color} text={item.line.timestamp} textStyle="u_bold" />
                                 </div>
-                                {/* the chatter field keeps the white of a text window behind its row coloured text, over the whole height of the row */}
-                                <div style={{ position: 'absolute', left: chatter.x, top: chatter.y, width: chatter.width, height: Math.min(createdHeights?.[index] ?? heights[index], heights[index]), backgroundColor: '#fff' }} />
                                 <div style={{ position: 'absolute', left: chatter.x, top: chatter.y, width: chatter.width, height: heights[index], overflow: 'hidden', fontSize: 0, lineHeight: 0, cursor: item.line.userId > 0 ? 'pointer' : undefined }} onClick={item.line.userId > 0 ? () => onOpenUserInfo(item.line.userId) : undefined}>
                                     <NativeText
-                                        background={WHITE}
-                                        overrides={{ color: item.chatterColor, underline: item.line.userId > 0, bold: true }}
+                                        background={item.color}
+                                        overrides={{ underline: item.line.userId > 0, bold: true }}
                                         text={item.line.userId > 0 ? item.line.userName : item.line.userId === 0 ? 'Bot / pet' : '-'}
                                         textStyle="u_bold"
                                     />
                                 </div>
                                 <MessageText
                                     background={item.color}
+                                    bold={item.line.hasHighlighting}
                                     text={item.line.message}
                                     width={messageWidth}
                                     x={message.x}
@@ -277,8 +259,8 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     );
 };
 
-/** The message field: Ubuntu regular in the row colour, wrapped at the field width; its height drives the height of the row. */
-const MessageText: FC<{ text: string; background: number; width: number; x: number; y: number; onHeight: (height: number) => void }> = ({ text, background, width, x, y, onHeight }) => {
+/** The message field: Ubuntu regular (bold for a highlighted line) on the row colour, wrapped at the field width; its height drives the height of the row. */
+const MessageText: FC<{ text: string; background: number; bold: boolean; width: number; x: number; y: number; onHeight: (height: number) => void }> = ({ text, background, bold, width, x, y, onHeight }) => {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -323,7 +305,7 @@ const MessageText: FC<{ text: string; background: number; width: number; x: numb
 
     return (
         <div ref={ref} style={{ position: 'absolute', left: x, top: y, width }}>
-            <NativeText background={background} maxWidth={width} overrides={{ color: background }} text={text} textStyle="u_regular" />
+            <NativeText background={background} maxWidth={width} overrides={bold ? { bold: true } : undefined} text={text} textStyle="u_regular" />
         </div>
     );
 };
