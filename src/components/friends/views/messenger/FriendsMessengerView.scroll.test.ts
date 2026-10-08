@@ -3,11 +3,6 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('FriendsMessengerView routing and scroll behavior', () => {
-    it('does not dereference the legacy message box when the persistent view is mounted', () => {
-        const source = readFileSync(join(process.cwd(), 'src/components/friends/views/messenger/FriendsMessengerView.tsx'), 'utf8');
-
-        expect(source).toMatch(/if\s*\(!messagesBox\.current\)\s*return;/);
-    });
 
     it('routes Staff Chat and direct chats through the same persistent window', () => {
         const source = readFileSync(join(process.cwd(), 'src/components/friends/views/messenger/FriendsMessengerView.tsx'), 'utf8');

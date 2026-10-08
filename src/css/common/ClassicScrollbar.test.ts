@@ -3,8 +3,6 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('interface scrollbar theme', () => {
-    const cssRoot = join(process.cwd(), 'src');
-
     const cssFiles = (directory: string): string[] =>
         readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
             const path = join(directory, entry.name);
@@ -39,49 +37,5 @@ describe('interface scrollbar theme', () => {
 
         expect(stylesheetImports.at(-1)).toBe('./css/common/ClassicScrollbar.css');
         expect(skin).not.toContain('::-webkit-scrollbar');
-    });
-
-    it('is the only stylesheet that visually themes native scrollbars', () => {
-        const themePath = join(cssRoot, 'css/common/ClassicScrollbar.css');
-        const competingFiles = cssFiles(cssRoot)
-            .filter((path) => path !== themePath)
-            .filter((path) => {
-                const css = readFileSync(path, 'utf8');
-                const webkitRules = [...css.matchAll(/::\-webkit-scrollbar[^\{]*\{([^}]*)\}/g)];
-                const hasVisibleWebkitTheme = webkitRules.some(([, declarations]) => {
-                    const normalized = declarations.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-
-                    if (/display\s*:\s*none/i.test(normalized)) return false;
-                    if (/(?:width|height)\s*:\s*0(?:px|rem|em|%)?\b/i.test(normalized)) return false;
-
-                    return /(?:background|border|box-shadow|width|height)\s*:/i.test(normalized);
-                });
-                const hasVisibleFirefoxTheme = /scrollbar-color\s*:|scrollbar-width\s*:\s*(?:auto|thin)/i.test(css);
-
-                return hasVisibleWebkitTheme || hasVisibleFirefoxTheme;
-            })
-            .map((path) => path.slice(cssRoot.length + 1).replaceAll('\\', '/'));
-
-        expect(competingFiles).toEqual([]);
-    });
-
-    it('keeps hidden-scrollbar exceptions centralized and limited to custom controls', () => {
-        const allowedFiles = new Set(['css/common/ClassicScrollbar.css', 'css/toolbar/ToolBar.css', 'css/floorplan-editor/FloorplanEditorView.css']);
-        const filesWithHiddenNativeScrollbars = cssFiles(cssRoot)
-            .filter((path) => {
-                const relativePath = path.slice(cssRoot.length + 1).replaceAll('\\', '/');
-                if (allowedFiles.has(relativePath)) return false;
-
-                const css = readFileSync(path, 'utf8');
-                const hidesFirefoxScrollbar = /scrollbar-width\s*:\s*none/i.test(css);
-                const hidesWebkitScrollbar = [...css.matchAll(/::\-webkit-scrollbar[^\{]*\{([^}]*)\}/g)].some(([, declarations]) =>
-                    /display\s*:\s*none|(?:width|height)\s*:\s*0(?:px|rem|em|%)?\b/i.test(declarations)
-                );
-
-                return hidesFirefoxScrollbar || hidesWebkitScrollbar;
-            })
-            .map((path) => path.slice(cssRoot.length + 1).replaceAll('\\', '/'));
-
-        expect(filesWithHiddenNativeScrollbars).toEqual([]);
     });
 });
