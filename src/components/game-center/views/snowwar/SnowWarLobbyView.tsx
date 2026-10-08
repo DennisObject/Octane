@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
-import { SnowWarArenaVotes, SnowWarLobbyPlayer } from '../../../../api/snowwar';
-import { SnowWarArenaVoteView } from './SnowWarArenaVoteView';
+import { SnowWarLobbyPlayer } from '../../../../api/snowwar';
 import { SnowWarAvatarImage } from './SnowWarAvatarImage';
 import { SnowWarAnimation, SnowWarBitmap, SnowWarBox } from './SnowWarBitmap';
 import { localizeSnowWar, SnowWarStrokeText, SnowWarText } from './SnowWarText';
@@ -13,9 +12,6 @@ interface SnowWarLobbyViewProps
     queuePosition: number;
     /** Wall-clock deadline of Game2StartCounter, null while waiting. */
     countdownDeadline: number | null;
-    /** Plus arena voting; null hides the row. */
-    arenaVotes: SnowWarArenaVotes | null;
-    onVoteArena: (fieldType: number) => void;
     onCancel: () => void;
 }
 
@@ -28,7 +24,7 @@ const GRID_COLUMNS = Math.floor((335 + GRID_SPACING) / (TILE_WIDTH + GRID_SPACIN
 const secondsUntil = (deadline: number, now: number) => Math.max(0, Math.ceil((deadline - now) / 1000));
 
 /** `snowwar_lobby_cont` inside games_main (GameLobbyWindowCtrl); `center()`ed in the 407x491 frame content. */
-export const SnowWarLobbyView: FC<SnowWarLobbyViewProps> = ({ players, maxPlayers, queuePosition, countdownDeadline, arenaVotes, onVoteArena, onCancel }) =>
+export const SnowWarLobbyView: FC<SnowWarLobbyViewProps> = ({ players, maxPlayers, queuePosition, countdownDeadline, onCancel }) =>
 {
     const [ now, setNow ] = useState(Date.now);
 
@@ -70,7 +66,6 @@ export const SnowWarLobbyView: FC<SnowWarLobbyViewProps> = ({ players, maxPlayer
                     );
                 })}
             </SnowWarBox>
-            {arenaVotes && arenaVotes.arenas.length > 0 && <SnowWarArenaVoteView arenaVotes={arenaVotes} onVote={onVoteArena} />}
             <SnowWarBox className="snowwar-clickable" name="cancel_link_region" x={178} y={385} width={63} height={23} onClick={onCancel}>
                 <SnowWarText name="cancel_link" size={12} text={LocalizeText('generic.cancel')} underline x={0} y={0} width={83} height={17} />
             </SnowWarBox>
