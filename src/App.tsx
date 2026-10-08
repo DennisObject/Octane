@@ -50,6 +50,15 @@ const syncViewportCssVars = () => {
     document.documentElement.style.setProperty('--octane-app-height', `${height}px`);
 };
 
+// bootstrap.ts starts the socket itself when the page was opened with a hand-off ticket.
+const takeEarlyCommunicationInit = (): Promise<void> | null => {
+    const early = (window as any).__octaneEarlyCommunicationInit as Promise<void> | undefined;
+
+    delete (window as any).__octaneEarlyCommunicationInit;
+
+    return early ?? null;
+};
+
 const preloadUrl = async (url: string): Promise<void> => {
     if (!url) return;
 
@@ -511,7 +520,7 @@ export const App: FC<{}> = (props) => {
                     listenForPerkAllowances();
                     // Without the auth API a dropped session cannot get a new ticket; it ends instead.
                     GetCommunication().setReconnectTicketProvider(authEnabled ? fetchReconnectTicket : async () => '');
-                    communicationInitRef.current = GetCommunication().init();
+                    communicationInitRef.current = takeEarlyCommunicationInit() ?? GetCommunication().init();
                     communicationInitRef.current.catch(() => {});
                 }
 

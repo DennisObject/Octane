@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetCommunication, GetConfiguration } from '@octane/renderer';
 import { captureLaunchCredentials } from './api/auth/launchCredentials';
 import { derivePetConfig, DerivedPetConfig, PetDefinition } from './api/octane/PetData';
 import { parseJsonDocument, UiJsonMode } from './json/JsonDocumentParser';
@@ -233,6 +233,17 @@ const preconnectOrigins = () => {
 };
 
 preconnectOrigins();
+
+// With a hand-off ticket, log in now: the socket opens and authenticates while the app bundle
+// evaluates. The connection holds incoming messages until MainView calls ready(), and App takes
+// over this init (see takeEarlyCommunicationInit) instead of starting its own.
+if (launchCredentials.ssoTicket) {
+    const communicationInit = GetCommunication().init();
+
+    communicationInit.catch(() => {});
+    (window as any).__octaneEarlyCommunicationInit = communicationInit;
+    setBootDebug('boot: socket started');
+}
 
 // pets.json loads alongside the configuration. Its keys override the config files, as the
 // OctaneConfig defaults do, and stay on OctaneConfig for any later configuration reload.
