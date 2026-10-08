@@ -146,8 +146,8 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
     return (
         <NativeWindowShell type="roomTool" windowKey={`${roomId}`} x={x} y={y}>
             <Native0Frame caption={nativeCaption(root)} height={frameHeight} width={nativeNumber(root, 'width')} onClose={onClose}>
-                {/* the boxes are wider than the client area and the frame clips them 2px past its right edge (no dark right border shows) */}
-                <div style={{ position: 'absolute', left: 0, top: 0, width: nativeNumber(root, 'width') - 12 + 2, height: 2000, overflow: 'hidden' }}>
+                {/* the boxes (230 wide) are wider than the client area and the window clips them one pixel short of the client's right edge (no dark right border shows) */}
+                <div style={{ position: 'absolute', left: 0, top: 0, width: nativeNumber(root, 'width') - 13, height: 2000, overflow: 'hidden' }}>
                     {(!data || exists) && (
                         <Native0Border {...roomCont} height={roomContHeight} y={row.room}>
                             {data && exists && (
