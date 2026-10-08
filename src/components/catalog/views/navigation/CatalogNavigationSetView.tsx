@@ -19,7 +19,7 @@ export const CatalogNavigationSetView: FC<CatalogNavigationSetViewProps> = (prop
                 node.children.map((n) => {
                     if (!n.isVisible) return null;
 
-                    return <CatalogNavigationItemView key={n.pageId} child={child} node={n} runtime={runtime} />;
+                    return <CatalogNavigationItemView key={n.id} child={child} node={n} runtime={runtime} />;
                 })}
         </>
     );

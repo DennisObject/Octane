@@ -1,9 +1,7 @@
 export interface ICatalogNode {
-    activate(): void;
-    deactivate(): void;
-    open(): void;
-    close(): void;
     addChild(node: ICatalogNode): void;
+    /** Unique per node. Folder headings all share pageId -1, so the node is never identified by its page. */
+    readonly id: number;
     readonly depth: number;
     readonly isBranch: boolean;
     readonly isLeaf: boolean;
@@ -16,6 +14,4 @@ export interface ICatalogNode {
     readonly offerIds: number[];
     readonly parent: ICatalogNode;
     readonly isVisible: boolean;
-    readonly isActive: boolean;
-    readonly isOpen: boolean;
 }

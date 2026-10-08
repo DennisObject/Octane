@@ -1,7 +1,10 @@
 import { NodeData } from '@octane/renderer';
 import { ICatalogNode } from './ICatalogNode';
 
+let nextNodeId = 1;
+
 export class CatalogNode implements ICatalogNode {
+    private readonly _id: number = nextNodeId++;
     private _depth: number = 0;
     private _localization: string = '';
     private _pageId: number = -1;
@@ -12,8 +15,6 @@ export class CatalogNode implements ICatalogNode {
     private _offerIds: number[];
     private _parent: ICatalogNode;
     private _isVisible: boolean;
-    private _isActive: boolean;
-    private _isOpen: boolean;
 
     constructor(node: NodeData, depth: number, parent: ICatalogNode) {
         this._depth = depth;
@@ -26,30 +27,16 @@ export class CatalogNode implements ICatalogNode {
         this._children = [];
         this._offerIds = node.offerIds;
         this._isVisible = node.visible;
-        this._isActive = false;
-        this._isOpen = false;
-    }
-
-    public activate(): void {
-        this._isActive = true;
-    }
-
-    public deactivate(): void {
-        this._isActive = false;
-    }
-
-    public open(): void {
-        this._isOpen = true;
-    }
-
-    public close(): void {
-        this._isOpen = false;
     }
 
     public addChild(child: ICatalogNode): void {
         if (!child) return;
 
         this._children.push(child);
+    }
+
+    public get id(): number {
+        return this._id;
     }
 
     public get depth(): number {
@@ -98,13 +85,5 @@ export class CatalogNode implements ICatalogNode {
 
     public get isVisible(): boolean {
         return this._isVisible;
-    }
-
-    public get isActive(): boolean {
-        return this._isActive;
-    }
-
-    public get isOpen(): boolean {
-        return this._isOpen;
     }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { CatalogType } from '../../api/catalog/CatalogType';
 import {
     buildCatalogNodeTree,
@@ -12,17 +12,14 @@ import {
 describe('restoreCatalogActivePath', () => {
     it('rebinds the active path to nodes from a refreshed catalog tree', () => {
         const root: any = { pageId: -1, pageName: 'root', children: [] };
-        const parent: any = { pageId: 10, pageName: 'parent', parent: root, children: [], activate: vi.fn(), open: vi.fn() };
-        const child: any = { pageId: 11, pageName: 'child', parent, children: [], activate: vi.fn(), open: vi.fn() };
+        const parent: any = { pageId: 10, pageName: 'parent', parent: root, children: [] };
+        const child: any = { pageId: 11, pageName: 'child', parent, children: [] };
         root.children = [parent];
         parent.children = [child];
 
         const restored = restoreCatalogActivePath(root, 11);
 
         expect(restored).toEqual([parent, child]);
-        expect(parent.activate).toHaveBeenCalledOnce();
-        expect(child.activate).toHaveBeenCalledOnce();
-        expect(parent.open).toHaveBeenCalledOnce();
     });
 });
 

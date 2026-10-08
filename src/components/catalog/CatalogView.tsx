@@ -29,6 +29,7 @@ const CatalogViewInner: FC<{}> = () => {
         isVisible = false,
         setIsVisible = null,
         setNavigationHidden = null,
+        currentTab = null,
         activeNodes = [],
         setSearchResult = null
     } = useCatalogUiState();
@@ -36,7 +37,8 @@ const CatalogViewInner: FC<{}> = () => {
         openPageById = null,
         openPageByName = null,
         openPageByOfferId = null,
-        activateNode = null,
+        showTab = null,
+        getNodeById = null,
         openCatalogByType = null,
         toggleCatalogByType = null,
         retryCurrentPage = null
@@ -47,7 +49,10 @@ const CatalogViewInner: FC<{}> = () => {
     const isMod = catalogAdmin?.canEdit ?? false;
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
-    const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
+    // The header belongs to the open page: a folder (pageId -1) can be active without opening one.
+    const pageId = currentPage?.pageId ?? -1;
+    const activeCatalogNode =
+        (pageId > -1 && (activeNodes.findLast((node) => node.pageId === pageId) ?? getNodeById(pageId, rootNode))) || activeNodes.at(-1) || null;
     // Keep technical suffixes and numeric page hints out of the tab captions.
     const stripSwfTabSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
     const getSwfTabLabel = (label: string) => stripSwfTabSuffix(parseCatalogTabLabel(label).name);
@@ -151,17 +156,17 @@ const CatalogViewInner: FC<{}> = () => {
                     <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} justifyContent="start">
                         {rootNode &&
                             rootNode.children.length > 0 &&
-                            rootNode.children.map((child, index) => {
+                            rootNode.children.map((child) => {
                                 if (!child.isVisible) return null;
                                 return (
                                     <OctaneCardTabsItemView
-                                        key={`${child.pageId}-${child.pageName}-${index}`}
-                                        isActive={child.isActive}
+                                        key={child.id}
+                                        isActive={child === currentTab}
                                         title={child.localization}
                                         onClick={() => {
                                             if (searchResult) setSearchResult(null);
 
-                                            activateNode(child);
+                                            showTab(child);
                                         }}
                                     >
                                         <div className="flex items-center gap-1">
@@ -214,7 +219,7 @@ const CatalogViewInner: FC<{}> = () => {
                                         <CatalogSearchView />
                                     </div>
                                     <div className="octane-catalog-navigation-shell">
-                                        {activeNodes && activeNodes.length > 0 && <CatalogNavigationView node={activeNodes[0]} />}
+                                        {currentTab && <CatalogNavigationView node={currentTab} />}
                                     </div>
                                 </div>
                             )}

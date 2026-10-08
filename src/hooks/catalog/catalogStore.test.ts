@@ -55,8 +55,6 @@ describe('catalogStore navigation', () => {
         expect(state.activeNodes).toEqual([furni, chairs]);
         expect(state.pageId).toBe(2);
         expect(state.pendingOfferId).toBe(101);
-        expect(furni.isOpen).toBe(true);
-        expect(chairs.isActive).toBe(true);
         expect(state.pageOverride).toBeNull();
         expect(state.currentOffer).toBeNull();
     });
@@ -69,16 +67,6 @@ describe('catalogStore navigation', () => {
 
         expect(useCatalogStore.getState().activeNodes).toEqual([furni, chairs]);
         expect(useCatalogStore.getState().pageId).toBe(2);
-    });
-
-    it('activating the active open node closes it', () => {
-        const { root, furni, chairs } = buildIndex();
-        client.setQueryData(catalogIndexKey(CatalogType.NORMAL), { rootNode: root, offersToNodes: new Map() });
-
-        useCatalogStore.getState().activateNode(chairs);
-        expect(chairs.isOpen).toBe(true);
-        useCatalogStore.getState().activateNode(chairs);
-        expect(chairs.isOpen).toBe(false);
     });
 
     it('openPageById with the index in cache activates the node', () => {

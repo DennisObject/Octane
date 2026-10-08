@@ -15,6 +15,7 @@ import { createOctaneStore } from '../../state/createOctaneStore';
 import {
     findNodeById,
     findNodeByName,
+    getCatalogNodePath,
     getNodesByOfferIdFromMap,
     normalizeCatalogType,
     replaceCatalogPageOffers,
@@ -34,7 +35,12 @@ export interface CatalogUiState {
     currentType: string;
     pageId: number;
     previousPageId: number;
+    /** Top-level node whose tree the navigation list shows. */
+    currentTab: ICatalogNode | null;
+    /** Path from the current tab down to the single active node. */
     activeNodes: ICatalogNode[];
+    /** Expanded branches: the ancestors of the active node, plus the node itself when it is an open branch. */
+    openNodes: ICatalogNode[];
     pendingRequest: CatalogPendingRequest | null;
     pendingOfferId: number;
     pageOverride: ICatalogPage | null;
@@ -59,6 +65,8 @@ export interface CatalogActions {
     openCatalogByType: (type?: string) => void;
     toggleCatalogByType: (type?: string) => void;
     activateNode: (node: ICatalogNode, offerId?: number) => void;
+    showTab: (tab: ICatalogNode) => void;
+    openNavigatorAtNode: (node: ICatalogNode, offerId?: number) => void;
     openPageById: (id: number) => void;
     openPageByName: (name: string) => void;
     openPageByOfferId: (offerId: number) => void;
@@ -100,7 +108,9 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     currentType: CatalogType.NORMAL,
     pageId: -1,
     previousPageId: -1,
+    currentTab: null,
     activeNodes: [],
+    openNodes: [],
     pendingRequest: null,
     pendingOfferId: -1,
     pageOverride: null,
@@ -120,30 +130,29 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     placedObjectPurchaseBought: false
 };
 
-const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
-    const nodes: ICatalogNode[] = [];
-    let node: ICatalogNode | null = target;
+const openedPage = (pageId: number, offerId: number) => ({
+    pageId,
+    previousPageId: pageId,
+    pendingOfferId: offerId,
+    pageOverride: null,
+    currentOffer: null
+});
 
-    while (node && node.pageName !== 'root') {
-        nodes.push(node);
-        node = node.parent;
-    }
-
-    return nodes.reverse();
-};
-
-// The first visible page under a tab, through page-less headings (official getPathToNodeWithLayout).
-const findTabLandingNode = (node: ICatalogNode): ICatalogNode | null => {
+/** AIR CatalogNavigator.getPathToNodeWithLayout: the first visible descendant that is a page, through folders. */
+const getPathToNodeWithLayout = (node: ICatalogNode): ICatalogNode[] => {
     for (const child of node.children) {
         if (!child.isVisible) continue;
-        if (child.pageId > -1) return child;
 
-        const landing = child.isBranch ? findTabLandingNode(child) : null;
+        if (child.pageId > -1) return [child];
 
-        if (landing) return landing;
+        if (child.isBranch) {
+            const path = getPathToNodeWithLayout(child);
+
+            if (path.length) return [child, ...path];
+        }
     }
 
-    return null;
+    return [];
 };
 
 export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) => ({
@@ -155,7 +164,9 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({
             pageId: -1,
             previousPageId: -1,
+            currentTab: null,
             activeNodes: [],
+            openNodes: [],
             pendingRequest: null,
             pendingOfferId: -1,
             pageOverride: null,
@@ -189,49 +200,72 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({ isVisible: true });
     },
 
+    // Mirrors AIR CatalogNavigator.activateNode. Nodes are identified by
+    // reference: folder headings all carry pageId -1, and captions repeat
+    // across tabs. Exactly one node is active; only its ancestors stay open,
+    // and a folder toggles without opening a page.
     activateNode: (targetNode, offerId = -1) => {
+        if (!targetNode?.parent) return;
+
+        if (!targetNode.parent.parent) {
+            get().showTab(targetNode);
+
+            return;
+        }
+
         get().cancelObjectMover();
 
-        // A tab shows its content like the official client (CatalogNavigator.showNodeContent): it lands on
-        // the first page under it, walking down through page-less headings, and selecting it again resets to
-        // that page instead of toggling it closed.
-        const isTab = !!(targetNode.parent && targetNode.parent.pageName === 'root' && targetNode.children.length);
+        const { activeNodes, openNodes } = get();
+        const path = getCatalogNodePath(targetNode);
+        const nextOpen = path.slice(1, -1);
+        const closing = activeNodes.includes(targetNode) && openNodes.includes(targetNode);
 
-        if (isTab) targetNode = findTabLandingNode(targetNode) ?? targetNode;
+        if (targetNode.isBranch && !closing) nextOpen.push(targetNode);
 
-        const nodes = pathToRoot(targetNode);
-        const previous = get().activeNodes;
-        const wasActive = previous.indexOf(targetNode) >= 0;
-        const wasOpen = targetNode.isOpen;
+        set({ currentTab: path[0], activeNodes: path, openNodes: nextOpen, navigationHidden: false });
 
-        for (const existing of previous) {
-            existing.deactivate();
+        if (targetNode.pageId > -1) set(openedPage(targetNode.pageId, offerId));
+    },
 
-            if (nodes.indexOf(existing) === -1) existing.close();
+    // Mirrors AIR CatalogNavigator.showNodeContent for a top tab: the list
+    // shows only that tab's tree, and the first page under it opens.
+    showTab: (tab) => {
+        if (!tab?.isVisible) return;
+
+        get().cancelObjectMover();
+
+        set({ currentTab: tab, activeNodes: [tab], openNodes: [], navigationHidden: false });
+
+        const path = tab.isBranch ? getPathToNodeWithLayout(tab) : [];
+
+        if (path.length) {
+            get().activateNode(path[path.length - 1]);
+
+            return;
         }
 
-        for (const node of nodes) {
-            node.activate();
+        if (tab.pageId > -1) set(openedPage(tab.pageId, -1));
+    },
 
-            if (node.parent) node.open();
+    // Mirrors AIR CatalogNavigator.openNavigatorAtNode: used by links and
+    // offer lookups, it selects the node's tab and the node itself.
+    openNavigatorAtNode: (node, offerId = -1) => {
+        if (!node?.parent) return;
 
-            if (node === targetNode.parent && node.children.length) node.open();
+        const tab = getCatalogNodePath(node)[0];
+
+        if (node !== tab) {
+            set({ currentTab: tab, activeNodes: [], openNodes: [] });
+            get().activateNode(node, offerId);
+
+            return;
         }
 
-        if (wasActive && wasOpen && !isTab) targetNode.close();
-        else targetNode.open();
+        // A link to the tab's own page opens that page, not its first child.
+        get().cancelObjectMover();
+        set({ currentTab: tab, activeNodes: [tab], openNodes: [], navigationHidden: false });
 
-        const pageId = targetNode.pageId;
-
-        set((state) => ({
-            activeNodes: nodes,
-            pageId: pageId > -1 ? pageId : state.pageId,
-            previousPageId: pageId > -1 ? pageId : state.previousPageId,
-            pendingOfferId: offerId,
-            pageOverride: null,
-            currentOffer: null,
-            navigationHidden: false
-        }));
+        if (tab.pageId > -1) set(openedPage(tab.pageId, offerId));
     },
 
     getNodeById: (id, node) => findNodeById(id, node, readCatalogIndex(get().currentType)?.rootNode ?? null),
@@ -251,9 +285,10 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             return;
         }
 
-        const node = findNodeById(id, index.rootNode, index.rootNode);
+        // Every folder heading has pageId -1, so -1 never names a page.
+        const node = id > -1 ? findNodeById(id, index.rootNode, index.rootNode) : null;
 
-        if (node) get().activateNode(node);
+        if (node) get().openNavigatorAtNode(node);
     },
 
     openPageByName: (name) => {
@@ -269,7 +304,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
 
         const node = findNodeByName(name, index.rootNode, index.rootNode);
 
-        if (node) get().activateNode(node);
+        if (node) get().openNavigatorAtNode(node);
     },
 
     openPageByOfferId: (offerId) => {
@@ -287,7 +322,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
 
         if (!nodes || !nodes.length) return;
 
-        get().activateNode(nodes[0], offerId);
+        get().openNavigatorAtNode(nodes[0], offerId);
     },
 
     resolvePendingRequest: () => {
@@ -317,7 +352,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         if (index.rootNode.isBranch) {
             for (const child of index.rootNode.children) {
                 if (child && child.isVisible) {
-                    get().activateNode(child);
+                    get().showTab(child);
 
                     return;
                 }

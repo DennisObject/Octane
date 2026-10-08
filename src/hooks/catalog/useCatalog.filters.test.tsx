@@ -46,6 +46,7 @@ describe('useCatalog filter contract', () => {
         expect(Object.keys(result.current).sort()).toEqual([
             'activeNodes',
             'catalogPlaceMultipleObjects',
+            'currentTab',
             'currentType',
             'giftReceiver',
             'isVisible',
@@ -84,6 +85,7 @@ describe('useCatalog filter contract', () => {
             'resetPlacedOfferData',
             'retryCurrentPage',
             'selectCatalogOffer',
+            'showTab',
             'toggleCatalogByType'
         ]);
 

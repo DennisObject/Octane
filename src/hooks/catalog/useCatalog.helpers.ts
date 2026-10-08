@@ -3,24 +3,23 @@ import { CatalogNode, CatalogPage, CatalogType, ICatalogNode, ICatalogPage, IPur
 
 export const normalizeCatalogType = (_type?: string): string => CatalogType.NORMAL;
 
-export const restoreCatalogActivePath = (rootNode: ICatalogNode, activePageId: number): ICatalogNode[] => {
-    const target = findNodeById(activePageId, rootNode, rootNode);
-    if (!target) return [];
-
-    const path: ICatalogNode[] = [];
+/** Nodes from the top-level tab down to the target; the index root is left out. */
+export const getCatalogNodePath = (target: ICatalogNode): ICatalogNode[] => {
+    const nodes: ICatalogNode[] = [];
     let node: ICatalogNode | null = target;
 
-    while (node && node !== rootNode) {
-        path.unshift(node);
+    while (node && node.parent) {
+        nodes.push(node);
         node = node.parent;
     }
 
-    for (const activeNode of path) {
-        activeNode.activate();
-        activeNode.open();
-    }
+    return nodes.reverse();
+};
 
-    return path;
+export const restoreCatalogActivePath = (rootNode: ICatalogNode, activePageId: number): ICatalogNode[] => {
+    const target = activePageId > -1 ? findNodeById(activePageId, rootNode, rootNode) : null;
+
+    return target ? getCatalogNodePath(target) : [];
 };
 
 export const findNodeById = (id: number, node: ICatalogNode | null, rootNode: ICatalogNode | null): ICatalogNode | null => {

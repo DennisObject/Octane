@@ -48,8 +48,8 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = (props) => 
         >
             {searchResult &&
                 searchResult.filteredNodes.length > 0 &&
-                searchResult.filteredNodes.map((n, index) => {
-                    return <CatalogNavigationItemView key={n.pageId} node={n} runtime={runtime} />;
+                searchResult.filteredNodes.map((n) => {
+                    return <CatalogNavigationItemView key={n.id} node={n} runtime={runtime} />;
                 })}
             {!searchResult && <CatalogNavigationSetView node={node} runtime={runtime} />}
         </ClassicScrollAreaView>

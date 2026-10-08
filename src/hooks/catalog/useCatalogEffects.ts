@@ -219,20 +219,26 @@ export const useCatalogEffects = (): void => {
 
         if (!data) return;
 
-        const { activeNodes, pageId: activePageId } = useCatalogStore.getState();
+        const { activeNodes, currentTab, pageId: activePageId } = useCatalogStore.getState();
 
-        if (activePageId > -1 && (!activeNodes.length || activeNodes.at(-1).pageId !== activePageId || !isNodeInTree(activeNodes.at(-1) ?? null, data.rootNode))) {
-            const restoredNodes = restoreCatalogActivePath(data.rootNode, activePageId);
+        if (currentTab ? isNodeInTree(activeNodes.at(-1) ?? currentTab, data.rootNode) : activePageId <= -1) return;
 
-            if (!restoredNodes.length)
-            {
-                useCatalogStore.setState({ activeNodes: [], pageId: -1, pageOverride: null, currentOffer: null, searchResult: null });
-                useCatalogStore.getState().resolvePendingRequest();
-            }
-            else
-            {
-                useCatalogStore.setState({ activeNodes: restoredNodes });
-            }
+        const restoredNodes = restoreCatalogActivePath(data.rootNode, activePageId);
+
+        if (!restoredNodes.length)
+        {
+            useCatalogStore.setState({ currentTab: null, activeNodes: [], openNodes: [], pageId: -1, pageOverride: null, currentOffer: null, searchResult: null });
+            useCatalogStore.getState().resolvePendingRequest();
+        }
+        else
+        {
+            const target = restoredNodes.at(-1);
+
+            useCatalogStore.setState({
+                currentTab: restoredNodes[0],
+                activeNodes: restoredNodes,
+                openNodes: [...restoredNodes.slice(1, -1), ...(target.isBranch && restoredNodes.length > 1 ? [target] : [])]
+            });
         }
     }, [indexQuery.data]);
 
