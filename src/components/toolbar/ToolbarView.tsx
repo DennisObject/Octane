@@ -456,7 +456,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             )}
                             {isMod && (
                                 <motion.div variants={itemVariants} className="relative tb-slot">
-                                    <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/toggle')} className="tb-icon" />
+                                    <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/show')} className="tb-icon" />
                                     {openTicketsCount > 0 && (
                                         <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
                                     )}
@@ -632,7 +632,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 )}
                 {isMod && (
                     <motion.div variants={itemVariants} className="relative">
-                        <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/toggle')} className="tb-icon" />
+                        <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/show')} className="tb-icon" />
                         {openTicketsCount > 0 && <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />}
                     </motion.div>
                 )}

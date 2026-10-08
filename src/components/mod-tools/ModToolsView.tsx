@@ -39,7 +39,8 @@ export const ModToolsView: FC<{}> = () => {
     const setStartPanel = useModWindowTrackerStore((state) => state.setStartPanel);
     const { settings = null, cfhCategories = [] } = useModTools();
     const issueContext = useIssueManager();
-    // the toolbar's moderator button (and anything else linking `mod-tools/show|hide|toggle`) only reaches the start panel for a moderator
+    // the toolbar's moderator button (and anything else linking `mod-tools/show|hide|toggle`) only reaches the start panel for a moderator. The button links `show`: the panel opens by
+    // itself when the init message arrives (classic fme.show), so a toggle would close it on the first click of a moderator who has not closed it yet.
     const canUseModTools = useHasPermission(Permission.ModerationTool);
     const canUseModToolsRef = useRef(false);
 
