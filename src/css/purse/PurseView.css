@@ -527,6 +527,13 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
+/* seasonal_icon: icon window at 3,3, fitted to its style's bitmap */
+.octane-purse-seasonal-currency .seasonal-icon {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+}
+
 .octane-purse-seasonal-currency .seasonal-amount.is-info {
     text-decoration: underline;
 }

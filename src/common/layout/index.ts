@@ -1,3 +1,4 @@
+export * from './LayoutActivityPointIcon';
 export * from './LayoutAvatarImageView';
 export * from './LayoutBackgroundImage';
 export * from './LayoutBadgeImageView';

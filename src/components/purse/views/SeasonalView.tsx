@@ -1,6 +1,7 @@
 import { CreateLinkEvent } from '@octane/renderer';
 import { CSSProperties, FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, LocalizeFormattedNumber, localizeWithFallback } from '../../../api';
+import { GetActivityPointName, GetConfigurationValue, LocalizeFormattedNumber, localizeWithFallback } from '../../../api';
+import { LayoutActivityPointIcon, UsesActivityPointIcon } from '../../../common';
 
 interface SeasonalViewProps {
     type: number;
@@ -65,7 +66,9 @@ const toCssColor = (value: string, fallback: string): string => {
 
 export const SeasonalView: FC<SeasonalViewProps> = (props) => {
     const { type = -1, amount = -1 } = props;
-    const iconUrl = GetConfigurationValue<string>('currency.asset.icon.url', '').replace('%type%', type.toString());
+    // The indicator icon is getIconStyleFor(type, big); a type without a style keeps the hotel's wallet icon.
+    const hasAirIcon = UsesActivityPointIcon(type, true);
+    const iconUrl = hasAirIcon ? '' : GetConfigurationValue<string>('currency.asset.icon.url', '').replace('%type%', type.toString());
     // seasonalcurrency.id.<type> names the currency, seasonalcurrency.<id>.color its preset, which sets border and font colour.
     const currencyId = GetConfigurationValue<string>(`seasonalcurrency.id.${type}`, '');
     const preset = currencyId
@@ -76,8 +79,7 @@ export const SeasonalView: FC<SeasonalViewProps> = (props) => {
     const nameColor = toCssColor(preset ? GetConfigurationValue<string>(`seasonalcurrency.preset.${preset}.font`, '') : '', DEFAULT_NAME_COLOR);
     const page = GetConfigurationValue<string>('seasonalcurrencyindicator.page', '');
     // v75 looks the name up as activitypoint.name.<type> and localizes that key; the old purse.seasonal.currency.<type> only covers a missing config.
-    const nameKey = GetConfigurationValue<string>(`activitypoint.name.${type}`, '');
-    const name = nameKey ? localizeWithFallback(nameKey, nameKey) : localizeWithFallback(`purse.seasonal.currency.${type}`, '');
+    const name = GetActivityPointName(type) || localizeWithFallback(`purse.seasonal.currency.${type}`, '');
     const formattedAmount = LocalizeFormattedNumber(amount);
     const change = useBalanceChange(type, amount);
     // The counter holds the old balance for the first half of the change, then counts to the new one.
@@ -99,7 +101,10 @@ export const SeasonalView: FC<SeasonalViewProps> = (props) => {
             <span className={`seasonal-amount${shownAmount === 0 ? ' is-info' : ''}`} title={formattedAmount}>
                 {amountText}
             </span>
-            <span className="seasonal-badge">{iconUrl && <img src={iconUrl} alt="" className="seasonal-image" />}</span>
+            <span className="seasonal-badge">
+                {hasAirIcon && <LayoutActivityPointIcon big className="seasonal-icon" type={type} />}
+                {iconUrl && <img src={iconUrl} alt="" className="seasonal-image" />}
+            </span>
             {change && (
                 <span
                     className="seasonal-change"
