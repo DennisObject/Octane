@@ -22,7 +22,6 @@ import {
     GetRoomObjectScreenLocation,
     IRoomChatSettings,
     LocalizeText,
-    loadEmojiShortcodes,
     PlaySound,
     RoomChatFormatter,
     resolveChatBubbleWidth
@@ -438,8 +437,6 @@ const useChatWidgetState = () => {
 
     useEffect(() => {
         isDisposed.current = false;
-
-        if (GetConfigurationValue<boolean>('chat.emoji.enabled', true)) loadEmojiShortcodes();
 
         return () => {
             isDisposed.current = true;

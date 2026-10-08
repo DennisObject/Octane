@@ -62,7 +62,6 @@
   "habbicons.enabled": true,
 	"habbicons.asset.root": "/habbicons",
 	"habbicons.asset.hash": "default",
-  "chat.emoji.enabled": true,
   "timezone.settings": "Europe/Amsterdam",
   "youtube.publish.disabled": false,
   "user.badges.group.slot.enabled": true,
