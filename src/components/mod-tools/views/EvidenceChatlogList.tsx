@@ -42,6 +42,8 @@ export interface EvidenceChatlogListProps {
     hiddenExtra?: number;
     /** The width of the clipped viewport the rows and the header buttons are drawn in (the rows' width unless the window says otherwise: the header buttons reach past the shorter rows). */
     viewportWidth?: number;
+    /** The chat line follows the list's width (the chatlog window's own list); the handler's embedded list keeps the XML's line. */
+    lineFollowsList?: boolean;
     scrollbarX: number;
     scrollbarHeight: number;
     viewHeight: number;
@@ -98,7 +100,7 @@ export const useEvidence = (kind: EvidenceChatlogKind, id: number): Evidence => 
 // The rows of a chatlog window (Q5 populate): each record starts with a header row (what the log is of, "Room tool" / "View room" for a room), then one row per line; the rows
 // alternate between a pale blue and white and the chatters the window was opened for take 0xf0d6a3 (the reported user) or 0xa3bdf0 (the caller). A line is 17px at least and
 // as high as its wrapped message plus 5px. Names, messages and the chatter column are set in the row colour (the classic client paints them with the row's own colour value).
-export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, listWidth, hiddenExtra = 22, viewportWidth, scrollbarX, scrollbarHeight, viewHeight, scrollbarVariant = 0, scrollbarBlend, onOpenUserInfo, onOpenRoomTool, onEnterRoom }) => {
+export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, listWidth, hiddenExtra = 22, viewportWidth, lineFollowsList = false, scrollbarX, scrollbarHeight, viewHeight, scrollbarVariant = 0, scrollbarBlend, onOpenUserInfo, onOpenRoomTool, onEnterRoom }) => {
     const root = useMemo(() => parseNativeLayout(evidenceXml), []);
     const list = findNativeNode(root, 'evidence_list');
     const header = rectOf(list.children[0]);
@@ -152,13 +154,16 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
     const clamped = Math.max(0, Math.min(range, offset));
     const rowColors = items.map((item) => (item.kind === 'header' ? FRAME_COLOR : item.color));
     const heights = items.map((item, index) => rowHeight(index, item));
-    const messageWidth = line.width - message.x;
+    // the chat line follows the width of the list (scale bits 144: it stretches) and its message field is what is left of it, so a narrower window wraps the messages onto more lines;
+    // the handler's embedded list keeps the XML's line
+    const lineWidth = lineFollowsList ? width : line.width;
+    const messageWidth = lineWidth - message.x;
 
     return (
         <>
             <div className="native0-list" style={{ left: 0, top: 0, width: viewport, height: viewHeight }} onWheel={(event) => setOffset(Math.max(0, Math.min(range, clamped + event.deltaY * 0.75)))}>
                 <div style={{ position: 'absolute', left: 0, top: -clamped, width: viewport, height: contentHeight }}>
-                    <Native0Rows colors={rowColors} heights={heights} width={Math.min(width, Math.max(header.width, line.width))} />
+                    <Native0Rows colors={rowColors} heights={heights} width={lineFollowsList ? width : Math.min(width, Math.max(header.width, line.width))} />
                     {items.map((item, index) =>
                         item.kind === 'header' ? (
                             <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: header.width, height: header.height, overflow: 'hidden' }}>
@@ -178,7 +183,7 @@ export const EvidenceChatlogList: FC<EvidenceChatlogListProps> = ({ evidence, li
                                 )}
                             </div>
                         ) : (
-                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: line.width, height: heights[index] }}>
+                            <div key={index} style={{ position: 'absolute', left: 0, top: tops[index], width: lineWidth, height: heights[index] }}>
                                 <div style={{ position: 'absolute', left: time.x, top: time.y, width: time.width, height: heights[index], overflow: 'hidden', fontSize: 0, lineHeight: 0 }}>
                                     <NativeText background={item.color} text={item.line.timestamp} textStyle="u_bold" />
                                 </div>

@@ -37,6 +37,7 @@ export const EvidenceChatlogView: FC<EvidenceChatlogProps> = ({ kind, id, x, y, 
                 <EvidenceChatlogList
                     evidence={evidence}
                     hiddenExtra={23}
+                    lineFollowsList
                     listWidth={width - 60}
                     viewportWidth={width - 37}
                     scrollbarHeight={height - 32}
