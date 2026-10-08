@@ -81,11 +81,7 @@ const NativeLabel: FC<{ node: NativeNode; context: NativeLayoutContext }> = ({ n
 
     return (
         <div className="native-label" data-native-name={name} style={rectStyle(node)}>
-            {context.hover && color === 0 ? (
-                <NativeText background={0xffffff} overrides={{ color }} style={{ mixBlendMode: 'multiply' }} text={text} textStyle={textStyle} />
-            ) : (
-                <NativeText background={context.background} overrides={{ color }} text={text} textStyle={textStyle} />
-            )}
+            <NativeText background={context.background} overrides={{ color }} text={text} textStyle={textStyle} />
         </div>
     );
 };

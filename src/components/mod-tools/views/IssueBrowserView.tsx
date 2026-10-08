@@ -116,7 +116,7 @@ export const IssueBrowserView: FC<IssueBrowserProps> = ({ x, y, width, height, c
                 {/* the tab's content is clipped by the panel's inner edge (the bottom "release all" button loses its lower border row) */}
                 <div style={{ position: 'absolute', left: base.x, top: base.y, width: panel.x + panel.width - 1 - base.x, height: panel.y + panel.height - 1 - base.y, overflow: 'hidden' }}>
                     {header.children.map((node, index) => (
-                        <Native0Text key={index} bold text={label(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x') + (movesRight(node) ? stretchX : 0)} y={nativeNumber(node, 'y')} />
+                        <Native0Text key={index} bold text={label(node)} width={nativeNumber(node, 'width')} x={nativeNumber(node, 'x') + (movesRight(node) ? stretchX : 0) - (label(node) === 'Msgs' ? 1 : 0)} y={nativeNumber(node, 'y')} />
                     ))}
                     <div className="native0-list" style={{ left: listRect.x, top: listRect.y, width: listRect.width, height: listRect.height }} onWheel={(event) => setOffset(Math.max(0, Math.min(Math.max(0, contentHeight - listRect.height), clamped + event.deltaY * 0.75)))}>
                         <div style={{ position: 'absolute', left: 0, top: -clamped, width: listRect.width, height: contentHeight }}>

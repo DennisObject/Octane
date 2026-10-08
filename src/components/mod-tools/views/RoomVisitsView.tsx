@@ -71,7 +71,7 @@ export const RoomVisitsView: FC<RoomVisitsProps> = ({ userId, x, y, width, heigh
                             <div key={index} style={{ position: 'absolute', left: 0, top: index * row.height, width: listWidth, height: row.height }}>
                                 <Native0Text bold clip height={row.height} text={room.roomName} underline width={name.width} x={name.x} y={0} onClick={() => onOpenRoomTool(room.roomId)} />
                                 <Native0Text height={row.height} text={`${pad(room.enterHour)}:${pad(room.enterMinute)}`} width={time.width} x={time.x} y={0} />
-                                <Native0Text bold height={row.height} text={enterCaption} underline width={enter.width} x={enter.x - 1} y={0} onClick={() => onEnterRoom(room.roomId)} />
+                                <Native0Text bold height={row.height} text={enterCaption} underline width={enter.width} x={enter.x} y={0} onClick={() => onEnterRoom(room.roomId)} />
                             </div>
                         ))}
                     </div>

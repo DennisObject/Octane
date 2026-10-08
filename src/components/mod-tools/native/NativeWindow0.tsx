@@ -43,6 +43,9 @@ export const FRAME_COLOR = 0x418db0;
 
 const rect = (x: number, y: number, width: number, height: number): CSSProperties => ({ left: x, top: y, width, height });
 
+// the native bitmap font sets a string that starts with "1" or "4" one pixel further left than the web font does (the first glyph only; the same glyphs inside a string sit where the font puts them)
+const LEADING_ONE_OR_FOUR = /^[14]/;
+
 interface Native0TextProps {
     text: string;
     x: number;
@@ -96,7 +99,7 @@ export const Native0Text: FC<Native0TextProps> = ({ text, x, y, width, height, b
                 style={{ left: x, top: y, width: wrap || clip ? width : undefined, height: height === undefined ? undefined : height, overflow: clip ? 'hidden' : undefined, color: `#${(white ? 0xffffff : color).toString(16).padStart(6, '0')}`, ...(glow === undefined ? {} : { ['--native0-glow' as string]: glow }), ...style }}
                 onClick={onClick}
             >
-                <span className={`native0-text__line${glow === undefined ? '' : ' has-glow'}${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`}>{text}</span>
+                <span className={`native0-text__line${glow === undefined ? '' : ' has-glow'}${bold || white ? ' is-bold' : ''}${underline ? ' is-underline' : ''}${wrap ? ' is-wrap' : ''}`} style={LEADING_ONE_OR_FOUR.test(text) ? { marginLeft: -1 } : undefined}>{text}</span>
             </div>
         </>
     );
