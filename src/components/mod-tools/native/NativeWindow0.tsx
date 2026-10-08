@@ -43,8 +43,9 @@ export const FRAME_COLOR = 0x418db0;
 
 const rect = (x: number, y: number, width: number, height: number): CSSProperties => ({ left: x, top: y, width, height });
 
-// the native bitmap font sets a string that starts with "1" or "4" one pixel further left than the web font does (the first glyph only; the same glyphs inside a string sit where the font puts them)
-const LEADING_ONE_OR_FOUR = /^[14]/;
+// the native bitmap font sets a string that starts with one of these glyphs one pixel further left than the web font does (the first glyph only; the same glyphs inside a string sit where the
+// font puts them); measured on "1", "4", "no" and "yes" in the captures
+const LEADING_ONE_OR_FOUR = /^[14ny]/;
 
 interface Native0TextProps {
     text: string;

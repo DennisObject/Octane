@@ -171,8 +171,8 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
                         <Native0Text bold text="Has event:" width={90} x={5} y={41} />
                         <Native0Text text={data ? data.ownerName : 'sulka'} underline width={71} x={85} y={2} onClick={data ? () => onOpenUserInfo(data.ownerId) : undefined} />
                         <Native0Text text={data ? `${data.userCount}` : '18'} width={40} x={100} y={15} />
-                        <Native0Text text={data ? (data.ownerInRoom ? 'Yes' : 'No') : 'yes'} width={40} x={data ? 100 : 99} y={28} />
-                        <Native0Text text="no" width={40} x={99} y={41} />
+                        <Native0Text text={data ? (data.ownerInRoom ? 'Yes' : 'No') : 'yes'} width={40} x={100} y={28} />
+                        <Native0Text text="no" width={40} x={100} y={41} />
                         <Native0Button height={21} label="Enter room" width={70} x={155} y={4} onClick={() => data && CreateLinkEvent(`navigator/goto/${data.flatId}`)} />
                         <Native0Button enabled={settings.chatlogsPermission} height={21} label="Chatlog" width={70} x={155} y={26} onClick={() => data && onOpenChatlog(data.flatId)} />
                         <Native0Button
