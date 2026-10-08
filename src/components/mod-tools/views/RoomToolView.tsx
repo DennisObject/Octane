@@ -8,7 +8,7 @@ import {
     ModeratorRoomInfoEvent,
     RoomModerationData
 } from '@octane/renderer';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { OpenUrl, SendMessageComposer } from '../../../api';
 import { showModAlert, useMessageEvent, useModWindowTrackerStore } from '../../../hooks';
 import roomToolXml from '../../../assets/mod-tools/xml/roomtool_frame.xml?raw';
@@ -112,14 +112,27 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
 
     // the tracker places the windows opened from this one by its current frame
     useEffect(() => resizeWindow('roomTool', `${roomId}`, nativeNumber(root, 'width'), frameHeight), [resizeWindow, roomId, root, frameHeight]);
-    const canAct = data ? data.flatId === currentRoomId && settings.roomAlertPermission : true;
+    // The answer for this flat, the moderator being in that very room and the room alert permission: the classic tool only wires its send buttons when the answer arrives (RQ.populate attaches
+    // the click listeners) and enables them by exactly this rule (RQ._r8595b44a050a80, launcher.pretty.js:281598-281636). Until then the window shows its XML (enabled looking) buttons, which
+    // do nothing; the action carries no room id, so it always lands on the room the moderator is in.
+    const eligible = !!data && data.flatId === currentRoomId && !!settings?.roomAlertPermission;
+    const canAct = data ? eligible : true;
+    // the room the sends are for right now (0: none), refreshed with every commit so a callback captured earlier still sees the present state when it runs
+    const sendFlatRef = useRef(0);
+
+    useLayoutEffect(() => {
+        sendFlatRef.current = eligible ? data.flatId : 0;
+    }, [eligible, data]);
+
     const templates = settings.roomMessageTemplates ?? [];
 
     // the window is disposed by its first send: a second click before it is gone must not send again
     const sentRef = useRef(false);
 
     const send = (caution: boolean) => {
-        if (sentRef.current) return;
+        const flatId = sendFlatRef.current;
+
+        if (sentRef.current || flatId === 0) return;
 
         if (isPlaceholder || message === '') {
             showModAlert('You must input a message to the user');
@@ -138,7 +151,7 @@ export const RoomToolView: FC<RoomToolProps> = ({ roomId, x, y, settings, curren
         sentRef.current = true;
         SendMessageComposer(new ModeratorActionMessageComposer(type, message, ''));
 
-        if (data && (lock || changeName || kick)) SendMessageComposer(new ModerateRoomMessageComposer(data.flatId, lock ? 1 : 0, changeName ? 1 : 0, kick ? 1 : 0));
+        if (lock || changeName || kick) SendMessageComposer(new ModerateRoomMessageComposer(flatId, lock ? 1 : 0, changeName ? 1 : 0, kick ? 1 : 0));
 
         onClose();
     };
