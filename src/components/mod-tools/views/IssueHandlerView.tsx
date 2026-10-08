@@ -181,7 +181,7 @@ export const IssueHandlerView: FC<IssueHandlerProps> = ({
 
     return (
         <NativeWindowShell type="issueHandler" windowKey={`${bundleId}`} x={x} y={y}>
-            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} onResize={(_, h) => onResize(750, Math.max(390, h))}>
+            <Native0Frame caption={nativeCaption(root)} height={height} width={width} onClose={() => onClose()} minHeight={390} minWidth={750} onResize={(_, h) => onResize(750, h)}>
                 {/* left column */}
                 <div className="native0-box" style={{ left: left.x, top: left.y, width: left.width, height: Math.min(left.height + stretch, height - 32), backgroundColor: '#418db0' }} />
                 {/* the column is not clipped: below 515 its content is taller than the window and runs up over the frame's header like the classic client's */}

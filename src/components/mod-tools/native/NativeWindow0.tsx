@@ -304,12 +304,15 @@ interface Native0FrameProps {
     className?: string;
     /** A resizable frame (params 98305) shows the scaler in its corner; the new size is reported while it is dragged (minimum 150 x 100). */
     onResize?: (width: number, height: number) => void;
+    /** The smallest size the scaler gives the frame (150 x 100 unless the window's layout says otherwise). */
+    minWidth?: number;
+    minHeight?: number;
     /** Opacity of the glow around the caption letters (0.16, the native halo, unless the window says otherwise). */
     glow?: number;
 }
 
 /** Frame style 0: blue skin, header (6,6) with tiled centre and shine, centred frame_title caption, 15x15 close button; content sits at (6,25). */
-export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, onClose, children, className = '', onResize, glow }) => {
+export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, onClose, children, className = '', onResize, minWidth = 150, minHeight = 100, glow }) => {
     const headerWidth = width - 12;
     const [closeState, setCloseState] = useState<'default' | 'hovering' | 'pressed'>('default');
     const captionRef = useRef<HTMLDivElement>(null);
@@ -365,11 +368,21 @@ export const Native0Frame: FC<Native0FrameProps> = ({ width, height, caption, on
                     style={rect(width - 15, height - 15, 15, 15)}
                     onPointerDown={(event) => {
                         // like the classic window manager the size follows the pointer by what it moved since the last event, so a size the window refused (its minimum) is not owed back when the pointer returns
+                        // (the first movement after the press only starts the drag: the classic client resizes from the second one)
                         let lastX = event.clientX;
                         let lastY = event.clientY;
+                        let started = false;
                         const move = (moveEvent: PointerEvent) => {
-                            const nextWidth = Math.max(150, sizeRef.current.width + moveEvent.clientX - lastX);
-                            const nextHeight = Math.max(100, sizeRef.current.height + moveEvent.clientY - lastY);
+                            if (!started) {
+                                started = true;
+                                lastX = moveEvent.clientX;
+                                lastY = moveEvent.clientY;
+
+                                return;
+                            }
+
+                            const nextWidth = Math.max(minWidth, sizeRef.current.width + moveEvent.clientX - lastX);
+                            const nextHeight = Math.max(minHeight, sizeRef.current.height + moveEvent.clientY - lastY);
 
                             lastX = moveEvent.clientX;
                             lastY = moveEvent.clientY;
