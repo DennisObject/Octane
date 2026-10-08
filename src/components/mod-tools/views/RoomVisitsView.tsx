@@ -4,7 +4,7 @@ import { SendMessageComposer } from '../../../api';
 import { useMessageEvent } from '../../../hooks';
 import roomVisitsXml from '../../../assets/mod-tools/xml/roomvisits_frame.xml?raw';
 import { NativeWindowShell } from '../native/NativeWindowShell';
-import { findNativeNode, nativeCaption, nativeNumber, NativeNode, parseNativeLayout } from '../native/NativeLayout';
+import { findNativeNode, nativeCaption, nativeNumber, nativeScaledRect, NativeNode, parseNativeLayout } from '../native/NativeLayout';
 import { Native0Frame, Native0Rows, Native0Scrollbar, Native0Text } from '../native/NativeWindow0';
 
 const rectOf = (node: NativeNode) => ({ x: nativeNumber(node, 'x'), y: nativeNumber(node, 'y'), width: nativeNumber(node, 'width'), height: nativeNumber(node, 'height') });
@@ -29,9 +29,9 @@ export interface RoomVisitsProps {
 export const RoomVisitsView: FC<RoomVisitsProps> = ({ userId, x, y, width, height, onClose, onResize, onOpenRoomTool, onEnterRoom }) => {
     const root = useMemo(() => parseNativeLayout(roomVisitsXml), []);
     const row = rectOf(findNativeNode(root, 'visitrow'));
-    const time = rectOf(findNativeNode(root, 'time_txt'));
-    const name = rectOf(findNativeNode(root, 'room_name_txt'));
-    const enter = rectOf(findNativeNode(root, 'view_room_txt'));
+    const timeNode = findNativeNode(root, 'time_txt');
+    const nameNode = findNativeNode(root, 'room_name_txt');
+    const enterNode = findNativeNode(root, 'view_room_txt');
     const enterCaption = nativeCaption(findNativeNode(root, 'view_room_txt'));
     const [data, setData] = useState<RoomVisitsData>(null);
     const [offset, setOffset] = useState(0);
@@ -58,6 +58,11 @@ export const RoomVisitsView: FC<RoomVisitsProps> = ({ userId, x, y, width, heigh
     const contentHeight = data.rooms.length * row.height;
     const overflow = contentHeight > viewHeight;
     const listWidth = clientWidth - (overflow ? 17 : 0);
+    // the row follows the list's width and its fields follow the row (name stretches, time and "Enter" move): the XML's row is 263 wide
+    const rowChange = listWidth - row.width;
+    const time = nativeScaledRect(timeNode, rowChange, 0);
+    const name = nativeScaledRect(nameNode, rowChange, 0);
+    const enter = nativeScaledRect(enterNode, rowChange, 0);
     const rowColors = data.rooms.map((_, index) => (index % 2 === 0 ? SHADE : 0xffffff));
     const clamped = Math.max(0, Math.min(Math.max(0, contentHeight - viewHeight), offset));
 

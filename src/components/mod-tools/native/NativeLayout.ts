@@ -60,3 +60,29 @@ export const findNativeNode = (node: NativeNode, name: string): NativeNode | nul
 
     return null;
 };
+
+// How a child follows a change of its parent's size: the window's scale bits (AIR WindowController.updateScaleRelativeToParent, WindowController.as:1832-1905): 0xC0 for the width, 0x0C00
+// for the height; 128 / 2048 stretch the child (its size grows by the parent's change), 64 / 1024 move it (its position does) and anything else leaves it where it is.
+export type NativeFollow = 'fixed' | 'move' | 'stretch';
+
+export const nativeFollow = (node: NativeNode, axis: 'x' | 'y'): NativeFollow => {
+    const bits = Number(node.attrs.params ?? 0) & (axis === 'x' ? 0xc0 : 0x0c00);
+
+    if (bits === (axis === 'x' ? 128 : 2048)) return 'stretch';
+    if (bits === (axis === 'x' ? 64 : 1024)) return 'move';
+
+    return 'fixed';
+};
+
+/** The node's rectangle after its parent grew by (deltaWidth, deltaHeight). */
+export const nativeScaledRect = (node: NativeNode, deltaWidth: number, deltaHeight: number) => {
+    const fx = nativeFollow(node, 'x');
+    const fy = nativeFollow(node, 'y');
+
+    return {
+        x: nativeNumber(node, 'x') + (fx === 'move' ? deltaWidth : 0),
+        y: nativeNumber(node, 'y') + (fy === 'move' ? deltaHeight : 0),
+        width: nativeNumber(node, 'width') + (fx === 'stretch' ? deltaWidth : 0),
+        height: nativeNumber(node, 'height') + (fy === 'stretch' ? deltaHeight : 0)
+    };
+};
