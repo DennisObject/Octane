@@ -1,6 +1,7 @@
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from './Air32NativeTextRenderer';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from './NativeFont';
+import { useNativeTextScale } from './NativeTextScale';
 import { NativeTextStyleName, nativeTextStyles } from './NativeTextStyles';
 
 interface NativeTextProps {
@@ -63,6 +64,7 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
     const [size, setSize] = useState<{ width: number; height: number }>(null);
     const fontStyle = { ...nativeTextStyles[textStyle], ...overrides, background };
     const styleKey = JSON.stringify(fontStyle);
+    const scale = useNativeTextScale();
 
     useEffect(() => {
         let disposed = false;
@@ -84,10 +86,15 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             const fieldHeight = Math.ceil(lines.length * lineHeight) + 4;
             // Keep the native text fallback for unsupported or excessively large fields.
             if (fieldWidth * fieldHeight > 2 * 1024 * 1024) return;
-            const pixels = new Uint8ClampedArray(fieldWidth * fieldHeight * 4);
+            // Layout stays in CSS pixels; the raster is drawn at the display scale (see NativeTextScale),
+            // as wide as the lines measure at that size.
+            const scaledStyle = { ...fontStyle, size: fontStyle.size * scale };
+            const pixelWidth = Math.max(fieldWidth * scale, ...lines.map((line) => Math.ceil(measureNativeText(loaded.font, line, scaledStyle)) + 4 * scale));
+            const pixelHeight = fieldHeight * scale;
+            const pixels = new Uint8ClampedArray(pixelWidth * pixelHeight * 4);
             lines.forEach((line, index) =>
                 loaded.renderer.render(line, {
-                    size: fontStyle.size,
+                    size: fontStyle.size * scale,
                     color: fontStyle.color ?? 0,
                     antiAliasType: fontStyle.antiAliasType ?? 'advanced',
                     gridFitType: 'pixel',
@@ -103,19 +110,19 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
                     // Each line gets a local surface view: the native renderer's
                     // etching pass is relative to that surface, not target.offsetY.
                     target: {
-                        pixels: pixels.subarray(Math.round(index * lineHeight) * fieldWidth * 4),
-                        width: fieldWidth,
-                        height: fieldHeight - Math.round(index * lineHeight)
+                        pixels: pixels.subarray(Math.round(index * lineHeight) * scale * pixelWidth * 4),
+                        width: pixelWidth,
+                        height: pixelHeight - Math.round(index * lineHeight) * scale
                     }
                 })
             );
             if (disposed || !canvasRef.current) return;
             const canvas = canvasRef.current;
-            canvas.width = fieldWidth;
-            canvas.height = fieldHeight;
+            canvas.width = pixelWidth;
+            canvas.height = pixelHeight;
             const composited = compositeAir32RetainedToOpaque(pixels, [(background >>> 16) & 255, (background >>> 8) & 255, background & 255, 255]);
-            canvas.getContext('2d').putImageData(new ImageData(composited, fieldWidth, fieldHeight), 0, 0);
-            setSize({ width: fieldWidth, height: fieldHeight });
+            canvas.getContext('2d').putImageData(new ImageData(composited, pixelWidth, pixelHeight), 0, 0);
+            setSize({ width: pixelWidth / scale, height: fieldHeight });
         };
         render().catch((error) => {
             if (!disposed) console.warn('Native text rendering failed', error);
@@ -123,7 +130,7 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
         return () => {
             disposed = true;
         };
-    }, [text, textStyle, styleKey, maxWidth, leading]);
+    }, [text, textStyle, styleKey, maxWidth, leading, scale]);
 
     return (
         <span
@@ -131,7 +138,11 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             data-native-text={size ? textStyle : 'fallback'}
             style={{ display: 'inline-block', verticalAlign: 'top', position: 'relative', ...size, ...style }}
         >
-            <canvas ref={canvasRef} aria-hidden="true" style={{ display: size ? 'block' : 'none', imageRendering: 'pixelated' }} />
+            <canvas
+                ref={canvasRef}
+                aria-hidden="true"
+                style={{ display: size ? 'block' : 'none', width: size?.width, height: size?.height, imageRendering: scale > 1 ? 'auto' : 'pixelated' }}
+            />
             <span
                 style={
                     size

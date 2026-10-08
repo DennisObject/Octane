@@ -63,11 +63,7 @@ export class ChatBubbleUtilities {
             image.onerror = reject;
             image.src = sourceUrl;
         });
-        const canvas = document.createElement('canvas');
-        canvas.width = 50;
-        canvas.height = 50;
-        const context = canvas.getContext('2d');
-        context.imageSmoothingEnabled = false;
+        let head: HTMLCanvasElement | HTMLImageElement = source;
         if (zoom) {
             const scaled = document.createElement('canvas');
             scaled.width = Math.round(source.width / 2);
@@ -75,12 +71,9 @@ export class ChatBubbleUtilities {
             const scaledContext = scaled.getContext('2d');
             scaledContext.imageSmoothingEnabled = true;
             scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
-            canvas.width = 25;
-            canvas.height = 25;
-            context.imageSmoothingEnabled = false;
-            context.drawImage(scaled, 10, 14, 25, 25, 0, 0, 25, 25);
-        } else context.drawImage(source, 21, 28, 50, 50, 0, 0, 50, 50);
-        const imageUrl = canvas.toDataURL('image/png');
+            head = scaled;
+        }
+        const imageUrl = this.focusFace(head, zoom ? 25 : 50).toDataURL('image/png');
         if (isPlaceholder) this.PLACEHOLDER_IMAGE_CACHE.set(zoom, imageUrl);
 
         this.AVATAR_IMAGE_CACHE.set(this.getAvatarImageCacheKey(figure, zoom), imageUrl);
@@ -88,6 +81,46 @@ export class ChatBubbleUtilities {
         this.pruneCache(this.AVATAR_IMAGE_CACHE);
 
         return imageUrl;
+    }
+
+    /**
+     * The face icon the official client builds with HabboFaceFocuser: the head centred, chin near the bottom
+     * (a bubble shows the icon's bottom rows). The official fixed crop assumes its own avatar canvas, which
+     * Octane's head image does not share, so the head is placed by its visible pixels instead.
+     */
+    private static focusFace(head: HTMLCanvasElement | HTMLImageElement, size: number): HTMLCanvasElement {
+        const width = head.width;
+        const height = head.height;
+        const source = document.createElement('canvas');
+        source.width = width;
+        source.height = height;
+        const sourceContext = source.getContext('2d');
+        sourceContext.drawImage(head, 0, 0);
+
+        const alpha = sourceContext.getImageData(0, 0, width, height).data;
+        let left = width, top = height, right = -1, bottom = -1;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (alpha[(y * width + x) * 4 + 3] === 0) continue;
+                if (x < left) left = x;
+                if (x > right) right = x;
+                if (y < top) top = y;
+                if (y > bottom) bottom = y;
+            }
+        }
+
+        const face = document.createElement('canvas');
+        face.width = size;
+        face.height = size;
+
+        if (right < 0) return face;
+
+        const context = face.getContext('2d');
+        context.imageSmoothingEnabled = false;
+        context.drawImage(source, Math.round(size / 2 - (left + right + 1) / 2), Math.round(size * 0.94 - (bottom + 1)));
+
+        return face;
     }
 
     public static async getUserImage(figure: string): Promise<string> {
@@ -99,8 +132,8 @@ export class ChatBubbleUtilities {
         return existing;
     }
 
-    public static async getPetImage(figure: string, direction: number, _arg_3: boolean, scale: number = 64, posture: string = null) {
-        const cacheKey = `${figure}-${posture || 'std'}-${direction}-${scale}`;
+    public static async getPetImage(figure: string, direction: number, headOnly: boolean, scale: number = 64, posture: string = null) {
+        const cacheKey = `${figure}-${posture || 'std'}-${direction}-${scale}-${headOnly ? 'head' : 'full'}`;
         let existing = this.PET_IMAGE_CACHE.get(cacheKey);
 
         if (existing) return existing;
@@ -141,7 +174,7 @@ export class ChatBubbleUtilities {
                     imageReady: async (result) => listenerResolve(await getImageUrl(result)),
                     imageFailed: () => listenerResolve(null)
                 },
-                typeId === 35,
+                headOnly || typeId === 35,
                 0,
                 figureData.customParts,
                 posture
