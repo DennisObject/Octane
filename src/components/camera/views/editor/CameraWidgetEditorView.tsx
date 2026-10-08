@@ -45,6 +45,13 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
     const requestIdRef = useRef<number>(0);
     const stableTexture = picture?.texture ?? null;
 
+    // useCamera loads the effects once the hotel is idle; opening the editor first loads them now.
+    useEffect(() => {
+        const manager = GetRoomCameraWidgetManager();
+
+        if (!manager.isLoaded) void manager.init();
+    }, []);
+
     const colorMatrixEffects = useMemo(() => availableEffects.filter((effect) => effect.colorMatrix), [availableEffects]);
     const compositeEffects = useMemo(() => availableEffects.filter((effect) => effect.texture), [availableEffects]);
     const visibleEffects = currentTab === CameraEditorTabs.COLORMATRIX ? colorMatrixEffects : compositeEffects;
