@@ -180,9 +180,26 @@ const furnidataVersion = (() => {
     return typeof version === 'string' && /^[0-9a-f]{8,64}$/i.test(version) ? version : null;
 })();
 
+// Gamedata versions (file name -> version) from the entry page: those files are requested by version instead
+// of with a new timestamp per load (see the renderer's configuration interpolation).
+const gamedataVersions = (() => {
+    const text = inlineConfigDocument('gamedata-versions');
+
+    if (text === null) return null;
+
+    const files = (parseJsonDocument(text, resolveJsonMode(), 'gamedata-versions.json') as { files?: unknown })?.files;
+
+    if (!files || typeof files !== 'object') return null;
+
+    const versions = Object.fromEntries(Object.entries(files).filter(([file, version]) => file && typeof version === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(version)));
+
+    return Object.keys(versions).length ? versions : null;
+})();
+
 (window as any).OctaneConfig = {
     'config.urls': [rendererConfigUrl, uiConfigUrl],
     ...(furnidataVersion ? { 'furnidata.version': furnidataVersion } : {}),
+    ...(gamedataVersions ? { 'gamedata.versions': gamedataVersions } : {}),
     'sso.ticket': launchCredentials.ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
