@@ -1,7 +1,7 @@
 import { CatalogPageMessageOfferData } from '@octane/renderer';
 import { FC, useCallback } from 'react';
 import { LocalizeText, ProductImageUtility } from '../../../../../../api';
-import { Button, LayoutGridItem, LayoutImage, Text } from '../../../../../../common';
+import { LayoutImage } from '../../../../../../common';
 
 export interface VipGiftItemViewProps {
     offer: CatalogPageMessageOfferData;
@@ -50,28 +50,22 @@ export const VipGiftItem: FC<VipGiftItemViewProps> = (props) => {
 
     const description = getItemDesc();
 
+    // Official club_gift_list_item: image box left, name / description / requirement stacked beside it,
+    // Select bottom right (enabled only while this gift can be chosen), VIP mark in the corner.
     return (
-        <LayoutGridItem alignItems="center" center={false} className="octane-catalog-club-gift p-1" column={false} gap={2}>
-            <LayoutImage imageUrl={getImageUrlForOffer()} />
-            <div className="flex min-w-0 grow flex-col gap-0.5">
-                <div className="flex items-center gap-1">
-                    {isVip && <span aria-hidden="true" className="octane-club-compact-mark is-vip relative! top-0! left-0! shrink-0" />}
-                    <Text truncate fontWeight="bold">
-                        {getItemTitle()}
-                    </Text>
-                </div>
-                {!!requirementText && <Text small>{requirementText}</Text>}
-                {!!description && (
-                    <Text small variant="gray">
-                        {description}
-                    </Text>
-                )}
+        <div className="octane-catalog-club-gift">
+            <div className="octane-catalog-club-gift-image">
+                <LayoutImage imageUrl={getImageUrlForOffer()} />
             </div>
-            <Button
+            {isVip && <span aria-hidden="true" className="octane-club-compact-mark is-vip octane-catalog-club-gift-vip" />}
+            <div className="octane-catalog-club-gift-name">{getItemTitle()}</div>
+            {!!description && <div className="octane-catalog-club-gift-desc">{description}</div>}
+            {!!requirementText && <div className="octane-catalog-club-gift-requirement">{requirementText}</div>}
+            <button
                 aria-disabled={!isAvailable}
+                className="octane-catalog-standard-button octane-catalog-club-gift-select"
                 disabled={!isAvailable}
-                role="button"
-                variant="secondary"
+                type="button"
                 onClick={() => {
                     if (!isAvailable) return;
 
@@ -79,7 +73,7 @@ export const VipGiftItem: FC<VipGiftItemViewProps> = (props) => {
                 }}
             >
                 {LocalizeText('catalog.club_gift.select')}
-            </Button>
-        </LayoutGridItem>
+            </button>
+        </div>
     );
 };
