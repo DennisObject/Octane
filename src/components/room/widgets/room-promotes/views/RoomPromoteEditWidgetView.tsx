@@ -19,6 +19,8 @@ const NAME_LENGTH = 25;
 const DESCRIPTION_LENGTH = 100;
 const MIN_NAME_LENGTH = 3;
 const FRAME_WIDTH = 241;
+// The frame's header box sits 6px inside the 241px card on each side (the caption is placed relative to it).
+const HEADER_INSET = 6;
 
 export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ eventId, eventName, eventDescription, onClose }) => {
     const [name, setName] = useState<string>(eventName);
@@ -26,7 +28,8 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     const [hasNameError, setHasNameError] = useState<boolean>(false);
     const lastSaved = useRef<string>(JSON.stringify([eventName, eventDescription]));
     const caption = LocalizeText('navigator.eventsettings.editcaption');
-    // The official caption sits at floor((frame - field) / 2) with the AIR field width (floor(textWidth) + 5), one pixel left of CSS centring for this frame.
+    // Measured against the official window: for this 241px frame the caption lands one pixel left of the centred field (field = AIR field width, floor(textWidth) + 5), i.e. at floor((240 - field) / 2).
+    // One native pair only (the header lays its title out through an item list); the rule is not pinned in the source.
     const captionWidth = useAirFieldWidth(caption, 12, true, 'u_frame_title');
 
     const save = (nextName: string, nextDescription: string) => {
@@ -54,14 +57,14 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     background={0x377998}
                     className="octane-room-promote-edit__title"
                     overrides={{ color: 0xffffff }}
-                    style={captionWidth === undefined ? undefined : { left: Math.floor((FRAME_WIDTH - captionWidth) / 2), transform: 'none' }}
+                    style={captionWidth === undefined ? undefined : { left: Math.floor((FRAME_WIDTH - 1 - captionWidth) / 2) - HEADER_INSET, transform: 'none' }}
                     text={caption}
                     textStyle="u_frame_title"
                 />
             </OctaneCardHeaderView>
             <div className="octane-room-promote-edit__client">
                 <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
-                    <NativeText background={0xe9e9e1} overrides={{ sharpness: 0, thickness: 0 }} text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
+                    <NativeText background={0xe9e9e1} text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
                 </div>
                 {hasNameError && <div className="octane-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
                 <RoomPromoteField
@@ -75,7 +78,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     onChange={setName}
                 />
                 <div className="octane-room-promote-edit__label" style={{ top: 40 }}>
-                    <NativeText background={0xe9e9e1} overrides={{ sharpness: 0, thickness: 0 }} text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
+                    <NativeText background={0xe9e9e1} text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
                 </div>
                 <RoomPromoteField
                     height={88}
