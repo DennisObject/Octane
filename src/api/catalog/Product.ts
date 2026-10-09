@@ -40,15 +40,18 @@ export class Product implements IProduct {
         this._uniqueLimitedItemsLeft = uniqueLimitedItemsLeft;
     }
 
+    // Native Product.stripAddonProducts: a lone product stays, including chat style.
+    // Otherwise drop badges, chat styles, and only the ninja disappear effect.
     public static stripAddonProducts(products: IProduct[]): IProduct[] {
         if (products.length === 1) return products;
 
-        return products.filter(
-            (product) =>
-                product.productType !== ProductTypeEnum.BADGE &&
-                product.productType !== ProductTypeEnum.EFFECT &&
-                product.productClassId !== Product.EFFECT_CLASSID_NINJA_DISAPPEAR
-        );
+        return products.filter((product) => {
+            if (product.productType === ProductTypeEnum.BADGE) return false;
+            if (product.productType === 'chat_style') return false;
+            if (product.productType === ProductTypeEnum.EFFECT && product.productClassId === Product.EFFECT_CLASSID_NINJA_DISAPPEAR) return false;
+
+            return true;
+        });
     }
 
     public getIconUrl(offer: IPurchasableOffer = null, stuffData: IObjectData = null): string {

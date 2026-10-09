@@ -54,6 +54,84 @@
     text-shadow: none !important;
 }
 
+/* A deal hides the room canvas, so the name and description go back to black. */
+.octane-catalog-offer-preview.is-bundle .octane-catalog-product-details-name,
+.octane-catalog-offer-preview.is-bundle .octane-catalog-product-details-description,
+.octane-catalog-badge-preview.is-bundle .octane-catalog-product-details-name,
+.octane-catalog-badge-preview.is-bundle .octane-catalog-product-details-description {
+    color: #000 !important;
+}
+
+.octane-catalog-bundle-preview {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    flex: 0 0 auto;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* Centered in the 360x348 teaser bitmap, then clipped by the 240px product view. */
+.octane-catalog-bundle-preview-scene {
+    position: absolute;
+    top: 74px;
+    left: 0;
+    width: 360px;
+    height: 200px;
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-catalog-bundle-preview-grid {
+    position: absolute;
+    top: 88px;
+    left: 11px;
+    width: 137px;
+    height: 76px;
+    display: grid;
+    grid-template-columns: repeat(3, 36px);
+    grid-auto-rows: 36px;
+    gap: 2px;
+    align-content: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.octane-catalog-bundle-preview-item {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+}
+
+.octane-catalog-bundle-preview-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* gridItem multiCounter sits at x=3,y=0 inside the alpha-0 plate at x=18,y=21. */
+.octane-catalog-bundle-preview-count {
+    position: absolute;
+    top: 21px;
+    left: 21px;
+    z-index: 1;
+    color: #cccc66;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
 .octane-catalog-product-details-badges {
     display: flex;
     flex-direction: column;

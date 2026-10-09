@@ -1,6 +1,6 @@
 import { InfiniteGrid } from '@layout/InfiniteGrid';
 import { CSSProperties, FC, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { IPurchasableOffer } from '../../../../../api';
+import { IPurchasableOffer, Offer } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView } from '../../../../../common';
 import { useCatalogActions, useCatalogData, useScrollWindow } from '../../../../../hooks';
 import { useCatalogAdminOfferReorder } from '../../../../../hooks/catalog/useCatalogAdminOfferReorder';
@@ -52,6 +52,19 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         ...(isAirStandardDensity && { '--octane-air-column-count': airColumnCount.toString() })
     } as CSSProperties;
     const mixedLayout = useMemo(() => layoutAirCatalogOffers(offers, airColumnCount), [airColumnCount, offers]);
+    const bundleCounterByOffer = useMemo(() => {
+        const counters = new Map<IPurchasableOffer, number>();
+        let bundleCounter = 0;
+
+        for (const pageOffer of offers) {
+            if (pageOffer.pricingModel !== Offer.PRICING_MODEL_BUNDLE) continue;
+
+            bundleCounter += 1;
+            counters.set(pageOffer, bundleCounter);
+        }
+
+        return counters;
+    }, [offers]);
 
     useLayoutEffect(() => {
         if (elementRef.current) {
@@ -156,6 +169,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                 onDrop={adminMode ? () => handleDrop(index) : undefined}
             >
                 <CatalogGridOfferView
+                    bundleCounter={bundleCounterByOffer.get(offer) ?? 0}
                     itemActive={currentOffer && currentOffer.offerId === offer.offerId}
                     offer={offer}
                     selectOffer={selectOffer}
