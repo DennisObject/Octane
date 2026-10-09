@@ -32,7 +32,8 @@ export class ChatBubbleUtilities {
     }
 
     public static async setFigureImage(figure: string, zoom: boolean = GetConfigurationValue<boolean>('zoom.enabled', false)): Promise<string> {
-        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, zoom ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
+        // Native sh head sprites are already the half-size pixels, so the crop never smooth-resamples a large head.
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.SMALL, null, {
             resetFigure: (figure) => this.setFigureImage(figure, zoom),
             dispose: () => {},
             disposed: false
@@ -63,17 +64,7 @@ export class ChatBubbleUtilities {
             image.onerror = reject;
             image.src = sourceUrl;
         });
-        let head: HTMLCanvasElement | HTMLImageElement = source;
-        if (zoom) {
-            const scaled = document.createElement('canvas');
-            scaled.width = Math.round(source.width / 2);
-            scaled.height = Math.round(source.height / 2);
-            const scaledContext = scaled.getContext('2d');
-            scaledContext.imageSmoothingEnabled = true;
-            scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
-            head = scaled;
-        }
-        const imageUrl = this.focusFace(head, zoom ? 25 : 50).toDataURL('image/png');
+        const imageUrl = this.focusFace(source, zoom ? 25 : 50).toDataURL('image/png');
         if (isPlaceholder) this.PLACEHOLDER_IMAGE_CACHE.set(zoom, imageUrl);
 
         this.AVATAR_IMAGE_CACHE.set(this.getAvatarImageCacheKey(figure, zoom), imageUrl);
