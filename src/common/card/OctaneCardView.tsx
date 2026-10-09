@@ -60,6 +60,8 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
 
     return (
         <OctaneCardContextProvider value={{ theme }}>
+            {/* Native Canvas shadowBlur=4 maps to CSS sigma 2, with alpha 0.349. Chrome truncates fractional offsets;
+                3px is nearest to native 2.828px. This approximates the measured native shadow, rather than reproducing every edge pixel. */}
             <DraggableWindow
                 disableDrag={disableDrag}
                 dragStyle={resolvedFrameStyle === 3 ? { filter: 'drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.349))', ...dragStyle } : dragStyle}
