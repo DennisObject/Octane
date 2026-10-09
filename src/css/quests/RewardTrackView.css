@@ -1081,22 +1081,69 @@
 }
 
 .octane-reward-track .octane-reward-track-filter[data-active="true"]::before {
-    border-width: 5px;
-    border-image: var(--rt-tab-selected) 5 fill / 5px stretch;
+    /* a 6px bottom slice puts the light/dark band seam on the native row (13 light rows of 29) */
+    border-width: 5px 5px 6px;
+    border-image: var(--rt-tab-selected) 5 5 6 fill / 5px 5px 6px stretch;
 }
 
-/* tasks: scrollable_itemlist_vertical style 100 (Illumina light, 9px scrollbar, auto-hidden). */
+/* tasks: scrollable_itemlist_vertical style 100 (RewardTrackScrollList): 422x259, content 406 wide, 9px scrollbar at the right edge. */
 .octane-reward-track .octane-reward-track-task-list {
     position: absolute;
     left: 14px;
     top: 94px;
-    display: flex;
-    flex-direction: column;
     width: 422px;
     height: 259px;
+}
+
+.octane-reward-track .octane-reward-track-scroll-viewport {
+    width: 422px;
+    height: 259px;
+    overflow: hidden;
+}
+
+.octane-reward-track .octane-reward-track-task-list-content {
+    display: flex;
+    flex-direction: column;
     gap: 5px;
-    overflow-x: hidden;
-    overflow-y: auto;
+    width: 406px;
+}
+
+/* track window 9x259 (skin slice 2/5/2); the lift is a child window with its own 4/1/4 skin and two transparent rows at each end. */
+.octane-reward-track .octane-reward-track-scrollbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 9px;
+    height: 259px;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar::before,
+.octane-reward-track .octane-reward-track-scrollbar-lift::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    border-style: solid;
+    border-color: transparent;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar::before {
+    border-width: 2px 0;
+    border-image: url("../../assets/images/reward-track/air/scrollbar-track.png") 2 0 fill / 2px 0 stretch;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar-lift {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 9px;
+    touch-action: none;
+}
+
+.octane-reward-track .octane-reward-track-scrollbar-lift::before {
+    border-width: 4px 0;
+    border-image: url("../../assets/images/reward-track/air/scrollbar-lift.png") 4 0 fill / 4px 0 stretch;
 }
 
 .octane-reward-track .octane-reward-track-task {
@@ -1180,14 +1227,13 @@
     white-space: nowrap;
 }
 
-/* border (331,15,62,31) right aligned on resize; itemlist (8,4): 14px count (y 2), point_small (y 5), spacing 5. */
+/* border (331,15,62,31) right aligned on resize, so it is as wide as its content (54px for a one digit count); itemlist (8,4): 14px count (y 2), point_small (y 5), spacing 5. */
 .octane-reward-track .octane-reward-track-task-reward {
     position: absolute;
     right: 13px;
     top: 15px;
     display: flex;
     align-items: flex-start;
-    min-width: 62px;
     height: 31px;
     padding: 0 10px 0 8px;
     gap: 5px;
@@ -1521,21 +1567,21 @@
 }
 
 /* Illumina light scrollbar (style 100): track 2/5/2, lift 4/1/4, 9px, no arrows. */
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar {
     width: 9px !important;
     height: 9px !important;
     background: transparent !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button,
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button:single-button:vertical:decrement,
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-button:single-button:vertical:increment {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button,
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button:single-button:vertical:decrement,
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-button:single-button:vertical:increment {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-track:vertical {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-track:vertical {
     border: solid transparent !important;
     border-width: 2px 0 !important;
     border-image: url("../../assets/images/reward-track/air/scrollbar-track.png") 2 0 fill / 2px 0 stretch !important;
@@ -1543,7 +1589,7 @@
     image-rendering: pixelated !important;
 }
 
-.has-classic-scrollbar .octane-reward-track :is(.octane-reward-track-task-list, .octane-reward-track-levels)::-webkit-scrollbar-thumb:vertical {
+.has-classic-scrollbar .octane-reward-track .octane-reward-track-levels::-webkit-scrollbar-thumb:vertical {
     min-height: 9px !important;
     border: solid transparent !important;
     border-width: 4px 0 !important;
@@ -1632,11 +1678,18 @@
 
 /* ---- premium purchase confirmation (390x352, margins 1/25/1/7) ---- */
 
+/* each hidden benefit row takes 29px (24px + 5px gap) off the window, the panel and everything under the list */
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="1"]) { --rt-shrink: 29px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="2"]) { --rt-shrink: 58px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="3"]) { --rt-shrink: 87px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="4"]) { --rt-shrink: 116px; }
+.draggable-window:has(> .octane-reward-track-premium[data-hidden-benefits="5"]) { --rt-shrink: 145px; }
+
 .draggable-window:has(> .octane-reward-track-premium) {
     width: 390px;
     min-width: 390px;
     max-width: 390px;
-    height: 352px;
+    height: calc(352px - var(--rt-shrink, 0px));
 }
 
 .octane-card-shell.octane-reward-track-premium {
@@ -1644,9 +1697,9 @@
     width: 390px !important;
     min-width: 390px !important;
     max-width: 390px !important;
-    height: 352px !important;
-    min-height: 352px !important;
-    max-height: 352px !important;
+    height: calc(352px - var(--rt-shrink, 0px)) !important;
+    min-height: calc(352px - var(--rt-shrink, 0px)) !important;
+    max-height: calc(352px - var(--rt-shrink, 0px)) !important;
     color: #000;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     --octane-card-text: #000;
@@ -1668,7 +1721,7 @@
     position: relative;
     display: block;
     width: 384px;
-    height: 313px;
+    height: calc(313px - var(--rt-shrink, 0px));
     min-height: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -1683,7 +1736,7 @@
     left: 10px;
     top: 9px;
     width: 366px;
-    height: 268px;
+    height: calc(268px - var(--rt-shrink, 0px));
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel {
@@ -1691,12 +1744,16 @@
     left: 0;
     top: 0;
     width: 132px;
-    height: 208px;
+    height: calc(208px - var(--rt-shrink, 0px));
+    /* the official panel clips its children when the window shrinks (0 to 2 visible benefit rows) */
+    overflow: hidden;
     --rt-border: url("../../assets/images/reward-track/air/border-15-f5def8.png");
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-frame {
     position: absolute;
+    /* drawn above the name and info texts, which the shrunk panel hides behind it */
+    z-index: 1;
     left: 13px;
     top: 13px;
     width: 106px;
@@ -1723,7 +1780,7 @@
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel-name {
-    top: 138px;
+    top: calc(139px - var(--rt-shrink, 0px) / 2);
     height: 19px;
     color: #5d2c82;
     font-size: 14px;
@@ -1732,7 +1789,7 @@
 }
 
 .octane-reward-track-premium .octane-reward-track-premium-panel-info {
-    top: 157px;
+    top: calc(157px - var(--rt-shrink, 0px) / 2);
     height: 16px;
     color: #4d3559;
     font-size: 11px;
@@ -1756,6 +1813,7 @@
 
 .octane-reward-track-premium .octane-reward-track-premium-desc {
     width: 220px;
+    height: 30px;
     margin: 0;
     padding: 2px;
     color: #2d1f35;
@@ -1796,7 +1854,7 @@
 .octane-reward-track-premium .octane-reward-track-premium-cost {
     position: absolute;
     left: 0;
-    top: 220px;
+    top: calc(220px - var(--rt-shrink, 0px));
     width: 366px;
     height: 38px;
     --rt-border: url("../../assets/images/reward-track/air/border-15-f7e7ff.png");
@@ -1845,7 +1903,7 @@
 .octane-reward-track-premium .octane-reward-track-premium-buttons {
     position: absolute;
     left: 10px;
-    top: 278px;
+    top: calc(278px - var(--rt-shrink, 0px));
     display: flex;
     justify-content: space-between;
     width: 366px;

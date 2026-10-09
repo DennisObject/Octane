@@ -46,9 +46,12 @@ import rewardGift from '../../assets/images/reward-track/air/reward-gift.png';
 import rewardGiftPremium from '../../assets/images/reward-track/air/reward-gift-premium.png';
 import taskListIcon from '../../assets/images/reward-track/air/task-list.png';
 import { DraggableWindowPosition, LayoutAvatarImageView, LayoutBadgeImageView, LayoutCurrencyIcon, LayoutFurniIconImageView } from '../../common';
+import { nativeTextStyles } from '../../common/native-text/NativeTextStyles';
 import { useHasPermission, useNotification, useRewardTracks } from '../../hooks';
 import { OctaneCard } from '../../layout';
+import { useAirFieldWidth } from '../achievements/AchievementText';
 import { RewardTrackAdminView } from './RewardTrackAdminView';
+import { RewardTrackScrollList } from './RewardTrackScrollList';
 
 const CURRENCY_TYPES: Record<string, number> = { credits: -1, duckets: 0, diamonds: 5 };
 const FILTERS: RewardTrackTaskFilter[] = ['all', 'in_progress', 'completed'];
@@ -225,6 +228,26 @@ const RewardTrackPrizeView: FC<{
     );
 };
 
+// task_hint_button (471,16,109 wide): the official shiny button is as wide as its label field plus 15 and keeps the right edge of its layout rect.
+const HINT_BUTTON_RIGHT = 580;
+const HINT_LABEL_SIZE = nativeTextStyles.button_shiny_regular.size;
+
+const RewardTrackHintButton: FC<{ label: string; onClick: () => void }> = ({ label, onClick }) =>
+{
+    const fieldWidth = useAirFieldWidth(label, HINT_LABEL_SIZE, false, 'button_shiny_regular');
+    const width = fieldWidth === undefined ? 109 : fieldWidth + 15;
+
+    return (
+        <button type="button" className="octane-reward-track-btn" style={{ left: HINT_BUTTON_RIGHT - width, width }} onClick={onClick}>
+            {label}
+        </button>
+    );
+};
+
+// the official list collapses every hidden benefit row (24px + 5px gap) and the window shrinks with it
+const countHiddenPremiumBenefits = (track: RewardTrackData): number =>
+    5 - [track.taskPointsBoost > 1, track.hasPremiumPrizes, track.instantPoints > 0, track.hasPremiumTasks, track.hasPremiumLevels].filter(Boolean).length;
+
 const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boolean; onConfirm: () => void; onCancel: () => void }> = ({
     track,
     pending,
@@ -235,6 +258,7 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
         className={`octane-reward-track-premium resize-none${pending ? ' is-pending' : ''}`}
         uniqueKey="reward-track-premium"
         windowPosition={DraggableWindowPosition.CENTER}
+        data-hidden-benefits={countHiddenPremiumBenefits(track)}
     >
         <OctaneCard.Header headerText={rewardText('reward_track.premium.confirm.title', 'Unlock Premium Track')} onCloseClick={() => !pending && onCancel()} />
         <OctaneCard.Content className="octane-reward-track-premium-content">
@@ -447,10 +471,20 @@ export const RewardTrackView: FC<{}> = () => {
 
     if (!trackId) return null;
 
+    // the official list re-selects its first task when the selected one drops out of the new filter, and keeps it afterwards
+    const onFilter = (value: RewardTrackTaskFilter) =>
+    {
+        const next = filterRewardTrackTasks(track?.tasks ?? [], value);
+
+        if (!next.some((task) => task.id === selectedTask?.id)) setSelectedTaskId(next[0]?.id ?? null);
+
+        setFilter(value);
+    };
     const onClaim = (prize: RewardTrackPrizeData) => track && claimPrize && claimPrize(track.id, prize.id);
     const onPremium = () => track && track.hasPremiumConfig && !track.premium && setPremiumConfirm(true);
     const progressX = track ? layout.xForPoints(track.points, safePage) : 0;
-    const progressFill = Math.max(0, Math.min(MAIN_BAR_WIDTH, Math.round(MAIN_BAR_WIDTH * Math.max(0, Math.min(1, progressX / MAIN_BAR_WIDTH)))));
+    // the official loading bar truncates the x position (Math.trunc(x) / width) before scaling it back to the bar width
+    const progressFill = Math.max(0, Math.min(MAIN_BAR_WIDTH, Math.trunc(progressX)));
     const progressShape = progressFill >= MAIN_BAR_WIDTH - 4 ? MAIN_BAR_WIDTH : progressFill + 4;
     let unclaimedBefore = 0;
     let unclaimedAfter = 0;
@@ -482,7 +516,7 @@ export const RewardTrackView: FC<{}> = () => {
             <OctaneCard
                 className="octane-reward-track resize-none"
                 uniqueKey="reward-track"
-                windowPosition={DraggableWindowPosition.TOP_CENTER}
+                windowPosition={DraggableWindowPosition.CENTER}
                 style={themeStyle}
                 data-theme={themeKey}
             >
@@ -678,13 +712,13 @@ export const RewardTrackView: FC<{}> = () => {
                                                 type="button"
                                                 className="octane-reward-track-filter"
                                                 data-active={filter === value}
-                                                onClick={() => setFilter(value)}
+                                                onClick={() => onFilter(value)}
                                             >
                                                 {filterText(value)}
                                             </button>
                                         ))}
                                     </div>
-                                    <div className="octane-reward-track-task-list">
+                                    <RewardTrackScrollList key={`${track.id}:${filter}`} className="octane-reward-track-task-list" contentClassName="octane-reward-track-task-list-content" height={259}>
                                         {filteredTasks.map((task) => {
                                             const level = task.activeLevel;
                                             const ratio = task.progressRatioFor(level);
@@ -717,7 +751,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                 </button>
                                             );
                                         })}
-                                    </div>
+                                    </RewardTrackScrollList>
                                     {(!track.hasPremiumConfig || track.premium) && (
                                         <div className="octane-reward-track-tip">
                                             <img className="octane-reward-track-tip-gift" src={rewardGift} alt="" width={41} height={36} draggable={false} />
@@ -804,9 +838,10 @@ export const RewardTrackView: FC<{}> = () => {
                                                 {getRewardTrackTaskText(track.id, selectedTask.id, 'hint.desc', '')}
                                             </div>
                                             {hintLink && (
-                                                <button type="button" className="octane-reward-track-btn" onClick={() => CreateLinkEvent(hintLink.link)}>
-                                                    {getRewardTrackTaskText(track.id, selectedTask.id, 'hint.button_text', hintLink.fallbackText)}
-                                                </button>
+                                                <RewardTrackHintButton
+                                                    label={getRewardTrackTaskText(track.id, selectedTask.id, 'hint.button_text', hintLink.fallbackText)}
+                                                    onClick={() => CreateLinkEvent(hintLink.link)}
+                                                />
                                             )}
                                         </div>
                                     </div>
