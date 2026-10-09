@@ -62,7 +62,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
         <OctaneCardContextProvider value={{ theme }}>
             <DraggableWindow
                 disableDrag={disableDrag}
-                dragStyle={resolvedFrameStyle === 3 ? { filter: 'drop-shadow(2.828px 2.828px 4px rgba(0, 0, 0, 0.349))', ...dragStyle } : dragStyle}
+                dragStyle={resolvedFrameStyle === 3 ? { filter: 'drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.349))', ...dragStyle } : dragStyle}
                 handleSelector={handleSelector}
                 offsetLeft={offsetLeft}
                 offsetTop={offsetTop}
