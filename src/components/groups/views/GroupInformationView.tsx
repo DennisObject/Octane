@@ -1,5 +1,5 @@
 import { GroupConfirmMemberRemoveEvent, GroupDeleteComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useLayoutEffect, useRef } from 'react';
 import {
     CatalogPageName,
     GetGroupManager,
@@ -41,7 +41,10 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
     const shownGroupIdRef = useRef<number>(shownGroupId);
     const confirmOpenRef = useRef<boolean>(false);
 
-    shownGroupIdRef.current = shownGroupId;
+    // Read by the confirmation callbacks; refreshed before any of them can run.
+    useLayoutEffect(() => {
+        shownGroupIdRef.current = shownGroupId;
+    });
 
     // A confirmation belongs to the group it was asked for: showing another group (or closing the window) retires it.
     useEffect(() => {

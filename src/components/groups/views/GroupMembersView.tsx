@@ -20,7 +20,7 @@ import {
     ILinkEventTracker,
     RemoveLinkEventTracker
 } from '@octane/renderer';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetUserProfile, LocalizeText, SendMessageComposer } from '../../../api';
 import {
@@ -51,7 +51,11 @@ export const GroupMembersView: FC<{}> = (props) => {
     const { request: requestMemberRemoval, claimReply, isCurrentSession } = useGroupMemberRemoval();
     const groupIdRef = useRef<number>(-1);
 
-    groupIdRef.current = groupId;
+    // Read by the removal confirmation callback; refreshed before it can run.
+    useLayoutEffect(() => {
+        groupIdRef.current = groupId;
+    });
+
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
     const getRankDescription = (member: GroupMemberParser) => {
@@ -95,8 +99,11 @@ export const GroupMembersView: FC<{}> = (props) => {
         SendMessageComposer(new GroupMembershipAcceptComposer(membersData.groupId, member.id));
     };
 
+    // The server answers a removal request only for these members: never the owner or oneself, and an administrator only when the owner asks.
+    const canRemoveMember = (member: GroupMemberParser) => !!membersData?.admin && member.rank !== GroupRank.OWNER && member.id !== GetSessionDataManager().userId && (member.rank !== GroupRank.ADMIN || isOwner);
+
     const removeMemberOrDeclineMembership = (member: GroupMemberParser) => {
-        if (!membersData.admin) return;
+        if (!canRemoveMember(member)) return;
 
         const key = `remove_${member.id}`;
         if (pendingActionsRef.current.has(key)) return;
@@ -298,7 +305,7 @@ export const GroupMembersView: FC<{}> = (props) => {
                                             />
                                         </Flex>
                                     )}
-                                    {membersData.admin && member.rank !== GroupRank.OWNER && member.id !== GetSessionDataManager().userId && (
+                                    {canRemoveMember(member) && (
                                         <Flex alignItems="center">
                                             <div
                                                 className="cursor-pointer octane-friends-spritesheet icon-deny"

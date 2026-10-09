@@ -1,5 +1,5 @@
 import { GetSessionDataManager, GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer } from '@octane/renderer';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../events';
 
@@ -27,12 +27,14 @@ const liveOwners = new Set<number>();
 
 const currentSessionUserId = () => GetSessionDataManager().userId;
 
-const dropForeignSession = () => {
+const dropForeignSession = () =>
+{
     if (transaction && transaction.sessionUserId !== currentSessionUserId()) transaction = null;
 };
 
 /** The outstanding transaction when the reply is for it and `owner` is the window that asked. */
-const claimOwned = (owner: number, replyUserId: number): RemovalTransaction => {
+const claimOwned = (owner: number, replyUserId: number): RemovalTransaction =>
+{
     dropForeignSession();
 
     const request = transaction;
@@ -45,7 +47,8 @@ const claimOwned = (owner: number, replyUserId: number): RemovalTransaction => {
 };
 
 /** Retires the reply for a transaction whose window is gone. The request is discarded, never handed to another window. */
-const retireOrphaned = (replyUserId: number) => {
+const retireOrphaned = (replyUserId: number) =>
+{
     dropForeignSession();
 
     if (transaction && transaction.userId === replyUserId && !liveOwners.has(transaction.owner)) transaction = null;
@@ -66,41 +69,44 @@ export interface GroupMemberRemoval {
     sessionUserId: number;
 }
 
-export const useGroupMemberRemoval = (): GroupMemberRemovalActions => {
-    const ownerRef = useRef<number>(0);
+export const useGroupMemberRemoval = (): GroupMemberRemovalActions =>
+{
+    // One id per window for as long as it is mounted.
+    const [owner] = useState<number>(() => nextOwner++);
 
-    if (!ownerRef.current) ownerRef.current = nextOwner++;
-
-    useEffect(() => {
-        const owner = ownerRef.current;
-
+    useEffect(() =>
+    {
         liveOwners.add(owner);
 
-        return () => {
+        return () =>
+        {
             liveOwners.delete(owner);
         };
-    }, []);
+    }, [owner]);
 
-    const request = useCallback((groupId: number, userId: number) => {
+    const request = useCallback((groupId: number, userId: number) =>
+    {
         dropForeignSession();
 
         if (transaction) return false;
 
-        transaction = { owner: ownerRef.current, groupId, userId, sessionUserId: currentSessionUserId() };
+        transaction = { owner, groupId, userId, sessionUserId: currentSessionUserId() };
         SendMessageComposer(new GroupConfirmRemoveMemberComposer(groupId, userId));
 
         return true;
-    }, []);
+    }, [owner]);
 
-    const claimReply = useCallback((userId: number) => claimOwned(ownerRef.current, userId), []);
+    const claimReply = useCallback((userId: number) => claimOwned(owner, userId), [owner]);
     const isCurrentSession = useCallback((removal: GroupMemberRemoval) => removal.sessionUserId === currentSessionUserId(), []);
 
     return { request, claimReply, isCurrentSession };
 };
 
 /** Mounted once for the whole client: resolves a reply whose owning window has closed, so it can neither block nor leak to another window. */
-export const useGroupMemberRemovalSink = () => {
-    useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
+export const useGroupMemberRemovalSink = () =>
+{
+    useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) =>
+    {
         retireOrphaned(event.getParser().userId);
     });
 };
