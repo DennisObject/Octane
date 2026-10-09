@@ -65,7 +65,7 @@ export const GroupsContainerView: FC<GroupsContainerViewProps> = ({ itsMe, group
                             <p className="octane-extended-profile-groups__empty-caption">{LocalizeText(itsMe ? 'extendedprofile.nogroups.me' : 'extendedprofile.nogroups.user')}</p>
                             <img className="octane-extended-profile-groups__empty-image" src={noGroupsImage} alt="" />
                             <p className="octane-extended-profile-groups__empty-info">{LocalizeText('extendedprofile.nogroups.info')}</p>
-                            <button type="button" className="octane-extended-profile-groups__browse" onClick={() => CreateLinkEvent('navigator/search/groups')}>
+                            <button type="button" className="octane-extended-profile-groups__browse" onClick={() => CreateLinkEvent('navigator/search/hotel_view/group:')}>
                                 <img src={groupBaseIcon} alt="" />
                                 <span>{LocalizeText('extendedprofile.nogroups.viewgroups')}</span>
                             </button>

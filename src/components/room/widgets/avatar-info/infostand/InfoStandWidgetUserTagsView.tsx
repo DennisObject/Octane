@@ -1,16 +1,12 @@
-import { CreateLinkEvent, NavigatorSearchComposer } from '@octane/renderer';
+import { CreateLinkEvent } from '@octane/renderer';
 import { FC } from 'react';
-import { SendMessageComposer } from '../../../../../api';
 import { Flex, Text } from '../../../../../common';
 
 interface InfoStandWidgetUserTagsViewProps {
     tags: string[];
 }
 
-const processAction = (tag: string) => {
-    CreateLinkEvent(`navigator/search/${tag}`);
-    SendMessageComposer(new NavigatorSearchComposer('hotel_view', `tag:${tag}`));
-};
+const processAction = (tag: string) => CreateLinkEvent(`navigator/tag/${tag}`);
 
 export const InfoStandWidgetUserTagsView: FC<InfoStandWidgetUserTagsViewProps> = (props) => {
     const { tags = null } = props;
