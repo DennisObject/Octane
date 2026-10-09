@@ -12,11 +12,14 @@ const FACE_CACHE_MAX = 200;
 const FACE_CACHE = new Map<string, Blob>();
 
 const cropFace = (imageUrl: string): Promise<string> =>
-    new Promise((resolve) => {
+    new Promise((resolve) =>
+    {
         const image = new Image();
 
-        image.onload = () => {
-            try {
+        image.onload = () =>
+        {
+            try
+            {
                 const canvas = document.createElement('canvas');
 
                 canvas.width = FACE_SIZE;
@@ -29,7 +32,9 @@ const cropFace = (imageUrl: string): Promise<string> =>
                 context.imageSmoothingEnabled = false;
                 context.drawImage(image, FACE_X, FACE_Y, FACE_SIZE, FACE_SIZE, 0, 0, FACE_SIZE, FACE_SIZE);
                 resolve(canvas.toDataURL('image/png'));
-            } catch {
+            }
+            catch
+            {
                 // A rejected draw must not leave the render waiting for a crop that never comes.
                 resolve(null);
             }
@@ -39,18 +44,21 @@ const cropFace = (imageUrl: string): Promise<string> =>
     });
 
 /** The head of an entry as the v75 leaderboard draws it: one fixed crop of the head image, never re-centred per figure. */
-export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
+export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) =>
+{
     const [shown, setShown] = useState<{ figure: string; url: string }>(null);
     const requestRef = useRef(0);
     const objectUrlRef = useRef<string>(null);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const requestId = ++requestRef.current;
         let isDisposed = false;
         // Every render of this figure (the first one and each resetFigure redraw) takes a number; only the newest may show its result,
         // however long its crop takes.
         let latestRender = 0;
-        const show = (blob: Blob, renderId: number) => {
+        const show = (blob: Blob, renderId: number) =>
+        {
             if (isDisposed || requestRef.current !== requestId || renderId !== latestRender) return;
 
             if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
@@ -63,15 +71,18 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
 
         const cached = FACE_CACHE.get(figure);
 
-        if (cached) {
+        if (cached)
+        {
             show(cached, ++latestRender);
 
-            return () => {
+            return () =>
+            {
                 isDisposed = true;
             };
         }
 
-        const render = async (currentFigure: string) => {
+        const render = async (currentFigure: string) =>
+        {
             if (isDisposed || requestRef.current !== requestId) return;
 
             const renderId = ++latestRender;
@@ -98,7 +109,8 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
             if (!blob) return;
 
             // A placeholder figure is redrawn through resetFigure once its parts have loaded; only the finished image is cached.
-            if (!isPlaceholder) {
+            if (!isPlaceholder)
+            {
                 if (FACE_CACHE.size >= FACE_CACHE_MAX) FACE_CACHE.delete(FACE_CACHE.keys().next().value);
 
                 FACE_CACHE.set(currentFigure, blob);
@@ -109,13 +121,15 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) => {
 
         void render(figure);
 
-        return () => {
+        return () =>
+        {
             isDisposed = true;
         };
     }, [figure]);
 
     useEffect(
-        () => () => {
+        () => () =>
+        {
             if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
 
             objectUrlRef.current = null;

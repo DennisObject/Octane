@@ -120,7 +120,7 @@ export const LEADERBOARD_TEXT_FALLBACKS: Record<string, string> = {
     'badge_leaderboard.option.rarity': '%rarity% badges',
     'badge_leaderboard.info.total_badges': 'Overview of players with the most badges.\\nThese users are on a grind!',
     'badge_leaderboard.info.achievement_level':
-        "Players with the highest achievement level.\\nThe achievement level is the sum of all the user's achievement badge levels combined.",
+        'Players with the highest achievement level.\\nThe achievement level is the sum of all the user\'s achievement badge levels combined.',
     'badge_leaderboard.info.rarity.uncommon': 'Players with the most uncommon badges.Uncommon badges are awarded to 200 or less users.',
     'badge_leaderboard.info.rarity.rare': 'Players with the most rare badges.\\nRare badges are awarded to 50 or less users.',
     'badge_leaderboard.info.rarity.epic': 'Players with the most epic badges.\\nEpic badges are awarded to 10 or less users.',
@@ -145,7 +145,8 @@ const isInteger = (value: unknown): value is number => typeof value === 'number'
 export const getSupportedRarities = (hasUncommon: boolean): LeaderboardRarity[] => (hasUncommon ? [1, 2, 3, 4, 5, 6] : [2, 3, 4, 5, 6]);
 
 /** normalizeType() / normalizeRarity(): an unknown type or an unsupported rarity falls back to the total board. */
-export const normalizeTarget = (type: unknown, rarity: unknown, page: unknown, supported: LeaderboardRarity[]): LeaderboardTarget => {
+export const normalizeTarget = (type: unknown, rarity: unknown, page: unknown, supported: LeaderboardRarity[]): LeaderboardTarget =>
+{
     const safePage = isInteger(page) && page > 0 ? page : 0;
 
     if (type === 2) return { type: 2, rarity: -1, page: safePage };
@@ -155,12 +156,14 @@ export const normalizeTarget = (type: unknown, rarity: unknown, page: unknown, s
 };
 
 /** linkReceived(): badge_leaderboard/<type>/<rarity>/<page>, every part optional and numeric. */
-export const parseLeaderboardLink = (url: string): { type: number; rarity: number; page: number } | null => {
+export const parseLeaderboardLink = (url: string): { type: number; rarity: number; page: number } | null =>
+{
     const parts = url.split('/');
 
     if (parts[0] !== 'badge_leaderboard') return null;
 
-    const read = (index: number, fallback: number) => {
+    const read = (index: number, fallback: number) =>
+    {
         const value = Number(parts[index]);
 
         return parts[index] === undefined || parts[index] === '' || Number.isNaN(value) ? fallback : Math.trunc(value);
@@ -182,7 +185,8 @@ export interface LeaderboardPageInfo {
 
 export const getRarityDescriptor = (rarity: number): RarityDescriptor | null => RARITIES[rarity as LeaderboardRarity] ?? null;
 
-export const getBoard = (response: BadgeLeaderboardResponse | null, target: LeaderboardTarget): BadgeLeaderboardBoard | null => {
+export const getBoard = (response: BadgeLeaderboardResponse | null, target: LeaderboardTarget): BadgeLeaderboardBoard | null =>
+{
     if (!response?.leaderboards) return null;
     if (target.type === 2) return response.leaderboards.achievementLevel ?? null;
     if (target.type === 1) return response.leaderboards.rarity?.[getRarityDescriptor(target.rarity)?.key] ?? null;
@@ -190,10 +194,12 @@ export const getBoard = (response: BadgeLeaderboardResponse | null, target: Lead
     return response.leaderboards.totalBadges ?? null;
 };
 
-export const getAssetsFor = (target: LeaderboardTarget) => {
+export const getAssetsFor = (target: LeaderboardTarget) =>
+{
     if (target.type === 2)
         return { frame: frameLeaderboardAchievement, emblem: badgeEmblemAchievement, extended: badgeEmblemAchievementExtended, extendedYOffset: -1 };
-    if (target.type === 1) {
+    if (target.type === 1)
+    {
         const descriptor = getRarityDescriptor(target.rarity);
 
         return { frame: descriptor.frame, emblem: descriptor.emblem, extended: descriptor.extended, extendedYOffset: descriptor.extendedYOffset };

@@ -99,7 +99,8 @@ const LeaderboardText: FC<LeaderboardTextProps> = ({
 
 /** rank_type_extended_img: a bitmap in the middle of its 65x47 box; the v75 runtime lands it 3px below the container top plus half the free height. */
 /** rank_type_info: a 295x40 field whose text sits in the middle of its height. */
-const InfoText: FC<{ value: string }> = ({ value }) => {
+const InfoText: FC<{ value: string }> = ({ value }) =>
+{
     const textRef = useRef<HTMLDivElement>(null);
     const { height } = useElementSize(textRef, value);
 
@@ -116,7 +117,8 @@ const InfoText: FC<{ value: string }> = ({ value }) => {
     );
 };
 
-const HeaderEmblem: FC<{ src: string; yOffset: number }> = ({ src, yOffset }) => {
+const HeaderEmblem: FC<{ src: string; yOffset: number }> = ({ src, yOffset }) =>
+{
     const [size, setSize] = useState<[number, number]>([25, 25]);
 
     return (
@@ -132,10 +134,12 @@ const HeaderEmblem: FC<{ src: string; yOffset: number }> = ({ src, yOffset }) =>
 };
 
 /** Track an element's size: NativeText fills its field after the font has loaded, so the first layout pass is not the final one. */
-const useElementSize = (ref: RefObject<HTMLElement>, dependency: unknown): { width: number; height: number } => {
+const useElementSize = (ref: RefObject<HTMLElement>, dependency: unknown): { width: number; height: number } =>
+{
     const [size, setSize] = useState({ width: 0, height: 0 });
 
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const element = ref.current;
 
         if (!element) return;
@@ -158,7 +162,8 @@ const useElementSize = (ref: RefObject<HTMLElement>, dependency: unknown): { wid
 };
 
 /** rank_border (border style 14, 25x25) grows with its number so it always holds it, and stays centred in the 45px rank_container. */
-const RankBubble: FC<{ rank: number; isOwn: boolean }> = ({ rank, isOwn }) => {
+const RankBubble: FC<{ rank: number; isOwn: boolean }> = ({ rank, isOwn }) =>
+{
     const textRef = useRef<HTMLDivElement>(null);
     const { width: textWidth } = useElementSize(textRef, rank);
     const width = Math.max(25, (textWidth || 13) + 12);
@@ -183,7 +188,8 @@ interface EntryRowProps {
 }
 
 // entry_template (362x41) and own_container (370x43): the rank bubble, the face region, the name and the right-aligned score + emblem.
-const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }) => {
+const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }) =>
+{
     const [emblemWidth, setEmblemWidth] = useState(25);
     const right = isOwn ? 359 : 351;
 
@@ -222,7 +228,8 @@ const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }
     );
 };
 
-export const BadgeLeaderboardView: FC<{}> = () => {
+export const BadgeLeaderboardView: FC<{}> = () =>
+{
     const [isVisible, setIsVisible] = useState(false);
     const [target, setTarget] = useState<LeaderboardTarget>(DEFAULT_TARGET);
     const [version, setVersion] = useState(0);
@@ -238,7 +245,8 @@ export const BadgeLeaderboardView: FC<{}> = () => {
 
     // Opening, switching category and paging all go through native showBadgeLeaderboard(type, rarity, page).
     const show = useCallback(
-        (type: number, rarity: number, page: number) => {
+        (type: number, rarity: number, page: number) =>
+        {
             setTarget(normalizeTarget(type, rarity, page, supported));
             setIsMenuOpen(false);
             setIsVisible(true);
@@ -247,11 +255,14 @@ export const BadgeLeaderboardView: FC<{}> = () => {
         [supported]
     );
 
-    useEffect(() => {
-        const linkReceived = (url: string) => {
+    useEffect(() =>
+    {
+        const linkReceived = (url: string) =>
+        {
             const nativeLink = parseLeaderboardLink(url);
 
-            if (nativeLink) {
+            if (nativeLink)
+            {
                 show(nativeLink.type, nativeLink.rarity, nativeLink.page);
 
                 return;
@@ -261,7 +272,8 @@ export const BadgeLeaderboardView: FC<{}> = () => {
 
             if (parts.length < 2) return;
 
-            switch (parts[1]) {
+            switch (parts[1])
+            {
                 case 'show':
                     show(0, -1, 0);
                     return;
@@ -284,12 +296,14 @@ export const BadgeLeaderboardView: FC<{}> = () => {
 
         for (const tracker of trackers) AddLinkEventTracker(tracker);
 
-        return () => {
+        return () =>
+        {
             for (const tracker of trackers) RemoveLinkEventTracker(tracker);
         };
     }, [show]);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!isVisible) return;
 
         let cancelled = false;
@@ -297,24 +311,29 @@ export const BadgeLeaderboardView: FC<{}> = () => {
         if (getCachedBadgeLeaderboard() && Date.now() - lastFetchRef.current <= STALE_AFTER_MS) return;
 
         fetchBadgeLeaderboard(true)
-            .then(() => {
+            .then(() =>
+            {
                 lastFetchRef.current = Date.now();
 
-                if (!cancelled) {
+                if (!cancelled)
+                {
                     setLoadError(null);
                     setLoadedAt(Date.now());
                 }
             })
-            .catch((error) => {
+            .catch((error) =>
+            {
                 if (!cancelled) setLoadError(String((error as Error)?.message || error));
             });
 
-        return () => {
+        return () =>
+        {
             cancelled = true;
         };
     }, [isVisible, version]);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!isMenuOpen) return;
 
         const close = () => setIsMenuOpen(false);
@@ -339,14 +358,14 @@ export const BadgeLeaderboardView: FC<{}> = () => {
         target.type === 1
             ? text('badge_leaderboard.title.rarity', ['rarity'], [rarityName(target.rarity)])
             : target.type === 2
-              ? text('badge_leaderboard.title.achievement_level')
-              : text('badge_leaderboard.title.total_badges');
+                ? text('badge_leaderboard.title.achievement_level')
+                : text('badge_leaderboard.title.total_badges');
     const infoText =
         target.type === 1
             ? text(getRarityDescriptor(target.rarity).infoKey)
             : target.type === 2
-              ? text('badge_leaderboard.info.achievement_level')
-              : text('badge_leaderboard.info.total_badges');
+                ? text('badge_leaderboard.info.achievement_level')
+                : text('badge_leaderboard.info.total_badges');
     const options = [
         { label: text('badge_leaderboard.option.total_badges'), type: 0, rarity: -1 },
         { label: text('badge_leaderboard.option.achievement_level'), type: 2, rarity: -1 },
@@ -358,7 +377,8 @@ export const BadgeLeaderboardView: FC<{}> = () => {
     const { width: titleWidth } = useElementSize(titleRef, isVisible);
     const titleLeft = titleWidth > 0 ? Math.ceil((412 - titleWidth) / 2) : null;
 
-    const openProfile = useCallback((userId: number) => {
+    const openProfile = useCallback((userId: number) =>
+    {
         if (userId > 0) GetUserProfile(userId);
     }, []);
 
