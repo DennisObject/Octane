@@ -114,6 +114,8 @@ export class Offer implements IPurchasableOffer {
 
         if (this._products.length === 1) return this._products[0];
 
+        if (this.isSingleChatStyle) return this._products.find((product) => product.productType === 'chat_style');
+
         const products = Product.stripAddonProducts(this._products);
 
         if (products.length) return products[0];
@@ -142,6 +144,8 @@ export class Offer implements IPurchasableOffer {
     }
 
     public get localizationName(): string {
+        if (this.usesSharedOfferLocalization) return this.sharedOfferLocalization.name;
+
         const furnitureProduct = this.product;
 
         if (furnitureProduct?.furnitureData?.name?.length) return furnitureProduct.furnitureData.name;
@@ -154,6 +158,8 @@ export class Offer implements IPurchasableOffer {
     }
 
     public get localizationDescription(): string {
+        if (this.usesSharedOfferLocalization) return this.sharedOfferLocalization.description;
+
         const furnitureProduct = this.product;
 
         if (furnitureProduct?.furnitureData?.description?.length) return furnitureProduct.furnitureData.description;
@@ -181,7 +187,29 @@ export class Offer implements IPurchasableOffer {
         return this._haveOffer;
     }
 
+    // Native Offer resolves stack and deal names from getProductData(localizationId).
+    // A single offer still prefers the furni name already shown on this client.
+    // Missing product data uses LocalizeText, which returns the key itself.
+    private get usesSharedOfferLocalization(): boolean {
+        return this._pricingModel === Offer.PRICING_MODEL_BUNDLE || this._pricingModel === Offer.PRICING_MODEL_MULTI;
+    }
+
+    private get sharedOfferLocalization(): { name: string; description: string } {
+        const productData = GetProductDataForLocalization(this._localizationId);
+        const fallback = LocalizeText(this._localizationId);
+
+        return {
+            name: productData ? productData.name : fallback,
+            description: productData ? productData.description : fallback
+        };
+    }
+
     private setPricingModelForProducts(): void {
+        if (this.isSingleChatStyle) {
+            this._pricingModel = Offer.PRICING_MODEL_SINGLE;
+            return;
+        }
+
         const products = Product.stripAddonProducts(this._products);
 
         if (products.length === 1) {
@@ -195,6 +223,15 @@ export class Offer implements IPurchasableOffer {
         } else {
             this._pricingModel = Offer.PRICING_MODEL_UNKNOWN;
         }
+    }
+
+    private get isSingleChatStyle(): boolean {
+        return (
+            (this._products.length === 1 && this._products[0].productType === 'chat_style') ||
+            (this._products.length === 2 &&
+                this._products.some((product) => product.productType === 'chat_style') &&
+                this._products.some((product) => product.productType === ProductTypeEnum.BADGE))
+        );
     }
 
     private setPricingType(): void {

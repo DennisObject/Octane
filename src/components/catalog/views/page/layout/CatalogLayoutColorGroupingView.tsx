@@ -1,7 +1,7 @@
 import { ColorConverter } from '@octane/renderer';
 import { FC, useMemo, useState } from 'react';
 import { FaFillDrip } from 'react-icons/fa';
-import { IPurchasableOffer, SanitizeHtml } from '../../../../../api';
+import { IPurchasableOffer, Offer, SanitizeHtml } from '../../../../../api';
 import { AutoGrid, Button, Column, LayoutGridItem, Text } from '../../../../../common';
 import { useCatalogData, useCatalogUiState } from '../../../../../hooks';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
@@ -159,7 +159,9 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
             {currentOffer && (
                 <div className="octane-catalog-offer-panel flex flex-col items-center grow overflow-hidden gap-2">
                     <div className="octane-catalog-offer-preview relative flex items-center justify-center overflow-hidden">
-                        <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
+                        {currentOffer.pricingModel !== Offer.PRICING_MODEL_BUNDLE && (
+                            <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
+                        )}
                         <CatalogViewProductWidgetView height={240} />
                         <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 inset-e-1" position="absolute" />
                         {currentOffer.product.furnitureData.hasIndexedColor && (

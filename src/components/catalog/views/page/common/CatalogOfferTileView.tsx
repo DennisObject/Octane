@@ -1,6 +1,7 @@
 import { MouseEventType } from '@octane/renderer';
 import { FC, KeyboardEvent, MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, GetProductIconUrl, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
+import dealIconNarrow from '../../../../../assets/images/catalog/air/ctlg-pic-deal-icon-narrow.png';
 import {
     LayoutActivityPointIcon,
     LayoutAvatarImageView,
@@ -15,6 +16,7 @@ export interface CatalogOfferTileViewProps extends LayoutGridItemProps {
     offer: IPurchasableOffer;
     selectOffer: (offer: IPurchasableOffer) => void;
     requestOfferToMover?: (offer: IPurchasableOffer) => void;
+    bundleCounter?: number;
     readOnly?: boolean;
     tintColor?: string;
     showTechnicalDetails?: boolean;
@@ -26,6 +28,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
         offer = null,
         selectOffer = null,
         requestOfferToMover = null,
+        bundleCounter = 0,
         readOnly = false,
         itemActive = false,
         tintColor = null,
@@ -58,7 +61,9 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
     }, [offer?.offerId]);
 
     const resolvedIconUrl = useMemo(() => {
-        if (!offer || offer.pricingModel === Offer.PRICING_MODEL_BUNDLE) return null;
+        if (!offer) return null;
+        // Offer-list icon is the cardboard deal, not the first furni (AIR initProductIcon).
+        if (offer.pricingModel === Offer.PRICING_MODEL_BUNDLE) return dealIconNarrow;
 
         return GetProductIconUrl(offer.product, offer);
     }, [offer]);
@@ -104,6 +109,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
     if (!offer?.product) return null;
     const product = offer.product;
     const iconUrl = iconVisible ? resolvedIconUrl : null;
+    const isBundleOffer = offer.pricingModel === Offer.PRICING_MODEL_BUNDLE;
 
     return (
         <div
@@ -126,22 +132,27 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                 onMouseUp={onMouseEvent}
                 {...rest}
             >
-                {iconUrl && product.productType !== ProductTypeEnum.HABBICON && product.productType !== ProductTypeEnum.ROBOT && (
+                {iconVisible && offer.pricingModel === Offer.PRICING_MODEL_BUNDLE && bundleCounter > 0 && (
+                    <span className="octane-catalog-grid-bundle-counter">{bundleCounter}</span>
+                )}
+                {iconUrl && (isBundleOffer || (product.productType !== ProductTypeEnum.HABBICON && product.productType !== ProductTypeEnum.ROBOT)) && (
                     <img
                         className="octane-catalog-grid-offer-icon"
                         src={iconUrl}
                         draggable={false}
-                        style={tintColor ? { filter: 'url(#guild-furni-recolor)', transform: 'translateZ(0)' } : undefined}
+                        style={!isBundleOffer && tintColor ? { filter: 'url(#guild-furni-recolor)', transform: 'translateZ(0)' } : undefined}
                         onError={(event) => {
+                            if (offer.pricingModel === Offer.PRICING_MODEL_BUNDLE) return;
+
                             const fallbackIconUrl = typeof product.getIconUrl === 'function' ? product.getIconUrl(offer) : null;
                             if (fallbackIconUrl && event.currentTarget.src !== fallbackIconUrl) event.currentTarget.src = fallbackIconUrl;
                         }}
                     />
                 )}
-                {product.productType === ProductTypeEnum.HABBICON && (
+                {!isBundleOffer && product.productType === ProductTypeEnum.HABBICON && (
                     <LayoutHabbiconImageView className="octane-catalog-grid-habbicon-icon" id={product.productClassId} />
                 )}
-                {product.productType === ProductTypeEnum.ROBOT && <LayoutAvatarImageView direction={2} figure={product.extraParam} fit />}
+                {!isBundleOffer && product.productType === ProductTypeEnum.ROBOT && <LayoutAvatarImageView direction={2} figure={product.extraParam} fit />}
                 {offer.clubLevel > 0 && (
                     <span aria-label="Habbo Club" className="octane-catalog-grid-club-level" title="Habbo Club">
                         <i aria-hidden="true" className="octane-icon icon-catalogue-hc_small" />

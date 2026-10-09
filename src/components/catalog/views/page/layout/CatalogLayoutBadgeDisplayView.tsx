@@ -15,11 +15,12 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 export const CatalogLayoutBadgeDisplayView: FC<CatalogLayoutProps> = (props) => {
     const { page = null } = props;
     const { currentOffer = null, roomPreviewer = null } = useCatalogData();
+    const isBundleOffer = currentOffer?.pricingModel === 'pricing_model_bundle';
 
     return (
         <div className="octane-catalog-badge-display-layout">
             <CatalogFirstProductSelectorWidgetView />
-            <section className={`octane-catalog-badge-preview ${currentOffer ? '' : 'is-empty'}`.trim()}>
+            <section className={`octane-catalog-badge-preview ${currentOffer ? '' : 'is-empty'} ${isBundleOffer ? 'is-bundle' : ''}`.trim()}>
                 {!currentOffer && (
                     <div className="octane-catalog-badge-intro">
                         {!!page.localization.getImage(1) && <img alt="" src={page.localization.getImage(1)} />}
@@ -34,7 +35,7 @@ export const CatalogLayoutBadgeDisplayView: FC<CatalogLayoutProps> = (props) => 
                         <div className="octane-catalog-badge-product-copy octane-catalog-preview-details">
                             <CatalogProductDetailsView offer={currentOffer} />
                         </div>
-                        <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
+                        {!isBundleOffer && <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />}
                         <div className="octane-catalog-badge-limited">
                             <CatalogLimitedItemWidgetView />
                         </div>
@@ -46,12 +47,7 @@ export const CatalogLayoutBadgeDisplayView: FC<CatalogLayoutProps> = (props) => 
             </section>
 
             <section className="octane-catalog-badge-product-picker">
-                <CatalogItemGridWidgetView
-                    className="octane-catalog-badge-offer-list"
-                    columnCount={1}
-                    columnMinHeight={70}
-                    columnMinWidth={70}
-                />
+                <CatalogItemGridWidgetView className="octane-catalog-badge-offer-list" columnCount={1} columnMinHeight={70} columnMinWidth={70} />
             </section>
 
             <section className="octane-catalog-badge-picker">

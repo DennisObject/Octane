@@ -1,7 +1,8 @@
 import { GetAvatarRenderManager, GetRoomEngine, GetSessionDataManager, RoomObjectVariable, Vector3d } from '@octane/renderer';
 import { FC, useEffect } from 'react';
 import { FurniCategory, GetProductIconUrl, Offer, ProductTypeEnum } from '../../../../../api';
-import { AutoGrid, Column, LayoutGridItem, LayoutHabbiconImageView, LayoutRoomPreviewerView } from '../../../../../common';
+import dyndealBackground from '../../../../../assets/images/catalog/air/ctlg-dyndeal-background.png';
+import { LayoutHabbiconImageView, LayoutRoomPreviewerView } from '../../../../../common';
 import { useCatalogData, useCatalogUiState } from '../../../../../hooks';
 
 const PREVIEW_LIFT = 21;
@@ -192,25 +193,28 @@ export const CatalogViewProductWidgetView: FC<{ height?: number }> = (props) => 
     if (!currentOffer) return null;
 
     if (currentOffer.pricingModel === Offer.PRICING_MODEL_BUNDLE) {
-        return (
-            <Column fit className="bg-muted p-2 rounded" overflow="hidden">
-                <AutoGrid fullWidth className="octane-catalog-layout-bundle-grid" columnCount={4}>
-                    {currentOffer.products.length > 0 &&
-                        currentOffer.products.map((product, index) => {
-                            const iconUrl = GetProductIconUrl(product, currentOffer);
+        const bundleProducts = currentOffer.products.filter((product) => product.productType !== ProductTypeEnum.BADGE);
 
-                            return (
-                                <LayoutGridItem key={index} itemCount={product.productCount}>
-                                    {product.productType === ProductTypeEnum.HABBICON ? (
-                                        <LayoutHabbiconImageView id={product.productClassId} />
-                                    ) : (
-                                        iconUrl && <img alt="" className="octane-catalog-grid-offer-icon" draggable={false} src={iconUrl} />
-                                    )}
-                                </LayoutGridItem>
-                            );
-                        })}
-                </AutoGrid>
-            </Column>
+        return (
+            <div className="octane-catalog-bundle-preview" style={{ height }}>
+                <img alt="" className="octane-catalog-bundle-preview-scene" draggable={false} src={dyndealBackground} />
+                <div className="octane-catalog-bundle-preview-grid" key={currentOffer.offerId}>
+                    {bundleProducts.map((product, index) => {
+                        const iconUrl = GetProductIconUrl(product, currentOffer);
+
+                        return (
+                            <div className="octane-catalog-bundle-preview-item" key={`${product.productType}-${product.productClassId}-${index}`}>
+                                {product.productType === ProductTypeEnum.HABBICON ? (
+                                    <LayoutHabbiconImageView className="octane-catalog-bundle-preview-icon" id={product.productClassId} size={36} />
+                                ) : (
+                                    iconUrl && <img alt="" className="octane-catalog-bundle-preview-icon" draggable={false} src={iconUrl} />
+                                )}
+                                {product.productCount > 1 && <span className="octane-catalog-bundle-preview-count">{`x${product.productCount}`}</span>}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         );
     }
 

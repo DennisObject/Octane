@@ -26,6 +26,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
     const showBundlePurchase =
         !!currentOffer?.bundlePurchaseAllowed &&
         GetConfigurationValue<boolean>('catalog.multiple.purchase.enabled', true);
+    const isBundleOffer = currentOffer?.pricingModel === 'pricing_model_bundle';
 
     return (
         <div className="octane-catalog-default-layout flex flex-col h-full gap-2">
@@ -33,7 +34,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
                 {currentOffer && (
                     <div className="octane-catalog-offer-panel flex gap-0">
                         <div
-                            className={`octane-catalog-offer-preview relative flex items-center justify-center ${currentOffer.product.productType === ProductTypeEnum.BADGE ? 'is-badge' : ''}`}
+                            className={`octane-catalog-offer-preview relative flex items-center justify-center ${currentOffer.product.productType === ProductTypeEnum.BADGE ? 'is-badge' : ''} ${isBundleOffer ? 'is-bundle' : ''}`}
                             style={{ flex: '1 1 auto', minWidth: 0, width: '100%' }}
                         >
                             <div className="octane-catalog-preview-details">
@@ -44,7 +45,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
                             </div>
                             {currentOffer.product.productType !== ProductTypeEnum.BADGE && (
                                 <>
-                                    <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
+                                    {!isBundleOffer && <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />}
                                     <CatalogViewProductWidgetView height={240} />
                                     <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 right-1 absolute" />
                                 </>

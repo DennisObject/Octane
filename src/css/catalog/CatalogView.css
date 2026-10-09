@@ -1544,6 +1544,25 @@
     margin: 0;
 }
 
+/* gridItem bundleCounter is Volter Bold #cccc66 at x=18,y=18 of the 36px icon. */
+.octane-catalog-grid-bundle-counter {
+    position: absolute;
+    z-index: 2;
+    top: 18px;
+    left: 18px;
+    color: #cccc66;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item:not(.uses-base-grid-template) > .octane-catalog-grid-bundle-counter {
+    top: 20px;
+    left: 26px;
+}
+
 /* The selected tile paints an opaque plate through ::before at z-index 0, so the
    habbicon has to be lifted over it the way the furni icon already is. */
 .octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item > .octane-catalog-grid-habbicon-icon {

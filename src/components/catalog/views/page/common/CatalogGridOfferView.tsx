@@ -7,6 +7,7 @@ import { CatalogOfferTileView } from './CatalogOfferTileView';
 interface CatalogGridOfferViewProps extends LayoutGridItemProps {
     offer: IPurchasableOffer;
     selectOffer: (offer: IPurchasableOffer) => void;
+    bundleCounter?: number;
     tintColor?: string;
     showTechnicalDetails?: boolean;
     showPrices?: boolean;

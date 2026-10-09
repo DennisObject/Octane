@@ -1,6 +1,7 @@
 import { StringDataType } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FaExchangeAlt, FaSyncAlt } from 'react-icons/fa';
+import { Offer } from '../../../../../api';
 import { Column } from '../../../../../common';
 import { useCatalogData, useCatalogUiState, useUserGroups } from '../../../../../hooks';
 import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
@@ -15,6 +16,7 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = () => {
     const { currentOffer = null, roomPreviewer = null } = useCatalogData();
+    const isBundleOffer = currentOffer?.pricingModel === Offer.PRICING_MODEL_BUNDLE;
     const { purchaseOptions = null } = useCatalogUiState();
     const { data: groups = null } = useUserGroups();
     const hasGroups = !!(groups && groups.length);
@@ -52,22 +54,26 @@ export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = () => {
             <Column fullHeight gap={1} overflow="hidden">
                 {!!currentOffer && (
                     <div className="relative shrink-0 overflow-hidden">
-                        <button
-                            aria-label="Rotate preview"
-                            className="octane-catalog-preview-btn octane-catalog-preview-rotate"
-                            type="button"
-                            onClick={() => roomPreviewer?.changeRoomObjectDirection()}
-                        >
-                            <FaSyncAlt />
-                        </button>
-                        <button
-                            aria-label="Change preview state"
-                            className="octane-catalog-preview-btn octane-catalog-preview-state"
-                            type="button"
-                            onClick={() => roomPreviewer?.changeRoomObjectState()}
-                        >
-                            <FaExchangeAlt />
-                        </button>
+                        {!isBundleOffer && (
+                            <>
+                                <button
+                                    aria-label="Rotate preview"
+                                    className="octane-catalog-preview-btn octane-catalog-preview-rotate"
+                                    type="button"
+                                    onClick={() => roomPreviewer?.changeRoomObjectDirection()}
+                                >
+                                    <FaSyncAlt />
+                                </button>
+                                <button
+                                    aria-label="Change preview state"
+                                    className="octane-catalog-preview-btn octane-catalog-preview-state"
+                                    type="button"
+                                    onClick={() => roomPreviewer?.changeRoomObjectState()}
+                                >
+                                    <FaExchangeAlt />
+                                </button>
+                            </>
+                        )}
                         <CatalogViewProductWidgetView height={210} />
                         <div className="absolute bottom-1 left-1 z-10">
                             <CatalogGuildBadgeWidgetView />
