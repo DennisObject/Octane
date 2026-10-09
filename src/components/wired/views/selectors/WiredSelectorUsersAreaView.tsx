@@ -1,5 +1,5 @@
 import { GetRoomEngine, RoomAreaSelectionManager } from '@octane/renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { useWired } from '../../../../hooks';
 import { WiredButtonRow } from '../WiredButtonRow';
@@ -17,6 +17,8 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
     // InArea.as: both buttons need an activated area selection manager; Select Area stays disabled from the click until the drag (or Clear) reports an area.
     const [isAreaActive, setIsAreaActive] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
+    // True only while this window's own activate() succeeded: another selector's activation is never touched, cleared or deactivated from here.
+    const ownsAreaSelection = useRef(false);
     const { trigger = null, setIntParams } = useWired();
 
     const save = useCallback(() => {
@@ -36,6 +38,8 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
 
         const activated = GetRoomEngine().areaSelectionManager.activate(callback, RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
 
+        ownsAreaSelection.current = activated;
+
         if (activated) {
             if (trigger.intData.length >= 4 && trigger.intData[2] > 0 && trigger.intData[3] > 0) {
                 GetRoomEngine().areaSelectionManager.setHighlight(trigger.intData[0], trigger.intData[1], trigger.intData[2], trigger.intData[3]);
@@ -43,7 +47,9 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
         }
 
         return () => {
-            GetRoomEngine().areaSelectionManager.deactivate();
+            if (ownsAreaSelection.current) GetRoomEngine().areaSelectionManager.deactivate();
+
+            ownsAreaSelection.current = false;
         };
     }, [trigger]);
 
@@ -64,25 +70,30 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
 
         setFilterExisting(trigger.intData.length >= 5 && trigger.intData[4] === 1);
         setInvert(trigger.intData.length >= 6 && trigger.intData[5] === 1);
-        // The first effect has just tried to activate the manager: it is active only when that worked.
-        setIsAreaActive(GetRoomEngine().areaSelectionManager.areaSelectionState !== RoomAreaSelectionManager.NOT_ACTIVE);
+        // The first effect has just tried to activate the manager: both buttons work only when that call succeeded (InArea.onEditStart).
+        setIsAreaActive(ownsAreaSelection.current);
         setIsSelecting(false);
     }, [trigger]);
 
     useEffect(() => {
-        if (!trigger) return;
+        if (!trigger || !ownsAreaSelection.current) return;
 
         GetRoomEngine().areaSelectionManager.setHighlightType(invert ? RoomAreaSelectionManager.HIGHLIGHT_GREEN : RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
     }, [invert, trigger]);
 
     const selectArea = () =>
     {
+        // Direct calls obey the same enable rules as the button: an owned manager that is idle (InArea.onSelect runs only from an enabled button).
+        if (!ownsAreaSelection.current || GetRoomEngine().areaSelectionManager.areaSelectionState !== RoomAreaSelectionManager.NOT_SELECTING_AREA) return;
+
         setIsSelecting(true);
         GetRoomEngine().areaSelectionManager.startSelecting();
     };
 
     const clearArea = () =>
     {
+        if (!ownsAreaSelection.current) return;
+
         GetRoomEngine().areaSelectionManager.clearHighlight();
         setRootX(0);
         setRootY(0);
