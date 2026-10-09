@@ -13,7 +13,7 @@ import {
     RemoveLinkEventTracker,
     RequestEarningsCenterComposer
 } from '@octane/renderer';
-import { CSSProperties, FC, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../api';
 import imgAchievements from '../../assets/images/vault/achievements.png';
 import imgBonusbag from '../../assets/images/vault/bonusbag.png';
@@ -32,7 +32,8 @@ import { LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../
 import { NativeText } from '../../common/native-text/NativeText';
 import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../hooks';
 
-const localizeWithFallback = (key: string, fallback: string) => {
+const localizeWithFallback = (key: string, fallback: string) =>
+{
     const text = LocalizeText(key);
     return text && text !== key ? text : fallback;
 };
@@ -83,8 +84,10 @@ const nativeIcon = (src: string, size: number, className = '') => (
 );
 
 // A reward that a native slot does not cover (diamonds, HC days, a currency the v75 row has no slot for) keeps its own slot, so nothing earned is hidden.
-const extraRewardIcon = (reward: IEarningsReward): ReactElement | null => {
-    switch (reward.type) {
+const extraRewardIcon = (reward: IEarningsReward): ReactElement | null =>
+{
+    switch (reward.type)
+    {
         case 'credits':
             return nativeIcon(imgCredit, 22);
         case 'pixels':
@@ -98,8 +101,10 @@ const extraRewardIcon = (reward: IEarningsReward): ReactElement | null => {
     }
 };
 
-const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot[] => {
-    const slots: Slot[] = category.slots.map((kind) => {
+const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot[] =>
+{
+    const slots: Slot[] = category.slots.map((kind) =>
+    {
         if (kind === 'pixels')
             return {
                 id: kind,
@@ -122,7 +127,8 @@ const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot
     const covered = new Set<string>(category.slots.flatMap((kind) => (kind === 'product' ? ['badge', 'item'] : [kind])));
     const extra = new Map<string, Slot>();
 
-    for (const reward of rewards) {
+    for (const reward of rewards)
+    {
         if (covered.has(reward.type)) continue;
 
         const id = `${reward.type}:${reward.pointsType}`;
@@ -144,7 +150,8 @@ const ROW_PITCH = 37;
 const windowHeight = (rows: number) => 92 + ROW_PITCH * rows;
 
 /** static_bitmap 32x32 at (1,1): the bitmap sits in the middle of it, rounded down. */
-const CategoryIcon: FC<{ src: string }> = ({ src }) => {
+const CategoryIcon: FC<{ src: string }> = ({ src }) =>
+{
     const [size, setSize] = useState<[number, number]>([32, 32]);
 
     return (
@@ -180,7 +187,8 @@ const VaultButton: FC<VaultButtonProps> = ({ label, disabled, kind, style, onCli
     </button>
 );
 
-export const VaultView: FC<{}> = () => {
+export const VaultView: FC<{}> = () =>
+{
     const [isVisible, setIsVisible] = useState(false);
     const [entries, setEntries] = useState<IEarningsEntry[]>([]);
     const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
@@ -195,11 +203,16 @@ export const VaultView: FC<{}> = () => {
     const { showConfirm = null } = useNotification();
     const getCurrencyRef = useRef(getCurrencyAmount);
 
-    getCurrencyRef.current = getCurrencyAmount;
-    pendingRef.current = pending;
-    entriesRef.current = entries;
+    // Read by callbacks that run after a click or a confirm dialog; refreshed before any of them can run.
+    useLayoutEffect(() =>
+    {
+        getCurrencyRef.current = getCurrencyAmount;
+        pendingRef.current = pending;
+        entriesRef.current = entries;
+    });
 
-    const entriesByKey = useMemo(() => {
+    const entriesByKey = useMemo(() =>
+    {
         const map = new Map<string, IEarningsEntry>();
         for (const entry of entries) map.set(entry.categoryKey, entry);
         return map;
@@ -217,20 +230,23 @@ export const VaultView: FC<{}> = () => {
 
     useMessageEvent<EarningsCenterEvent>(
         EarningsCenterEvent,
-        useCallback((event: EarningsCenterEvent) => {
+        useCallback((event: EarningsCenterEvent) =>
+        {
             const parser = event.getParser();
             if (!parser) return;
             setEntries(parser.entries ?? []);
         }, [])
     );
 
-    const commitPending = useCallback((next: ReadonlySet<string>) => {
+    const commitPending = useCallback((next: ReadonlySet<string>) =>
+    {
         pendingRef.current = next;
         setPending(next);
     }, []);
 
     // Every way of opening or closing goes through here so the refs a captured callback reads change in the same task as the click, not after the next commit.
-    const changeVisibility = useCallback((next: boolean | ((current: boolean) => boolean)) => {
+    const changeVisibility = useCallback((next: boolean | ((current: boolean) => boolean)) =>
+    {
         const value = typeof next === 'function' ? next(isVisibleRef.current) : next;
 
         if (value === isVisibleRef.current) return;
@@ -238,12 +254,20 @@ export const VaultView: FC<{}> = () => {
         isVisibleRef.current = value;
         openIdRef.current += 1;
         setIsVisible(value);
-    }, []);
+
+        // A closed window forgets claims that were in flight.
+        if (!value)
+        {
+            allExpectedRef.current = new Set();
+            commitPending(new Set());
+        }
+    }, [commitPending]);
 
     // A dropped connection ends every dialog that was asked before it, even when the same user comes back.
     useOctaneEvent(
         OctaneEventType.CONNECTION_STATE_CHANGED,
-        useCallback(() => {
+        useCallback(() =>
+        {
             if (GetCommunication().connection.connectionState.phase === 'connected') return;
 
             openIdRef.current += 1;
@@ -255,19 +279,25 @@ export const VaultView: FC<{}> = () => {
     // A claim result releases the buttons it covers: a refused claim re-enables them, a successful one zeroes the entry (the server's refreshed entry wins).
     useMessageEvent<EarningsClaimResultEvent>(
         EarningsClaimResultEvent,
-        useCallback((event: EarningsClaimResultEvent) => {
+        useCallback((event: EarningsClaimResultEvent) =>
+        {
             const parser = event.getParser();
             if (!parser) return;
 
-            setEntries((prev) => {
+            setEntries((prev) =>
+            {
                 const next = prev.slice();
 
-                for (const result of parser.results) {
-                    if (result.hasEntry && result.entry) {
+                for (const result of parser.results)
+                {
+                    if (result.hasEntry && result.entry)
+                    {
                         const idx = next.findIndex((e) => e.categoryKey === result.entry.categoryKey);
                         if (idx >= 0) next[idx] = result.entry;
                         else next.push(result.entry);
-                    } else if (result.success) {
+                    }
+                    else if (result.success)
+                    {
                         // No refreshed entry but the claim worked — mark it spent.
                         const idx = next.findIndex((e) => e.categoryKey === result.categoryKey);
                         if (idx >= 0) next[idx] = { ...next[idx], claimable: false, rewards: [] };
@@ -279,7 +309,8 @@ export const VaultView: FC<{}> = () => {
 
             const next = new Set(pendingRef.current);
 
-            for (const result of parser.results) {
+            for (const result of parser.results)
+            {
                 next.delete(result.categoryKey);
                 allExpectedRef.current.delete(result.categoryKey);
             }
@@ -289,18 +320,21 @@ export const VaultView: FC<{}> = () => {
             if (next.has('*') && allExpectedRef.current.size === 0) next.delete('*');
 
             commitPending(next);
-        }, [])
+        }, [commitPending])
     );
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) => {
+            linkReceived: (url: string) =>
+            {
                 const parts = url.split('/');
 
                 if (parts.length < 3) return;
                 if (parts[2] !== 'vault') return;
 
-                switch (parts[1]) {
+                switch (parts[1])
+                {
                     case 'open':
                         changeVisibility(true);
                         return;
@@ -320,20 +354,15 @@ export const VaultView: FC<{}> = () => {
         return () => RemoveLinkEventTracker(linkTracker);
     }, [changeVisibility]);
 
-    // Ask the server for fresh earnings every time the window opens; a closed window forgets claims that were in flight.
-    useEffect(() => {
-        if (!isVisible) {
-            allExpectedRef.current = new Set();
-            commitPending(new Set());
-
-            return;
-        }
-
-        SendMessageComposer(new RequestEarningsCenterComposer());
-    }, [isVisible, commitPending]);
+    // Ask the server for fresh earnings every time the window opens.
+    useEffect(() =>
+    {
+        if (isVisible) SendMessageComposer(new RequestEarningsCenterComposer());
+    }, [isVisible]);
 
     // What a claim asked for: it only counts while the window is still the same opening, the same signed-in user and the same connection.
-    const captureAsk = useCallback(() => {
+    const captureAsk = useCallback(() =>
+    {
         const openId = openIdRef.current;
         const userId = GetSessionDataManager().userId;
 
@@ -343,15 +372,18 @@ export const VaultView: FC<{}> = () => {
     // v75 asks before a claim that would push the duckets over the soft limit (earning.exceeding_limit). The approval is for the numbers shown when it was
     // asked: if the earnings or the purse changed while the dialog was open, the claim asks again instead of sending under the old approval.
     const confirmDucketLimit = useCallback(
-        (isCurrent: () => boolean, readDuckets: () => number, perform: () => void) => {
-            const ask = () => {
+        (isCurrent: () => boolean, readDuckets: () => number, perform: () => void) =>
+        {
+            const ask = () =>
+            {
                 if (!isCurrent()) return;
 
                 const softLimit = GetConfigurationValue<number>('duckets.soft_limit', 2147483647);
                 const amount = readDuckets();
                 const purse = getCurrencyRef.current(0);
 
-                if (amount > 0 && amount + purse > softLimit) {
+                if (amount > 0 && amount + purse > softLimit)
+                {
                     let isDone = false;
 
                     showConfirm(
@@ -359,14 +391,16 @@ export const VaultView: FC<{}> = () => {
                             'earning.exceeding_limit',
                             'You are exceeding the ducket limit by claiming these earnings. This means some duckets will be lost, are you sure you want to continue?'
                         ),
-                        () => {
+                        () =>
+                        {
                             if (isDone) return;
 
                             isDone = true;
 
                             if (!isCurrent()) return;
 
-                            if (readDuckets() !== amount || getCurrencyRef.current(0) !== purse) {
+                            if (readDuckets() !== amount || getCurrencyRef.current(0) !== purse)
+                            {
                                 ask();
 
                                 return;
@@ -392,7 +426,8 @@ export const VaultView: FC<{}> = () => {
     );
 
     // The button is disabled the moment the claim is sent; the result (or closing the window) releases it. One claim-all or any row claim in flight blocks the others.
-    const startPending = (key: string) => {
+    const startPending = useCallback((key: string) =>
+    {
         const current = pendingRef.current;
 
         if (key === '*' ? current.size > 0 : current.has(key) || current.has('*')) return false;
@@ -403,18 +438,20 @@ export const VaultView: FC<{}> = () => {
         commitPending(next);
 
         return true;
-    };
+    }, [commitPending]);
 
     // A confirmed claim runs later than the click: it only counts if it is still the asking opening/user/connection and the entry is still claimable.
     const claimOne = useCallback(
-        (categoryKey: string) => {
+        (categoryKey: string) =>
+        {
             const isCurrent = captureAsk();
             const find = () => entriesRef.current.find((entry) => entry.categoryKey === categoryKey);
 
             confirmDucketLimit(
                 isCurrent,
                 () => ducketsOf(find() ?? null),
-                () => {
+                () =>
+                {
                     if (!isCurrent() || !claimable(find())) return;
                     if (!startPending(categoryKey)) return;
 
@@ -422,18 +459,19 @@ export const VaultView: FC<{}> = () => {
                 }
             );
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [captureAsk, confirmDucketLimit, claimable]
+        [captureAsk, confirmDucketLimit, claimable, startPending]
     );
 
-    const claimAll = useCallback(() => {
+    const claimAll = useCallback(() =>
+    {
         const isCurrent = captureAsk();
         const covered = () => entriesRef.current.filter((entry) => claimable(entry));
 
         confirmDucketLimit(
             isCurrent,
             () => covered().reduce((sum, entry) => sum + ducketsOf(entry), 0),
-            () => {
+            () =>
+            {
                 const keys = covered().map((entry) => entry.categoryKey);
 
                 if (!isCurrent() || !keys.length || !startPending('*')) return;
@@ -442,8 +480,7 @@ export const VaultView: FC<{}> = () => {
                 SendMessageComposer(new ClaimAllEarningsRewardsComposer());
             }
         );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [captureAsk, confirmDucketLimit, claimable]);
+    }, [captureAsk, confirmDucketLimit, claimable, startPending]);
 
     if (!isVisible) return null;
 
@@ -470,7 +507,8 @@ export const VaultView: FC<{}> = () => {
                 />
             </OctaneCardHeaderView>
             <div className="octane-vault-content">
-                {visibleCategories.map((category, index) => {
+                {visibleCategories.map((category, index) =>
+                {
                     const entry = entriesByKey.get(category.key) ?? null;
                     const isPending = pending.has(category.key) || pending.has('*');
                     const canClaim = claimable(entry) && !isPending;
@@ -487,7 +525,8 @@ export const VaultView: FC<{}> = () => {
                                     <NativeText background={0xffffff} text={category.isBackendOnly ? `${label}` : label} textStyle="u_bold" />
                                 </div>
                             </div>
-                            {slots.map((slot, slotIndex) => {
+                            {slots.map((slot, slotIndex) =>
+                            {
                                 const x = slots.length > 2 ? 8 + slotIndex * 54 : 15 + slotIndex * 70;
 
                                 return (
