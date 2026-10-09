@@ -1443,6 +1443,11 @@
     pointer-events: none;
 }
 
+.octane-wired__button-row {
+    display: grid;
+    column-gap: 12px;
+}
+
 .octane-wired__shell-button--illumina {
     height: 22px;
     color: #333;

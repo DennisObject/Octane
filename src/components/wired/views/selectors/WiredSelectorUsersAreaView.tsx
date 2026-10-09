@@ -1,8 +1,10 @@
 import { GetRoomEngine, RoomAreaSelectionManager } from '@octane/renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText } from '../../../../api';
-import { Button, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredButtonRow } from '../WiredButtonRow';
+import { WiredCheckboxGroup, WiredCheckboxOption } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSelectorBaseView } from './WiredSelectorBaseView';
 
 export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
@@ -12,6 +14,11 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
     const [areaHeight, setAreaHeight] = useState(0);
     const [filterExisting, setFilterExisting] = useState(false);
     const [invert, setInvert] = useState(false);
+    // InArea.as: both buttons need an activated area selection manager; Select Area stays disabled from the click until the drag (or Clear) reports an area.
+    const [isAreaActive, setIsAreaActive] = useState(false);
+    const [isSelecting, setIsSelecting] = useState(false);
+    // True only while this window's own activate() succeeded: another selector's activation is never touched, cleared or deactivated from here.
+    const ownsAreaSelection = useRef(false);
     const { trigger = null, setIntParams } = useWired();
 
     const save = useCallback(() => {
@@ -26,9 +33,12 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
             setRootY(y);
             setAreaWidth(w);
             setAreaHeight(h);
+            setIsSelecting(false);
         };
 
         const activated = GetRoomEngine().areaSelectionManager.activate(callback, RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
+
+        ownsAreaSelection.current = activated;
 
         if (activated) {
             if (trigger.intData.length >= 4 && trigger.intData[2] > 0 && trigger.intData[3] > 0) {
@@ -37,7 +47,9 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
         }
 
         return () => {
-            GetRoomEngine().areaSelectionManager.deactivate();
+            if (ownsAreaSelection.current) GetRoomEngine().areaSelectionManager.deactivate();
+
+            ownsAreaSelection.current = false;
         };
     }, [trigger]);
 
@@ -58,55 +70,55 @@ export const WiredSelectorUsersAreaView: FC<{}> = (props) => {
 
         setFilterExisting(trigger.intData.length >= 5 && trigger.intData[4] === 1);
         setInvert(trigger.intData.length >= 6 && trigger.intData[5] === 1);
+        // The first effect has just tried to activate the manager: both buttons work only when that call succeeded (InArea.onEditStart).
+        setIsAreaActive(ownsAreaSelection.current);
+        setIsSelecting(false);
     }, [trigger]);
 
     useEffect(() => {
-        if (!trigger) return;
+        if (!trigger || !ownsAreaSelection.current) return;
 
         GetRoomEngine().areaSelectionManager.setHighlightType(invert ? RoomAreaSelectionManager.HIGHLIGHT_GREEN : RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
     }, [invert, trigger]);
 
-    const hasArea = areaWidth > 0 && areaHeight > 0;
+    const selectArea = () =>
+    {
+        // Direct calls obey the same enable rules as the button: an owned manager that is idle (InArea.onSelect runs only from an enabled button).
+        if (!ownsAreaSelection.current || GetRoomEngine().areaSelectionManager.areaSelectionState !== RoomAreaSelectionManager.NOT_SELECTING_AREA) return;
+
+        setIsSelecting(true);
+        GetRoomEngine().areaSelectionManager.startSelecting();
+    };
+
+    const clearArea = () =>
+    {
+        if (!ownsAreaSelection.current) return;
+
+        GetRoomEngine().areaSelectionManager.clearHighlight();
+        setRootX(0);
+        setRootY(0);
+        setAreaWidth(0);
+        setAreaHeight(0);
+        setIsSelecting(false);
+    };
 
     return (
-        <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: '385px' }}>
-            <div className="flex flex-col gap-2">
-                <Text bold>{LocalizeText('wiredfurni.params.area_selection')}</Text>
-                <Text small>{LocalizeText('wiredfurni.params.area_selection.info')}</Text>
-
-                <div className="flex gap-1">
-                    <Button fullWidth variant="primary" onClick={() => GetRoomEngine().areaSelectionManager.startSelecting()}>
-                        {LocalizeText('wiredfurni.params.area_selection.select')}
-                    </Button>
-                    <Button
-                        fullWidth
-                        variant="secondary"
-                        onClick={() => {
-                            GetRoomEngine().areaSelectionManager.clearHighlight();
-                            setRootX(0);
-                            setRootY(0);
-                            setAreaWidth(0);
-                            setAreaHeight(0);
-                        }}
-                    >
-                        {LocalizeText('wiredfurni.params.area_selection.clear')}
-                    </Button>
-                </div>
-
-                <hr className="m-0 bg-dark" />
-
-                <Text bold>{LocalizeText('wiredfurni.params.selector_options_selector')}</Text>
-
-                <label className="flex items-center gap-1">
-                    <input type="checkbox" className="form-check-input" checked={filterExisting} onChange={(e) => setFilterExisting(e.target.checked)} />
-                    <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
-                </label>
-
-                <label className="flex items-center gap-1">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(e) => setInvert(e.target.checked)} />
-                    <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
-                </label>
-            </div>
+        <WiredSelectorBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: '385px' }}>
+            <WiredSection title={LocalizeText('wiredfurni.params.area_selection')}>
+                <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">{LocalizeText('wiredfurni.params.area_selection.info')}</span>
+                <WiredButtonRow
+                    buttons={[
+                        { id: 'select', label: LocalizeText('wiredfurni.params.area_selection.select'), disabled: !isAreaActive || isSelecting, onClick: selectArea },
+                        { id: 'clear', label: LocalizeText('wiredfurni.params.area_selection.clear'), disabled: !isAreaActive, onClick: clearArea }
+                    ]}
+                />
+            </WiredSection>
+            <WiredSection title={LocalizeText('wiredfurni.params.selector_options_selector')}>
+                <WiredCheckboxGroup>
+                    <WiredCheckboxOption checked={filterExisting} label={LocalizeText('wiredfurni.params.selector_option.0')} onChange={setFilterExisting} />
+                    <WiredCheckboxOption checked={invert} label={LocalizeText('wiredfurni.params.selector_option.1')} last={true} onChange={setInvert} />
+                </WiredCheckboxGroup>
+            </WiredSection>
         </WiredSelectorBaseView>
     );
 };
