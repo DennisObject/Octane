@@ -142,7 +142,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 CreateLinkEvent('catalog/open/' + CatalogPageName.GUILD_CUSTOM_FURNI);
                 break;
             case 'popular_groups':
-                CreateLinkEvent('navigator/search/groups');
+                CreateLinkEvent('navigator/search/hotel_view/group:');
                 break;
             case 'forum':
                 CreateLinkEvent('groupforum/' + groupInformation.id);

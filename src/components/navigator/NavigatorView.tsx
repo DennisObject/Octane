@@ -38,6 +38,8 @@ import { NavigatorSearchResultView } from './views/search/NavigatorSearchResultV
 import { NavigatorSearchSavesResultView } from './views/search/NavigatorSearchSavesResultView';
 import { NavigatorSearchView } from './views/search/NavigatorSearchView';
 
+const SEARCH_LINK_TABS = new Set(['official_view', 'hotel_view', 'roomads_view', 'myworld_view']);
+
 const persistNavigatorBounds = (element: HTMLElement | null) => {
     if (!element) return;
     const rect = element.getBoundingClientRect();
@@ -126,10 +128,14 @@ export const NavigatorView: FC<{}> = () => {
                     case 'create':
                         store.openCreator();
                         return;
-                    case 'search':
-                        store.setSearch('hotel_view', parts.slice(2).join('/'));
+                    case 'search': {
+                        if (parts.length <= 2) return;
+                        // AIR links are navigator/search/<filter>; navigator/search/<tab>/<filter> picks the tab too.
+                        const hasTab = SEARCH_LINK_TABS.has(parts[2]);
+                        store.setSearch(hasTab ? parts[2] : 'hotel_view', parts.slice(hasTab ? 3 : 2).join('/'));
                         store.show();
                         return;
+                    }
                     case 'tag':
                         store.setSearch('hotel_view', `tag:${parts.slice(2).join('/')}`);
                         store.show();

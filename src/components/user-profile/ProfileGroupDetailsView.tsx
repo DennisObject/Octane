@@ -51,7 +51,7 @@ export const ProfileGroupDetailsView: FC<ProfileGroupDetailsViewProps> = ({ grou
             <button type="button" className="octane-profile-group-info__furniture" onClick={() => CreateLinkEvent('catalog/open/' + CatalogPageName.GUILD_CUSTOM_FURNI)}>
                 {LocalizeText('group.buyfurni')}
             </button>
-            <button type="button" className="octane-profile-group-info__browse" onClick={() => CreateLinkEvent('navigator/search/groups')}>
+            <button type="button" className="octane-profile-group-info__browse" onClick={() => CreateLinkEvent('navigator/search/hotel_view/group:')}>
                 {LocalizeText('group.showgroups')}
             </button>
             {group.hasForum && <button type="button" className="octane-profile-group-info__forum" onClick={() => CreateLinkEvent('groupforum/' + group.id)}>
