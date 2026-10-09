@@ -232,7 +232,8 @@ const RewardTrackPrizeView: FC<{
 const HINT_BUTTON_RIGHT = 580;
 const HINT_LABEL_SIZE = nativeTextStyles.button_shiny_regular.size;
 
-const RewardTrackHintButton: FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => {
+const RewardTrackHintButton: FC<{ label: string; onClick: () => void }> = ({ label, onClick }) =>
+{
     const fieldWidth = useAirFieldWidth(label, HINT_LABEL_SIZE, false, 'button_shiny_regular');
     const width = fieldWidth === undefined ? 109 : fieldWidth + 15;
 
@@ -471,7 +472,8 @@ export const RewardTrackView: FC<{}> = () => {
     if (!trackId) return null;
 
     // the official list re-selects its first task when the selected one drops out of the new filter, and keeps it afterwards
-    const onFilter = (value: RewardTrackTaskFilter) => {
+    const onFilter = (value: RewardTrackTaskFilter) =>
+    {
         const next = filterRewardTrackTasks(track?.tasks ?? [], value);
 
         if (!next.some((task) => task.id === selectedTask?.id)) setSelectedTaskId(next[0]?.id ?? null);

@@ -18,7 +18,8 @@ interface RewardTrackScrollListProps {
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
-export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ className, contentClassName, height, children }) => {
+export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ className, contentClassName, height, children }) =>
+{
     const rootRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -33,12 +34,14 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
     const travel = height - liftHeight;
     const overflow = range > 0;
 
-    const setOffset = useCallback((value: number) => {
+    const setOffset = useCallback((value: number) =>
+    {
         offsetRef.current = clamp(value);
         setOffsetState(offsetRef.current);
     }, []);
 
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const content = contentRef.current;
 
         if (!content) return;
@@ -55,22 +58,26 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
     }, []);
 
     // the content shrank or grew: the same offset fraction stays valid, a list that now fits goes back to the top
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         if (!overflow && offsetRef.current !== 0) setOffset(0);
     }, [overflow, setOffset]);
 
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const viewport = viewportRef.current;
 
         if (viewport) viewport.scrollTop = Math.trunc(offset * range);
     }, [offset, range, contentHeight]);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const root = rootRef.current;
 
         if (!root) return;
 
-        const onWheel = (event: WheelEvent) => {
+        const onWheel = (event: WheelEvent) =>
+        {
             if (!event.deltaY || !overflow) return;
 
             event.preventDefault();
@@ -84,7 +91,8 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
 
     const liftY = Math.round(offset * travel);
 
-    const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) =>
+    {
         if (event.target !== event.currentTarget || !overflow) return;
 
         const lift = event.currentTarget.getBoundingClientRect().top + liftY;
@@ -94,18 +102,21 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
         else if (event.clientY > lift + liftHeight) setOffset(offsetRef.current + page);
     };
 
-    const onLiftPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const onLiftPointerDown = (event: ReactPointerEvent<HTMLDivElement>) =>
+    {
         event.preventDefault();
         event.currentTarget.setPointerCapture(event.pointerId);
         dragRef.current = { pointerId: event.pointerId, startY: null, startOffset: 0 };
     };
 
-    const onLiftPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const onLiftPointerMove = (event: ReactPointerEvent<HTMLDivElement>) =>
+    {
         const drag = dragRef.current;
 
         if (!drag || drag.pointerId !== event.pointerId || travel <= 0) return;
 
-        if (drag.startY === null) {
+        if (drag.startY === null)
+        {
             drag.startY = event.clientY;
             drag.startOffset = offsetRef.current;
 
@@ -115,7 +126,8 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
         setOffset(drag.startOffset + (event.clientY - drag.startY) / travel);
     };
 
-    const onLiftPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const onLiftPointerUp = (event: ReactPointerEvent<HTMLDivElement>) =>
+    {
         if (dragRef.current?.pointerId !== event.pointerId) return;
 
         dragRef.current = null;
