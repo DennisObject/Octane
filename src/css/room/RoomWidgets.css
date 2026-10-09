@@ -1659,3 +1659,45 @@ textarea.octane-room-promote-edit__input {
     background: #fff;
     white-space: nowrap;
 }
+
+/* Fractional device pixel ratio: the surface (RoomPromoteEditSurface) paints the window as one bitmap. Only leaf visuals are hidden - never the input or an ancestor of it - so the
+   browser's caret, selection and IME text stay visible; the input keeps its own text unless the surface shows that exact text (is-raster). */
+.octane-room-promote-edit__surface {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.octane-room-promote-edit__sources {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.octane-room-promote-edit.is-native-surface.octane-card-shell.octane-card-frame-3::before {
+    opacity: 0;
+}
+
+.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__title canvas,
+.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__label canvas {
+    visibility: hidden;
+}
+
+.octane-room-promote-edit.is-native-surface.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    background-image: none !important;
+}
+
+.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__raster {
+    visibility: hidden;
+}
+
+.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__input {
+    border-color: transparent !important;
+    background: transparent !important;
+    caret-color: #000;
+}

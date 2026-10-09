@@ -3,7 +3,9 @@ import { FC, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
 import { NativeText } from '../../../../../common/native-text/NativeText';
+import { useNativeTextSampling } from '../../../../../common/native-text/NativeTextScale';
 import { useAirFieldWidth } from '../../../../achievements/AchievementText';
+import { RoomPromoteEditSurface, RoomPromoteEditSurfaceState, RoomPromoteFieldReceipt, RoomPromoteFieldFill } from '../RoomPromoteEditSurface';
 import { RoomPromoteField } from '../RoomPromoteField';
 
 interface RoomPromoteEditWidgetViewProps {
@@ -26,11 +28,22 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     const [name, setName] = useState<string>(eventName);
     const [description, setDescription] = useState<string>(eventDescription);
     const [hasNameError, setHasNameError] = useState<boolean>(false);
+    const [focusedField, setFocusedField] = useState<'name' | 'description' | null>(null);
+    const [surface, setSurface] = useState<RoomPromoteEditSurfaceState>({ drawn: false, name: null, description: null });
+    // The fractional-DPR surface exists only at a fractional device pixel ratio; integer ratios keep the DOM window and the native shadow canvas.
+    const isFractional = useNativeTextSampling(true) === 'auto';
+    // A drawn surface counts only while the ratio is still fractional, so an integer ratio never hides the DOM window for a render with the surface already gone.
+    const isSurfaceDrawn = isFractional && surface.drawn;
     const lastSaved = useRef<string>(JSON.stringify([eventName, eventDescription]));
     const caption = LocalizeText('navigator.eventsettings.editcaption');
     // Measured against the official window: for this 241px frame the caption lands one pixel left of the centred field (field = AIR field width, floor(textWidth) + 5), i.e. at floor((240 - field) / 2).
     // One native pair only (the header lays its title out through an item list); the rule is not pinned in the source.
     const captionWidth = useAirFieldWidth(caption, 12, true, 'u_frame_title');
+    const captionLeft = captionWidth === undefined ? undefined : Math.floor((FRAME_WIDTH - 1 - captionWidth) / 2) - HEADER_INSET;
+    const nameFill: RoomPromoteFieldFill = hasNameError ? 'yellow' : 'white';
+    // A field hides its own browser text only while the surface really shows exactly this text on this fill.
+    const ownsText = (receipt: RoomPromoteFieldReceipt | null, value: string, fill: RoomPromoteFieldFill): boolean | undefined =>
+        isSurfaceDrawn ? !!receipt && receipt.fits && receipt.text === value && receipt.fill === fill : undefined;
 
     const save = (nextName: string, nextDescription: string) => {
         if (nextName.trim().length < MIN_NAME_LENGTH) {
@@ -51,45 +64,73 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     };
 
     return (
-        <OctaneCardView aria-label={caption} className="octane-room-promote-edit" frameStyle={3} isResizable={false} nativeShadow role="dialog" uniqueKey="room-promote-edit">
+        <OctaneCardView
+            aria-label={caption}
+            className={`octane-room-promote-edit${isSurfaceDrawn ? ' is-native-surface' : ''}`}
+            dragStyle={isSurfaceDrawn ? { filter: 'none' } : undefined}
+            frameStyle={3}
+            isResizable={false}
+            nativeShadow
+            role="dialog"
+            uniqueKey="room-promote-edit"
+        >
             <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
                 <NativeText
                     background={0x377998}
                     className="octane-room-promote-edit__title"
                     nativeResolution
                     overrides={{ color: 0xffffff }}
-                    style={captionWidth === undefined ? undefined : { left: Math.floor((FRAME_WIDTH - 1 - captionWidth) / 2) - HEADER_INSET, transform: 'none' }}
+                    style={captionLeft === undefined ? undefined : { left: captionLeft, transform: 'none' }}
                     text={caption}
                     textStyle="u_frame_title"
                 />
             </OctaneCardHeaderView>
+            {isFractional && (
+                <RoomPromoteEditSurface
+                    caption={caption}
+                    captionLeft={captionLeft}
+                    description={description}
+                    descriptionLabel={LocalizeText('navigator.eventsettings.desc')}
+                    focusedField={focusedField}
+                    hasNameError={hasNameError}
+                    name={name}
+                    nameLabel={LocalizeText('navigator.eventsettings.name')}
+                    onStateChange={setSurface}
+                />
+            )}
             <div className="octane-room-promote-edit__client">
                 <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
                     <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
                 </div>
                 {hasNameError && <div className="octane-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
                 <RoomPromoteField
+                    isEditing={focusedField === 'name'}
                     isError={hasNameError}
                     label={LocalizeText('navigator.eventsettings.name')}
                     maxLength={NAME_LENGTH}
+                    surfaceOwnsText={ownsText(surface.name, name, nameFill)}
                     value={name}
                     y={20}
                     height={15}
                     onBlur={() => save(name, description)}
                     onChange={setName}
+                    onEditingChange={(editing) => setFocusedField((current) => (editing ? 'name' : current === 'name' ? null : current))}
                 />
                 <div className="octane-room-promote-edit__label" style={{ top: 40 }}>
                     <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
                 </div>
                 <RoomPromoteField
                     height={88}
+                    isEditing={focusedField === 'description'}
                     label={LocalizeText('navigator.eventsettings.desc')}
                     maxLength={DESCRIPTION_LENGTH}
                     multiline
+                    surfaceOwnsText={ownsText(surface.description, description, 'white')}
                     value={description}
                     y={56}
                     onBlur={() => save(name, description)}
                     onChange={setDescription}
+                    onEditingChange={(editing) => setFocusedField((current) => (editing ? 'description' : current === 'description' ? null : current))}
                 />
             </div>
         </OctaneCardView>
