@@ -18,7 +18,7 @@ export class ChatBubbleUtilities {
     public static PET_IMAGE_CACHE: Map<string, string> = new Map();
     private static PET_IMAGE_PENDING_CACHE: Map<string, Promise<string>> = new Map();
 
-    private static PLACEHOLDER_IMAGE_CACHE: Map<boolean, string> = new Map();
+    private static PLACEHOLDER_IMAGE_CACHE: Map<string, string> = new Map();
 
     private static pruneCache<T>(cache: Map<string, T>, maxSize: number = ChatBubbleUtilities.MAX_CACHE_SIZE): void {
         if (cache.size <= maxSize) return;
@@ -31,9 +31,10 @@ export class ChatBubbleUtilities {
         }
     }
 
-    public static async setFigureImage(figure: string, zoom: boolean = GetConfigurationValue<boolean>('zoom.enabled', false)): Promise<string> {
-        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, zoom ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
-            resetFigure: (figure) => this.setFigureImage(figure, zoom),
+    public static async setFigureImage(figure: string, zoom: boolean = GetConfigurationValue<boolean>('zoom.enabled', false), highResolution: boolean = false): Promise<string> {
+        // Low-res keeps the half-size head. High-res keeps the LARGE head and crops it 1:1 into a 2x canvas.
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, highResolution ? AvatarScaleType.LARGE : AvatarScaleType.SMALL, null, {
+            resetFigure: (figure) => this.setFigureImage(figure, zoom, highResolution),
             dispose: () => {},
             disposed: false
         });
@@ -41,8 +42,8 @@ export class ChatBubbleUtilities {
         if (!avatarImage) return null;
 
         const isPlaceholder = avatarImage.isPlaceholder();
-
-        const placeholderImageUrl = this.PLACEHOLDER_IMAGE_CACHE.get(zoom);
+        const placeholderKey = this.getImageCacheVariant(zoom, highResolution);
+        const placeholderImageUrl = this.PLACEHOLDER_IMAGE_CACHE.get(placeholderKey);
 
         if (isPlaceholder && placeholderImageUrl?.length) {
             avatarImage.dispose();
@@ -63,20 +64,10 @@ export class ChatBubbleUtilities {
             image.onerror = reject;
             image.src = sourceUrl;
         });
-        let head: HTMLCanvasElement | HTMLImageElement = source;
-        if (zoom) {
-            const scaled = document.createElement('canvas');
-            scaled.width = Math.round(source.width / 2);
-            scaled.height = Math.round(source.height / 2);
-            const scaledContext = scaled.getContext('2d');
-            scaledContext.imageSmoothingEnabled = true;
-            scaledContext.drawImage(source, 0, 0, scaled.width, scaled.height);
-            head = scaled;
-        }
-        const imageUrl = this.focusFace(head, zoom ? 25 : 50).toDataURL('image/png');
-        if (isPlaceholder) this.PLACEHOLDER_IMAGE_CACHE.set(zoom, imageUrl);
+        const imageUrl = this.focusFace(source, (zoom ? 25 : 50) * (highResolution ? 2 : 1)).toDataURL('image/png');
+        if (isPlaceholder) this.PLACEHOLDER_IMAGE_CACHE.set(placeholderKey, imageUrl);
 
-        this.AVATAR_IMAGE_CACHE.set(this.getAvatarImageCacheKey(figure, zoom), imageUrl);
+        this.AVATAR_IMAGE_CACHE.set(this.getAvatarImageCacheKey(figure, zoom, highResolution), imageUrl);
 
         this.pruneCache(this.AVATAR_IMAGE_CACHE);
 
@@ -123,11 +114,11 @@ export class ChatBubbleUtilities {
         return face;
     }
 
-    public static async getUserImage(figure: string): Promise<string> {
+    public static async getUserImage(figure: string, highResolution: boolean = false): Promise<string> {
         const zoom = GetConfigurationValue<boolean>('zoom.enabled', false);
-        let existing = this.AVATAR_IMAGE_CACHE.get(this.getAvatarImageCacheKey(figure, zoom));
+        let existing = this.AVATAR_IMAGE_CACHE.get(this.getAvatarImageCacheKey(figure, zoom, highResolution));
 
-        if (!existing) existing = await this.setFigureImage(figure, zoom);
+        if (!existing) existing = await this.setFigureImage(figure, zoom, highResolution);
 
         return existing;
     }
@@ -226,7 +217,11 @@ export class ChatBubbleUtilities {
         return canvas.toDataURL('image/png');
     }
 
-    private static getAvatarImageCacheKey(figure: string, zoom: boolean): string {
-        return `${zoom ? 'zoom' : 'normal'}:${figure}`;
+    private static getImageCacheVariant(zoom: boolean, highResolution: boolean): string {
+        return `${highResolution ? 'high' : 'low'}:${zoom ? 'zoom' : 'normal'}`;
+    }
+
+    private static getAvatarImageCacheKey(figure: string, zoom: boolean, highResolution: boolean): string {
+        return `${this.getImageCacheVariant(zoom, highResolution)}:${figure}`;
     }
 }

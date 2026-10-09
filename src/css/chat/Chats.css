@@ -1961,4 +1961,5 @@
     max-width: none;
     max-height: none;
     transform: none;
+    image-rendering: auto;
 }

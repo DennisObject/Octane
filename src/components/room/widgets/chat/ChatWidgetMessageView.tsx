@@ -1,6 +1,6 @@
 import { GetRoomEngine, RoomChatSettings, RoomObjectCategory } from '@octane/renderer';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ChatBubbleMessage } from '../../../../api';
+import { ChatBubbleMessage, GetConfigurationValue } from '../../../../api';
 import { useOnClickChat } from '../../../../hooks';
 import { useSessionInfo } from '../../../../hooks/session/useSessionInfo';
 import { ChatTextSize, getChatFontScale, getChatTextSize } from '../chat-input/chatTextSize';
@@ -32,7 +32,11 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     useLayoutEffect(() => {
         chat.textSize ??= chatTextSize;
     }, [chat, chatTextSize]);
-    const [faceSize, setFaceSize] = useState({ width: 50, height: 50 });
+    const [faceSize, setFaceSize] = useState(() => {
+        const size = GetConfigurationValue<boolean>('zoom.enabled', false) ? 25 : 50;
+
+        return { width: size, height: size };
+    });
     const [defaultSkin, setDefaultSkin] = useState<string>(null);
     const fontScale = getChatFontScale(chatTextSize);
     const anonymous = isNativeAnonymousStyle(chat.styleId);
@@ -160,7 +164,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                 style={chat.styleId === 0 && defaultSkin ? { borderImageSource: `url(${defaultSkin})` } : undefined}
             >
                 <div className="user-container absolute overflow-hidden" style={{
-                    left: 13 - faceSize.width / 2,
+                    left: Math.trunc(13 - faceSize.width / 2),
                     width: faceSize.width,
                     height: `min(${faceSize.height}px, 100%)`,
                     top: `max(1px, calc(12px - min(${faceSize.height}px, 100%) / 2))`
@@ -170,7 +174,15 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                             alt=""
                             src={chat.imageUrl}
                             className="user-image absolute bottom-0 left-0 max-w-none"
-                            onLoad={(event) => setFaceSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+                            style={{ width: faceSize.width, height: faceSize.height }}
+                            onLoad={(event) => {
+                                const imageScale = chat.imageScale || 1;
+
+                                setFaceSize({
+                                    width: event.currentTarget.naturalWidth / imageScale,
+                                    height: event.currentTarget.naturalHeight / imageScale
+                                });
+                            }}
                         />
                     )}
                 </div>
