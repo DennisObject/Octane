@@ -274,14 +274,15 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
                     const i10 = i00 + 4;
                     const i01 = i00 + sourceWidth * 4;
                     const i11 = i01 + 4;
-                    const alpha = source[i00 + 3] * w00 + source[i10 + 3] * w10 + source[i01 + 3] * w01 + source[i11 + 3] * w11;
+                    // A neighbour outside the composite has weight 0 and is not read at all (reading past the array would give undefined, and undefined * 0 is NaN).
+                    const alpha = (w00 > 0 ? source[i00 + 3] * w00 : 0) + (w10 > 0 ? source[i10 + 3] * w10 : 0) + (w01 > 0 ? source[i01 + 3] * w01 : 0) + (w11 > 0 ? source[i11 + 3] * w11 : 0);
                     const target = (line * width + column) * 4;
 
                     if (alpha > 0) {
                         const scale = 255 / alpha;
 
                         for (let k = 0; k < 3; k++) {
-                            const value = source[i00 + k] * w00 + source[i10 + k] * w10 + source[i01 + k] * w01 + source[i11 + k] * w11;
+                            const value = (w00 > 0 ? source[i00 + k] * w00 : 0) + (w10 > 0 ? source[i10 + k] * w10 : 0) + (w01 > 0 ? source[i01 + k] * w01 : 0) + (w11 > 0 ? source[i11 + k] * w11 : 0);
 
                             output.data[target + k] = Math.min(255, Math.round(value * scale));
                         }
