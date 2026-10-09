@@ -62,7 +62,7 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
             {multiline ? <textarea {...props} onChange={(event) => onChange(event.target.value)} /> : <input {...props} type="text" onChange={(event) => onChange(event.target.value)} />}
             <div ref={overlayRef} aria-hidden="true" className={`octane-room-promote-edit__raster${showRaster ? '' : ' is-hidden'}`} style={{ top: y + 1, left: 1, width: 215, height: height - 3 }}>
                 <div style={{ position: 'absolute', left: -1, top: -1 }}>
-                    <NativeText background={isError ? 0xffe91b : 0xffffff} maxWidth={multiline ? 217 : undefined} text={value} textStyle="u_regular" />
+                    <NativeText background={isError ? 0xffe91b : 0xffffff} maxWidth={multiline ? 217 : undefined} nativeResolution text={value} textStyle="u_regular" />
                 </div>
             </div>
         </>

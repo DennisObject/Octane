@@ -30,3 +30,20 @@ const subscribe = (onChange: () => void) => {
 
 /** The native text scale, updated when the window moves to a display with another pixel ratio or zooms. */
 export const useNativeTextScale = (): number => useSyncExternalStore(subscribe, getNativeTextScale, () => 1);
+
+/**
+ * Sampling of a native-resolution raster (a text drawn at 1x that the browser enlarges). The native stage is enlarged without smoothing
+ * on an integer device pixel ratio and smoothed on a fractional one (launcher app init: imageRendering pixelated / auto), so the
+ * answer depends on integer-ness, not on the rounded raster scale, and it is re-read when the pixel ratio changes.
+ */
+export const getNativeTextSampling = (): 'pixelated' | 'auto' => {
+    const ratio = globalThis.devicePixelRatio;
+
+    return Number.isInteger(Number.isFinite(ratio) && ratio > 0 ? ratio : 1) ? 'pixelated' : 'auto';
+};
+
+const subscribeNothing = () => () => {};
+
+/** Only a native-resolution text follows the pixel ratio; every other text keeps its constant answer and subscribes to nothing. */
+export const useNativeTextSampling = (enabled: boolean): 'pixelated' | 'auto' => useSyncExternalStore(enabled ? subscribe : subscribeNothing, enabled ? getNativeTextSampling : () => 'pixelated', () => 'pixelated');
+

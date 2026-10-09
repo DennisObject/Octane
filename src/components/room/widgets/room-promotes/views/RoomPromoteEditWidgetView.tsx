@@ -56,6 +56,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                 <NativeText
                     background={0x377998}
                     className="octane-room-promote-edit__title"
+                    nativeResolution
                     overrides={{ color: 0xffffff }}
                     style={captionWidth === undefined ? undefined : { left: Math.floor((FRAME_WIDTH - 1 - captionWidth) / 2) - HEADER_INSET, transform: 'none' }}
                     text={caption}
@@ -64,7 +65,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
             </OctaneCardHeaderView>
             <div className="octane-room-promote-edit__client">
                 <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
-                    <NativeText background={0xe9e9e1} text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
+                    <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
                 </div>
                 {hasNameError && <div className="octane-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
                 <RoomPromoteField
@@ -78,7 +79,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     onChange={setName}
                 />
                 <div className="octane-room-promote-edit__label" style={{ top: 40 }}>
-                    <NativeText background={0xe9e9e1} text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
+                    <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
                 </div>
                 <RoomPromoteField
                     height={88}
