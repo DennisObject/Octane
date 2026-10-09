@@ -39,6 +39,9 @@ import {
 // BadgeLeaderboardDataServer: a chunk older than a minute is requested again.
 const STALE_AFTER_MS = 60000;
 const DEFAULT_TARGET: LeaderboardTarget = { type: 0, rarity: -1, page: 0 };
+// hidden_dropdown: 19px per option inside 6px of padding and border, 139px for the default seven options and one row taller with the uncommon board.
+const MENU_ITEM_HEIGHT = 19;
+const MENU_CHROME = 6;
 
 const text = (key: string, parameters: string[] = null, replacements: string[] = null) =>
     localizeWithFallback(key, LEADERBOARD_TEXT_FALLBACKS[key] ?? key, parameters, replacements);
@@ -231,7 +234,9 @@ const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }
 export const BadgeLeaderboardView: FC<{}> = () =>
 {
     const [isVisible, setIsVisible] = useState(false);
-    const [target, setTarget] = useState<LeaderboardTarget>(DEFAULT_TARGET);
+    // The board asked for (a link, the menu or the pager); it is normalized against the rarities known now, so a link that names the uncommon board before the
+    // response says the hotel has one shows it as soon as that is known.
+    const [request, setRequest] = useState<{ type: number; rarity: number; page: number }>(DEFAULT_TARGET);
     const [version, setVersion] = useState(0);
     const [loadError, setLoadError] = useState<string>(null);
     const [, setLoadedAt] = useState(0);
@@ -242,17 +247,18 @@ export const BadgeLeaderboardView: FC<{}> = () =>
     const response = getCachedBadgeLeaderboard();
     const hasUncommon = GetConfigurationValue<boolean>('badge_rarity.uncommon', false) || (response?.leaderboards?.rarity?.uncommon?.totalPlayers ?? 0) > 0;
     const supported = useMemo(() => getSupportedRarities(hasUncommon), [hasUncommon]);
+    const target = useMemo(() => normalizeTarget(request.type, request.rarity, request.page, supported), [request, supported]);
 
     // Opening, switching category and paging all go through native showBadgeLeaderboard(type, rarity, page).
     const show = useCallback(
         (type: number, rarity: number, page: number) =>
         {
-            setTarget(normalizeTarget(type, rarity, page, supported));
+            setRequest({ type, rarity, page });
             setIsMenuOpen(false);
             setIsVisible(true);
             setVersion((value) => value + 1);
         },
-        [supported]
+        []
     );
 
     useEffect(() =>
@@ -442,7 +448,7 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                         <span style={{ backgroundImage: `url(${leaderboardButtonCloseSwf})` }} />
                     </button>
                     {isMenuOpen && (
-                        <div className="octane-badge-leaderboard__menu" role="listbox" onPointerDown={(event) => event.stopPropagation()}>
+                        <div className="octane-badge-leaderboard__menu" role="listbox" style={{ height: MENU_CHROME + options.length * MENU_ITEM_HEIGHT }} onPointerDown={(event) => event.stopPropagation()}>
                             {options.map((option, index) => (
                                 <button
                                     key={`${option.type}-${option.rarity}`}
