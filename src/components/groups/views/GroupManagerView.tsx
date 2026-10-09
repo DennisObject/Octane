@@ -1,14 +1,23 @@
 import { GroupInformationEvent, GroupSettingsEvent, HabboGroupDeactivatedMessageEvent } from '@octane/renderer';
 import { FC, useState } from 'react';
 import { GroupBadgePart, IGroupData, LocalizeText } from '../../../api';
-import { Column, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView, Text } from '../../../common';
 import { useMessageEvent } from '../../../hooks';
+import { GroupManagementWindow } from './GroupManagementWindow';
+import { GroupText } from './GroupNativeLayout';
 import { GroupTabBadgeView } from './tabs/GroupTabBadgeView';
 import { GroupTabColorsView } from './tabs/GroupTabColorsView';
 import { GroupTabIdentityView } from './tabs/GroupTabIdentityView';
 import { GroupTabSettingsView } from './tabs/GroupTabSettingsView';
 
 const TABS: number[] = [1, 2, 3, 5];
+
+// edit_guild_tab_context sits at (-6, 89); its tab_buttons scale to their captions: [x, width, caption shift] as drawn by the v75 client.
+const TAB_RECTS: [number, number, number][] = [
+    [0, 78, 2],
+    [77, 77, 1],
+    [152, 77, 1],
+    [227, 82, 2]
+];
 
 export const GroupManagerView: FC<{}> = (props) => {
     const [currentTab, setCurrentTab] = useState<number>(1);
@@ -84,38 +93,32 @@ export const GroupManagerView: FC<{}> = (props) => {
     if (!groupData || groupData.groupId <= 0) return null;
 
     return (
-        <OctaneCardView frameStyle={3} className="octane-groups-window octane-group-manager w-[560px]">
-            <OctaneCardHeaderView headerText={LocalizeText('group.window.title')} onCloseClick={onClose} />
-            <OctaneCardTabsView>
-                {TABS.map((tab) => {
-                    return (
-                        <OctaneCardTabsItemView key={tab} isActive={currentTab === tab} onClick={() => changeTab(tab)}>
-                            {LocalizeText(`group.edit.tab.${tab}`)}
-                        </OctaneCardTabsItemView>
-                    );
-                })}
-            </OctaneCardTabsView>
-            <OctaneCardContentView className="octane-groups-content">
-                <div className="octane-groups-tab-header items-center gap-2">
-                    <div className={`octane-group-tab-image tab-${currentTab}`} />
-                    <Column grow gap={0}>
-                        <Text bold fontSize={4}>
-                            {LocalizeText(`group.edit.tabcaption.${currentTab}`)}
-                        </Text>
-                        <Text>{LocalizeText(`group.edit.tabdesc.${currentTab}`)}</Text>
-                    </Column>
+        <GroupManagementWindow
+            caption={LocalizeText(`group.edit.tabcaption.${currentTab}`)}
+            description={LocalizeText(`group.edit.tabdesc.${currentTab}`)}
+            headerImageStep={currentTab}
+            tabs={
+                <div className="octane-group-native__tabs">
+                    {TABS.map((tab, index) => (
+                        <button
+                            key={tab}
+                            className={`octane-group-native__tab${currentTab === tab ? ' is-selected' : ''}`}
+                            style={{ left: TAB_RECTS[index][0], width: TAB_RECTS[index][1], paddingLeft: TAB_RECTS[index][2] * 2 }}
+                            type="button"
+                            onClick={() => changeTab(tab)}
+                        >
+                            <GroupText blend="multiply" className="is-static" text={LocalizeText(`group.edit.tab.${tab}`)} textStyle="button_tab" x={0} y={0} />
+                        </button>
+                    ))}
                 </div>
-                <Column grow overflow="hidden">
-                    {currentTab === 1 && (
-                        <GroupTabIdentityView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />
-                    )}
-                    {currentTab === 2 && (
-                        <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} skipDefault={true} />
-                    )}
-                    {currentTab === 3 && <GroupTabColorsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
-                    {currentTab === 5 && <GroupTabSettingsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
-                </Column>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            }
+            uniqueKey="group-manager"
+            onClose={onClose}
+        >
+            {currentTab === 1 && <GroupTabIdentityView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
+            {currentTab === 2 && <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} skipDefault={true} />}
+            {currentTab === 3 && <GroupTabColorsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
+            {currentTab === 5 && <GroupTabSettingsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
+        </GroupManagementWindow>
     );
 };

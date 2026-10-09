@@ -4,7 +4,6 @@ import {
     GroupAdminGiveComposer,
     GroupAdminTakeComposer,
     GroupConfirmMemberRemoveEvent,
-    GroupConfirmRemoveMemberComposer,
     GroupInformationComposer,
     GroupInformationEvent,
     GroupMemberParser,
@@ -21,7 +20,7 @@ import {
     ILinkEventTracker,
     RemoveLinkEventTracker
 } from '@octane/renderer';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetUserProfile, LocalizeText, SendMessageComposer } from '../../../api';
 import {
@@ -36,7 +35,7 @@ import {
     OctaneCardView,
     Text
 } from '../../../common';
-import { useMessageEvent, useNotification } from '../../../hooks';
+import { useGroupMemberRemoval, useMessageEvent, useNotification } from '../../../hooks';
 import { classNames } from '../../../layout';
 
 export const GroupMembersView: FC<{}> = (props) => {
@@ -49,6 +48,15 @@ export const GroupMembersView: FC<{}> = (props) => {
     const [isOwner, setIsOwner] = useState(false);
     const pendingRemoval = useRef<{ groupId: number; userId: number; name: string }>(null);
     const { showConfirm = null } = useNotification();
+    const { request: requestMemberRemoval, claimReply, isCurrentSession } = useGroupMemberRemoval();
+    const groupIdRef = useRef<number>(-1);
+
+    // Read by the removal confirmation callback; refreshed before it can run.
+    useLayoutEffect(() =>
+    {
+        groupIdRef.current = groupId;
+    });
+
     const pendingActionsRef = useRef<Set<string>>(new Set());
 
     const getRankDescription = (member: GroupMemberParser) => {
@@ -92,8 +100,11 @@ export const GroupMembersView: FC<{}> = (props) => {
         SendMessageComposer(new GroupMembershipAcceptComposer(membersData.groupId, member.id));
     };
 
+    // The server answers a removal request only for these members: never the owner or oneself, and an administrator only when the owner asks.
+    const canRemoveMember = (member: GroupMemberParser) => !!membersData?.admin && member.rank !== GroupRank.OWNER && member.id !== GetSessionDataManager().userId && (member.rank !== GroupRank.ADMIN || isOwner);
+
     const removeMemberOrDeclineMembership = (member: GroupMemberParser) => {
-        if (!membersData.admin) return;
+        if (!canRemoveMember(member)) return;
 
         const key = `remove_${member.id}`;
         if (pendingActionsRef.current.has(key)) return;
@@ -106,8 +117,8 @@ export const GroupMembersView: FC<{}> = (props) => {
             return;
         }
 
-        pendingRemoval.current = { groupId: membersData.groupId, userId: member.id, name: member.name };
-        SendMessageComposer(new GroupConfirmRemoveMemberComposer(membersData.groupId, member.id));
+        // One outstanding GroupConfirmRemoveMember for all group windows; when another is still unresolved nothing is sent.
+        if (requestMemberRemoval(membersData.groupId, member.id)) pendingRemoval.current = { groupId: membersData.groupId, userId: member.id, name: member.name };
     };
 
     useMessageEvent<GroupMembersEvent>(GroupMembersEvent, (event) => {
@@ -142,11 +153,14 @@ export const GroupMembersView: FC<{}> = (props) => {
 
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) => {
         const parser = event.getParser();
+        const owned = claimReply(parser.userId);
         const removal = pendingRemoval.current;
 
-        if (!removal || removal.groupId !== groupId || removal.userId !== parser.userId) return;
+        if (!owned || !removal || removal.groupId !== owned.groupId || removal.groupId !== groupId || removal.userId !== owned.userId) return;
 
         pendingRemoval.current = null;
+
+        let isSent = false;
 
         showConfirm(
             LocalizeText(
@@ -155,6 +169,10 @@ export const GroupMembersView: FC<{}> = (props) => {
                 [removal.name, parser.furnitureCount.toString()]
             ),
             () => {
+                // Valid only while this window still shows that group for the same signed-in user.
+                if (isSent || removal.groupId !== groupIdRef.current || !isCurrentSession(owned)) return;
+
+                isSent = true;
                 SendMessageComposer(new GroupRemoveMemberComposer(removal.groupId, removal.userId));
             },
             null
@@ -199,12 +217,13 @@ export const GroupMembersView: FC<{}> = (props) => {
     }, [groupId, levelId, pageId, searchQuery]);
 
     useEffect(() => {
+        pendingRemoval.current = null;
+
         if (groupId === -1) return;
 
         setMembersData(null);
         setTotalPages(0);
         setSearchQuery('');
-        pendingRemoval.current = null;
         setIsOwner(false);
         SendMessageComposer(new GroupInformationComposer(groupId, false));
     }, [groupId]);
@@ -284,7 +303,7 @@ export const GroupMembersView: FC<{}> = (props) => {
                                             />
                                         </Flex>
                                     )}
-                                    {membersData.admin && member.rank !== GroupRank.OWNER && member.id !== GetSessionDataManager().userId && (
+                                    {canRemoveMember(member) && (
                                         <Flex alignItems="center">
                                             <div
                                                 className="cursor-pointer octane-friends-spritesheet icon-deny"

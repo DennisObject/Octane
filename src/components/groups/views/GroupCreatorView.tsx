@@ -1,8 +1,11 @@
 import { GroupBadgePartsComposer, GroupBuyComposer, GroupBuyDataComposer, GroupBuyDataEvent } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { HasHabboClub, IGroupData, LocalizeText, SendMessageComposer } from '../../../api';
-import { Button, Column, Flex, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../common';
+import { CreateLinkEvent, GroupBadgePart, HasHabboClub, IGroupData, LocalizeText, SendMessageComposer } from '../../../api';
+import creditIcon from '../../../assets/images/groups/native/gcreate_icon_credit.png';
+import vipIcon from '../../../assets/images/groups/native/icon-vip-square.png';
 import { useMessageEvent } from '../../../hooks';
+import { flatText, GroupBox, GroupButton, GroupText } from './GroupNativeLayout';
+import { GroupManagementWindow } from './GroupManagementWindow';
 import { GroupTabBadgeView } from './tabs/GroupTabBadgeView';
 import { GroupTabColorsView } from './tabs/GroupTabColorsView';
 import { GroupTabCreatorConfirmationView } from './tabs/GroupTabCreatorConfirmationView';
@@ -11,8 +14,6 @@ import { GroupTabIdentityView } from './tabs/GroupTabIdentityView';
 interface GroupCreatorViewProps {
     onClose: () => void;
 }
-
-const TABS: number[] = [1, 2, 3, 4];
 
 let isBuyingGroup = false;
 
@@ -23,6 +24,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     const [groupData, setGroupData] = useState<IGroupData>(null);
     const [availableRooms, setAvailableRooms] = useState<{ id: number; name: string }[]>(null);
     const [purchaseCost, setPurchaseCost] = useState<number>(0);
+    const hasClub = HasHabboClub();
 
     const onCloseClose = () => {
         setCloseAction(null);
@@ -34,18 +36,13 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     const buyGroup = () => {
         if (!groupData || isBuyingGroup) return;
 
+        // The badge step does not let a badge without a base through; a list that still lacks one is never sent.
+        const badge = GroupBadgePart.serialize(groupData.groupBadgeParts);
+
+        if (!badge) return;
+
         isBuyingGroup = true;
         setTimeout(() => (isBuyingGroup = false), 5000);
-
-        const badge = [];
-
-        groupData.groupBadgeParts.forEach((part) => {
-            if (part.code) {
-                badge.push(part.key);
-                badge.push(part.color);
-                badge.push(part.position);
-            }
-        });
 
         SendMessageComposer(
             new GroupBuyComposer(
@@ -65,7 +62,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
         }
 
         if (currentTab === 1) {
-            onClose();
+            onCloseClose();
 
             return;
         }
@@ -76,12 +73,6 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     const nextStep = () => {
         if (closeAction && closeAction.action) {
             if (!closeAction.action()) return;
-        }
-
-        if (currentTab === 4) {
-            buyGroup();
-
-            return;
         }
 
         setCurrentTab((value) => (value === 4 ? value : value + 1));
@@ -120,67 +111,54 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     if (!groupData) return null;
 
     return (
-        <OctaneCardView frameStyle={3} className="octane-groups-window octane-group-creator h-[355px] w-[390px]" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('group.create.title')} onCloseClick={onCloseClose} />
-            <OctaneCardContentView className="octane-groups-content">
-                <div className="flex items-center justify-center creator-tabs">
-                    {TABS.map((tab, index) => {
-                        return (
-                            <Flex
-                                key={index}
-                                center
-                                className={`relative -ml-[6px] bg-[url('@/assets/images/groups/creator_tabs.png')] bg-no-repeat transition-[transform,filter,opacity] duration-150 ${tab === 1 ? 'w-[84px] h-[24px] bg-position-[0px_0px]' : tab === 4 ? 'w-[133px] h-[28px] bg-position-[0px_-104px]' : 'w-[83px] h-[24px] bg-position-[0px_-52px]'} ${currentTab === tab ? 'active z-[1] scale-[1.05] brightness-110 saturate-150 drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]' : 'opacity-60 saturate-50'}`}
-                            >
-                                <Text variant="white">{LocalizeText(`group.create.steplabel.${tab}`)}</Text>
-                            </Flex>
-                        );
-                    })}
-                </div>
-                <Column overflow="hidden">
-                    <div className="flex items-center gap-2">
-                        <div
-                            className={`bg-no-repeat w-[122px] h-[68px] bg-[url('@/assets/images/groups/creator_images.png')] ${currentTab === 1 && 'bg-position-[0px_0px] w-[99px]! h-[50px]!'}
-                        ${currentTab == 2 && 'bg-position-[-99px_0px]! w-[98px]! h-[62px]!'}  ${currentTab === 3 && 'bg-position-[0px_-50px]! w-[96px]! h-[45px]!'} ${currentTab === 4 || (currentTab === 5 && 'bg-position-[0px_-95px]! w-[114px]! h-[61px]!')}  `}
+        <GroupManagementWindow
+            caption={LocalizeText(`group.create.stepcaption.${currentTab}`)}
+            description={LocalizeText(`group.create.stepdesc.${currentTab}`)}
+            headerImageStep={currentTab}
+            step={currentTab}
+            uniqueKey="group-creator"
+            onClose={onCloseClose}
+        >
+            {currentTab === 1 && (
+                <GroupTabIdentityView availableRooms={availableRooms} groupData={groupData} isCreator={true} setCloseAction={setCloseAction} setGroupData={setGroupData} />
+            )}
+            {currentTab === 2 && <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
+            {currentTab === 3 && <GroupTabColorsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
+            {currentTab === 4 && <GroupTabCreatorConfirmationView groupData={groupData} purchaseCost={purchaseCost} setGroupData={setGroupData} />}
+            <div className="octane-group-native__footer">
+                <GroupText
+                    className="is-link"
+                    overrides={flatText(12, { underline: true })}
+                    text={LocalizeText(currentTab === 1 ? 'generic.cancel' : 'group.create.previousstep')}
+                    x={11}
+                    y={430}
+                    onClick={previousStep}
+                />
+                {currentTab === 4 && !hasClub && (
+                    <GroupBox height={39} kind="red" width={248} x={126} y={364} onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
+                        <img alt="" className="octane-group-native__vip-icon" draggable={false} src={vipIcon} />
+                        <GroupText background={0xcc0000} overrides={flatText(12, { bold: true, color: 0xffffff })} text={LocalizeText('group.create.confirm.viprequired')} x={38} y={4} />
+                        <GroupText background={0xcc0000} overrides={flatText(12, { color: 0xffffff })} text={LocalizeText('group.create.confirm.getvip')} x={38} y={20} />
+                    </GroupBox>
+                )}
+                {currentTab === 4 && (
+                    <GroupBox height={39} kind={hasClub ? 'yellow' : 'gray'} width={248} x={126} y={410}>
+                        <img alt="" className="octane-group-native__buy-icon" draggable={false} src={creditIcon} />
+                        <GroupText
+                            background={hasClub ? 0xffc300 : 0xaaaaaa}
+                            height={34}
+                            overrides={flatText(13)}
+                            text={LocalizeText('group.create.confirm.buyinfo', ['amount'], [purchaseCost.toString()])}
+                            width={131}
+                            wrap
+                            x={37}
+                            y={3}
                         />
-                        <Column grow gap={0}>
-                            <Text bold fontSize={4}>
-                                {LocalizeText(`group.create.stepcaption.${currentTab}`)}
-                            </Text>
-                            <Text>{LocalizeText(`group.create.stepdesc.${currentTab}`)}</Text>
-                        </Column>
-                    </div>
-                    <Column overflow="hidden">
-                        {currentTab === 1 && (
-                            <GroupTabIdentityView
-                                availableRooms={availableRooms}
-                                groupData={groupData}
-                                isCreator={true}
-                                setCloseAction={setCloseAction}
-                                setGroupData={setGroupData}
-                            />
-                        )}
-                        {currentTab === 2 && <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
-                        {currentTab === 3 && <GroupTabColorsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
-                        {currentTab === 4 && <GroupTabCreatorConfirmationView groupData={groupData} purchaseCost={purchaseCost} setGroupData={setGroupData} />}
-                    </Column>
-                    <div className="octane-groups-footer flex justify-between">
-                        <Button className="octane-groups-button" variant="link" onClick={previousStep}>
-                            {LocalizeText(currentTab === 1 ? 'generic.cancel' : 'group.create.previousstep')}
-                        </Button>
-                        <Button
-                            size={null}
-                            className="octane-groups-button octane-groups-button--primary"
-                            disabled={currentTab === 4 && !HasHabboClub()}
-                            variant={currentTab === 4 ? (HasHabboClub() ? 'success' : 'danger') : 'primary'}
-                            onClick={nextStep}
-                        >
-                            {LocalizeText(
-                                currentTab === 4 ? (HasHabboClub() ? 'group.create.confirm.buy' : 'group.create.confirm.viprequired') : 'group.create.nextstep'
-                            )}
-                        </Button>
-                    </div>
-                </Column>
-            </OctaneCardContentView>
-        </OctaneCardView>
+                        <GroupButton disabled={!hasClub} height={29} labelShift={2} label={LocalizeText('group.create.confirm.buy')} width={72} x={172} y={5} onClick={buyGroup} />
+                    </GroupBox>
+                )}
+                {currentTab < 4 && <GroupButton height={29} label={LocalizeText('group.create.nextstep')} width={120} x={256} y={423} onClick={nextStep} />}
+            </div>
+        </GroupManagementWindow>
     );
 };
