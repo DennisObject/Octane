@@ -144,9 +144,11 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-/* The native window shadow bitmap (NativeFrameShadow): behind the window and never a pointer target; its image-rendering follows the device pixel ratio in the component. */
+/* The native window shadow bitmap (NativeFrameShadow): always behind the window (the draggable wrapper is a stacking context) and never a pointer target;
+   its image-rendering follows the device pixel ratio in the component. */
 .octane-native-frame-shadow {
     position: absolute;
+    z-index: -1;
     pointer-events: none;
 }
 

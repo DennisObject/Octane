@@ -4,18 +4,8 @@ import { FC, RefObject, useEffect, useRef } from 'react';
 // the window is extracted at resolution 1, drawn once with shadowBlur/shadowOffset set and the result is put under the window as a bitmap.
 // The window image is drawn into that bitmap too, so its anti-aliased frame pixels are composited twice. The routine below is that function.
 // frame_3 (2119_frame_3_xml): DropShadowFilter distance 4, angle 45, color 0, alpha 0.35, blurX 4, blurY 4; strength and quality are the defaults.
-export interface NativeShadowFilter {
-    distance: number;
-    angle: number;
-    color: number;
-    alpha: number;
-    blurX: number;
-    blurY: number;
-    strength: number;
-    quality: number;
-}
-
-export const FRAME_3_SHADOW: NativeShadowFilter = { distance: 4, angle: 45, color: 0, alpha: 0.35, blurX: 4, blurY: 4, strength: 1, quality: 1 };
+// The routine is fixed to this one proven filter and only reachable through NativeFrameShadow, which bounds the frame size before anything is allocated.
+const FRAME_3_SHADOW = { distance: 4, angle: 45, color: 0, alpha: 0.35, blurX: 4, blurY: 4, strength: 1, quality: 1 };
 
 // habbo_skin_frame_3: 10px corners, 33px title and 10px footer cut from frame-ubuntu-3.png, the same slices OctaneCardView.css gives border-image.
 const FRAME_URL = new URL('../../assets/images/habbo-skin/slices/frame-ubuntu-3.png', import.meta.url).href;
@@ -34,7 +24,7 @@ const shadowColor = (color: number, alpha: number): string => {
     return `rgba(${(rgb >>> 16) & 255}, ${(rgb >>> 8) & 255}, ${rgb & 255}, ${Math.max(0, Math.min(1, alpha))})`;
 };
 
-const shadowPads = (filter: NativeShadowFilter) => {
+const shadowPads = (filter: typeof FRAME_3_SHADOW) => {
     const angle = (filter.angle * Math.PI) / 180;
     const blur = Math.max(0, Math.max(filter.blurX, filter.blurY));
     const offsetX = Math.cos(angle) * filter.distance;
@@ -51,8 +41,20 @@ const shadowPads = (filter: NativeShadowFilter) => {
     };
 };
 
-// Draws `source` with its shadow into a new canvas; `left`/`top` are where the source lands inside it.
-export const renderNativeShadow = (source: HTMLCanvasElement, filter: NativeShadowFilter): { canvas: HTMLCanvasElement; left: number; top: number } | null => {
+// Whether a frame of this size may be drawn: whole pixels from the frame minimum up, with the shadow bitmap under the area limit.
+const isFrameSizeSupported = (width: number, height: number): boolean => {
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < MIN_WIDTH || height < MIN_HEIGHT) return false;
+
+    const { left, top, right, bottom } = shadowPads(FRAME_3_SHADOW);
+
+    return (width + left + right) * (height + top + bottom) <= MAX_SPRITE_AREA;
+};
+
+// Draws `source` (a frame raster) with its shadow into a new canvas; `left`/`top` are where the source lands inside it.
+const renderNativeShadow = (source: HTMLCanvasElement): { canvas: HTMLCanvasElement; left: number; top: number } | null => {
+    if (!isFrameSizeSupported(source.width, source.height)) return null;
+
+    const filter = FRAME_3_SHADOW;
     const width = Math.max(1, Math.ceil(source.width || 1));
     const height = Math.max(1, Math.ceil(source.height || 1));
     const passes = Math.max(1, Math.round(filter.quality * Math.max(1, filter.strength)));
@@ -103,6 +105,8 @@ const loadFrameImage = (): Promise<HTMLImageElement> => {
 
 // The frame raster at width x height: fixed corners, the stretched edges and the opaque fill, like border-image-slice "33 10 10 10 fill".
 const drawFrame = (image: HTMLImageElement, width: number, height: number): HTMLCanvasElement | null => {
+    if (!isFrameSizeSupported(width, height)) return null;
+
     const canvas = document.createElement('canvas');
 
     canvas.width = width;
@@ -182,13 +186,12 @@ export const NativeFrameShadow: FC<NativeFrameShadowProps> = ({ targetRef, onRea
             const width = target.offsetWidth;
             const height = target.offsetHeight;
             const key = `${width}x${height}`;
+            // Every report invalidates what is still pending, including one that returns to the size already drawn.
+            const current = ++request;
 
             if (key === drawnKey) return;
 
-            const current = ++request;
-            const { left, top, right, bottom } = shadowPads(FRAME_3_SHADOW);
-
-            if (!Number.isFinite(width) || !Number.isFinite(height) || width < MIN_WIDTH || height < MIN_HEIGHT || (width + left + right) * (height + top + bottom) > MAX_SPRITE_AREA) {
+            if (!isFrameSizeSupported(width, height)) {
                 clear();
 
                 return;
@@ -200,7 +203,7 @@ export const NativeFrameShadow: FC<NativeFrameShadowProps> = ({ targetRef, onRea
                     if (disposed || current !== request) return;
 
                     const frame = drawFrame(image, width, height);
-                    const shadow = frame ? renderNativeShadow(frame, FRAME_3_SHADOW) : null;
+                    const shadow = frame ? renderNativeShadow(frame) : null;
                     const context = shadow ? canvas.getContext('2d', CANVAS_OPTIONS) : null;
 
                     if (!shadow || !context) {
@@ -239,6 +242,8 @@ export const NativeFrameShadow: FC<NativeFrameShadowProps> = ({ targetRef, onRea
             disposed = true;
             observer.disconnect();
             window.removeEventListener('resize', onDeviceChange);
+            // The canvas goes away with this effect, so the caller's fallback shadow must come back until a new one is drawn.
+            onReadyChange(false);
         };
     }, [targetRef, onReadyChange]);
 
