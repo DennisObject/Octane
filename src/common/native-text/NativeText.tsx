@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from './Air32NativeTextRenderer';
 import { renderCanvasSpacedText, supportsCanvasSpacedText } from './CanvasSpacedText';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from './NativeFont';
@@ -84,7 +84,10 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
     const scale = nativeResolution ? 1 : displayScale;
     const onRasterRef = useRef(onRaster);
 
-    onRasterRef.current = onRaster;
+    // Refreshed before the render effect below runs, like the other callback refs of the code base (never written during render).
+    useLayoutEffect(() => {
+        onRasterRef.current = onRaster;
+    });
 
     useEffect(() => {
         let disposed = false;

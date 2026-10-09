@@ -32,6 +32,8 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     const [surface, setSurface] = useState<RoomPromoteEditSurfaceState>({ drawn: false, name: null, description: null });
     // The fractional-DPR surface exists only at a fractional device pixel ratio; integer ratios keep the DOM window and the native shadow canvas.
     const isFractional = useNativeTextSampling(true) === 'auto';
+    // A drawn surface counts only while the ratio is still fractional, so an integer ratio never hides the DOM window for a render with the surface already gone.
+    const isSurfaceDrawn = isFractional && surface.drawn;
     const lastSaved = useRef<string>(JSON.stringify([eventName, eventDescription]));
     const caption = LocalizeText('navigator.eventsettings.editcaption');
     // Measured against the official window: for this 241px frame the caption lands one pixel left of the centred field (field = AIR field width, floor(textWidth) + 5), i.e. at floor((240 - field) / 2).
@@ -41,7 +43,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     const nameFill: RoomPromoteFieldFill = hasNameError ? 'yellow' : 'white';
     // A field hides its own browser text only while the surface really shows exactly this text on this fill.
     const ownsText = (receipt: RoomPromoteFieldReceipt | null, value: string, fill: RoomPromoteFieldFill): boolean | undefined =>
-        surface.drawn ? !!receipt && receipt.fits && receipt.text === value && receipt.fill === fill : undefined;
+        isSurfaceDrawn ? !!receipt && receipt.fits && receipt.text === value && receipt.fill === fill : undefined;
 
     const save = (nextName: string, nextDescription: string) => {
         if (nextName.trim().length < MIN_NAME_LENGTH) {
@@ -64,8 +66,8 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     return (
         <OctaneCardView
             aria-label={caption}
-            className={`octane-room-promote-edit${surface.drawn ? ' is-native-surface' : ''}`}
-            dragStyle={surface.drawn ? { filter: 'none' } : undefined}
+            className={`octane-room-promote-edit${isSurfaceDrawn ? ' is-native-surface' : ''}`}
+            dragStyle={isSurfaceDrawn ? { filter: 'none' } : undefined}
             frameStyle={3}
             isResizable={false}
             nativeShadow

@@ -103,7 +103,7 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
     useEffect(() => {
         const canvas = canvasRef.current;
         const card = canvas?.parentElement;
-        const wrapper = canvas?.closest('.draggable-window') as HTMLElement | null;
+        const wrapper = canvas?.closest<HTMLElement>('.draggable-window') ?? null;
 
         if (!canvas || !card) return;
 
@@ -347,6 +347,17 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             if (!bake()) hide(true);
         };
 
+        // Only a raster the committed scene paints right now repaints; the others (the focused field's text while it is typed, the fill that is not showing) are stored for the next paint.
+        const isPainted = (key: SourceKey): boolean => {
+            const p = latest.current;
+
+            if (key === 'nameWhite') return p.focusedField !== 'name' && !p.hasNameError;
+            if (key === 'nameYellow') return p.focusedField !== 'name' && p.hasNameError;
+            if (key === 'descriptionWhite') return p.focusedField !== 'description';
+
+            return true;
+        };
+
         engine.current = {
             repaint: (sync, force) => repaint(sync, force),
             setRaster: (key) => (next) => {
@@ -354,6 +365,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
                 if (next) rasters.set(key, next);
                 else rasters.delete(key);
+
+                if (!isPainted(key)) return;
 
                 // A raster arriving is async work outside React; one being dropped happens inside an effect, where the change is batched.
                 repaint(next !== null);
@@ -415,6 +428,21 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         resizes?.observe(card);
         window.addEventListener('resize', rebake);
 
+        // A move between two fractional ratios changes neither the page size, nor the wrapper style, nor the card: only the resolution media query says so.
+        let ratioQuery: MediaQueryList | null = null;
+        const onRatioChange = () => {
+            rebake();
+            listenRatio();
+        };
+        const listenRatio = () => {
+            if (disposed || typeof matchMedia !== 'function') return;
+
+            ratioQuery = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+            ratioQuery.addEventListener('change', onRatioChange, { once: true });
+        };
+
+        listenRatio();
+
         Promise.all([renderFrame3WithShadow(WIDTH, HEIGHT), Promise.all(Object.values(CLOSE_URLS).map(loadImage))])
             .then(([renderedFrame, images]) => {
                 if (disposed) return;
@@ -436,6 +464,7 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             document.removeEventListener('lostpointercapture', release, true);
             window.removeEventListener('blur', onLeaveWindow);
             window.removeEventListener('resize', rebake);
+            ratioQuery?.removeEventListener('change', onRatioChange);
             mutations?.disconnect();
             resizes?.disconnect();
             // The DOM visuals and the CSS shadow must return with the surface gone.
