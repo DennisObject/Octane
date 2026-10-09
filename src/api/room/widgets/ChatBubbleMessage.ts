@@ -22,6 +22,7 @@ export class ChatBubbleMessage {
     public showTranslation: boolean = false;
     public translationDetectedLanguage: string = '';
     public translationTargetLanguage: string = '';
+    public imageScale: number = 1;
 
     private _top: number = 0;
     private _left: number = 0;

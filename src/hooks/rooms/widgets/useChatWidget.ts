@@ -198,7 +198,7 @@ const useChatWidgetState = () => {
                     imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 32, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
                     break;
                 case RoomObjectType.USER:
-                    imagePromise = ChatBubbleUtilities.getUserImage(figure).catch(() => null);
+                    imagePromise = ChatBubbleUtilities.getUserImage(figure, true).catch(() => null);
                     break;
                 case RoomObjectType.RENTABLE_BOT:
                 case RoomObjectType.BOT:
@@ -284,6 +284,7 @@ const useChatWidgetState = () => {
             imageUrl,
             color
         );
+        if (userType === RoomObjectType.USER) chatMessage.imageScale = 2;
         captureNativeChatCreation(chatMessage, chatSettings.mode);
         // The renderer adds bubbleWidthOverride to the chat event in Octane-Renderer#212; until that
         // lands the published event has no such field, so it is read as optional.
@@ -357,8 +358,14 @@ const useChatWidgetState = () => {
 
                     return [...prevValue];
                 });
+            }).catch(() => {});
+        }
 
-                if (chatEntryId >= 0) updateChatEntry(chatEntryId, { imageUrl: resolvedImageUrl });
+        if (chatEntryId >= 0) {
+            void ChatBubbleUtilities.getUserImage(userData.figure).then((historyImageUrl) => {
+                if (!historyImageUrl || isDisposed.current || roomToken !== roomTokenRef.current) return;
+
+                updateChatEntry(chatEntryId, { imageUrl: historyImageUrl });
             }).catch(() => {});
         }
 
