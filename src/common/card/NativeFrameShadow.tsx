@@ -148,7 +148,8 @@ const drawFrame = (image: HTMLImageElement, width: number, height: number): HTML
  * The frame-3 window frame raster and its native shadow sprite, for one fixed contract and a size guard: `sprite` is the shadow with the frame drawn into it
  * (as the native routine does), `frame` the window frame alone, `left`/`top` where the window lands inside the sprite. Null when the size is not supported or a canvas is missing.
  */
-export const renderFrame3WithShadow = async (width: number, height: number): Promise<{ sprite: HTMLCanvasElement; frame: HTMLCanvasElement; left: number; top: number } | null> => {
+export const renderFrame3WithShadow = async (width: number, height: number): Promise<{ sprite: HTMLCanvasElement; frame: HTMLCanvasElement; left: number; top: number } | null> =>
+{
     if (!isFrameSizeSupported(width, height)) return null;
 
     const image = await loadFrameImage();

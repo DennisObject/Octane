@@ -55,7 +55,8 @@ type CloseState = keyof typeof CLOSE_URLS;
 type SourceKey = 'caption' | 'nameLabel' | 'descriptionLabel' | 'nameWhite' | 'nameYellow' | 'descriptionWhite';
 
 const loadImage = (url: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, reject) =>
+    {
         const image = new Image();
 
         image.onload = () => resolve(image);
@@ -63,7 +64,8 @@ const loadImage = (url: string): Promise<HTMLImageElement> =>
         image.src = url;
     });
 
-const createCanvas = (width: number, height: number): [HTMLCanvasElement, CanvasRenderingContext2D] | null => {
+const createCanvas = (width: number, height: number): [HTMLCanvasElement, CanvasRenderingContext2D] | null =>
+{
     const canvas = document.createElement('canvas');
 
     canvas.width = width;
@@ -84,7 +86,8 @@ const sameState = (a: RoomPromoteEditSurfaceState, b: RoomPromoteEditSurfaceStat
  * Mounted only at a fractional ratio. The inputs stay DOM elements: the surface paints boxes and rasters from committed props only, and reports per field
  * what it painted (text, fill, fit) so a field hides its own browser text only while the surface really shows that text.
  */
-export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) => {
+export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =>
+{
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const latest = useRef(props);
     const engine = useRef<{ repaint: (sync: boolean, force?: boolean) => void; setRaster: (key: SourceKey) => (raster: NativeTextRaster | null) => void } | null>(null);
@@ -100,7 +103,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         []
     );
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const canvas = canvasRef.current;
         const card = canvas?.parentElement;
         const wrapper = canvas?.closest<HTMLElement>('.draggable-window') ?? null;
@@ -117,7 +121,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         let composite: { canvas: HTMLCanvasElement; left: number; top: number; premultiplied: Float32Array } | null = null;
         let state: RoomPromoteEditSurfaceState = { drawn: false, name: null, description: null };
 
-        const commit = (next: RoomPromoteEditSurfaceState, sync: boolean) => {
+        const commit = (next: RoomPromoteEditSurfaceState, sync: boolean) =>
+        {
             if (sameState(state, next)) return;
 
             state = next;
@@ -127,19 +132,22 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             else latest.current.onStateChange(next);
         };
 
-        const hide = (sync: boolean) => {
+        const hide = (sync: boolean) =>
+        {
             canvas.style.visibility = 'hidden';
             composite = null;
             commit({ drawn: false, name: null, description: null }, sync);
         };
 
-        const raster = (key: SourceKey, text: string, background: number) => {
+        const raster = (key: SourceKey, text: string, background: number) =>
+        {
             const found = rasters.get(key);
 
             return found && found.text === text && found.background === background && found.canvas.width > 0 ? found : null;
         };
 
-        const paintField = (context: CanvasRenderingContext2D, field: typeof NAME_FIELD, value: string, fill: RoomPromoteFieldFill, focused: boolean, key: SourceKey): RoomPromoteFieldReceipt | null => {
+        const paintField = (context: CanvasRenderingContext2D, field: typeof NAME_FIELD, value: string, fill: RoomPromoteFieldFill, focused: boolean, key: SourceKey): RoomPromoteFieldReceipt | null =>
+        {
             context.fillStyle = '#000';
             context.fillRect(field.x, field.y, field.width, field.height);
             context.fillStyle = fill === 'yellow' ? YELLOW : '#fff';
@@ -155,7 +163,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             // The v75 field clips its text bitmap to the 215px interior, ending 2px above the field's bottom edge; a raster that does not fit stays the browser's text.
             const fits = source.canvas.width <= 215 && (!field.multiline || source.canvas.height <= field.height - 2);
 
-            if (fits) {
+            if (fits)
+            {
                 context.save();
                 context.beginPath();
                 context.rect(field.x + 1, field.y + 1, 215, field.height - 3);
@@ -167,7 +176,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             return { text: value, fill, fits };
         };
 
-        const compose = (): { receipts: Pick<RoomPromoteEditSurfaceState, 'name' | 'description'> } | null => {
+        const compose = (): { receipts: Pick<RoomPromoteEditSurfaceState, 'name' | 'description'> } | null =>
+        {
             const p = latest.current;
             const caption = raster('caption', p.caption, 0x377998);
             const nameLabel = raster('nameLabel', p.nameLabel, 0xe9e9e1);
@@ -203,7 +213,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             const pixels = sheetContext.getImageData(0, 0, sheetCanvas.width, sheetCanvas.height).data;
             const premultiplied = new Float32Array(pixels.length);
 
-            for (let index = 0; index < pixels.length; index += 4) {
+            for (let index = 0; index < pixels.length; index += 4)
+            {
                 const alpha = pixels[index + 3] / 255;
 
                 premultiplied[index] = pixels[index] * alpha;
@@ -219,7 +230,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
         // The native stage scales a resolution-1 bitmap with bilinear sampling, centre-based, from the stage origin. The same mapping is evaluated here for the
         // device pixels the composite covers, from the card's viewport position, and drawn 1:1 at a device-aligned origin.
-        const bake = (): boolean => {
+        const bake = (): boolean =>
+        {
             if (!composite) return false;
 
             const ratio = window.devicePixelRatio;
@@ -243,7 +255,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             const columnBase = new Int32Array(width);
             const columnWeight = new Float32Array(width);
 
-            for (let column = 0; column < width; column++) {
+            for (let column = 0; column < width; column++)
+            {
                 const position = (deviceX0 + column + 0.5) / ratio - 0.5 - originX;
                 const base = Math.floor(position);
 
@@ -251,14 +264,16 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
                 columnWeight[column] = position - base;
             }
 
-            for (let line = 0; line < height; line++) {
+            for (let line = 0; line < height; line++)
+            {
                 const position = (deviceY0 + line + 0.5) / ratio - 0.5 - originY;
                 const y0 = Math.floor(position);
                 const wy = position - y0;
                 const row0 = y0 >= 0 && y0 < sourceHeight;
                 const row1 = y0 + 1 >= 0 && y0 + 1 < sourceHeight;
 
-                for (let column = 0; column < width; column++) {
+                for (let column = 0; column < width; column++)
+                {
                     const x0 = columnBase[column];
                     const wx = columnWeight[column];
                     const col0 = x0 >= 0 && x0 < sourceWidth;
@@ -278,10 +293,12 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
                     const alpha = (w00 > 0 ? source[i00 + 3] * w00 : 0) + (w10 > 0 ? source[i10 + 3] * w10 : 0) + (w01 > 0 ? source[i01 + 3] * w01 : 0) + (w11 > 0 ? source[i11 + 3] * w11 : 0);
                     const target = (line * width + column) * 4;
 
-                    if (alpha > 0) {
+                    if (alpha > 0)
+                    {
                         const scale = 255 / alpha;
 
-                        for (let k = 0; k < 3; k++) {
+                        for (let k = 0; k < 3; k++)
+                        {
                             const value = (w00 > 0 ? source[i00 + k] * w00 : 0) + (w10 > 0 ? source[i10 + k] * w10 : 0) + (w01 > 0 ? source[i01 + k] * w01 : 0) + (w11 > 0 ? source[i11 + k] * w11 : 0);
 
                             output.data[target + k] = Math.min(255, Math.round(value * scale));
@@ -292,7 +309,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
                 }
             }
 
-            if (canvas.width !== width || canvas.height !== height) {
+            if (canvas.width !== width || canvas.height !== height)
+            {
                 canvas.width = width;
                 canvas.height = height;
             }
@@ -310,12 +328,14 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         };
 
         let paintedKey = '';
-        const sceneKey = () => {
+        const sceneKey = () =>
+        {
             const p = latest.current;
 
             return JSON.stringify([p.caption, p.captionLeft, p.nameLabel, p.descriptionLabel, p.focusedField === 'name' ? null : p.name, p.focusedField === 'description' ? null : p.description, p.hasNameError, p.focusedField]);
         };
-        const repaint = (sync: boolean, force = true) => {
+        const repaint = (sync: boolean, force = true) =>
+        {
             if (disposed) return;
 
             const key = sceneKey();
@@ -325,10 +345,12 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
             paintedKey = key;
 
-            try {
+            try
+            {
                 const painted = compose();
 
-                if (!painted || !bake()) {
+                if (!painted || !bake())
+                {
                     hide(sync);
 
                     return;
@@ -336,19 +358,23 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
                 canvas.style.visibility = 'visible';
                 commit({ drawn: true, ...painted.receipts }, sync);
-            } catch {
+            }
+            catch
+            {
                 hide(sync);
             }
         };
 
-        const rebake = () => {
+        const rebake = () =>
+        {
             if (disposed || !state.drawn) return;
 
             if (!bake()) hide(true);
         };
 
         // Only a raster the committed scene paints right now repaints; the others (the focused field's text while it is typed, the fill that is not showing) are stored for the next paint.
-        const isPainted = (key: SourceKey): boolean => {
+        const isPainted = (key: SourceKey): boolean =>
+        {
             const p = latest.current;
 
             if (key === 'nameWhite') return p.focusedField !== 'name' && !p.hasNameError;
@@ -360,7 +386,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
         engine.current = {
             repaint: (sync, force) => repaint(sync, force),
-            setRaster: (key) => (next) => {
+            setRaster: (key) => (next) =>
+            {
                 if (disposed) return;
 
                 if (next) rasters.set(key, next);
@@ -373,7 +400,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             }
         };
 
-        const setClose = () => {
+        const setClose = () =>
+        {
             const next: CloseState = pressed ? 'pressed' : hover ? 'hover' : 'default';
 
             if (next === closeState) return;
@@ -381,33 +409,41 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             closeState = next;
             repaint(true);
         };
-        const onOver = (event: PointerEvent) => {
-            if ((event.target as Element)?.closest?.('.octane-card-close-button')) {
+        const onOver = (event: PointerEvent) =>
+        {
+            if ((event.target as Element)?.closest?.('.octane-card-close-button'))
+            {
                 hover = true;
                 setClose();
             }
         };
-        const onOut = (event: PointerEvent) => {
+        const onOut = (event: PointerEvent) =>
+        {
             const to = event.relatedTarget as Element | null;
 
-            if ((event.target as Element)?.closest?.('.octane-card-close-button') && !to?.closest?.('.octane-card-close-button')) {
+            if ((event.target as Element)?.closest?.('.octane-card-close-button') && !to?.closest?.('.octane-card-close-button'))
+            {
                 hover = false;
                 setClose();
             }
         };
-        const onDown = (event: PointerEvent) => {
-            if ((event.target as Element)?.closest?.('.octane-card-close-button')) {
+        const onDown = (event: PointerEvent) =>
+        {
+            if ((event.target as Element)?.closest?.('.octane-card-close-button'))
+            {
                 pressed = true;
                 setClose();
             }
         };
-        const release = () => {
+        const release = () =>
+        {
             if (!pressed && !hover) return;
 
             pressed = false;
             setClose();
         };
-        const onLeaveWindow = () => {
+        const onLeaveWindow = () =>
+        {
             hover = false;
             pressed = false;
             setClose();
@@ -430,11 +466,13 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
         // A move between two fractional ratios changes neither the page size, nor the wrapper style, nor the card: only the resolution media query says so.
         let ratioQuery: MediaQueryList | null = null;
-        const onRatioChange = () => {
+        const onRatioChange = () =>
+        {
             rebake();
             listenRatio();
         };
-        const listenRatio = () => {
+        const listenRatio = () =>
+        {
             if (disposed || typeof matchMedia !== 'function') return;
 
             ratioQuery = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
@@ -444,7 +482,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         listenRatio();
 
         Promise.all([renderFrame3WithShadow(WIDTH, HEIGHT), Promise.all(Object.values(CLOSE_URLS).map(loadImage))])
-            .then(([renderedFrame, images]) => {
+            .then(([renderedFrame, images]) =>
+            {
                 if (disposed) return;
 
                 frame = renderedFrame;
@@ -453,7 +492,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
             })
             .catch(() => hide(true));
 
-        return () => {
+        return () =>
+        {
             disposed = true;
             engine.current = null;
             card.removeEventListener('pointerover', onOver);
@@ -473,7 +513,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
     }, []);
 
     // Everything the surface paints comes from the committed props of this render, never from an earlier or a pending one.
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         latest.current = props;
         engine.current?.repaint(false, false);
     });

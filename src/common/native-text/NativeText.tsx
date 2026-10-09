@@ -85,7 +85,8 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
     const onRasterRef = useRef(onRaster);
 
     // Refreshed before the render effect below runs, like the other callback refs of the code base (never written during render).
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         onRasterRef.current = onRaster;
     });
 
