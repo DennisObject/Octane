@@ -13,11 +13,10 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { getRewardTrackResultText, localizeWithFallback, NotificationAlertType, NotificationBubbleType, SendMessageComposer } from '../../api';
+import freeTrackIcon from '../../assets/images/reward-track/air/free-track.png';
+import premiumTrackIcon from '../../assets/images/reward-track/air/premium-track.png';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
-
-const FREE_CLAIM_ICON = 'reward_track_free_track';
-const PREMIUM_CLAIM_ICON = 'reward_track_premium_track';
 
 /** RewardTrackController: the active tracks, claims, progress and the premium purchase. */
 const useRewardTracksState = () => {
@@ -78,7 +77,7 @@ const useRewardTracksState = () => {
                     showSingleBubble(
                         localizeWithFallback('reward_track.claim.notification.success', 'Reward claimed!'),
                         NotificationBubbleType.INFO,
-                        prize && prize.premium ? PREMIUM_CLAIM_ICON : FREE_CLAIM_ICON,
+                        prize && prize.premium ? premiumTrackIcon : freeTrackIcon,
                         `reward_track/open/${track.id}`
                     );
                 }
@@ -129,7 +128,7 @@ const useRewardTracksState = () => {
                 showSingleBubble(
                     localizeWithFallback('reward_track.premium.notification.success', 'Premium unlocked!'),
                     NotificationBubbleType.INFO,
-                    PREMIUM_CLAIM_ICON,
+                    premiumTrackIcon,
                     `reward_track/open/${parser.trackId}`
                 );
             }
