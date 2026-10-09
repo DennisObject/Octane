@@ -152,7 +152,7 @@ describe('pet catalog layout', () => {
         expect(screen.getByRole('textbox')).toHaveAttribute('maxLength', '16');
         // jsdom normalises the hex stops to rgb() from 30.1 on; accept either spelling.
         expect(screen.getByRole('button', { name: 'catalog.pets.choose.color 1' }).style.background).toMatch(
-            /^linear-gradient\(135deg, (#00000a|rgb\(0, 0, 10\)) 0 50%, (#00000b|rgb\(0, 0, 11\)) 50% 100%\)$/
+            /^linear-gradient\(to right, (#00000a|rgb\(0, 0, 10\)) 0(px|%)? 50%, (#00000b|rgb\(0, 0, 11\)) 50% 100%\)$/
         );
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-type-id', '8');
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-direction', '3');

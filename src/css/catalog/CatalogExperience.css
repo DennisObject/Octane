@@ -419,6 +419,19 @@
     height: 40px;
 }
 
+.octane-catalog-pet-breed-title {
+    position: absolute;
+    top: 16px;
+    left: 10px;
+    z-index: 2;
+    max-width: 300px;
+    color: #242424;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    pointer-events: none;
+}
+
 .octane-catalog-pet-editor {
     position: absolute;
     inset: 0;
@@ -704,19 +717,42 @@
 }
 
 .octane-catalog-pet-color-swatch {
+    position: relative;
     width: 27px;
     min-width: 27px;
     height: 22px;
     min-height: 22px;
-    border: 1px solid #777;
-    border-radius: 2px;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 27px 22px;
     cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
 }
 
-.octane-catalog-pet-color-swatch[aria-pressed='true'] {
-    border-color: #000;
-    box-shadow: inset 0 0 0 2px #fff, 0 0 0 1px #000;
+.octane-catalog-pet-color-swatch::before,
+.octane-catalog-pet-swatch-chosen {
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 27px 22px;
+    content: '';
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-catalog-pet-color-swatch::before {
+    z-index: 1;
+    background-image: url('../../assets/images/catalog/air/pets/ctlg-clr-27x22-1.png');
+}
+
+.octane-catalog-pet-swatch-chosen {
+    z-index: 2;
+    background-image: url('../../assets/images/catalog/air/pets/ctlg-clr-27x22-3.png');
 }
 
 .octane-catalog-pet-color-swatch:disabled {
@@ -735,8 +771,8 @@
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 3;
     background: rgba(0, 0, 0, 0.35);
-    border-radius: inherit;
 }
 
 .octane-catalog-pet-swatch-lock {
@@ -744,7 +780,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1;
+    z-index: 4;
     font-size: 10px;
     color: #ffd24a;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.9));
@@ -967,6 +1003,29 @@
     position: absolute;
     right: 3px;
     bottom: 2px;
+}
+
+.octane-catalog-info-native {
+    position: relative;
+    width: 360px;
+    height: 460px;
+    color: #000;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.octane-catalog-info-native-text,
+.octane-catalog-info-native-illustration {
+    position: absolute;
+}
+
+.octane-catalog-info-native-text {
+    overflow: auto;
+}
+
+.octane-catalog-info-native-illustration {
+    object-fit: none;
+    object-position: top left;
 }
 
 .octane-catalog-information-layout {

@@ -1045,3 +1045,106 @@
     min-height: 22px;
     line-height: 16px !important;
 }
+
+/* layout_club_buy style-2 borders. HC items are 0x9b9448 over 0xebeada. VIP items are 0x969696 over 0xdfdfdf.
+   Header and remaining bars are a single 0xdfdfdf border. Club gifts keep their own rules above. */
+.is-club-page .octane-club-membership-header,
+.is-club-page .octane-club-remaining,
+.is-club-page .octane-club-info-card,
+.is-club-page .octane-club-offer.is-compact {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    isolation: isolate;
+}
+
+.is-club-page .octane-club-membership-header::before,
+.is-club-page .octane-club-remaining::before,
+.is-club-page .octane-club-info-card::before,
+.is-club-page .octane-club-info-card::after,
+.is-club-page .octane-club-offer.is-compact::before,
+.is-club-page .octane-club-offer.is-compact::after,
+.is-club-page .octane-club-offer.is-compact.is-hc .octane-club-offer-header::before,
+.is-club-page .octane-club-offer.is-compact.is-vip .octane-club-offer-header::before,
+.is-club-page .octane-club-info-card strong::before {
+    position: absolute;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 6px;
+    border-image-slice: 6 fill;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    content: '';
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.is-club-page .octane-club-membership-header::before,
+.is-club-page .octane-club-remaining::before {
+    inset: 0;
+    z-index: -1;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-dfdfdf-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact.is-hc::before,
+.is-club-page .octane-club-info-card::before {
+    inset: 0;
+    z-index: 0;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-9b9448-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact.is-hc::after,
+.is-club-page .octane-club-info-card::after {
+    top: 1px;
+    left: 1px;
+    z-index: 1;
+    width: 149px;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-ebeada-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact.is-hc::after {
+    height: 65px;
+}
+
+.is-club-page .octane-club-info-card::after {
+    height: 137px;
+}
+
+.is-club-page .octane-club-offer.is-compact.is-vip::before {
+    inset: 0;
+    z-index: 0;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-969696-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact.is-vip::after {
+    top: 1px;
+    left: 1px;
+    z-index: 1;
+    width: 149px;
+    height: 65px;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-dfdfdf-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact > *,
+.is-club-page .octane-club-info-card > * {
+    z-index: 2;
+}
+
+.is-club-page .octane-club-offer.is-compact .octane-club-offer-header,
+.is-club-page .octane-club-info-card strong {
+    background: transparent;
+    isolation: isolate;
+}
+
+.is-club-page .octane-club-offer.is-compact.is-hc .octane-club-offer-header::before,
+.is-club-page .octane-club-info-card strong::before {
+    inset: 0;
+    z-index: -1;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-9b9448-13.png');
+}
+
+.is-club-page .octane-club-offer.is-compact.is-vip .octane-club-offer-header::before {
+    inset: 0;
+    z-index: -1;
+    border-image-source: url('../../assets/images/catalog/air/hc/habbo-border-colorless-969696-13.png');
+}

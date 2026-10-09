@@ -1,5 +1,5 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useCallback, useEffect } from 'react';
+import { FC, useCallback, useEffect, useRef } from 'react';
 import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
@@ -20,7 +20,7 @@ import { CatalogBreadcrumbView } from './views/navigation/CatalogBreadcrumbView'
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
-import { getCatalogLayoutDefinition } from './views/page/layout/catalogLayoutRegistry';
+import { catalogPageHidesLeftPane } from './views/page/layout/catalogLayoutRegistry';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
 
 const CatalogViewInner: FC<{}> = () => {
@@ -59,8 +59,14 @@ const CatalogViewInner: FC<{}> = () => {
 
     const hideCatalogNavigation = useCallback(() => setNavigationHidden(true), [setNavigationHidden]);
 
-    const layoutRenderer = getCatalogLayoutDefinition(currentPage?.layoutCode)?.renderer;
-    const sidebarHidden = layoutRenderer === 'frontpage' || layoutRenderer === 'info';
+    // Search draws into the page already open and does not move the left pane. Remember that pane while the synthetic result page is showing.
+    const searchKeepsOpenPane = !!searchResult && currentPage?.pageId === -1;
+    const openPageHidesLeftPane = catalogPageHidesLeftPane(currentPage?.layoutCode);
+    const leftPaneHiddenRef = useRef(false);
+
+    if (!searchKeepsOpenPane) leftPaneHiddenRef.current = openPageHidesLeftPane;
+
+    const sidebarHidden = searchKeepsOpenPane ? leftPaneHiddenRef.current : openPageHidesLeftPane;
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {
