@@ -101,6 +101,8 @@ const extraRewardIcon = (reward: IEarningsReward): ReactElement | null =>
     }
 };
 
+const MAX_SLOTS = 3;
+
 const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot[] =>
 {
     const slots: Slot[] = category.slots.map((kind) =>
@@ -138,7 +140,15 @@ const buildSlots = (category: EarningCategory, rewards: IEarningsReward[]): Slot
         else extra.set(id, { id, amount: reward.amount, icon: extraRewardIcon(reward) });
     }
 
-    return [...slots, ...extra.values()];
+    const all = [...slots, ...extra.values()];
+
+    // The row has room for three slots before the Claim button; any further reward types are counted on one present slot instead of being drawn under it.
+    if (all.length <= MAX_SLOTS) return all;
+
+    const folded = all.slice(MAX_SLOTS - 1);
+    const count = rewards.filter((reward) => folded.some((slot) => slot.id === reward.type || slot.id === `${reward.type}:${reward.pointsType}` || (slot.id === 'product' && (reward.type === 'badge' || reward.type === 'item')))).length;
+
+    return [...all.slice(0, MAX_SLOTS - 1), { id: 'more', amount: count, icon: nativeIcon(imgPresent, 24, 'is-product') }];
 };
 
 const ducketsOf = (entry: IEarningsEntry | null) =>
@@ -221,7 +231,15 @@ export const VaultView: FC<{}> = () =>
     // Games stays hidden like v75 unless wired.game_earnings is on; a games entry that holds rewards is shown anyway.
     const showGames = GetConfigurationValue<boolean>('wired.game_earnings', false);
     const visibleCategories = useMemo(
-        () => CATEGORIES.filter((category) => !category.needsGameEarnings || showGames || (entriesByKey.get(category.key)?.rewards.length ?? 0) > 0),
+        () => CATEGORIES.filter((category) =>
+        {
+            const entry = entriesByKey.get(category.key);
+
+            // A row v75 does not have is shown only while the backend really holds something in it.
+            if (category.isBackendOnly) return !!entry && (entry.rewards.length > 0 || entry.claimable);
+
+            return !category.needsGameEarnings || showGames || (entry?.rewards.length ?? 0) > 0;
+        }),
         [entriesByKey, showGames]
     );
 
@@ -527,7 +545,7 @@ export const VaultView: FC<{}> = () =>
                             </div>
                             {slots.map((slot, slotIndex) =>
                             {
-                                const x = slots.length > 2 ? 8 + slotIndex * 54 : 15 + slotIndex * 70;
+                                const x = slots.length > 2 ? 8 + slotIndex * 48 : 15 + slotIndex * 70;
 
                                 return (
                                     <div key={slot.id} className="octane-vault__slot" style={{ left: 179 + x }}>
