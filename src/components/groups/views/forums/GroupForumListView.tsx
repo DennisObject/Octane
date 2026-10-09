@@ -10,13 +10,15 @@ const ROW_WIDTH = 532;
 
 interface GroupForumListViewProps {
     listCode: number;
+    pageIndex: number;
+    onLeave: () => void;
     onOpenForum: (groupId: number) => void;
+    onPageChange: (pageIndex: number) => void;
 }
 
-export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, onOpenForum }) => {
+export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, pageIndex, onLeave, onOpenForum, onPageChange }) => {
     const [forums, setForums] = useState<ForumData[]>([]);
     const [totalForums, setTotalForums] = useState<number>(0);
-    const [pageIndex, setPageIndex] = useState<number>(0);
     const pageCount = Math.max(1, Math.ceil(totalForums / FORUM_PAGE_SIZE));
 
     useMessageEvent<ForumsListMessageEvent>(ForumsListMessageEvent, (event) => {
@@ -32,10 +34,13 @@ export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, onOp
         SendMessageComposer(new GetForumsListMessageComposer(listCode, pageIndex * FORUM_PAGE_SIZE, FORUM_PAGE_SIZE));
     }, [listCode, pageIndex]);
 
+    // markForumsAsRead: every listed forum with unread messages is marked read as a whole, then the window closes (back_button of the forums list).
     const markAsRead = () => {
-        const entries = forums.filter((forum) => forum.unreadMessages > 0 && forum.lastMessageId > 0).map((forum) => new UpdateForumReadMarkerEntry(forum.groupId, forum.lastMessageId, true));
+        const entries = forums.filter((forum) => forum.unreadMessages > 0).map((forum) => new UpdateForumReadMarkerEntry(forum.groupId, forum.totalMessages, true));
 
         if (entries.length) SendMessageComposer(new UpdateForumReadMarkerMessageComposer(...entries));
+
+        onLeave();
     };
 
     // "Did you know? You can get your own group forum <u><a href=...>here</a></u>." keeps its link as a separate, working piece.
@@ -94,7 +99,7 @@ export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, onOp
             </div>
             <div className="octane-forum__footer">
                 <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={markAsRead} />
-                <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={setPageIndex} />
+                <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={onPageChange} />
             </div>
             <div className="octane-forum__status is-list">
                 <GroupText background={FORUM_SURFACE} className="is-static" overrides={flatText(11)} text={before} x={0} y={0} />

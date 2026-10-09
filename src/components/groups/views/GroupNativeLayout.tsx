@@ -7,8 +7,6 @@ import { NativeTextStyleName } from '../../../common/native-text/NativeTextStyle
 // groups_main_window client coordinates: the frame draws 33px of title above them.
 export const GROUP_SURFACE = 0xe9e9e1;
 export const GROUP_HEADER_SURFACE = 0xb3b099;
-// frame_3: DropShadowFilter distance 4 at 45 degrees (2.828px each way); blur and alpha fitted to the v75 shadow ramp.
-export const FRAME_SHADOW: CSSProperties = { filter: 'drop-shadow(2.828px 2.828px 3px rgba(0, 0, 0, 0.45))' };
 // The caption's field sits above the 33px frame header; its glyphs start 12px below the window top.
 const TITLE_Y = 9;
 
@@ -50,13 +48,15 @@ export const GroupText: FC<GroupTextProps> = ({
     blend,
     className = '',
     onClick
-}) => {
+}) =>
+{
     const textRef = useRef<HTMLDivElement>(null);
     const [centerOffset, setCenterOffset] = useState(0);
     const isCentered = align === 'center' && width !== undefined;
 
     // auto_size center puts the field at floor((width - fieldWidth) / 2).
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const field = textRef.current?.firstElementChild;
 
         if (!isCentered || !field) return;
@@ -168,19 +168,22 @@ interface GroupInputProps {
  * sit inside the field (overflow, unsupported glyphs), so caret, selection, scrolling and IME stay the browser's; at rest the
  * v75 raster is drawn over the input.
  */
-export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, plain = false, fontSize = 13, inset = 1, onChange }) => {
+export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y, width, height, multiline = false, plain = false, fontSize = 13, inset = 1, onChange }) =>
+{
     const overlayRef = useRef<HTMLDivElement>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [rasterFits, setRasterFits] = useState(false);
 
     // The raster fits when it was drawn natively (no glyph fallback) and stays inside the bordered field.
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const overlay = overlayRef.current;
         const field = overlay?.firstElementChild as HTMLElement | null;
 
         if (!field) return;
 
-        const measure = () => {
+        const measure = () =>
+        {
             const isNative = field.dataset.nativeText !== 'fallback';
 
             setRasterFits(isNative && field.offsetWidth <= width - 2 && field.offsetHeight <= height - 2);
@@ -192,7 +195,8 @@ export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y,
         observer.observe(field);
         mutations.observe(field, { attributes: true, attributeFilter: ['data-native-text'] });
 
-        return () => {
+        return () =>
+        {
             observer.disconnect();
             mutations.disconnect();
         };

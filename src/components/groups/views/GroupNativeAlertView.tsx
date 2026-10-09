@@ -1,6 +1,6 @@
 import { createContext, FC, useContext } from 'react';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
-import { FRAME_SHADOW, GroupText, GroupWindowTitle } from './GroupNativeLayout';
+import { GroupText, GroupWindowTitle } from './GroupNativeLayout';
 
 export interface GroupAlert {
     title: string;
@@ -18,7 +18,6 @@ export const GroupNativeAlertView: FC<{ alert: GroupAlert; onClose: () => void }
     <OctaneCardView
         aria-label={alert.title}
         className="octane-group-alert"
-        dragStyle={FRAME_SHADOW}
         frameStyle={3}
         isResizable={false}
         role="alertdialog"

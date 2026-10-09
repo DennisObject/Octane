@@ -7,12 +7,10 @@ import {
     PostMessageMessageEvent,
     PostThreadMessageEvent,
     ThreadMessagesMessageEvent,
-    UpdateForumReadMarkerEntry,
-    UpdateForumReadMarkerMessageComposer,
     UpdateMessageMessageEvent,
     UpdateThreadMessageEvent
 } from '@octane/renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, ReportType, SendMessageComposer } from '../../../../api';
 import hideIcon from '../../../../assets/images/groups/native/forum_forum_hide.png';
 import replyIcon from '../../../../assets/images/groups/native/forum_reply.png';
@@ -21,7 +19,7 @@ import unhideIcon from '../../../../assets/images/groups/native/forum_forum_unhi
 import { ClassicScrollAreaView, LayoutAvatarImageView } from '../../../../common';
 import { useHelp, useMessageEvent } from '../../../../hooks';
 import { flatText, GroupText } from '../GroupNativeLayout';
-import { FORUM_PAGE_SIZE, FORUM_SURFACE, stripTags, ForumButton, forumAge, ForumPager } from './GroupForumLayout';
+import { FORUM_PAGE_SIZE, FORUM_SURFACE, stripTags, ForumButton, forumAge, forumQuote, ForumPager } from './GroupForumLayout';
 import { forumPermissionText } from './GroupForumThreadListView';
 
 // Message states: 0 and 1 are visible, 10 is hidden by a group administrator, 20 deleted by Hotel staff.
@@ -36,14 +34,20 @@ interface GroupForumThreadViewProps {
     groupId: number;
     threadId: number;
     initialThread: GuildForumThread;
+    /** The page to open and the message of it to scroll to (a link to one message). */
+    initialPageIndex: number;
+    scrollIndex: number;
     onBack: () => void;
+    onMessagesSeen: (messageId: number) => void;
     onReply: (subject: string, quote?: string) => void;
 }
 
-export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData, groupId, threadId, initialThread, onBack, onReply }) => {
+export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData, groupId, threadId, initialThread, initialPageIndex, scrollIndex, onBack, onMessagesSeen, onReply }) => {
     const [messages, setMessages] = useState<MessageData[]>([]);
     const [thread, setThread] = useState<GuildForumThread>(initialThread);
-    const [pageIndex, setPageIndex] = useState<number>(0);
+    const [pageIndex, setPageIndex] = useState<number>(initialPageIndex);
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const pendingScroll = useRef<number>(scrollIndex);
     const { report = null } = useHelp();
     const canModerate = forumData?.hasModeratePermissionError ?? false;
     const canReport = forumData?.canReport ?? false;
@@ -58,11 +62,8 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
 
         setMessages(parser.messages);
 
-        if (parser.messages.length > 0) {
-            const last = parser.messages[parser.messages.length - 1];
-
-            SendMessageComposer(new UpdateForumReadMarkerMessageComposer(new UpdateForumReadMarkerEntry(groupId, last.messageId, true)));
-        }
+        // updateUnreadMessageCounts: the newest message of the page counts as seen; the marker is sent when the forum is left (GroupForumController.markForumAsRead).
+        if (parser.messages.length > 0) onMessagesSeen(parser.messages[parser.messages.length - 1].messageId);
     });
 
     useMessageEvent<PostMessageMessageEvent>(PostMessageMessageEvent, (event) => {
@@ -94,31 +95,48 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
         if (parser.groupId === groupId && parser.thread.threadId === threadId) setThread(parser.thread);
     });
 
+    // A link to one message scrolls its page to that message once (MessageListView.scrollToSpecificElement): the top of the message sits at the top of the list.
+    useEffect(() => {
+        const viewport = viewportRef.current;
+        const index = pendingScroll.current;
+
+        if (!viewport || messages.length === 0 || index <= 0) return;
+
+        pendingScroll.current = 0;
+
+        const target = viewport.querySelectorAll<HTMLElement>('.octane-forum__message')[index];
+
+        if (target) viewport.scrollTop = target.offsetTop;
+    }, [messages]);
+
     useEffect(() => {
         if (!groupId || !threadId) return;
 
         SendMessageComposer(new GetMessagesMessageComposer(groupId, threadId, pageIndex * FORUM_PAGE_SIZE, FORUM_PAGE_SIZE));
     }, [groupId, threadId, pageIndex]);
 
-    // The v75 quote: "<age> <author> wrote:" and the message under a "> " marker.
-    const quoteOf = (message: MessageData) =>
-        LocalizeText('groupforum.compose.reply_template', ['CREATION_TIME', 'AUTHOR_NAME', 'creation_time', 'author_name'], [forumAge(message.creationTime), message.authorName, forumAge(message.creationTime), message.authorName]) +
-        '\n> ' +
-        message.messageText;
+    const quoteOf = (message: MessageData) => forumQuote(message);
 
     const moderate = (message: MessageData) => {
         SendMessageComposer(new ModerateMessageMessageComposer(groupId, threadId, message.messageId, message.state === MESSAGE_HIDDEN_BY_ADMIN ? MESSAGE_VISIBLE : MESSAGE_HIDDEN_BY_ADMIN));
     };
 
     const subject = thread?.header ?? '';
-    const statusCode = !forumData?.hasPostMessagePermissionError ? forumData?.postMessagePermissionError : '';
-    const statusText = statusCode ? forumPermissionText(statusCode, 'operation_post_message') : '';
+    // openMessagesList: replying needs the permission, and a locked thread only takes replies from moderators.
+    const isLocked = !!thread?.isLocked && !canModerate;
+    const canReply = canPost && !isLocked;
+    const getStatusText = (): string => {
+        if (!canPost) return forumData?.postMessagePermissionError ? forumPermissionText(forumData.postMessagePermissionError, 'operation_post_message') : '';
+
+        return isLocked && forumData?.moderatePermissionError ? forumPermissionText(forumData.moderatePermissionError, 'operation_post_in_locked') : '';
+    };
+    const statusText = getStatusText();
 
     return (
         <>
             <GroupText background={FORUM_SURFACE} height={25} overrides={flatText(16, { bold: true, color: 0xa6a6a2 })} text={subject} width={541} x={0} y={115} />
             <div className="octane-forum__list">
-                <ClassicScrollAreaView className="octane-forum__scroll is-messages" contentClassName="octane-forum__scroll-content" minThumbSize={26} scrollStep={127}>
+                <ClassicScrollAreaView className="octane-forum__scroll is-messages" contentClassName="octane-forum__scroll-content" minThumbSize={26} scrollStep={127} viewportRef={viewportRef}>
                     {messages.map((message) => {
                         const isHiddenByAdmin = message.state === MESSAGE_HIDDEN_BY_ADMIN;
                         const isDeleted = message.state === MESSAGE_DELETED_BY_STAFF;
@@ -126,11 +144,13 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
                         const panelColor = isDeleted ? 0xffdfd2 : isHiddenByAdmin ? 0xd7d7cf : 0xc6eff9;
                         const textColor = isDeleted ? 0xffc6ba : isHiddenByAdmin ? 0xe9e9e0 : 0xffffff;
                         const showText = !isHidden || canModerate || isDeleted;
-                        const text = isDeleted
-                            ? LocalizeText('groupforum.view.message_hidden_by_staff')
-                            : isHiddenByAdmin && !canModerate
-                              ? LocalizeText('groupforum.view.message_hidden_by_admin', ['ADMIN_NAME', 'admin_name'], [message.adminName, message.adminName])
-                              : message.messageText;
+                        const getText = (): string => {
+                            if (isDeleted) return LocalizeText('groupforum.view.message_hidden_by_staff');
+                            if (isHiddenByAdmin && !canModerate) return LocalizeText('groupforum.view.message_hidden_by_admin', ['ADMIN_NAME', 'admin_name'], [message.adminName, message.adminName]);
+
+                            return message.messageText;
+                        };
+                        const text = getText();
                         const actions = (canModerate && !isDeleted ? 1 : 0) + (canReport ? 1 : 0) + 1;
                         const actionsWidth = actions * 22;
 
@@ -158,7 +178,7 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
                                                 <img alt="" draggable={false} src={reportIcon} style={{ left: 2, top: 6 }} />
                                             </button>
                                         )}
-                                        <button className="octane-forum__action is-reply" disabled={!canPost} type="button" onClick={() => onReply(subject, quoteOf(message))}>
+                                        <button className="octane-forum__action is-reply" disabled={!canReply} type="button" onClick={() => onReply(subject, quoteOf(message))}>
                                             <img alt="" draggable={false} src={replyIcon} style={{ left: 2, top: 6 }} />
                                         </button>
                                     </div>
@@ -189,7 +209,7 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = ({ forumData,
             </div>
             <div className="octane-forum__footer">
                 <ForumButton label={LocalizeText('groupforum.view.back')} width={95} x={10} onClick={onBack} />
-                <ForumButton disabled={!canPost} label={LocalizeText('groupforum.view.reply')} right={178} tint="blue" width={95} onClick={() => onReply(subject)} />
+                <ForumButton disabled={!canReply} label={LocalizeText('groupforum.view.reply')} right={178} tint="blue" width={95} onClick={() => onReply(subject)} />
                 <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={setPageIndex} />
             </div>
             {statusText && (

@@ -1,5 +1,5 @@
 import { ExtendedForumData, UpdateForumSettingsMessageComposer } from '@octane/renderer';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { flatText, GroupText } from '../GroupNativeLayout';
@@ -30,14 +30,29 @@ const SECTIONS: Section[] = [
 interface GroupForumSettingsViewProps {
     forumData: ExtendedForumData;
     groupId: number;
+    /** The newest forum data of the group, read when OK is pressed. */
+    readForumData: () => ExtendedForumData | null;
     initialPosition: { x: number; y: number };
     onClose: () => void;
 }
 
-export const GroupForumSettingsView: FC<GroupForumSettingsViewProps> = ({ forumData, groupId, initialPosition, onClose }) => {
+export const GroupForumSettingsView: FC<GroupForumSettingsViewProps> = ({ forumData, groupId, readForumData, initialPosition, onClose }) => {
     const [levels, setLevels] = useState<number[]>([forumData.readPermissions, forumData.postMessagePermissions, forumData.postThreadPermissions, forumData.moderatePermissions]);
 
+    // Two presses before the window closes still send one update.
+    const saved = useRef<boolean>(false);
+
     const save = () => {
+        const live = readForumData();
+
+        // The right to change the settings is checked at the moment of sending: it can have been taken away while the window was open.
+        if (saved.current || !live || live.groupId !== groupId || !live.canChangeSettings) {
+            if (!saved.current) onClose();
+
+            return;
+        }
+
+        saved.current = true;
         SendMessageComposer(new UpdateForumSettingsMessageComposer(groupId, levels[0], levels[1], levels[2], levels[3]));
         onClose();
     };

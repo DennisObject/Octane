@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { LocalizeText } from '../../../api';
 import welcomeImage from '../../../assets/images/groups/native/group_welcome_info.png';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
-import { FRAME_SHADOW, GroupButton, GroupWindowTitle } from './GroupNativeLayout';
+import { GroupButton, GroupWindowTitle } from './GroupNativeLayout';
 import { GroupRichText } from './GroupRichText';
 
 // group_created_window: 358x381 frame, html text (22,10 311x150), group_welcome_info (20,140), Ok button (115,304 131x29),
@@ -11,7 +11,6 @@ export const GroupCreatedView: FC<{ onClose: () => void }> = ({ onClose }) => (
     <OctaneCardView
         aria-label={LocalizeText('group.created.title')}
         className="octane-group-created"
-        dragStyle={FRAME_SHADOW}
         frameStyle={3}
         isResizable={false}
         role="dialog"

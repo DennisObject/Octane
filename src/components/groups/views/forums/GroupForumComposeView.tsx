@@ -1,16 +1,24 @@
 import { ExtendedForumData, GuildForumThread, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent } from '@octane/renderer';
-import { FC, useEffect, useState } from 'react';
-import { CreateLinkEvent, LocalizeText, SendMessageComposer } from '../../../../api';
+import { FC, useEffect, useRef, useState } from 'react';
+import { CreateLinkEvent, FriendlyTime, LocalizeText, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
 import { flatText, GroupInput, GroupText } from '../GroupNativeLayout';
 import { FORUM_HEADER, FORUM_SURFACE, ForumButton, ForumFrame, stripTags } from './GroupForumLayout';
+import { forumPermissionText } from './GroupForumThreadListView';
 
+// ComposeMessageView.validateInputs: a subject or a message of 10 characters or fewer is refused, and a post follows the last one by at least 30 seconds.
 const MIN_LENGTH = 10;
+const POST_COOLDOWN = 30000;
+
+// GroupForumController.lastPostTime: shared by every composer of the session; it starts 30 seconds in the past.
+let lastPostTime = -POST_COOLDOWN;
 
 interface GroupForumComposeViewProps {
     compose: { kind: 'thread' } | { kind: 'reply'; threadId: number; subject: string; quote?: string; quoteSeq: number };
     forumData: ExtendedForumData;
+    /** The newest forum data of the group, read when Post is pressed (the committed props can be one update behind). */
+    readForumData: () => ExtendedForumData | null;
     groupId: number;
     initialPosition: { x: number; y: number };
     onClose: () => void;
@@ -18,24 +26,47 @@ interface GroupForumComposeViewProps {
 }
 
 /** groupforum_compose_message: a new thread (subject and message) or a reply (the thread subject shown read-only). */
-export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose, forumData, groupId, initialPosition, onClose, onThreadCreated }) => {
+export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose, forumData, readForumData, groupId, initialPosition, onClose, onThreadCreated }) =>
+{
     const isReply = compose.kind === 'reply';
     const [subject, setSubject] = useState<string>('');
     const [message, setMessage] = useState<string>(isReply && compose.quote ? compose.quote : '');
     const [isPosting, setIsPosting] = useState<boolean>(false);
+    // Pressing Post twice before the window re-renders must still send once.
+    const postSent = useRef<boolean>(false);
+    const [now, setNow] = useState<number>(() => performance.now());
+    const [isHintShown, setIsHintShown] = useState<boolean>(true);
     // Replying to another message while the composer is open adds its quote under the text so far.
     const quote = isReply ? compose.quote : undefined;
     const quoteSeq = isReply ? compose.quoteSeq : 0;
 
-    useEffect(() => {
-        if (quote && quoteSeq > 0) setMessage((previous) => (previous ? previous + '\n\n' + quote : quote));
+    // ComposeMessageView.focus: a quote added while the window is open goes under the text so far, unless a post is on its way.
+    useEffect(() =>
+    {
+        if (quote && quoteSeq > 0 && !postSent.current) setMessage((previous) => (previous ? previous + '\n\n' + quote : quote));
     }, [quote, quoteSeq]);
 
-    const subjectOk = isReply || subject.trim().length >= MIN_LENGTH;
-    const messageOk = message.trim().length >= MIN_LENGTH;
+    // The window validates once a second, so the cooldown counts down and the first check clears the reply hint.
+    useEffect(() =>
+    {
+        const timer = setInterval(() =>
+        {
+            setNow(performance.now());
+            setIsHintShown(false);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const subjectOk = isReply || subject.length > MIN_LENGTH;
+    const messageOk = message.length > MIN_LENGTH;
+    const cooldown = Math.max(0, POST_COOLDOWN - (now - lastPostTime));
+    const permissionError = isReply ? forumData.postMessagePermissionError : forumData.postThreadPermissionError;
+    const canPostHere = permissionError.length === 0;
 
     // The server answers a post with the new thread (a new thread) or the new message (a reply); either one closes the composer.
-    useMessageEvent<PostThreadMessageEvent>(PostThreadMessageEvent, (event) => {
+    useMessageEvent<PostThreadMessageEvent>(PostThreadMessageEvent, (event) =>
+    {
         const parser = event.getParser();
 
         if (isReply || parser.groupId !== groupId || !isPosting) return;
@@ -43,7 +74,8 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
         onThreadCreated(parser.thread);
     });
 
-    useMessageEvent<PostMessageMessageEvent>(PostMessageMessageEvent, (event) => {
+    useMessageEvent<PostMessageMessageEvent>(PostMessageMessageEvent, (event) =>
+    {
         const parser = event.getParser();
 
         if (!isReply || parser.groupId !== groupId || parser.threadId !== compose.threadId || !isPosting) return;
@@ -51,20 +83,44 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
         onClose();
     });
 
-    const post = () => {
-        if (isPosting || !subjectOk || !messageOk) return;
+    const post = () =>
+    {
+        // Checked again at the moment of sending: the posting permission can be gone by now, the cooldown of an earlier post still runs.
+        const live = readForumData();
+        const allowed = !!live && live.groupId === groupId && (isReply ? live.hasPostMessagePermissionError : live.hasPostThreadPermissionError);
+        const remaining = POST_COOLDOWN - (performance.now() - lastPostTime);
 
+        if (postSent.current || isPosting || !subjectOk || !messageOk || !allowed || remaining > 0)
+        {
+            setNow(performance.now());
+
+            return;
+        }
+
+        postSent.current = true;
+        lastPostTime = performance.now();
         setIsPosting(true);
-        SendMessageComposer(new PostMessageMessageComposer(groupId, isReply ? compose.threadId : 0, isReply ? '' : subject.trim(), message.trim()));
+        // The v75 text fields separate lines with a carriage return, and so do the messages the other clients show.
+        SendMessageComposer(new PostMessageMessageComposer(groupId, isReply ? compose.threadId : 0, isReply ? '' : subject, message.replace(/\r\n|\n/g, '\r')));
     };
 
-    const status = isPosting
-        ? LocalizeText('groupforum.compose.posting')
-        : !subjectOk
-          ? LocalizeText('groupforum.compose.subject_too_short')
-          : !messageOk
-            ? LocalizeText('groupforum.compose.message_too_short')
-            : '';
+    const getStatus = (): string =>
+    {
+        if (isPosting) return LocalizeText('groupforum.compose.posting');
+        if (!subjectOk) return LocalizeText('groupforum.compose.subject_too_short');
+        if (!messageOk) return LocalizeText('groupforum.compose.message_too_short');
+        if (!canPostHere) return forumPermissionText(permissionError, isReply ? 'operation_post_message' : 'operation_post_thread');
+
+        if (cooldown > 0)
+        {
+            const remaining = FriendlyTime.format(cooldown / 1000 + 1, '', 1);
+
+            return LocalizeText('groupforum.compose.post_cooldown', ['time_remaining', 'TIME_REMAINING'], [remaining, remaining]);
+        }
+
+        return isHintShown ? LocalizeText('groupforum.compose.reply_hint') : '';
+    };
+    const status = getStatus();
 
     return (
         <ForumFrame
@@ -93,7 +149,10 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
             {isReply ? (
                 <GroupText background={0xffffff} overrides={flatText(16)} text={compose.subject} x={0} y={117} />
             ) : (
-                <GroupInput fontSize={16} height={22} inset={2} label={LocalizeText('groupforum.compose.subject')} maxLength={120} plain value={subject} width={444} x={0} y={117} onChange={setSubject} />
+                <GroupInput fontSize={16} height={22} inset={2} label={LocalizeText('groupforum.compose.subject')} maxLength={120} plain value={subject} width={444} x={0} y={117} onChange={(value) =>
+                {
+                    setSubject(value); setIsHintShown(false);
+                }} />
             )}
             <div className="octane-forum__compose-bar" style={{ top: 145 }}>
                 <GroupText background={0x227aad} overrides={flatText(12, { color: 0xeeeeee })} text={LocalizeText('groupforum.compose.message')} x={1} y={1} />
@@ -101,9 +160,12 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
                     <GroupText background={0x227aad} className="is-static" overrides={flatText(12, { color: 0xffffff, underline: true })} text={stripTags(LocalizeText('groupforum.compose.formatting_help'))} x={0} y={0} />
                 </button>
             </div>
-            <GroupInput fontSize={12} height={200} inset={4} label={LocalizeText('groupforum.compose.message')} maxLength={4000} multiline plain value={message} width={444} x={0} y={165} onChange={setMessage} />
+            <GroupInput fontSize={12} height={200} inset={4} label={LocalizeText('groupforum.compose.message')} maxLength={4000} multiline plain value={message} width={444} x={0} y={165} onChange={(value) =>
+            {
+                setMessage(value); setIsHintShown(false);
+            }} />
             <ForumButton label={LocalizeText('groupforum.compose.cancel')} width={120} x={25} y={378} onClick={onClose} />
-            <ForumButton disabled={isPosting || !subjectOk || !messageOk} label={LocalizeText('groupforum.compose.post')} tint="blue" width={120} x={295} y={378} onClick={post} />
+            <ForumButton disabled={isPosting || !subjectOk || !messageOk || !canPostHere || cooldown > 0} label={LocalizeText('groupforum.compose.post')} tint="blue" width={120} x={295} y={378} onClick={post} />
             {status && <GroupText background={FORUM_SURFACE} overrides={flatText(11)} text={status} width={424} wrap x={10} y={425} />}
         </ForumFrame>
     );

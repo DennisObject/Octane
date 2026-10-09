@@ -13,7 +13,7 @@ import headerIdentity from '../../../assets/images/groups/native/group_UI_identi
 import headerReady from '../../../assets/images/groups/native/group_UI_ready.png';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
 import { GroupAlert, GroupAlertContext, GroupNativeAlertView } from './GroupNativeAlertView';
-import { FRAME_SHADOW, flatText, GROUP_HEADER_SURFACE, GroupText, GroupWindowTitle } from './GroupNativeLayout';
+import { flatText, GROUP_HEADER_SURFACE, GroupText, GroupWindowTitle } from './GroupNativeLayout';
 
 // header_pic_bitmap_step_N, stretched into their 114x62 layout rectangle.
 const HEADER_IMAGES: Record<number, string> = { 1: headerIdentity, 2: headerBadge, 3: headerColors, 4: headerReady, 5: headerReady };
@@ -51,7 +51,8 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
     onClose,
     tabs = null,
     children
-}) => {
+}) =>
+{
     const [alert, setAlert] = useState<GroupAlert>(null);
     // Without the step header (edit mode) the header band's picture and captions sit higher.
     const isEditing = step === 0;
@@ -61,7 +62,6 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
             <OctaneCardView
                 aria-label={LocalizeText('group.window.title')}
                 className="octane-group-native"
-                dragStyle={FRAME_SHADOW}
                 frameStyle={3}
                 isResizable={false}
                 role="dialog"
@@ -73,7 +73,8 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                     <div className="octane-group-native__header" />
                     {step > 0 && (
                         <div className="octane-group-native__steps">
-                            {STEPS.map(([x, width, inactive, active], index) => {
+                            {STEPS.map(([x, width, inactive, active], index) =>
+                            {
                                 const isActive = step === index + 1;
 
                                 return (

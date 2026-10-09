@@ -5,8 +5,6 @@ import {
     GuildForumThreadsEvent,
     ModerateThreadMessageComposer,
     PostThreadMessageEvent,
-    UpdateForumReadMarkerEntry,
-    UpdateForumReadMarkerMessageComposer,
     UpdateThreadMessageComposer,
     UpdateThreadMessageEvent
 } from '@octane/renderer';
@@ -42,14 +40,16 @@ export const forumPermissionText = (code: string, operationKey: string): string 
 interface GroupForumThreadListViewProps {
     forumData: ExtendedForumData;
     groupId: number;
+    pageIndex: number;
+    onLeave: () => void;
     onNewThread: () => void;
     onOpenThread: (thread: GuildForumThread) => void;
+    onPageChange: (pageIndex: number) => void;
 }
 
 
-export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ forumData, groupId, onNewThread, onOpenThread }) => {
+export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ forumData, groupId, pageIndex, onLeave, onNewThread, onOpenThread, onPageChange }) => {
     const [threads, setThreads] = useState<GuildForumThread[]>([]);
-    const [pageIndex, setPageIndex] = useState<number>(0);
     const { report = null } = useHelp();
     const canModerate = forumData.hasModeratePermissionError;
     const canReport = forumData.canReport;
@@ -88,10 +88,6 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
 
     const moderate = (thread: GuildForumThread) => {
         SendMessageComposer(new ModerateThreadMessageComposer(groupId, thread.threadId, thread.state === THREAD_HIDDEN_BY_ADMIN ? THREAD_VISIBLE : THREAD_HIDDEN_BY_ADMIN));
-    };
-
-    const markAsRead = () => {
-        if (forumData.lastMessageId > 0) SendMessageComposer(new UpdateForumReadMarkerMessageComposer(new UpdateForumReadMarkerEntry(groupId, forumData.lastMessageId, true)));
     };
 
     const buttonCount = (canModerate ? 1 : 0) + (canReport ? 1 : 0);
@@ -185,9 +181,9 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                 </ClassicScrollAreaView>
             </div>
             <div className="octane-forum__footer">
-                <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={markAsRead} />
+                <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={onLeave} />
                 <ForumButton disabled={!canPostThread} label={LocalizeText('groupforum.view.start_thread')} right={178} tint="blue" width={95} onClick={onNewThread} />
-                <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={setPageIndex} />
+                <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={onPageChange} />
             </div>
             {statusKey && (
                 <div className="octane-forum__status">

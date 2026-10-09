@@ -1,8 +1,9 @@
 import { CSSProperties, FC, ReactNode } from 'react';
 import { FriendlyTime, LocalizeText } from '../../../../api';
 import settingsIcon from '../../../../assets/images/groups/native/pursearea_settings_icon.png';
+import { MessageData } from '@octane/renderer';
 import { LayoutBadgeImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
-import { FRAME_SHADOW, flatText, GroupText, GroupWindowTitle } from '../GroupNativeLayout';
+import { flatText, GroupText, GroupWindowTitle } from '../GroupNativeLayout';
 
 export const FORUM_PAGE_SIZE = 20;
 
@@ -13,8 +14,40 @@ export const stripTags = (text: string) => text.replace(/<[^>]*>/g, '').replace(
 export const FORUM_SURFACE = 0xe9e9e1;
 export const FORUM_HEADER = 0x0e3f52;
 
-/** The v75 friendly time ("10 days ago"): three units of the next smaller kind before rolling over. */
-export const forumAge = (seconds: number): string => FriendlyTime.format(seconds, '.ago', 3);
+/** GroupForumView.getAsDaysHoursMinutes: FriendlyTime with the ".ago" texts and a threshold of 1, so a unit rolls over as soon as the next bigger one is exceeded ("90 seconds" is "2 minutes ago"). */
+export const forumAge = (seconds: number): string => FriendlyTime.format(seconds, '.ago', 1);
+
+// MessageListView.const_31: a line that starts with ">" (and the one space after it) is quoted text.
+const QUOTE_LINE = /^>(?: ?|$)/;
+
+/**
+ * ComposeMessageView.addQuote, without the text that is already in the field: "<age> <author> wrote:", then every line of the message behind "> ",
+ * a run of lines that are quotes themselves collapsed to one "[quote skipped]" line, and a blank line after it.
+ */
+export const forumQuote = (message: MessageData): string =>
+{
+    const lines = [LocalizeText('groupforum.compose.reply_template', ['CREATION_TIME', 'AUTHOR_NAME', 'creation_time', 'author_name'], [forumAge(message.creationTime), message.authorName, forumAge(message.creationTime), message.authorName])];
+    let skipping = false;
+
+    for (const line of message.messageText.split(/\r\n|\r|\n/))
+    {
+        if (QUOTE_LINE.test(line))
+        {
+            if (!skipping)
+            {
+                skipping = true;
+                lines.push('> ' + LocalizeText('groupforum.compose.skipped_quote'));
+            }
+        }
+        else
+        {
+            lines.push('> ' + line);
+            skipping = false;
+        }
+    }
+
+    return lines.join('\n') + '\n\n';
+};
 
 interface ForumFrameProps {
     uniqueKey: string;
@@ -36,7 +69,6 @@ export const ForumFrame: FC<ForumFrameProps> = ({ uniqueKey, className, title, w
     <OctaneCardView
         aria-label={title}
         className={`octane-forum ${className}`}
-        dragStyle={FRAME_SHADOW}
         frameStyle={3}
         initialPosition={initialPosition}
         isResizable={isResizable}
@@ -93,7 +125,8 @@ interface ForumShortcutsProps {
 }
 
 /** shortcuts: the white "Quick Links:" strip; the three links are html anchors in the texts, rendered here as their link text. */
-export const ForumShortcuts: FC<ForumShortcutsProps> = ({ unreadCount = 0, onOpenList }) => {
+export const ForumShortcuts: FC<ForumShortcutsProps> = ({ unreadCount = 0, onOpenList }) =>
+{
     const strip = (key: string) => stripTags(LocalizeText(key));
     const mine = unreadCount > 0 ? stripTags(LocalizeText('groupforum.view.shortcuts.my.unread', ['UNREAD_COUNT'], [String(unreadCount)])) : strip('groupforum.view.shortcuts.my');
 
@@ -148,7 +181,8 @@ interface ForumPagerProps {
 }
 
 /** The 165x30 pager: first / previous, "n / total", next / last. */
-export const ForumPager: FC<ForumPagerProps> = ({ pageIndex, pageCount, onPage }) => {
+export const ForumPager: FC<ForumPagerProps> = ({ pageIndex, pageCount, onPage }) =>
+{
     const last = Math.max(0, pageCount - 1);
     const buttons: [string, number, number, boolean][] = [
         ['<<', 0, 0, pageIndex === 0],

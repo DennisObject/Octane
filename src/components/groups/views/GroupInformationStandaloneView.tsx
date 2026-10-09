@@ -4,7 +4,7 @@ import { LocalizeText } from '../../../api';
 import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
 import { useMessageEvent } from '../../../hooks';
 import { GroupInformationView } from './GroupInformationView';
-import { FRAME_SHADOW, GroupWindowTitle } from './GroupNativeLayout';
+import { GroupWindowTitle } from './GroupNativeLayout';
 
 export const GroupInformationStandaloneView: FC<{}> = (props) => {
     const [groupInformation, setGroupInformation] = useState<GroupInformationParser>(null);
@@ -21,7 +21,6 @@ export const GroupInformationStandaloneView: FC<{}> = (props) => {
         <OctaneCardView
             aria-label={LocalizeText('group.window.title')}
             className="octane-group-info"
-            dragStyle={FRAME_SHADOW}
             frameStyle={3}
             isResizable={false}
             role="dialog"

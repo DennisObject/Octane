@@ -21,16 +21,20 @@ interface Run {
 }
 
 // An html text field: <b> switches to the bold face, <br> breaks the line, any other tag is dropped.
-const parseHtml = (html: string): Run[] => {
+const parseHtml = (html: string): Run[] =>
+{
     const runs: Run[] = [];
     let bold = false;
 
-    for (const token of html.split(/(<\/?[a-z][^>]*>)/i)) {
+    for (const token of html.split(/(<\/?[a-z][^>]*>)/i))
+    {
         const tag = /^<(\/?)([a-z]+)/i.exec(token);
 
-        if (!tag) {
+        if (!tag)
+        {
             if (token) runs.push({ text: token.replace(/&nbsp;/g, ' ').replace(/\r?\n/g, ''), bold });
-        } else if (tag[2].toLowerCase() === 'b') bold = !tag[1];
+        }
+        else if (tag[2].toLowerCase() === 'b') bold = !tag[1];
         else if (tag[2].toLowerCase() === 'br') runs.push({ text: '\n', bold });
     }
 
@@ -45,13 +49,16 @@ interface GroupRichTextProps {
 }
 
 /** Word-wrapped html text drawn with the v75 raster, one NativeText per bold/regular segment of a line (black text only). */
-export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) => {
+export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) =>
+{
     const [layout, setLayout] = useState<{ lines: Line[]; lineHeight: number }>(null);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         let disposed = false;
 
-        const measure = async () => {
+        const measure = async () =>
+        {
             const base = nativeTextStyles.u_regular;
             const fonts = {
                 regular: await loadNativeFont({ ...base, bold: false }),
@@ -70,9 +77,12 @@ export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) => 
             const lines: Line[] = [{ segments: [], ascent }];
             let cursor = 0;
 
-            for (const run of parseHtml(html)) {
-                for (const word of run.text.split(/(\s+|\n)/).filter(Boolean)) {
-                    if (word === '\n') {
+            for (const run of parseHtml(html))
+            {
+                for (const word of run.text.split(/(\s+|\n)/).filter(Boolean))
+                {
+                    if (word === '\n')
+                    {
                         lines.push({ segments: [], ascent });
                         cursor = 0;
                         continue;
@@ -81,7 +91,8 @@ export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) => 
                     const wordWidth = widthOf(word, run.bold);
                     const isSpace = /^\s+$/.test(word);
 
-                    if (!isSpace && cursor > 0 && cursor + wordWidth > limit) {
+                    if (!isSpace && cursor > 0 && cursor + wordWidth > limit)
+                    {
                         lines.push({ segments: [], ascent });
                         cursor = 0;
                     }
@@ -100,10 +111,12 @@ export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) => 
             }
 
             // Each run advances by its own measured width (blanks included), as the glyph advances sum within a run.
-            for (const line of lines) {
+            for (const line of lines)
+            {
                 let advance = 0;
 
-                for (const segment of line.segments) {
+                for (const segment of line.segments)
+                {
                     segment.x = advance;
                     advance += rawWidth(`${segment.text}|`, segment.bold) - rawWidth('|', segment.bold);
                 }
@@ -114,7 +127,8 @@ export const GroupRichText: FC<GroupRichTextProps> = ({ html, x, y, width }) => 
 
         measure().catch((error) => console.warn('Native text layout failed', error));
 
-        return () => {
+        return () =>
+        {
             disposed = true;
         };
     }, [html, width]);
