@@ -12,6 +12,9 @@ import { shouldVirtualizeCatalogOffers } from './catalogGridPerformance.helpers'
 interface CatalogItemGridWidgetViewProps extends AutoGridProps {
     tintColor?: string;
     showPrices?: boolean;
+    /** Replaces the page's offers, e.g. one tile per colour family. Disables admin reordering. */
+    offers?: IPurchasableOffer[];
+    isOfferActive?: (offer: IPurchasableOffer) => boolean;
 }
 
 export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (props) => {
@@ -24,11 +27,14 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         children = null,
         className = '',
         style = {},
+        offers: offersOverride = null,
+        isOfferActive = null,
         ...rest
     } = props;
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const { selectCatalogOffer = null } = useCatalogActions();
     const adminMode = useCatalogAdmin()?.adminMode ?? false;
+    const canReorder = adminMode && !offersOverride;
     const reorderOffers = useCatalogAdminOfferReorder();
     const elementRef = useRef<HTMLDivElement>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -37,7 +43,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const baseGridClassName = columnCount > 1 && !className.split(/\s+/).includes('octane-catalog-grid') ? `${className} octane-catalog-grid`.trim() : className;
     const isAirStandardDensity = className.split(/\s+/).includes('octane-catalog-grid-density-standard');
 
-    const offers = currentPage?.offers ?? [];
+    const offers = offersOverride ?? currentPage?.offers ?? [];
     const hasAirBaseOffer = offers.some((offer) => isAirBaseCatalogOffer(offer));
     const hasAirPricedOffer = offers.some((offer) => !isAirBaseCatalogOffer(offer));
     const usesAirMixedGridTemplate = isAirStandardDensity && hasAirBaseOffer && hasAirPricedOffer;
@@ -157,20 +163,20 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                 key={offer.offerId}
                 className={`${isDragging ? 'octane-catalog-admin-dragging' : ''} ${isDropTarget ? 'octane-catalog-admin-drop-target' : ''}`}
                 data-air-offer-index={airPosition ? index : undefined}
-                draggable={adminMode}
+                draggable={canReorder}
                 style={
                     airPosition
                         ? { position: 'absolute', left: airPosition.x, top: airPosition.y, width: airPosition.width, height: airPosition.height }
                         : undefined
                 }
-                onDragEnd={adminMode ? handleDragEnd : undefined}
-                onDragOver={adminMode ? (e) => handleDragOver(e, index) : undefined}
-                onDragStart={adminMode ? () => handleDragStart(index) : undefined}
-                onDrop={adminMode ? () => handleDrop(index) : undefined}
+                onDragEnd={canReorder ? handleDragEnd : undefined}
+                onDragOver={canReorder ? (e) => handleDragOver(e, index) : undefined}
+                onDragStart={canReorder ? () => handleDragStart(index) : undefined}
+                onDrop={canReorder ? () => handleDrop(index) : undefined}
             >
                 <CatalogGridOfferView
                     bundleCounter={bundleCounterByOffer.get(offer) ?? 0}
-                    itemActive={currentOffer && currentOffer.offerId === offer.offerId}
+                    itemActive={isOfferActive ? isOfferActive(offer) : currentOffer && currentOffer.offerId === offer.offerId}
                     offer={offer}
                     selectOffer={selectOffer}
                     tintColor={tintColor}
@@ -189,7 +195,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                     className={`octane-catalog-air-mixed-grid ${gridClassName}`}
                     role="listbox"
                     style={{ ...airGridStyle, width: mixedLayout.width, minWidth: '100%', height: mixedLayout.height }}
-                    onDragEnd={adminMode ? handleDragEnd : undefined}
+                    onDragEnd={canReorder ? handleDragEnd : undefined}
                 >
                     {renderedMixedEntries.map(({ offer, index, ...position }) => renderOfferTile(offer, index, position))}
                     {children}
@@ -204,7 +210,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                 aria-label="Catalog items"
                 className={`octane-catalog-grid-virtual h-full min-h-0 ${gridClassName}`.trim()}
                 role="listbox"
-                onDragEnd={adminMode ? handleDragEnd : undefined}
+                onDragEnd={canReorder ? handleDragEnd : undefined}
                 style={
                     {
                         '--octane-grid-column-min-height': `${effectiveColumnMinHeight}px`,

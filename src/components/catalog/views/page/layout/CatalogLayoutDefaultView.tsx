@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { GetConfigurationValue, LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
+import { FC, ReactNode } from 'react';
+import { GetConfigurationValue, IPurchasableOffer, LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
 import { Text } from '../../../../../common';
 import { getCatalogGridMetrics, useCatalogData, useCatalogDisplayPreferences } from '../../../../../hooks';
 import { CatalogHeaderView } from '../../catalog-header/CatalogHeaderView';
@@ -15,8 +15,15 @@ import { CatalogTotalPriceWidget } from '../widgets/CatalogTotalPriceWidget';
 import { CatalogViewProductWidgetView } from '../widgets/CatalogViewProductWidgetView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
-export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
-    const { page = null } = props;
+interface CatalogLayoutDefaultViewProps extends CatalogLayoutProps {
+    /** `default_3x3_color_grouping`: grouped grid offers plus the colour grid that sits under the item grid. */
+    gridOffers?: IPurchasableOffer[];
+    isGridOfferActive?: (offer: IPurchasableOffer) => boolean;
+    colourGrid?: ReactNode;
+}
+
+export const CatalogLayoutDefaultView: FC<CatalogLayoutDefaultViewProps> = (props) => {
+    const { page = null, gridOffers, isGridOfferActive, colourGrid = null } = props;
     const { currentOffer = null, currentPage = null, roomPreviewer = null } = useCatalogData();
     const { density = 'standard', showTilePrices = true } = useCatalogDisplayPreferences();
     const gridMetrics = getCatalogGridMetrics(density);
@@ -29,7 +36,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
     const isBundleOffer = currentOffer?.pricingModel === 'pricing_model_bundle';
 
     return (
-        <div className="octane-catalog-default-layout flex flex-col h-full gap-2">
+        <div className={`octane-catalog-default-layout flex flex-col h-full gap-2 ${colourGrid ? 'has-colour-grid' : ''}`}>
             <div className="octane-catalog-product-view">
                 {currentOffer && (
                     <div className="octane-catalog-offer-panel flex gap-0">
@@ -69,10 +76,14 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
                 {GetConfigurationValue('catalog.headers') && <CatalogHeaderView imageUrl={currentPage.localization.getImage(0)} />}
                 <CatalogItemGridWidgetView
                     className={`octane-catalog-grid octane-catalog-grid-density-${density}`}
+                    isOfferActive={isGridOfferActive}
+                    offers={gridOffers}
                     showPrices={showTilePrices}
                     {...gridMetrics}
                 />
             </div>
+
+            {colourGrid}
 
             {showBundlePurchase && (
                 <div className="octane-catalog-price-row flex items-center justify-between gap-2">

@@ -224,6 +224,68 @@
     bottom: 0;
 }
 
+/*
+ * AIR CatalogPage.initializeWidgets for `default_3x3_color_grouping`: the item grid shrinks to
+ * 64 - 3 px and `colourGridWidget` (360x91) sits 3px under it, ending where the spinner starts (405).
+ */
+.octane-catalog-default-layout.has-colour-grid .octane-catalog-grid-shell {
+    bottom: auto;
+    height: 61px;
+}
+
+.octane-catalog-colour-grid-shell {
+    position: absolute;
+    left: 0;
+    top: 309px;
+    width: 360px;
+    height: 91px;
+    padding: 2px 4px 4px 2px;
+    border: 1px solid #b4b4ae;
+    border-radius: 5px;
+    background: var(--catalog-standard-panel);
+}
+
+/* `scrollable_itemgrid_vertical` with spacing 2 of `color_chooser_cell`s. */
+.octane-catalog-colour-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 2px;
+}
+
+/* ctlg_clr_27x22_1 frame, ctlg_clr_27x22_2 tinted by the colour (ColorTransform), ctlg_clr_27x22_3 when chosen. */
+.octane-catalog-colour-swatch {
+    position: relative;
+    width: 27px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: url("@/assets/images/catalog/air/colour-grid/ctlg_clr_27x22_1.png") no-repeat;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-catalog-colour-swatch::before,
+.octane-catalog-colour-swatch.is-chosen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.octane-catalog-colour-swatch::before {
+    background-color: var(--octane-swatch-colour, #ffffff);
+    mask: url("@/assets/images/catalog/air/colour-grid/ctlg_clr_27x22_2.png") no-repeat;
+}
+
+.octane-catalog-colour-swatch.is-chosen::after {
+    background: url("@/assets/images/catalog/air/colour-grid/ctlg_clr_27x22_3.png") no-repeat;
+}
+
+.octane-catalog-colour-swatch:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: 1px;
+}
+
 .octane-catalog-loading-state {
     position: absolute;
     inset: 31px 0 0;
