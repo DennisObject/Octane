@@ -52,7 +52,8 @@ export const GroupMembersView: FC<{}> = (props) => {
     const groupIdRef = useRef<number>(-1);
 
     // Read by the removal confirmation callback; refreshed before it can run.
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         groupIdRef.current = groupId;
     });
 
@@ -216,16 +217,13 @@ export const GroupMembersView: FC<{}> = (props) => {
     }, [groupId, levelId, pageId, searchQuery]);
 
     useEffect(() => {
-        if (groupId === -1) {
-            pendingRemoval.current = null;
+        pendingRemoval.current = null;
 
-            return;
-        }
+        if (groupId === -1) return;
 
         setMembersData(null);
         setTotalPages(0);
         setSearchQuery('');
-        pendingRemoval.current = null;
         setIsOwner(false);
         SendMessageComposer(new GroupInformationComposer(groupId, false));
     }, [groupId]);

@@ -18,7 +18,8 @@ export const GroupsView: FC<{}> = (props) => {
     useGroupMemberRemovalSink();
 
     // The server refuses a join with a reason code; the v75 client explains it in its plain alert.
-    useMessageEvent<HabboGroupJoinFailedMessageEvent>(HabboGroupJoinFailedMessageEvent, (event) => {
+    useMessageEvent<HabboGroupJoinFailedMessageEvent>(HabboGroupJoinFailedMessageEvent, (event) =>
+    {
         setJoinFailure({ title: LocalizeText('group.joinfail.title'), message: LocalizeText(`group.joinfail.${event.getParser().reason}`) });
     });
 
@@ -54,7 +55,8 @@ export const GroupsView: FC<{}> = (props) => {
 
         // The v75 link router opens a group's information window with group/<id>.
         const infoTracker: ILinkEventTracker = {
-            linkReceived: (url: string) => {
+            linkReceived: (url: string) =>
+            {
                 const groupId = Number(url.split('/')[1]);
 
                 if (groupId > 0) GetGroupInformation(groupId);
@@ -65,7 +67,8 @@ export const GroupsView: FC<{}> = (props) => {
         AddLinkEventTracker(linkTracker);
         AddLinkEventTracker(infoTracker);
 
-        return () => {
+        return () =>
+        {
             RemoveLinkEventTracker(linkTracker);
             RemoveLinkEventTracker(infoTracker);
         };

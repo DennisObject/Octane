@@ -1,7 +1,7 @@
-import { GetSessionDataManager, GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer } from '@octane/renderer';
+import { GetCommunication, GetSessionDataManager, GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer, OctaneEventType } from '@octane/renderer';
 import { useCallback, useEffect, useState } from 'react';
 import { SendMessageComposer } from '../../api';
-import { useMessageEvent } from '../events';
+import { useMessageEvent, useOctaneEvent } from '../events';
 
 /**
  * GroupConfirmMemberRemove is answered with only a userId and a furniture count: the reply names neither the group nor the request
@@ -11,18 +11,22 @@ import { useMessageEvent } from '../events';
  * - the first reply for its user resolves it, and only for the window that owns it; the reply of a closed window is retired by the sink;
  * - a confirmation captured from a reply is valid only for the group on screen and the signed-in user it was captured for (isCurrentSession);
  * - there is no timeout, a late reply is never rebound to a later request;
- * - an unanswered request therefore blocks further requests until the page reloads or the session user changes. A reconnect of the same
- *   user is not detected: the transaction and its late reply are then indistinguishable from a live one.
+ * - an unanswered request therefore blocks further requests until the session user changes or the connection is lost: the sink drops the
+ *   transaction when the connection is no longer authenticated, so a request sent on the old socket can neither block the new one nor be
+ *   answered for it, and a confirmation shown before the loss is no longer valid (isCurrentSession compares the connection epoch).
  */
 interface RemovalTransaction {
     owner: number;
     groupId: number;
     userId: number;
     sessionUserId: number;
+    epoch: number;
 }
 
 let transaction: RemovalTransaction = null;
 let nextOwner = 1;
+// Bumped every time the connection is lost.
+let epoch = 0;
 const liveOwners = new Set<number>();
 
 const currentSessionUserId = () => GetSessionDataManager().userId;
@@ -67,6 +71,7 @@ export interface GroupMemberRemoval {
     groupId: number;
     userId: number;
     sessionUserId: number;
+    epoch: number;
 }
 
 export const useGroupMemberRemoval = (): GroupMemberRemovalActions =>
@@ -90,14 +95,14 @@ export const useGroupMemberRemoval = (): GroupMemberRemovalActions =>
 
         if (transaction) return false;
 
-        transaction = { owner, groupId, userId, sessionUserId: currentSessionUserId() };
+        transaction = { owner, groupId, userId, sessionUserId: currentSessionUserId(), epoch };
         SendMessageComposer(new GroupConfirmRemoveMemberComposer(groupId, userId));
 
         return true;
     }, [owner]);
 
     const claimReply = useCallback((userId: number) => claimOwned(owner, userId), [owner]);
-    const isCurrentSession = useCallback((removal: GroupMemberRemoval) => removal.sessionUserId === currentSessionUserId(), []);
+    const isCurrentSession = useCallback((removal: GroupMemberRemoval) => removal.sessionUserId === currentSessionUserId() && removal.epoch === epoch, []);
 
     return { request, claimReply, isCurrentSession };
 };
@@ -105,6 +110,15 @@ export const useGroupMemberRemoval = (): GroupMemberRemovalActions =>
 /** Mounted once for the whole client: resolves a reply whose owning window has closed, so it can neither block nor leak to another window. */
 export const useGroupMemberRemovalSink = () =>
 {
+    // The server forgets the request with the socket: nothing is answered for it on the next connection.
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    {
+        if (GetCommunication().connection.connectionState.authenticated) return;
+
+        epoch++;
+        transaction = null;
+    });
+
     useMessageEvent<GroupConfirmMemberRemoveEvent>(GroupConfirmMemberRemoveEvent, (event) =>
     {
         retireOrphaned(event.getParser().userId);

@@ -58,8 +58,10 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
         return () => clearInterval(timer);
     }, []);
 
-    const subjectOk = isReply || subject.length > MIN_LENGTH;
-    const messageOk = message.length > MIN_LENGTH;
+    // The server trims both fields and drops a post whose trimmed text is too short without a reply, so the length rule is applied to the trimmed text
+    // (the v75 window counts the raw text); what is sent stays exactly what was typed.
+    const subjectOk = isReply || subject.trim().length > MIN_LENGTH;
+    const messageOk = message.trim().length > MIN_LENGTH;
     const cooldown = Math.max(0, POST_COOLDOWN - (now - lastPostTime));
     const permissionError = isReply ? forumData.postMessagePermissionError : forumData.postThreadPermissionError;
     const canPostHere = permissionError.length === 0;
