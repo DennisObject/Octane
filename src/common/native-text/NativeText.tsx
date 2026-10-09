@@ -5,6 +5,13 @@ import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText 
 import { useNativeTextSampling, useNativeTextScale } from './NativeTextScale';
 import { NativeTextStyleName, nativeTextStyles } from './NativeTextStyles';
 
+/** A drawn raster handed to `onRaster`: the 1x or display-scale canvas, the text it shows and the surface colour it was composited against. */
+export interface NativeTextRaster {
+    canvas: HTMLCanvasElement;
+    text: string;
+    background: number;
+}
+
 interface NativeTextProps {
     text: string;
     textStyle: NativeTextStyleName;
@@ -20,6 +27,8 @@ interface NativeTextProps {
      * device pixel ratio, smoothed on a fractional one). The default keeps the sharper raster at the next whole display scale.
      */
     nativeResolution?: boolean;
+    /** Told when a raster is drawn and, with null, when it is dropped (text change, fallback). Default texts pass nothing. */
+    onRaster?: (raster: NativeTextRaster | null) => void;
 }
 
 // TextField.wrapText preserves whitespace and splits a long token only when a
@@ -65,7 +74,7 @@ function wrapNativeParagraph(text: string, width: number, measure: (text: string
 }
 
 /** A v75 TextField raster, retaining its 2px gutter and accessible DOM text. */
-export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, overrides, className, style, nativeResolution = false }) => {
+export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, overrides, className, style, nativeResolution = false, onRaster }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [size, setSize] = useState<{ width: number; height: number }>(null);
     const fontStyle = { ...nativeTextStyles[textStyle], ...overrides, background };
@@ -73,10 +82,14 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
     const displayScale = useNativeTextScale();
     const sampling = useNativeTextSampling(nativeResolution);
     const scale = nativeResolution ? 1 : displayScale;
+    const onRasterRef = useRef(onRaster);
+
+    onRasterRef.current = onRaster;
 
     useEffect(() => {
         let disposed = false;
         setSize(null);
+        onRasterRef.current?.(null);
         const render = async () => {
             // Bound work before tokenisation or native layout. Oversized messages
             // retain the existing DOM text rather than being truncated.
@@ -114,6 +127,7 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
                     canvas.height = spaced.canvas.height;
                     canvas.getContext('2d').drawImage(spaced.canvas as CanvasImageSource, 0, 0);
                     setSize({ width: spaced.width, height: spaced.height });
+                    onRasterRef.current?.({ canvas, text, background });
 
                     return;
                 }
@@ -169,6 +183,7 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             const composited = compositeAir32RetainedToOpaque(pixels, [(background >>> 16) & 255, (background >>> 8) & 255, background & 255, 255]);
             canvas.getContext('2d').putImageData(new ImageData(composited, pixelWidth, pixelHeight), 0, 0);
             setSize({ width: pixelWidth / scale, height: fieldHeight });
+            onRasterRef.current?.({ canvas, text, background });
         };
         render().catch((error) => {
             if (!disposed) console.warn('Native text rendering failed', error);

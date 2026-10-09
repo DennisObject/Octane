@@ -9,6 +9,11 @@ interface RoomPromoteFieldProps {
     height: number;
     multiline?: boolean;
     isError?: boolean;
+    /** Focus lives in the view (one committed value for the whole window); the field only reports it. */
+    isEditing: boolean;
+    /** Set while the fractional-DPR surface is on screen: whether it shows this field's text (the input's own text is then transparent). */
+    surfaceOwnsText?: boolean;
+    onEditingChange: (editing: boolean) => void;
     onChange: (value: string) => void;
     onBlur: () => void;
 }
@@ -19,9 +24,8 @@ interface RoomPromoteFieldProps {
  * interior like the native field: 215px wide, and its text bitmap ends 2px above the field's bottom edge (a single line is clipped there, a wrapped
  * description must fit).
  */
-export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxLength, y, height, multiline = false, isError = false, onChange, onBlur }) => {
+export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxLength, y, height, multiline = false, isError = false, isEditing, surfaceOwnsText, onEditingChange, onChange, onBlur }) => {
     const overlayRef = useRef<HTMLDivElement>(null);
-    const [isEditing, setIsEditing] = useState(false);
     const [rasterFits, setRasterFits] = useState(false);
 
     useLayoutEffect(() => {
@@ -43,7 +47,7 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
         };
     }, [value, height, multiline]);
 
-    const showRaster = !isEditing && rasterFits && value.length > 0;
+    const showRaster = surfaceOwnsText === undefined ? !isEditing && rasterFits && value.length > 0 : surfaceOwnsText && !isEditing && value.length > 0;
     const props = {
         'aria-label': label,
         className: `octane-room-promote-edit__input${isError ? ' is-error' : ''}${showRaster ? ' is-raster' : ''}`,
@@ -51,10 +55,10 @@ export const RoomPromoteField: FC<RoomPromoteFieldProps> = ({ label, value, maxL
         style: { top: y, height },
         value,
         onBlur: () => {
-            setIsEditing(false);
+            onEditingChange(false);
             onBlur();
         },
-        onFocus: () => setIsEditing(true)
+        onFocus: () => onEditingChange(true)
     };
 
     return (
