@@ -51,7 +51,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     };
 
     return (
-        <OctaneCardView aria-label={caption} className="octane-room-promote-edit" frameStyle={3} isResizable={false} role="dialog" uniqueKey="room-promote-edit">
+        <OctaneCardView aria-label={caption} className="octane-room-promote-edit" frameStyle={3} isResizable={false} nativeShadow role="dialog" uniqueKey="room-promote-edit">
             <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
                 <NativeText
                     background={0x377998}

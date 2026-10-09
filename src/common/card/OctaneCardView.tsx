@@ -1,7 +1,8 @@
-import { FC, useMemo, useRef } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { Column, ColumnProps } from '..';
 import { DraggableWindow, DraggableWindowPosition, DraggableWindowProps } from '../draggable-window';
 import { CardResizeHandle } from './CardResizeHandle';
+import { NativeFrameShadow } from './NativeFrameShadow';
 import { OctaneCardContextProvider } from './OctaneCardContext';
 
 export interface OctaneCardViewProps extends DraggableWindowProps, ColumnProps {
@@ -12,6 +13,8 @@ export interface OctaneCardViewProps extends DraggableWindowProps, ColumnProps {
     /** Official 17px scrollbar skin (default). Pass false for the slim native scrollbar. */
     classicScrollbar?: boolean;
     resizeAxis?: 'both' | 'vertical' | 'horizontal';
+    /** Frame 3 only: draw the window shadow with the native client's Canvas2D routine instead of the CSS drop-shadow (kept as the fallback). */
+    nativeShadow?: boolean;
 }
 
 export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
@@ -29,6 +32,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
         frameStyle = null,
         classicScrollbar = true,
         resizeAxis = 'both',
+        nativeShadow = false,
         children,
         dragStyle,
         offsetLeft,
@@ -40,12 +44,16 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
         ...rest
     } = props;
     const elementRef = useRef<HTMLDivElement>(null);
+    const [isNativeShadowDrawn, setIsNativeShadowDrawn] = useState(false);
 
     const isWired =
         classNames.some((name) => name === 'octane-wired' || name.startsWith('octane-wired ')) ||
         (typeof rest.className === 'string' && rest.className.split(/\s+/).includes('octane-wired'));
     const resolvedFrameStyle = isWired ? null : frameStyle;
     const resolvedOverflow = overflow ?? (resolvedFrameStyle === 3 ? 'visible' : 'hidden');
+    // An explicit dragStyle filter keeps winning; the CSS shadow stays until the native one is actually drawn and returns if it cannot be.
+    const hasNativeShadow = nativeShadow && resolvedFrameStyle === 3 && !dragStyle?.filter;
+    const isCssShadowOff = hasNativeShadow && isNativeShadowDrawn;
 
     const getClassNames = useMemo(() => {
         const newClassNames: string[] = [isResizable ? 'resize' : 'resize-none', 'octane-card', 'octane-card-shell', `theme-${theme}`];
@@ -64,7 +72,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
                 3px is nearest to native 2.828px. This approximates the measured native shadow, rather than reproducing every edge pixel. */}
             <DraggableWindow
                 disableDrag={disableDrag}
-                dragStyle={resolvedFrameStyle === 3 ? { filter: 'drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.349))', ...dragStyle } : dragStyle}
+                dragStyle={resolvedFrameStyle === 3 && !isCssShadowOff ? { filter: 'drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.349))', ...dragStyle } : dragStyle}
                 handleSelector={handleSelector}
                 offsetLeft={offsetLeft}
                 offsetTop={offsetTop}
@@ -75,6 +83,7 @@ export const OctaneCardView: FC<OctaneCardViewProps> = (props) => {
                 uniqueKey={uniqueKey}
                 windowPosition={windowPosition}
             >
+                {hasNativeShadow && <NativeFrameShadow targetRef={elementRef} onReadyChange={setIsNativeShadowDrawn} />}
                 <Column classNames={getClassNames} gap={gap} innerRef={elementRef} overflow={resolvedOverflow} position={position} {...rest}>
                     {children}
                     {isResizable && resolvedFrameStyle === 3 && <CardResizeHandle uniqueKey={uniqueKey} elementRef={elementRef} resizeAxis={resizeAxis} />}
