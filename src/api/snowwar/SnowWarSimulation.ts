@@ -1,838 +1,1630 @@
-import {
-    calculateFlightPathWorld,
-    direction360To8,
-    getAngleFromComponents,
-    getBaseVelX,
-    getBaseVelY,
-    INITIAL_HIT_POINTS,
-    INVINCIBLE_AFTER_STUN_TIME,
-    moveTowards,
-    SNOWBALL_CREATE_TIME,
-    STUN_TIME,
-    SUBTURN_MOVEMENT,
-    SUBTURN_MS,
-    SUBTURNS_PER_TICK,
-    TILE_SIZE_WORLD,
-    tileToWorld,
-    worldToTile,
-} from './SnowWarMath';
+import { baseVectorX, baseVectorY, direction360ToDirection8, DIRECTION8_X, DIRECTION8_Y, fastSqrt, getAngleFromComponents, isInDistance, iterateSeed, javaDiv, rotateDirection8, SUBTURNS_PER_TURN, TILE_HALFWIDTH, TILE_WIDTH, toInt, validateDirection360, worldToTile } from './SnowWarMath';
+import type { ISnowWarHuman, ISnowWarMachine, ISnowWarPile, ISnowWarSnowball, ISnowWarTree, SnowWarEngineEvent, SnowWarPosture } from './SnowWarTypes';
+import { SnowWarActivityState, SnowWarObjectType, SnowWarTrajectory } from './SnowWarTypes';
 
-/**
- * Client-side SnowWar world state.
- *
- * The server is authoritative: it streams one GameStatus packet per 150ms
- * turn containing 3 subturns of events, plus FullGameStatus snapshots on
- * demand. This class replays those events at the same 50ms/subturn cadence
- * using the same integer math as the server, and keeps the previous subturn
- * position of every mobile object so the view can interpolate between
- * subturns for smooth animation.
- */
+// Port of the AIR deterministic SnowStorm simulation (com/sulake/habbo/game/snowwar: Tile, class_2527,
+// class_2526, SynchronizedGameArena, gameobjects/*, events/*). Rules, constants and evaluation order are
+// AIR's; the server runs the same simulation and both compare the per-turn checksum.
 
-export const SNOWWAR_OBJECT_AVATAR = 1;
-export const SNOWWAR_OBJECT_SNOWBALL = 2;
-export const SNOWWAR_OBJECT_MACHINE = 3;
-export const SNOWWAR_OBJECT_TREE = 4;
-export const SNOWWAR_OBJECT_PILE = 5;
-
-export const SNOWWAR_EVENT_MOVE = 2;
-export const SNOWWAR_EVENT_CREATE_SNOWBALL = 3;
-export const SNOWWAR_EVENT_LAUNCH_SNOWBALL = 4;
-export const SNOWWAR_EVENT_HIT = 5;
-export const SNOWWAR_EVENT_MACHINE_ADD = 11;
-export const SNOWWAR_EVENT_MACHINE_TRANSFER = 12;
-export const SNOWWAR_EVENT_DELETE_OBJECT = 8;
-export const SNOWWAR_EVENT_STUN = 9;
-export const SNOWWAR_EVENT_RAY_GUN_BURST = 10;
-export const SNOWWAR_EVENT_TREE_HIT = 13;
-
-export const SNOWWAR_STATE_NORMAL = 0;
-export const SNOWWAR_STATE_CREATING = 1;
-export const SNOWWAR_STATE_STUNNED = 2;
-export const SNOWWAR_STATE_INVINCIBLE = 3;
-
-export interface SnowWarSimEvent {
-    type: number;
-    p1: number;
-    p2: number;
-    p3: number;
-    p4: number;
-    p5: number;
-}
-
-export interface SnowWarAvatarState {
-    objectId: number;
-    userId: number;
-    teamId: number;
-    name: string;
-    figure: string;
-    gender: string;
-    worldX: number;
-    worldY: number;
-    prevWorldX: number;
-    prevWorldY: number;
-    rotation: number;
-    health: number;
-    snowballCount: number;
-    activityState: number;
-    activityTimer: number;
-    score: number;
-    tileX: number;
-    tileY: number;
-    walkGoalX: number | null;
-    walkGoalY: number | null;
-    nextGoalX: number | null;
-    nextGoalY: number | null;
-    pathfindIterations: number;
-}
-
-export interface SnowWarSnowballState {
-    objectId: number;
-    throwerObjectId: number;
-    locH: number;
-    locV: number;
-    prevLocH: number;
-    prevLocV: number;
-    height: number;
-    prevHeight: number;
-    direction: number;
-    trajectory: number;
-    timeToLive: number;
-    parabolaOffset: number;
-    planarVelocity: number;
-}
-
-export interface SnowWarMachineState {
-    objectId: number;
-    tileX: number;
-    tileY: number;
-    snowballCount: number;
-}
-
-export interface SnowWarTreeState {
-    objectId: number;
-    tileX: number;
-    tileY: number;
-    maximumHits: number;
-    hits: number;
-}
-
-export interface SnowWarPileState {
-    objectId: number;
-    tileX: number;
-    tileY: number;
-    maxSnowballs: number;
-    snowballCount: number;
-}
-
-export interface SnowWarImpactState {
-    id: number;
-    worldX: number;
-    worldY: number;
-    height: number;
-    trajectory: number;
-}
-
-interface FullStatusObject {
-    objectType: number;
-    objectId: number;
-    // avatar
-    worldX?: number;
-    worldY?: number;
-    rotation?: number;
-    health?: number;
-    snowballCount?: number;
-    activityTimer?: number;
-    activityState?: number;
-    score?: number;
-    userId?: number;
-    teamId?: number;
-    name?: string;
-    figure?: string;
-    gender?: string;
-    // snowball
-    locH?: number;
-    locV?: number;
-    height?: number;
-    direction?: number;
-    trajectory?: number;
-    timeToLive?: number;
-    throwerObjectId?: number;
-    parabolaOffset?: number;
-    maximumHits?: number;
-    hits?: number;
-    maxSnowballs?: number;
-}
-
-const MAX_PATHFIND_ITERATIONS = 50;
-
-// The custom Polaris full-status shape predates AIR's planar-velocity field.
-// Live launch events carry enough data for the exact value; a mid-flight
-// snapshot uses AIR's nominal coefficient until the next authoritative update.
-const nominalPlanarVelocity = (trajectory: number): number =>
+/** Level shape the simulation needs (subset of AIR GameLevelData / FuseObjectData). */
+export interface SnowWarSimLevel
 {
-    if (trajectory === 0) return 2000;
-    if (trajectory === 1) return 1788;
-    return 1414;
+    width: number;
+    height: number;
+    heightMap: string;
+    fuseObjects: readonly SnowWarSimFuseObject[];
+}
+
+export interface SnowWarSimFuseObject
+{
+    id?: number;
+    name?: string;
+    x: number;
+    y: number;
+    xDimension: number;
+    yDimension: number;
+    height: number;
+    direction: number;
+    canStandOn: boolean;
+}
+
+/** Wire object (AIR GameObjectsData entry): variables[0] = type, [1] = id; humans add four strings. */
+export interface SnowWarSimObjectData
+{
+    variables: readonly number[];
+    name?: string;
+    mission?: string;
+    figure?: string;
+    sex?: string;
+}
+
+/** GameStatus event (AIR SnowWarGameEventData); unused fields are 0. */
+export interface SnowWarSimEventData
+{
+    id: number;
+    humanGameObjectId: number;
+    targetHumanGameObjectId: number;
+    snowBallGameObjectId: number;
+    snowBallMachineReference: number;
+    x: number;
+    y: number;
+    trajectory: number;
+    /** Event 100 only. */
+    rayGunFuseObjectId?: number;
+}
+
+export type SnowWarSimNotification = SnowWarEngineEvent | { type: 'stopWaitingForSnowball'; humanId: number } | { type: 'sound'; name: string };
+
+const INFINITE_HEIGHT = 100000;
+
+/** Plus extra (CONTRACT §7, Polaris "Domexx" ray gun): not part of any official client. */
+export const RAY_GUN_FUSE_NAME = 'ads_igorraygun';
+export const RAY_GUN_BURST_EVENT = 100;
+const RAY_GUN_RANGE = 15;
+const RAY_GUN_TARGET_OFFSETS: readonly (readonly [ number, number ])[] = [ [ 0, 0 ], [ 0, 1 ], [ 1, 0 ], [ -1, 1 ], [ -1, -1 ], [ 1, -1 ], [ 1, 1 ] ];
+
+export const isRayGun = (fuseObject: SnowWarSimFuseObject): boolean =>
+    (fuseObject.name === RAY_GUN_FUSE_NAME) && ((fuseObject.direction & 1) === 0) && (fuseObject.direction >= 0) && (fuseObject.direction <= 6);
+
+/** The tile behind the gun a human stands on to fire it; E/W guns swap the footprint like the stage does. */
+export const getRayGunUseTile = (gun: SnowWarSimFuseObject): { x: number; y: number } =>
+{
+    const dx = DIRECTION8_X[gun.direction];
+    const dy = DIRECTION8_Y[gun.direction];
+    const rotated = (gun.direction === 2) || (gun.direction === 6);
+    const xDimension = rotated ? gun.yDimension : gun.xDimension;
+    const yDimension = rotated ? gun.xDimension : gun.yDimension;
+
+    return {
+        x: gun.x + ((dx < 0) ? xDimension : ((dx > 0) ? -1 : 0)),
+        y: gun.y + ((dy < 0) ? yDimension : ((dy > 0) ? -1 : 0))
+    };
 };
 
-// Same order as the server's SnowWarPathfinder.DIAGONAL_MOVE_POINTS - the
-// greedy step tie-breaks by this order via stable sort on both sides.
-const DIAGONAL_MOVE_POINTS: [number, number][] = [
-    [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1],
-];
+const HUMAN_SPEED = 534;
+const MAXIMUM_SNOWBALL_COUNT = 5;
+const INITIAL_HIT_POINTS = 5;
+const SNOWBALL_CREATE_TIME = 20;
+const STUN_TIME = 100;
+const INVINCIBLE_AFTER_STUN_TIME = 60;
+const SNOWBALL_THROW_INTERVAL = 5;
+const PLAYER_HEIGHT = 5000;
+const SCORE_ON_HIT = 1;
+const SCORE_ON_KNOCK_DOWN = 5;
+const HUMAN_RADIUS = 1600;
 
-const RAY_GUN_SPREAD: [number, number][] = [
-    [0, 0], [0, 1], [1, 0], [-1, 1], [-1, -1], [1, -1], [1, 1],
-];
+const SNOWBALL_RADIUS = 400;
+const THROW_VELOCITY = 2000;
+const INITIAL_HEIGHT = 3000;
+const LONG_LOB_TIME_TO_TARGET_COEF = 0.0007072135785007072;
+const SHORT_LOB_TIME_TO_TARGET_COEF = 0.000559;
+const SHORT_LOB_MAX_RANGE = 60000;
+const LONG_LOB_MAX_RANGE = 100000;
+const DEFAULT_THROW_TO_LOB_CUTOFF_RANGE = 42000;
+const QUICK_THROW_HEIGHT_SCALING_FACTOR = 10;
+const SHORT_LOB_HEIGHT_SCALING_FACTOR = 25;
+const LONG_LOB_HEIGHT_SCALING_FACTOR = 50;
 
-export class SnowWarSimulation
+const TREE_RADIUS = TILE_WIDTH - SNOWBALL_RADIUS - 1;
+const MACHINE_RADIUS = 1200;
+const PILE_RADIUS_PER_SNOWBALL = 100;
+
+interface Point3
 {
-    public readonly avatars: Map<number, SnowWarAvatarState> = new Map();
-    public readonly snowballs: Map<number, SnowWarSnowballState> = new Map();
-    public readonly machines: Map<number, SnowWarMachineState> = new Map();
-    public readonly trees: Map<string, SnowWarTreeState> = new Map();
-    public readonly piles: Map<string, SnowWarPileState> = new Map();
+    x: number;
+    y: number;
+    z: number;
+}
 
-    private _impacts: SnowWarImpactState[] = [];
-    private _impactId = 0;
+/** AIR `Tile`. */
+export class SnowWarTile
+{
+    public readonly location: Readonly<Point3>;
+    public gameObject: SnowWarSimObject = null;
+    public fuseObjectCount = 0;
+    public fuseBlocked = false;
+    public height = 0;
+    public blocked = false;
 
-    private _blockedTiles: boolean[][] = [];
-    private _mapWidth = 0;
-    private _mapHeight = 0;
-
-    private _pendingSubturns: SnowWarSimEvent[][] = [];
-    private _subturnClock = 0; // ms accumulated toward the next subturn
-    private _subturnCount = 0; // total subturns processed (monotonic)
-    private _lastAdvanceAt: number | null = null;
-
-    private static readonly MAX_EXTRAPOLATION_ALPHA = 2;
-
-    private static readonly TARGET_BUFFER_SUBTURNS = 2;
-
-    private static readonly CATCHUP_BUFFER_SUBTURNS = 12;
-    // Must outpace the server's 20 subturns/s even on a low-FPS tab, or the
-    // buffer pins at the cap and the whole replica runs behind real time
-    // (live symptom: throw sound now, ball/splash seconds later).
-    private static readonly CATCHUP_RATE = 3;
-    // Hard bound on both memory and standing delay: 18 subturns = 0.9s. AIR
-    // keeps its replica pinned to the newest server turn; anything past this
-    // is drained synchronously rather than replayed late.
-    private static readonly MAX_BUFFERED_SUBTURNS = 18;
-
-    public get subturnCount(): number
+    constructor(public readonly x: number, public readonly y: number)
     {
-        return this._subturnCount;
+        this.location = { x: x * TILE_WIDTH, y: y * TILE_WIDTH, z: 0 };
     }
 
-    /**
-     * Progress between the last processed subturn and the next. 0..1 during
-     * normal playback; allowed up to MAX_EXTRAPOLATION_ALPHA while starved so
-     * brief jitter reads as continued motion instead of a freeze.
-     */
-    public get interpolationAlpha(): number
+    public addFuseObject(fuseObject: SnowWarSimFuseObject): void
     {
-        return Math.min(SnowWarSimulation.MAX_EXTRAPOLATION_ALPHA, this._subturnClock / SUBTURN_MS);
+        this.fuseObjectCount++;
+        // One fuse object blocks when it cannot be stood on; two or more always block.
+        this.fuseBlocked = (this.fuseObjectCount > 1) || !fuseObject.canStandOn;
+        this.addToHeight(fuseObject.height);
     }
 
-    public reset(): void
+    public addToHeight(value: number): void
     {
-        this.avatars.clear();
-        this.snowballs.clear();
-        this.machines.clear();
-        this.trees.clear();
-        this.piles.clear();
-        this._impacts = [];
-        this._pendingSubturns = [];
-        this._subturnClock = 0;
-        this._subturnCount = 0;
-        this._lastAdvanceAt = null;
-        this._blockedTiles = [];
-        this._mapWidth = 0;
-        this._mapHeight = 0;
+        this.height = toInt(this.height + value);
+
+        if(this.height < 0) this.height = 0;
     }
 
-    /**
-     * Build the walkability grid from LevelData - the mirror of the server's
-     * SnowWarMap tile construction: heightmap x/X tiles are blocked, a tile is
-     * blocked only when it carries a solid item (walkableHeight > 0) so walkable
-     * props (rugs/tiles) stay walkable, and each machine occupies (x,y)..(x+2,y).
-     */
-    public setLevel(
-        heightmapRows: string[],
-        items: { x: number; y: number; rotation?: number; walkableHeight?: number; width?: number; length?: number }[],
-        machines: { x: number; y: number }[]): void
+    public locationIsInTileRange(point: Point3): boolean
     {
-        this._mapHeight = heightmapRows.length;
-        this._mapWidth = this._mapHeight > 0 ? heightmapRows[0].length : 0;
-        this._blockedTiles = heightmapRows.map(row =>
-        {
-            const cells: boolean[] = [];
-            for (let x = 0; x < this._mapWidth; x++)
-            {
-                const tile = x < row.length ? row.charAt(x) : 'x';
-                cells.push(tile === 'x' || tile === 'X');
-            }
-            return cells;
-        });
-
-        const block = (x: number, y: number) =>
-        {
-            if (x >= 0 && y >= 0 && x < this._mapWidth && y < this._mapHeight) this._blockedTiles[y][x] = true;
-        };
-
-        for (const item of items)
-        {
-            if ((item.walkableHeight ?? 3) <= 0) continue;
-            const swap = item.rotation === 2 || item.rotation === 6;
-            const effW = Math.max(1, (swap ? item.length : item.width) ?? 1);
-            const effL = Math.max(1, (swap ? item.width : item.length) ?? 1);
-            for (let dx = 0; dx < effW; dx++)
-                for (let dy = 0; dy < effL; dy++)
-                    block(item.x + dx, item.y + dy);
-        }
-        for (const machine of machines)
-        {
-            block(machine.x, machine.y);
-            block(machine.x + 1, machine.y);
-            block(machine.x + 2, machine.y);
-        }
+        return Math.abs(this.location.x - point.x) < TILE_HALFWIDTH && Math.abs(this.location.y - point.y) < TILE_HALFWIDTH;
     }
 
-    /** Rebuild the whole world from a FullGameStatus snapshot. */
-    public applyFullStatus(objects: FullStatusObject[]): void
+    public canMoveTo(): boolean
     {
-        this.avatars.clear();
-        this.snowballs.clear();
-        this.machines.clear();
-        this.trees.clear();
-        this.piles.clear();
-        this._impacts = [];
-        this._pendingSubturns = [];
-
-        for (const object of objects)
-        {
-            switch (object.objectType)
-            {
-                case SNOWWAR_OBJECT_AVATAR:
-                    this.avatars.set(object.objectId, {
-                        objectId: object.objectId,
-                        userId: object.userId ?? 0,
-                        teamId: object.teamId ?? 0,
-                        name: object.name ?? '',
-                        figure: object.figure ?? '',
-                        gender: object.gender ?? 'M',
-                        worldX: object.worldX ?? 0,
-                        worldY: object.worldY ?? 0,
-                        prevWorldX: object.worldX ?? 0,
-                        prevWorldY: object.worldY ?? 0,
-                        rotation: object.rotation ?? 0,
-                        health: object.health ?? INITIAL_HIT_POINTS,
-                        snowballCount: object.snowballCount ?? 0,
-                        activityState: object.activityState ?? SNOWWAR_STATE_NORMAL,
-                        activityTimer: object.activityTimer ?? 0,
-                        score: object.score ?? 0,
-                        tileX: worldToTile(object.worldX ?? 0),
-                        tileY: worldToTile(object.worldY ?? 0),
-                        walkGoalX: null,
-                        walkGoalY: null,
-                        nextGoalX: null,
-                        nextGoalY: null,
-                        pathfindIterations: 0,
-                    });
-                    break;
-                case SNOWWAR_OBJECT_SNOWBALL:
-                    this.snowballs.set(object.objectId, {
-                        objectId: object.objectId,
-                        throwerObjectId: object.throwerObjectId ?? 0,
-                        locH: object.locH ?? 0,
-                        locV: object.locV ?? 0,
-                        prevLocH: object.locH ?? 0,
-                        prevLocV: object.locV ?? 0,
-                        height: object.height ?? 0,
-                        prevHeight: object.height ?? 0,
-                        direction: object.direction ?? 0,
-                        trajectory: object.trajectory ?? 1,
-                        timeToLive: object.timeToLive ?? 0,
-                        parabolaOffset: object.parabolaOffset ?? 0,
-                        planarVelocity: nominalPlanarVelocity(object.trajectory ?? 1),
-                    });
-                    break;
-                case SNOWWAR_OBJECT_MACHINE:
-                    this.machines.set(object.objectId, {
-                        objectId: object.objectId,
-                        tileX: worldToTile(object.worldX ?? 0),
-                        tileY: worldToTile(object.worldY ?? 0),
-                        snowballCount: object.snowballCount ?? 0,
-                    });
-                    break;
-                case SNOWWAR_OBJECT_TREE: {
-                    const tileX = worldToTile(object.worldX ?? 0);
-                    const tileY = worldToTile(object.worldY ?? 0);
-                    this.trees.set(`${tileX},${tileY}`, {
-                        objectId: object.objectId,
-                        tileX,
-                        tileY,
-                        maximumHits: object.maximumHits ?? 3,
-                        hits: object.hits ?? 0,
-                    });
-                    break;
-                }
-                case SNOWWAR_OBJECT_PILE: {
-                    const tileX = worldToTile(object.worldX ?? 0);
-                    const tileY = worldToTile(object.worldY ?? 0);
-                    this.piles.set(`${tileX},${tileY}`, {
-                        objectId: object.objectId,
-                        tileX,
-                        tileY,
-                        maxSnowballs: object.maxSnowballs ?? 12,
-                        snowballCount: object.snowballCount ?? 0,
-                    });
-                    break;
-                }
-            }
-        }
+        return !this.fuseBlocked && !this.gameObject && !this.blocked;
     }
 
-    /** Queue one server tick worth of subturn event lists. */
-    public queueGameStatus(subturns: SnowWarSimEvent[][]): void
+    public addGameObject(gameObject: SnowWarSimObject): boolean
     {
-        for (const subturn of subturns) this._pendingSubturns.push(subturn);
+        if(this.gameObject) return false;
 
-        // Empty/movement-only backlog can be collapsed safely, but never
-        // consume projectile subturns here: queueGameStatus runs between
-        // paints, so a short throw could otherwise be launched, flown and
-        // deleted without ever reaching the DOM.
-        while (this._pendingSubturns.length > SnowWarSimulation.MAX_BUFFERED_SUBTURNS)
-        {
-            if (this.snowballs.size > 0 || this.nextSubturnTouchesProjectile()) break;
-            this.advanceSubturn();
-        }
-    }
-
-    /** Advance real time; processes queued subturns at the AIR 50ms cadence. */
-    public update(nowMs: number): void
-    {
-        if (this._lastAdvanceAt === null)
-        {
-            this._lastAdvanceAt = nowMs;
-            return;
-        }
-
-        const delta = Math.min(500, Math.max(0, nowMs - this._lastAdvanceAt));
-        this._lastAdvanceAt = nowMs;
-
-        const buffered = this._pendingSubturns.length;
-        const presentingProjectile = this.snowballs.size > 0 || this.nextSubturnTouchesProjectile();
-        let rate = 1;
-        if (!presentingProjectile)
-        {
-            if (buffered < SnowWarSimulation.TARGET_BUFFER_SUBTURNS) rate = 0.92;
-            else if (buffered > SnowWarSimulation.CATCHUP_BUFFER_SUBTURNS) rate = SnowWarSimulation.CATCHUP_RATE;
-            else if (buffered > SnowWarSimulation.TARGET_BUFFER_SUBTURNS + 3) rate = 1.08;
-        }
-        this._subturnClock += delta * rate;
-
-        while (this._subturnClock >= SUBTURN_MS && this._pendingSubturns.length > 0)
-        {
-            this._subturnClock -= SUBTURN_MS;
-            const projectileSubturn = this.snowballs.size > 0 || this.nextSubturnTouchesProjectile();
-            this.advanceSubturn();
-
-            if (projectileSubturn || this.snowballs.size > 0)
-            {
-                // A browser frame must be allowed to paint each projectile
-                // step. Discard catch-up credit for this frame so the next
-                // AIR subturn is presented after another real 50 ms instead
-                // of being consumed by this same update() call.
-                this._subturnClock = 0;
-                break;
-            }
-        }
-
-        const maxClock = SUBTURN_MS * SnowWarSimulation.MAX_EXTRAPOLATION_ALPHA;
-        if (this._pendingSubturns.length === 0 && this._subturnClock > maxClock)
-        {
-            this._subturnClock = maxClock;
-        }
-    }
-
-    /**
-     * Fired when a server event is applied during replay. Sounds hang off this
-     * (AIR plays them from the engine replay too) so audio stays in sync with
-     * the rendered state instead of the packet arrival time.
-     */
-    public onEventApplied: ((event: SnowWarSimEvent) => void) | null = null;
-
-    private nextSubturnTouchesProjectile(): boolean
-    {
-        const next = this._pendingSubturns[0];
-        if (!next) return false;
-
-        return next.some(event =>
-            event.type === SNOWWAR_EVENT_LAUNCH_SNOWBALL
-            || event.type === SNOWWAR_EVENT_RAY_GUN_BURST
-            || event.type === SNOWWAR_EVENT_DELETE_OBJECT);
-    }
-
-    private advanceSubturn(): void
-    {
-        const events = this._pendingSubturns.shift() ?? [];
-        this._subturnCount++;
-
-        for (const event of events)
-        {
-            this.applyEvent(event);
-            this.onEventApplied?.(event);
-        }
-
-        for (const avatar of this.avatars.values()) this.stepAvatar(avatar);
-        for (const ball of [...this.snowballs.values()]) this.stepSnowball(ball);
-    }
-
-    private applyEvent(event: SnowWarSimEvent): void
-    {
-        switch (event.type)
-        {
-            case SNOWWAR_EVENT_MOVE: {
-                const avatar = this.avatars.get(event.p1);
-                if (!avatar) return;
-                if (avatar.activityState === SNOWWAR_STATE_CREATING)
-                {
-                    avatar.activityState = SNOWWAR_STATE_NORMAL;
-                    avatar.activityTimer = 0;
-                }
-                const goalTileX = worldToTile(event.p2);
-                const goalTileY = worldToTile(event.p3);
-                if (avatar.walkGoalX !== goalTileX || avatar.walkGoalY !== goalTileY)
-                {
-                    avatar.walkGoalX = goalTileX;
-                    avatar.walkGoalY = goalTileY;
-                    avatar.pathfindIterations = 0;
-                }
-                return;
-            }
-            case SNOWWAR_EVENT_CREATE_SNOWBALL: {
-                const avatar = this.avatars.get(event.p1);
-                if (!avatar) return;
-                avatar.activityState = SNOWWAR_STATE_CREATING;
-                avatar.activityTimer = SNOWBALL_CREATE_TIME;
-                this.stopAvatarWalk(avatar);
-                return;
-            }
-            case SNOWWAR_EVENT_LAUNCH_SNOWBALL: {
-                this.launchSnowball(event.p1, event.p2, event.p3, event.p4, event.p5, true, true);
-                return;
-            }
-            case SNOWWAR_EVENT_RAY_GUN_BURST: {
-                RAY_GUN_SPREAD.forEach(([dx, dy], index) => this.launchSnowball(
-                    event.p1 + index,
-                    event.p2,
-                    event.p3 + (dx * TILE_SIZE_WORLD),
-                    event.p4 + (dy * TILE_SIZE_WORLD),
-                    event.p5,
-                    index === 0,
-                    false));
-                return;
-            }
-            case SNOWWAR_EVENT_HIT: {
-                const target = this.avatars.get(event.p2);
-                const thrower = this.avatars.get(event.p1);
-                if (target)
-                {
-                    target.health = Math.max(0, target.health - 1);
-                }
-                if (thrower) thrower.score += 1;
-                return;
-            }
-            case SNOWWAR_EVENT_MACHINE_ADD: {
-                const machine = this.machines.get(event.p1);
-                if (machine) machine.snowballCount = Math.min(5, machine.snowballCount + 1);
-                return;
-            }
-            case SNOWWAR_EVENT_MACHINE_TRANSFER: {
-                const avatar = this.avatars.get(event.p1);
-                const machine = this.machines.get(event.p2);
-                const pile = [...this.piles.values()].find(candidate => candidate.objectId === event.p2);
-                if (machine) machine.snowballCount = Math.max(0, machine.snowballCount - 1);
-                if (pile) pile.snowballCount = Math.max(0, pile.snowballCount - 1);
-                if (avatar) avatar.snowballCount = Math.min(5, avatar.snowballCount + 1);
-                return;
-            }
-            case SNOWWAR_EVENT_DELETE_OBJECT: {
-                this.snowballs.delete(event.p1);
-                this._impacts.push({
-                    id: ++this._impactId,
-                    worldX: event.p2,
-                    worldY: event.p3,
-                    height: event.p4,
-                    trajectory: event.p5,
-                });
-                return;
-            }
-            case SNOWWAR_EVENT_STUN: {
-                const target = this.avatars.get(event.p1);
-                const thrower = this.avatars.get(event.p2);
-                if (target)
-                {
-                    target.activityState = SNOWWAR_STATE_STUNNED;
-                    target.activityTimer = STUN_TIME;
-                    target.health = 0;
-                    target.rotation = (direction360To8(event.p3) + 4) % 8;
-                    this.stopAvatarWalk(target);
-                }
-                if (thrower) thrower.score += 5;
-                return;
-            }
-            case SNOWWAR_EVENT_TREE_HIT: {
-                const key = `${event.p1},${event.p2}`;
-                const tree = this.trees.get(key);
-                if (tree) tree.hits = event.p3;
-                return;
-            }
-        }
-    }
-
-    public drainImpacts(): SnowWarImpactState[]
-    {
-        return this._impacts.splice(0);
-    }
-
-    private launchSnowball(
-        objectId: number,
-        throwerObjectId: number,
-        targetX: number,
-        targetY: number,
-        trajectory: number,
-        turnsThrower: boolean,
-        consumeAmmo: boolean): void
-    {
-        const thrower = this.avatars.get(throwerObjectId);
-        const startX = thrower ? thrower.worldX : targetX;
-        const startY = thrower ? thrower.worldY : targetY;
-        const flight = calculateFlightPathWorld(startX, startY, targetX, targetY, trajectory);
-
-        if (thrower && turnsThrower)
-        {
-            thrower.rotation = direction360To8(getAngleFromComponents(targetX - thrower.worldX, targetY - thrower.worldY));
-            this.stopAvatarWalk(thrower);
-        }
-
-        // Only hand throws spend carried snowballs; the server never charges
-        // ammo for ray gun bursts, so the replica must not either.
-        if (thrower && consumeAmmo)
-        {
-            thrower.snowballCount = Math.max(0, thrower.snowballCount - 1);
-        }
-
-        this.snowballs.set(objectId, {
-            objectId,
-            throwerObjectId,
-            locH: startX,
-            locV: startY,
-            prevLocH: startX,
-            prevLocV: startY,
-            height: 3000,
-            prevHeight: 3000,
-            direction: flight.direction,
-            trajectory: flight.trajectory,
-            timeToLive: flight.timeToLive,
-            parabolaOffset: flight.parabolaOffset,
-            planarVelocity: flight.planarVelocity,
-        });
-    }
-
-    private stepAvatar(avatar: SnowWarAvatarState): void
-    {
-        avatar.prevWorldX = avatar.worldX;
-        avatar.prevWorldY = avatar.worldY;
-
-        if (avatar.activityTimer > 0)
-        {
-            avatar.activityTimer--;
-
-            if (avatar.activityTimer === 0)
-            {
-                switch (avatar.activityState)
-                {
-                    case SNOWWAR_STATE_CREATING:
-                        avatar.activityState = SNOWWAR_STATE_NORMAL;
-                        avatar.snowballCount = Math.min(5, avatar.snowballCount + 1);
-                        break;
-                    case SNOWWAR_STATE_STUNNED:
-                        avatar.activityState = SNOWWAR_STATE_INVINCIBLE;
-                        avatar.activityTimer = INVINCIBLE_AFTER_STUN_TIME;
-                        avatar.health = INITIAL_HIT_POINTS;
-                        break;
-                    case SNOWWAR_STATE_INVINCIBLE:
-                        avatar.activityState = SNOWWAR_STATE_NORMAL;
-                        break;
-                }
-            }
-        }
-
-        if (avatar.walkGoalX === null || avatar.walkGoalY === null) return;
-        if (avatar.activityState !== SNOWWAR_STATE_NORMAL && avatar.activityState !== SNOWWAR_STATE_INVINCIBLE) return;
-
-        const targetWorldX = tileToWorld(avatar.walkGoalX);
-        const targetWorldY = tileToWorld(avatar.walkGoalY);
-
-        if (avatar.worldX === targetWorldX && avatar.worldY === targetWorldY)
-        {
-            this.stopAvatarWalk(avatar);
-            return;
-        }
-
-        if (avatar.nextGoalX === null || avatar.nextGoalY === null)
-        {
-            avatar.pathfindIterations++;
-            if (avatar.pathfindIterations > MAX_PATHFIND_ITERATIONS)
-            {
-                this.stopAvatarWalk(avatar);
-                return;
-            }
-
-            const next = this.getNextDirection(avatar);
-            if (!next)
-            {
-                this.stopAvatarWalk(avatar);
-                return;
-            }
-
-            avatar.nextGoalX = next.x;
-            avatar.nextGoalY = next.y;
-            avatar.rotation = direction360To8(getAngleFromComponents(
-                tileToWorld(next.x) - avatar.worldX, tileToWorld(next.y) - avatar.worldY));
-        }
-
-        const nextWorldX = tileToWorld(avatar.nextGoalX);
-        const nextWorldY = tileToWorld(avatar.nextGoalY);
-
-        avatar.worldX = moveTowards(avatar.worldX, nextWorldX, SUBTURN_MOVEMENT);
-        avatar.worldY = moveTowards(avatar.worldY, nextWorldY, SUBTURN_MOVEMENT);
-
-        avatar.tileX = worldToTile(avatar.worldX);
-        avatar.tileY = worldToTile(avatar.worldY);
-
-        if (avatar.worldX === nextWorldX && avatar.worldY === nextWorldY)
-        {
-            avatar.nextGoalX = null;
-            avatar.nextGoalY = null;
-        }
-
-        if (avatar.worldX === targetWorldX && avatar.worldY === targetWorldY)
-        {
-            this.stopAvatarWalk(avatar);
-        }
-    }
-
-    private stopAvatarWalk(avatar: SnowWarAvatarState): void
-    {
-        avatar.walkGoalX = null;
-        avatar.walkGoalY = null;
-        avatar.nextGoalX = null;
-        avatar.nextGoalY = null;
-    }
-
-    /** Mirror of the server's SnowWarPathfinder.getNextDirection. */
-    private getNextDirection(avatar: SnowWarAvatarState): { x: number; y: number } | null
-    {
-        if (avatar.walkGoalX === null || avatar.walkGoalY === null) return null;
-
-        const positions: { x: number; y: number }[] = [];
-
-        for (const [dx, dy] of DIAGONAL_MOVE_POINTS)
-        {
-            const x = avatar.tileX + dx;
-            const y = avatar.tileY + dy;
-            if (dx !== 0 && dy !== 0
-                && !this.isValidStep(avatar, avatar.tileX + dx, avatar.tileY)
-                && !this.isValidStep(avatar, avatar.tileX, avatar.tileY + dy)) continue;
-            if (this.isValidStep(avatar, x, y)) positions.push({ x, y });
-        }
-
-        if (!positions.length) return null;
-
-        const goalX = avatar.walkGoalX;
-        const goalY = avatar.walkGoalY;
-        const distanceSquared = (p: { x: number; y: number }) =>
-            ((p.x - goalX) * (p.x - goalX)) + ((p.y - goalY) * (p.y - goalY));
-
-        positions.sort((a, b) => distanceSquared(a) - distanceSquared(b));
-
-        if (distanceSquared(positions[0]) >= distanceSquared({ x: avatar.tileX, y: avatar.tileY })) return null;
-
-        return positions[0];
-    }
-
-    /** Mirror of the server's SnowWarPathfinder.isValidTile. */
-    private isValidStep(avatar: SnowWarAvatarState, x: number, y: number): boolean
-    {
-        if (!this.isTileWalkable(x, y)) return false;
-
-        for (const other of this.avatars.values())
-        {
-            if (other.objectId === avatar.objectId) continue;
-
-            if (other.nextGoalX !== null && other.nextGoalY !== null)
-            {
-                if (other.nextGoalX === x && other.nextGoalY === y) return false;
-            }
-            else if (other.tileX === x && other.tileY === y)
-            {
-                return false;
-            }
-        }
+        this.gameObject = gameObject;
 
         return true;
     }
 
-    private isTileWalkable(x: number, y: number): boolean
+    public removeGameObject(): SnowWarSimObject
     {
-        if (!this._mapHeight) return true;
-        if (x < 0 || y < 0 || x >= this._mapWidth || y >= this._mapHeight) return false;
-        return !this._blockedTiles[y][x];
+        const gameObject = this.gameObject;
+
+        this.gameObject = null;
+
+        return gameObject;
     }
 
-    private stepSnowball(ball: SnowWarSnowballState): void
+    public get occupyingHuman(): SnowWarHumanObject
     {
-        ball.prevLocH = ball.locH;
-        ball.prevLocV = ball.locV;
-        ball.prevHeight = ball.height;
+        return (this.gameObject instanceof SnowWarHumanObject) ? this.gameObject : null;
+    }
 
-        ball.timeToLive--;
+    public removeOccupyingHuman(): SnowWarHumanObject
+    {
+        const human = this.occupyingHuman;
 
-        ball.locH = (ball.locH + (((getBaseVelX(ball.direction) * ball.planarVelocity) / 255) | 0)) | 0;
-        ball.locV = (ball.locV + (((getBaseVelY(ball.direction) * ball.planarVelocity) / 255) | 0)) | 0;
+        if(human) this.gameObject = null;
 
-        let distanceFromPeak = ball.timeToLive - ball.parabolaOffset;
-        let heightMultiplier: number;
-        switch (ball.trajectory)
+        return human;
+    }
+}
+
+/** AIR `SnowWarGameObject`. */
+export abstract class SnowWarSimObject
+{
+    public active = false;
+
+    constructor(public readonly id: number)
+    {
+    }
+
+    public abstract readonly type: number;
+    public abstract get numberOfVariables(): number;
+    public abstract getVariable(index: number): number;
+    public abstract get x(): number;
+    public abstract get y(): number;
+
+    public get z(): number
+    {
+        return 0;
+    }
+
+    /** Bounding circle radius (all SnowStorm objects use circle bounds). */
+    public abstract get boundingRadius(): number;
+
+    public get collisionHeight(): number
+    {
+        return this.boundingRadius;
+    }
+
+    public subturn(_stage: SnowWarStage): void
+    {
+    }
+
+    public onRemove(): void
+    {
+    }
+
+    public testSnowBallCollision(ball: SnowWarSnowballObject): boolean
+    {
+        return ball.z < this.collisionHeight && isInDistance(this.x, this.y, ball.x, ball.y, this.boundingRadius + SNOWBALL_RADIUS);
+    }
+
+    public onSnowBallHit(_stage: SnowWarStage, _ball: SnowWarSnowballObject): void
+    {
+    }
+}
+
+/** AIR `HumanGameObject` (ghost prediction is not ported). */
+export class SnowWarHumanObject extends SnowWarSimObject implements ISnowWarHuman
+{
+    public readonly type = SnowWarObjectType.HUMAN;
+    public readonly location: Point3;
+    public readonly moveTarget: Point3;
+    public currentTile: SnowWarTile;
+    public nextTile: SnowWarTile = null;
+    public isMoving = false;
+    public bodyDirection: number;
+    public hitPoints: number;
+    public snowballs: number;
+    public readonly isBot = 0;
+    public activityTimer: number;
+    public activityState: number;
+    public throwTimer = 0;
+    public score: number;
+    public readonly team: number;
+    public readonly userId: number;
+    public readonly name: string;
+    public readonly mission: string;
+    public readonly figure: string;
+    public readonly sex: string;
+
+    constructor(stage: SnowWarStage, data: SnowWarSimObjectData)
+    {
+        super(data.variables[1]);
+
+        const v = data.variables;
+
+        this.sex = data.sex ?? '';
+        this.name = data.name ?? '';
+        this.mission = data.mission ?? '';
+        this.figure = data.figure ?? '';
+        this.team = v[17];
+        this.userId = v[18];
+        this.activityState = v[11];
+        this.activityTimer = v[10];
+        this.location = { x: v[2], y: v[3], z: 0 };
+        this.bodyDirection = v[6];
+        this.hitPoints = v[7];
+        this.moveTarget = { x: v[14], y: v[15], z: 0 };
+        this.snowballs = v[8];
+        this.score = v[16];
+        this.currentTile = stage.getTileAt(v[4], v[5]);
+        this.currentTile?.addGameObject(this);
+
+        const nextTile = stage.getTileAt(v[12], v[13]);
+
+        if(nextTile && nextTile !== this.currentTile)
         {
-            case 0:
-                if (ball.timeToLive > 3) distanceFromPeak = 3 - ball.parabolaOffset;
-                heightMultiplier = 10;
-                break;
+            this.nextTile = nextTile;
+            this.nextTile.addGameObject(this);
+            this.currentTile?.removeOccupyingHuman();
+            this.isMoving = true;
+        }
+    }
+
+    public get numberOfVariables(): number
+    {
+        return 19;
+    }
+
+    public getVariable(index: number): number
+    {
+        switch(index)
+        {
+            case 0: return SnowWarObjectType.HUMAN;
+            case 1: return this.id;
+            case 2: return this.location.x;
+            case 3: return this.location.y;
+            case 4: return this.currentTile.x;
+            case 5: return this.currentTile.y;
+            case 6: return this.bodyDirection;
+            case 7: return this.hitPoints;
+            case 8: return this.snowballs;
+            case 9: return this.isBot;
+            case 10: return this.activityTimer;
+            case 11: return this.activityState;
+            case 12: return (this.nextTile ?? this.currentTile).x;
+            case 13: return (this.nextTile ?? this.currentTile).y;
+            case 14: return this.moveTarget.x;
+            case 15: return this.moveTarget.y;
+            case 16: return this.score;
+            case 17: return this.team;
+            case 18: return this.userId;
+            default: throw new Error(`No such variable: ${ index }`);
+        }
+    }
+
+    public get x(): number
+    {
+        return this.location.x;
+    }
+
+    public get y(): number
+    {
+        return this.location.y;
+    }
+
+    public get tileX(): number
+    {
+        return this.currentTile?.x ?? worldToTile(this.location.x);
+    }
+
+    public get tileY(): number
+    {
+        return this.currentTile?.y ?? worldToTile(this.location.y);
+    }
+
+    public get nextTileX(): number
+    {
+        return this.nextTile?.x ?? this.tileX;
+    }
+
+    public get nextTileY(): number
+    {
+        return this.nextTile?.y ?? this.tileY;
+    }
+
+    public get moveTargetX(): number
+    {
+        return this.moveTarget.x;
+    }
+
+    public get moveTargetY(): number
+    {
+        return this.moveTarget.y;
+    }
+
+    public get boundingRadius(): number
+    {
+        return HUMAN_RADIUS;
+    }
+
+    public get collisionHeight(): number
+    {
+        return PLAYER_HEIGHT;
+    }
+
+    public get isStunned(): boolean
+    {
+        return this.activityState === SnowWarActivityState.STUNNED;
+    }
+
+    public get isInvincible(): boolean
+    {
+        return this.activityState === SnowWarActivityState.INVINCIBLE;
+    }
+
+    /** `HumanGameObject.posture`. */
+    public get posture(): SnowWarPosture
+    {
+        if(this.throwTimer > 0) return 'swthrow';
+
+        if(this.activityState === SnowWarActivityState.MAKING_SNOWBALL) return 'swpick';
+
+        if(this.activityState === SnowWarActivityState.STUNNED) return 'swdieback';
+
+        return this.isMoving ? 'swrun' : 'std';
+    }
+
+    public onRemove(): void
+    {
+        if(this.currentTile && this.currentTile.occupyingHuman === this) this.currentTile.removeOccupyingHuman();
+
+        if(this.nextTile && this.nextTile.occupyingHuman === this) this.nextTile.removeOccupyingHuman();
+
+        this.isMoving = false;
+    }
+
+    private activityTimerTriggered(stage: SnowWarStage): void
+    {
+        if(this.activityState === SnowWarActivityState.STUNNED)
+        {
+            this.hitPoints = INITIAL_HIT_POINTS;
+            this.activityState = SnowWarActivityState.INVINCIBLE;
+            this.activityTimer = INVINCIBLE_AFTER_STUN_TIME;
+
+            return;
+        }
+
+        if(this.activityState === SnowWarActivityState.MAKING_SNOWBALL) this.snowballs++;
+
+        this.activityState = SnowWarActivityState.NORMAL;
+        stage.notify({ type: 'stopWaitingForSnowball', humanId: this.id });
+    }
+
+    public subturn(stage: SnowWarStage): void
+    {
+        if(this.activityTimer > 0)
+        {
+            if(this.activityTimer === 1) this.activityTimerTriggered(stage);
+
+            this.activityTimer--;
+        }
+
+        if(this.throwTimer > 0) this.throwTimer--;
+
+        if(!this.canMove() || !this.currentTile)
+        {
+            this.isMoving = false;
+
+            return;
+        }
+
+        if(this.nextTile)
+        {
+            this.moveTowardsNextTile();
+
+            return;
+        }
+
+        if(this.currentTile.locationIsInTileRange(this.moveTarget))
+        {
+            this.isMoving = false;
+
+            return;
+        }
+
+        const angle = getAngleFromComponents(this.moveTarget.x - this.currentTile.location.x, this.moveTarget.y - this.currentTile.location.y);
+        let direction = direction360ToDirection8(angle);
+
+        this.nextTile = stage.getTileInDirection(this.currentTile, direction);
+
+        if(!this.nextTile || !this.nextTile.canMoveTo())
+        {
+            if(this.nextTile && !this.nextTile.canMoveTo())
+            {
+                if(this.moveTarget.x === this.nextTile.location.x && this.moveTarget.y === this.nextTile.location.y && this.moveTarget.z === this.nextTile.location.z)
+                {
+                    this.nextTile = null;
+                    this.stopMovement();
+
+                    return;
+                }
+            }
+
+            direction = rotateDirection8(direction, -1);
+            this.nextTile = stage.getTileInDirection(this.currentTile, direction);
+
+            if(!this.nextTile || !this.nextTile.canMoveTo())
+            {
+                direction = rotateDirection8(direction, 2);
+                this.nextTile = stage.getTileInDirection(this.currentTile, direction);
+
+                if(this.nextTile && !this.nextTile.canMoveTo()) this.nextTile = null;
+            }
+        }
+
+        if(this.nextTile)
+        {
+            this.currentTile.removeOccupyingHuman();
+            this.nextTile.addGameObject(this);
+            this.bodyDirection = direction;
+            this.moveTowardsNextTile();
+        }
+        else
+        {
+            this.isMoving = false;
+        }
+    }
+
+    private moveTowardsNextTile(): void
+    {
+        const targetX = this.nextTile.location.x;
+        const targetY = this.nextTile.location.y;
+        let x = this.location.x;
+        let y = this.location.y;
+        const dx = x - targetX;
+        const dy = y - targetY;
+
+        if(dx !== 0)
+        {
+            if(dx < 0) x = (dx > -HUMAN_SPEED) ? targetX : x + HUMAN_SPEED;
+            else x = (dx < HUMAN_SPEED) ? targetX : x - HUMAN_SPEED;
+        }
+
+        if(dy !== 0)
+        {
+            if(dy < 0) y = (dy > -HUMAN_SPEED) ? targetY : y + HUMAN_SPEED;
+            else y = (dy < HUMAN_SPEED) ? targetY : y - HUMAN_SPEED;
+        }
+
+        this.location.x = x;
+        this.location.y = y;
+
+        const distance = Math.abs(targetX - x) + Math.abs(targetY - y) + Math.abs(this.nextTile.location.z - this.location.z);
+
+        if(distance < 267)
+        {
+            this.currentTile = this.nextTile;
+            this.nextTile = null;
+        }
+
+        this.isMoving = true;
+    }
+
+    public changeMoveTarget(stage: SnowWarStage, x: number, y: number): void
+    {
+        if(this.activityState === SnowWarActivityState.MAKING_SNOWBALL)
+        {
+            this.activityState = SnowWarActivityState.NORMAL;
+            this.activityTimer = 0;
+            stage.notify({ type: 'stopWaitingForSnowball', humanId: this.id });
+        }
+
+        if(this.canMove())
+        {
+            this.moveTarget.x = x;
+            this.moveTarget.y = y;
+        }
+    }
+
+    private playerIsHitBySnowball(stage: SnowWarStage, thrower: SnowWarHumanObject, direction360: number, ball: SnowWarSnowballObject): void
+    {
+        if(this.team === thrower.team)
+        {
+            stage.notify({ type: 'hit', humanId: this.id, byHumanId: thrower.id, damaged: false, knockedDown: false, snowballId: ball.id });
+
+            return;
+        }
+
+        if(this.hitPoints <= 0) return;
+
+        const knockedDown = (this.hitPoints === 1);
+
+        if(knockedDown)
+        {
+            this.playerFallsDown(stage, direction360);
+            thrower.onKnockDownHuman(stage, this);
+            stage.notify({ type: 'sound', name: 'HBSTG_snowwar_hit3' });
+        }
+
+        this.hitPoints--;
+        stage.notify({ type: 'hit', humanId: this.id, byHumanId: thrower.id, damaged: true, knockedDown, snowballId: ball.id });
+
+        if(knockedDown) stage.notify({ type: 'knockdown', humanId: this.id, byHumanId: thrower.id });
+    }
+
+    private onHitHuman(stage: SnowWarStage, victim: SnowWarHumanObject): void
+    {
+        if(this.team !== victim.team || stage.isDeathMatch) this.addScore(stage, SCORE_ON_HIT);
+    }
+
+    private onKnockDownHuman(stage: SnowWarStage, victim: SnowWarHumanObject): void
+    {
+        if(this.team !== victim.team || stage.isDeathMatch) this.addScore(stage, SCORE_ON_KNOCK_DOWN);
+    }
+
+    private addScore(stage: SnowWarStage, value: number): void
+    {
+        this.score += value;
+        stage.addTeamScore(this.team, value);
+        stage.notify({ type: 'scoreChange', humanId: this.id, team: this.team, delta: value, score: this.score, teamScores: stage.teamScores });
+    }
+
+    private playerFallsDown(stage: SnowWarStage, direction360: number): void
+    {
+        this.activityState = SnowWarActivityState.STUNNED;
+        this.activityTimer = STUN_TIME;
+        this.bodyDirection = rotateDirection8(direction360ToDirection8(direction360), 4);
+        this.stopMovement();
+        stage.notify({ type: 'stopWaitingForSnowball', humanId: this.id });
+    }
+
+    /** `HumanGameObject.stopMovement`: snap to the next (or current) tile centre. */
+    public stopMovement(): void
+    {
+        if(!this.nextTile)
+        {
+            if(this.currentTile)
+            {
+                this.moveTarget.x = this.currentTile.location.x;
+                this.moveTarget.y = this.currentTile.location.y;
+                this.moveTarget.z = 0;
+                this.location.x = this.currentTile.location.x;
+                this.location.y = this.currentTile.location.y;
+                this.location.z = 0;
+            }
+        }
+        else
+        {
+            this.currentTile = this.nextTile;
+            this.location.x = this.nextTile.location.x;
+            this.location.y = this.nextTile.location.y;
+            this.location.z = 0;
+            this.moveTarget.x = this.nextTile.location.x;
+            this.moveTarget.y = this.nextTile.location.y;
+            this.moveTarget.z = 0;
+            this.nextTile = null;
+        }
+
+        this.isMoving = false;
+    }
+
+    public canThrowSnowballs(): boolean
+    {
+        return this.snowballs > 0 && this.throwTimer < 1 && this.canMove();
+    }
+
+    public startThrowTimer(): void
+    {
+        this.throwTimer = SNOWBALL_THROW_INTERVAL;
+    }
+
+    public throwSnowball(targetX: number, targetY: number): boolean
+    {
+        if(this.snowballs < 1) return false;
+
+        this.stopMovement();
+        this.bodyDirection = direction360ToDirection8(getAngleFromComponents(targetX - this.location.x, targetY - this.location.y));
+        this.snowballs--;
+
+        return true;
+    }
+
+    public canMove(): boolean
+    {
+        return this.activityState === SnowWarActivityState.NORMAL || this.activityState === SnowWarActivityState.INVINCIBLE;
+    }
+
+    public canMakeSnowballs(): boolean
+    {
+        return this.canMove() && this.snowballs < MAXIMUM_SNOWBALL_COUNT;
+    }
+
+    public startMakingSnowball(): void
+    {
+        if(!this.canMakeSnowballs()) return;
+
+        this.activityState = SnowWarActivityState.MAKING_SNOWBALL;
+        this.activityTimer = SNOWBALL_CREATE_TIME;
+        this.stopMovement();
+    }
+
+    public getRemainingSnowballCapacity(): number
+    {
+        return MAXIMUM_SNOWBALL_COUNT - this.snowballs;
+    }
+
+    public testSnowBallCollision(ball: SnowWarSnowballObject): boolean
+    {
+        return !this.isStunned && !this.isInvincible && ball.thrower !== this && super.testSnowBallCollision(ball);
+    }
+
+    public onSnowBallHit(stage: SnowWarStage, ball: SnowWarSnowballObject): void
+    {
+        const thrower = ball.thrower;
+
+        // AIR dereferences the thrower unconditionally; a ball restored by a full status after its thrower
+        // left has none, so it only splashes here.
+        if(!thrower) return;
+
+        this.playerIsHitBySnowball(stage, thrower, ball.direction360, ball);
+        thrower.onHitHuman(stage, this);
+        stage.notify({ type: 'sound', name: 'HBSTG_snowwar_hit1' });
+    }
+}
+
+/** AIR `SnowBallGameObject`. */
+export class SnowWarSnowballObject extends SnowWarSimObject implements ISnowWarSnowball
+{
+    public readonly type = SnowWarObjectType.SNOWBALL;
+    public readonly location: Point3 = { x: 0, y: 0, z: 0 };
+    public direction360 = 0;
+    public trajectory = 0;
+    public planarVelocity = 0;
+    public timeToLive = 0;
+    public thrower: SnowWarHumanObject = null;
+    public parabolaOffset = 0;
+
+    public initializeFromData(data: SnowWarSimObjectData, thrower: SnowWarHumanObject): void
+    {
+        const v = data.variables;
+
+        this.location.x = v[2];
+        this.location.y = v[3];
+        this.location.z = v[4];
+        this.direction360 = validateDirection360(v[5]);
+        this.trajectory = v[6];
+        this.planarVelocity = v[10];
+        this.timeToLive = v[7];
+        this.thrower = thrower;
+        this.parabolaOffset = v[9];
+        this.active = true;
+    }
+
+    public initialize(x: number, y: number, z: number, trajectory: number, targetX: number, targetY: number, thrower: SnowWarHumanObject): void
+    {
+        this.active = true;
+        this.location.x = x;
+        this.location.y = y;
+        this.location.z = z;
+        this.trajectory = trajectory;
+
+        const dx = javaDiv((targetX - x) / 200);
+        const dy = javaDiv((targetY - y) / 200);
+
+        this.direction360 = validateDirection360(getAngleFromComponents(dx, dy));
+
+        let distance = toInt(fastSqrt((dx * dx) + (dy * dy)) * 200);
+
+        if(trajectory === SnowWarTrajectory.DEFAULT)
+        {
+            if(distance <= DEFAULT_THROW_TO_LOB_CUTOFF_RANGE) this.trajectory = SnowWarTrajectory.QUICK;
+            else if(distance <= SHORT_LOB_MAX_RANGE) this.trajectory = SnowWarTrajectory.SHORT_LOB;
+            else this.trajectory = SnowWarTrajectory.LONG_LOB;
+        }
+
+        if(this.trajectory === SnowWarTrajectory.QUICK)
+        {
+            this.timeToLive = 10;
+            this.planarVelocity = THROW_VELOCITY;
+        }
+        else if(this.trajectory === SnowWarTrajectory.SHORT_LOB)
+        {
+            distance = Math.min(distance, SHORT_LOB_MAX_RANGE);
+            this.timeToLive = toInt(distance * SHORT_LOB_TIME_TO_TARGET_COEF);
+            this.planarVelocity = (this.timeToLive === 0) ? 0 : javaDiv(distance / this.timeToLive);
+        }
+        else if(this.trajectory === SnowWarTrajectory.LONG_LOB)
+        {
+            distance = Math.min(distance, LONG_LOB_MAX_RANGE);
+            this.timeToLive = toInt(distance * LONG_LOB_TIME_TO_TARGET_COEF);
+            this.planarVelocity = (this.timeToLive === 0) ? 0 : javaDiv(distance / this.timeToLive);
+        }
+
+        this.parabolaOffset = javaDiv(this.timeToLive / 2);
+        this.thrower = thrower;
+    }
+
+    public get numberOfVariables(): number
+    {
+        return 11;
+    }
+
+    public getVariable(index: number): number
+    {
+        switch(index)
+        {
+            case 0: return SnowWarObjectType.SNOWBALL;
+            case 1: return this.id;
+            case 2: return this.location.x;
+            case 3: return this.location.y;
+            case 4: return this.location.z;
+            case 5: return this.direction360;
+            case 6: return this.trajectory;
+            case 7: return this.timeToLive;
+            case 8: return this.thrower ? this.thrower.id : 0;
+            case 9: return this.parabolaOffset;
+            case 10: return this.planarVelocity;
+            default: throw new Error(`No such variable: ${ index }`);
+        }
+    }
+
+    public get x(): number
+    {
+        return this.location.x;
+    }
+
+    public get y(): number
+    {
+        return this.location.y;
+    }
+
+    public get z(): number
+    {
+        return this.location.z;
+    }
+
+    public get throwerId(): number
+    {
+        return this.thrower ? this.thrower.id : 0;
+    }
+
+    public get boundingRadius(): number
+    {
+        return SNOWBALL_RADIUS;
+    }
+
+    public subturn(stage: SnowWarStage): void
+    {
+        if(!this.active) return;
+
+        this.timeToLive--;
+
+        if(this.trajectory === SnowWarTrajectory.QUICK) this.updatePosition(QUICK_THROW_HEIGHT_SCALING_FACTOR, true);
+        else if(this.trajectory === SnowWarTrajectory.SHORT_LOB) this.updatePosition(SHORT_LOB_HEIGHT_SCALING_FACTOR, false);
+        else this.updatePosition(LONG_LOB_HEIGHT_SCALING_FACTOR, false);
+
+        const tile = stage.getTileAt(worldToTile(this.location.x), worldToTile(this.location.y));
+        let collision = this.testCollisions(stage, tile);
+        let ground = false;
+
+        if(!collision)
+        {
+            collision = ground = stage.testCollisionWithGround(this);
+
+            if(ground)
+            {
+                stage.notify({ type: 'sound', name: 'HBSTG_snowwar_miss' });
+                stage.notify({ type: 'miss', snowballId: this.id, x: this.location.x, y: this.location.y, z: this.location.z });
+            }
+        }
+
+        if(!collision) return;
+
+        stage.notify({ type: 'splash', snowballId: this.id, x: this.location.x, y: this.location.y, z: this.location.z, ground });
+        stage.putGameObjectOnDeleteList(this);
+    }
+
+    private testCollisions(stage: SnowWarStage, tile: SnowWarTile): boolean
+    {
+        if(!tile) return false;
+
+        if(this.testCollision(stage, tile)) return true;
+
+        const direction = direction360ToDirection8(this.direction360);
+
+        if(this.testCollision(stage, stage.getTileInDirection(tile, direction))) return true;
+
+        if(this.testCollision(stage, stage.getTileInDirection(tile, rotateDirection8(direction, -1)))) return true;
+
+        return this.testCollision(stage, stage.getTileInDirection(tile, rotateDirection8(direction, 1)));
+    }
+
+    private testCollision(stage: SnowWarStage, tile: SnowWarTile): boolean
+    {
+        const target = tile?.gameObject;
+
+        if(!target || !target.testSnowBallCollision(this)) return false;
+
+        if(!(target instanceof SnowWarHumanObject)) stage.notify({ type: 'objectHit', objectId: target.id, objectType: target.type, snowballId: this.id });
+
+        target.onSnowBallHit(stage, this);
+
+        return true;
+    }
+
+    private updatePosition(heightFactor: number, capHeight: boolean): void
+    {
+        const x = this.location.x + javaDiv((baseVectorX(this.direction360) * this.planarVelocity) / 255);
+        const y = this.location.y + javaDiv((baseVectorY(this.direction360) * this.planarVelocity) / 255);
+        const offset = this.timeToLive - this.parabolaOffset;
+        let z = toInt((((this.parabolaOffset * this.parabolaOffset) - (offset * offset)) * heightFactor) + INITIAL_HEIGHT);
+
+        if(capHeight) z = Math.min(z, INITIAL_HEIGHT);
+
+        this.location.x = toInt(x);
+        this.location.y = toInt(y);
+        this.location.z = z;
+    }
+}
+
+/** AIR `TreeGameObject`. */
+export class SnowWarTreeObject extends SnowWarSimObject implements ISnowWarTree
+{
+    public readonly type = SnowWarObjectType.TREE;
+    public readonly tile: SnowWarTile;
+    public readonly direction: number;
+    public readonly height: number;
+    public readonly fuseObjectId: number;
+    public readonly maxHits: number;
+    public hits: number;
+
+    constructor(data: SnowWarSimObjectData, stage: SnowWarStage)
+    {
+        super(data.variables[1]);
+
+        const v = data.variables;
+
+        this.active = true;
+        this.tile = stage.getTileAt(worldToTile(v[2]), worldToTile(v[3]));
+        this.direction = v[4];
+        this.fuseObjectId = v[6];
+        this.height = v[5];
+        this.hits = v[8];
+        this.maxHits = v[7];
+
+        if(this.tile)
+        {
+            if(this.hits < this.maxHits) this.tile.addGameObject(this);
+
+            this.tile.addToHeight(-this.height);
+            this.tile.blocked = true;
+        }
+    }
+
+    public get numberOfVariables(): number
+    {
+        return 9;
+    }
+
+    public getVariable(index: number): number
+    {
+        switch(index)
+        {
+            case 0: return SnowWarObjectType.TREE;
+            case 1: return this.id;
+            case 2: return this.tile.location.x;
+            case 3: return this.tile.location.y;
+            case 4: return this.direction;
+            case 5: return this.height;
+            case 6: return this.fuseObjectId;
+            case 7: return this.maxHits;
+            case 8: return this.hits;
+            default: throw new Error(`No such variable: ${ index }`);
+        }
+    }
+
+    public get x(): number
+    {
+        return this.tile.location.x;
+    }
+
+    public get y(): number
+    {
+        return this.tile.location.y;
+    }
+
+    public get boundingRadius(): number
+    {
+        return (this.hits < this.maxHits) ? TREE_RADIUS : 0;
+    }
+
+    public get collisionHeight(): number
+    {
+        return this.height;
+    }
+
+    public onSnowBallHit(): void
+    {
+        if(this.hits < this.maxHits) this.hits++;
+
+        if(this.hits >= this.maxHits) this.tile.removeGameObject();
+    }
+}
+
+/** AIR `SnowballGivingGameObject`. */
+export abstract class SnowWarSnowballGivingObject extends SnowWarSimObject
+{
+    public readonly tile: SnowWarTile;
+    public readonly fuseObjectId: number;
+    public snowballCount: number;
+
+    constructor(id: number, snowballCount: number, tile: SnowWarTile, fuseObjectId: number)
+    {
+        super(id);
+
+        this.active = true;
+        this.snowballCount = snowballCount;
+        this.tile = tile;
+        this.fuseObjectId = fuseObjectId;
+    }
+
+    public get x(): number
+    {
+        return this.tile.location.x;
+    }
+
+    public get y(): number
+    {
+        return this.tile.location.y;
+    }
+
+    public pickupSnowballs(count: number): number
+    {
+        if(this.snowballCount < count) count = this.snowballCount;
+
+        this.snowballCount -= count;
+        this.onSnowballPickup();
+
+        return count;
+    }
+
+    protected onSnowballPickup(): void
+    {
+    }
+}
+
+/** AIR `SnowballMachineGameObject`. */
+export class SnowWarMachineObject extends SnowWarSnowballGivingObject implements ISnowWarMachine
+{
+    public readonly type = SnowWarObjectType.MACHINE;
+    public readonly maxSnowballs: number;
+    public readonly direction: number;
+
+    constructor(data: SnowWarSimObjectData, stage: SnowWarStage)
+    {
+        const v = data.variables;
+
+        super(v[1], v[6], stage.getTileAt(worldToTile(v[2]), worldToTile(v[3])), v[7]);
+
+        this.maxSnowballs = v[5];
+        this.direction = v[4];
+        this.tile?.addGameObject(this);
+    }
+
+    public get numberOfVariables(): number
+    {
+        return 8;
+    }
+
+    public getVariable(index: number): number
+    {
+        switch(index)
+        {
+            case 0: return SnowWarObjectType.MACHINE;
+            case 1: return this.id;
+            case 2: return this.tile.location.x;
+            case 3: return this.tile.location.y;
+            case 4: return this.direction;
+            case 5: return this.maxSnowballs;
+            case 6: return this.snowballCount;
+            case 7: return this.fuseObjectId;
+            default: throw new Error(`No such variable: ${ index }`);
+        }
+    }
+
+    public get boundingRadius(): number
+    {
+        return MACHINE_RADIUS;
+    }
+
+    public createSnowball(): void
+    {
+        if(this.snowballCount < this.maxSnowballs) this.snowballCount++;
+    }
+}
+
+/** AIR `SnowballPileGameObject`. */
+export class SnowWarPileObject extends SnowWarSnowballGivingObject implements ISnowWarPile
+{
+    public readonly type = SnowWarObjectType.PILE;
+    public readonly maxSnowballs: number;
+    private _radius: number;
+
+    constructor(data: SnowWarSimObjectData, stage: SnowWarStage)
+    {
+        const v = data.variables;
+
+        super(v[1], v[5], stage.getTileAt(worldToTile(v[2]), worldToTile(v[3])), v[6]);
+
+        this.maxSnowballs = v[4];
+
+        if(this.snowballCount > 0) this.tile?.addGameObject(this);
+
+        this._radius = this.snowballCount * PILE_RADIUS_PER_SNOWBALL;
+    }
+
+    public get numberOfVariables(): number
+    {
+        return 7;
+    }
+
+    public getVariable(index: number): number
+    {
+        switch(index)
+        {
+            case 0: return SnowWarObjectType.PILE;
+            case 1: return this.id;
+            case 2: return this.tile.location.x;
+            case 3: return this.tile.location.y;
+            case 4: return this.maxSnowballs;
+            case 5: return this.snowballCount;
+            case 6: return this.fuseObjectId;
+            default: throw new Error(`No such variable: ${ index }`);
+        }
+    }
+
+    public get boundingRadius(): number
+    {
+        return this._radius;
+    }
+
+    protected onSnowballPickup(): void
+    {
+        this._radius = this.snowballCount * PILE_RADIUS_PER_SNOWBALL;
+
+        if(this.snowballCount <= 0) this.tile.removeGameObject();
+    }
+}
+
+/** A queued arena event (AIR ISynchronizedGameEvent); targets are resolved when the GameStatus arrives. */
+export type SnowWarArenaEvent = (stage: SnowWarStage) => void;
+
+/**
+ * AIR `class_2527` + `class_2526` (stage: tiles, ordered objects, delete list, checksum) and
+ * `SynchronizedGameArena` (turn/subturn counters, event queues, team scores).
+ */
+export class SnowWarStage
+{
+    private _tiles: SnowWarTile[][] = [];
+    private _width = 0;
+    private _fuseObjects = new Map<number, SnowWarSimFuseObject>();
+    private _objects = new Map<number, SnowWarSimObject>();
+    private _deleteList: SnowWarSimObject[] = [];
+    private _queues = new Map<number, SnowWarArenaEvent[][]>();
+    private _checksums = new Map<number, number>();
+    private _skipObjectUpdates = false;
+    private _teamScores: number[] = [];
+
+    public turn = 0;
+    public subturn = 0;
+
+    constructor(public readonly numberOfTeams: number, private readonly _notify: (notification: SnowWarSimNotification) => void = () => undefined)
+    {
+        for(let i = 0; i < numberOfTeams; i++) this._teamScores.push(0);
+    }
+
+    public get isDeathMatch(): boolean
+    {
+        return this.numberOfTeams === 1;
+    }
+
+    public get teamScores(): readonly number[]
+    {
+        return this._teamScores;
+    }
+
+    public notify(notification: SnowWarSimNotification): void
+    {
+        this._notify(notification);
+    }
+
+    // ---- level / tiles (class_2527) ----
+
+    public initialize(level: SnowWarSimLevel): void
+    {
+        this.linkTiles(level);
+
+        for(const fuseObject of level.fuseObjects)
+        {
+            if(fuseObject.id !== undefined) this._fuseObjects.set(fuseObject.id, fuseObject);
+
+            const tile = this.getTileAt(fuseObject.x, fuseObject.y);
+
+            if(!tile) continue;
+
+            tile.addFuseObject(fuseObject);
+            this.checkAndAdjustNeighbouringTiles(fuseObject);
+        }
+    }
+
+    private checkAndAdjustNeighbouringTiles(fuseObject: SnowWarSimFuseObject): void
+    {
+        let xDimension = fuseObject.xDimension;
+        let yDimension = fuseObject.yDimension;
+
+        if(fuseObject.direction === 2 || fuseObject.direction === 6)
+        {
+            const swap = xDimension;
+
+            xDimension = yDimension;
+            yDimension = swap;
+        }
+
+        for(let i = 1; i < xDimension; i++) this.adjustNeighbour(this.getTileAt(fuseObject.x + i, fuseObject.y), fuseObject);
+
+        for(let i = 1; i < yDimension; i++) this.adjustNeighbour(this.getTileAt(fuseObject.x, fuseObject.y + i), fuseObject);
+    }
+
+    private adjustNeighbour(tile: SnowWarTile, fuseObject: SnowWarSimFuseObject): void
+    {
+        if(!tile) return;
+
+        tile.addToHeight(fuseObject.height);
+
+        if(!fuseObject.canStandOn) tile.blocked = true;
+    }
+
+    private linkTiles(level: SnowWarSimLevel): void
+    {
+        const heights = SnowWarStage.parseHeightMap(level.heightMap);
+
+        this._width = level.width;
+        this._tiles = [];
+
+        for(let y = 0; y < level.height; y++)
+        {
+            const row: SnowWarTile[] = [];
+
+            for(let x = 0; x < level.width; x++) row.push(((heights[y]?.[x]) !== INFINITE_HEIGHT) ? new SnowWarTile(x, y) : null);
+
+            this._tiles.push(row);
+        }
+    }
+
+    /** AIR `parseHeightMap`: only `x` marks a missing tile; a cell past the row end still exists. */
+    private static parseHeightMap(heightMap: string): number[][]
+    {
+        return heightMap.split('\r').map(row => Array.from(row, char =>
+        {
+            if(char >= '0' && char <= '9') return char.charCodeAt(0) - 48;
+
+            if(char === 'x') return INFINITE_HEIGHT;
+
+            return 10 + (char.charCodeAt(0) - 97);
+        }));
+    }
+
+    public getTileAt(x: number, y: number): SnowWarTile
+    {
+        if(x < 0 || x >= this._width || y < 0 || y >= this._tiles.length) return null;
+
+        return this._tiles[y][x];
+    }
+
+    public getTileInDirection(tile: SnowWarTile, direction: number): SnowWarTile
+    {
+        return this.getTileAt(tile.x + DIRECTION8_X[direction], tile.y + DIRECTION8_Y[direction]);
+    }
+
+    public get width(): number
+    {
+        return this._width;
+    }
+
+    public get height(): number
+    {
+        return this._tiles.length;
+    }
+
+    public testCollisionWithGround(ball: SnowWarSnowballObject): boolean
+    {
+        if(ball.z < 1) return true;
+
+        const tile = this.getTileAt(worldToTile(ball.x), worldToTile(ball.y));
+
+        return tile ? (ball.z < tile.height) : false;
+    }
+
+    public resetTiles(): void
+    {
+        for(const row of this._tiles) for(const tile of row) tile?.removeGameObject();
+    }
+
+    // ---- objects (class_2526) ----
+
+    public addGameObject(gameObject: SnowWarSimObject): void
+    {
+        if(!this._objects.has(gameObject.id))
+        {
+            this._objects.set(gameObject.id, gameObject);
+            this.notify({ type: 'objectAdded', objectId: gameObject.id, objectType: gameObject.type });
+        }
+
+        gameObject.active = true;
+    }
+
+    public removeGameObject(id: number): void
+    {
+        const gameObject = this._objects.get(id);
+
+        if(!gameObject) return;
+
+        this._objects.delete(id);
+        gameObject.onRemove();
+        this.notify({ type: 'objectRemoved', objectId: id, objectType: gameObject.type });
+    }
+
+    public removeAllGameObjects(): void
+    {
+        const objects = [ ...this._objects.values() ];
+
+        this._objects = new Map();
+
+        for(const gameObject of objects)
+        {
+            gameObject.onRemove();
+            this.notify({ type: 'objectRemoved', objectId: gameObject.id, objectType: gameObject.type });
+        }
+    }
+
+    public putGameObjectOnDeleteList(gameObject: SnowWarSimObject): void
+    {
+        if(!gameObject) return;
+
+        this._deleteList.push(gameObject);
+        gameObject.active = false;
+    }
+
+    public getGameObject(id: number): SnowWarSimObject
+    {
+        return this._objects.get(id) ?? null;
+    }
+
+    public getGameObjects(): SnowWarSimObject[]
+    {
+        return [ ...this._objects.values() ];
+    }
+
+    /** One subturn of every object, in insertion order, then the delete list. */
+    private updateObjects(): void
+    {
+        for(const gameObject of [ ...this._objects.values() ]) gameObject.subturn(this);
+
+        if(!this._deleteList.length) return;
+
+        const deleteList = this._deleteList;
+
+        this._deleteList = [];
+
+        for(const gameObject of deleteList) this.removeGameObject(gameObject.id);
+    }
+
+    /** `class_2526.calculateChecksum`: seed(turn) + Σ var[i] * (i + 1) over active objects, int32. */
+    public calculateChecksum(turn: number): number
+    {
+        let checksum = iterateSeed(turn);
+
+        for(const gameObject of this._objects.values())
+        {
+            if(!gameObject.active) continue;
+
+            const count = gameObject.numberOfVariables;
+
+            for(let i = 0; i < count; i++) checksum = toInt(checksum + (gameObject.getVariable(i) * (i + 1)));
+        }
+
+        return checksum;
+    }
+
+    /** Variable dump of the active objects (wire/checksum order), for diagnostics. */
+    public dumpObjects(): number[][]
+    {
+        const dump: number[][] = [];
+
+        for(const gameObject of this._objects.values())
+        {
+            if(!gameObject.active) continue;
+
+            const variables: number[] = [];
+
+            for(let i = 0; i < gameObject.numberOfVariables; i++) variables.push(gameObject.getVariable(i));
+
+            dump.push(variables);
+        }
+
+        return dump;
+    }
+
+    /** `class_1951.initializeGameObjects`. */
+    public initializeGameObjects(objects: readonly SnowWarSimObjectData[]): void
+    {
+        this.removeAllGameObjects();
+
+        for(const data of objects)
+        {
+            switch(data.variables[0])
+            {
+                case SnowWarObjectType.SNOWBALL: {
+                    const ball = new SnowWarSnowballObject(data.variables[1]);
+                    const thrower = this.getGameObject(data.variables[8]);
+
+                    ball.initializeFromData(data, (thrower instanceof SnowWarHumanObject) ? thrower : null);
+                    this.addGameObject(ball);
+                    break;
+                }
+                case SnowWarObjectType.TREE:
+                    this.addGameObject(new SnowWarTreeObject(data, this));
+                    break;
+                case SnowWarObjectType.PILE:
+                    this.addGameObject(new SnowWarPileObject(data, this));
+                    break;
+                case SnowWarObjectType.MACHINE:
+                    this.addGameObject(new SnowWarMachineObject(data, this));
+                    break;
+                case SnowWarObjectType.HUMAN:
+                    this.addGameObject(new SnowWarHumanObject(this, data));
+                    break;
+            }
+        }
+    }
+
+    // ---- arena (SynchronizedGameArena) ----
+
+    public addTeamScore(team: number, value: number): void
+    {
+        if(team > 0 && team <= this.numberOfTeams) this._teamScores[team - 1] += value;
+    }
+
+    public addGameEvent(turn: number, subturn: number, event: SnowWarArenaEvent): void
+    {
+        if(subturn < 0 || subturn >= SUBTURNS_PER_TURN) return;
+
+        let queue = this._queues.get(turn);
+
+        if(!queue)
+        {
+            queue = SnowWarStage.emptyQueue();
+            this._queues.set(turn, queue);
+        }
+
+        queue[subturn].push(event);
+    }
+
+    /** `SynchronizedGameArena.gamePulse`: queued events of (turn, subturn), then one object subturn. */
+    public pulse(): void
+    {
+        const queue = this._queues.get(this.turn);
+
+        if(queue)
+        {
+            const events = queue[this.subturn];
+
+            while(events.length) events.shift()(this);
+        }
+
+        if(!this._skipObjectUpdates) this.updateObjects();
+
+        if(this.subturn >= SUBTURNS_PER_TURN - 1)
+        {
+            this._checksums.set(this.turn, this.calculateChecksum(this.turn));
+            this._queues.delete(this.turn);
+            this._checksums.delete(this.turn - 64);
+            this.turn++;
+            this._skipObjectUpdates = false;
+        }
+
+        this.subturn++;
+
+        if(this.subturn >= SUBTURNS_PER_TURN) this.subturn = 0;
+    }
+
+    /** AS3 `int(undefined)` = 0 for turns that were never simulated. */
+    public getChecksum(turn: number): number
+    {
+        return this._checksums.get(turn) ?? 0;
+    }
+
+    /** `SynchronizedGameArena.seekToTurn`: the 3 subturns of `turn` then run without object updates. */
+    public seekToTurn(turn: number, checksum: number): void
+    {
+        this.turn = turn;
+        this.subturn = 0;
+        this._checksums.set(turn, checksum);
+        this._queues = new Map();
+        this._queues.set(turn, SnowWarStage.emptyQueue());
+        this._skipObjectUpdates = true;
+    }
+
+    private static emptyQueue(): SnowWarArenaEvent[][]
+    {
+        const queue: SnowWarArenaEvent[][] = [];
+
+        for(let i = 0; i < SUBTURNS_PER_TURN; i++) queue.push([]);
+
+        return queue;
+    }
+
+    // ---- GameStatus events (class_1951.handleGameStatus + events/*) ----
+
+    /** Builds the arena event for one GameStatus entry; null when AIR would not queue it. */
+    public createArenaEvent(data: SnowWarSimEventData): SnowWarArenaEvent
+    {
+        const human = this.getGameObject(data.humanGameObjectId);
+        const actor = (human instanceof SnowWarHumanObject) ? human : null;
+
+        switch(data.id)
+        {
             case 1:
-                heightMultiplier = 25;
-                break;
+                if(!actor) return null;
+
+                return stage =>
+                {
+                    stage.putGameObjectOnDeleteList(actor);
+                    actor.onRemove();
+                    stage.notify({ type: 'humanLeft', humanId: actor.id });
+                };
+            case 2:
+                if(!actor) return null;
+
+                return stage => actor.changeMoveTarget(stage, data.x, data.y);
+            case 3: {
+                const target = this.getGameObject(data.targetHumanGameObjectId);
+
+                if(!actor || !(target instanceof SnowWarHumanObject)) return null;
+
+                return stage =>
+                {
+                    actor.throwSnowball(target.location.x, target.location.y);
+                    actor.startThrowTimer();
+                    stage.notify({ type: 'sound', name: 'HBSTG_snowwar_throw' });
+                    stage.notify({ type: 'throw', humanId: actor.id, targetHumanId: target.id, targetX: target.location.x, targetY: target.location.y, trajectory: data.trajectory });
+                };
+            }
+            case 4:
+                if(!actor) return null;
+
+                return stage =>
+                {
+                    actor.throwSnowball(data.x, data.y);
+                    actor.startThrowTimer();
+                    stage.notify({ type: 'sound', name: 'HBSTG_snowwar_throw' });
+                    stage.notify({ type: 'throw', humanId: actor.id, targetHumanId: null, targetX: data.x, targetY: data.y, trajectory: data.trajectory });
+                };
+            case 7:
+                if(!actor) return null;
+
+                return () => actor.startMakingSnowball();
+            case 8: {
+                if(!actor) return null;
+
+                const ball = new SnowWarSnowballObject(data.snowBallGameObjectId);
+
+                return stage =>
+                {
+                    ball.initialize(actor.location.x, actor.location.y, INITIAL_HEIGHT, data.trajectory, data.x, data.y, actor);
+                    stage.addGameObject(ball);
+                    stage.notify({ type: 'snowballCreated', snowballId: ball.id, humanId: actor.id });
+                };
+            }
+            case 11: {
+                const machine = this.getGameObject(data.snowBallMachineReference);
+
+                if(!(machine instanceof SnowWarMachineObject)) return null;
+
+                return stage =>
+                {
+                    machine.createSnowball();
+                    stage.notify({ type: 'machineRefill', machineId: machine.id, snowballCount: machine.snowballCount });
+                };
+            }
+            case 12: {
+                const source = this.getGameObject(data.snowBallMachineReference);
+
+                if(!actor || !(source instanceof SnowWarSnowballGivingObject)) return null;
+
+                return stage =>
+                {
+                    if(actor.getRemainingSnowballCapacity() <= 0) return;
+
+                    const count = source.pickupSnowballs(1);
+
+                    if(count <= 0) return;
+
+                    actor.snowballs += count;
+                    stage.notify({ type: 'sound', name: 'HBSTG_snowwar_get_snowball' });
+                    stage.notify({ type: 'pickup', humanId: actor.id, sourceId: source.id, count });
+                };
+            }
+            case RAY_GUN_BURST_EVENT: {
+                const gun = this._fuseObjects.get(data.rayGunFuseObjectId);
+
+                if(!actor || !gun || !isRayGun(gun)) return null;
+
+                const balls = RAY_GUN_TARGET_OFFSETS.map((_, index) => new SnowWarSnowballObject(data.snowBallGameObjectId + index));
+
+                return stage =>
+                {
+                    const dx = DIRECTION8_X[gun.direction];
+                    const dy = DIRECTION8_Y[gun.direction];
+                    const centreX = gun.x + (RAY_GUN_RANGE * dx);
+                    const centreY = gun.y + (RAY_GUN_RANGE * dy);
+
+                    // Faces the gun's way and holds the throw pose; the burst costs no ammo.
+                    actor.bodyDirection = gun.direction;
+                    actor.startThrowTimer();
+
+                    balls.forEach((ball, index) =>
+                    {
+                        const [ offsetX, offsetY ] = RAY_GUN_TARGET_OFFSETS[index];
+
+                        ball.initialize(actor.location.x, actor.location.y, INITIAL_HEIGHT, SnowWarTrajectory.DEFAULT, (centreX + offsetX) * TILE_WIDTH, (centreY + offsetY) * TILE_WIDTH, actor);
+                        stage.addGameObject(ball);
+                        stage.notify({ type: 'snowballCreated', snowballId: ball.id, humanId: actor.id });
+                    });
+
+                    stage.notify({ type: 'sound', name: 'HBSTG_snowwar_throw' });
+                    stage.notify({ type: 'rayGunBurst', humanId: actor.id, rayGunFuseObjectId: data.rayGunFuseObjectId, firstSnowballId: data.snowBallGameObjectId });
+                };
+            }
             default:
-                heightMultiplier = 50;
-                break;
+                return null;
         }
-
-        ball.height = (3000 + heightMultiplier
-            * ((ball.parabolaOffset * ball.parabolaOffset) - (distanceFromPeak * distanceFromPeak))) | 0;
-        if (ball.trajectory === 0) ball.height = Math.min(ball.height, 3000);
-
-        if (ball.height < 0) this.snowballs.delete(ball.objectId);
     }
 
-    public getAvatarByUserId(userId: number): SnowWarAvatarState | null
+    /** Queues every event of GameStatus(turn) at turn + 1, at its subturn index. */
+    public queueGameStatus(turn: number, events: readonly (readonly SnowWarSimEventData[])[]): void
     {
-        for (const avatar of this.avatars.values())
+        events.forEach((subturnEvents, subturn) =>
         {
-            if (avatar.userId === userId) return avatar;
-        }
-        return null;
+            for(const data of subturnEvents)
+            {
+                const event = this.createArenaEvent(data);
+
+                if(event) this.addGameEvent(turn + 1, subturn, event);
+            }
+        });
     }
 }

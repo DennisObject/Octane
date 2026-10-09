@@ -1,6 +1,5 @@
-import { CreateLinkEvent, FrontPageItem, GetRoomEngine, GetSessionDataManager, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@octane/renderer';
+import { CreateLinkEvent, FrontPageItem, GetRoomEngine, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@octane/renderer';
 import {
-    BuilderFurniPlaceableStatus,
     CatalogType,
     GetRoomSession,
     ICatalogNode,
@@ -16,17 +15,15 @@ import { createOctaneStore } from '../../state/createOctaneStore';
 import {
     findNodeById,
     findNodeByName,
+    getCatalogNodePath,
     getNodesByOfferIdFromMap,
     normalizeCatalogType,
     replaceCatalogPageOffers,
-    resolveBuilderFurniPlaceableStatus,
     RoomControllerLevel,
-    RoomObjectCategory,
-    RoomObjectType
+    RoomObjectCategory
 } from './useCatalog.helpers';
 import { invalidateCatalogIndex, invalidateCatalogPage, readCatalogIndex, refetchCatalogPage } from './useCatalogQueries';
 
-export const DUMMY_PAGE_ID_FOR_OFFER_SEARCH = -12345678;
 const DRAG_AND_DROP_ENABLED = true;
 
 export type CatalogPendingRequest = { kind: 'id'; id: number } | { kind: 'name'; name: string } | { kind: 'offer'; offerId: number };
@@ -38,7 +35,12 @@ export interface CatalogUiState {
     currentType: string;
     pageId: number;
     previousPageId: number;
+    /** Top-level node whose tree the navigation list shows. */
+    currentTab: ICatalogNode | null;
+    /** Path from the current tab down to the single active node. */
     activeNodes: ICatalogNode[];
+    /** Expanded branches: the ancestors of the active node, plus the node itself when it is an open branch. */
+    openNodes: ICatalogNode[];
     pendingRequest: CatalogPendingRequest | null;
     pendingOfferId: number;
     pageOverride: ICatalogPage | null;
@@ -54,15 +56,8 @@ export interface CatalogUiState {
     objectMoverRequested: boolean;
     purchasableOffer: IPurchasableOffer | null;
     placedObjectPurchaseData: PlacedObjectPurchaseData | null;
-    furniCount: number;
-    furniLimit: number;
-    maxFurniLimit: number;
-    secondsLeft: number;
-    updateTime: number;
-    secondsLeftWithGrace: number;
-    builderPlacementBlockedByVisitors: boolean;
-    builderPlacementAllowedInCurrentRoom: boolean;
-    builderTrialRoomHideConfirmed: boolean;
+    placedObjectPurchaseSent: boolean;
+    placedObjectPurchaseBought: boolean;
 }
 
 export interface CatalogActions {
@@ -70,6 +65,8 @@ export interface CatalogActions {
     openCatalogByType: (type?: string) => void;
     toggleCatalogByType: (type?: string) => void;
     activateNode: (node: ICatalogNode, offerId?: number) => void;
+    showTab: (tab: ICatalogNode) => void;
+    openNavigatorAtNode: (node: ICatalogNode, offerId?: number) => void;
     openPageById: (id: number) => void;
     openPageByName: (name: string) => void;
     openPageByOfferId: (offerId: number) => void;
@@ -89,23 +86,13 @@ export interface CatalogActions {
     setCatalogPlaceMultipleObjects: (flag: boolean) => void;
     bumpLocalizationVersion: () => void;
     setRoomPreviewer: (previewer: RoomPreviewer | null) => void;
-    setBuildersClubFurniCount: (furniCount: number) => void;
-    setBuildersClubSubscription: (status: {
-        furniLimit: number;
-        maxFurniLimit: number;
-        secondsLeft: number;
-        updateTime: number;
-        secondsLeftWithGrace: number;
-        placementBlockedByVisitors: boolean;
-        placementAllowedInCurrentRoom: boolean;
-    }) => void;
-    setBuilderTrialRoomHideConfirmed: (flag: boolean) => void;
-    getBuilderFurniPlaceableStatus: (offer: IPurchasableOffer) => BuilderFurniPlaceableStatus;
     isDraggable: (offer: IPurchasableOffer) => boolean;
     requestOfferToMover: (offer: IPurchasableOffer) => void;
     cancelObjectMover: () => void;
     resetObjectMover: (flag?: boolean) => void;
     setPlacedObjectPurchaseData: (data: PlacedObjectPurchaseData | null) => void;
+    setPlacedObjectPurchaseSent: (sent: boolean) => void;
+    setPlacedObjectPurchaseBought: (bought: boolean) => void;
     resetPlacedOfferData: (flag?: boolean) => void;
     resetRoomPaint: (planeType: string, type: string) => void;
     refreshIndex: () => void;
@@ -121,7 +108,9 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     currentType: CatalogType.NORMAL,
     pageId: -1,
     previousPageId: -1,
+    currentTab: null,
     activeNodes: [],
+    openNodes: [],
     pendingRequest: null,
     pendingOfferId: -1,
     pageOverride: null,
@@ -137,27 +126,33 @@ export const INITIAL_CATALOG_UI_STATE: CatalogUiState = {
     objectMoverRequested: false,
     purchasableOffer: null,
     placedObjectPurchaseData: null,
-    furniCount: 0,
-    furniLimit: 0,
-    maxFurniLimit: 0,
-    secondsLeft: 0,
-    updateTime: 0,
-    secondsLeftWithGrace: 0,
-    builderPlacementBlockedByVisitors: false,
-    builderPlacementAllowedInCurrentRoom: false,
-    builderTrialRoomHideConfirmed: false
+    placedObjectPurchaseSent: false,
+    placedObjectPurchaseBought: false
 };
 
-const pathToRoot = (target: ICatalogNode): ICatalogNode[] => {
-    const nodes: ICatalogNode[] = [];
-    let node: ICatalogNode | null = target;
+const openedPage = (pageId: number, offerId: number) => ({
+    pageId,
+    previousPageId: pageId,
+    pendingOfferId: offerId,
+    pageOverride: null,
+    currentOffer: null
+});
 
-    while (node && node.pageName !== 'root') {
-        nodes.push(node);
-        node = node.parent;
+/** AIR CatalogNavigator.getPathToNodeWithLayout: the first visible descendant that is a page, through folders. */
+const getPathToNodeWithLayout = (node: ICatalogNode): ICatalogNode[] => {
+    for (const child of node.children) {
+        if (!child.isVisible) continue;
+
+        if (child.pageId > -1) return [child];
+
+        if (child.isBranch) {
+            const path = getPathToNodeWithLayout(child);
+
+            if (path.length) return [child, ...path];
+        }
     }
 
-    return nodes.reverse();
+    return [];
 };
 
 export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) => ({
@@ -169,7 +164,9 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({
             pageId: -1,
             previousPageId: -1,
+            currentTab: null,
             activeNodes: [],
+            openNodes: [],
             pendingRequest: null,
             pendingOfferId: -1,
             pageOverride: null,
@@ -203,51 +200,72 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({ isVisible: true });
     },
 
+    // Mirrors AIR CatalogNavigator.activateNode. Nodes are identified by
+    // reference: folder headings all carry pageId -1, and captions repeat
+    // across tabs. Exactly one node is active; only its ancestors stay open,
+    // and a folder toggles without opening a page.
     activateNode: (targetNode, offerId = -1) => {
+        if (!targetNode?.parent) return;
+
+        if (!targetNode.parent.parent) {
+            get().showTab(targetNode);
+
+            return;
+        }
+
         get().cancelObjectMover();
 
-        if (targetNode.parent && targetNode.parent.pageName === 'root' && targetNode.children.length) {
-            for (const child of targetNode.children) {
-                if (!child.isVisible) continue;
+        const { activeNodes, openNodes } = get();
+        const path = getCatalogNodePath(targetNode);
+        const nextOpen = path.slice(1, -1);
+        const closing = activeNodes.includes(targetNode) && openNodes.includes(targetNode);
 
-                targetNode = child;
-                break;
-            }
+        if (targetNode.isBranch && !closing) nextOpen.push(targetNode);
+
+        set({ currentTab: path[0], activeNodes: path, openNodes: nextOpen, navigationHidden: false });
+
+        if (targetNode.pageId > -1) set(openedPage(targetNode.pageId, offerId));
+    },
+
+    // Mirrors AIR CatalogNavigator.showNodeContent for a top tab: the list
+    // shows only that tab's tree, and the first page under it opens.
+    showTab: (tab) => {
+        if (!tab?.isVisible) return;
+
+        get().cancelObjectMover();
+
+        set({ currentTab: tab, activeNodes: [tab], openNodes: [], navigationHidden: false });
+
+        const path = tab.isBranch ? getPathToNodeWithLayout(tab) : [];
+
+        if (path.length) {
+            get().activateNode(path[path.length - 1]);
+
+            return;
         }
 
-        const nodes = pathToRoot(targetNode);
-        const previous = get().activeNodes;
-        const wasActive = previous.indexOf(targetNode) >= 0;
-        const wasOpen = targetNode.isOpen;
+        if (tab.pageId > -1) set(openedPage(tab.pageId, -1));
+    },
 
-        for (const existing of previous) {
-            existing.deactivate();
+    // Mirrors AIR CatalogNavigator.openNavigatorAtNode: used by links and
+    // offer lookups, it selects the node's tab and the node itself.
+    openNavigatorAtNode: (node, offerId = -1) => {
+        if (!node?.parent) return;
 
-            if (nodes.indexOf(existing) === -1) existing.close();
+        const tab = getCatalogNodePath(node)[0];
+
+        if (node !== tab) {
+            set({ currentTab: tab, activeNodes: [], openNodes: [] });
+            get().activateNode(node, offerId);
+
+            return;
         }
 
-        for (const node of nodes) {
-            node.activate();
+        // A link to the tab's own page opens that page, not its first child.
+        get().cancelObjectMover();
+        set({ currentTab: tab, activeNodes: [tab], openNodes: [], navigationHidden: false });
 
-            if (node.parent) node.open();
-
-            if (node === targetNode.parent && node.children.length) node.open();
-        }
-
-        if (wasActive && wasOpen) targetNode.close();
-        else targetNode.open();
-
-        const pageId = targetNode.pageId;
-
-        set((state) => ({
-            activeNodes: nodes,
-            pageId: pageId > -1 ? pageId : state.pageId,
-            previousPageId: pageId > -1 ? pageId : state.previousPageId,
-            pendingOfferId: offerId,
-            pageOverride: null,
-            currentOffer: null,
-            navigationHidden: false
-        }));
+        if (tab.pageId > -1) set(openedPage(tab.pageId, offerId));
     },
 
     getNodeById: (id, node) => findNodeById(id, node, readCatalogIndex(get().currentType)?.rootNode ?? null),
@@ -267,9 +285,10 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             return;
         }
 
-        const node = findNodeById(id, index.rootNode, index.rootNode);
+        // Every folder heading has pageId -1, so -1 never names a page.
+        const node = id > -1 ? findNodeById(id, index.rootNode, index.rootNode) : null;
 
-        if (node) get().activateNode(node);
+        if (node) get().openNavigatorAtNode(node);
     },
 
     openPageByName: (name) => {
@@ -285,7 +304,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
 
         const node = findNodeByName(name, index.rootNode, index.rootNode);
 
-        if (node) get().activateNode(node);
+        if (node) get().openNavigatorAtNode(node);
     },
 
     openPageByOfferId: (offerId) => {
@@ -303,7 +322,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
 
         if (!nodes || !nodes.length) return;
 
-        get().activateNode(nodes[0], offerId);
+        get().openNavigatorAtNode(nodes[0], offerId);
     },
 
     resolvePendingRequest: () => {
@@ -333,7 +352,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         if (index.rootNode.isBranch) {
             for (const child of index.rootNode.children) {
                 if (child && child.isVisible) {
-                    get().activateNode(child);
+                    get().showTab(child);
 
                     return;
                 }
@@ -405,78 +424,19 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         })),
     setRoomPreviewer: (roomPreviewer) => set({ roomPreviewer }),
 
-    setBuildersClubFurniCount: (furniCount) => set({ furniCount }),
-    setBuildersClubSubscription: (status) =>
-        set({
-            furniLimit: status.furniLimit,
-            maxFurniLimit: status.maxFurniLimit,
-            secondsLeft: status.secondsLeft,
-            updateTime: status.updateTime,
-            secondsLeftWithGrace: status.secondsLeftWithGrace,
-            builderPlacementBlockedByVisitors: status.placementBlockedByVisitors,
-            builderPlacementAllowedInCurrentRoom: status.placementAllowedInCurrentRoom,
-            builderTrialRoomHideConfirmed: status.secondsLeft > 0 ? false : get().builderTrialRoomHideConfirmed
-        }),
-    setBuilderTrialRoomHideConfirmed: (builderTrialRoomHideConfirmed) => set({ builderTrialRoomHideConfirmed }),
-
-    getBuilderFurniPlaceableStatus: (offer) => {
-        const { secondsLeft, furniCount, furniLimit, builderPlacementAllowedInCurrentRoom, builderPlacementBlockedByVisitors } = get();
-        const roomSession = GetRoomSession();
-
-        let visitorCount = 0;
-
-        if (roomSession && secondsLeft <= 0 && !builderPlacementBlockedByVisitors) {
-            const roomEngine = GetRoomEngine();
-            const userDataManager = roomSession.userDataManager;
-            const sessionDataManager = GetSessionDataManager();
-
-            if (roomEngine && userDataManager && sessionDataManager) {
-                const roomObjects = roomEngine.getRoomObjects(roomSession.roomId, RoomObjectCategory.UNIT);
-
-                if (roomObjects && roomObjects.length) {
-                    for (const roomObject of roomObjects) {
-                        if (!roomObject) continue;
-
-                        const userData = userDataManager.getUserDataByIndex(roomObject.id);
-
-                        if (!userData || userData.type !== RoomObjectType.USER) continue;
-                        if (userData.webID === sessionDataManager.userId) continue;
-                        if (userData.isModerator) continue;
-
-                        visitorCount++;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return resolveBuilderFurniPlaceableStatus({
-            offer,
-            roomSession: roomSession
-                ? { isGuildRoom: roomSession.isGuildRoom, isRoomOwner: roomSession.isRoomOwner, controllerLevel: roomSession.controllerLevel }
-                : null,
-            secondsLeft,
-            furniCount,
-            furniLimit,
-            builderPlacementAllowedInCurrentRoom,
-            builderPlacementBlockedByVisitors,
-            visitorCount
-        });
-    },
-
     isDraggable: (offer) => {
         const roomSession = GetRoomSession();
         const { currentType } = get();
 
         return (
-            ((DRAG_AND_DROP_ENABLED &&
-                roomSession &&
-                offer.page &&
-                offer.page.layoutCode !== 'sold_ltd_items' &&
-                currentType === CatalogType.NORMAL &&
-                (roomSession.isRoomOwner || (roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_MEMBER))) ||
-                (currentType === CatalogType.BUILDER && get().getBuilderFurniPlaceableStatus(offer) === BuilderFurniPlaceableStatus.OKAY)) &&
+            DRAG_AND_DROP_ENABLED &&
+            roomSession &&
+            offer.page &&
+            offer.page.layoutCode !== 'sold_ltd_items' &&
+            currentType === CatalogType.NORMAL &&
+            (roomSession.isRoomOwner || (roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_MEMBER)) &&
             offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE &&
+            offer.pricingModel !== Offer.PRICING_MODEL_MULTI &&
             offer.product.productType !== ProductTypeEnum.EFFECT &&
             offer.product.productType !== ProductTypeEnum.HABBO_CLUB
         );
@@ -519,7 +479,11 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
         set({ objectMoverRequested: false });
     },
 
-    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData }),
+    setPlacedObjectPurchaseData: (placedObjectPurchaseData) => set({ placedObjectPurchaseData, placedObjectPurchaseSent: false, placedObjectPurchaseBought: false }),
+
+    setPlacedObjectPurchaseSent: (placedObjectPurchaseSent) => set({ placedObjectPurchaseSent, placedObjectPurchaseBought: false }),
+
+    setPlacedObjectPurchaseBought: (placedObjectPurchaseBought) => set({ placedObjectPurchaseBought }),
 
     resetRoomPaint: (planeType, type) => {
         const roomEngine = GetRoomEngine();
@@ -576,7 +540,7 @@ export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) =
             }
         }
 
-        set({ placedObjectPurchaseData: null });
+        set({ placedObjectPurchaseData: null, placedObjectPurchaseSent: false, placedObjectPurchaseBought: false });
     },
 
     refreshIndex: () => invalidateCatalogIndex(get().currentType),

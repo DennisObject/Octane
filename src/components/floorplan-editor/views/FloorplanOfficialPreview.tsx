@@ -125,7 +125,7 @@ export const FloorplanOfficialPreview: FC<Props> = ({ plan, onDrawn }) => {
 
     const bars = (
         <>
-            <FloorplanSkinScrollbar scrollerRef={scrollerRef} axis="vertical" slot={20} className="fp-bc-preview-vbar" testId="floorplan-preview-scroll-vertical" />
+            <FloorplanSkinScrollbar scrollerRef={scrollerRef} axis="vertical" slot={15} className="fp-bc-preview-vbar" testId="floorplan-preview-scroll-vertical" />
             <FloorplanSkinScrollbar scrollerRef={scrollerRef} axis="horizontal" slot={14} className="fp-bc-preview-hbar" testId="floorplan-preview-scroll-horizontal" />
         </>
     );

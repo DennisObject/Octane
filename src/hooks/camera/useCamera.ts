@@ -7,10 +7,12 @@ import {
     RoomCameraWidgetManagerEvent,
     RoomSessionEvent
 } from '@octane/renderer';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { CameraPicture, cancelTrustedCameraRequests, completeTrustedCameraRequest, SendMessageComposer } from '../../api';
 import { useMessageEvent, useOctaneEvent } from '../events';
+
+const CAMERA_EFFECTS_LOAD_DELAY_MS = 10000;
 
 const useCameraState = () => {
     const [availableEffects, setAvailableEffects] = useState<IRoomCameraWidgetEffect[]>([]);
@@ -18,6 +20,8 @@ const useCameraState = () => {
     // must remain addressable so a deleted photograph does not shift the
     // photographs to its right and the user can choose where the next shot goes.
     const [cameraRoll, setCameraRoll] = useState<Array<CameraPicture | null>>(() => Array(5).fill(null));
+    // A capture that finishes after the camera window closed still needs the current roll.
+    const cameraRollRef = useRef(cameraRoll);
     const [selectedPictureIndex, setSelectedPictureIndex] = useState(-1);
     const [activePictureSlotIndex, setActivePictureSlotIndex] = useState(0);
     const [price, setPrice] = useState<{ credits: number; duckets: number; publishDucketPrice: number }>(null);
@@ -27,7 +31,9 @@ const useCameraState = () => {
     });
 
     useMessageEvent<CameraStorageUrlMessageEvent>(CameraStorageUrlMessageEvent, (event) => {
-        completeTrustedCameraRequest(event.getParser().url);
+        const parser = event.getParser();
+
+        completeTrustedCameraRequest(parser.url, parser.png);
     });
 
     useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
@@ -47,18 +53,50 @@ const useCameraState = () => {
     });
 
     useEffect(() => {
-        const manager = GetRoomCameraWidgetManager();
+        cameraRollRef.current = cameraRoll;
+    }, [cameraRoll]);
 
-        if (!manager.isLoaded) manager.init();
-        else setAvailableEffects(Array.from(manager.effects.values()));
+    useEffect(() => {
+        const manager = GetRoomCameraWidgetManager();
+        let delayHandle: number | null = null;
+        let idleHandle: number | null = null;
+
+        if (manager.isLoaded) {
+            setAvailableEffects(Array.from(manager.effects.values()));
+        } else {
+            // The effect textures (~1.6 MB) are only needed in the photo editor: load them once the
+            // hotel has finished booting rather than while it does. Idle time alone comes too early,
+            // between the boot's own requests, so the idle load waits for the boot to be over first.
+            const load = () => {
+                idleHandle = null;
+
+                if (!manager.isLoaded) void manager.init();
+            };
+
+            delayHandle = window.setTimeout(() => {
+                delayHandle = null;
+                idleHandle = window.requestIdleCallback ? window.requestIdleCallback(load, { timeout: 5000 }) : window.setTimeout(load, 0);
+            }, CAMERA_EFFECTS_LOAD_DELAY_MS);
+        }
 
         SendMessageComposer(new RequestCameraConfigurationComposer());
-        return cancelTrustedCameraRequests;
+
+        return () => {
+            if (delayHandle !== null) window.clearTimeout(delayHandle);
+
+            if (idleHandle !== null) {
+                if (window.cancelIdleCallback) window.cancelIdleCallback(idleHandle);
+                else window.clearTimeout(idleHandle);
+            }
+
+            cancelTrustedCameraRequests();
+        };
     }, []);
 
     return {
         availableEffects,
         cameraRoll,
+        cameraRollRef,
         setCameraRoll,
         selectedPictureIndex,
         setSelectedPictureIndex,

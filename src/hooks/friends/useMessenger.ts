@@ -5,6 +5,7 @@ import {
     FriendIsTypingEvent,
     FriendListUpdateEvent,
     GetSessionDataManager,
+    InstantMessageErrorEvent,
     MarkConsoleReadComposer,
     MessengerMessageAckEvent,
     MessengerMessageEvent,
@@ -16,13 +17,12 @@ import {
     SendMessageComposer as SendMessageComposerPacket,
     SendMessengerMessageComposer
 } from '@octane/renderer';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {
     CloneObject,
     LocalizeText,
     localizeWithFallback,
-    MessengerIconState,
     MessengerThread,
     MessengerThreadChat,
     NotificationAlertType,
@@ -34,7 +34,6 @@ import {
 } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
-import { IResolvedTranslation, useTranslation } from '../translation';
 import { useMessengerHistory, useMessengerRealtime } from './messenger';
 import { useFriends } from './useFriends';
 
@@ -44,12 +43,10 @@ const useMessengerState = () => {
     const persistentState = useMessengerRealtime();
     const persistentHistory = useMessengerHistory();
     const [messageThreads, setMessageThreads] = useState<MessengerThread[]>([]);
-    const [activeThreadId, setActiveThreadId] = useState<number>(-1);
+    const [activeThreadId, updateActiveThreadId] = useState<number>(-1);
     const [hiddenThreadIds, setHiddenThreadIds] = useState<number[]>([]);
-    const [iconState, setIconState] = useState<number>(MessengerIconState.HIDDEN);
     const { getFriend = null } = useFriends();
     const { simpleAlert = null } = useNotification();
-    const { settings, translateIncoming } = useTranslation();
 
     const [typingUserIds, setTypingUserIds] = useState<number[]>([]);
     const typingTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
@@ -59,8 +56,38 @@ const useMessengerState = () => {
     const hiddenThreadIdsRef = useRef(hiddenThreadIds);
 
     const messageThreadsRef = useRef(messageThreads);
-    messageThreadsRef.current = messageThreads;
-    hiddenThreadIdsRef.current = hiddenThreadIds;
+    const activeThreadIdRef = useRef(-1);
+    const moderationShown = useRef(false);
+    // Native widgets retain this construction flag until the conversation is rebuilt.
+    const visualizationThreadIdRef = useRef(-1);
+    const offlinePlaceholderMessagesRef = useRef(new WeakSet<MessengerThreadChat>());
+    const getOfflinePlaceholder = useCallback((chat: MessengerThreadChat) => offlinePlaceholderMessagesRef.current.has(chat), []);
+
+    const publishThreads = useCallback((threads: MessengerThread[]) => {
+        messageThreadsRef.current = threads;
+        setMessageThreads(threads);
+    }, []);
+
+    const publishHiddenThreads = (ids: number[]) => {
+        hiddenThreadIdsRef.current = ids;
+        setHiddenThreadIds(ids);
+    };
+
+    const setActiveThreadId = useCallback((threadId: number, rebuildVisualization = true) => {
+        if (threadId > 0 && (rebuildVisualization || visualizationThreadIdRef.current !== threadId)) {
+            visualizationThreadIdRef.current = threadId;
+            // Retained/history messages are backfilled, not constructed as live outgoing widgets.
+            offlinePlaceholderMessagesRef.current = new WeakSet<MessengerThreadChat>();
+        }
+        activeThreadIdRef.current = threadId;
+        updateActiveThreadId(threadId);
+        const current = messageThreadsRef.current.find((thread) => thread.threadId === threadId);
+        if (!current) return;
+        const thread = CloneObject(current);
+        thread.setRead();
+        publishThreads(messageThreadsRef.current.map((existing) => existing.threadId === threadId ? thread : existing));
+        if (thread.participant.id > 0) SendMessageComposer(new MarkConsoleReadComposer(thread.participant.id));
+    }, [publishThreads]);
 
     const visibleThreads = useMemo(() => messageThreads.filter((thread) => hiddenThreadIds.indexOf(thread.threadId) === -1), [messageThreads, hiddenThreadIds]);
     const activeThread = useMemo(
@@ -78,112 +105,56 @@ const useMessengerState = () => {
 
             thread = new MessengerThread(friend);
 
-            thread.addMessage(null, LocalizeText('messenger.moderationinfo'), 0, null, MessengerThreadChat.SECURITY_NOTIFICATION);
+            if (!moderationShown.current) {
+                thread.addMessage(null, LocalizeText('messenger.moderationinfo'), 0, null, MessengerThreadChat.SECURITY_NOTIFICATION);
+                moderationShown.current = true;
+            }
+            if (!friend.online) thread.addMessage(null, LocalizeText('messenger.notification.persisted_messages'), 0, null, MessengerThreadChat.SECURITY_NOTIFICATION);
 
             thread.setRead();
 
-            messageThreadsRef.current = [...messageThreadsRef.current, thread];
-            setMessageThreads((prevValue) => (prevValue.some((existing) => existing.threadId === thread.threadId) ? prevValue : [...prevValue, thread]));
+            publishThreads([...messageThreadsRef.current, thread]);
         } else {
-            const hiddenIndex = hiddenThreadIdsRef.current.indexOf(thread.threadId);
-
-            if (hiddenIndex >= 0) {
-                setHiddenThreadIds((prevValue) => {
-                    const newValue = [...prevValue];
-
-                    newValue.splice(hiddenIndex, 1);
-
-                    return newValue;
-                });
-            }
+            if (hiddenThreadIdsRef.current.includes(thread.threadId)) publishHiddenThreads(hiddenThreadIdsRef.current.filter((id) => id !== thread.threadId));
         }
 
         return thread;
     };
 
     const closeThread = (threadId: number) => {
-        setHiddenThreadIds((prevValue) => {
-            const newValue = [...prevValue];
-
-            if (newValue.indexOf(threadId) >= 0) return prevValue;
-
-            newValue.push(threadId);
-
-            return newValue;
-        });
-
-        if (activeThreadId === threadId) setActiveThreadId(-1);
+        if (!hiddenThreadIdsRef.current.includes(threadId)) publishHiddenThreads([...hiddenThreadIdsRef.current, threadId]);
+        if (activeThreadIdRef.current === threadId) {
+            const first = messageThreadsRef.current.find((thread) => !hiddenThreadIdsRef.current.includes(thread.threadId));
+            setActiveThreadId(first?.threadId ?? -1);
+        }
     };
 
     const sendMessage = (
         thread: MessengerThread,
         senderId: number,
         messageText: string,
-        secondsSinceSent: number = 0,
+        secondsSinceSent = 0,
         extraData: string = null,
-        messageType: number = MessengerThreadChat.CHAT,
-        translation: IResolvedTranslation = null
+        messageType = MessengerThreadChat.CHAT
     ) => {
-        if (!thread || !messageText || !messageText.length) return;
-
+        if (!thread || !messageText?.length) return;
         const ownMessage = senderId === GetSessionDataManager().userId;
-
-        if (ownMessage && messageType === MessengerThreadChat.CHAT && messageText.length <= 255)
-            SendMessageComposer(new SendMessageComposerPacket(thread.participant.id, messageText));
-
-        let addedChatId = -1;
-
-        setMessageThreads((prevValue) => {
-            const newValue = [...prevValue];
-            const index = newValue.findIndex((newThread) => newThread.threadId === thread.threadId);
-
-            if (index === -1) return prevValue;
-
-            thread = CloneObject(newValue[index]);
-
-            if (ownMessage && thread.groups.length === 1) PlaySound(SoundNames.MESSENGER_NEW_THREAD);
-
-            const isNotification = messageType === MessengerThreadChat.ROOM_INVITE || messageType === MessengerThreadChat.STATUS_NOTIFICATION;
-            const addedChat = thread.addMessage(isNotification ? null : senderId, messageText, secondsSinceSent, extraData, messageType);
-
-            addedChatId = addedChat?.id || -1;
-
-            if (translation && messageType === MessengerThreadChat.CHAT)
-                addedChat?.setTranslation(translation.originalText, translation.translatedText, translation.detectedLanguage, translation.targetLanguage);
-
-            if (activeThreadId === thread.threadId) thread.setRead();
-
-            newValue[index] = thread;
-
-            if (!ownMessage && messageType !== MessengerThreadChat.STATUS_NOTIFICATION && thread.unread) PlaySound(SoundNames.MESSENGER_MESSAGE_RECEIVED);
-
-            return newValue;
-        });
-
-        const canTranslateMessage = !translation && settings.enabled && messageType === MessengerThreadChat.CHAT && !!messageText?.trim().length;
-
-        if (!canTranslateMessage || addedChatId <= 0) return;
-
-        void translateIncoming(messageText).then((translation) => {
-            if (!translation) return;
-
-            setMessageThreads((prevValue) => {
-                const newValue = [...prevValue];
-                const index = newValue.findIndex((newThread) => newThread.threadId === thread.threadId);
-
-                if (index === -1) return prevValue;
-
-                const clonedThread = CloneObject(newValue[index]);
-                const chat = clonedThread.getChat(addedChatId);
-
-                if (!chat) return prevValue;
-
-                chat.setTranslation(translation.originalText, translation.translatedText, translation.detectedLanguage, translation.targetLanguage);
-                newValue[index] = clonedThread;
-
-                return newValue;
-            });
-        });
+        if (ownMessage && messageType === MessengerThreadChat.CHAT && messageText.length > 120) return;
+        const current = messageThreadsRef.current.find((existing) => existing.threadId === thread.threadId);
+        if (!current) return;
+        const next = CloneObject(current);
+        const previousMessages = ownMessage ? next.groups.flatMap((group) => group.chats) : [];
+        const firstOwnMessage = ownMessage && (previousMessages.length === 0 || (previousMessages.length === 1 && previousMessages[0].type === MessengerThreadChat.SECURITY_NOTIFICATION));
+        const isNotification = messageType === MessengerThreadChat.ROOM_INVITE || messageType === MessengerThreadChat.STATUS_NOTIFICATION || messageType === MessengerThreadChat.SECURITY_NOTIFICATION;
+        // MessengerThread owns mutable groups: append once in the action, never in a React updater.
+        if (ownMessage && messageType === MessengerThreadChat.CHAT) SendMessageComposer(new SendMessageComposerPacket(next.participant.id, messageText));
+        const displayText = ownMessage && messageType === MessengerThreadChat.CHAT && messageText.startsWith('${') ? ` ${messageText}` : messageText;
+        const chat = next.addMessage(isNotification ? null : senderId, displayText, secondsSinceSent, extraData, messageType);
+        if (chat && ownMessage && visualizationThreadIdRef.current === next.threadId && !next.participant.online && (next.participant.persistedMessageUser || next.participant.pocketHabboUser)) offlinePlaceholderMessagesRef.current.add(chat);
+        if (activeThreadIdRef.current === next.threadId) next.setRead();
+        publishThreads(messageThreadsRef.current.map((existing) => existing.threadId === next.threadId ? next : existing));
+        if (firstOwnMessage) PlaySound(SoundNames.MESSENGER_NEW_THREAD);
+        if (!ownMessage && activeThreadIdRef.current < 0 && (messageType === MessengerThreadChat.CHAT || messageType === MessengerMessageType.Habbicon || messageType === MessengerThreadChat.ROOM_INVITE)) PlaySound(SoundNames.MESSENGER_MESSAGE_RECEIVED);
     };
 
     const sendHabbiconMessage = (thread: MessengerThread, id: number) => {
@@ -239,7 +210,7 @@ const useMessengerState = () => {
 
         noteHabbiconMessage(message.conversationId, message.id);
         sendMessage(thread, message.senderId, message.message, 0, message.metadata, MessengerMessageType.Habbicon);
-        if (thread.threadId === activeThreadId) SendMessageComposer(new MarkConsoleReadComposer(message.senderId));
+        if (thread.threadId === activeThreadIdRef.current) SendMessageComposer(new MarkConsoleReadComposer(message.senderId));
     });
 
     useEffect(
@@ -268,7 +239,7 @@ const useMessengerState = () => {
         }
 
         sendMessage(thread, parser.senderId, parser.messageText, parser.secondsSinceSent, parser.extraData);
-        if (thread.threadId === activeThreadId && parser.senderId > 0) SendMessageComposer(new MarkConsoleReadComposer(parser.senderId));
+        if (thread.threadId === activeThreadIdRef.current && parser.senderId > 0) SendMessageComposer(new MarkConsoleReadComposer(parser.senderId));
     });
 
     useMessageEvent<FriendListUpdateEvent>(FriendListUpdateEvent, (event) => {
@@ -276,38 +247,22 @@ const useMessengerState = () => {
 
         if (!parser.updatedFriends.length) return;
 
-        setMessageThreads((prevValue) => {
-            const newValue = [...prevValue];
-            let changed = false;
-
-            for (const updatedFriend of parser.updatedFriends) {
-                const index = newValue.findIndex((thread) => thread.participant?.id === updatedFriend.id);
-
-                if (index === -1) continue;
-
-                const thread = CloneObject(newValue[index]);
-                const wasOnline = thread.participant.online;
-
-                thread.participant.online = updatedFriend.online;
-
-                if (wasOnline !== updatedFriend.online && hiddenThreadIdsRef.current.indexOf(thread.threadId) === -1) {
-                    thread.addMessage(
-                        null,
-                        LocalizeText(updatedFriend.online ? 'messenger.notification.online' : 'messenger.notification.offline'),
-                        0,
-                        null,
-                        MessengerThreadChat.STATUS_NOTIFICATION
-                    );
-
-                    if (activeThreadId === thread.threadId) thread.setRead();
-                }
-
-                newValue[index] = thread;
-                changed = true;
+        const next = [...messageThreadsRef.current];
+        let changed = false;
+        for (const updatedFriend of parser.updatedFriends) {
+            const index = next.findIndex((thread) => thread.participant?.id === updatedFriend.id);
+            if (index === -1) continue;
+            const thread = CloneObject(next[index]);
+            const wasOnline = thread.participant.online;
+            thread.participant.online = updatedFriend.online;
+            if (wasOnline !== updatedFriend.online) {
+                thread.addMessage(null, LocalizeText(updatedFriend.online ? 'messenger.notification.online' : 'messenger.notification.offline'), 0, null, MessengerThreadChat.STATUS_NOTIFICATION);
+                if (activeThreadIdRef.current === thread.threadId) thread.setRead();
             }
-
-            return changed ? newValue : prevValue;
-        });
+            next[index] = thread;
+            changed = true;
+        }
+        if (changed) publishThreads(next);
     });
 
     useEffect(() => {
@@ -326,40 +281,30 @@ const useMessengerState = () => {
     useEffect(() => {
         const now = Math.floor(Date.now() / 1000);
 
-        setMessageThreads((previousThreads) => {
-            let changed = false;
-            const nextThreads = [...previousThreads];
-
-            for (let index = 0; index < nextThreads.length; index++) {
-                const currentThread = nextThreads[index];
-                const participantId = currentThread.participant?.id ?? 0;
-                if (participantId <= 0) continue;
-
-                const conversation = persistentState.conversationIds
-                    .map((conversationId) => persistentState.conversationsById[conversationId])
-                    .find((candidate) => candidate?.type === 0 && candidate.participantId === participantId);
-                if (!conversation || !persistentState.historyByConversation[conversation.id]?.loaded) continue;
-
-                const knownMessageIds = historyMessageIdsRef.current.get(conversation.id) ?? new Set<number>();
-                const historyMessages = selectMessages(persistentState, conversation.id).filter(
-                    (message) => message.id > 0 && !knownMessageIds.has(message.id)
-                );
-                if (!historyMessages.length) continue;
-
-                const thread = CloneObject(currentThread);
-                for (const message of historyMessages) {
-                    thread.addMessage(message.senderId, message.message, Math.max(0, now - message.createdAt), message.metadata || null, message.type);
-                    knownMessageIds.add(message.id);
-                }
-                thread.setRead();
-                historyMessageIdsRef.current.set(conversation.id, knownMessageIds);
-                nextThreads[index] = thread;
-                changed = true;
+        const nextThreads = [...messageThreadsRef.current];
+        let changed = false;
+        for (let index = 0; index < nextThreads.length; index++) {
+            const currentThread = nextThreads[index];
+            const participantId = currentThread.participant?.id ?? 0;
+            if (participantId <= 0) continue;
+            const conversation = persistentState.conversationIds.map((id) => persistentState.conversationsById[id])
+                .find((candidate) => candidate?.type === 0 && candidate.participantId === participantId);
+            if (!conversation || !persistentState.historyByConversation[conversation.id]?.loaded) continue;
+            const known = historyMessageIdsRef.current.get(conversation.id) ?? new Set<number>();
+            const messages = selectMessages(persistentState, conversation.id).filter((message) => message.id > 0 && !known.has(message.id));
+            if (!messages.length) continue;
+            const thread = CloneObject(currentThread);
+            for (const message of messages) {
+                thread.addMessage(message.senderId, message.message, Math.max(0, now - message.createdAt), message.metadata || null, message.type);
+                known.add(message.id);
             }
-
-            return changed ? nextThreads : previousThreads;
-        });
-    }, [persistentState]);
+            thread.setRead();
+            historyMessageIdsRef.current.set(conversation.id, known);
+            nextThreads[index] = thread;
+            changed = true;
+        }
+        if (changed) publishThreads(nextThreads);
+    }, [persistentState, publishThreads]);
 
     useMessageEvent<RoomInviteEvent>(RoomInviteEvent, (event) => {
         const parser = event.getParser();
@@ -415,50 +360,29 @@ const useMessengerState = () => {
         const parser = event.getParser();
         const ownUserId = GetSessionDataManager().userId;
 
-        setMessageThreads((prevValue) => {
-            const index = prevValue.findIndex((thread) => thread.participant && thread.participant.id === parser.readerId);
-
-            if (index === -1) return prevValue;
-
-            const newValue = [...prevValue];
-
-            newValue[index] = CloneObject(newValue[index]);
-            newValue[index].setMessagesReadFromUser(ownUserId);
-
-            return newValue;
-        });
+        const current = messageThreadsRef.current.find((thread) => thread.participant?.id === parser.readerId);
+        if (!current) return;
+        const next = CloneObject(current);
+        next.setMessagesReadFromUser(ownUserId);
+        publishThreads(messageThreadsRef.current.map((thread) => thread.threadId === next.threadId ? next : thread));
     });
 
-    useEffect(() => {
-        if (activeThreadId <= 0) return;
+    useMessageEvent<InstantMessageErrorEvent>(InstantMessageErrorEvent, (event) => {
+        const parser = event.getParser();
+        const keys: Record<number, string> = { 3: 'receivermuted', 4: 'sendermuted', 5: 'offline', 6: 'notfriend', 7: 'busy', 8: 'receiverhasnochat', 9: 'senderhasnochat', 10: 'offline_failed', 11: 'not_group_member', 12: 'not_group_admin', 13: 'sender_im_unavailable', 14: 'recipient_im_unavailable' };
+        const key = keys[parser.errorCode];
+        if (!key) return;
+        const thread = getMessageThread(parser.userId);
+        if (!thread) return;
+        const text = LocalizeText(`messenger.error.${key}`);
+        sendMessage(thread, null, parser.message?.length ? `${text}: ${parser.message}` : text, 0, null, MessengerThreadChat.SECURITY_NOTIFICATION);
+    });
 
-        const activeThreadValue = messageThreadsRef.current.find((thread) => thread.threadId === activeThreadId);
-        const participantId = activeThreadValue?.participant?.id ?? 0;
-
-        setMessageThreads((prevValue) => {
-            const newValue = [...prevValue];
-            const index = newValue.findIndex((newThread) => newThread.threadId === activeThreadId);
-
-            if (index >= 0) {
-                newValue[index] = CloneObject(newValue[index]);
-                newValue[index].setRead();
-            }
-
-            return newValue;
-        });
-
-        if (participantId > 0) SendMessageComposer(new MarkConsoleReadComposer(participantId));
-    }, [activeThreadId]);
-
-    useEffect(() => {
-        setIconState(
-            selectMessengerIconState(
-                persistentState,
-                visibleThreads.length > 0,
-                visibleThreads.some((thread) => thread.unreadCount > 0)
-            )
-        );
-    }, [persistentState, visibleThreads]);
+    const iconState = useMemo(() => selectMessengerIconState(
+        persistentState,
+        visibleThreads.length > 0,
+        visibleThreads.some((thread) => thread.unreadCount > 0)
+    ), [persistentState, visibleThreads]);
 
     return {
         messageThreads,
@@ -469,6 +393,7 @@ const useMessengerState = () => {
         setActiveThreadId,
         closeThread,
         sendMessage,
+        getOfflinePlaceholder,
         sendHabbiconMessage,
         typingUserIds,
         sendTypingStatus

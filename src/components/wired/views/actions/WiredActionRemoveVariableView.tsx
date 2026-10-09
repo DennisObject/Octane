@@ -4,12 +4,14 @@ import { GetWiredTimeLocale, LocalizeText, localizeWithFallback, WiredFurniType 
 import contextVariableIcon from '../../../../assets/images/wired/var/icon_source_context_clean.png';
 import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_furni.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
-import { Button, Slider, Text } from '../../../../common';
+import { Button, Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import {
     buildWiredVariablePickerEntries,
+    canMutateWiredBuiltinPresence,
     createFallbackVariableEntry,
     flattenWiredVariablePickerEntries,
     getCustomVariableItemId,
@@ -124,12 +126,13 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const parsedVariableItemId = parseInt((trigger.stringData || '').trim(), 10);
+        const wireToken = normalizeVariableTokenFromWire(trigger.stringData || '');
+        const parsedVariableItemId = getCustomVariableItemId(wireToken);
         const nextTargetType = normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER);
 
         setSelectedTargetType(nextTargetType);
         setSelectedVariableToken(
-            normalizeVariableTokenFromWire(!Number.isNaN(parsedVariableItemId) && parsedVariableItemId > 0 ? String(parsedVariableItemId) : '')
+            normalizeVariableTokenFromWire(canMutateWiredBuiltinPresence(nextTargetType, wireToken) ? wireToken : !Number.isNaN(parsedVariableItemId) && parsedVariableItemId > 0 ? String(parsedVariableItemId) : '')
         );
         setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
         setFurniSource(trigger.intData.length > 2 ? trigger.intData[2] : (trigger.selectedItems?.length ?? 0) > 0 ? SOURCE_SELECTED : 0);
@@ -139,12 +142,12 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
         const targetValue = getTargetValue(selectedTargetType);
         const variableItemId = getCustomVariableItemId(selectedVariableToken);
 
-        setStringParam(variableItemId ? String(variableItemId) : '');
+        setStringParam(variableItemId ? String(variableItemId) : canMutateWiredBuiltinPresence(selectedTargetType, selectedVariableToken) ? selectedVariableToken : '');
         setIntParams([targetValue, userSource, furniSource]);
         setFurniIds(selectedTargetType === 'furni' && furniSource === SOURCE_SELECTED ? [...furniIds] : []);
     };
 
-    const validate = () => getCustomVariableItemId(selectedVariableToken) > 0;
+    const validate = () => (getCustomVariableItemId(selectedVariableToken) > 0 || canMutateWiredBuiltinPresence(selectedTargetType, selectedVariableToken));
 
     const requiresFurni =
         selectedTargetType === 'furni' ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT : WiredFurniType.STUFF_SELECTION_OPTION_NONE;

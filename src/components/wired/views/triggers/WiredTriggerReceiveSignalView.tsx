@@ -25,10 +25,10 @@ export const WiredTriggerReceiveSignalView: FC<{}> = () => {
         if (!trigger) return;
 
         const p = trigger.intData;
-        if (p.length >= 1) setChannel(p[0]);
-        if (p.length >= 2) setSenderCount(p[1]);
-        if (p.length >= 4) setFurniSource(normalizeFurniSource(p[3]));
-        else setFurniSource(100);
+        // Current saves contain [channel, source]; older opens included sender metadata before source.
+        setChannel(p[0] ?? 0);
+        setSenderCount(p.length >= 4 ? p[1] : 0);
+        setFurniSource(normalizeFurniSource(p.length >= 4 ? p[3] : p[1]));
     }, [trigger]);
 
     return (

@@ -1,10 +1,10 @@
 import { SelectClubGiftComposer } from '@octane/renderer';
 import { FC, useCallback, useMemo } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../../api';
-import { AutoGrid, Text } from '../../../../../../common';
+import { ClassicScrollAreaView } from '../../../../../../common';
 import { useClubGifts, useNotification, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
-import { ClubGiftText, getGiftRequirementText, getPastClubDaysText, getPastVipDaysText } from './clubGifts.helpers';
+import { ClubGiftText, getGiftRequirementText, getPastClubDaysText } from './clubGifts.helpers';
 import { VipGiftItem } from './VipGiftItemView';
 
 let isSelectingGift = false;
@@ -41,8 +41,8 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
         return LocalizeText('catalog.club_gift.no_club');
     }, [clubGifts, purse]);
 
+    // The official widget keeps its past VIP days line hidden: HC and VIP time count together in this one.
     const pastClubDaysText = purse ? localizeClubGiftText(getPastClubDaysText(purse.pastClubDays, purse.pastVipDays)) : '';
-    const pastVipDaysText = purse ? localizeClubGiftText(getPastVipDaysText(purse.pastVipDays)) : '';
 
     const selectGift = useCallback(
         (localizationId: string) => {
@@ -74,22 +74,11 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
         return [...clubGifts.offers].sort((a, b) => clubGifts.getOfferExtraData(a.offerId).daysRequired - clubGifts.getOfferExtraData(b.offerId).daysRequired);
     }, [clubGifts]);
 
+    // Official clubGiftWidget: wrapped info line, the gift list, then the past HC length centred below it.
     return (
-        <>
-            <Text shrink truncate fontWeight="bold">
-                {giftsAvailable()}
-            </Text>
-            {!!pastClubDaysText && (
-                <Text shrink truncate small>
-                    {pastClubDaysText}
-                </Text>
-            )}
-            {!!pastVipDaysText && (
-                <Text shrink truncate small>
-                    {pastVipDaysText}
-                </Text>
-            )}
-            <AutoGrid className="octane-catalog-layout-vip-gifts-grid" columnCount={1}>
+        <div className="octane-catalog-club-gifts">
+            <div className="octane-catalog-club-gifts-info">{giftsAvailable()}</div>
+            <ClassicScrollAreaView className="octane-catalog-club-gifts-list" contentClassName="octane-catalog-club-gifts-list-content" scrollStep={59}>
                 {clubGifts &&
                     clubGifts.offers.length > 0 &&
                     sortGifts.map((offer) => {
@@ -106,7 +95,8 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
                             />
                         );
                     })}
-            </AutoGrid>
-        </>
+            </ClassicScrollAreaView>
+            {!!pastClubDaysText && <div className="octane-catalog-club-gifts-past">{pastClubDaysText}</div>}
+        </div>
     );
 };

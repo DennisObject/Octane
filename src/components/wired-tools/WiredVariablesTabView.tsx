@@ -1,9 +1,16 @@
 import { FC } from 'react';
 import { localizeWithFallback } from '../../api';
-import { Button, Text } from '../../common';
+import trashIcon from '../../assets/images/wired/native/menu_trash.png';
+import contextIcon from '../../assets/images/wired/native/menu_variable_context.png';
+import furniIcon from '../../assets/images/wired/native/menu_variable_furni.png';
+import globalIcon from '../../assets/images/wired/native/menu_variable_global.png';
+import userIcon from '../../assets/images/wired/native/menu_variable_user.png';
 import { VARIABLES_ELEMENTS } from './WiredCreatorTools.constants';
 import { VariableDefinition, VariablesElementButton, VariablesElementType, VariableTextValue } from './WiredCreatorTools.types';
+import { WiredMenuButton, WiredMenuItem, WiredMenuPanel, WiredMenuTable, WiredMenuTitle } from './WiredMenuParts';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
+
+const TYPE_ICONS: Partial<Record<VariablesElementType, string>> = { furni: furniIcon, user: userIcon, global: globalIcon, context: contextIcon };
 
 export interface WiredVariablesTabViewProps {
     variablePickerDefinitions: VariableDefinition[];
@@ -63,133 +70,98 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
     const setIsVariableHighlightActive = useWiredCreatorToolsUiStore((s) => s.setIsVariableHighlightActive);
 
     return (
-        <div className="p-3 min-h-[360px] flex gap-4">
-            <div className="w-[205px] shrink-0 flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                    <Text bold>Variable type:</Text>
-                    <div className="flex gap-1">
-                        {variableElements.map((element) => (
-                            <button
-                                key={element.key}
-                                type="button"
-                                className={`w-[42px] h-[38px] rounded border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,.7)] ${element.disabled ? 'border-[#b7b7b7] bg-[#e7e3da] opacity-60 cursor-not-allowed' : variablesType === element.key ? 'border-[#222] bg-[#d9d6cf]' : 'border-[#7f7f7f] bg-[#ece9e1]'}`}
-                                disabled={element.disabled}
-                                onClick={() => !element.disabled && setVariablesType(element.key)}
-                                title={element.label}
-                            >
-                                <img alt={element.label} className="w-auto h-auto max-w-[22px] max-h-[22px] object-contain" src={element.icon} />
-                            </button>
-                        ))}
-                    </div>
+        <>
+            <WiredMenuTitle h={19} w={165} x={14} y={18}>
+                Variable type:
+            </WiredMenuTitle>
+            <WiredMenuPanel h={47} w={188} x={14} y={38}>
+                {variableElements.map((element, index) => (
+                    <WiredMenuButton
+                        key={element.key}
+                        className={variablesType === element.key ? 'is-selected' : ''}
+                        disabled={element.disabled}
+                        h={36}
+                        title={element.label}
+                        w={37}
+                        x={5 + index * 47}
+                        y={5}
+                        onClick={() => setVariablesType(element.key)}
+                    >
+                        <img alt={element.label} className="octane-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
+                    </WiredMenuButton>
+                ))}
+            </WiredMenuPanel>
+            <WiredMenuTitle h={19} w={165} x={14} y={94}>
+                Variable picker:
+            </WiredMenuTitle>
+            <WiredMenuItem className="octane-wired-menu__box" h={219} w={188} x={14} y={114}>
+                <div className="octane-wired-menu__picker-list has-classic-scrollbar">
+                    {variablePickerDefinitions.map((variable) => (
+                        <button
+                            key={variable.key}
+                            className={`octane-wired-menu__picker-row ${selectedVariableDefinition?.key === variable.key ? 'is-selected' : ''}`}
+                            type="button"
+                            onClick={() => onPickVariable(variable.key)}
+                        >
+                            {variable.key}
+                        </button>
+                    ))}
+                    {!variablePickerDefinitions.length && <div className="octane-wired-menu__empty">{emptyPickerText || 'Nothing to display'}</div>}
                 </div>
-                <div className="flex flex-col gap-1 min-h-0 grow">
-                    <Text bold>Variable picker:</Text>
-                    <div className="grow rounded border border-[#bdb8ab] bg-white overflow-hidden">
-                        <div className="max-h-[408px] overflow-y-auto">
-                            <table className="w-full text-[12px]">
-                                <tbody>
-                                    {variablePickerDefinitions.map((variable, index) => (
-                                        <tr
-                                            key={variable.key}
-                                            className={`cursor-pointer ${selectedVariableDefinition?.key === variable.key ? 'bg-[#d7dfea]' : index % 2 === 0 ? 'bg-white' : 'bg-[#f3f3f3]'} hover:bg-[#e8eefc]`}
-                                            onClick={() => onPickVariable(variable.key)}
-                                        >
-                                            <td className="px-3 py-1 text-[#444]">{variable.key}</td>
-                                        </tr>
-                                    ))}
-                                    {!variablePickerDefinitions.length && !!emptyPickerText && (
-                                        <tr>
-                                            <td className="px-3 py-2 text-[#777] text-center">{emptyPickerText}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    {showHighlight && (
-                        <Button disabled={!canVariableHighlight} variant="secondary" onClick={() => setIsVariableHighlightActive((value) => !value)}>
-                            {isVariableHighlightActive ? 'Undo' : 'Highlight'}
-                        </Button>
-                    )}
-                    <Button disabled={!variableManageCanOpen} variant="secondary" onClick={onOpenManagePanel}>
-                        Manage
-                    </Button>
-                    {showArrayInspector && (
-                        <Button disabled={!arrayInspectorCanOpen} variant="secondary" onClick={onOpenArrayInspector}>
-                            Contents
-                        </Button>
-                    )}
-                    <Button disabled={!canVariableClear} variant="secondary" onClick={onClearVariable}>
-                        {clearLabel ?? localizeWithFallback('wiredmenu.variable_overview.delete_all.title', 'Clear this variable')}
-                    </Button>
-                    {!!onOpenWebApiExplorer && (
-                        <Button variant="secondary" onClick={onOpenWebApiExplorer}>
-                            {localizeWithFallback('wiredmenu.variables.web_api_explorer', 'Web API explorer')}
-                        </Button>
-                    )}
-                </div>
-            </div>
-            <div className="min-w-0 grow flex flex-col gap-3">
-                {variablesType === 'context' && (
-                    <div className="rounded border border-[#c8b98f] bg-[#fff7df] px-3 py-2 text-[12px] text-[#6a5d33]">
-                        Context variables live only during the current wired execution. This tab shows their definitions, text mappings and execution-scoped
-                        capabilities, but not live values from a running stack.
-                    </div>
-                )}
-                <div className="flex flex-col gap-1">
-                    <Text bold>Properties:</Text>
-                    <div className="rounded border border-[#bdb8ab] bg-white overflow-hidden">
-                        <div className="grid grid-cols-[1fr_120px] border-b border-[#d8d4c8] bg-[#f5f2ea] px-3 py-2 text-[12px] font-bold text-[#333]">
-                            <span>Property</span>
-                            <span>Value</span>
-                        </div>
-                        <div className="max-h-[210px] overflow-y-auto">
-                            <table className="w-full text-[12px]">
-                                <tbody>
-                                    {selectedVariableProperties.map((property, index) => (
-                                        <tr key={property.key} className={index % 2 === 0 ? 'bg-white' : 'bg-[#f3f3f3]'}>
-                                            <td className="px-3 py-1 text-[#444]">{property.key}</td>
-                                            <td className="px-3 py-1 text-[#222]">{property.value}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {showTextValues && (
-                    <div className="flex flex-col gap-1 min-h-0 grow">
-                        <Text bold>Text values:</Text>
-                        <div className="grow rounded border border-[#bdb8ab] bg-white overflow-hidden">
-                            <div className="grid grid-cols-[120px_1fr] border-b border-[#d8d4c8] bg-[#f5f2ea] px-3 py-2 text-[12px] font-bold text-[#333]">
-                                <span>Value</span>
-                                <span>Text</span>
-                            </div>
-                            {!selectedVariableTextValues.length && (
-                                <div className="h-[calc(100%-37px)] flex items-center justify-center text-[#b1aca2] text-[20px]">
-                                    <Text>Nothing to display</Text>
-                                </div>
-                            )}
-                            {!!selectedVariableTextValues.length && (
-                                <div className="max-h-[178px] overflow-y-auto">
-                                    <table className="w-full text-[12px]">
-                                        <tbody>
-                                            {selectedVariableTextValues.map((entry, index) => (
-                                                <tr key={`${entry.value}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-[#f3f3f3]'}>
-                                                    <td className="px-3 py-1 text-[#444]">{entry.value}</td>
-                                                    <td className="px-3 py-1 text-[#222]">{entry.text}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+            </WiredMenuItem>
+            {showHighlight && (
+                <WiredMenuButton disabled={!canVariableHighlight} h={25} w={73} x={14} y={342} onClick={() => setIsVariableHighlightActive((value) => !value)}>
+                    {isVariableHighlightActive ? 'Undo' : 'Highlight'}
+                </WiredMenuButton>
+            )}
+            <WiredMenuButton disabled={!variableManageCanOpen} h={25} w={73} x={95} y={342} onClick={onOpenManagePanel}>
+                Manage
+            </WiredMenuButton>
+            <WiredMenuButton danger={true} disabled={!canVariableClear} h={25} w={25} x={176} y={342} title={clearLabel ?? localizeWithFallback('wiredmenu.variable_overview.delete_all.title', 'Clear this variable')} onClick={onClearVariable}>
+                <img alt="" className="octane-wired-menu__trash-icon" draggable={false} src={trashIcon} />
+            </WiredMenuButton>
+            {showArrayInspector && arrayInspectorCanOpen && (
+                <WiredMenuButton h={25} w={73} x={14} y={372} onClick={onOpenArrayInspector}>
+                    Contents
+                </WiredMenuButton>
+            )}
+            {!!onOpenWebApiExplorer && (
+                <WiredMenuButton h={19} w={92} x={110} y={18} onClick={onOpenWebApiExplorer}>
+                    {localizeWithFallback('wiredmenu.variables.web_api_explorer', 'Web API explorer')}
+                </WiredMenuButton>
+            )}
+            <WiredMenuTitle h={19} w={188} x={230} y={17}>
+                Properties:
+            </WiredMenuTitle>
+            <WiredMenuTable
+                columns={[
+                    { key: 'property', title: 'Property', factor: 0.52, align: 'left' },
+                    { key: 'value', title: 'Value', factor: 0.48, align: 'left' }
+                ]}
+                h={188}
+                rows={selectedVariableProperties.map((property) => ({ key: property.key, cells: { property: property.key, value: property.value } }))}
+                w={256}
+                x={230}
+                y={37}
+            />
+            {showTextValues && (
+                <>
+                    <WiredMenuTitle h={19} w={188} x={230} y={233}>
+                        Text values:
+                    </WiredMenuTitle>
+                    <WiredMenuTable
+                        columns={[
+                            { key: 'value', title: 'Value', factor: 0.2, align: 'left' },
+                            { key: 'text', title: 'Text', factor: 0.8, align: 'right' }
+                        ]}
+                        h={115}
+                        rows={selectedVariableTextValues.map((entry, index) => ({ key: `${entry.value}-${index}`, cells: { value: entry.value, text: entry.text } }))}
+                        w={256}
+                        x={230}
+                        y={253}
+                    />
+                </>
+            )}
+        </>
     );
 };

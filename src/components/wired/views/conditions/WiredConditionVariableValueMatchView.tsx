@@ -1,3 +1,4 @@
+import { parseWiredScalarLiteral, readWiredScalarLiteral, writeWiredScalarLiteral } from '../../../../api/wired/WiredScalarLiteral';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType, WiredSelectionVisualizer } from '../../../../api';
 import contextVariableIcon from '../../../../assets/images/wired/var/icon_source_context_clean.png';
@@ -157,6 +158,8 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
     const [comparison, setComparison] = useState(2);
     const [referenceMode, setReferenceMode] = useState<ReferenceMode>('constant');
     const [referenceConstantValueInput, setReferenceConstantValueInput] = useState('0');
+    const [exactLiteralShape, setExactLiteralShape] = useState(false);
+    const parsedLiteral = parseWiredScalarLiteral(referenceConstantValueInput);
     const [referenceTargetType, setReferenceTargetType] = useState<VariableTargetType>('user');
     const [referenceVariableToken, setReferenceVariableToken] = useState('');
     const [userSource, setUserSource] = useState(SOURCE_TRIGGER);
@@ -277,7 +280,8 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
         setVariableToken(normalizeVariableTokenFromWire(stringParts.length > 0 ? stringParts[0] : ''));
         setComparison(trigger.intData.length > 1 ? trigger.intData[1] : 2);
         setReferenceMode((trigger.intData.length > 2 ? trigger.intData[2] : REFERENCE_CONSTANT) === REFERENCE_VARIABLE ? 'variable' : 'constant');
-        setReferenceConstantValueInput((trigger.intData.length > 3 ? trigger.intData[3] : 0).toString());
+        setExactLiteralShape(trigger.intData.length === 12);
+        setReferenceConstantValueInput(readWiredScalarLiteral(trigger.intData, 10, 3));
         setReferenceTargetType(nextReferenceTargetType);
         setReferenceVariableToken(normalizeVariableTokenFromWire(stringParts.length > 1 ? stringParts[1] : ''));
         setUserSource(trigger.intData.length > 5 ? trigger.intData[5] : SOURCE_TRIGGER);
@@ -327,27 +331,28 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
     const save = () => {
         const nextDestinationFurniIds = selectionMode === 'destination' ? [...furniIds] : [...destinationFurniIds];
         const nextReferenceFurniIds = selectionMode === 'reference' ? [...furniIds] : [...referenceFurniIds];
-        const parsedReferenceConstantValue = parseInt(referenceConstantValueInput.trim(), 10);
+        if (parsedLiteral === null) return;
 
         setDestinationFurniIds(nextDestinationFurniIds);
         setReferenceFurniIds(nextReferenceFurniIds);
         setStringParam(serializeStringData(variableToken, referenceMode === 'variable' ? referenceVariableToken : '', nextReferenceFurniIds));
-        setIntParams([
+        setIntParams(writeWiredScalarLiteral([
             getTargetValue(targetType),
             comparison,
             referenceMode === 'variable' ? REFERENCE_VARIABLE : REFERENCE_CONSTANT,
-            Number.isFinite(parsedReferenceConstantValue) ? parsedReferenceConstantValue : 0,
+            0,
             getTargetValue(referenceTargetType),
             userSource,
             furniSource,
             referenceUserSource,
             referenceFurniSource,
             quantifier
-        ]);
+        ], 3, parsedLiteral, exactLiteralShape));
         setFurniIds(isFurniTarget(targetType) && furniSource === SOURCE_SELECTED ? [...nextDestinationFurniIds] : []);
     };
 
     const validate = () => {
+        if (parsedLiteral === null) return false;
         if (!variableToken) return false;
         if (referenceMode === 'variable' && !referenceVariableToken) return false;
 
@@ -500,10 +505,12 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
                         <Text>{localizeWithFallback('wiredfurni.params.variables.reference_value.set_value', LocalizeText('wiredfurni.params.operator.2'))}</Text>
                         <OctaneInput
                             className="octane-wired__give-var-number"
-                            type="number"
+                            type="text"
+                                inputMode="numeric"
                             value={referenceConstantValueInput}
                             onChange={(event) => setReferenceConstantValueInput(event.target.value)}
                         />
+                            {parsedLiteral === null && <Text role="alert">Enter a signed 64-bit integer.</Text>}
                     </label>
 
                     <div className="octane-wired__change-var-reference-block">

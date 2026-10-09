@@ -26,9 +26,12 @@ interface IInternalVariableMeta {
     key: string;
     canUseAsDestination: boolean;
     canUseAsReference: boolean;
+    canCreateAndDelete: boolean;
 }
 
 const INTERNAL_VARIABLE_ALIASES: Record<string, string> = {
+    '@projectile.animation.is_traveling': '@projectile.animation.is_travelling',
+    '@projectile.animation.tiles_traveled': '@projectile.animation.tiles_travelled',
     '@position.x': '@position_x',
     '@position.y': '@position_y',
     '@effect': '@effect_id',
@@ -48,10 +51,11 @@ const CUSTOM_TOKEN_PREFIX = 'custom:';
 const INTERNAL_TOKEN_PREFIX = 'internal:';
 const GROUP_TOKEN_PREFIX = 'group:';
 
-const createInternalMeta = (key: string, canUseAsDestination = false, canUseAsReference = false): IInternalVariableMeta => ({
+const createInternalMeta = (key: string, canUseAsDestination = false, canUseAsReference = false, canCreateAndDelete = false): IInternalVariableMeta => ({
     key,
     canUseAsDestination,
-    canUseAsReference
+    canUseAsReference,
+    canCreateAndDelete
 });
 
 export const normalizeInternalVariableKey = (key: string) => {
@@ -64,7 +68,25 @@ export const normalizeInternalVariableKey = (key: string) => {
 
 const INTERNAL_VARIABLES: Record<'user' | 'furni' | 'global' | 'context', IInternalVariableMeta[]> = {
     furni: [
-        createInternalMeta('~teleport.target_id', false, true),
+        createInternalMeta('@position', true, true),
+        createInternalMeta('@occupation', true, true),
+        createInternalMeta('~background_color.hue', true, true),
+        createInternalMeta('~background_color.saturation', true, true),
+        createInternalMeta('~background_color.lightness', true, true),
+        createInternalMeta('~chest.available_amount', false, true),
+        createInternalMeta('~chest.capacity', false, true),
+        createInternalMeta('~chest.is_auto_lock', false, false),
+        createInternalMeta('~chest.locked', false, false),
+        createInternalMeta('~chest.is_open', false, false),
+        createInternalMeta('~chest.is_donatable', false, false),
+        createInternalMeta('~teleport.target_id', true, true),
+        createInternalMeta('~area_hide.root_x', true, true),
+        createInternalMeta('~area_hide.root_y', true, true),
+        createInternalMeta('~area_hide.width', true, true),
+        createInternalMeta('~area_hide.length', true, true),
+        createInternalMeta('~area_hide.is_invisible_furni', false, false, true),
+        createInternalMeta('~area_hide.hiding_wallitems', false, false, true),
+        createInternalMeta('~area_hide.inverted', false, false, true),
         createInternalMeta('@id', false, true),
         createInternalMeta('@class_id', false, true),
         createInternalMeta('@height', false, true),
@@ -75,12 +97,12 @@ const INTERNAL_VARIABLES: Record<'user' | 'furni' | 'global' | 'context', IInter
         createInternalMeta('@altitude', true, true),
         createInternalMeta('@opacity', true, true),
         createInternalMeta('@gravity', true, true),
-        createInternalMeta('@is_invisible', false, true),
+        createInternalMeta('@is_invisible', false, false),
         createInternalMeta('@type', false, true),
-        createInternalMeta('@is_stackable', false, true),
-        createInternalMeta('@can_stand_on', false, true),
-        createInternalMeta('@can_sit_on', false, true),
-        createInternalMeta('@can_lay_on', false, true),
+        createInternalMeta('@is_stackable', false, false),
+        createInternalMeta('@can_stand_on', false, false),
+        createInternalMeta('@can_sit_on', false, false),
+        createInternalMeta('@can_lay_on', false, false),
         createInternalMeta('@wallitem_offset', false, true),
         createInternalMeta('@dimensions.x', false, true),
         createInternalMeta('@dimensions.y', false, true),
@@ -88,31 +110,51 @@ const INTERNAL_VARIABLES: Record<'user' | 'furni' | 'global' | 'context', IInter
         createInternalMeta('@projectile.animation.position.x', false, true),
         createInternalMeta('@projectile.animation.position.y', false, true),
         createInternalMeta('@projectile.animation.position.altitude', false, true),
-        createInternalMeta('@projectile.animation.is_traveling', false, false),
-        createInternalMeta('@projectile.animation.tiles_traveled', false, true),
+        createInternalMeta('@projectile.animation.is_travelling', false, false),
+        createInternalMeta('@projectile.animation.tiles_travelled', false, true),
         createInternalMeta('@projectile.animation.furni_collisions', false, true),
         createInternalMeta('@projectile.animation.user_collisions', false, true)
     ],
     user: [
+        createInternalMeta('@position', true, true),
+        createInternalMeta('~horse.controller_user_id', false, true),
+        createInternalMeta('~horse.has_saddle', false, false),
+        createInternalMeta('~horse.is_riding', false, false),
+        createInternalMeta('~pet.creation_time', false, true),
+        createInternalMeta('~pet.energy', false, true),
+        createInternalMeta('~pet.experience', false, true),
+        createInternalMeta('~pet.experience_required', false, true),
+        createInternalMeta('~pet.happiness', false, true),
+        createInternalMeta('~pet.level', false, true),
+        createInternalMeta('~pet.max_energy', false, true),
+        createInternalMeta('~pet.max_happiness', false, true),
+        createInternalMeta('~pet.max_level', false, true),
+        createInternalMeta('~pet.owner_id', false, true),
+        createInternalMeta('~pet.scratches', false, true),
+        createInternalMeta('@transaction.in_trade', false, false),
+        createInternalMeta('@transaction.contract_id', false, true),
+        createInternalMeta('@transaction.state', false, true),
+        createInternalMeta('@transaction.can_accept', false, false),
+        createInternalMeta('@transaction.current_multiplier', false, true),
         createInternalMeta('@index', false, true),
         createInternalMeta('@type', false, true),
         createInternalMeta('@gender', false, true),
         createInternalMeta('@level', false, true),
         createInternalMeta('@achievement_score', false, true),
-        createInternalMeta('@is_hc', false, true),
-        createInternalMeta('@has_rights', false, true),
-        createInternalMeta('@is_group_admin', false, true),
-        createInternalMeta('@is_owner', false, true),
-        createInternalMeta('@is_muted', false, true),
-        createInternalMeta('@is_trading', false, true),
-        createInternalMeta('@is_frozen', false, true),
+        createInternalMeta('@is_hc', false, false),
+        createInternalMeta('@has_rights', false, false),
+        createInternalMeta('@is_group_admin', false, false),
+        createInternalMeta('@is_owner', false, false),
+        createInternalMeta('@is_muted', false, false),
+        createInternalMeta('@is_trading', false, false),
+        createInternalMeta('@is_frozen', false, false),
         createInternalMeta('@effect_id', false, true),
         createInternalMeta('@team_score', false, true),
         createInternalMeta('@team_color', false, true),
         createInternalMeta('@team_type', false, true),
         createInternalMeta('@sign', false, true),
         createInternalMeta('@dance', false, true),
-        createInternalMeta('@is_idle', false, true),
+        createInternalMeta('@is_idle', false, false),
         createInternalMeta('@handitem_id', false, true),
         createInternalMeta('@position_x', true, true),
         createInternalMeta('@position_y', true, true),
@@ -155,6 +197,12 @@ const INTERNAL_VARIABLES: Record<'user' | 'furni' | 'global' | 'context', IInter
         createInternalMeta('@current_time.year', false, true)
     ],
     context: [
+        createInternalMeta('@event.transaction_complete.multiplier', false, true),
+        createInternalMeta('@event.transaction_complete.deposit.furni_count', false, true),
+        createInternalMeta('@event.transaction_complete.deposit.coins_count', false, true),
+        createInternalMeta('@event.transaction_complete.withdrawal.furni_count', false, true),
+        createInternalMeta('@event.transaction_complete.withdrawal.coins_count', false, true),
+        createInternalMeta('@event.transaction_failed.reason', false, true),
         createInternalMeta('@selector_furni_count', false, true),
         createInternalMeta('@selector_user_count', false, true),
         createInternalMeta('@signal_furni_count', false, true),
@@ -185,6 +233,9 @@ const getInternalSelectable = (usage: WiredVariablePickerUsage, meta: IInternalV
             return meta.canUseAsReference;
         case 'echo':
             return true;
+        case 'give':
+        case 'remove':
+            return meta.canCreateAndDelete;
         case 'change-destination':
             return meta.canUseAsDestination;
         case 'change-reference':
@@ -390,6 +441,9 @@ export const createFallbackVariableEntry = (target: WiredVariablePickerTarget, t
 
     return null;
 };
+
+export const canMutateWiredBuiltinPresence = (target: WiredVariablePickerTarget, token: string) =>
+    INTERNAL_VARIABLES[getNormalizedInternalTarget(target)].some(meta => meta.canCreateAndDelete && token === createInternalVariableToken(meta.key));
 
 export const buildWiredVariablePickerEntries = (
     target: WiredVariablePickerTarget,

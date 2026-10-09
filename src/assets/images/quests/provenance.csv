@@ -1,0 +1,9 @@
+destination,swf symbol,source png path,pixel size
+task-completed.png,common_icon_task_completed_s,/home/ubuntu/dev/plus/polaris/reference/habbo-air-WIN63-202609091217-117204808/decompiled/images/2889_icon_task_completed_s_png$67dc897d4954c5a09bf6a46dfb8fb0051029134952.png,20x22
+button-shiny-01a101-default.png,button-shiny-default (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-default.png,11x22
+button-shiny-01a101-hover.png,button-shiny-hover (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-hover.png,11x22
+button-shiny-01a101-pressed.png,button-shiny-pressed (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-pressed.png,11x22
+button-shiny-01a101-disabled.png,button-shiny-disabled (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-disabled.png,11x22
+button-shiny-thick-01a101-default.png,button-shiny-thick-default (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-thick-default.png,11x24
+button-shiny-thick-01a101-hover.png,button-shiny-thick-hover (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-thick-hover.png,11x24
+button-shiny-thick-01a101-pressed.png,button-shiny-thick-pressed (habbo-skin slice) x 0x01a101 colour transform,src/assets/images/habbo-skin/slices/button-shiny-thick-pressed.png,11x24

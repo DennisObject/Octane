@@ -7,4 +7,5 @@ export class NotificationAlertType {
     public static OCTANE_INFO: string = 'octane-info';
     public static SEARCH: string = 'search';
     public static ALERT: string = 'alert';
+    public static WINDOW: string = 'window';
 }

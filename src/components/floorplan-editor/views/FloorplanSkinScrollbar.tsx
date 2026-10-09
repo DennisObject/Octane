@@ -1,20 +1,22 @@
-import { FC, PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
+import { FC, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import { SCROLL_STEP, scrollMetrics, ScrollMetrics } from './skinScrollbar';
 
 type Axis = 'vertical' | 'horizontal';
 type SkinState = 'default' | 'hover' | 'pressed' | 'passive';
 
 type Props = {
-    scrollerRef: { current: HTMLDivElement | null };
+    scrollerRef: { current: HTMLElement | null };
     axis: Axis;
     slot: number;
     className?: string;
     testId: string;
+    /** Changes whenever the scroller's content changes without a resize, for example a textarea value. */
+    revision?: unknown;
 };
 
 const EMPTY: ScrollMetrics = { track: 0, maxScroll: 0, thumb: 0, thumbPos: 0 };
 
-const readMetrics = (axis: Axis, scroller: HTMLDivElement, bar: HTMLDivElement): ScrollMetrics => {
+const readMetrics = (axis: Axis, scroller: HTMLElement, bar: HTMLDivElement): ScrollMetrics => {
     const barLength = axis === 'vertical' ? bar.clientHeight : bar.clientWidth;
     const content = axis === 'vertical' ? scroller.scrollHeight : scroller.scrollWidth;
     const viewport = axis === 'vertical' ? scroller.clientHeight : scroller.clientWidth;
@@ -32,7 +34,7 @@ const shown = (pressed: boolean, hover: boolean, passive: boolean): SkinState =>
 };
 
 /** External style-3 scrollbar. The 17px art is left/top aligned and the slot clips the rest. */
-export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, className, testId }) => {
+export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, className, testId, revision }) => {
     const rootRef = useRef<HTMLDivElement>(null);
     const [metrics, setMetrics] = useState<ScrollMetrics>(EMPTY);
     const [decPressed, setDecPressed] = useState(false);
@@ -55,6 +57,7 @@ export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, cla
 
         update();
         scroller.addEventListener('scroll', update);
+        scroller.addEventListener('input', update);
         const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
 
         observer?.observe(scroller);
@@ -66,10 +69,18 @@ export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, cla
 
         return () => {
             scroller.removeEventListener('scroll', update);
+            scroller.removeEventListener('input', update);
             observer?.disconnect();
             contentObserver.disconnect();
         };
     }, [axis, scrollerRef]);
+
+    useEffect(() => {
+        const scroller = scrollerRef.current;
+        const bar = rootRef.current;
+
+        if (scroller && bar) setMetrics(readMetrics(axis, scroller, bar));
+    }, [axis, scrollerRef, revision]);
 
     useEffect(() => () => {
         dragCleanupRef.current?.();
@@ -93,6 +104,16 @@ export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, cla
         nudge(direction * SCROLL_STEP);
         if (direction < 0) setDecPressed(true);
         else setIncPressed(true);
+    };
+
+    // Enter and Space reach the arrow as a click with no pointer (detail 0); a pointer click already stepped on pointerdown.
+    const onArrowClick = (direction: -1 | 1) => (event: ReactMouseEvent<HTMLButtonElement>) => {
+        if (event.detail === 0) nudge(direction * SCROLL_STEP);
+    };
+
+    // The room chat listens on the body for Enter and Space and swallows them; keep them for the focused arrow.
+    const onArrowKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation();
     };
 
     const onTrackDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -176,6 +197,8 @@ export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, cla
                     data-testid={`${testId}-decrement`}
                     data-state={decState}
                     onPointerDown={onArrowDown(-1)}
+                    onClick={onArrowClick(-1)}
+                    onKeyDown={onArrowKeyDown}
                     onPointerUp={() => setDecPressed(false)}
                     onPointerCancel={() => setDecPressed(false)}
                     onPointerEnter={() => setDecHover(true)}
@@ -211,6 +234,8 @@ export const FloorplanSkinScrollbar: FC<Props> = ({ scrollerRef, axis, slot, cla
                     data-testid={`${testId}-increment`}
                     data-state={incState}
                     onPointerDown={onArrowDown(1)}
+                    onClick={onArrowClick(1)}
+                    onKeyDown={onArrowKeyDown}
                     onPointerUp={() => setIncPressed(false)}
                     onPointerCancel={() => setIncPressed(false)}
                     onPointerEnter={() => setIncHover(true)}

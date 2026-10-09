@@ -1,5 +1,6 @@
 import {
     AcceptFriendMessageComposer,
+    AcceptFriendResultEvent,
     AddFriendCategoryComposer,
     DeclineFriendMessageComposer,
     FollowFriendFailedEvent,
@@ -11,6 +12,8 @@ import {
     FriendRequestsEvent,
     GetFriendRequestsComposer,
     GetSessionDataManager,
+    HabboSearchResultData,
+    HabboSearchResultEvent,
     MessageErrorEvent,
     MessengerInitComposer,
     MessengerInitEvent,
@@ -22,7 +25,7 @@ import {
     RequestOfflineMessagesComposer,
     SetRelationshipStatusComposer
 } from '@octane/renderer';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {
     CloneObject,
@@ -52,15 +55,20 @@ const useFriendsStore = () => {
     const [sentRequests, setSentRequests] = useState<number[]>([]);
     const [dismissedRequestIds, setDismissedRequestIds] = useState<number[]>([]);
     const [settings, setSettings] = useState<MessengerSettings>(null);
+    const [searchResults, setSearchResults] = useState<{ friends: HabboSearchResultData[]; others: HabboSearchResultData[] }>({ friends: [], others: [] });
+    const [searchValue, setSearchValue] = useState('');
     const [offlineMessagesReady, setOfflineMessagesReady] = useState(false);
     const friendsRef = useRef<MessengerFriend[]>([]);
+    const requestsRef = useRef<MessengerRequest[]>([]);
     const lastRequestedFriendIdRef = useRef<number>(-1);
     const { simpleAlert = null, showSingleBubble = null } = useNotification();
+
+    const pendingRequests = useMemo(() => requests.filter((request) => request.state === MessengerRequest.PENDING), [requests]);
 
     const onlineFriends = useMemo(() => {
         const onlineFriends = friends.filter((friend) => friend.online);
 
-        onlineFriends.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        onlineFriends.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'accent' }));
 
         return onlineFriends;
     }, [friends]);
@@ -68,7 +76,7 @@ const useFriendsStore = () => {
     const offlineFriends = useMemo(() => {
         const offlineFriends = friends.filter((friend) => !friend.online);
 
-        offlineFriends.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        offlineFriends.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'accent' }));
 
         return offlineFriends;
     }, [friends]);
@@ -117,9 +125,9 @@ const useFriendsStore = () => {
     const canRequestFriend = (userId: number) => {
         if (userId === GetSessionDataManager().userId) return false;
 
-        if (getFriend(userId)) return false;
+        if (!settings || friends.length >= settings.userFriendLimit) return false;
 
-        if (requests.find((request) => request.requesterUserId === userId)) return false;
+        if (getFriend(userId)) return false;
 
         if (sentRequests.indexOf(userId) >= 0) return false;
 
@@ -127,7 +135,10 @@ const useFriendsStore = () => {
     };
 
     const requestFriend = (userId: number, userName: string) => {
-        if (!canRequestFriend(userId)) return false;
+        if (!canRequestFriend(userId)) {
+            if (settings && friendsRef.current.length >= settings.userFriendLimit) showFriendLimit();
+            return false;
+        }
 
         lastRequestedFriendIdRef.current = userId;
 
@@ -142,29 +153,47 @@ const useFriendsStore = () => {
         SendMessageComposer(new RequestFriendComposer(userName));
     };
 
-    const requestResponse = (requestId: number, flag: boolean) => {
-        if (requestId === -1 && !flag) {
-            SendMessageComposer(new DeclineFriendMessageComposer(true));
+    const updateRequests = useCallback((next: MessengerRequest[]) => {
+        requestsRef.current = next;
+        setRequests(next);
+    }, []);
 
-            setRequests([]);
-        } else {
-            setRequests((prevValue) => {
-                const newRequests = [...prevValue];
-                const index = newRequests.findIndex((request) => request.id === requestId);
+    const clearRequestOutcomes = useCallback(() => {
+        updateRequests(requestsRef.current.filter((request) => request.state === MessengerRequest.PENDING));
+    }, [updateRequests]);
 
-                if (index === -1) return prevValue;
+    const showFriendLimit = () => simpleAlert(
+        LocalizeText('friendlist.listfull.text', ['mylimit', 'clublimit'], [String(settings?.userFriendLimit ?? 0), String(settings?.extendedFriendLimit ?? 0)]),
+        NotificationAlertType.DEFAULT, null, null, LocalizeText('friendlist.listfull.title')
+    );
 
-                if (flag) {
-                    SendMessageComposer(new AcceptFriendMessageComposer(newRequests[index].id));
-                } else {
-                    SendMessageComposer(new DeclineFriendMessageComposer(false, newRequests[index].id));
-                }
+    const requestResponse = (requestId: number, accept: boolean) => {
+        const all = requestId === -1;
+        const current = requestsRef.current;
+        const targets = all ? current.filter((request) => request.state !== MessengerRequest.ACCEPTED && request.state !== MessengerRequest.DECLINED)
+            : current.filter((request) => request.id === requestId && request.state === MessengerRequest.PENDING);
 
-                newRequests.splice(index, 1);
+        if (!targets.length) return;
 
-                return newRequests;
-            });
+        if (accept && all && settings && friendsRef.current.length + current.length > settings.userFriendLimit) {
+            showFriendLimit();
+            return;
         }
+
+        const ids = new Set(targets.map((request) => request.id));
+        updateRequests(current.map((request) => {
+            if (!ids.has(request.id)) return request;
+            const next = CloneObject(request);
+            next.state = accept ? MessengerRequest.ACCEPTED : MessengerRequest.DECLINED;
+            return next;
+        }));
+
+        if (accept && !all && settings && friendsRef.current.length >= settings.userFriendLimit) {
+            showFriendLimit();
+            return;
+        }
+
+        SendMessageComposer(accept ? new AcceptFriendMessageComposer(...ids) : new DeclineFriendMessageComposer(all, ...(all ? [] : ids)));
     };
 
     useMessageEvent<MessengerInitEvent>(MessengerInitEvent, (event) => {
@@ -179,22 +208,17 @@ const useFriendsStore = () => {
     useMessageEvent<FriendListFragmentEvent>(FriendListFragmentEvent, (event) => {
         const parser = event.getParser();
 
-        setFriends((prevValue) => {
-            const newValue = [...prevValue];
+        const newValue = [...friendsRef.current];
+        for (const friend of parser.fragment) {
+            const index = newValue.findIndex((existingFriend) => existingFriend.id === friend.id);
+            const newFriend = new MessengerFriend();
+            newFriend.populate(friend);
 
-            for (const friend of parser.fragment) {
-                const index = newValue.findIndex((existingFriend) => existingFriend.id === friend.id);
-                const newFriend = new MessengerFriend();
-                newFriend.populate(friend);
-
-                if (index > -1) newValue[index] = newFriend;
-                else newValue.push(newFriend);
-            }
-
-            friendsRef.current = newValue;
-
-            return newValue;
-        });
+            if (index > -1) newValue[index] = newFriend;
+            else newValue.push(newFriend);
+        }
+        friendsRef.current = newValue;
+        setFriends(newValue);
 
         if (parser.totalFragments === 0 || parser.fragmentNumber >= parser.totalFragments - 1) setOfflineMessagesReady(true);
     });
@@ -214,35 +238,31 @@ const useFriendsStore = () => {
 
         setSettings((previous) => withUpdatedFriendCategories(previous, parser.categories));
 
-        setFriends((prevValue) => {
-            const newValue = [...prevValue];
+        const newValue = [...friendsRef.current];
 
-            const processUpdate = (friend: FriendParser) => {
-                const index = newValue.findIndex((existingFriend) => existingFriend.id === friend.id);
-                const newFriend = new MessengerFriend();
-                newFriend.populate(friend);
+        const processUpdate = (friend: FriendParser) => {
+            const index = newValue.findIndex((existingFriend) => existingFriend.id === friend.id);
+            const newFriend = new MessengerFriend();
+            newFriend.populate(friend);
 
-                if (index === -1) {
-                    newValue.unshift(newFriend);
-                } else {
-                    newValue[index] = newFriend;
-                }
-            };
-
-            for (const friend of parser.addedFriends) processUpdate(friend);
-
-            for (const friend of parser.updatedFriends) processUpdate(friend);
-
-            for (const removedFriendId of parser.removedFriendIds) {
-                const index = newValue.findIndex((existingFriend) => existingFriend.id === removedFriendId);
-
-                if (index > -1) newValue.splice(index, 1);
+            if (index === -1) {
+                newValue.unshift(newFriend);
+            } else {
+                newValue[index] = newFriend;
             }
+        };
 
-            friendsRef.current = newValue;
+        for (const friend of parser.addedFriends) processUpdate(friend);
 
-            return newValue;
-        });
+        for (const friend of parser.updatedFriends) processUpdate(friend);
+
+        for (const removedFriendId of parser.removedFriendIds) {
+            const index = newValue.findIndex((existingFriend) => existingFriend.id === removedFriendId);
+
+            if (index > -1) newValue.splice(index, 1);
+        }
+        friendsRef.current = newValue;
+        setFriends(newValue);
 
         for (const friend of onlineNotifications) {
             const text = localizeWithFallback('notifications.friend_online', `${friend.name} is online`, ['name'], [friend.name]);
@@ -254,69 +274,75 @@ const useFriendsStore = () => {
     useMessageEvent<FriendRequestsEvent>(FriendRequestsEvent, (event) => {
         const parser = event.getParser();
 
-        setRequests((prevValue) => {
-            const newValue = [...prevValue];
+        updateRequests(parser.requests.map((request) => {
+            const next = new MessengerRequest();
+            next.populate(request);
+            return next;
+        }));
+    });
 
-            for (const request of parser.requests) {
-                const index = newValue.findIndex((existing) => existing.requesterUserId === request.requesterUserId);
-
-                if (index !== -1) {
-                    newValue[index] = CloneObject(newValue[index]);
-                    newValue[index].populate(request);
-                } else {
-                    const newRequest = new MessengerRequest();
-                    newRequest.populate(request);
-
-                    newValue.push(newRequest);
-                }
-            }
-
-            return newValue;
-        });
+    useMessageEvent<HabboSearchResultEvent>(HabboSearchResultEvent, (event) => {
+        const parser = event.getParser();
+        setSearchResults({ friends: parser.friends, others: parser.others });
     });
 
     useMessageEvent<FollowFriendFailedEvent>(FollowFriendFailedEvent, () => {
         simpleAlert(LocalizeText('friendlist.followerror.hotelview'), NotificationAlertType.DEFAULT, null, null, LocalizeText('friendlist.alert.title'));
     });
 
-    useMessageEvent<MessageErrorEvent>(MessageErrorEvent, (event) => {
-        const errorCode = event.getParser().errorCode;
+    const showMessengerError = (errorCode: number, messageId = 0) => {
         const localizeKeys: Record<number, string> = {
             1: 'friendlist.error.friendlistownlimit',
             2: 'friendlist.error.friendlistlimitofrequester',
             3: 'friendlist.error.friend_requests_disabled',
-            4: 'friendlist.error.requestnotfound'
+            4: 'friendlist.error.requestnotfound',
+            7: 'friendlist.error.blocked_by_them',
+            8: 'friendlist.error.blocked_by_you'
         };
         const localizeKey = localizeKeys[errorCode];
 
-        if (!localizeKey) return;
+        simpleAlert(localizeKey ? LocalizeText(localizeKey) : `Received messenger error: msg: ${messageId}, errorCode: ${errorCode}`,
+            NotificationAlertType.DEFAULT, null, null, LocalizeText('friendlist.alert.title'));
+    };
+
+    useMessageEvent<AcceptFriendResultEvent>(AcceptFriendResultEvent, (event) => {
+        const failures = event.getParser().failures;
+        const failedIds = new Set(failures.map((failure) => failure.senderId));
+        if (failedIds.size) updateRequests(requestsRef.current.map((request) => {
+            if (!failedIds.has(request.requesterUserId)) return request;
+            const next = CloneObject(request);
+            next.state = MessengerRequest.FAILED;
+            return next;
+        }));
+        for (const failure of failures) showMessengerError(failure.errorCode, failure.senderId);
+    });
+
+    useMessageEvent<MessageErrorEvent>(MessageErrorEvent, (event) => {
+        const parser = event.getParser();
 
         const requestedFriendId = lastRequestedFriendIdRef.current;
 
         if (requestedFriendId > 0) setSentRequests((prevValue) => prevValue.filter((userId) => userId !== requestedFriendId));
 
         lastRequestedFriendIdRef.current = -1;
-        simpleAlert(LocalizeText(localizeKey), NotificationAlertType.DEFAULT, null, null, LocalizeText('friendlist.alert.title'));
+        showMessengerError(parser.errorCode, parser.clientMessageId);
     });
 
     useMessageEvent<NewFriendRequestEvent>(NewFriendRequestEvent, (event) => {
         const parser = event.getParser();
         const request = parser.request;
 
-        setRequests((prevValue) => {
-            const newRequests = [...prevValue];
+        const newRequests = [...requestsRef.current];
 
-            const index = newRequests.findIndex((existing) => existing.requesterUserId === request.requesterUserId);
+        const index = newRequests.findIndex((existing) => existing.requesterUserId === request.requesterUserId);
 
-            if (index === -1) {
-                const newRequest = new MessengerRequest();
-                newRequest.populate(request);
+        if (index === -1) {
+            const newRequest = new MessengerRequest();
+            newRequest.populate(request);
 
-                newRequests.push(newRequest);
-            }
-
-            return newRequests;
-        });
+            newRequests.push(newRequest);
+        }
+        updateRequests(newRequests);
     });
 
     useEffect(() => {
@@ -339,7 +365,11 @@ const useFriendsStore = () => {
 
     return {
         friends,
-        requests,
+        requests: pendingRequests,
+        requestRows: requests,
+        searchResults,
+        searchValue,
+        setSearchValue,
         sentRequests,
         dismissedRequestIds,
         setDismissedRequestIds,
@@ -350,6 +380,7 @@ const useFriendsStore = () => {
         canRequestFriend,
         requestFriend,
         requestResponse,
+        clearRequestOutcomes,
         followFriend,
         updateRelationship,
         addCategory,
@@ -403,12 +434,13 @@ export const useFriendsState = () => {
  * relationship.
  */
 export const useFriendsActions = () => {
-    const { requestFriend, requestResponse, followFriend, updateRelationship, addCategory, renameCategory, removeCategory, moveFriendToCategory } =
+    const { requestFriend, requestResponse, clearRequestOutcomes, followFriend, updateRelationship, addCategory, renameCategory, removeCategory, moveFriendToCategory } =
         useSharedHook(useFriendsStore);
 
     return {
         requestFriend,
         requestResponse,
+        clearRequestOutcomes,
         followFriend,
         updateRelationship,
         addCategory,

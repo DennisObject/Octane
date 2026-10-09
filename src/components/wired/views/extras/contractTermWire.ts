@@ -11,8 +11,8 @@ export const CONTRACT_KIND_FURNI = 1;
 export const CONTRACT_RULES_FORMAT = -1;
 
 /** Matches the ceilings the contract enforces on save. */
-export const CONTRACT_MAX_RULES = 8;
-export const CONTRACT_MAX_NODES = 8;
+export const CONTRACT_MAX_RULES = 3;
+export const CONTRACT_MAX_NODES = 5;
 
 const NODE_STRIDE = 5;
 const LEGACY_STRIDE = 3;
@@ -213,6 +213,4 @@ export const serializeContractRules = (rules: ContractRules): { intParams: numbe
 
 export const CURRENCY_OPTIONS = [
     { value: -1, label: 'Credits' },
-    { value: 0, label: 'Duckets' },
-    { value: 5, label: 'Diamonds' },
 ];

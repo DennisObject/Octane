@@ -260,7 +260,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--classic']}
+            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--classic', 'octane-avatar-action-menu--wide']}
             collapsable={true}
             freezePositionOnHover={true}
             maximumVerticalLeadRatio={0.05}

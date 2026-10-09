@@ -1,14 +1,16 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { AchievementUtilities, LocalizeText } from '../../api';
-import { DraggableWindowPosition } from '../../common';
+import { OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useAchievements } from '../../hooks';
-import { OctaneCard } from '../../layout';
 import { AchievementCategoryView } from './AchievementCategoryView';
+import { AchievementText } from './AchievementText';
 import { AirAchievementProgressBar } from './AirAchievementProgressBar';
 import { AchievementsCategoryListView } from './category-list';
 
 export const AchievementsView: FC = () => {
+    const [windowPosition, setWindowPosition] = useState<{ x: number; y: number } | null>(null);
     const {
         isVisible,
         isLoaded,
@@ -64,18 +66,36 @@ export const AchievementsView: FC = () => {
         };
     }, [close, isVisible, show]);
 
-    if (!isVisible || !isLoaded) return null;
+    useEffect(() => {
+        if (!isVisible || !isLoaded || windowPosition) return;
+
+        setWindowPosition({ x: Math.round((window.innerWidth - 389) / 2), y: 20 });
+    }, [isLoaded, isVisible, windowPosition]);
+
+    if (!isVisible || !isLoaded || !windowPosition) return null;
 
     return (
-        <OctaneCard
-            className="octane-achievements-air octane-card-frame-3"
+        <OctaneCardView
+            className="octane-achievements-air"
             uniqueKey="achievements"
-            windowPosition={DraggableWindowPosition.TOP_CENTER}
-            offsetTop={-30}
+            frameStyle={3}
+            isResizable={false}
+            initialPosition={windowPosition}
+            onPositionChange={setWindowPosition}
+            unconstrainedPosition
+            dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
             data-view={selectedCategory ? 'category' : 'categories'}
         >
-            <OctaneCard.Header headerText={LocalizeText('inventory.achievements')} onCloseClick={close} />
-            <OctaneCard.Content className="air-achievements-content">
+            <OctaneCardHeaderView headerText="" onCloseClick={close}>
+                <NativeText
+                    background={0x377998}
+                    className="air-achievements-native-title"
+                    overrides={{ color: 0xffffff }}
+                    text={LocalizeText('inventory.achievements')}
+                    textStyle="u_frame_title"
+                />
+            </OctaneCardHeaderView>
+            <div className="air-achievements-content octane-card-content-shell">
                 {!selectedCategory && (
                     <>
                         <AchievementsCategoryListView
@@ -84,17 +104,27 @@ export const AchievementsView: FC = () => {
                             setSelectedCategoryCode={setSelectedCategoryCode}
                         />
                         <div className="air-achievements-category-footer">
+                            {/* The score field overlaps the last row of the bar by one pixel, so it is drawn first. */}
+                            <AchievementText
+                                background={0xe9e9e1}
+                                bold
+                                color={0x444444}
+                                size={13}
+                                text={LocalizeText('achievements.categories.score', ['score'], [achievementScore.toString()])}
+                                floorCenter
+                                height={18}
+                                width={379}
+                                x={5}
+                                y={23}
+                                align="center"
+                            />
                             <AirAchievementProgressBar
                                 className="air-achievements-total-progress"
                                 width={246}
                                 maxProgress={getMaxProgress}
                                 progress={getProgress}
-                                key={getMaxProgress}
                                 localizationKey="achievements.categories.totalprogress"
                             />
-                            <div className="air-achievements-score">
-                                {LocalizeText('achievements.categories.score', ['score'], [achievementScore.toString()])}
-                            </div>
                         </div>
                     </>
                 )}
@@ -107,14 +137,21 @@ export const AchievementsView: FC = () => {
                                 onClick={() => setSelectedCategoryCode(null)}
                                 aria-label={LocalizeText('generic.back')}
                             />
-                            <div className="air-achievements-category-name">{AchievementUtilities.getAchievementCategoryName(selectedCategory)}</div>
-                            <div className="air-achievements-category-progress">
-                                {LocalizeText(
+                            <AchievementText background={0x8899a2} bold color={0xffffff} height={22} size={20} text={AchievementUtilities.getAchievementCategoryName(selectedCategory)} x={78} y={13} />
+                            <AchievementText
+                                background={0x8899a2}
+                                bold
+                                color={0xffffff}
+                                size={13}
+                                text={LocalizeText(
                                     'achievements.details.categoryprogress',
                                     ['progress', 'limit'],
                                     [selectedCategory.getProgress().toString(), selectedCategory.getMaxProgress().toString()]
                                 )}
-                            </div>
+                                height={24}
+                                x={78}
+                                y={40}
+                            />
                             <img
                                 className="air-achievements-category-icon"
                                 src={AchievementUtilities.getAchievementCategoryImageUrl(selectedCategory, true)}
@@ -131,7 +168,7 @@ export const AchievementsView: FC = () => {
                         <AchievementCategoryView category={selectedCategory} />
                     </>
                 )}
-            </OctaneCard.Content>
-        </OctaneCard>
+            </div>
+        </OctaneCardView>
     );
 };

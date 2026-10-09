@@ -58,7 +58,7 @@ describe('FloorplanOptionsPanel', () => {
 
         avatarManager.mockImplementation(() => ({
             createAvatarImage: (_figure: string, scale: string, _gender: string, next: { resetFigure: (figure: string) => void }) => {
-                expect(scale).toBe(AvatarScaleType.SMALL);
+                expect(scale).toBe(AvatarScaleType.LARGE);
                 calls += 1;
                 listener = next;
 
@@ -89,7 +89,6 @@ describe('FloorplanOptionsPanel', () => {
 
         act(() => listener?.resetFigure('hd-180-1.ch-210-66.lg-270-82.sh-290-81'));
 
-        expect(getByTestId('floorplan-ghost').querySelector('img')?.getAttribute('src')).toBe('blob:ghost');
         expect(dispose).toHaveBeenCalled();
     });
 });

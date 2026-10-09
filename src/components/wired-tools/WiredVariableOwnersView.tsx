@@ -106,7 +106,7 @@ export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => 
             };
 
             SendMessageComposer(
-                new WiredVariableHoldersPageComposer(variableId, requested, WIRED_VARIABLE_OWNERS_PAGE_SIZE, filters.userTypeFilter, filters.sortTypeFilter)
+                new WiredVariableHoldersPageComposer(variableId, requested, WIRED_VARIABLE_OWNERS_PAGE_SIZE, filters.userTypeFilter, filters.sortTypeFilter, true)
             );
         }
     });
@@ -114,7 +114,7 @@ export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => 
     // The first page of a new variable, unfiltered.
     useEffect(() => {
         setPage(null);
-        SendMessageComposer(new WiredVariableHoldersPageComposer(variableId, 1, WIRED_VARIABLE_OWNERS_PAGE_SIZE, USER_FILTER_ALL, SORT_NONE));
+        SendMessageComposer(new WiredVariableHoldersPageComposer(variableId, 1, WIRED_VARIABLE_OWNERS_PAGE_SIZE, USER_FILTER_ALL, SORT_NONE, true));
     }, [variableId]);
 
     const changeFilters = (nextUserType: number, nextSortType: number) => {

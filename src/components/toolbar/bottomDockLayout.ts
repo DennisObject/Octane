@@ -13,7 +13,7 @@ export interface BottomDockLayout {
 const AIR_CHAT_WIDTH = 466;
 const AIR_RAIL_CLEARANCE = 8;
 const AIR_DOCKED_CHAT_BOTTOM = 7;
-const AIR_RAISED_CHAT_BOTTOM = 65;
+export const AIR_RAISED_CHAT_BOTTOM = 62;
 const AIR_FRIEND_TAB_WIDTH = 127;
 const AIR_FRIEND_BAR_EDGE_PADDING = 16;
 

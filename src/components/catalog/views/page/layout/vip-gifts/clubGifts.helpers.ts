@@ -35,8 +35,6 @@ const daysText = (baseKey: string, totalDays: number): ClubGiftText => ({
 
 export const getPastClubDaysText = (pastClubDays: number, pastVipDays: number): ClubGiftText => daysText('catalog.club_gift.past_club', pastClubDays + pastVipDays);
 
-export const getPastVipDaysText = (pastVipDays: number): ClubGiftText => daysText('catalog.club_gift.past_vip', pastVipDays);
-
 export const getGiftRequirementText = (gift: ClubGiftRequirementLike, purse: ClubGiftPurseLike, giftsAvailable: number): ClubGiftText | null => {
     const pastDays = gift.isVip ? purse.pastVipDays : purse.pastClubDays + purse.pastVipDays;
     const missingDays = gift.daysRequired - pastDays;

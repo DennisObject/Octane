@@ -1,11 +1,28 @@
-import { GetRoomEngine, GetSessionDataManager } from '@octane/renderer';
-import { CSSProperties, FC, MouseEvent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType, WiredSelectionVisualizer, wiredStyleClassName } from '../../../api';
-import wiredBgLeft from '../../../assets/images/wired/wired_bg_left.png';
-import wiredBgRight from '../../../assets/images/wired/wired_bg_right.png';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../common';
+import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager } from '@octane/renderer';
+import { CSSProperties, FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
+import {
+    isWiredVolterStyle,
+    LocalizeText,
+    localizeWithFallback,
+    resolveWiredStyle,
+    WiredFurniType,
+    WiredSelectionVisualizer,
+    wiredStyleClassName,
+    wiredStyleWidth,
+    wiredWidthMultiplier
+} from '../../../api';
+import volterAtlas from '../../../assets/images/wired/volter_shell_atlas.png';
+import { OctaneCardContentView, OctaneCardView, Text } from '../../../common';
 import { useWired, useWiredTools } from '../../../hooks';
-import { WiredFurniSelectorView } from './WiredFurniSelectorView';
+import { WiredBannerCanvas } from './WiredBannerCanvas';
+import { WiredNativeContext } from './WiredNativeContext';
+import { WiredFurniSelectorSection, WiredFurniSelectorView } from './WiredFurniSelectorView';
+import { WiredSection, WiredSplitter } from './WiredSection';
+import { WiredShellButton, WiredShellHeaderView } from './WiredShellHeaderView';
+import { WiredVolterBorderView, WiredVolterFrameView } from './WiredVolterFrameView';
+
+// The official frame is centred while it is still its 108px minimum height and then grows downwards.
+const WIRED_OPEN_HEIGHT = 108;
 
 export interface WiredBaseViewProps {
     wiredType: string;
@@ -19,10 +36,14 @@ export interface WiredBaseViewProps {
     selectionPreview?: ReactNode;
     /** False keeps furni picking on but leaves its section out, for views that show it elsewhere. */
     showSelection?: boolean;
+    /** Children are native sections (WiredSection) that bring their own splitters instead of one padded body. */
+    nativeLayout?: boolean;
+    /** The action delay section: native frames put it after the furni picks, legacy ones keep it with the body. */
+    delay?: ReactNode;
+    legacyDelay?: ReactNode;
 }
 
 export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) => {
-    const WIRED_CARD_WIDTH = 244;
     const {
         wiredType = '',
         requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE,
@@ -34,13 +55,14 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         footer = null,
         footerCollapsible = true,
         selectionPreview = null,
-        showSelection = true
+        showSelection = true,
+        nativeLayout = false,
+        delay = null,
+        legacyDelay = null
     } = props;
-    const [wiredName, setWiredName] = useState<string>(null);
     const [needsSave, setNeedsSave] = useState<boolean>(false);
     const [keepOpenOnSave, setKeepOpenOnSave] = useState<boolean>(false);
     const [showFooter, setShowFooter] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [pasteInto, setPasteInto] = useState(false);
     const {
         trigger = null,
@@ -58,7 +80,14 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         resetWiredToDefault = null,
         clearWiredPicks = null
     } = useWired();
-    const { roomSettings, accountPreferences } = useWiredTools();
+    const { roomSettings, activeWiredStyle } = useWiredTools();
+    const furniData = trigger ? GetSessionDataManager().getFloorItemData(trigger.spriteId) : null;
+    const wiredName = furniData?.name || `NAME: ${trigger?.spriteId ?? -1}`;
+    const shellStyle = resolveWiredStyle(activeWiredStyle, furniData?.className);
+    const isVolter = isWiredVolterStyle(shellStyle);
+    const isNative = shellStyle === 'illumina';
+    const iconOffset = { action: 0, trigger: 16, condition: 32, selector: 48, extra: 64, variable: 80 }[wiredType];
+    const [summaryKind = '', summaryName = ''] = (wiredName || '').split(':', 2);
 
     const clearRoomAreaSelection = () => {
         GetRoomEngine().areaSelectionManager.clearHighlight();
@@ -92,19 +121,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         setKeepOpenOnSave(false);
     }, [needsSave, keepOpenOnSave, saveWired, saveWiredAndKeepOpen]);
 
-    // The quick menu. Copy pushes the view's current settings into the hook first (the same
-    // step "ready" takes), so the clipboard holds what is on screen and not what was last saved.
     const canEdit = !!roomSettings.canModify;
-    // The header is the drag handle; a press on the menu is a click, not the start of a drag.
-    const stopDrag = (event: MouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        event.nativeEvent.stopImmediatePropagation();
-    };
-
-    const runMenuAction = (action: () => void) => {
-        setIsMenuOpen(false);
-        action();
-    };
     const onCopy = () => {
         if (validate && !validate()) return;
 
@@ -135,31 +152,22 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
             onClick: () => clearWiredPicks?.()
         },
         { id: 'reset', label: localizeWithFallback('wiredfurni.params.menu.reset', 'Reset to default'), disabled: !canEdit, onClick: () => resetWiredToDefault?.() },
+        null
+    ];
+    const shellMenuItems = [
+        ...menuItems,
+        { id: 'open-menu', label: localizeWithFallback('wiredfurni.params.menu.open_menu', 'Open Menu'), disabled: false, onClick: () => CreateLinkEvent('wiredmenu/open') },
         null,
-        {
-            id: 'save-open',
-            label: localizeWithFallback('wiredfurni.params.menu.save_without_closing', 'Save without closing'),
-            disabled: !canEdit,
-            onClick: () => onSave(true)
-        }
+        { id: 'save', label: localizeWithFallback('wiredfurni.params.menu.save', 'Save'), disabled: !canEdit, onClick: () => onSave(true) },
+        { id: 'close', label: localizeWithFallback('wiredfurni.params.menu.close', 'Close'), disabled: false, onClick: onClose }
     ];
 
     useEffect(() => {
         if (!trigger) return;
 
         setShowFooter(false);
-        setIsMenuOpen(false);
 
         WiredSelectionVisualizer.clearAllSelectionShaders();
-
-        const spriteId = trigger.spriteId || -1;
-        const furniData = GetSessionDataManager().getFloorItemData(spriteId);
-
-        if (!furniData) {
-            setWiredName('NAME: ' + spriteId);
-        } else {
-            setWiredName(furniData.name);
-        }
 
         if (hasSpecialInput) {
             setIntParams(trigger.intData);
@@ -197,110 +205,124 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
 
     const resolvedCardStyle: CSSProperties = { ...cardStyle };
 
-    resolvedCardStyle.width = WIRED_CARD_WIDTH;
-    resolvedCardStyle.minWidth = WIRED_CARD_WIDTH;
-    resolvedCardStyle.maxWidth = WIRED_CARD_WIDTH;
+    const cardWidth = Math.trunc(wiredStyleWidth(shellStyle) * wiredWidthMultiplier(wiredType, trigger?.code));
+    resolvedCardStyle.width = cardWidth;
+    resolvedCardStyle.minWidth = cardWidth;
+    resolvedCardStyle.maxWidth = cardWidth;
     resolvedCardStyle.resize = 'none';
 
+    const advancedToggle = (
+        <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
+            {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
+        </button>
+    );
+
+    const bodySections = isNative ? (
+        <>
+            {nativeLayout ? children : !!children && <WiredSection className="octane-wired__section--body">{children}</WiredSection>}
+            {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (selectionPreview || <WiredFurniSelectorSection />)}
+            {delay}
+            {footer &&
+                (footerCollapsible ? (
+                    <div className="octane-wired__native-advanced">
+                        {advancedToggle}
+                        {showFooter && <div className="octane-wired__native-advanced-body">{footer}</div>}
+                    </div>
+                ) : (
+                    <WiredSection className="octane-wired__section--footer">{footer}</WiredSection>
+                ))}
+        </>
+    ) : (
+        <>
+            {!!children && <div className="octane-wired__divider" />}
+            {!!children && <div className="octane-wired__section octane-wired__section--body">{children}</div>}
+            {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
+                <>
+                    <div className="octane-wired__divider" />
+                    <div className="octane-wired__section octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>
+                </>
+            )}
+            {legacyDelay}
+            {footer && (
+                <>
+                    <div className="octane-wired__divider" />
+                    <div className="octane-wired__section octane-wired__section--footer">
+                        {footerCollapsible ? (
+                            <>
+                                {advancedToggle}
+                                {showFooter && <div className="octane-wired__advanced-body">{footer}</div>}
+                            </>
+                        ) : (
+                            footer
+                        )}
+                    </div>
+                </>
+            )}
+        </>
+    );
+
     return (
+        <WiredNativeContext.Provider value={isNative}>
         <OctaneCardView
-            className={`octane-wired ${wiredStyleClassName(accountPreferences?.wiredStyle)} max-h-[calc(100vh-16px)]`}
+            className={`octane-wired octane-wired--official ${isNative ? 'octane-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'octane-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'octane-wired--volter-colour' : ''}`}
             theme="primary-slim"
             uniqueKey="octane-wired"
             isResizable={false}
             style={resolvedCardStyle}
+            initialPosition={{ x: Math.round((window.innerWidth - cardWidth) / 2), y: Math.round((window.innerHeight - WIRED_OPEN_HEIGHT) / 2) }}
         >
-            <OctaneCardHeaderView classNames={['octane-wired__header']} headerText={LocalizeText('wiredfurni.title')} onCloseClick={onClose}>
-                <div className="octane-wired__menu">
-                    <button
-                        aria-expanded={isMenuOpen}
-                        aria-haspopup="menu"
-                        aria-label={localizeWithFallback('wiredfurni.params.menu', 'Menu')}
-                        className="octane-wired__menu-toggle"
-                        title={localizeWithFallback('wiredfurni.params.menu', 'Menu')}
-                        type="button"
-                        onClick={() => setIsMenuOpen((value) => !value)}
-                        onMouseDownCapture={stopDrag}
-                    >
-                        &#8801;
-                    </button>
-                    {isMenuOpen && (
-                        <div className="octane-wired__menu-list" role="menu" onMouseDownCapture={stopDrag}>
-                            {menuItems.map((item, index) =>
-                                item ? (
-                                    <button
-                                        key={item.id}
-                                        aria-checked={item.checked}
-                                        className="octane-wired__menu-item"
-                                        disabled={item.disabled}
-                                        role={item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'}
-                                        type="button"
-                                        onClick={() => (item.checked === undefined ? runMenuAction(item.onClick) : item.onClick())}
-                                    >
-                                        {item.checked !== undefined && <span className="octane-wired__menu-check">{item.checked ? '\u2611' : '\u2610'}</span>}
-                                        <span>{item.label}</span>
-                                    </button>
-                                ) : (
-                                    <div key={`spacer-${index}`} className="octane-wired__menu-spacer" />
-                                )
-                            )}
-                        </div>
-                    )}
-                </div>
-            </OctaneCardHeaderView>
+            {isWiredVolterStyle(shellStyle) && <WiredVolterFrameView shellStyle={shellStyle} />}
+            <WiredShellHeaderView
+                key={`${shellStyle}-${trigger?.id}`}
+                shellStyle={shellStyle}
+                title={LocalizeText('wiredfurni.title')}
+                onClose={onClose}
+                menuItems={shellMenuItems}
+            />
             <OctaneCardContentView classNames={['octane-wired__content']} gap={0}>
                 <div className="octane-wired__section octane-wired__summary">
-                    <img className="octane-wired__summary-bg octane-wired__summary-bg--left" src={wiredBgLeft} alt="" />
-                    <img className="octane-wired__summary-bg octane-wired__summary-bg--right" src={wiredBgRight} alt="" />
+                    {shellStyle === 'illumina' && (
+                        <div className="octane-wired__banner" aria-hidden="true">
+                            <WiredBannerCanvas />
+                        </div>
+                    )}
+                    {isVolter && iconOffset !== undefined && (
+                        <svg className="octane-wired__type-icon" viewBox={`${iconOffset} 336 13 14`} aria-hidden="true">
+                            <image href={volterAtlas} width={490} height={360} />
+                        </svg>
+                    )}
                     <div className="octane-wired__summary-copy">
-                        <Text bold className="octane-wired__summary-title">
-                            {wiredName}
-                        </Text>
+                        {shellStyle === 'illumina' ? (
+                            <>
+                                <span className="octane-wired__summary-kind">{summaryKind.toUpperCase()}</span>
+                                <span className="octane-wired__summary-title">{summaryName.replace(/^ +/, '')}</span>
+                            </>
+                        ) : (
+                            <Text bold className="octane-wired__summary-title">
+                                {wiredName}
+                            </Text>
+                        )}
                     </div>
                 </div>
                 <div className="octane-wired__body">
-                    {!!children && <div className="octane-wired__divider" />}
-                    {!!children && <div className="octane-wired__section octane-wired__section--body">{children}</div>}
-                    {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
-                        <>
-                            <div className="octane-wired__divider" />
-                            <div className="octane-wired__section octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>
-                        </>
-                    )}
-                    {footer && (
-                        <>
-                            <div className="octane-wired__divider" />
-                            <div className="octane-wired__section octane-wired__section--footer">
-                                {footerCollapsible ? (
-                                    <>
-                                        <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
-                                            {LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand')}
-                                        </button>
-                                        {showFooter && <div className="octane-wired__advanced-body">{footer}</div>}
-                                    </>
-                                ) : (
-                                    footer
-                                )}
-                            </div>
-                        </>
-                    )}
-                    <div className="octane-wired__divider" />
-                    <div className="flex items-center gap-1 octane-wired__actions">
-                        <Button
-                            disabled={!roomSettings.canModify}
-                            fullWidth
-                            variant="success"
-                            classNames={['octane-wired__button', 'octane-wired__button--primary']}
-                            onClick={() => onSave(false)}
-                        >
-                            {LocalizeText('wiredfurni.ready')}
-                        </Button>
-                        <Button fullWidth variant="secondary" classNames={['octane-wired__button', 'octane-wired__button--secondary']} onClick={onClose}>
-                            {LocalizeText('cancel')}
-                        </Button>
+                    {isWiredVolterStyle(shellStyle) && shellStyle !== 'volter' ? (
+                        <WiredVolterBorderView shellStyle={shellStyle}>{bodySections}</WiredVolterBorderView>
+                    ) : bodySections}
+                    {!isNative && <div className="octane-wired__divider octane-wired__footer-divider" />}
+                    <div className={isNative ? 'octane-wired__native-footer' : 'contents'}>
+                        {isNative && <WiredSplitter />}
+                        <div className="flex items-center gap-1 octane-wired__actions">
+                            <WiredShellButton shellStyle={shellStyle} disabled={!roomSettings.canModify} onClick={() => onSave(false)}>
+                                {LocalizeText('wiredfurni.ready')}
+                            </WiredShellButton>
+                            <WiredShellButton shellStyle={shellStyle} onClick={onClose}>
+                                {LocalizeText('cancel')}
+                            </WiredShellButton>
+                        </div>
                     </div>
                 </div>
             </OctaneCardContentView>
         </OctaneCardView>
+        </WiredNativeContext.Provider>
     );
 };

@@ -1,6 +1,12 @@
 import { FriendRequestData } from '@octane/renderer';
 
 export class MessengerRequest {
+    public static readonly PENDING = 1;
+    public static readonly ACCEPTED = 2;
+    public static readonly DECLINED = 3;
+    public static readonly FAILED = 4;
+
+    public state: number = MessengerRequest.PENDING;
     private _id: number;
     private _name: string;
     private _requesterUserId: number;

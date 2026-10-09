@@ -4,6 +4,7 @@ import { FurnitureContextMenuView } from './context-menu/FurnitureContextMenuVie
 import { FurnitureAreaHideView } from './FurnitureAreaHideView';
 import { FurnitureBackgroundColorView } from './FurnitureBackgroundColorView';
 import { FurnitureBadgeDisplayView } from './FurnitureBadgeDisplayView';
+import { FurnitureWiredChestRewardView } from './FurnitureWiredChestRewardView';
 import { FurnitureChestView } from './FurnitureChestView';
 import { FurnitureCraftingView } from './FurnitureCraftingView';
 import { FurnitureDimmerView } from './FurnitureDimmerView';
@@ -37,6 +38,7 @@ export const FurnitureWidgetsView: FC<{}> = (props) => {
             </WidgetErrorBoundary>
             <WidgetErrorBoundary name="FurnitureChest">
                 <FurnitureChestView />
+                <FurnitureWiredChestRewardView />
             </WidgetErrorBoundary>
             <WidgetErrorBoundary name="FurnitureCrafting">
                 <FurnitureCraftingView />

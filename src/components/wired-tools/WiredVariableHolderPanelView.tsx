@@ -6,7 +6,7 @@ export interface WiredHolderPanelEntry {
     name: string;
     availability: string;
     hasValue: boolean;
-    value: number | null;
+    value: bigint | number | null;
     isReadOnly?: boolean;
 }
 
@@ -184,7 +184,7 @@ export const WiredVariableHolderPanelView = (props: WiredVariableHolderPanelView
                                                     <input
                                                         autoFocus
                                                         className="w-[72px] rounded border border-[#b8b2a4] bg-white px-2 py-[2px] text-[12px]"
-                                                        type="number"
+                                                        type="text" inputMode="numeric"
                                                         value={editingValue}
                                                         onBlur={onEditBlur}
                                                         onChange={(event) => onEditingValueChange(event.target.value)}
@@ -221,7 +221,7 @@ export const WiredVariableHolderPanelView = (props: WiredVariableHolderPanelView
                             <input
                                 className="w-[96px] rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px] disabled:opacity-60"
                                 disabled={!selectedGiveOption?.hasValue}
-                                type="number"
+                                type="text" inputMode="numeric"
                                 value={giveValue}
                                 onChange={(event) => onGiveValueChange(event.target.value)}
                             />

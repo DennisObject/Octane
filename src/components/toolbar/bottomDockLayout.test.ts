@@ -50,7 +50,7 @@ describe('AIR bottom dock layout', () => {
             })
         ).toEqual({
             chatRaised: true,
-            chatBottom: 65
+            chatBottom: 62
         });
     });
 
@@ -63,7 +63,7 @@ describe('AIR bottom dock layout', () => {
             })
         ).toEqual({
             chatRaised: true,
-            chatBottom: 65
+            chatBottom: 62
         });
     });
 

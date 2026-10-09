@@ -1,5 +1,5 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
@@ -8,18 +8,19 @@ import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore'
 import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
 import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
 import { getCatalogHeaderDescription } from './catalogLocalization.helpers';
-import { parseCatalogTabLabel, useCatalogWindowWidth } from './useCatalogWindowWidth';
+import { parseCatalogTabLabel } from './catalogTabLabel';
 import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
 import { CatalogAdminOfferEditView } from './views/admin/CatalogAdminOfferEditView';
 import { CatalogAdminPageEditView } from './views/admin/CatalogAdminPageEditView';
 import { CatalogLoadingStateView } from './views/CatalogLoadingStateView';
-import { CatalogBuildersClubStatusView } from './views/catalog-header/CatalogBuildersClubStatusView';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
+import { CatalogPlacedOfferConfirmView } from './views/CatalogPlacedOfferConfirmView';
 import { CatalogBreadcrumbView } from './views/navigation/CatalogBreadcrumbView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
+import { getCatalogLayoutDefinition } from './views/page/layout/catalogLayoutRegistry';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
 
 const CatalogViewInner: FC<{}> = () => {
@@ -27,17 +28,17 @@ const CatalogViewInner: FC<{}> = () => {
     const {
         isVisible = false,
         setIsVisible = null,
-        navigationHidden = false,
         setNavigationHidden = null,
+        currentTab = null,
         activeNodes = [],
-        setSearchResult = null,
-        currentType = CatalogType.NORMAL
+        setSearchResult = null
     } = useCatalogUiState();
     const {
         openPageById = null,
         openPageByName = null,
         openPageByOfferId = null,
-        activateNode = null,
+        showTab = null,
+        getNodeById = null,
         openCatalogByType = null,
         toggleCatalogByType = null,
         retryCurrentPage = null
@@ -48,49 +49,20 @@ const CatalogViewInner: FC<{}> = () => {
     const isMod = catalogAdmin?.canEdit ?? false;
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
-    const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
-    const buildersClubEnabled = GetConfigurationValue<boolean>('buildersclub.enabled', GetConfigurationValue<boolean>('toolbar.buildersclub.enabled', true));
-    // Strip technical suffixes like "(BC)" or "(Hot)" but keep the
-    // pageId hint the gameserver appends when the viewer has
-    // ACC_CATALOG_IDS - that's a pure-numeric "(6)" trailer.
+    // The header belongs to the open page: a folder (pageId -1) can be active without opening one.
+    const pageId = currentPage?.pageId ?? -1;
+    const activeCatalogNode =
+        (pageId > -1 && (activeNodes.findLast((node) => node.pageId === pageId) ?? getNodeById(pageId, rootNode))) || activeNodes.at(-1) || null;
+    // Keep technical suffixes and numeric page hints out of the tab captions.
     const stripSwfTabSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
     const getSwfTabLabel = (label: string) => stripSwfTabSuffix(parseCatalogTabLabel(label).name);
-    const tabsShellRef = useRef<HTMLDivElement>(null);
 
-    const visibleRootTabCount = useMemo(() => {
-        if (!rootNode?.children?.length) return 0;
+    const hideCatalogNavigation = useCallback(() => setNavigationHidden(true), [setNavigationHidden]);
 
-        return rootNode.children.filter((child) => {
-            if (!child.isVisible) return false;
-
-            return true;
-        }).length;
-    }, [rootNode]);
-
-    const catalogWindowStyle = useCatalogWindowWidth(
-        tabsShellRef,
-        isVisible,
-        visibleRootTabCount,
-        adminMode,
-        isMod,
-        currentType,
-        rootNode?.pageId,
-        activeCatalogNode?.pageId
-    );
+    const layoutRenderer = getCatalogLayoutDefinition(currentPage?.layoutCode)?.renderer;
+    const sidebarHidden = layoutRenderer === 'frontpage' || layoutRenderer === 'info';
 
     useEffect(() => {
-        const getCatalogTypeFromLink = (type?: string) => {
-            switch ((type || '').toLowerCase()) {
-                case 'bc':
-                case 'builder':
-                case 'buildersclub':
-                case 'builders_club':
-                    return buildersClubEnabled ? CatalogType.BUILDER : CatalogType.NORMAL;
-                default:
-                    return CatalogType.NORMAL;
-            }
-        };
-
         const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) => {
                 const parts = url.split('/');
@@ -100,7 +72,7 @@ const CatalogViewInner: FC<{}> = () => {
                 switch (parts[1]) {
                     case 'show':
                         if (parts.length > 2) {
-                            openCatalogByType(getCatalogTypeFromLink(parts[2]));
+                            openCatalogByType(CatalogType.NORMAL);
 
                             return;
                         }
@@ -112,7 +84,7 @@ const CatalogViewInner: FC<{}> = () => {
                         return;
                     case 'toggle':
                         if (parts.length > 2) {
-                            toggleCatalogByType(getCatalogTypeFromLink(parts[2]));
+                            toggleCatalogByType(CatalogType.NORMAL);
 
                             return;
                         }
@@ -146,20 +118,19 @@ const CatalogViewInner: FC<{}> = () => {
         AddLinkEventTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [setIsVisible, openPageById, openPageByOfferId, openPageByName, openCatalogByType, toggleCatalogByType, buildersClubEnabled]);
+    }, [setIsVisible, openPageById, openPageByOfferId, openPageByName, openCatalogByType, toggleCatalogByType]);
 
     return (
         <>
             {isVisible && (
                 <OctaneCardView
                     classNames={['octane-catalog-window']}
-                    dragStyle={catalogWindowStyle}
-                    isResizable={false}
-                    style={catalogWindowStyle}
+                    frameStyle={3}
+                    isResizable
+                    resizeAxis="vertical"
                     uniqueKey="catalog"
                 >
                     <OctaneCardHeaderView
-                        className={currentType === CatalogType.BUILDER ? 'builders-club-card-header' : ''}
                         headerText={isBusy ? LocalizeText('generic.loading') || 'Loading...' : LocalizeText('catalog.title')}
                         onCloseClick={() => setIsVisible(false)}
                     />
@@ -182,24 +153,23 @@ const CatalogViewInner: FC<{}> = () => {
                             ))}
                         </div>
                     </div>
-                    <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} innerRef={tabsShellRef} justifyContent="start">
+                    <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} justifyContent="start">
                         {rootNode &&
                             rootNode.children.length > 0 &&
-                            rootNode.children.map((child, index) => {
+                            rootNode.children.map((child) => {
                                 if (!child.isVisible) return null;
                                 return (
                                     <OctaneCardTabsItemView
-                                        key={`${child.pageId}-${child.pageName}-${index}`}
-                                        isActive={child.isActive}
+                                        key={child.id}
+                                        isActive={child === currentTab}
                                         title={child.localization}
                                         onClick={() => {
                                             if (searchResult) setSearchResult(null);
 
-                                            activateNode(child);
+                                            showTab(child);
                                         }}
                                     >
                                         <div className="flex items-center gap-1">
-                                            {child.iconId > 0 && <CatalogIconView icon={child.iconId} className="octane-catalog-tab-icon" />}
                                             <span className="octane-catalog-tab-label">{getSwfTabLabel(child.localization)}</span>
                                         </div>
                                     </OctaneCardTabsItemView>
@@ -211,7 +181,7 @@ const CatalogViewInner: FC<{}> = () => {
                             </OctaneCardTabsItemView>
                         )}
                     </OctaneCardTabsView>
-                    <div className={`octane-catalog-standard-header ${currentType === CatalogType.BUILDER ? 'is-builder' : ''}`}>
+                    <div className="octane-catalog-standard-header">
                         <div
                             className="octane-catalog-standard-header-bg"
                             style={currentPage?.localization?.getImage(0) ? { backgroundImage: `url(${currentPage.localization.getImage(0)})` } : undefined}
@@ -220,42 +190,36 @@ const CatalogViewInner: FC<{}> = () => {
                             <CatalogIconView icon={activeCatalogNode?.iconId ?? rootNode?.iconId ?? 1} />
                         </div>
                         <div className="octane-catalog-standard-header-copy">
-                            {currentType === CatalogType.BUILDER ? (
-                                <CatalogBuildersClubStatusView />
-                            ) : (
-                                <>
-                                    <div className="octane-catalog-standard-header-title">
-                                        {searchResult
-                                            ? LocalizeText('catalog.search.header')
-                                            : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title'))}
-                                    </div>
-                                    <div
-                                        className="octane-catalog-standard-header-description"
-                                        dangerouslySetInnerHTML={{
-                                            __html: SanitizeHtml(
-                                                searchResult
-                                                    ? LocalizeText(
-                                                          'catalog.search.results',
-                                                          ['count', 'needle'],
-                                                          [String(searchResult.offers.length), searchResult.searchValue]
-                                                      )
-                                                    : getCatalogHeaderDescription(currentPage?.layoutCode, currentPage?.localization)
-                                            )
-                                        }}
-                                    />
-                                </>
-                            )}
+                            <div className="octane-catalog-standard-header-title">
+                                {searchResult
+                                    ? LocalizeText('catalog.search.header')
+                                    : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title'))}
+                            </div>
+                            <div
+                                className="octane-catalog-standard-header-description"
+                                dangerouslySetInnerHTML={{
+                                    __html: SanitizeHtml(
+                                        searchResult
+                                            ? LocalizeText(
+                                                  'catalog.search.results',
+                                                  ['count', 'needle'],
+                                                  [String(searchResult.offers.length), searchResult.searchValue]
+                                              )
+                                            : getCatalogHeaderDescription(currentPage?.layoutCode, currentPage?.localization)
+                                    )
+                                }}
+                            />
                         </div>
                     </div>
                     <OctaneCardContentView classNames={['octane-catalog-content-shell']}>
-                        <div className={`octane-catalog-stage ${navigationHidden ? 'is-navigation-hidden' : ''}`}>
-                            {!navigationHidden && (
+                        <div className={`octane-catalog-stage ${sidebarHidden ? 'is-navigation-hidden' : ''}`}>
+                            {!sidebarHidden && (
                                 <div className="octane-catalog-sidebar">
                                     <div className="octane-catalog-search-shell">
                                         <CatalogSearchView />
                                     </div>
                                     <div className="octane-catalog-navigation-shell">
-                                        {activeNodes && activeNodes.length > 0 && <CatalogNavigationView node={activeNodes[0]} catalogType={currentType} />}
+                                        {currentTab && <CatalogNavigationView node={currentTab} />}
                                     </div>
                                 </div>
                             )}
@@ -266,7 +230,7 @@ const CatalogViewInner: FC<{}> = () => {
                                         {!!currentPage?.localization?.getImage(0) && <img alt="" src={currentPage.localization.getImage(0)} />}
                                     </div>
                                 </div>
-                                <div className="octane-catalog-layout-container">{GetCatalogLayout(currentPage, () => setNavigationHidden(true))}</div>
+                                <div className="octane-catalog-layout-container">{GetCatalogLayout(currentPage, hideCatalogNavigation)}</div>
                             </div>
                         </div>
                     </OctaneCardContentView>
@@ -277,6 +241,7 @@ const CatalogViewInner: FC<{}> = () => {
             <CatalogAdminPageEditView />
             <CatalogAdminOfferEditView />
             <CatalogGiftView />
+            <CatalogPlacedOfferConfirmView />
             <MarketplacePostOfferView />
         </>
     );

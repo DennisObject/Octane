@@ -11,7 +11,7 @@ const MODE_OPTIONS = [MODE_SKIP, MODE_EXACT, MODE_RANGE];
 const WEEKDAY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
 const MONTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-const createMask = (values: number[]) => values.reduce((mask, value) => mask | (1 << value), 0);
+const createMask = (values: number[]) => values.reduce((mask, value) => mask | (1 << (value - 1)), 0);
 const ALL_WEEKDAYS_MASK = createMask(WEEKDAY_OPTIONS);
 const ALL_MONTHS_MASK = createMask(MONTH_OPTIONS);
 
@@ -26,9 +26,9 @@ const parseInputValue = (event: ChangeEvent<HTMLInputElement>, min: number, max:
 };
 
 const toggleMaskValue = (mask: number, value: number, enabled: boolean) => {
-    if (enabled) return mask | (1 << value);
+    if (enabled) return mask | (1 << (value - 1));
 
-    return mask & ~(1 << value);
+    return mask & ~(1 << (value - 1));
 };
 
 const InlineNumberInput: FC<{ value: number; min: number; max: number; onChange: (value: number) => void }> = (props) => {
@@ -163,7 +163,7 @@ export const WiredConditionMatchDateView: FC<{}> = () => {
                     <Text bold>{LocalizeText('wiredfurni.params.time.weekday_selection')}</Text>
                     <div className="flex flex-wrap gap-2">
                         {WEEKDAY_OPTIONS.map((value) => {
-                            const checked = (weekdayMask & (1 << value)) !== 0;
+                            const checked = (weekdayMask & (1 << (value - 1))) !== 0;
 
                             return (
                                 <label key={value} className="flex items-center gap-1">
@@ -195,7 +195,7 @@ export const WiredConditionMatchDateView: FC<{}> = () => {
                     <Text bold>{LocalizeText('wiredfurni.params.time.month_selection')}</Text>
                     <div className="flex flex-wrap gap-2">
                         {MONTH_OPTIONS.map((value) => {
-                            const checked = (monthMask & (1 << value)) !== 0;
+                            const checked = (monthMask & (1 << (value - 1))) !== 0;
 
                             return (
                                 <label key={value} className="flex items-center gap-1">

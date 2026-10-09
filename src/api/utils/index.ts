@@ -12,7 +12,6 @@ export * from './LocalizeBageName';
 export * from './LocalizeFormattedNumber';
 export * from './LocalizeShortNumber';
 export * from './LocalizeText';
-export * from './emojiShortcodes';
 export * from './LocalStorageKeys';
 export * from './localizeWithFallback';
 export * from './PlaySound';

@@ -12,6 +12,7 @@
   "sounds.url": "http://localhost:5173/nitro-assets/sounds/%sample%.mp3",
   // Text, translations, and game data loaded at runtime.
   "external.texts.url": [
+    "${gamedata.url}/QuestUITexts.jsonc",
     "${gamedata.url}/ExternalTexts.json",
     "${gamedata.url}/UITexts.jsonc"
   ],
@@ -27,13 +28,17 @@
   "avatar.figuredata.url": "${gamedata.url}/FigureData.json?t=%timestamp%",
   "avatar.figuremap.url": "${gamedata.url}/FigureMap.json?t=%timestamp%",
   "avatar.effectmap.url": "${gamedata.url}/EffectMap.json?t=%timestamp%",
+  // Asset bundle format the hotel serves: "hab" (official Habbo bundles, the default) or "nitro".
+  // Bundle URLs below get this extension, whatever they are written with. Convert custom
+  // .nitro files with hab-converter.
+  "asset.bundle.format": "hab",
   // URL templates for the different graphic libraries.
-  "avatar.asset.url": "${asset.url}/figure/%libname%.nitro",
-  "avatar.asset.effect.url": "${asset.url}/effect/%libname%.nitro",
-  "furni.asset.url": "${asset.url}/furniture/%libname%.nitro",
+  "avatar.asset.url": "${asset.url}/figure/%libname%.hab",
+  "avatar.asset.effect.url": "${asset.url}/effect/%libname%.hab",
+  "furni.asset.url": "${asset.url}/furniture/%libname%.hab",
   "furni.asset.icon.url": "${hof.furni.url}/icons/%libname%%param%_icon.png",
-  "pet.asset.url": "${asset.url}/pet/%libname%.nitro",
-  "generic.asset.url": "${asset.url}/generic/%libname%.nitro",
+  "pet.asset.url": "${asset.url}/pet/%libname%.hab",
+  "generic.asset.url": "${asset.url}/generic/%libname%.hab",
   "badge.asset.url": "${image.library.url}album1584/%badgename%.gif",
   // Renderer visual behavior, diagnostics, and frame rates.
   "furni.rotation.bounce.steps": 20,
@@ -57,7 +62,6 @@
   "habbicons.enabled": true,
 	"habbicons.asset.root": "/habbicons",
 	"habbicons.asset.hash": "default",
-  "chat.emoji.enabled": true,
   "timezone.settings": "Europe/Amsterdam",
   "youtube.publish.disabled": false,
   "user.badges.group.slot.enabled": true,
@@ -74,6 +78,7 @@
   "login.remember.endpoint": "${api.url}/api/auth/remember",
   "login.server_key.endpoint": "${api.url}/api/auth/server-key",
   "login.sso-token.endpoint": "${api.url}/api/auth/sso-token",
+  "login.ticket.endpoint": "${api.url}/api/auth/ticket",
   "login.refresh.endpoint": "${api.url}/api/auth/refresh",
   "login.health.method": "GET",
   "login.news.url": "${api.url}/api/auth/news",

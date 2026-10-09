@@ -1,28 +1,17 @@
 import { FC } from 'react';
-import { NotificationBubbleItem, OpenUrl, SanitizeHtml } from '../../../../api';
-import { Flex, LayoutNotificationBubbleView, LayoutNotificationBubbleViewProps, Text } from '../../../../common';
+import { NotificationBubbleItem, OpenUrl } from '../../../../api';
+import { NativeNotificationBubbleView } from '../native/NativeNotificationBubbleView';
 
-export interface NotificationDefaultBubbleViewProps extends LayoutNotificationBubbleViewProps {
+export interface NotificationDefaultBubbleViewProps {
     item: NotificationBubbleItem;
+    onClose: () => void;
 }
 
-export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProps> = (props) => {
-    const { item = null, onClose = null, ...rest } = props;
-
-    const htmlText = item.message.replace(/\r\n|\r|\n/g, '<br />');
-
-    return (
-        <LayoutNotificationBubbleView
-            alignItems="center"
-            gap={2}
-            onClick={(event) => item.linkUrl && item.linkUrl.length && OpenUrl(item.linkUrl)}
-            onClose={onClose}
-            {...rest}
-        >
-            <Flex center className="w-[50px] h-[50px]">
-                {item.iconUrl && item.iconUrl.length && <img alt="" className="no-select" src={item.iconUrl} />}
-            </Flex>
-            <Text wrap dangerouslySetInnerHTML={{ __html: SanitizeHtml(htmlText) }} variant="white" />
-        </LayoutNotificationBubbleView>
-    );
-};
+export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProps> = ({ item = null, onClose = null }) => (
+    <NativeNotificationBubbleView
+        iconUrl={item.iconUrl}
+        message={item.message}
+        onActivate={() => item.linkUrl && item.linkUrl.length && OpenUrl(item.linkUrl)}
+        onClose={onClose}
+    />
+);

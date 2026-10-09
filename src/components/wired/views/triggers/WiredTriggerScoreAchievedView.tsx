@@ -1,10 +1,12 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { LocalizeText, WiredFurniType, WIRED_SLIDER_ECHO } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
-const TEAM_TYPES = [0, 1, 2, 3, 4];
+const TEAM_OPTIONS = [0, 1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(id === 0 ? 'wiredfurni.params.team.any' : `wiredfurni.params.team.${id}`), newLine: id === 0 }));
 
 export const WiredTriggeScoreAchievedView: FC<{}> = (props) => {
     const [points, setPoints] = useState(1);
@@ -19,25 +21,11 @@ export const WiredTriggeScoreAchievedView: FC<{}> = (props) => {
     }, [trigger]);
 
     return (
-        <WiredTriggerBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.setscore2', LocalizeText('wiredfurni.params.setscore', ['points'], [points.toString()]))}</Text>
-                <Slider max={1000} min={1} value={points} onChange={(event) => setPoints(event)} />
-                <hr className="m-0 bg-dark" />
-                <Text bold>{LocalizeText('wiredfurni.params.team')}</Text>
-                {TEAM_TYPES.map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={teamType === value}
-                            className="form-check-input"
-                            name="scoreAchievedTeamType"
-                            type="radio"
-                            onChange={() => setTeamType(value)}
-                        />
-                        <Text>{LocalizeText(value === 0 ? 'wiredfurni.params.team.any' : `wiredfurni.params.team.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
+        <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSection title={LocalizeText('wiredfurni.params.team')}>
+                <WiredRadioGroup columns={2} name="scoreAchievedTeamType" options={TEAM_OPTIONS} value={teamType} onChange={setTeamType} />
+            </WiredSection>
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={1000} min={1} titleKey="wiredfurni.params.setscore2" value={points} onChange={setPoints} />
         </WiredTriggerBaseView>
     );
 };

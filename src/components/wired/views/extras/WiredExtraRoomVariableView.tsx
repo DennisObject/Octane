@@ -1,3 +1,4 @@
+import { parseWiredInt64, wiredInt64Parts } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
@@ -44,9 +45,12 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
     const [variableName, setVariableName] = useState('');
     const [availability, setAvailability] = useState(AVAILABILITY_ROOM_ACTIVE);
-    const [currentValue, setCurrentValue] = useState(0);
+    const [currentValue, setCurrentValue] = useState('0');
+    const [exactShape, setExactShape] = useState(false);
 
-    const normalizedCurrentValue = useMemo(() => (Number.isFinite(currentValue) ? currentValue : 0), [currentValue]);
+    const normalizedCurrentValue = useMemo(() => {
+        try { return parseWiredInt64(currentValue); } catch { return null; }
+    }, [currentValue]);
 
     useEffect(() => {
         if (!trigger) return;
@@ -55,16 +59,21 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
         const nextAvailability = trigger.intData.length > 0 ? trigger.intData[0] : AVAILABILITY_ROOM_ACTIVE;
 
         setAvailability(nextAvailability === AVAILABILITY_PERMANENT || nextAvailability === AVAILABILITY_SHARED ? nextAvailability : AVAILABILITY_ROOM_ACTIVE);
-        setCurrentValue(trigger.intData.length > 1 ? trigger.intData[1] : 0);
+        setExactShape(trigger.intData.length === 4);
+        setCurrentValue(trigger.intData.length === 4 && trigger.intData[1] === 1
+            ? ((BigInt(trigger.intData[2]) << 32n) | BigInt(trigger.intData[3] >>> 0)).toString()
+            : String(trigger.intData.length > 1 ? trigger.intData[1] : 0));
     }, [trigger]);
 
     const save = () => {
         setStringParam(normalizeVariableName(variableName));
-        setIntParams([availability, normalizedCurrentValue]);
+        if (normalizedCurrentValue === null) return;
+        setIntParams(exactShape || normalizedCurrentValue < -2147483648n || normalizedCurrentValue > 2147483647n
+            ? [availability, 1, ...wiredInt64Parts(normalizedCurrentValue)] : [availability, Number(normalizedCurrentValue)]);
     };
 
     return (
-        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} cardStyle={{ width: 400 }}>
+        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} validate={() => normalizedCurrentValue !== null} cardStyle={{ width: 400 }}>
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
                     <Text>{LocalizeText('wiredfurni.params.variables.variable_name')}</Text>
@@ -113,7 +122,9 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
 
                 <div className="flex flex-col gap-1">
                     <Text>{LocalizeText('wiredfurni.params.variables.inspection')}</Text>
-                    <Text>{LocalizeText('wiredfurni.params.variables.inspection.current_value', ['value'], [normalizedCurrentValue.toString()])}</Text>
+                    <Text>{LocalizeText('wiredfurni.params.variables.inspection.current_value', ['value'], [normalizedCurrentValue?.toString() ?? currentValue])}</Text>
+                    <OctaneInput type="text" inputMode="numeric" value={currentValue} onChange={event => setCurrentValue(event.target.value)} />
+                    {normalizedCurrentValue === null && <Text>Enter a signed 64-bit integer.</Text>}
                 </div>
             </div>
         </WiredExtraBaseView>

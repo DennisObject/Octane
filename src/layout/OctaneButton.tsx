@@ -2,12 +2,12 @@ import { ButtonHTMLAttributes, DetailedHTMLProps, PropsWithChildren, Ref } from 
 import { classNames } from './classNames';
 
 const classes = {
-    base: 'inline-flex justify-center items-center gap-2 rounded-none font-bold text-[11px] leading-tight cursor-pointer select-none',
+    base: 'inline-flex justify-center items-center gap-2 rounded-none leading-tight cursor-pointer select-none',
     disabled: 'opacity-55 pointer-events-none',
     size: {
-        default: 'px-3 py-0.5 min-h-[22px]',
-        lg: 'px-5 py-1 min-h-[28px] text-sm',
-        xl: 'px-6 py-1.5 min-h-[32px] text-sm'
+        default: '',
+        lg: 'px-5 py-1 min-h-[28px] text-sm font-bold',
+        xl: 'px-6 py-1.5 min-h-[32px] text-sm font-bold'
     },
     variant: {
         default: 'habbo-btn-secondary',
@@ -48,6 +48,7 @@ export const OctaneButton = ({
             className={classNames(
                 classes.base,
                 classes.size[size],
+                color === 'dark' && size === 'default' && 'px-3 py-0.5 min-h-[22px] font-bold text-[11px]',
                 outline ? 'habbo-btn-secondary !bg-transparent' : variantClass,
                 disabled && classes.disabled,
                 className

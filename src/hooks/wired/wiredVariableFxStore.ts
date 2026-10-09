@@ -6,7 +6,7 @@ export interface IWiredVariableFxStatusEntry {
     key: string;
     status: IWiredVariableFxStatus;
     changedAt: number;
-    previousValue: number | null;
+    previousValue: bigint | number | null;
 }
 
 export type WiredVariableFxState = {

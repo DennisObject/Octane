@@ -1,3 +1,5 @@
+import { parseWiredInt64, WiredUserVariableUpdate64Composer } from '@octane/renderer';
+import { useWiredFurniInspection } from '../../hooks/wired-tools/useWiredFurniInspection';
 import {
     AddLinkEventTracker,
     AvatarExpressionEnum,
@@ -5,7 +7,6 @@ import {
     FurnitureFloorUpdateEvent,
     FurnitureMultiStateComposer,
     FurnitureWallMultiStateComposer,
-    FurnitureWallUpdateComposer,
     FurnitureWallUpdateEvent,
     GetLocalizationManager,
     GetRoomEngine,
@@ -113,7 +114,6 @@ import {
     ManagedHolderVariableEntry,
     MonitorLog,
     MonitorStat,
-    ParsedWallLocation,
     TeamEffectData,
     VariableDefinition,
     VariableHighlightOverlay,
@@ -124,6 +124,7 @@ import {
     WiredToolsTab
 } from './WiredCreatorTools.types';
 import { WiredInspectionTabView } from './WiredInspectionTabView';
+import { WiredMenuFrame } from './WiredMenuParts';
 import { WiredMonitorTabView } from './WiredMonitorTabView';
 import { WiredRoomLogsView } from './WiredRoomLogsView';
 import { WiredSelfDonationView } from './WiredSelfDonationView';
@@ -139,6 +140,19 @@ const WIRED_FURNI_GRAVITY_MODEL_KEY = 'wired_furni_gravity';
 
 /** icon_wired_<category>_png, as the official error view picks it. */
 const MONITOR_ERROR_ICONS: Record<string, string> = { ERROR: wiredErrorIcon, WARNING: wiredWarningIcon };
+
+const MENU_HEADER_TITLES: Record<WiredToolsTab, string> = {
+    monitor: 'Monitor',
+    variables: 'Variable Overview',
+    inspection: 'Inspection',
+    chests: 'Chests and Transactions',
+    settings: 'Settings'
+};
+
+const WALL_INSPECTION_EDIT_TOKENS: Record<string, string> = {
+    '@position_x': '@position.x', '@position_y': '@position.y', '@rotation': '@rotation',
+    '@altitude': '@altitude', '@wallitem_offset': '@wallitem_offset'
+};
 
 export const WiredCreatorToolsView: FC<{}> = () => {
     const openVariablesExplorer = useVariablesExplorerStore((s) => s.open);
@@ -274,21 +288,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         [roomSession]
     );
 
-    const parseWallLocation = (wallLocation: string): ParsedWallLocation => {
-        if (!wallLocation) return null;
 
-        const match = wallLocation.match(/^:w=(-?\d+),(-?\d+)\s+l=(-?\d+),(-?\d+)\s+([^\s]+)$/i);
-
-        if (!match) return null;
-
-        return {
-            width: parseInt(match[1], 10),
-            height: parseInt(match[2], 10),
-            localX: parseInt(match[3], 10),
-            localY: parseInt(match[4], 10),
-            direction: match[5]
-        };
-    };
 
     const getSignDisplayName = (value: number): string => {
         if (value < 0) return '';
@@ -1028,6 +1028,16 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
     const [selectedRoomObject, setSelectedRoomObject] = useState<ReturnType<ReturnType<typeof GetRoomEngine>['getRoomObject']> | null>(null);
     const [selectedUserRoomObject, setSelectedUserRoomObject] = useState<ReturnType<ReturnType<typeof GetRoomEngine>['getRoomObject']> | null>(null);
+    const wallInspection = useWiredFurniInspection(roomSession?.roomId ?? 0, selectedFurni?.objectId ?? 0, selectedRoomObject,
+        isVisible && activeTab === 'inspection' && inspectionType === 'furni' && selectedFurni?.category === RoomObjectCategory.WALL && roomSettings.canInspect);
+
+    useEffect(() => {
+        if(selectedFurni?.category === RoomObjectCategory.WALL && !wallInspection.values && WALL_INSPECTION_EDIT_TOKENS[editingVariable]) {
+            setEditingVariable(null);
+            setEditingValue('');
+        }
+    }, [selectedFurni?.category, wallInspection.values, editingVariable, setEditingVariable, setEditingValue]);
+
 
     useEffect(() => {
         setSelectedRoomObject(
@@ -1213,23 +1223,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
         return GetSessionDataManager().getFloorItemData(typeId);
     }, [selectedRoomObject, selectedFurni]);
-    const currentWallLocationString = useMemo(() => {
-        if (!roomSession || !selectedFurni || selectedFurni.category !== RoomObjectCategory.WALL || !selectedRoomObject) return null;
-
-        const wallGeometry = GetRoomEngine().getLegacyWallGeometry(roomSession.roomId);
-
-        if (!wallGeometry) return null;
-
-        const angle = (((Math.round(selectedRoomObject.getDirection().x / 45) % 8) + 8) % 8) * 45;
-
-        return wallGeometry.getOldLocationString(selectedRoomObject.getLocation(), angle);
-    }, [roomSession, selectedFurni, selectedRoomObject, selectedFurniLiveState]);
-    const parsedWallLocation = useMemo(() => parseWallLocation(currentWallLocationString), [currentWallLocationString]);
-    const wallItemOffset = useMemo(() => {
-        if (!parsedWallLocation) return null;
-
-        return `${parsedWallLocation.localX},${parsedWallLocation.localY}`;
-    }, [parsedWallLocation]);
     const canEditInspection = roomSettings.canModify;
     const roomVariableAssignmentMap = useMemo(() => {
         return new Map(roomVariableAssignments.map((assignment) => [assignment.variableItemId, assignment]));
@@ -1291,14 +1284,14 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             ...(Number(selectedFurni.info?.teleportTargetId ?? 0) > 0
                 ? [{ key: '~teleport.target_id', value: String(selectedFurni.info.teleportTargetId) }]
                 : []),
-            { key: '@id', value: String(selectedFurni.objectId) },
-            { key: '@class_id', value: String(classId) },
+            { key: '@id', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@id')?.toString() ?? 'Unavailable' : String(selectedFurni.objectId) },
+            { key: '@class_id', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@class_id')?.toString() ?? 'Unavailable' : String(classId) },
             { key: '@height', value: String(Math.round(tileSizeZ * 100)) },
             { key: '@state', value: String(liveState?.state ?? 0), editable: canEditInspection },
-            { key: '@position_x', value: String(liveState?.positionX ?? 0), editable: canEditInspection },
-            { key: '@position_y', value: String(liveState?.positionY ?? 0), editable: canEditInspection },
-            { key: '@rotation', value: String(liveState?.rotation ?? 0), editable: canEditInspection },
-            { key: '@altitude', value: String(liveState?.altitude ?? 0), editable: canEditInspection },
+            { key: '@position_x', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@position.x')?.toString() ?? 'Unavailable' : String(liveState?.positionX ?? 0), editable: canEditInspection && (selectedFurni.category !== RoomObjectCategory.WALL || !!wallInspection.values) },
+            { key: '@position_y', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@position.y')?.toString() ?? 'Unavailable' : String(liveState?.positionY ?? 0), editable: canEditInspection && (selectedFurni.category !== RoomObjectCategory.WALL || !!wallInspection.values) },
+            { key: '@rotation', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@rotation')?.toString() ?? 'Unavailable' : String(liveState?.rotation ?? 0), editable: canEditInspection && (selectedFurni.category !== RoomObjectCategory.WALL || !!wallInspection.values) },
+            { key: '@altitude', value: selectedFurni.category === RoomObjectCategory.WALL ? wallInspection.values?.get('@altitude')?.toString() ?? 'Unavailable' : String(liveState?.altitude ?? 0), editable: canEditInspection && (selectedFurni.category !== RoomObjectCategory.WALL || !!wallInspection.values) },
             { key: '@opacity', value: String(opacity), editable: canEditInspection },
             {
                 key: '@gravity',
@@ -1310,11 +1303,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 editable: canEditInspection
             },
             { key: '@is_invisible', value: '0' },
-            ...(wallItemOffset ? [{ key: '@wallitem_offset', value: wallItemOffset, editable: canEditInspection }] : []),
-            {
-                key: '@type',
-                value: `${selectedFurnitureData?.availableForBuildersClub ? 1 : 0}${selectedFurnitureData?.availableForBuildersClub ? ' (BC)' : ' (Normal)'}`
-            },
+            ...(selectedFurni.category === RoomObjectCategory.WALL ? [
+                { key: '@wallitem_offset', value: wallInspection.values?.get('@wallitem_offset')?.toString() ?? 'Unavailable', editable: canEditInspection && !!wallInspection.values },
+                { key: '@position', value: wallInspection.values?.get('@position')?.toString() ?? 'Unavailable' },
+                { key: '@occupation', value: wallInspection.values?.get('@occupation')?.toString() ?? 'Unavailable' }
+            ] : []),
             ...dynamicFlags,
             { key: '@dimensions.x', value: String(selectedFurni.info?.tileSizeX ?? 0) },
             { key: '@dimensions.y', value: String(selectedFurni.info?.tileSizeY ?? 0) },
@@ -1327,7 +1320,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         selectedFurniLiveState,
         selectedRoomObject,
         selectedFurnitureData,
-        wallItemOffset,
+        wallInspection.values,
         canEditInspection,
         selectedFurniCustomVariableDefinitions,
         selectedFurniAssignmentMap,
@@ -2324,8 +2317,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         if (!selectedManagedHolderVariableEntry.hasValue) return;
         if (variablesType === 'context') return;
 
-        const parsedValue = Number(editingManagedHolderValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? Math.trunc(parsedValue) : 0;
+        let nextValue: bigint;
+        try { nextValue = parseWiredInt64(editingManagedHolderValue.trim()); }
+        catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
         switch (variablesType) {
             case 'user':
@@ -2354,8 +2348,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         if (!selectedManagedVariableEntry || !selectedManagedGiveDefinition || !roomSettings.canModify) return;
         if (variablesType === 'global' || variablesType === 'context') return;
 
-        const parsedValue = Number(managedGiveValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? Math.trunc(parsedValue) : 0;
+        let nextValue: bigint;
+        try { nextValue = parseWiredInt64(managedGiveValue.trim()); }
+        catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
         if (variablesType === 'user') assignUserVariable(selectedManagedVariableEntry.entityId, selectedManagedGiveDefinition.itemId, nextValue);
         else assignFurniVariable(selectedManagedVariableEntry.entityId, selectedManagedGiveDefinition.itemId, nextValue);
@@ -2429,12 +2424,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 return;
             }
 
-            const parsed = parseInt(editingValue.trim(), 10);
-
-            if (Number.isNaN(parsed)) {
-                cancelVariableEdit();
-                return;
-            }
+            let parsed: bigint;
+            try { parsed = parseWiredInt64(editingValue.trim()); }
+            catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
             const currentValue = roomVariableAssignmentMap.get(customDefinition.itemId)?.value ?? 0;
 
@@ -2453,12 +2445,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             const customDefinition = selectedUserCustomVariableDefinitionMap.get(editingVariable);
 
             if (customDefinition?.hasValue && !customDefinition.isReadOnly) {
-                const parsed = parseInt(editingValue.trim(), 10);
-
-                if (Number.isNaN(parsed)) {
-                    cancelVariableEdit();
-                    return;
-                }
+                let parsed: bigint;
+            try { parsed = parseWiredInt64(editingValue.trim()); }
+            catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
                 const assignment = selectedUserAssignmentMap.get(customDefinition.itemId);
 
@@ -2575,12 +2564,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         const customFurniDefinition = selectedFurniCustomVariableDefinitionMap.get(editingVariable);
 
         if (customFurniDefinition?.hasValue && !customFurniDefinition.isReadOnly) {
-            const parsed = parseInt(editingValue.trim(), 10);
-
-            if (Number.isNaN(parsed)) {
-                cancelVariableEdit();
-                return;
-            }
+            let parsed: bigint;
+            try { parsed = parseWiredInt64(editingValue.trim()); }
+            catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
             const assignment = selectedFurniAssignmentMap.get(customFurniDefinition.itemId);
 
@@ -2614,6 +2600,24 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
         if (!editingVariable || !selectedFurni || !selectedRoomObject || !roomSession) return;
 
+        const wallToken = WALL_INSPECTION_EDIT_TOKENS[editingVariable];
+        if(selectedFurni.category === RoomObjectCategory.WALL && wallToken) {
+            if(!roomSettings.canModify || !wallInspection.values
+                || GetRoomEngine().getRoomObject(roomSession.roomId, selectedFurni.objectId, RoomObjectCategory.WALL) !== selectedRoomObject) {
+                cancelVariableEdit();
+                return;
+            }
+            let value: bigint;
+            try { value = parseWiredInt64(editingValue.trim()); }
+            catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(1, selectedFurni.objectId, 0, value, `internal:${wallToken}`));
+            setEditingVariable(null);
+            setEditingValue('');
+            // This observes state without acknowledging the write.
+            wallInspection.refresh();
+            return;
+        }
+
         const currentLiveState = selectedFurniLiveState ?? getFurniLiveState(selectedFurni.objectId, selectedFurni.category);
 
         if (!currentLiveState) {
@@ -2628,8 +2632,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         let nextState: number = null;
         let nextOpacity: number = null;
         let nextGravity: number = null;
-        let nextWallOffsetX: number = null;
-        let nextWallOffsetY: number = null;
         let isValid = true;
 
         switch (editingVariable) {
@@ -2710,23 +2712,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 nextGravity = parsed > 0 ? 1 : 0;
                 break;
             }
-            case '@wallitem_offset': {
-                if (selectedFurni.category !== RoomObjectCategory.WALL) {
-                    isValid = false;
-                    break;
-                }
 
-                const match = editingValue.trim().match(/^(-?\d+)\s*,\s*(-?\d+)$/);
-
-                if (!match) {
-                    isValid = false;
-                    break;
-                }
-
-                nextWallOffsetX = parseInt(match[1], 10);
-                nextWallOffsetY = parseInt(match[2], 10);
-                break;
-            }
         }
 
         if (!isValid) {
@@ -2787,66 +2773,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             return;
         }
 
-        if (editingVariable === '@wallitem_offset') {
-            if (selectedFurni.category !== RoomObjectCategory.WALL || !parsedWallLocation) {
-                cancelVariableEdit();
-                return;
-            }
-
-            if (nextWallOffsetX === parsedWallLocation.localX && nextWallOffsetY === parsedWallLocation.localY) {
-                cancelVariableEdit();
-                return;
-            }
-
-            const wallGeometry = GetRoomEngine().getLegacyWallGeometry(roomSession.roomId);
-
-            if (!wallGeometry) {
-                cancelVariableEdit();
-                return;
-            }
-
-            const nextWallLocationString = `:w=${parsedWallLocation.width},${parsedWallLocation.height} l=${nextWallOffsetX},${nextWallOffsetY} ${parsedWallLocation.direction}`;
-            const nextLocation = wallGeometry.getLocation(
-                parsedWallLocation.width,
-                parsedWallLocation.height,
-                nextWallOffsetX,
-                nextWallOffsetY,
-                parsedWallLocation.direction
-            );
-            const nextAngle = wallGeometry.getDirection(parsedWallLocation.direction);
-            const currentExtra = selectedFurni.info?.stuffData?.getLegacyString?.() ?? selectedFurni.info?.extraParam ?? '0';
-
-            if (!nextLocation) {
-                cancelVariableEdit();
-                return;
-            }
-
-            GetRoomEngine().updateRoomObjectWall(
-                roomSession.roomId,
-                selectedFurni.objectId,
-                nextLocation,
-                new Vector3d(nextAngle),
-                currentLiveState.state,
-                currentExtra
-            );
-
-            setSelectedFurniLiveState((previousValue) => {
-                if (!previousValue) return previousValue;
-
-                return {
-                    ...previousValue,
-                    positionX: Math.round(nextLocation.x),
-                    positionY: Math.round(nextLocation.y),
-                    altitude: Math.round(nextLocation.z * 100),
-                    rotation: ((Math.round(nextAngle / 45) % 8) + 8) % 8
-                };
-            });
-
-            SendMessageComposer(new FurnitureWallUpdateComposer(selectedFurni.objectId, nextWallLocationString));
-            setEditingVariable(null);
-            setEditingValue('');
-            return;
-        }
 
         if (
             nextX === currentLiveState.positionX &&
@@ -2870,54 +2796,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             };
         });
 
-        if (selectedFurni.category === RoomObjectCategory.WALL) {
-            const wallGeometry = GetRoomEngine().getLegacyWallGeometry(roomSession.roomId);
-
-            if (!wallGeometry) {
-                cancelVariableEdit();
-                return;
-            }
-
-            const currentLocation = selectedRoomObject.getLocation();
-            const currentExtra = selectedFurni.info?.stuffData?.getLegacyString?.() ?? selectedFurni.info?.extraParam ?? '0';
-            const nextLocation = new Vector3d(nextX, nextY, nextZ);
-            const nextAngle = nextRotation * 45;
-            const wallLocation = wallGeometry.getOldLocationString(nextLocation, nextAngle);
-
-            if (!wallLocation) {
-                cancelVariableEdit();
-                return;
-            }
-
-            GetRoomEngine().updateRoomObjectWall(
-                roomSession.roomId,
-                selectedFurni.objectId,
-                nextLocation,
-                new Vector3d(nextAngle),
-                currentLiveState.state,
-                currentExtra
-            );
-
-            if (currentLocation) {
-                setSelectedFurniLiveState((previousValue) => {
-                    if (!previousValue) return previousValue;
-
-                    return {
-                        ...previousValue,
-                        positionX: Math.round(nextLocation.x),
-                        positionY: Math.round(nextLocation.y),
-                        altitude: Math.round(nextLocation.z * 100),
-                        rotation: nextRotation
-                    };
-                });
-            }
-
-            SendMessageComposer(new FurnitureWallUpdateComposer(selectedFurni.objectId, wallLocation));
-            setEditingVariable(null);
-            setEditingValue('');
-            return;
-        }
-
         SendMessageComposer(new UpdateFurniturePositionComposer(selectedFurni.objectId, nextX, nextY, Math.round(nextZ * 10000), nextRotation));
 
         setEditingVariable(null);
@@ -2931,8 +2809,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const giveInspectionVariable = useCallback(() => {
         if (!canManageInspectionVariableAssignments || !selectedInspectionGiveDefinition) return;
 
-        const parsedValue = Number(inspectionGiveValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? parsedValue : 0;
+        let nextValue: bigint;
+        try { nextValue = parseWiredInt64(inspectionGiveValue.trim()); }
+        catch { simpleAlert('Enter a signed 64-bit integer.'); return; }
 
         if (inspectionType === 'user' && selectedUser) {
             assignUserVariable(selectedUserHolderKey, selectedInspectionGiveDefinition.itemId, nextValue);
@@ -2980,6 +2859,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     ]);
 
     const onVariableInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        const input = event.currentTarget;
         event.stopPropagation();
 
         switch (event.key) {
@@ -2987,12 +2867,12 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             case 'NumpadEnter':
                 event.preventDefault();
                 commitVariableEdit();
-                window.requestAnimationFrame(() => event.currentTarget.blur());
+                window.requestAnimationFrame(() => input.blur());
                 return;
             case 'Escape':
                 event.preventDefault();
                 cancelVariableEdit();
-                window.requestAnimationFrame(() => event.currentTarget.blur());
+                window.requestAnimationFrame(() => input.blur());
                 return;
         }
     };
@@ -3103,23 +2983,16 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 </div>
             )}
             {/* Official wired_menu_view: frame 3, 500x500. The tab bodies are this hotel's, so taller ones may grow it. */}
-            <OctaneCardView
-                className="min-h-[500px] w-[500px]"
-                frameStyle={3}
-                isResizable={false}
-                theme="primary-slim"
-                uniqueKey="wired-creator-tools"
-                windowPosition={DraggableWindowPosition.TOP_LEFT}
+            <WiredMenuFrame
+                activeTab={activeTab}
+                headerTitle={MENU_HEADER_TITLES[activeTab]}
+                tabs={TABS}
+                title={localizeWithFallback('wiredmenu.title', 'Wired Creator Tools - Loading')}
+                onClose={() => setIsVisible(false)}
+                onTabChange={(tab) => setActiveTab(tab as WiredToolsTab)}
             >
-                <OctaneCardHeaderView headerText="Wired Creator Tools (:wired)" onCloseClick={() => setIsVisible(false)} />
-                <OctaneCardTabsView justifyContent="start">
-                    {TABS.map((tab) => (
-                        <OctaneCardTabsItemView key={tab.key} isActive={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
-                            <Text>{tab.label}</Text>
-                        </OctaneCardTabsItemView>
-                    ))}
-                </OctaneCardTabsView>
-                <OctaneCardContentView className="text-black bg-[#e9e6d9]" gap={3}>
+                {(
+                    <>
                     {activeTab === 'monitor' && (
                         <WiredMonitorTabView
                             monitorStats={monitorStats}
@@ -3186,8 +3059,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     )}
                     {activeTab === 'settings' && <WiredToolsSettingsTabView onOpenSelfDonation={() => setIsSelfDonationOpen(true)} />}
                     {activeTab === 'chests' && <WiredChestsTabView />}
-                </OctaneCardContentView>
-            </OctaneCardView>
+                    </>
+                )}
+            </WiredMenuFrame>
             {isMonitorHistoryOpen && (
                 <OctaneCardView
                     className="min-w-[760px] max-w-[760px] max-h-[520px]"

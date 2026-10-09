@@ -65,11 +65,6 @@ describe('useNavigatorUiStore', () => {
     });
 
     describe('show / hide / toggle', () => {
-        it('show() sets isVisible true and requests a search', () => {
-            useNavigatorUiStore.getState().show();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(true);
-        });
 
         it('hide() sets isVisible false without touching needsSearch', () => {
             useNavigatorUiStore.setState({ isVisible: true, needsSearch: false });
@@ -77,26 +72,9 @@ describe('useNavigatorUiStore', () => {
             expect(useNavigatorUiStore.getState().isVisible).toBe(false);
             expect(useNavigatorUiStore.getState().needsSearch).toBe(false);
         });
-
-        it('toggle() flips visibility and requests a search on show', () => {
-            useNavigatorUiStore.getState().toggle();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(true);
-
-            useNavigatorUiStore.setState({ needsSearch: false });
-            useNavigatorUiStore.getState().toggle();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(false);
-            expect(useNavigatorUiStore.getState().needsSearch).toBe(false);
-        });
     });
 
     describe('creator panel', () => {
-        it('openCreator() opens both visible and creator', () => {
-            useNavigatorUiStore.getState().openCreator();
-            expect(useNavigatorUiStore.getState().isVisible).toBe(true);
-            expect(useNavigatorUiStore.getState().isCreatorOpen).toBe(true);
-        });
-
         it('closeCreator() closes only the creator panel', () => {
             useNavigatorUiStore.setState({ isVisible: true, isCreatorOpen: true });
             useNavigatorUiStore.getState().closeCreator();

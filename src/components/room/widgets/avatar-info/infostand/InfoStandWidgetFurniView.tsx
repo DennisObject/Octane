@@ -19,12 +19,11 @@ import {
     StringDataType,
     UpdateFurniturePositionComposer
 } from '@octane/renderer';
-import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaCrosshairs, FaEraser } from 'react-icons/fa';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FaEraser } from 'react-icons/fa';
 import { GrFormNextLink, GrRotateLeft, GrRotateRight } from 'react-icons/gr';
 import {
     AvatarInfoFurni,
-    CopyToClipboard,
     GetConfigurationValue,
     GetGroupInformation,
     IPhotoData,
@@ -66,33 +65,6 @@ const removeLandscapeLabel = () => {
     return !localized || localized === 'infostand.button.remove_landscape' ? 'Remove Landscape' : localized;
 };
 
-// An infostand id line (icon + "Label: value") that copies its value on click
-// and shows a check in place of the value for a moment.
-const InfoStandCopyValue: FC<{ icon: ReactNode; label: string; value: string | number }> = ({ icon, label, value }) => {
-    const [copied, setCopied] = useState(false);
-
-    useEffect(() => {
-        if (!copied) return;
-
-        const timeout = setTimeout(() => setCopied(false), 1200);
-
-        return () => clearTimeout(timeout);
-    }, [copied]);
-
-    return (
-        <div
-            className="flex items-center gap-1 cursor-pointer"
-            title={localizeWithFallback('infostand.copy.tooltip', 'Click to copy')}
-            onClick={() => void CopyToClipboard(String(value)).then((ok) => setCopied(ok))}
-        >
-            {icon}
-            <Text small wrap variant="white" className={copied ? '!text-[#7ec8e3]' : undefined}>
-                {label}: {copied ? '✓' : value}
-            </Text>
-        </div>
-    );
-};
-
 function formatPlantDuration(totalSeconds: number): string {
     const seconds = Math.max(0, Math.floor(totalSeconds));
     const hours = Math.floor(seconds / 3600);
@@ -103,6 +75,13 @@ function formatPlantDuration(totalSeconds: number): string {
     if (minutes > 0) return `${minutes}m ${secs}s`;
 
     return `${secs}s`;
+}
+
+// v75 renders the info stand picture with the placed object's own direction.
+function getObjectImageDirection(roomId: number, objectId: number, category: number) {
+    const roomObject = GetRoomEngine().getRoomObject(roomId, objectId, category);
+
+    return roomObject ? (roomObject.getDirection().x / 45 + 2) % 8 : 2;
 }
 
 function getValidRoomObjectDirection(roomObject: any, isPositive: boolean) {
@@ -169,9 +148,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
             return null;
         }
     }, [avatarInfo, roomSession]);
-    const descriptionsEnabled = GetConfigurationValue<boolean>('furni.descriptions.enabled', true);
-    const itemLocationEnabled = GetConfigurationValue<boolean>('furni.location.enabled', true);
-    const itemLocationRequireAccess = GetConfigurationValue<boolean>('furni.location.require.access', true);
     const [pickupMode, setPickupMode] = useState(0);
     const [canMove, setCanMove] = useState(false);
     const [canRotate, setCanRotate] = useState(false);
@@ -200,14 +176,9 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const [songId, setSongId] = useState<number>(-1);
     const [songName, setSongName] = useState<string>('');
     const [songCreator, setSongCreator] = useState<string>('');
-    const [itemLocation, setItemLocation] = useState<{ x: number; y: number; z: number }>({ x: -1, y: -1, z: -1 });
     const [dropdownOpen, setDropdownOpen] = useState(sessionStorage.getItem('dropdownOpen') === 'true');
     const [furniLocationZ, setFurniLocationZ] = useState<number>(null);
-    const showOwnerProfileIcon = useMemo(() => {
-        const ownerName = (avatarInfo?.ownerName || '').trim().toLowerCase();
-
-        return !!avatarInfo && avatarInfo.ownerId > 0 && ownerName !== 'builders club';
-    }, [avatarInfo]);
+    const showOwnerProfileIcon = useMemo(() => !!avatarInfo && avatarInfo.ownerId > 0, [avatarInfo]);
 
     const sendUpdate = useCallback(
         (deltaX: number, deltaY: number, newZ: number = 0, deltaDirection: number = 0) => {
@@ -323,7 +294,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
         const location = roomObjForLocation?.getLocation();
 
         if (location) {
-            setItemLocation({ x: location.x, y: location.y, z: location.z });
             setFurniLocationZ(location.z);
         }
 
@@ -472,7 +442,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
 
         if (!avatarInfo || item.itemId !== avatarInfo.id) return;
 
-        setItemLocation({ x: item.x, y: item.y, z: item.z });
         setFurniLocationZ(item.z);
 
         if (isPlant) {
@@ -672,29 +641,22 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
               .getRoomObject(roomSession.roomId, avatarInfo.id, avatarInfo.isWallItem ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR)
               ?.model?.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID) ?? '?')
         : '?';
-    const showLocation = itemLocation.x > -1 && itemLocationEnabled && (!itemLocationRequireAccess || canMove);
-    const showIds = godMode && canSeeFurniId;
+    const showIds = canSeeFurniId;
     const showEditFurni = godMode && canEditFurni && furniTypeId !== '?';
     const showBuildtools = godMode && !avatarInfo.isWallItem && canMove;
 
     return (
         <Column alignItems="end" className="octane-furni-infostand-stack">
-            <Column className="octane-furni-infostand relative z-30 min-w-[190px] max-w-[190px] pointer-events-auto">
+            <Column className={'octane-furni-infostand relative z-30 min-w-[190px] max-w-[190px] pointer-events-auto' + (isCrackable ? ' octane-furni-infostand--crackable' : '')}>
                 <button type="button" className="octane-furni-infostand__close" aria-label={localizeWithFallback('generic.close', 'Close')} onClick={onClose} />
-                <Column className="h-full p-[8px] overflow-auto" gap={1} overflow="visible">
-                    <div className="flex flex-col gap-1">
-                        <Flex alignItems="center" gap={1} justifyContent="between">
-                            <Text small wrap variant="white" className="max-w-[159px]">
-                                {avatarInfo.name}
-                            </Text>
-                        </Flex>
-                        <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                    </div>
+                <div className="octane-furni-infostand__list">
+                    <div className="octane-furni-infostand__name">{avatarInfo.name}</div>
+                    <div className="octane-furni-infostand__rule" />
                     {!isBranded && (
-                        <div className="flex flex-col gap-1">
-                            <Flex gap={1} position="relative">
+                        <>
+                            <div className="octane-furni-infostand__image">
                                 {avatarInfo.stuffData.isUnique && (
-                                    <div className="absolute inset-e-0">
+                                    <div className="absolute top-[6px] inset-e-[2px]">
                                         <LayoutLimitedEditionCompactPlateView
                                             uniqueNumber={avatarInfo.stuffData.uniqueNumber}
                                             uniqueSeries={avatarInfo.stuffData.uniqueSeries}
@@ -702,65 +664,48 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                     </div>
                                 )}
                                 {avatarInfo.stuffData.rarityLevel > -1 && (
-                                    <div className="absolute inset-e-0">
+                                    <div className="absolute top-[6px] inset-e-[2px]">
                                         <LayoutRarityLevelView level={avatarInfo.stuffData.rarityLevel} />
                                     </div>
                                 )}
-                                <Flex center fullWidth className="min-h-[74px] max-h-[86px] overflow-hidden">
-                                    {externalImagePhotoUrl ? (
-                                        <div className="bg-white p-[3px] pb-[9px] rounded-[2px] border border-[#00000080] shadow-[1px_2px_3px_rgba(0,0,0,0.5)]">
-                                            <img
-                                                alt=""
-                                                draggable={false}
-                                                src={externalImagePhotoUrl}
-                                                style={{ width: 64, height: 64, objectFit: 'contain', imageRendering: PIXEL_ART_RENDERING }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <LayoutRoomObjectImageView
-                                            category={avatarInfo.category}
-                                            objectId={avatarInfo.id}
-                                            roomId={roomSession.roomId}
-                                            style={{
-                                                maxWidth: 120,
-                                                maxHeight: 82,
-                                                backgroundSize: 'contain',
-                                                backgroundPosition: 'center',
-                                                backgroundRepeat: 'no-repeat'
-                                            }}
+                                {externalImagePhotoUrl ? (
+                                    <div className="bg-white p-[3px] pb-[9px] rounded-[2px] border border-[#00000080] shadow-[1px_2px_3px_rgba(0,0,0,0.5)]">
+                                        <img
+                                            alt=""
+                                            draggable={false}
+                                            src={externalImagePhotoUrl}
+                                            style={{ width: 64, height: 64, objectFit: 'contain', imageRendering: PIXEL_ART_RENDERING }}
                                         />
-                                    )}
-                                </Flex>
-                            </Flex>
-                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                    </div>
+                                ) : (
+                                    <LayoutRoomObjectImageView
+                                        category={avatarInfo.category}
+                                        objectId={avatarInfo.id}
+                                        direction={getObjectImageDirection(roomSession.roomId, avatarInfo.id, avatarInfo.category)}
+                                        roomId={roomSession.roomId}
+                                        style={{
+                                            width: 140,
+                                            maxWidth: 140,
+                                            maxHeight: 200,
+                                            backgroundSize: 'auto',
+                                            backgroundPosition: 'calc(50% - 0.5px) center',
+                                            backgroundRepeat: 'no-repeat'
+                                        }}
+                                    />
+                                )}
+                            </div>
+                            <div className="octane-furni-infostand__rule" />
+                        </>
+                    )}
+                    {avatarInfo.ownerId !== 0 && (
+                        <div className="octane-furni-infostand__owner">
+                            {showOwnerProfileIcon && <UserProfileIconView className="octane-furni-infostand__owner-icon" userId={avatarInfo.ownerId} />}
+                            <span className="octane-furni-infostand__owner-name">{avatarInfo.ownerName}</span>
                         </div>
                     )}
-                    {avatarInfo.description && descriptionsEnabled && (
-                        <Column gap={1}>
-                            <Text fullWidth wrap textBreak variant="white" small>
-                                {avatarInfo.description}
-                            </Text>
-                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                        </Column>
-                    )}
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                            {showOwnerProfileIcon && <UserProfileIconView userId={avatarInfo.ownerId} />}
-                            <Text small wrap variant="white">
-                                {LocalizeText('furni.owner', ['name'], [avatarInfo.ownerName])}
-                            </Text>
-                        </div>
-                        {avatarInfo.purchaseOfferId > 0 && (
-                            <Flex>
-                                <Text pointer small underline variant="white" onClick={(event) => processButtonAction('buy_one')}>
-                                    {LocalizeText('infostand.button.buy')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </div>
                     {(isJukeBox || isSongDisk) && (
-                        <div className="flex flex-col gap-1">
-                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                        <div className="contents">
+                            <div className="octane-furni-infostand__rule" />
                             {songId === -1 && (
                                 <Text small wrap variant="white">
                                     {LocalizeText('infostand.jukebox.text.not.playing')}
@@ -784,22 +729,22 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                             )}
                         </div>
                     )}
-                    <div className="flex flex-col gap-1">
+                    <div className="contents">
                         {isCrackable && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                                <Text small wrap variant="white">
+                                <div className="octane-furni-infostand__rule" />
+                                <div className="octane-furni-infostand__text">
                                     {LocalizeText(
                                         'infostand.crackable_furni.hits_remaining',
                                         ['hits', 'target'],
                                         [(crackableHits ?? 0).toString(), (crackableTarget ?? 0).toString()]
                                     )}
-                                </Text>
+                                </div>
                             </>
                         )}
                         {isPlant && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                <div className="octane-furni-infostand__rule" />
                                 {plantDead ? (
                                     <Text small wrap variant="danger">
                                         {LocalizeText('infostand.plant.dead')}
@@ -832,57 +777,32 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                         )}
                         {avatarInfo.groupId > 0 && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                                <Flex pointer alignItems="center" gap={2} onClick={() => GetGroupInformation(avatarInfo.groupId)}>
-                                    <LayoutBadgeImageView badgeCode={getGroupBadgeCode()} isGroup={true} />
-                                    <Text underline variant="white">
-                                        {groupName}
-                                    </Text>
-                                </Flex>
+                                <div className="octane-furni-infostand__rule" />
+                                <div className="octane-furni-infostand__group" onClick={() => GetGroupInformation(avatarInfo.groupId)}>
+                                    <div className="octane-furni-infostand__group-badge">
+                                        <LayoutBadgeImageView badgeCode={getGroupBadgeCode()} isGroup={true} />
+                                    </div>
+                                    <span className="octane-furni-infostand__group-name">{groupName}</span>
+                                </div>
                             </>
                         )}
-                        {(showLocation || showIds) && (
+                        {avatarInfo.purchaseOfferId > 0 && (
+                            <div className="octane-furni-infostand__purchase">
+                                <button type="button" className="octane-furni-infostand__shop" onClick={() => processButtonAction('buy_one')}>
+                                    <span className="octane-furni-infostand__shop-icon" />
+                                    <span className="octane-furni-infostand__shop-text">{LocalizeText('infostand.button.buy')}</span>
+                                </button>
+                            </div>
+                        )}
+                        {showIds && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                                {showLocation && (
-                                    <div className="flex items-center gap-1 min-w-0">
-                                        <FaCrosshairs className="fa-icon shrink-0" />
-                                        <Text small textBreak variant="white">
-                                            X: {itemLocation.x} · Y: {itemLocation.y} · H: {itemLocation.z < 0.01 ? 0 : itemLocation.z}
-                                        </Text>
-                                    </div>
-                                )}
-                                {showIds && (
-                                    <div className="flex items-center gap-3">
-                                        <InfoStandCopyValue
-                                            icon={
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-[#7ec8e3]">
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M4.93 1.31a41.401 41.401 0 0 1 10.14 0C16.194 1.45 17 2.414 17 3.517V18.25a.75.75 0 0 1-1.075.676l-2.8-1.344-2.8 1.344a.75.75 0 0 1-.65 0l-2.8-1.344-2.8 1.344A.75.75 0 0 1 3 18.25V3.517c0-1.103.806-2.068 1.93-2.207Z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            }
-                                            label="ID"
-                                            value={avatarInfo.id}
-                                        />
-                                        <InfoStandCopyValue
-                                            icon={
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-[#7ec8e3]">
-                                                    <path d="M5.127 3.502 5.25 3.5h9.5c.041 0 .082 0 .123.002A2.251 2.251 0 0 0 12.75 2h-5.5a2.25 2.25 0 0 0-2.123 1.502ZM1 10.25A2.25 2.25 0 0 1 3.25 8h13.5A2.25 2.25 0 0 1 19 10.25v5.5A2.25 2.25 0 0 1 16.75 18H3.25A2.25 2.25 0 0 1 1 15.75v-5.5ZM3.25 6.5c-.04 0-.082 0-.123.002A2.25 2.25 0 0 1 5.25 5h9.5c.98 0 1.814.627 2.123 1.502a3.819 3.819 0 0 0-.123-.002H3.25Z" />
-                                                </svg>
-                                            }
-                                            label="Sprite"
-                                            value={furniTypeId}
-                                        />
-                                    </div>
-                                )}
+                                <div className="octane-furni-infostand__rule" />
+                                <div className="octane-furni-infostand__text">id: {avatarInfo.id}</div>
                             </>
                         )}
                         {rareValue && rareValue.points > 0 && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                <div className="octane-furni-infostand__rule" />
                                 <Flex alignItems="center" gap={2}>
                                     <Text small variant="white">
                                         {LocalizeText('rarevalues.infostand.label')}
@@ -898,7 +818,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                         )}
                         {(showEditFurni || showBuildtools) && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                <div className="octane-furni-infostand__rule" />
                                 {(showEditFurni || showBuildtools) && (
                                     <div className="flex gap-1 w-full">
                                         {showEditFurni && (
@@ -1052,7 +972,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                 )}
                                 {furniKeys.length > 0 && (
                                     <>
-                                        <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                        <div className="octane-furni-infostand__rule" />
                                         <div className="flex flex-col gap-1">
                                             {furniKeys.map((key, index) => {
                                                 return (
@@ -1077,7 +997,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                         )}
                         {customKeys.length > 0 && (
                             <>
-                                <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                                <div className="octane-furni-infostand__rule" />
                                 <div className="flex flex-col gap-1">
                                     {customKeys.map((key, index) => {
                                         return (
@@ -1099,7 +1019,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                             </>
                         )}
                     </div>
-                </Column>
+                </div>
             </Column>
             <Flex className="octane-furni-infostand__actions" justifyContent="end">
                 {showInspectButton && (

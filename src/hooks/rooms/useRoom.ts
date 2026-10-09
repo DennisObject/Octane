@@ -19,6 +19,7 @@ import {
     RoomObjectOperationType,
     RoomSessionEvent,
     WiredClickSettingsEvent,
+    WiredEnvironmentEvent,
     RoomVariableEnum,
     Vector3d
 } from '@octane/renderer';
@@ -116,9 +117,10 @@ const useRoomState = () => {
     useOctaneEvent<RoomEngineEvent>([RoomEngineEvent.INITIALIZED, RoomEngineEvent.DISPOSED], (event) => {
         if (RoomId.isRoomPreviewerId(event.roomId)) return;
 
+        if (event.type === RoomEngineEvent.DISPOSED) GetRoomEngine().clearWiredUserClickRoom(event.roomId);
         const session = GetRoomSession();
 
-        if (!session) return;
+        if (!session || session.roomId !== event.roomId) return;
 
         switch (event.type) {
             case RoomEngineEvent.INITIALIZED:
@@ -138,12 +140,16 @@ const useRoomState = () => {
             case RoomSessionEvent.CREATED:
                 StartRoomSession(event.session);
                 return;
-            case RoomSessionEvent.ENDED:
+            case RoomSessionEvent.ENDED: {
+                GetRoomEngine().clearWiredUserClickRoom(event.session.roomId);
+                const currentSession = GetRoomSession() || roomSession;
+                if (currentSession && currentSession.roomId !== event.session.roomId) return;
                 setRoomSession(null);
                 setIsHandItemBlocked(false);
                 // A wired click setting belongs to the room that sent it.
                 GetRoomEngine().setWiredClickSettings(0, 0);
                 return;
+            }
         }
     });
 
@@ -155,6 +161,13 @@ const useRoomState = () => {
         if (!parser) return;
 
         GetRoomEngine().setWiredClickSettings(parser.userOption, parser.furniOption);
+    });
+
+    useMessageEvent<WiredEnvironmentEvent>(WiredEnvironmentEvent, (event) => {
+        const parser = event.getParser();
+        const session = GetRoomSession();
+        if(!parser || !session || (parser.roomId && parser.roomId !== session.roomId)) return;
+        GetRoomEngine().setWiredUserClickEnabled(parser.hasClickUserWired, session.roomId);
     });
 
     useMessageEvent<HanditemBlockStateMessageEvent>(HanditemBlockStateMessageEvent, (event) => {
@@ -327,6 +340,7 @@ const useRoomState = () => {
         GetStage().addChild(displayObject);
 
         SetActiveRoomId(roomSession.roomId);
+        roomEngine.initializeRoomCamera(roomId, canvasId);
 
         const resize = () => {
             const { width: newWidth, height: newHeight } = getViewportSize();

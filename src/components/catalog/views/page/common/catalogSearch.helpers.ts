@@ -35,7 +35,6 @@ export const findCatalogFurnitureMatches = (
 
     for (const item of furnitureDatas) {
         if (!item) continue;
-        if (catalogType === CatalogType.BUILDER && !item.availableForBuildersClub) continue;
         if (catalogType === CatalogType.NORMAL && item.excludeDynamic) continue;
         if (!getFurnitureSearchText(item).includes(normalizedQuery)) continue;
 

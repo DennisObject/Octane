@@ -1,5 +1,6 @@
 import { CSSProperties, FC } from 'react';
 import { AchievementUtilities, IAchievementCategory } from '../../../api';
+import { AchievementText } from '../AchievementText';
 
 interface AchievementCategoryListItemViewProps {
     category: IAchievementCategory;
@@ -38,12 +39,23 @@ export const AchievementsCategoryListItemView: FC<AchievementCategoryListItemVie
             style={style}
             onClick={() => setSelectedCategoryCode(category.code)}
         >
-            <span className="air-achievements-category-title">{AchievementUtilities.getAchievementCategoryName(category)}</span>
-            <img className="air-achievements-category-art" src={getCategoryImage} alt="" draggable={false} />
-            <span className="air-achievements-category-completion">
-                {progress}/{maxProgress}
+            <span className="air-achievements-category-bg" aria-hidden="true" />
+            <span className="air-achievements-category-content">
+                <AchievementText text={AchievementUtilities.getAchievementCategoryName(category)} bold height={17} x={0} y={7} width={115} align="center" />
+                <img
+                    className="air-achievements-category-art"
+                    src={getCategoryImage}
+                    alt=""
+                    draggable={false}
+                    onError={(event) => (event.currentTarget.style.visibility = 'hidden')}
+                />
+                <AchievementText text={`${progress}/${maxProgress}`} bold color={0xffffff} height={14} x={0} y={70} width={115} align="center" />
             </span>
-            {getTotalUnseen > 0 && <span className="air-achievements-unseen-count">{getTotalUnseen}</span>}
+            {getTotalUnseen > 0 && (
+                <span className="air-achievements-unseen-count">
+                    <AchievementText color={0xffffff} style={{ position: 'relative' }} text={String(getTotalUnseen)} textStyle="u_bold" x={0} y={0} />
+                </span>
+            )}
         </button>
     );
 };

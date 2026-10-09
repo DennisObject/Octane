@@ -6,5 +6,6 @@ export interface IAvatarEditorCategoryPartItem {
     usesColor?: boolean;
     maxPaletteCount?: number;
     isClear?: boolean;
+    isGetMore?: boolean;
     isSellableNotOwned?: boolean;
 }

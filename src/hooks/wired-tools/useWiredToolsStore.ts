@@ -1,3 +1,4 @@
+import { parseWiredInt64 } from '@octane/renderer';
 import {
     CreateLinkEvent,
     GetSessionDataManager,
@@ -5,20 +6,22 @@ import {
     WiredRoomSettingsDataEvent,
     WiredRoomSettingsRequestComposer,
     WiredRoomStateActionComposer,
-    WiredUserVariableManageComposer,
+    WiredUserVariableManage64Composer,
     WiredUserVariablesDataEvent,
     WiredUserVariablesRequestComposer,
-    WiredUserVariableUpdateComposer
+    WiredUserVariableUpdate64Composer
 } from '@octane/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook } from '@/state/useSharedHook';
 import {
     createPacketCooldownGate,
+    GetConfigurationValue,
     LocalizeText,
     NotificationAlertType,
     normalizeWiredStyle,
     SendMessageComposer,
     WIRED_STYLE_DEFAULT,
+    WiredShellStyle,
     WiredStyleName
 } from '../../api';
 import { useMessageEvent } from '../events';
@@ -26,6 +29,7 @@ import { useNotification } from '../notification';
 import { useRoom } from '../rooms';
 
 export interface IWiredAccountPreferences {
+    playTestMode: boolean;
     showInspectButton: boolean;
     showSystemNotifications: boolean;
     showToolbarButton: boolean;
@@ -60,7 +64,7 @@ export interface IWiredUserVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | number | null;
     variableItemId: number;
 }
 
@@ -79,7 +83,7 @@ export interface IWiredFurniVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | number | null;
     variableItemId: number;
 }
 
@@ -98,7 +102,7 @@ export interface IWiredRoomVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | number | null;
     variableItemId: number;
 }
 
@@ -125,6 +129,7 @@ const getCurrentUnixTime = () => Math.floor(Date.now() / 1000);
 const DEFAULT_ACCOUNT_PREFERENCES: IWiredAccountPreferences = {
     showToolbarButton: false,
     showInspectButton: false,
+    playTestMode: false,
     showSystemNotifications: false,
     wiredStyle: WIRED_STYLE_DEFAULT
 };
@@ -155,6 +160,9 @@ export const useWiredToolsStore = () => {
     const { roomSession = null } = useRoom();
     const { simpleAlert = null } = useNotification();
     const [accountPreferences, setAccountPreferences] = useState<IWiredAccountPreferences>(DEFAULT_ACCOUNT_PREFERENCES);
+    const [activeWiredStyle, setActiveWiredStyle] = useState<WiredShellStyle>('illumina');
+    const [areAccountPreferencesHydrated, setAreAccountPreferencesHydrated] = useState(false);
+    const previousWiredStyleRef = useRef<WiredStyleName>('volter');
     const [roomSettings, setRoomSettings] = useState<IWiredRoomSettings>(DEFAULT_ROOM_SETTINGS);
     const [userVariableDefinitions, setUserVariableDefinitions] = useState<IWiredUserVariableDefinition[]>([]);
     const [userVariableAssignments, setUserVariableAssignments] = useState<Record<number, IWiredUserVariableAssignment[]>>({});
@@ -174,7 +182,7 @@ export const useWiredToolsStore = () => {
         if (!roomSettings.canInspect) return;
 
         userVariablesRequestGateRef.current?.request(() => {
-            SendMessageComposer(new WiredUserVariablesRequestComposer());
+            SendMessageComposer(new WiredUserVariablesRequestComposer(true));
         });
     }, [roomSettings.canInspect]);
 
@@ -184,32 +192,47 @@ export const useWiredToolsStore = () => {
         return `${WIRED_TOOLS_STORAGE_PREFIX}.${userId || 'guest'}`;
     }, []);
 
+    // HBe/bRe keep preference history separate from the active factory. Local storage
+    // supplies compatibility preference events here; it is not the native 1175 receiver.
+    const applyWiredStylePreference = useCallback((value: unknown) => {
+        const style = normalizeWiredStyle(value);
+
+        if (style === previousWiredStyleRef.current) return;
+
+        previousWiredStyleRef.current = style;
+
+        if (GetConfigurationValue<boolean>('wired.ui_picker_enabled', false)) setActiveWiredStyle(style || 'volter');
+    }, []);
+
     useEffect(() => {
+        let preferences = DEFAULT_ACCOUNT_PREFERENCES;
+
         try {
             const rawValue = window.localStorage.getItem(storageKey);
 
-            if (!rawValue) {
-                setAccountPreferences(DEFAULT_ACCOUNT_PREFERENCES);
-                return;
+            if (rawValue) {
+                const parsedValue = JSON.parse(rawValue) as Partial<IWiredAccountPreferences>;
+
+                preferences = {
+                    ...DEFAULT_ACCOUNT_PREFERENCES,
+                    ...(parsedValue || {}),
+                    wiredStyle: normalizeWiredStyle(parsedValue?.wiredStyle)
+                };
             }
+        } catch {}
 
-            const parsedValue = JSON.parse(rawValue) as Partial<IWiredAccountPreferences>;
-
-            setAccountPreferences({
-                ...DEFAULT_ACCOUNT_PREFERENCES,
-                ...(parsedValue || {}),
-                wiredStyle: normalizeWiredStyle(parsedValue?.wiredStyle)
-            });
-        } catch {
-            setAccountPreferences(DEFAULT_ACCOUNT_PREFERENCES);
-        }
-    }, [storageKey]);
+        applyWiredStylePreference(preferences.wiredStyle);
+        setAccountPreferences(preferences);
+        setAreAccountPreferencesHydrated(true);
+    }, [applyWiredStylePreference, storageKey]);
 
     useEffect(() => {
+        if (!areAccountPreferencesHydrated) return;
+
         try {
             window.localStorage.setItem(storageKey, JSON.stringify(accountPreferences));
         } catch {}
-    }, [accountPreferences, storageKey]);
+    }, [accountPreferences, areAccountPreferencesHydrated, storageKey]);
 
     useEffect(() => {
         if (!roomSession?.roomId) {
@@ -295,12 +318,19 @@ export const useWiredToolsStore = () => {
         setAreUserVariablesLoaded(true);
     });
 
-    const updateAccountPreferences = useCallback((partialPreferences: Partial<IWiredAccountPreferences>) => {
-        setAccountPreferences((prevValue) => ({
-            ...prevValue,
-            ...partialPreferences
-        }));
-    }, []);
+    const updateAccountPreferences = useCallback(
+        (partialPreferences: Partial<IWiredAccountPreferences>) => {
+            const preferences =
+                'wiredStyle' in partialPreferences
+                    ? { ...partialPreferences, wiredStyle: normalizeWiredStyle(partialPreferences.wiredStyle) }
+                    : partialPreferences;
+
+            if ('wiredStyle' in preferences) applyWiredStylePreference(preferences.wiredStyle);
+
+            setAccountPreferences((prevValue) => ({ ...prevValue, ...preferences }));
+        },
+        [applyWiredStylePreference]
+    );
 
     // The official permissions packet carries the timezone too, so every save sends all three and
     // the server answers with the settings it kept.
@@ -340,8 +370,9 @@ export const useWiredToolsStore = () => {
     }, [roomSettings.canModify]);
 
     const updateUserVariableValue = useCallback(
-        (userId: number, variableItemId: number, value: number) => {
+        (userId: number, variableItemId: number, value: bigint | number) => {
             if (!roomSettings.canModify) return;
+            value = parseWiredInt64(value);
 
             setUserVariableAssignments((prevValue) => {
                 const existingAssignments = prevValue[userId];
@@ -370,14 +401,15 @@ export const useWiredToolsStore = () => {
                 };
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_USER, userId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_USER, userId, variableItemId, value));
         },
         [roomSettings.canModify]
     );
 
     const updateFurniVariableValue = useCallback(
-        (furniId: number, variableItemId: number, value: number) => {
+        (furniId: number, variableItemId: number, value: bigint | number) => {
             if (!roomSettings.canModify) return;
+            value = parseWiredInt64(value);
 
             setFurniVariableAssignments((prevValue) => {
                 const existingAssignments = prevValue[furniId];
@@ -406,14 +438,15 @@ export const useWiredToolsStore = () => {
                 };
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, value));
         },
         [roomSettings.canModify]
     );
 
     const updateRoomVariableValue = useCallback(
-        (variableItemId: number, value: number) => {
+        (variableItemId: number, value: bigint | number) => {
             if (!roomSettings.canModify) return;
+            value = parseWiredInt64(value);
 
             setRoomVariableAssignments((prevValue) => {
                 const now = getCurrentUnixTime();
@@ -445,14 +478,15 @@ export const useWiredToolsStore = () => {
                 ];
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_ROOM, roomSettings.roomId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_ROOM, roomSettings.roomId, variableItemId, value));
         },
         [roomSettings.canModify, roomSettings.roomId]
     );
 
     const assignUserVariable = useCallback(
-        (userId: number, variableItemId: number, value: number) => {
+        (userId: number, variableItemId: number, value: bigint | number) => {
             if (!roomSettings.canModify) return;
+            value = parseWiredInt64(value);
 
             const definition = userVariableDefinitions.find((entry) => entry.itemId === variableItemId);
 
@@ -491,12 +525,12 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_ASSIGN,
                     WIRED_VARIABLE_TARGET_USER,
                     userId,
                     variableItemId,
-                    Number(normalizedValue ?? 0)
+                    normalizedValue ?? 0
                 )
             );
         },
@@ -525,15 +559,16 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_USER, userId, variableItemId, 0)
+                new WiredUserVariableManage64Composer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_USER, userId, variableItemId, 0)
             );
         },
         [roomSettings.canModify]
     );
 
     const assignFurniVariable = useCallback(
-        (furniId: number, variableItemId: number, value: number) => {
+        (furniId: number, variableItemId: number, value: bigint | number) => {
             if (!roomSettings.canModify) return;
+            value = parseWiredInt64(value);
 
             const definition = furniVariableDefinitions.find((entry) => entry.itemId === variableItemId);
 
@@ -572,12 +607,12 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_ASSIGN,
                     WIRED_VARIABLE_TARGET_FURNI,
                     furniId,
                     variableItemId,
-                    Number(normalizedValue ?? 0)
+                    normalizedValue ?? 0
                 )
             );
         },
@@ -606,7 +641,7 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, 0)
+                new WiredUserVariableManage64Composer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, 0)
             );
         },
         [roomSettings.canModify]
@@ -637,7 +672,7 @@ export const useWiredToolsStore = () => {
             else setUserVariableAssignments((prevValue) => strip(prevValue) as typeof prevValue);
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_CLEAR_ALL,
                     scope === 'furni' ? WIRED_VARIABLE_TARGET_FURNI : WIRED_VARIABLE_TARGET_USER,
                     0,
@@ -693,6 +728,7 @@ export const useWiredToolsStore = () => {
 
     return {
         accountPreferences,
+        activeWiredStyle,
         roomSettings,
         showInspectButton,
         showToolbarButton,

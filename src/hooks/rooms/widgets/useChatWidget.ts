@@ -22,15 +22,16 @@ import {
     GetRoomObjectScreenLocation,
     IRoomChatSettings,
     LocalizeText,
-    loadEmojiShortcodes,
     PlaySound,
-    RoomChatFormatter
+    RoomChatFormatter,
+    resolveChatBubbleWidth
 } from '../../../api';
-import { getStoredChatTextSize } from '../../../components/room/widgets/chat-input/chatTextSize';
+import { captureNativeChatCreation } from '../../../components/room/widgets/chat/nativeChatScroller';
 import { useChatHistory } from './../../chat-history';
 import { useMessageEvent, useOctaneEvent } from '../../events';
 import { useUserDataSnapshot } from '../../session/useSessionSnapshots';
 import { useTranslation } from '../../translation';
+import { useChatPreferences } from '../../useChatPreferences';
 import { useRoom } from '../useRoom';
 import { createChatLineQueue, reserveChatLine, resetChatLineQueue, settleChatLine, takeReadyChatLines } from './chatLineQueue';
 
@@ -38,13 +39,20 @@ const CHAT_MESSAGES_MAX = 250;
 
 const useChatWidgetState = () => {
     const [chatMessages, setChatMessages] = useState<ChatBubbleMessage[]>([]);
-    const [chatSettings, setChatSettings] = useState<IRoomChatSettings>({
+    const [roomChatSettings, setChatSettings] = useState<IRoomChatSettings>({
         mode: RoomChatSettings.CHAT_MODE_FREE_FLOW,
         weight: RoomChatSettings.CHAT_BUBBLE_WIDTH_NORMAL,
         speed: RoomChatSettings.CHAT_SCROLL_SPEED_NORMAL,
         distance: 50,
         protection: RoomChatSettings.FLOOD_FILTER_NORMAL
     });
+    const { chatPreferences } = useChatPreferences();
+    const chatSettings = useMemo<IRoomChatSettings>(() => ({
+        ...roomChatSettings,
+        mode: chatPreferences?.chatMode ?? roomChatSettings.mode,
+        weight: chatPreferences?.chatBubbleWidth ?? roomChatSettings.weight,
+        speed: chatPreferences?.chatScrollSpeed ?? roomChatSettings.speed
+    }), [roomChatSettings, chatPreferences]);
     const { roomSession = null } = useRoom();
     const { addChatEntry, updateChatEntry } = useChatHistory();
     const { settings, translateIncoming, consumeOutgoingTranslation } = useTranslation();
@@ -187,7 +195,7 @@ const useChatWidgetState = () => {
 
             switch (userType) {
                 case RoomObjectType.PET:
-                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 64, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
+                    imagePromise = ChatBubbleUtilities.getPetImage(figure, 2, true, 32, roomObject.model.getValue<string>(RoomObjectVariable.FIGURE_POSTURE)).catch(() => null);
                     break;
                 case RoomObjectType.USER:
                     imagePromise = ChatBubbleUtilities.getUserImage(figure).catch(() => null);
@@ -276,10 +284,14 @@ const useChatWidgetState = () => {
             imageUrl,
             color
         );
+        captureNativeChatCreation(chatMessage, chatSettings.mode);
         // The renderer adds bubbleWidthOverride to the chat event in Octane-Renderer#212; until that
         // lands the published event has no such field, so it is read as optional.
-        chatMessage.textSize = getStoredChatTextSize();
-        chatMessage.bubbleWidthOverride = (event as RoomSessionChatEvent & { bubbleWidthOverride?: number }).bubbleWidthOverride ?? -1;
+        // Native bubbles resolve their width at creation; later preference changes affect new bubbles only.
+        chatMessage.bubbleWidthOverride = resolveChatBubbleWidth(
+            (event as RoomSessionChatEvent & { bubbleWidthOverride?: number }).bubbleWidthOverride,
+            chatSettings.weight
+        );
 
         if (outgoingTranslation) {
             applyTranslationToBubble(
@@ -426,8 +438,6 @@ const useChatWidgetState = () => {
     useEffect(() => {
         isDisposed.current = false;
 
-        if (GetConfigurationValue<boolean>('chat.emoji.enabled', true)) loadEmojiShortcodes();
-
         return () => {
             isDisposed.current = true;
             roomTokenRef.current += 1;
@@ -436,7 +446,7 @@ const useChatWidgetState = () => {
         };
     }, []);
 
-    return { chatMessages, setChatMessages, chatSettings, getScrollSpeed };
+    return { chatMessages, setChatMessages, chatSettings, getScrollSpeed, roomId: roomSession?.roomId };
 };
 
 export const useChatWidget = useChatWidgetState;

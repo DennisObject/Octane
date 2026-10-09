@@ -4,7 +4,7 @@ import { useCatalogData, useCatalogDisplayPreferences } from '../../../../../hoo
 import { CatalogLayoutDefaultView } from './CatalogLayoutDefaultView';
 
 vi.mock('../../../../../api', () => ({
-    CatalogType: { NORMAL: 'NORMAL', BUILDER: 'BUILDERS_CLUB' },
+    CatalogType: { NORMAL: 'NORMAL' },
     GetConfigurationValue: vi.fn((key: string) => key === 'catalog.multiple.purchase.enabled'),
     LocalizeText: (key: string) => key,
     ProductTypeEnum: { BADGE: 'b', FLOOR: 's' },

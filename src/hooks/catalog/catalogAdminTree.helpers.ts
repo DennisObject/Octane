@@ -1,14 +1,16 @@
 import type { NodeData } from '@octane/renderer';
 import { CatalogNode } from '../../api/catalog/CatalogNode';
 import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
-import { parseCatalogTabLabel } from '../../components/catalog/useCatalogWindowWidth';
+import { parseCatalogTabLabel } from '../../components/catalog/catalogTabLabel';
 import type { CatalogStudioCatalogType, CatalogStudioPageSnapshot } from './catalogStudio.types';
 
 /** Drag payload type for catalog pages, shared by the catalog navigation and the manager tree. */
 export const CATALOG_ADMIN_PAGE_DRAG_TYPE = 'application/x-catalog-admin-page';
 
-export const toStudioCatalogType = (catalogType: string): CatalogStudioCatalogType =>
-    catalogType === 'BUILDERS_CLUB' || catalogType === 'BUILDER' ? 'BUILDER' : 'NORMAL';
+export const toStudioCatalogType = (_catalogType: string): CatalogStudioCatalogType => 'NORMAL';
+
+/** Only the normal catalog exists; older servers may still send rows of another catalog. */
+export const isNormalCatalogRow = <T extends { catalogType: string }>(row: T): row is T & { catalogType: CatalogStudioCatalogType } => row.catalogType === 'NORMAL';
 
 const stripSwfSuffix = (label: string) => (label || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
 

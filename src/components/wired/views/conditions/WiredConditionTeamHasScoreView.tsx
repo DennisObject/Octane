@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { normalizeWiredComparison, WIRED_CMP_GREATER_EQUAL, WiredComparisonOperator } from '../WiredComparisonOperator';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';

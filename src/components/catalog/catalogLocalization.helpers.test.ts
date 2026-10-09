@@ -12,7 +12,6 @@ describe('standard catalog page localization mapping', () => {
     it('does not leak page content into the header for specialized layouts', () => {
         expect(getCatalogTextElementName(0, 'frontpage4')).toBe('ctlg_txt1');
         expect(getCatalogTextElementName(0, 'trophies')).toBe('trophy.description');
-        expect(getCatalogTextElementName(0, 'builders_club_frontpage')).toBe('ctlg_description');
         expect(getCatalogHeaderDescription('frontpage4', localization(['Front-page body']))).toBe('');
         expect(getCatalogHeaderDescription('trophies', localization(['Trophy body']))).toBe('');
     });

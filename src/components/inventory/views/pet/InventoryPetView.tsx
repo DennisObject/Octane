@@ -74,7 +74,7 @@ export const InventoryPetView: FC<{
     }, []);
 
     if (!petItems || !petItems.length) {
-        return <InventoryCategoryEmptyView desc={LocalizeText('inventory.empty.pets.desc')} title={LocalizeText('inventory.empty.pets.title')} />;
+        return <InventoryCategoryEmptyView desc={LocalizeText('inventory.empty.desc')} title={LocalizeText('inventory.empty.title')} />;
     }
 
     return (

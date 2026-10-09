@@ -16,7 +16,6 @@ const TOOLBAR_LABELS: Record<string, [string, string]> = {
     game: ['toolbar.icon.label.games', 'Games'],
     stories: ['toolbar.icon.label.stories', 'Stories'],
     catalog: ['toolbar.icon.label.catalogue', 'Shop'],
-    buildersclub: ['toolbar.icon.label.builder', 'Builders Club'],
     inventory: ['toolbar.icon.label.inventory', 'Inventory'],
     'wired-tools': ['toolbar.icon.label.wired_menu', 'Wired'],
     camera: ['camera.interface.title', 'Camera'],

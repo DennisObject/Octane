@@ -1,9 +1,23 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import {
+    CreateLinkEvent,
+    GetExtendedProfileByNameMessageComposer,
+    GetRoomEngine,
+    GetSessionDataManager,
+    RoomObjectCategory,
+    RoomObjectOperationType
+} from '@octane/renderer';
 import { FC } from 'react';
-import { attemptItemPlacement, CatalogPageName, LocalizeText } from '../../../../api';
-import { Button, Column, LayoutGiftTagView, LayoutImage, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { attemptItemPlacement, CatalogPageName, ProductTypeEnum, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
+import giftCardImage from '../../../../assets/images/catalog/air/gift/gift-card-blank.png';
+import giftIncognitoImage from '../../../../assets/images/catalog/air/gift/incognito.png';
+import warningAlertImage from '../../../../assets/images/room-widgets/present-widget/warning-alert.png';
+import giftIconBackgroundImage from '../../../../assets/images/room-widgets/present-widget/gift-icon-background.png';
+import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useCatalogUiState, useFurniturePresentWidget, useInventoryFurni } from '../../../../hooks';
+import { FurnitureGiftAvatar } from './FurnitureGiftAvatar';
 
+// v75 packagecard_new (unopened) and packagecard_new_opened (the gift's contents) in the style 3 frame. The unopened
+// frame is a 306px element_list at x=10 with 10px spacing; the opened one is a 336px container.
 export const FurnitureGiftOpeningView: FC<{}> = (props) => {
     const {
         objectId = -1,
@@ -14,7 +28,6 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
         senderName = null,
         senderFigure = null,
         placedItemId = -1,
-        placedItemType = null,
         placedInRoom = false,
         imageUrl = null,
         openPresent = null,
@@ -25,10 +38,24 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
 
     if (objectId === -1) return null;
 
+    const hasSender = !!senderName && senderName.length > 0;
+    const isOpened = placedItemId > -1;
+    const isClubItem = itemType === ProductTypeEnum.HABBO_CLUB;
+    const spaceName = itemType === ProductTypeEnum.WALL ? GetSessionDataManager().getWallItemData(classId)?.className : null;
+    const isSpacesItem = spaceName === 'floor' || spaceName === 'landscape' || spaceName === 'wallpaper';
+    const showPlacementButtons = !isSpacesItem && !isClubItem;
+
     const place = (itemId: number) => {
         const groupItem = groupItems.find((group) => group.getItemById(itemId)?.id === itemId);
 
         if (groupItem) attemptItemPlacement(groupItem);
+
+        onClose();
+    };
+
+    // The item is already standing in the room: take it back into the inventory; otherwise it simply stays there.
+    const putInInventory = () => {
+        if (placedInRoom) GetRoomEngine().processRoomObjectOperation(placedItemId, RoomObjectCategory.FLOOR, RoomObjectOperationType.OBJECT_PICKUP);
 
         onClose();
     };
@@ -38,67 +65,108 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
         CreateLinkEvent(`catalog/open/${CatalogPageName.GIFT_SHOP}`);
     };
 
+    const openSenderProfile = () => hasSender && SendMessageComposer(new GetExtendedProfileByNameMessageComposer(senderName));
+
+    const avatar = hasSender ? (
+        <FurnitureGiftAvatar figure={senderFigure} onClick={openSenderProfile} />
+    ) : (
+        <FurnitureGiftAvatar imageUrl={giftIncognitoImage} />
+    );
+
     return (
-        <OctaneCardView className="octane-gift-opening" theme="primary-slim">
+        <OctaneCardView
+            className={'octane-furni-gift ' + (isOpened ? 'is-opened' : 'is-closed')}
+            frameStyle={3}
+            isResizable={false}
+            uniqueKey="octane-furni-gift"
+        >
             <OctaneCardHeaderView
-                headerText={LocalizeText(senderName ? 'widget.furni.present.window.title_from' : 'widget.furni.present.window.title', ['name'], [senderName])}
+                headerText={LocalizeText(hasSender ? 'widget.furni.present.window.title_from' : 'widget.furni.present.window.title', ['name'], [senderName])}
                 onCloseClick={onClose}
             />
-            <OctaneCardContentView>
-                {placedItemId === -1 && (
-                    <Column overflow="hidden">
-                        <div className="flex justify-center items-center overflow-auto">
-                            <LayoutGiftTagView figure={senderFigure} message={text} userName={senderName} />
-                        </div>
-                        {isOwnerOfFurniture && (
-                            <div className="flex gap-1">
-                                {senderName && (
-                                    <Button fullWidth onClick={giveGiftBack}>
-                                        {LocalizeText('widget.furni.present.give_gift', ['name'], [senderName])}
-                                    </Button>
+            {!isOpened && (
+                <div className="fnd-gift-content">
+                    {/* The renderer does not carry furniture_trusted_sender, so every sender is untrusted (native default). */}
+                    <div className="fnd-gift-warning">
+                        <div className="fnd-gift-warning-body">
+                            <img alt="" className="fnd-gift-warning-icon" draggable={false} src={warningAlertImage} />
+                            <div className="fnd-gift-warning-text">
+                                {localizeWithFallback(
+                                    'gift.untrusted.banner.text',
+                                    'It\u2019s wise to NEVER visit websites linked in gift box messages. They are almost always scam websites that will drain your account.'
                                 )}
-                                <Button fullWidth variant="success" onClick={openPresent}>
-                                    {LocalizeText('widget.furni.present.open_gift')}
-                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="fnd-gift-card">
+                        <img alt="" className="fnd-gift-card-image" draggable={false} src={giftCardImage} />
+                        {avatar}
+                        <div className="fnd-gift-message">{text}</div>
+                        {hasSender && (
+                            <div className="fnd-gift-from" onClick={openSenderProfile}>
+                                {LocalizeText('widget.furni.present.message_from', ['name'], [senderName])}
                             </div>
                         )}
-                    </Column>
-                )}
-                {placedItemId > -1 && (
-                    <div className="flex gap-2 overflow-hidden">
-                        <Column center className="p-2">
-                            <LayoutImage imageUrl={imageUrl} />
-                        </Column>
-                        <Column grow>
-                            <Column center gap={1}>
-                                <Text small wrap>
-                                    {LocalizeText('widget.furni.present.message_opened')}
-                                </Text>
-                                <Text bold fontSize={5}>
-                                    {text}
-                                </Text>
-                            </Column>
-                            <Column grow gap={1}>
-                                <div className="flex gap-1">
-                                    {placedInRoom && (
-                                        <Button fullWidth onClick={null}>
-                                            {LocalizeText('widget.furni.present.put_in_inventory')}
-                                        </Button>
-                                    )}
-                                    <Button fullWidth variant="success" onClick={(event) => place(placedItemId)}>
-                                        {LocalizeText(placedInRoom ? 'widget.furni.present.keep_in_room' : 'widget.furni.present.place_in_room')}
-                                    </Button>
-                                </div>
-                                {senderName && senderName.length && (
-                                    <Button fullWidth onClick={giveGiftBack}>
-                                        {LocalizeText('widget.furni.present.give_gift', ['name'], [senderName])}
-                                    </Button>
-                                )}
-                            </Column>
-                        </Column>
                     </div>
-                )}
-            </OctaneCardContentView>
+                    {isOwnerOfFurniture && (
+                        <button type="button" className="fnd-button fnd-button-thick fnd-button-green" onClick={openPresent}>
+                            {LocalizeText('widget.furni.present.open_gift')}
+                        </button>
+                    )}
+                    {isOwnerOfFurniture && hasSender && (
+                        <button type="button" className="fnd-button" onClick={giveGiftBack}>
+                            {LocalizeText('widget.furni.present.give_gift', ['name'], [senderName])}
+                        </button>
+                    )}
+                    <div className="fnd-gift-separator" />
+                </div>
+            )}
+            {isOpened && (
+                <div className="fnd-gift-content">
+                    <div className="fnd-gift-opened-message">
+                        <div className="fnd-gift-image">
+                            <img alt="" className="fnd-gift-image-bg" draggable={false} src={giftIconBackgroundImage} />
+                            {imageUrl && <img alt="" className="fnd-gift-image-product" draggable={false} src={imageUrl} />}
+                        </div>
+                        <div className="fnd-gift-opened-text">
+                            {text &&
+                                (isClubItem
+                                    ? text
+                                    : LocalizeText(
+                                          isSpacesItem ? 'widget.furni.present.spaces.message_opened' : 'widget.furni.present.message_opened',
+                                          ['product'],
+                                          [text]
+                                      ))}
+                        </div>
+                    </div>
+                    <div className="fnd-gift-opened-buttons">
+                        {showPlacementButtons && placedInRoom && (
+                            <button type="button" className="fnd-button fnd-button-thick" onClick={onClose}>
+                                {LocalizeText('widget.furni.present.keep_in_room')}
+                            </button>
+                        )}
+                        {showPlacementButtons && !placedInRoom && (
+                            <button type="button" className="fnd-button fnd-button-thick" onClick={() => place(placedItemId)}>
+                                {LocalizeText('widget.furni.present.place_in_room')}
+                            </button>
+                        )}
+                        {showPlacementButtons && (
+                            <button type="button" className="fnd-button" onClick={putInInventory}>
+                                {LocalizeText('widget.furni.present.put_in_inventory')}
+                            </button>
+                        )}
+                        {!hasSender && <div className="fnd-gift-separator" />}
+                    </div>
+                    {hasSender && (
+                        <div className="fnd-gift-give">
+                            <button type="button" className="fnd-button fnd-button-thick fnd-button-green" onClick={giveGiftBack}>
+                                {LocalizeText('widget.furni.present.give_gift', ['name'], [senderName])}
+                            </button>
+                            {avatar}
+                        </div>
+                    )}
+                </div>
+            )}
         </OctaneCardView>
     );
 };

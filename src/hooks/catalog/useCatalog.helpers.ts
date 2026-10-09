@@ -1,30 +1,25 @@
-import { NodeData, RoomControllerLevel, RoomObjectCategory, RoomObjectType } from '@octane/renderer';
-import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogType, ICatalogNode, ICatalogPage, IPurchasableOffer } from '../../api';
+import { NodeData, RoomControllerLevel, RoomObjectCategory } from '@octane/renderer';
+import { CatalogNode, CatalogPage, CatalogType, ICatalogNode, ICatalogPage, IPurchasableOffer } from '../../api';
 
-export const normalizeCatalogType = (type?: string): string => {
-    if (type === CatalogType.BUILDER) return CatalogType.BUILDER;
+export const normalizeCatalogType = (_type?: string): string => CatalogType.NORMAL;
 
-    return CatalogType.NORMAL;
-};
-
-export const restoreCatalogActivePath = (rootNode: ICatalogNode, activePageId: number): ICatalogNode[] => {
-    const target = findNodeById(activePageId, rootNode, rootNode);
-    if (!target) return [];
-
-    const path: ICatalogNode[] = [];
+/** Nodes from the top-level tab down to the target; the index root is left out. */
+export const getCatalogNodePath = (target: ICatalogNode): ICatalogNode[] => {
+    const nodes: ICatalogNode[] = [];
     let node: ICatalogNode | null = target;
 
-    while (node && node !== rootNode) {
-        path.unshift(node);
+    while (node && node.parent) {
+        nodes.push(node);
         node = node.parent;
     }
 
-    for (const activeNode of path) {
-        activeNode.activate();
-        activeNode.open();
-    }
+    return nodes.reverse();
+};
 
-    return path;
+export const restoreCatalogActivePath = (rootNode: ICatalogNode, activePageId: number): ICatalogNode[] => {
+    const target = activePageId > -1 ? findNodeById(activePageId, rootNode, rootNode) : null;
+
+    return target ? getCatalogNodePath(target) : [];
 };
 
 export const findNodeById = (id: number, node: ICatalogNode | null, rootNode: ICatalogNode | null): ICatalogNode | null => {
@@ -97,58 +92,8 @@ export const buildCatalogNodeTree = (root: NodeData): { rootNode: ICatalogNode; 
     return { rootNode: walk(root, 0, null), offersToNodes };
 };
 
-export interface BuilderPlacementStatusInput {
-    offer: IPurchasableOffer | null | undefined;
-    roomSession: { isGuildRoom: boolean; isRoomOwner: boolean; controllerLevel: number } | null;
-    secondsLeft: number;
-    furniCount: number;
-    furniLimit: number;
-    builderPlacementAllowedInCurrentRoom: boolean;
-    builderPlacementBlockedByVisitors: boolean;
-    visitorCount?: number;
-}
-
-export const resolveBuilderFurniPlaceableStatus = (input: BuilderPlacementStatusInput): BuilderFurniPlaceableStatus => {
-    const {
-        offer,
-        roomSession,
-        secondsLeft,
-        furniCount,
-        furniLimit,
-        builderPlacementAllowedInCurrentRoom,
-        builderPlacementBlockedByVisitors,
-        visitorCount = 0
-    } = input;
-
-    if (!offer) return BuilderFurniPlaceableStatus.MISSING_OFFER;
-
-    if (!roomSession) return BuilderFurniPlaceableStatus.NOT_IN_ROOM;
-
-    const canUseGuildAdminFallback = roomSession.isGuildRoom && roomSession.controllerLevel >= RoomControllerLevel.GUILD_ADMIN && secondsLeft > 0;
-
-    const usesSharedPlacementPool = !roomSession.isRoomOwner && (builderPlacementAllowedInCurrentRoom || canUseGuildAdminFallback);
-
-    if (!roomSession.isRoomOwner && !builderPlacementAllowedInCurrentRoom && !canUseGuildAdminFallback) {
-        return BuilderFurniPlaceableStatus.NOT_GROUP_ADMIN;
-    }
-
-    if (!usesSharedPlacementPool && (furniCount < 0 || furniCount >= furniLimit)) {
-        return BuilderFurniPlaceableStatus.FURNI_LIMIT_REACHED;
-    }
-
-    if (secondsLeft <= 0 && builderPlacementBlockedByVisitors) {
-        return BuilderFurniPlaceableStatus.VISITORS_IN_ROOM;
-    }
-
-    if (secondsLeft <= 0 && visitorCount > 0) {
-        return BuilderFurniPlaceableStatus.VISITORS_IN_ROOM;
-    }
-
-    return BuilderFurniPlaceableStatus.OKAY;
-};
-
 export const replaceCatalogPageOffers = (page: ICatalogPage, offers: IPurchasableOffer[]): CatalogPage => {
     return new CatalogPage(page.pageId, page.layoutCode, page.localization, offers, page.acceptSeasonCurrencyAsCredits, page.mode);
 };
 
-export { RoomControllerLevel, RoomObjectCategory, RoomObjectType };
+export { RoomControllerLevel, RoomObjectCategory };

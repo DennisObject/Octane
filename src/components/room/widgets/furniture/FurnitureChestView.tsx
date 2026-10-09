@@ -1,4 +1,5 @@
 import {
+    WiredChestSettingsAckEvent,
     ChestCloseComposer,
     ChestDataEvent,
     ChestDepositComposer,
@@ -7,7 +8,6 @@ import {
     ChestFurniChunkEvent,
     ChestFurniDeltaEvent,
     ChestLogEvent,
-    ChestRequestLogComposer,
     ChestSaveNotificationsComposer,
     ChestSaveOptionsComposer,
     ChestSaveSettingsComposer,
@@ -30,10 +30,9 @@ import sceneLow from '../../../../assets/images/chest/light_coins_chest_balance_
 import sceneMedium from '../../../../assets/images/chest/light_coins_chest_balance_medium.png';
 import sceneZero from '../../../../assets/images/chest/light_coins_chest_balance_zero.png';
 import furniEmptyScene from '../../../../assets/images/chest/variant_furni_chest_empty.png';
-import bellIcon from '../../../../assets/images/chest/wired_chests_bell_icon.png';
 import gearIcon from '../../../../assets/images/chest/wired_chests_gear_icon.png';
 import { Column, Flex, LayoutCurrencyIcon, LayoutFurniImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, PIXEL_ART_RENDERING, Text } from '../../../../common';
-import { useMessageEvent, usePurse } from '../../../../hooks';
+import { useMessageEvent, useNotification, usePurse } from '../../../../hooks';
 import { useInventoryFurni } from '../../../../hooks/inventory';
 import { ChestButton } from './ChestButton';
 import { ChestFurniGroup, chestFurniDisplayName, groupStoredFurni } from './chestFurniGrouping';
@@ -55,7 +54,6 @@ interface ChestLogRow {
 
 const CREDITS = -1;
 const CHEST_KIND_FURNI = 1;
-const UPGRADE_STEP = 5000;
 const NON_DIGITS = /\D/g;
 /** Matches ChestStorage.MAX_CAPACITY, the ceiling the server refuses to go past. */
 const MAX_CAPACITY = 1_000_000;
@@ -94,6 +92,9 @@ export const FurnitureChestView: FC = () => {
     const [autoLock, setAutoLock] = useState(false);
     const [capacity, setCapacity] = useState(0);
     const [isOwner, setIsOwner] = useState(false);
+    const [canWithdraw, setCanWithdraw] = useState(false);
+    const [canDeposit, setCanDeposit] = useState(false);
+    const [canToggleLock, setCanToggleLock] = useState(false);
     const [appearanceState, setAppearanceState] = useState(0);
     const [notifyFull, setNotifyFull] = useState(false);
     const [notifyDonation, setNotifyDonation] = useState(false);
@@ -154,6 +155,7 @@ export const FurnitureChestView: FC = () => {
             { value: 0, label: LocalizeText('wiredchests.settings.appearance.state.0') },
             { value: 1, label: LocalizeText('wiredchests.settings.appearance.state.1') },
             { value: 2, label: LocalizeText('wiredchests.settings.appearance.state.2') },
+            { value: 3, label: localizeWithFallback('wiredchests.settings.appearance.state.3', 'Controlled by Wired') },
         ],
         [],
     );
@@ -162,7 +164,6 @@ export const FurnitureChestView: FC = () => {
         () => [
             { value: 0, label: LocalizeText('wiredchests.notification_settings.notification_mode.when.0') },
             { value: 1, label: LocalizeText('wiredchests.notification_settings.notification_mode.when.1') },
-            { value: 2, label: LocalizeText('wiredchests.notification_settings.notification_mode.when.2') },
         ],
         [],
     );
@@ -210,10 +211,13 @@ export const FurnitureChestView: FC = () => {
         setUsed(p.used);
         setAccessOpen(p.accessOpen);
         setAccessDonate(p.accessDonate);
+        setCanWithdraw(p.canWithdraw);
+        setCanDeposit(p.canDeposit);
+        setCanToggleLock(p.canLock);
         setLocked(p.locked);
         setAutoLock(p.autoLock);
-        setCapacity(p.capacity || p.capacityMax);
-        setCapacityDraft(String(p.capacity || p.capacityMax));
+        setCapacity(p.capacity ?? p.capacityMax);
+        setCapacityDraft(String(p.capacity ?? p.capacityMax));
         setIsOwner(p.viewerOwnsChest);
         setChestBaseItemId(p.chestSpriteId);
         setWiredEnabled(p.wiredEnabled);
@@ -303,6 +307,14 @@ export const FurnitureChestView: FC = () => {
         setShowLog(true);
     });
 
+    const { simpleAlert } = useNotification();
+    useMessageEvent<WiredChestSettingsAckEvent>(WiredChestSettingsAckEvent, event => {
+        const result = event.getParser();
+        if (result.chestId !== itemId) return;
+        if (result.saved) { setShowSettings(false); setShowNotifications(false); }
+        else simpleAlert(localizeWithFallback('wiredchests.settings.error', 'The chest settings were refused.'), null, null, null, localizeWithFallback('generic.error', 'Error'));
+    });
+
     if (itemId === -1) return null;
 
     const creditsBalance = entries.find((e) => e.currencyType === CREDITS)?.amount ?? 0;
@@ -361,7 +373,6 @@ export const FurnitureChestView: FC = () => {
         SendMessageComposer(new FurnitureListComposer());
         SendMessageComposer(new ChestStartDepositComposer(itemId));
     };
-    const requestLog = () => SendMessageComposer(new ChestRequestLogComposer(itemId));
     const saveSettings = () => {
         SendMessageComposer(
             new ChestSaveSettingsComposer(
@@ -375,7 +386,6 @@ export const FurnitureChestView: FC = () => {
                 previewAmount,
             ),
         );
-        setShowSettings(false);
     };
     /**
      * The three switches on this window save the moment they are touched, the way the official one
@@ -393,23 +403,11 @@ export const FurnitureChestView: FC = () => {
     };
 
     /**
-     * A lock closes the chest to the room, not to its owner, so the owner keeps both directions and
-     * everyone else loses both until it comes off.
-     */
-    const canWithdraw = !locked || isOwner;
-    const canDeposit = !locked || isOwner;
-
-    /**
-     * Anyone in the room who can reach this window may throw the lock -- that is the point of a panic
-     * button. Taking it off again is the owner's alone, so a lock cannot be undone by whoever set it.
-     */
-    const canToggleLock = isOwner || !locked;
-
-    /**
      * How many steps are still buyable. The official offers 1..remaining rather than a fixed list, so
      * the dropdown can never propose a purchase the chest has no room for.
      */
-    const upgradesLeft = Math.max(0, Math.floor((MAX_CAPACITY - capacityMax) / UPGRADE_STEP));
+    const upgradeStep = isFurni ? 1000 : 5000;
+    const upgradesLeft = Math.max(0, Math.floor(((isFurni ? 10000 : 100000) - capacityMax) / upgradeStep));
     const upgradeOptions = Array.from(
         { length: Math.min(upgradesLeft, MAX_UPGRADES_PER_PURCHASE) },
         (unused, index) => index + 1,
@@ -424,14 +422,13 @@ export const FurnitureChestView: FC = () => {
 
     const commitCapacity = () => {
         const parsed = parseInt(capacityDraft, 10);
-        const next = Math.min(Math.max(isNaN(parsed) ? 1 : parsed, 1), capacityMax);
+        const next = Math.min(Math.max(isNaN(parsed) ? 0 : parsed, 0), capacityMax);
 
         setCapacityDraft(String(next));
         if (next !== capacity) saveOptions({ capacity: next });
     };
     const saveNotifications = () => {
         SendMessageComposer(new ChestSaveNotificationsComposer(itemId, notifyFull, notifyDonation, notifyWithdraw, notifyEmpty, notifyWired, notifyMode));
-        setShowNotifications(false);
     };
     const buyUpgrade = () => {
         setUpgradeResult('');
@@ -447,8 +444,8 @@ export const FurnitureChestView: FC = () => {
                     {locked && !isOwner && (
                         <div className="mb-1 rounded border border-[#c08a5a] bg-[#f7e6cf] px-2 py-1 text-[11px] text-[#7a4a1c]">
                             {localizeWithFallback(
-                                'wiredchests.locked.notice',
-                                'This chest is locked. Nothing goes in or out by hand until it is unlocked.',
+                                'wiredchests.locked.transfer_notice',
+                                'This chest is locked. Its owner can withdraw stock; public donations remain available when enabled.',
                             )}
                         </div>
                     )}
@@ -482,21 +479,12 @@ export const FurnitureChestView: FC = () => {
                             {description || LocalizeText('wiredchests.description_placeholder')}
                         </Text>
                         <div style={{ position: 'absolute', top: 7, right: 9, display: 'flex', gap: 5 }}>
-                            {/* notification_settings_button 24x24, icon wired_chests_bell_icon 12x15 */}
-                            <button
-                                type="button"
-                                className="flex items-center justify-center cursor-pointer shrink-0"
-                                style={{ width: 24, height: 24, background: '#f1f0ee', border: '1px solid #cfcabc', borderRadius: 4, padding: 0 }}
-                                onClick={() => setShowNotifications(true)}
-                                title={LocalizeText('wiredchests.notifications.button')}
-                            >
-                                <img src={bellIcon} width={12} height={15} alt="" draggable={false} style={{ imageRendering: PIXEL_ART_RENDERING }} />
-                            </button>
                             {/* settings_button 24x24, icon wired_chests_gear_icon 14x14 */}
                             <button
                                 type="button"
                                 className="flex items-center justify-center cursor-pointer shrink-0"
                                 style={{ width: 24, height: 24, background: '#f1f0ee', border: '1px solid #cfcabc', borderRadius: 4, padding: 0 }}
+                                disabled={!isOwner}
                                 onClick={() => setShowSettings(true)}
                                 title={LocalizeText('wiredchests.settings.button')}
                             >
@@ -735,9 +723,6 @@ export const FurnitureChestView: FC = () => {
                                     </ChestButton>
                                 </div>
                             )}
-                            <ChestButton wide footer onClick={requestLog}>
-                                {LocalizeText('wiredchests.view_logs')}
-                            </ChestButton>
                         </div>
                     </div>
                 </OctaneCardContentView>
@@ -763,9 +748,9 @@ export const FurnitureChestView: FC = () => {
                             </label>
                             <Text bold>{LocalizeText('wiredchests.settings.info')}</Text>
                             <Text small>{LocalizeText('wiredchests.settings.info.name')}</Text>
-                            <input className="form-control form-control-sm" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
+                            <input className="form-control form-control-sm" maxLength={30} value={name} onChange={(e) => setName(e.target.value)} />
                             <Text small>{LocalizeText('wiredchests.settings.info.desc')}</Text>
-                            <textarea className="form-control form-control-sm" rows={3} maxLength={255} value={description} onChange={(e) => setDescription(e.target.value)} />
+                            <textarea className="form-control form-control-sm" rows={3} maxLength={200} value={description} onChange={(e) => setDescription(e.target.value)} />
                             <Text bold>{LocalizeText('wiredchests.settings.appearance')}</Text>
                             <Text small>{LocalizeText('wiredchests.settings.appearance.state')}</Text>
                             <select className="form-select form-select-sm" value={appearanceState} onChange={(e) => setAppearanceState(parseInt(e.target.value, 10))}>
@@ -921,13 +906,13 @@ export const FurnitureChestView: FC = () => {
                                 </div>
                                 <Column gap={1}>
                                     <Text bold>
-                                        {LocalizeText('wiredchests.upgrade.capacity.extra', ['purchase_capacity'], [String(UPGRADE_STEP * upgradeQty)])}
+                                        {LocalizeText('wiredchests.upgrade.capacity.extra', ['purchase_capacity'], [String(upgradeStep * upgradeQty)])}
                                     </Text>
                                     <Text small>
                                         {LocalizeText('wiredchests.upgrade.capacity.current', ['current_capacity'], [String(capacityMax)])}
                                     </Text>
                                     <Text small>
-                                        {LocalizeText('wiredchests.upgrade.capacity.new', ['new_capacity'], [String(capacityMax + UPGRADE_STEP * upgradeQty)])}
+                                        {LocalizeText('wiredchests.upgrade.capacity.new', ['new_capacity'], [String(capacityMax + upgradeStep * upgradeQty)])}
                                     </Text>
                                 </Column>
                             </Flex>

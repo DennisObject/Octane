@@ -10,9 +10,35 @@
          dns-prefetch + preconnect halve the TLS round-trips on cold load. -->
     <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin />
     <script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+    <!-- The loading screen's photo frame paints with the page, before any script runs.
+         LoadingView draws the same frame in the same place once React mounts. -->
+    <style>
+        html, body { margin: 0; background: #0e151c; }
+        .boot-loading-screen { position: fixed; inset: 0; overflow: hidden; background: #0e151c; }
+        .boot-loading-screen__photo { position: absolute; top: calc(50% - 250px); left: calc(50% - 250px); width: 500px; height: 434px; }
+        .boot-loading-screen__photo img { position: absolute; top: 0; left: 0; pointer-events: none; }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <div class="boot-loading-screen">
+            <div class="boot-loading-screen__photo">
+                <img src="/src/assets/images/loading/splash_bg.png" alt="" draggable="false" />
+                <img src="/src/assets/images/loading/splash_top.png" alt="" draggable="false" />
+            </div>
+        </div>
+    </div>
+    <!-- With nginx SSI on for this page ("ssi on; ssi_silent_errors on;"), the boot configuration ships
+         inside it instead of costing round trips; without SSI these stay comments and the client fetches
+         the files from configuration/. -->
+    <script type="application/json" id="octane-boot-client-mode"><!--# include virtual="configuration/client-mode.json" --></script>
+    <script type="application/json" id="octane-boot-renderer-config"><!--# include virtual="configuration/renderer-config.json" --></script>
+    <script type="application/json" id="octane-boot-ui-config"><!--# include virtual="configuration/ui-config.json" --></script>
+    <script type="application/json" id="octane-boot-pets"><!--# include virtual="configuration/pets.json" --></script>
+    <!-- {"version": "<sha1>"} of the furnidata the server generates; the client then boots with that exact version. -->
+    <script type="application/json" id="octane-boot-furnidata-version"><!--# include virtual="configuration/furnidata-version.json" --></script>
+    <!-- {"files": {"ExternalTexts.json": "<version>", ...}}: gamedata the client then requests by version, cacheable until it changes. -->
+    <script type="application/json" id="octane-boot-gamedata-versions"><!--# include virtual="configuration/gamedata-versions.json" --></script>
     <script type="module" src="/src/bootstrap.ts"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { CatalogType, GetConfigurationValue, LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
+import { GetConfigurationValue, LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
 import { Text } from '../../../../../common';
-import { getCatalogGridMetrics, useCatalogData, useCatalogDisplayPreferences, useCatalogUiState } from '../../../../../hooks';
+import { getCatalogGridMetrics, useCatalogData, useCatalogDisplayPreferences } from '../../../../../hooks';
 import { CatalogHeaderView } from '../../catalog-header/CatalogHeaderView';
 import { CatalogAddOnBadgeWidgetView } from '../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
@@ -18,7 +18,6 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
     const { page = null } = props;
     const { currentOffer = null, currentPage = null, roomPreviewer = null } = useCatalogData();
-    const { currentType = CatalogType.NORMAL } = useCatalogUiState();
     const { density = 'standard', showTilePrices = true } = useCatalogDisplayPreferences();
     const gridMetrics = getCatalogGridMetrics(density);
 
@@ -26,7 +25,6 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
     const hasTeaserText = !!teaserText.replace(/<[^>]*>/g, '').trim();
     const showBundlePurchase =
         !!currentOffer?.bundlePurchaseAllowed &&
-        currentType !== CatalogType.BUILDER &&
         GetConfigurationValue<boolean>('catalog.multiple.purchase.enabled', true);
 
     return (
@@ -47,7 +45,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = (props) => {
                             {currentOffer.product.productType !== ProductTypeEnum.BADGE && (
                                 <>
                                     <CatalogPreviewControls productType={currentOffer.product.productType} roomPreviewer={roomPreviewer} />
-                                    <CatalogViewProductWidgetView height={348} />
+                                    <CatalogViewProductWidgetView height={240} />
                                     <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 right-1 absolute" />
                                 </>
                             )}

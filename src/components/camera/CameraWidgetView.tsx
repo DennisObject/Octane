@@ -9,7 +9,7 @@ import {
     RoomSessionEvent
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { CameraEffectSelection, deleteTrustedCamera, GetConfigurationValue, LocalizeText } from '../../api';
+import { CameraEffectSelection, deleteTrustedCamera, GetConfigurationValue, LocalizeText, NotificationAlertType } from '../../api';
 import { useAchievements, useCamera, useNotification, useOctaneEvent, useRoom } from '../../hooks';
 import { getCameraAchievementLevel } from './CameraAirUtilities';
 import { CameraWidgetCaptureView } from './views/CameraWidgetCaptureView';
@@ -58,7 +58,7 @@ export const CameraWidgetView: FC<{}> = (props) => {
         if (!roomSession) return;
 
         if (!isDefaultRoomZoom(roomSession.roomId)) {
-            simpleAlert(LocalizeText('camera.zoom.missing.body'), null, null, null, LocalizeText('camera.zoom.missing.header'));
+            simpleAlert(LocalizeText('camera.zoom.missing.body'), NotificationAlertType.WINDOW, null, null, LocalizeText('camera.zoom.missing.header'));
             return;
         }
 
@@ -73,7 +73,8 @@ export const CameraWidgetView: FC<{}> = (props) => {
                 setMode(MODE_NONE);
                 return;
             case 'edit':
-                if (selectedPictureIndex < 0 || !cameraRoll[selectedPictureIndex]) return;
+                // A local preview has no server draft to edit or buy yet.
+                if (selectedPictureIndex < 0 || !cameraRoll[selectedPictureIndex]?.draftId) return;
 
                 if (!GetConfigurationValue<boolean>('camera.effects.enabled', true)) {
                     checkoutPictureUrl(cameraRoll[selectedPictureIndex].imageUrl);

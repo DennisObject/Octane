@@ -1,61 +1,65 @@
-import { FC, useState } from 'react';
-import { LocalizeText, ReportState } from '../../../api';
-import { Button, Column, Flex, Text } from '../../../common';
+import { FC } from 'react';
+import { LocalizeText, ReportState, ReportType } from '../../../api';
 import { useHelp, useModTools } from '../../../hooks';
+import { HelpActionButton } from './HelpIndexView';
+import { HelpText } from './HelpText';
 
-export const SelectTopicView: FC<{}> = (props) => {
-    const [selectedCategory, setSelectedCategory] = useState(-1);
-    const [selectedTopic, setSelectedTopic] = useState(-1);
-    const { setActiveReport = null } = useHelp();
-    const { cfhCategories = [] } = useModTools();
-
-    const submitTopic = () => {
-        if (selectedCategory < 0 || selectedTopic < 0) return;
-
-        setActiveReport((prevValue) => {
-            return {
-                ...prevValue,
-                cfhCategory: selectedCategory,
-                cfhTopic: cfhCategories[selectedCategory].topics[selectedTopic].id,
-                currentStep: ReportState.INPUT_REPORT_MESSAGE
-            };
-        });
-    };
-
+export const SelectTopicView: FC = () => {
+    const { activeReport, setActiveReport } = useHelp();
+    const { cfhCategories } = useModTools();
+    const category = cfhCategories[activeReport.cfhCategory];
+    const isRoom = activeReport.reportType === ReportType.ROOM;
+    const roomTopic = cfhCategories.flatMap((item) => item.topics).find((topic) => topic.name === 'inappropiate_room_group_event');
+    const isDirect =
+        isRoom ||
+        activeReport.reportType === ReportType.THREAD ||
+        activeReport.reportType === ReportType.MESSAGE ||
+        activeReport.reportType === ReportType.PHOTO;
+    const submitTopic = (topicId: number) => setActiveReport((previous) => ({ ...previous, cfhTopic: topicId, currentStep: ReportState.INPUT_REPORT_MESSAGE }));
     const back = () => {
-        setActiveReport((prevValue) => {
-            return { ...prevValue, currentStep: prevValue.currentStep - 1 };
-        });
+        if (category) setActiveReport((previous) => ({ ...previous, cfhCategory: -1 }));
+        else setActiveReport((previous) => ({ ...previous, currentStep: ReportState.SELECT_CHATS }));
     };
-
     return (
         <>
-            <div className="flex flex-col gap-1">
-                <Text fontSize={4}>{LocalizeText('help.emergency.chat_report.subtitle')}</Text>
-                <Text>{LocalizeText('help.cfh.pick.topic')}</Text>
+            <div className="help-topics-panel">
+                <p className="help-pick-topic">
+                    <HelpText text={LocalizeText('help.cfh.pick.topic')} maxWidth={405} />
+                </p>
+                <div className="help-topic-list help-scroll">
+                    {isRoom ? (
+                        <HelpActionButton tone="red" className="help-topic" textStyle="u_bold" textSize={14} textWidth={335} onClick={() => submitTopic(roomTopic?.id ?? -1)}>
+                            {LocalizeText('help.cfh.topic.34', ['name'], [activeReport.roomName])}
+                        </HelpActionButton>
+                    ) : category ? (
+                        category.topics.map((topic) => (
+                            <HelpActionButton key={topic.id} tone="red" className="help-topic" textStyle="u_bold" textSize={14} textWidth={335} onClick={() => submitTopic(topic.id)}>
+                                {LocalizeText('help.cfh.topic.' + topic.id)}
+                            </HelpActionButton>
+                        ))
+                    ) : (
+                        cfhCategories.map((item, index) => (
+                            <HelpActionButton
+                                key={item.name}
+                                tone="red"
+                                className="help-topic"
+                                textStyle="u_bold" textSize={14}
+                                textWidth={335}
+                                onClick={() => {
+                                    if (item.topics.length) setActiveReport((previous) => ({ ...previous, cfhCategory: index }));
+                                }}
+                            >
+                                {LocalizeText('help.cfh.reason.' + item.name)}
+                            </HelpActionButton>
+                        ))
+                    )}
+                </div>
             </div>
-            <Column gap={1} overflow="auto">
-                {selectedCategory < 0 &&
-                    cfhCategories.map((category, index) => (
-                        <Button key={index} variant="danger" onClick={(event) => setSelectedCategory(index)}>
-                            {LocalizeText(`help.cfh.reason.${category.name}`)}
-                        </Button>
-                    ))}
-                {selectedCategory >= 0 &&
-                    cfhCategories[selectedCategory].topics.map((topic, index) => (
-                        <Button key={index} active={selectedTopic === index} variant="danger" onClick={(event) => setSelectedTopic(index)}>
-                            {LocalizeText(`help.cfh.topic.${topic.id}`)}
-                        </Button>
-                    ))}
-            </Column>
-            <Flex gap={2} justifyContent="between">
-                <Button variant="secondary" onClick={back}>
+            {(!isDirect || category) && (
+                <HelpActionButton tone="gray" className="help-back" onClick={back}>
                     {LocalizeText('generic.back')}
-                </Button>
-                <Button disabled={selectedTopic < 0} onClick={submitTopic}>
-                    {LocalizeText('help.emergency.main.submit.button')}
-                </Button>
-            </Flex>
+                </HelpActionButton>
+            )}
         </>
     );
 };

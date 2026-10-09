@@ -369,34 +369,40 @@ export interface IWiredVariableFxConfigLike {
     rendererId: number;
     showMode: number;
     showDurationMs: number;
-    defaultMinValue: number;
-    defaultMaxValue: number;
+    defaultMinValue: bigint | number;
+    defaultMaxValue: bigint | number;
     extra: Record<string, string>;
 }
 
 export interface IWiredVariableFxStatusLike {
-    value: number;
-    overrideMinValue: number | null;
-    overrideMaxValue: number | null;
+    value: bigint | number;
+    overrideMinValue: bigint | number | null;
+    overrideMaxValue: bigint | number | null;
     extra: Record<string, string>;
 }
 
 /** The range a status is drawn against: its own pair when the server sent one, the config's otherwise. */
-export const resolveWiredVariableFxRange = (config: IWiredVariableFxConfigLike, status: IWiredVariableFxStatusLike): { min: number; max: number } => {
+export const resolveWiredVariableFxRange = (config: IWiredVariableFxConfigLike, status: IWiredVariableFxStatusLike): { min: bigint; max: bigint } => {
     const hasOverrides = status.overrideMinValue !== null && status.overrideMaxValue !== null && status.overrideMinValue !== undefined && status.overrideMaxValue !== undefined;
-    const min = hasOverrides ? status.overrideMinValue : config.defaultMinValue;
-    let max = hasOverrides ? status.overrideMaxValue : config.defaultMaxValue;
+    const min = exactFxValue(hasOverrides ? status.overrideMinValue : config.defaultMinValue);
+    let max = exactFxValue(hasOverrides ? status.overrideMaxValue : config.defaultMaxValue);
 
-    if (max <= min) max = min + 1;
+    if (max <= min) max = min + 1n;
 
     return { min, max };
 };
 
 /** 0..1 of the way from min to max, clamped. */
-export const wiredVariableFxProgress = (value: number, min: number, max: number): number => {
-    if (!Number.isFinite(value) || max <= min) return 0;
-
-    return clamp((value - min) / (max - min), 0, 1);
+const exactFxValue = (value: bigint | number): bigint => {
+    if (typeof value === 'number' && !Number.isSafeInteger(value)) throw new RangeError('Inexact FX value');
+    return BigInt(value);
+};
+export const wiredVariableFxProgress = (value: bigint | number, min: bigint | number, max: bigint | number): number => {
+    const v = exactFxValue(value), lo = exactFxValue(min), hi = exactFxValue(max);
+    if (hi <= lo || v <= lo) return 0;
+    if (v >= hi) return 1;
+    // Convert only a bounded 0..10000 pixel proportion, never the scalar itself.
+    return Number(((v - lo) * 10000n) / (hi - lo)) / 10000;
 };
 
 export interface IWiredVariableFxLevel {
@@ -454,17 +460,7 @@ export const resolveWiredVariableFxColor = (config: IWiredVariableFxConfigLike, 
 export const wiredVariableFxWidthPx = (widthId: number): number => (WIRED_FX_WIDTHS.find((entry) => entry.id === widthId) ?? WIRED_FX_WIDTHS[1]).px;
 
 /** Compact numbers so a boss bar reads "1.2k / 5k" instead of overflowing. */
-export const formatWiredVariableFxValue = (value: number): string => {
-    if (!Number.isFinite(value)) return '0';
-
-    const abs = Math.abs(value);
-
-    if (abs < 10000) return String(Math.trunc(value));
-    if (abs < 1000000) return `${(value / 1000).toFixed(abs < 100000 ? 1 : 0).replace(/\.0$/, '')}k`;
-    if (abs < 1000000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
-
-    return `${(value / 1000000000).toFixed(1).replace(/\.0$/, '')}B`;
-};
+export const formatWiredVariableFxValue = (value: bigint | number): string => exactFxValue(value).toString();
 
 /**
  * Whether a value is on screen right now: always, never, or only for the show duration after it

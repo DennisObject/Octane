@@ -143,14 +143,14 @@ export interface VariableManageEntry {
     entityName: string;
     manageLabel: string;
     updatedAt: number;
-    value: number | null;
+    value: bigint | number | null;
 }
 
 export interface VariableHighlightTarget {
     category: number;
     hasValue: boolean;
     objectId: number;
-    value: number | null;
+    value: bigint | number | null;
 }
 
 export interface VariableHighlightOverlay extends VariableHighlightTarget {
@@ -166,7 +166,7 @@ export interface ManagedHolderVariableEntry {
     name: string;
     isReadOnly?: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | number | null;
     variableItemId: number;
 }
 

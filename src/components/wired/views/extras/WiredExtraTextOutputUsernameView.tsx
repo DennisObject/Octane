@@ -24,7 +24,7 @@ const normalizePlaceholderName = (value: string) => {
         normalizedValue = normalizedValue.substring(2, normalizedValue.length - 1).trim();
     }
 
-    return normalizedValue.slice(0, MAX_PLACEHOLDER_NAME_LENGTH);
+    return normalizedValue.split(' ').join('_').toLowerCase().slice(0, MAX_PLACEHOLDER_NAME_LENGTH);
 };
 
 const normalizeDelimiter = (value: string) => {

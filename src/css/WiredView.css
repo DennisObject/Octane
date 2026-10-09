@@ -1,5 +1,5 @@
 .octane-wired {
-    width: min(300px, calc(100vw - 16px));
+    width: 240px;
     min-width: 0;
     max-width: calc(100vw - 16px);
     background: #efefef;
@@ -9,73 +9,6 @@
     color: #000;
     outline: none !important;
     overflow: hidden;
-
-    .octane-wired__header {
-        min-height: 21px !important;
-        max-height: 21px !important;
-        position: absolute !important;
-        inset: 0 0 auto 0;
-        z-index: 3;
-        border: 0 !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        pointer-events: auto;
-
-        .octane-card-title {
-            display: block;
-            color: #000 !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-            line-height: 21px;
-            text-align: center;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
-            transform: translateY(7px);
-            pointer-events: none;
-        }
-
-        > .flex::before {
-            content: none;
-        }
-
-        > .flex::after {
-            content: none;
-        }
-
-        .octane-card-close-button {
-            right: 6px !important;
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
-            border: 1px solid #777;
-            border-radius: 5px;
-            background: linear-gradient(180deg, #f9f9f9 0%, #cacaca 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-
-        .octane-card-close-button::before,
-        .octane-card-close-button::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 10px;
-            height: 2px;
-            border-radius: 2px;
-            background: #6a6a6a;
-            margin: 0;
-            transform-origin: center;
-        }
-
-        .octane-card-close-button::before {
-            transform: translate(-50%, -50%) rotate(45deg);
-        }
-
-        .octane-card-close-button::after {
-            transform: translate(-50%, -50%) rotate(-45deg);
-        }
-    }
 
     .octane-wired__content {
         position: relative;
@@ -113,7 +46,7 @@
         align-items: center;
         gap: 10px;
         padding: 22px 10px 7px 12px;
-        background: linear-gradient(180deg, #e5e5e5 0%, #d7d7d7 100%);
+        background: transparent;
         overflow: hidden;
         color: #000;
     }
@@ -145,81 +78,6 @@
     .octane-wired__summary-copy {
         position: relative;
         z-index: 1;
-    }
-
-    /* The quick menu: a small toggle in the summary corner and a list under it. */
-    /* Lives in the header, on the close button's line and just before it. */
-    .octane-wired__menu {
-        position: absolute;
-        top: 50%;
-        right: 28px;
-        transform: translateY(-50%);
-        z-index: 3;
-        pointer-events: auto;
-    }
-
-    .octane-wired__menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        padding: 0;
-        border: 1px solid #777;
-        border-radius: 5px;
-        background: linear-gradient(180deg, #f9f9f9 0%, #cacaca 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        color: #222;
-        font-size: 13px;
-        line-height: 1;
-        cursor: pointer;
-    }
-
-    .octane-wired__menu-toggle:hover {
-        background: linear-gradient(180deg, #ffffff 0%, #dcdcdc 100%);
-    }
-
-    .octane-wired__menu-list {
-        position: absolute;
-        top: 20px;
-        right: 0;
-        min-width: 190px;
-        padding: 2px;
-        border: 1px solid #000;
-        border-radius: 3px;
-        background: #f4f0e8;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .octane-wired__menu-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        width: 100%;
-        padding: 3px 8px;
-        border: 0;
-        background: transparent;
-        color: #222;
-        font-size: 12px;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .octane-wired__menu-item:hover:not(:disabled) {
-        background: #dbeaf4;
-    }
-
-    .octane-wired__menu-item:disabled {
-        color: #9a9488;
-        cursor: default;
-    }
-
-    .octane-wired__menu-spacer {
-        height: 1px;
-        margin: 2px 6px;
-        background: #b8b2a4;
     }
 
     .octane-wired__summary-copy {
@@ -1150,232 +1008,1716 @@
     box-shadow: none !important;
 }
 
-/*
- * Official wired window skins, colour for colour from the AIR client's wired_style_*.xml layouts:
- * volter (dark), ubuntu (light warm) and volter_blue (the yellow one; that is its name). "default"
- * carries no override and is the look above. Each block only restates what the layout defines:
- * window background, ruler (divider) colour, text colour, input background, the source-button box
- * and the menu items; the rest keeps the base rules.
- */
-.octane-wired.octane-wired--style-volter {
-    /* container colour 0x3d3d3d, ruler 0x232323, text white, source box 0x181818, mini button 0x333333, menu item 0x626262 */
-    background: #3d3d3d;
-    border-color: #232323 !important;
-    box-shadow: inset 0 0 0 1px #4a4a4a !important;
-    color: #fff;
+/* Wired's frame margins override the WindowManager's generic frame defaults. */
+.octane-wired.octane-wired--official {
+    --wired-section-spacing: 7px;
+    --wired-footer-inset: 7px;
+    --wired-body-font-size: 12px;
+    isolation: isolate;
+    box-sizing: border-box;
+    padding: 33px 1px 8px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    color: #222;
+    font-family: HabboAirUbuntu, sans-serif !important;
+    font-size: var(--wired-body-font-size);
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349));
 
-    .octane-wired__header .nitro-card-title {
-        color: #fff !important;
-        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+    * {
+        font-family: HabboAirUbuntu, sans-serif !important;
     }
 
-    .octane-wired__header .nitro-card-close-button {
-        border-color: #181818;
-        background: linear-gradient(180deg, #626262 0%, #333333 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-
-    .octane-wired__header .nitro-card-close-button::before,
-    .octane-wired__header .nitro-card-close-button::after {
-        background: #e8e8e8;
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        border: solid transparent;
+        border-width: 33px 10px 10px;
+        border-image: url('../assets/images/habbo-skin/slices/frame-ubuntu-3-teal.png') 33 10 10 10 fill / 33px 10px 10px 10px stretch;
+        image-rendering: pixelated;
+        pointer-events: none;
     }
 
     .octane-wired__content {
-        background: #3d3d3d !important;
+        z-index: 1;
+        height: auto !important;
+        min-height: 0 !important;
+        flex: none;
+        border-radius: 0;
+        background: transparent !important;
+        overflow: visible !important;
+    }
+
+    .octane-wired__body {
+        padding: 0;
+        gap: 0;
+        max-height: none;
+        overflow: visible;
+        background: #e9e9e1;
+        font-family: inherit;
+        font-size: var(--wired-body-font-size) !important;
+    }
+
+    .octane-wired__body :is(p, span, label, li, td, th, input, textarea, select, button) {
+        font-size: var(--wired-body-font-size) !important;
+    }
+
+    .octane-wired__section {
+        gap: 5px;
+        font-size: inherit;
+    }
+
+    /* Ubuntu's summary is compatibility content; the v75 main header factory rejects that style. */
+    .octane-wired__summary {
+        padding: 5px;
+        background: #e9e9e1;
+        color: #222;
+    }
+
+    .octane-wired__divider {
+        flex: none;
+        height: var(--wired-section-spacing);
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .octane-wired__divider:has(+ .octane-wired__actions) {
+        height: calc(var(--wired-section-spacing) * 2 + 1px);
+        background: linear-gradient(
+            to bottom,
+            transparent var(--wired-section-spacing),
+            #b5b5b5 var(--wired-section-spacing),
+            #b5b5b5 calc(var(--wired-section-spacing) + 1px),
+            transparent calc(var(--wired-section-spacing) + 1px)
+        );
+    }
+
+    .octane-wired__actions {
+        flex-direction: row !important;
+        gap: 12px !important;
+        padding: 0 var(--wired-footer-inset);
+    }
+
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 17px !important;
+    }
+}
+
+.octane-wired--official .octane-wired__shell-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 100%;
+    height: 33px;
+    padding: 0;
+    touch-action: none;
+}
+
+.octane-wired--official .octane-wired__shell-caption {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    height: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.octane-wired--official :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 19px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/habbo-skin/slices/close-3-default.png') no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+
+.octane-wired--official .octane-wired__shell-close:hover {
+    background-image: url('../assets/images/habbo-skin/slices/close-3-hover.png');
+}
+
+.octane-wired--official .octane-wired__shell-close:active {
+    background-image: url('../assets/images/habbo-skin/slices/close-3-pressed.png');
+}
+
+.octane-wired.octane-wired--official.octane-wired--style-illumina {
+    --wired-section-spacing: 5px;
+    --wired-footer-inset: 5px;
+    --wired-body-font-size: 11px;
+    padding: 25px 6px 7px;
+    color: #333;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.349));
+
+    &::before {
+        border-width: 4px 4px 7px;
+        border-image: url('../assets/images/friends/swf/illumina_light_border_frame.png') 4 4 7 4 fill / 4px 4px 7px 4px stretch;
+    }
+
+    .octane-wired__body {
+        background: transparent;
+    }
+
+    .octane-wired__shell-header {
+        height: 30px;
+    }
+
+    .octane-wired__shell-caption {
+        top: 12px;
+        left: 8px;
+        right: 8px;
+        height: 20px;
+        color: #000;
+        font-size: 10px;
+        line-height: 13px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    }
+
+    .octane-wired__shell-close,
+    .octane-wired__shell-menu-toggle {
+        top: 9px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+        background-image: url('../assets/images/friends/swf/illumina_light_button_frame_close.png');
+        background-position: 0 0;
+    }
+
+    .octane-wired__shell-menu-toggle {
+        left: 8px;
+        right: auto;
+        background-image: url('../assets/images/wired/illumina_light_button_frame_menu.png');
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):hover {
+        background-position: -52px 0;
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):active {
+        background-position: -26px 0;
     }
 
     .octane-wired__summary {
-        background: linear-gradient(180deg, #333333 0%, #2a2a2a 100%);
-        color: #fff;
+        min-height: 0;
+        padding: 5px;
+        background: transparent;
+        overflow: visible;
     }
 
-    .octane-wired__summary-kind,
+    .octane-wired__summary-copy {
+        position: relative;
+        z-index: 1;
+        gap: 0;
+        padding: 1px 0 0 5px;
+    }
+
+    .octane-wired__summary-kind {
+        display: block;
+        min-height: 16px;
+        font-size: 11px !important;
+        font-weight: 700;
+        letter-spacing: -0.1px;
+        line-height: 16px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    }
+
+    .octane-wired__summary-title {
+        display: block;
+        min-height: 17px;
+        margin-top: -2px;
+        padding: 2px 0;
+        color: #494949;
+        font-size: 12px !important;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        line-height: 13px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    }
+
+    .octane-wired__banner {
+        position: absolute;
+        top: -24px;
+        left: -5px;
+        right: -5px;
+        bottom: -6px;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .octane-wired__summary-bg {
+        width: auto;
+        height: 160px;
+        transform: none;
+    }
+
+    .octane-wired__summary-bg--left {
+        top: 0;
+        left: 0;
+        opacity: 0.1;
+    }
+
+    .octane-wired__summary-bg--right {
+        top: -19px;
+        left: auto;
+        right: 0;
+        opacity: 0.12;
+    }
+
+    .octane-wired__banner-darkening {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0.1;
+    }
+
+    .octane-wired__divider:has(+ .octane-wired__actions) {
+        background: linear-gradient(
+            to bottom,
+            transparent 5px,
+            #aaa 5px,
+            #aaa 6px,
+            transparent 6px
+        );
+    }
+
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        line-height: 13px !important;
+    }
+}
+
+.octane-wired__shell-menu {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    padding: 1px;
+    border: 1px solid #000;
+    border-radius: 0;
+    background: #f2f2f2;
+    color: #333;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+}
+
+.octane-wired__shell-menu-item {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding: 3px 12px 1px 28px;
+    border: 0;
+    border-radius: 0;
+    background: #d6d6d6;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+    background: #b2b2b2;
+}
+
+.octane-wired__shell-menu-item:disabled {
+    color: #888;
+    cursor: default;
+}
+
+/* Existing checkbox artwork is a compatibility skin; Illumina style101 remains pending. */
+.octane-wired__shell-menu-check {
+    position: absolute;
+    top: 1px;
+    left: 6px;
+    width: 19px;
+    height: 21px;
+    background: url('../assets/images/habbo-skin/slices/checkbox-default.png') 1px 2px no-repeat;
+    pointer-events: none;
+}
+
+.octane-wired__shell-menu-check.is-checked {
+    background-image: url('../assets/images/habbo-skin/slices/checkbox-checked.png');
+}
+
+.octane-wired__shell-menu-spacer {
+    position: relative;
+    height: 3px;
+    background: #d6d6d6;
+}
+
+.octane-wired__shell-menu-spacer::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 6px;
+    right: 6px;
+    height: 1px;
+    background: #aaa;
+}
+
+.octane-wired__shell-button {
+    --wired-button-offset-x: 0px;
+    --wired-button-right-offset-x: 0px;
+    --wired-button-offset-y: 0px;
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 24px;
+    padding: 0 5px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 17px;
+    cursor: pointer;
+}
+
+.octane-wired__shell-button:enabled:hover {
+    --wired-button-offset-x: -12px;
+    --wired-button-right-offset-x: -13px;
+}
+
+.octane-wired__shell-button:enabled:active {
+    --wired-button-offset-x: -25px;
+    --wired-button-right-offset-x: -25px;
+}
+
+.octane-wired__shell-button:disabled {
+    --wired-button-offset-x: -37px;
+    --wired-button-right-offset-x: -37px;
+    color: #888;
+    cursor: default;
+}
+
+.octane-wired__shell-button-skin,
+.octane-wired__shell-button-etching {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 5px minmax(0, 1fr) 5px;
+    grid-template-rows: 5px minmax(0, 1fr) 5px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+
+.octane-wired__shell-button-patch image {
+    transform: translate(var(--wired-button-offset-x), var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button-patch.is-right image {
+    transform: translate(var(--wired-button-right-offset-x), var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button-label {
+    position: relative;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button--illumina {
+    height: 22px;
+    color: #333;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 13px;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+}
+
+.octane-wired__shell-button--illumina:enabled:is(:hover, :active),
+.octane-wired__shell-button--illumina:disabled {
+    --wired-button-offset-x: 0px;
+    --wired-button-right-offset-x: 0px;
+}
+
+.octane-wired__shell-button--illumina:enabled:hover {
+    --wired-button-offset-y: -86px;
+}
+
+.octane-wired__shell-button--illumina:enabled:active {
+    --wired-button-offset-y: -50px;
+}
+
+.octane-wired__shell-button--illumina .octane-wired__shell-button-skin {
+    grid-template-columns: 6px minmax(0, 1fr) 4px;
+    grid-template-rows: 8px minmax(0, 1fr) 8px;
+}
+
+.octane-wired__shell-button--illumina .octane-wired__shell-button-etching {
+    top: auto;
+    height: 5px;
+    grid-template-columns: 6px minmax(0, 1fr) 4px;
+    grid-template-rows: 5px;
+}
+
+.octane-wired__shell-button .octane-wired__shell-button-curve {
+    position: absolute;
+    bottom: 7px;
+    width: 3px;
+    height: 5px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-button-curve.is-left {
+    left: 1px;
+}
+
+.octane-wired__shell-button-curve.is-right {
+    right: 1px;
+}
+
+.octane-wired__shell-button-curve image {
+    transform: translateY(var(--wired-button-offset-y));
+}
+
+.octane-wired__shell-button:enabled:active .octane-wired__shell-button-curve {
+    display: none;
+}
+
+.octane-wired--official button:focus-visible,
+.octane-wired__shell-menu-item:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 1px;
+}
+
+/* wx/TY/RY/SY use native frame0, Volter typography and subtype template widths. */
+.octane-wired.octane-wired--official.octane-wired--volter {
+    --wired-frame-color: #3d3d3d;
+    --wired-body-color: #3d3d3d;
+    --wired-text-color: #fff;
+    --wired-section-spacing: 4px;
+    --wired-footer-inset: 5px;
+    --wired-body-font-size: 9px;
+    padding: 25px 6px 7px;
+    color: var(--wired-text-color);
+    font-family: Volter, sans-serif !important;
+    font-size: 9px;
+    line-height: 13px;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349));
+
+    * {
+        font-family: Volter, sans-serif !important;
+    }
+
+    &::before {
+        content: none;
+    }
+
+    .octane-wired__content {
+        color: var(--wired-text-color) !important;
+    }
+
+    .octane-wired__body {
+        background: transparent;
+        line-height: 13px;
+    }
+
+    .octane-wired__body :is(div, p, span, label, li, td, th) {
+        color: var(--wired-text-color) !important;
+        line-height: 13px !important;
+    }
+
+    .octane-wired__summary {
+        min-height: 0;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 5px;
+        background: transparent;
+        color: var(--wired-text-color) !important;
+    }
+
+    .octane-wired__summary-copy {
+        flex: 1;
+        padding: 0;
+    }
+
     .octane-wired__summary-title,
-    .octane-wired__advanced-toggle,
-    .octane-wired__picker-label,
-    .form-check-label,
-    label,
-    .text-black,
-    .text-black\/60 {
-        color: #fff !important;
+    .octane-wired__section .font-bold:not(.octane-wired__summary-title) {
+        font-size: 9px !important;
+        line-height: 13px;
+        color: var(--wired-text-color) !important;
         text-shadow: none;
     }
 
-    .octane-wired__divider,
-    hr {
+    .octane-wired__type-icon {
+        flex: none;
+        width: 13px;
+        height: 14px;
+        overflow: hidden;
+        image-rendering: pixelated;
+    }
+
+    .octane-wired__shell-header {
+        height: 25px;
+    }
+
+    .octane-wired__shell-caption {
+        top: 6px;
+        left: 50%;
+        right: auto;
+        width: max-content;
+        max-width: calc(100% - 60px);
+        height: 15px;
+        padding: 1px 8px;
+        transform: translateX(-50%);
+        color: #fff;
+        background: var(--wired-frame-color);
+        font-size: 9px !important;
+        font-weight: 700;
+        line-height: 13px;
+        white-space: nowrap;
+    }
+
+    .octane-wired__volter-header-skin {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: calc(100% - 12px);
+        height: 15px;
+        overflow: hidden;
+        image-rendering: pixelated;
+        pointer-events: none;
+    }
+
+    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+        top: 6px;
+        right: 6px;
+        width: 15px;
+        height: 15px;
+        background-image: url('../assets/images/wired/volter_shell_atlas.png');
+        background-position: -377px 0;
+    }
+
+    .octane-wired__shell-menu-toggle {
+        left: 7px;
+        right: auto;
+        background-position: -470px 0;
+    }
+
+    .octane-wired__shell-close:hover {
+        background-position: -377px -16px;
+    }
+    .octane-wired__shell-close:active {
+        background-position: -377px -32px;
+    }
+    .octane-wired__shell-menu-toggle:hover {
+        background-position: -470px -16px;
+    }
+    .octane-wired__shell-menu-toggle:active {
+        background-position: -470px -32px;
+    }
+
+    .octane-wired__footer-divider {
+        position: relative;
+        height: 9px;
+        background: transparent;
+    }
+
+    .octane-wired__footer-divider::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 0;
+        right: 0;
+        height: 1px;
         background: #232323;
-        box-shadow: 0 1px 0 #4a4a4a;
     }
 
-    .form-check-input,
-    input[type='checkbox'],
-    input[type='radio'] {
-        border-color: #181818;
-        background: linear-gradient(180deg, #626262 0%, #4a4a4a 100%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+        font-size: 9px !important;
+        font-weight: 400 !important;
+        line-height: 13px !important;
+        color: var(--wired-text-color);
     }
 
-    .form-check-input[type='radio']:checked,
-    input[type='radio']:checked {
-        background:
-            radial-gradient(circle at center, #f4f4f4 0 34%, transparent 38%),
-            linear-gradient(180deg, #626262 0%, #4a4a4a 100%);
-        border-color: #181818;
+    .octane-wired__shell-button {
+        height: 22px;
+        text-shadow: none;
     }
 
-    .form-check-input[type='checkbox']:checked,
-    input[type='checkbox']:checked {
-        background: linear-gradient(180deg, #7a7a7a 0%, #5a5a5a 100%);
-        border-color: #181818;
+    .octane-wired__shell-button-skin {
+        grid-template-columns: 3px minmax(0, 1fr) 3px;
+        grid-template-rows: 3px minmax(0, 1fr) 3px;
     }
 
-    .form-check-input[type='checkbox']:checked::before,
-    .form-check-input[type='checkbox']:checked::after,
-    input[type='checkbox']:checked::before,
-    input[type='checkbox']:checked::after {
-        background: #f4f4f4;
+    .octane-wired__shell-button:enabled:hover {
+        --wired-button-offset-x: 0px;
+        --wired-button-right-offset-x: 0px;
+        --wired-button-offset-y: -46px;
     }
 
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #181818 !important;
-        background: #2b2b2b !important;
-        color: #fff !important;
-        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.4);
+    .octane-wired__shell-button:enabled:active {
+        --wired-button-offset-x: -20px;
+        --wired-button-right-offset-x: -20px;
+        --wired-button-offset-y: 0px;
     }
 
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-wired__selection-toggle,
-    .octane-slider-button {
-        border-color: #181818 !important;
-        background: linear-gradient(180deg, #6a6a6a 0%, #4f4f4f 46%, #3f3f3f 47%, #4a4a4a 100%) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-        color: #fff !important;
+    .octane-wired__shell-button:disabled {
+        --wired-button-offset-x: -10px;
+        --wired-button-right-offset-x: -10px;
+        --wired-button-offset-y: 0px;
     }
 }
 
-.octane-wired.octane-wired--style-ubuntu {
-    /* container colour 0xe9e9e1, ruler 0xb5b5b5, text 0x222222, menu item 0xb2b2b2, 10px il_regular text */
-    background: #e9e9e1;
-    border-color: #b5b5b5 !important;
-    box-shadow: inset 0 0 0 1px #f6f6f2 !important;
-    color: #222;
+.octane-wired.octane-wired--official.octane-wired--style-volter_blue {
+    --wired-frame-color: #7da9b5;
+    --wired-body-color: #c7d0d4;
+    --wired-text-color: #222;
+}
+.octane-wired.octane-wired--official.octane-wired--style-volter_green {
+    --wired-frame-color: #78b090;
+    --wired-body-color: #bfd6c9;
+    --wired-text-color: #222;
+}
+.octane-wired.octane-wired--official.octane-wired--style-volter_yellow {
+    --wired-frame-color: #fac200;
+    --wired-body-color: #faea7c;
+    --wired-text-color: #222;
 
-    .octane-wired__header .nitro-card-title,
-    .octane-wired__summary-kind,
-    .octane-wired__summary-title,
-    .octane-wired__advanced-toggle {
-        color: #222 !important;
-    }
-
-    .octane-wired__content {
-        background: #e9e9e1 !important;
-    }
-
-    .octane-wired__summary {
-        background: linear-gradient(180deg, #e2e2da 0%, #d6d6cc 100%);
-        color: #222;
-    }
-
-    .octane-wired__divider,
-    hr {
-        background: #b5b5b5;
-        box-shadow: 0 1px 0 #f6f6f2;
-    }
-
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #b5b5b5 !important;
-        background: #ffffff !important;
-        color: #222 !important;
-    }
-
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-slider-button {
-        border-color: #b2b2b2 !important;
-        background: linear-gradient(180deg, #fbfbf8 0%, #e9e9e1 46%, #d9d9d1 47%, #ecece4 100%) !important;
-        color: #222 !important;
+    :is(.octane-wired__shell-close, .octane-wired__shell-close:hover, .octane-wired__shell-close:active) {
+        background-position: -377px -216px;
     }
 }
 
-.octane-wired.octane-wired--style-volter_blue {
-    /* container colour 0xf4d763, ruler 0x222222, text 0x222222, input white, source box 0xffeda5, mini button 0xffeda5, menu item 0xdddddd */
-    background: #f4d763;
-    border-color: #222222 !important;
-    box-shadow: inset 0 0 0 1px #ffeda5 !important;
-    color: #222;
-
-    .octane-wired__header .nitro-card-title,
-    .octane-wired__summary-kind,
-    .octane-wired__summary-title,
-    .octane-wired__advanced-toggle {
-        color: #222 !important;
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-
-    .octane-wired__header .nitro-card-close-button {
-        border-color: #222222;
-        background: linear-gradient(180deg, #ffeda5 0%, #f4d763 100%);
-    }
-
+.octane-wired.octane-wired--official.octane-wired--volter-colour {
     .octane-wired__content {
-        background: #f4d763 !important;
+        gap: 5px !important;
+    }
+    .octane-wired__body {
+        gap: 5px;
+    }
+    .octane-wired__volter-inner-skin + .octane-wired__divider,
+    .octane-wired__footer-divider {
+        display: none;
+    }
+}
+
+.octane-wired__volter-frame,
+.octane-wired__volter-frame-grid,
+.octane-wired__volter-frame-shine {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.octane-wired__volter-frame {
+    z-index: 0;
+}
+.octane-wired__volter-frame-grid {
+    display: grid;
+    grid-template-columns: 13px minmax(0, 1fr) 13px;
+    grid-template-rows: 13px minmax(0, 1fr) 13px;
+}
+.octane-wired__volter-frame svg,
+.octane-wired__volter-inner-skin svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+.octane-wired__volter-frame-shine svg {
+    position: absolute;
+    width: auto;
+    height: auto;
+}
+.octane-wired__volter-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 9px;
+    background: transparent;
+}
+.octane-wired__volter-inner > :not(.octane-wired__volter-inner-skin) {
+    position: relative;
+    z-index: 1;
+}
+.octane-wired__volter-inner-skin {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) 12px;
+    grid-template-rows: 11px minmax(0, 1fr) 11px;
+    pointer-events: none;
+}
+
+.octane-wired__shell-menu--volter {
+    padding: 2px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-family: Volter, sans-serif;
+    font-size: 9px;
+    line-height: 13px;
+    box-shadow: none;
+
+    .octane-wired__shell-menu-item {
+        padding-bottom: 4px;
+        background: transparent;
+    }
+    .octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+        background: #626262;
+    }
+    .octane-wired__shell-menu-item:disabled {
+        color: inherit;
+        opacity: 0.5;
+    }
+    .octane-wired__shell-menu-check {
+        top: 3px;
+        width: 16px;
+        height: 16px;
+        background: url('../assets/images/wired/volter_shell_atlas.png') -410px -100px no-repeat;
+        image-rendering: pixelated;
+    }
+    .octane-wired__shell-menu-check.is-checked {
+        background-position: -410px -116px;
+    }
+    .octane-wired__shell-menu-spacer {
+        background: #424242;
+    }
+    .octane-wired__shell-menu-spacer::before {
+        background: #666;
+    }
+}
+
+.octane-wired__volter-menu-frame,
+.octane-wired__volter-menu-frame-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.octane-wired__volter-menu-frame-grid {
+    display: grid;
+    grid-template-columns: 3px minmax(0, 1fr) 3px;
+    grid-template-rows: 3px minmax(0, 1fr) 3px;
+}
+.octane-wired__volter-menu-frame-grid svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+
+/* Native v75 section kit (SectionPreset, SliderPreset, NumberInputPreset) for the Illumina frame. */
+.octane-wired.octane-wired--official.octane-wired--native-layout {
+    .octane-wired__body {
+        gap: 5px;
+        padding-top: 5px;
     }
 
-    .octane-wired__summary {
-        background: linear-gradient(180deg, #f8e28a 0%, #f0cf55 100%);
-        color: #222;
+    .octane-wired__native-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+.octane-wired__splitter {
+    position: relative;
+    flex: none;
+    height: 2px;
+    background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
+}
+
+.octane-wired__native-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.octane-wired__native-section-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0 5px;
+    min-width: 0;
+}
+
+.octane-wired__native-section-header {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    min-height: 16px;
+}
+
+.octane-wired__native-section-header-right {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.octane-wired__text {
+    padding: 0 1px 0 2px;
+    color: #000;
+    font-size: 11px;
+    line-height: 16px;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+    white-space: nowrap;
+}
+
+.octane-wired__text--bold {
+    font-weight: 700;
+}
+
+.octane-wired__input-box {
+    position: relative;
+    flex: none;
+    height: 21px;
+    isolation: isolate;
+}
+
+.octane-wired__input-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+/* The 21px Illumina input: background and border parts pre-composed at the template height. */
+.octane-wired__input-box::before,
+.octane-wired--native-layout .octane-wired__section--body :is(input[type='text'], input[type='number'], .form-control) {
+    background: url('../assets/images/wired/native/input_left.png') 0 0 no-repeat, url('../assets/images/wired/native/input_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/input_mid.png') 0 0 repeat-x;
+}
+
+.octane-wired__input-box.is-invalid::before {
+    filter: sepia(1) saturate(4) hue-rotate(-30deg);
+}
+
+.octane-wired .octane-wired__input-box .octane-wired__input-field {
+    position: absolute;
+    left: 4px;
+    top: 2px;
+    height: 16px;
+    padding: 0 0 0 3px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #4a4a4a !important;
+    font-size: 11px !important;
+    line-height: 16px;
+    min-height: 0 !important;
+    outline: 0;
+}
+
+.octane-wired__slider-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+}
+
+.octane-wired__icon-button.octane-wired__shell-button {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+}
+
+.octane-wired__icon-button .octane-wired__shell-button-label {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
+    padding-top: 5px;
+}
+
+.octane-wired__icon-button img {
+    display: block;
+    image-rendering: pixelated;
+}
+
+.octane-wired__slider {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 18px;
+    background: var(--wired-slider-bg) 0 0 / 100% 17px no-repeat;
+    image-rendering: pixelated;
+}
+
+.octane-wired__slider-area {
+    position: absolute;
+    inset: 1px 0 0;
+}
+
+.octane-wired__slider-thumb {
+    position: absolute;
+    top: 0;
+    width: 12px;
+    height: 17px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.octane-wired__banner-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+.octane-wired--native-layout {
+    .octane-wired__native-advanced {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
     }
 
-    .octane-wired__divider,
+    .octane-wired__native-advanced-body {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: #ccc;
+    }
+
+    .octane-wired__text--soft {
+        color: #444;
+    }
+
+    .octane-wired__text--wrap {
+        white-space: normal;
+        line-height: 13px;
+    }
+}
+
+.octane-wired .octane-wired__input-box .octane-wired__input-field.octane-wired__input-field--stretch {
+    width: calc(100% - 8px);
+}
+
+.octane-wired__input-limit {
+    position: absolute;
+    right: 0;
+    bottom: 24px;
+    padding: 1px 5px;
+    background: rgba(34, 34, 34, 0.7);
+    color: #fff;
+    font-size: 11px;
+    line-height: 14px;
+}
+
+/* Option rows (RadioButtonPreset / CheckboxOptionPreset). */
+.octane-wired__options {
+    display: grid;
+    column-gap: 5px;
+}
+
+.octane-wired__options--checkbox {
+    display: flex;
+    flex-direction: column;
+}
+
+.octane-wired__option {
+    display: flex;
+    align-items: flex-start;
+    gap: 3px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.octane-wired__option.is-last {
+    height: 16px;
+}
+
+.octane-wired__option.is-disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.octane-wired__option--checkbox {
+    height: 25px;
+}
+
+.octane-wired__option--checkbox.is-last {
+    height: 21px;
+}
+
+.octane-wired__option--checkbox .octane-wired__text {
+    margin-top: 2px;
+}
+
+.octane-wired .octane-wired__option input[type='radio'] {
+    flex: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 2px 0 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/radio.png') 0 0 / 11px 24px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired .octane-wired__option input[type='radio']:checked {
+    background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 19px;
+    height: 20px;
+    min-width: 19px;
+    margin: 0 0 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/checkbox.png') 0 -23px / 19px 43px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox']:checked {
+    background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
+}
+
+.octane-wired .octane-wired__option input[type='checkbox']::before,
+.octane-wired .octane-wired__option input[type='checkbox']::after {
+    content: none;
+}
+
+.octane-wired--native-layout .octane-wired__native-advanced > .octane-wired__advanced-toggle {
+    height: 16px;
+    padding: 0 2px !important;
+    color: #000;
+    font-size: 11px !important;
+    line-height: 16px;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.698);
+}
+
+/* Views that still use the old free-form markup get the native section rhythm, option rows and text metrics. */
+.octane-wired.octane-wired--native-layout .octane-wired__section--body {
+    .octane-wired__native-section-inner > .flex.flex-col {
+        gap: 0;
+    }
+
+    .octane-wired__native-section-inner > .flex.flex-col > * + * {
+        margin-top: 5px;
+    }
+
+    .octane-wired__native-section-inner > .flex.flex-col > label.flex + label.flex {
+        margin-top: 0;
+    }
+
+    .octane-wired__native-section-inner > * + * {
+        position: relative;
+        padding-top: 7px;
+    }
+
+    .octane-wired__native-section-inner > * + *::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -5px;
+        right: -5px;
+        height: 2px;
+        background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
+    }
+
     hr {
-        background: #222222;
-        box-shadow: 0 1px 0 #ffeda5;
+        flex: none;
+        height: 2px;
+        margin: 0 -5px !important;
+        border: 0;
+        background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
+        box-shadow: none;
+        opacity: 1;
     }
 
-    .form-check-input,
-    input[type='checkbox'],
-    input[type='radio'] {
-        border-color: #222222;
-        background: #ffffff;
+    :is(.font-bold, .inline) {
+        display: block;
+        padding: 0 1px 0 2px;
+        font-size: 11px !important;
+        line-height: 16px;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
 
-    .form-check-input[type='radio']:checked,
-    input[type='radio']:checked {
-        background: radial-gradient(circle at center, #222222 0 34%, transparent 38%), #ffffff;
-        border-color: #222222;
+    .font-bold {
+        font-weight: 700 !important;
+        white-space: normal;
     }
 
-    .form-check-input[type='checkbox']:checked,
-    input[type='checkbox']:checked {
-        background: #ffeda5;
-        border-color: #222222;
+    label.flex {
+        align-items: flex-start;
+        gap: 3px;
+        min-height: 20px;
+        margin: 0;
     }
 
-    .form-control,
-    .form-select,
-    input[type='text'],
-    input[type='number'],
-    textarea {
-        border-color: #222222 !important;
-        background: #ffffff !important;
-        color: #222 !important;
+    label.flex:last-child {
+        min-height: 16px;
     }
 
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-wired__selection-toggle,
-    .octane-slider-button {
-        border-color: #222222 !important;
-        background: linear-gradient(180deg, #ffeda5 0%, #f8e28a 46%, #f0cf55 47%, #f4d763 100%) !important;
-        color: #222 !important;
+    label.flex:has(> input[type='checkbox']) {
+        min-height: 25px;
     }
+
+    label.flex:has(> input[type='checkbox']):last-child {
+        min-height: 21px;
+    }
+
+    label.flex:has(> input[type='checkbox']) > .inline {
+        margin-top: 2px;
+    }
+}
+
+.octane-wired.octane-wired--native-layout input[type='radio'] {
+    flex: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 2px 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/radio.png') 0 0 / 11px 24px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout input[type='radio']:checked {
+    background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 19px;
+    height: 20px;
+    min-width: 19px;
+    margin: 0 0 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: url('../assets/images/wired/native/checkbox.png') 0 -23px / 19px 43px no-repeat;
+    box-shadow: none;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox']:checked {
+    background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
+}
+
+.octane-wired.octane-wired--native-layout input[type='checkbox']::before,
+.octane-wired.octane-wired--native-layout input[type='checkbox']::after {
+    content: none;
+}
+
+/* Dropdowns: the Illumina dropmenu frame (22px) with its arrow/separator part on the right. */
+.octane-wired.octane-wired--native-layout :is(select, .form-select) {
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 22px;
+    min-height: 22px !important;
+    padding: 0 28px 0 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: url('../assets/images/wired/native/dropdown_left.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid.png') 0 0 repeat-x !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font-size: 11px !important;
+    line-height: 22px;
+    image-rendering: pixelated;
+}
+
+.octane-wired.octane-wired--native-layout :is(select, .form-select):hover {
+    background: url('../assets/images/wired/native/dropdown_left_hover.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right_hover.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid_hover.png') 0 0 repeat-x !important;
+}
+
+.octane-wired__source-row {
+    min-height: 23px;
+}
+
+.octane-wired__source-label {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    white-space: normal;
+}
+
+/* wired_menu_view: absolute client coordinates of the 500x500 Wired Creator Tools window. */
+.octane-wired-menu.octane-card-shell.octane-card-frame-3 {
+    width: 500px;
+    min-width: 500px;
+    height: 500px;
+    min-height: 500px;
+    padding: 0 !important;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px;
+}
+
+.octane-wired-menu.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 4px !important;
+}
+
+.octane-wired-menu__client {
+    position: absolute;
+    left: 0;
+    top: 36px;
+    width: 500px;
+    height: 464px;
+    overflow: hidden;
+}
+
+.octane-wired-menu__tabs {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 500px;
+    height: 30px;
+}
+
+.octane-wired-menu__tab {
+    position: absolute;
+    top: 0;
+    width: 96px;
+    height: 30px;
+    padding: 5px 0 0;
+    overflow: hidden;
+    border: 0;
+    background: url('../assets/images/wired/native/menu_tab_default_left.png') left top / 9px 32px no-repeat, url('../assets/images/wired/native/menu_tab_default_right.png') right top / 9px 32px no-repeat,
+        url('../assets/images/wired/native/menu_tab_default_mid.png') 9px top / calc(100% - 18px) 32px no-repeat;
+    color: #000;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+    line-height: 17px;
+    text-align: center;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__tab:hover {
+    background-image: url('../assets/images/wired/native/menu_tab_hover_left.png'), url('../assets/images/wired/native/menu_tab_hover_right.png'), url('../assets/images/wired/native/menu_tab_hover_mid.png');
+}
+
+.octane-wired-menu__tab.is-active {
+    background-image: url('../assets/images/wired/native/menu_tab_selected_left.png'), url('../assets/images/wired/native/menu_tab_selected_right.png'), url('../assets/images/wired/native/menu_tab_selected_mid.png');
+}
+
+.octane-wired-menu__header {
+    position: absolute;
+    left: 1px;
+    top: 32px;
+    width: 498px;
+    height: 50px;
+    overflow: hidden;
+    background: #486f81;
+}
+
+.octane-wired-menu__header-inner {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 494px;
+    height: 46px;
+    background: #235061;
+}
+
+.octane-wired-menu__box-lines {
+    position: absolute;
+    width: 64px;
+    height: 51px;
+    opacity: 0.302;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-wired-menu__header-title {
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 500px;
+    height: 21px;
+    margin-left: -1px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 21px;
+    text-align: center;
+}
+
+.octane-wired-menu__discord {
+    position: absolute;
+    left: 472px;
+    top: 3px;
+    width: 22px;
+    height: 25px;
+}
+
+.octane-wired-menu__discord img {
+    position: absolute;
+    left: 0;
+    top: 1px;
+}
+
+.octane-wired-menu__body {
+    position: absolute;
+    left: 0;
+    top: 82px;
+    width: 500px;
+    height: 382px;
+    color: #000;
+}
+
+.octane-wired-menu__item {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.octane-wired-menu__panel {
+    background: #dadada;
+    /* Skin border style 3: corners cut two pixels on the long side and one on the short. */
+    clip-path: polygon(
+        2px 0,
+        calc(100% - 2px) 0,
+        calc(100% - 2px) 1px,
+        calc(100% - 1px) 1px,
+        calc(100% - 1px) 2px,
+        100% 2px,
+        100% calc(100% - 2px),
+        calc(100% - 1px) calc(100% - 2px),
+        calc(100% - 1px) calc(100% - 1px),
+        calc(100% - 2px) calc(100% - 1px),
+        calc(100% - 2px) 100%,
+        2px 100%,
+        2px calc(100% - 1px),
+        1px calc(100% - 1px),
+        1px calc(100% - 2px),
+        0 calc(100% - 2px),
+        0 2px,
+        1px 2px,
+        1px 1px,
+        2px 1px
+    );
+}
+
+.octane-wired-menu__text {
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.octane-wired-menu__text--bold {
+    font-weight: 700;
+}
+
+.octane-wired-menu__list {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.octane-wired-menu__stat {
+    height: 18px;
+    line-height: 16px;
+}
+
+.octane-wired-menu__monitor-image img {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.octane-wired-menu__option {
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+.octane-wired-menu__option .octane-wired-menu__text {
+    margin-left: 0;
+    line-height: 17px;
+}
+
+.octane-wired-menu__option input[type='checkbox'] {
+    flex: none;
+    appearance: none;
+    width: 20px;
+    height: 15px;
+    margin: 0;
+    border: 0;
+    background: url('../assets/images/wired/native/menu_checkbox.png') 0 0 no-repeat;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__option input[type='checkbox']:checked {
+    background-image: url('../assets/images/wired/native/menu_checkbox_checked.png');
+}
+
+.octane-wired-menu__option.is-disabled {
+    opacity: 0.6;
+}
+
+.octane-wired-menu__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 5px solid transparent;
+    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch;
+    background: none;
+    color: #000;
+    font-size: 12px;
+    line-height: 16px;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__button:hover:enabled {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-wired-menu__button:active:enabled,
+.octane-wired-menu__button.is-selected {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-wired-menu__button:disabled {
+    border-image-source: var(--habbo-skin-shiny-disabled);
+    color: #8c8c88;
+}
+
+.octane-wired-menu__button.is-danger {
+    border-image-source: var(--habbo-skin-shiny-red);
+    color: #fff;
+}
+
+.octane-wired-menu__button.is-danger:hover:enabled {
+    border-image-source: var(--habbo-skin-shiny-red-hover);
+}
+
+.octane-wired-menu__button.is-danger:active:enabled {
+    border-image-source: var(--habbo-skin-shiny-red-pressed);
+}
+
+.octane-wired-menu__button.is-danger:disabled {
+    border-image-source: var(--habbo-skin-shiny-red-disabled);
+    color: #fff;
+}
+
+.octane-wired-menu__dropdown {
+    appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 0 22px 0 0;
+    line-height: 13px;
+    border: 6px solid transparent;
+    border-image: url('../assets/images/habbo-skin/slices/dropmenu-3.png') 6 fill / 6px stretch;
+        color: #000;
+    font-size: 12px;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__dropdown:disabled {
+    color: #8c8c88;
+}
+
+.octane-wired-menu__table {
+    border: 1px solid #b1b1ab;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__table-title {
+    display: flex;
+    height: 23px;
+    margin: 5px 5px 0;
+}
+
+.octane-wired-menu__table-splitter {
+    height: 1px;
+    margin: 0 5px;
+    background: #d2d2cd;
+}
+
+.octane-wired-menu__table-rows {
+    height: calc(100% - 30px);
+    margin: 0 5px 5px;
+    overflow-y: auto;
+}
+
+.octane-wired-menu__table-row {
+    display: flex;
+    height: 20px;
+}
+
+.octane-wired-menu__table-row.is-even {
+    background: #eaeaea;
+}
+
+.octane-wired-menu__cell {
+    flex: none;
+    height: 20px;
+    padding: 0 4px;
+    overflow: hidden;
+    line-height: 20px;
+    text-overflow: ellipsis;
+}
+
+.octane-wired-menu__table-empty {
+    padding-top: 60px;
+    color: #333;
+    text-align: center;
+}
+
+.octane-wired-menu__link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0000ee;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.octane-wired-menu__text--soft {
+    color: #8c8c88;
+}
+
+.octane-wired-menu__box {
+    border: 1px solid #b1b1ab;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__picker-list {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.octane-wired-menu__picker-row {
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: left;
+}
+
+.octane-wired-menu__picker-row.is-selected {
+    background: #cbe3f0;
+}
+
+.octane-wired-menu__empty {
+    padding-top: 100px;
+    color: #333;
+    text-align: center;
+}
+
+.octane-wired-menu__type-icon {
+    display: block;
+    margin: auto;
+    image-rendering: pixelated;
+}
+
+.octane-wired-menu__preview-image {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-wired-menu__preview-instruction {
+    position: absolute;
+    top: 104px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.octane-wired-menu__trash-icon {
+    display: block;
+    margin: 0 auto;
+}
+
+.octane-wired-menu__table-row.is-selected {
+    background: #cbe3f0;
+}
+
+.octane-wired-menu__cell-input {
+    width: 100%;
+    height: 18px;
+    padding: 0 3px;
+    border: 1px solid #5e5e58;
+    background: #fff;
+    font-size: 12px;
+}
+
+.octane-wired-menu__bubble {
+    z-index: 5;
+    border: 1px solid #5e5e58;
+    border-radius: 5px;
+    background: #f2f2ed;
+}
+
+.octane-wired-menu__value-box input {
+    width: 100%;
+    height: 22px;
+    padding: 0 4px;
+    border: 1px solid #5e5e58;
+    background: #fff;
+    font-size: 12px;
+}
+
+.octane-wired-menu__dropdown-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.octane-wired-menu__dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    width: 22px;
+    height: 20px;
+    background: url('../assets/images/habbo-skin/slices/dropmenu-arrow.png') no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.octane-wired-menu__discord img {
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.28));
 }

@@ -10,7 +10,8 @@ export class PlacedObjectPurchaseData {
         public readonly x: number,
         public readonly y: number,
         public readonly direction: number,
-        public readonly offer: IPurchasableOffer
+        public readonly offer: IPurchasableOffer,
+        public readonly pageId: number = -1
     ) {}
 
     public get offerId(): number {

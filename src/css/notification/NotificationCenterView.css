@@ -36,8 +36,7 @@
     }
 
     &.octane-alert-system {
-        width: auto;
-        min-width: 260px;
+        width: 340px;
         max-width: 90vw;
         min-height: auto;
         max-height: none;
@@ -782,14 +781,6 @@
     border-image-source: var(--habbo-skin-button-hover) !important;
 }
 
-.alertView_octane-coolui-logo {
-	width: 150px;
-	height: 73px;
-	position: relative;
-	background-image: url("@/assets/images/notifications/octane_v3.png");
-	background-repeat: no-repeat;
-}
-
 .octane-friendonline-notification {
     position: relative;
     min-width: 86px;
@@ -1027,4 +1018,629 @@
     to {
         transform: scaleX(0);
     }
+}
+
+/* Native v75 notification windows (simple_alert_xml, layout_notification_popup_xml, habbo_window_confirm_xml). Style 3 frame, Ubuntu text. */
+.octane-native-modal {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: auto;
+}
+
+.octane-native-modal-slot {
+    position: absolute;
+    width: max-content;
+}
+
+.octane-native-modal-dim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert,
+.octane-card-shell.octane-card-frame-3.octane-native-confirm {
+    position: relative;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: none;
+    filter: drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349)) !important;
+    color: #000;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 13px;
+    text-align: left;
+}
+
+.octane-native-alert :is(button),
+.octane-native-confirm :is(button) {
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    cursor: pointer;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert > .octane-card-header-shell .octane-card-title,
+.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+    top: 4px !important;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+/* simple_alert_xml: content origin (1,30); list at (10,8); frame height is list height + 40 */
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-simple {
+    width: 310px;
+    padding: 38px 9px 2px 11px;
+}
+
+
+.octane-native-alert-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.octane-native-alert-row {
+    display: flex;
+    align-items: flex-start;
+}
+
+.octane-native-alert-illustration {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    margin: 0 10px 10px 0;
+    image-rendering: pixelated;
+}
+
+.octane-native-alert-top {
+    box-sizing: border-box;
+    flex: 0 0 290px;
+    width: 290px;
+}
+
+.octane-native-alert.has-image .octane-native-alert-top {
+    flex-basis: 291px;
+    width: 291px;
+}
+
+.octane-native-alert-subtitle {
+    height: 19px;
+    color: #c30000;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+    padding: 1px 0 0 2px;
+    letter-spacing: 0.12px;
+}
+
+.octane-native-alert-message {
+    letter-spacing: 0.1px;
+    line-height: 12px;
+    position: relative;
+    top: 2px;
+    padding: 0 2px 8px 3px;
+    overflow-wrap: break-word;
+}
+
+.octane-native-alert-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.octane-native-alert-separator {
+    width: 100%;
+    height: 2px;
+    margin-top: 11px;
+    background: linear-gradient(#ccc 50%, #fff 50%);
+}
+
+.octane-native-button {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    height: 28px;
+    margin: 0;
+    padding: 0 10px;
+    border: 5px solid transparent;
+    border-image-source: var(--habbo-skin-shiny);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    color: #000;
+    font-size: 12px;
+    line-height: 17px;
+    image-rendering: pixelated;
+}
+
+.octane-native-button:hover {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-native-button:active {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-native-button.is-thick {
+    margin-left: 1px;
+    padding: 0 7px 2px;
+    border-image-source: var(--habbo-skin-shiny-thick);
+    filter: brightness(0.9373);
+    -webkit-text-stroke: 0.3px #000;
+    color: #000;
+    font-weight: 400;
+}
+
+.octane-native-button.is-thick:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.octane-native-button.is-thick:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.octane-native-link {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #000;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    text-decoration: underline;
+}
+
+.octane-native-alert-bottom .octane-native-link {
+    font-size: 11px;
+    line-height: 13px;
+    width: 262px;
+    min-height: 21px;
+    padding-bottom: 5px;
+}
+
+/* layout_notification_popup_xml: content origin (3,36); list at (3,2) min 46 high; message column at x=1, 293 wide; frame colour 0x67a3bf */
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup {
+    width: max-content;
+    min-width: 306px;
+    padding: 38px 6px 3px 6px;
+    font-size: 12px;
+    line-height: 13px;
+}
+
+.octane-native-popup-tint {
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    left: 2px;
+    height: 31px;
+    background: linear-gradient(#67a3bf 0 2px, #578ca5 2px);
+    pointer-events: none;
+}
+
+.octane-native-popup-list {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.octane-native-popup-illustration {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    margin-bottom: 5px;
+    image-rendering: pixelated;
+}
+
+.octane-native-popup-column {
+    display: flex;
+    flex: 0 0 293px;
+    flex-direction: column;
+    align-items: center;
+    width: 293px;
+    margin-left: 1px;
+}
+
+/* the illustration replaces the 1px placeholder bitmap, so the list is one pixel narrower than image + column */
+.octane-native-popup-illustration + .octane-native-popup-column {
+    margin-right: -1px;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-native-popup-column .octane-native-link {
+    box-sizing: border-box;
+    min-height: 26px;
+    padding-bottom: 1px;
+}
+
+.octane-native-popup-column .octane-native-button {
+    height: 30px;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    padding: 0 6px 2px;
+    font-size: 12px;
+}
+
+.octane-native-popup-message {
+    line-height: 13.4px;
+    position: relative;
+    top: 2px;
+    letter-spacing: 0.1px;
+    align-self: stretch;
+    padding: 0 2px 8px;
+    overflow-wrap: break-word;
+}
+
+/* the hidden link row still reserves its 13px in the native itemlist */
+.octane-native-popup-message:last-child {
+    margin-bottom: 12.5px;
+}
+
+/* habbo_window_confirm_xml: content origin (6,25); text (16,14) 253x72; cancel (20,102) 100x17; OK (196,98) 28 high */
+.octane-card-shell.octane-card-frame-3.octane-native-confirm {
+    width: 300px;
+    padding: 25px 6px 7px;
+}
+
+.octane-native-confirm-body {
+    position: relative;
+    box-sizing: border-box;
+    width: 288px;
+    padding: 14px 0 0;
+}
+
+.octane-native-confirm-body::after {
+    content: "";
+    display: block;
+    height: 47px;
+}
+
+.octane-native-confirm-text {
+    box-sizing: border-box;
+    width: 253px;
+    min-height: 72px;
+    margin-left: 16px;
+    padding: 2px 0;
+    font-size: 12px;
+    line-height: 13.4px;
+    letter-spacing: 0.1px;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+}
+
+.octane-native-confirm-cancel {
+    position: absolute;
+    bottom: 14px;
+    left: 20px;
+    width: 100px;
+    height: 17px;
+}
+
+.octane-native-confirm-ok {
+    position: absolute;
+    bottom: 7px;
+    left: 195px;
+    width: auto;
+    min-width: 50px;
+}
+
+/* motd_notification_xml: content origin (6,25); border (1,0) 420x160; list (5,6) 410x149; OK (200,168) 30x26 */
+.octane-native-motd .octane-native-motd-border {
+    position: absolute;
+    left: 1px;
+    top: 0;
+    width: 420px;
+    height: 160px;
+}
+
+.octane-native-motd-list {
+    position: absolute;
+    left: 5px;
+    top: 6px;
+    box-sizing: border-box;
+    width: 410px;
+    height: 149px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.octane-native-motd-item {
+    box-sizing: border-box;
+    width: 395px;
+    padding: 8px 0 12px 9px;
+    color: #000;
+    font: 9px/9px Volter, sans-serif;
+    overflow-wrap: break-word;
+}
+
+.octane-native-motd .friends-dialog-close {
+    top: 1px;
+    right: 1px;
+    width: 13px;
+    height: 13px;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'><rect width='13' height='13' fill='%23fff'/><rect x='1' y='1' width='11' height='11' fill='%23000'/><rect x='3' y='3' width='1' height='1' fill='%23fff'/><rect x='9' y='3' width='1' height='1' fill='%23fff'/><rect x='4' y='4' width='1' height='1' fill='%23fff'/><rect x='8' y='4' width='1' height='1' fill='%23fff'/><rect x='5' y='5' width='1' height='1' fill='%23fff'/><rect x='7' y='5' width='1' height='1' fill='%23fff'/><rect x='6' y='6' width='1' height='1' fill='%23fff'/><rect x='5' y='7' width='1' height='1' fill='%23fff'/><rect x='7' y='7' width='1' height='1' fill='%23fff'/><rect x='4' y='8' width='1' height='1' fill='%23fff'/><rect x='8' y='8' width='1' height='1' fill='%23fff'/><rect x='3' y='9' width='1' height='1' fill='%23fff'/><rect x='9' y='9' width='1' height='1' fill='%23fff'/></svg>") no-repeat;
+}
+
+.octane-native-motd .friends-dialog-close-skin {
+    display: none !important;
+}
+
+.octane-native-motd-ok {
+    position: absolute;
+    left: 200px;
+    top: 168px;
+    width: 30px;
+    height: 26px;
+}
+
+.octane-native-motd .octane-native-motd-ok .friends-dialog-button {
+    left: 0;
+}
+
+/* layout_notification_xml: 190x66, config view height 70 per slot, 4 px apart, 5 px from the right edge */
+.octane-native-bubble-slot {
+    box-sizing: border-box;
+    width: 190px;
+    min-height: 70px;
+    margin-right: 1px;
+}
+
+.octane-native-bubble {
+    position: relative;
+    box-sizing: border-box;
+    width: 190px;
+    min-height: 66px;
+    cursor: pointer;
+    pointer-events: auto;
+    color: #fff;
+    font: 700 9px/12px Volter, sans-serif;
+    image-rendering: pixelated;
+    user-select: none;
+}
+
+.octane-native-bubble-chrome {
+    position: absolute;
+    inset: 0;
+    border: 6px solid transparent;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-black.png");
+    border-image-slice: 24;
+    border-image-width: 6px;
+    border-image-repeat: stretch;
+    background-color: #3d3d3d;
+    background-clip: padding-box;
+    pointer-events: none;
+}
+
+.octane-native-bubble-icon {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.octane-native-bubble-icon img {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
+}
+
+.octane-native-bubble-text {
+    position: relative;
+    box-sizing: border-box;
+    width: 116px;
+    min-height: 22px;
+    margin: 0 0 0 66px;
+    padding: 10px 2px 7px 3px;
+    line-height: 10px;
+    overflow-wrap: break-word;
+}
+
+.octane-native-bubble-text.uses-native-text {
+    top: 8px;
+    height: 50px;
+    margin: 0 0 0 66px;
+    padding: 0;
+    line-height: 0;
+    overflow: hidden;
+}
+
+/* club_gift_notification_xml */
+.octane-native-club-gift {
+    position: relative;
+    box-sizing: border-box;
+    width: 192px;
+    height: 82px;
+    margin-left: auto;
+    margin-right: -1px;
+    color: #fff;
+    font-family: Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 14px;
+    image-rendering: pixelated;
+}
+
+.octane-native-club-gift-chrome {
+    position: absolute;
+    inset: 0;
+    border: 7px solid transparent;
+    border-bottom-width: 8px;
+    border-image-source: url("../../assets/images/habbo-skin/slices/border-ubuntu-9.png");
+    border-image-slice: 28 28 32 28 fill;
+    border-image-width: 7px 7px 8px 7px;
+    border-image-repeat: stretch;
+    pointer-events: none;
+}
+
+.octane-native-club-gift-icon {
+    position: absolute;
+    left: 6px;
+    top: 7px;
+    width: 16px;
+    height: 16px;
+}
+
+.octane-native-club-gift-text {
+    position: absolute;
+    left: 26px;
+    top: 9px;
+    width: 174px;
+    height: 36px;
+    padding-right: 8px;
+    line-height: 13.4px;
+    letter-spacing: 0.2px;
+}
+
+.octane-native-club-gift-button {
+    position: absolute;
+    right: 8px;
+    top: 44px;
+    box-sizing: border-box;
+    min-width: 50px;
+    height: 28px;
+    margin: 0;
+    padding: 0 8px;
+    border: 5px solid transparent;
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-default.png");
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    border-radius: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.octane-native-club-gift-button:hover {
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-hover.png");
+}
+
+.octane-native-club-gift-button:active {
+    border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-pressed.png");
+}
+
+.octane-native-club-gift-later {
+    position: absolute;
+    letter-spacing: 0.2px;
+    left: 11px;
+    top: 49px;
+    width: 70px;
+    height: 17px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.octane-native-club-gift-later:hover {
+    color: #bae1f9;
+}
+
+.octane-native-motd .octane-native-motd-ok .friends-dialog-button span {
+    position: relative;
+    top: 1px;
+    left: 1.5px;
+}
+
+.octane-native-motd .friends-dialog-title {
+    padding-top: 2px;
+    letter-spacing: 0.2px;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-title {
+    letter-spacing: 0;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+    letter-spacing: 0.2px;
+}
+
+/* NativeText already includes TextField's two-pixel glyph gutter. */
+.octane-native-alert-message.uses-native-text {
+    letter-spacing: normal;
+    line-height: 0;
+    top: 0;
+    padding: 0 0 4px;
+}
+
+/* habbo_window_alert_xml: content origin (6,25); text (27,14) 210x57 min; thick Ok button (108,81) 50x24 */
+.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert {
+    width: 278px;
+    padding: 25px 6px 7px;
+}
+
+.octane-native-window-alert-body {
+    position: relative;
+    box-sizing: border-box;
+    width: 266px;
+    padding: 14px 0 4px 27px;
+}
+
+.octane-native-window-alert-text {
+    box-sizing: border-box;
+    width: 210px;
+    min-height: 57px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+}
+
+.octane-native-window-alert-ok.octane-native-button.is-thick {
+    position: relative;
+    display: block;
+    width: 50px;
+    min-width: 50px;
+    height: 24px;
+    margin: 0 0 0 81px;
+    padding: 0;
+    filter: none;
+    -webkit-text-stroke: 0;
+}
+
+.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: 278px !important;
+    height: 18px !important;
+    letter-spacing: 0;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+/* the header close button sits 3px further left than the shared frame-3 default */
+.octane-card-shell.octane-card-frame-3.octane-native-window-alert > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-native-window-alert-ok-label {
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    line-height: 0;
 }

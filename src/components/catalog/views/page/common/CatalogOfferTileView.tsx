@@ -1,15 +1,20 @@
 import { MouseEventType } from '@octane/renderer';
 import { FC, KeyboardEvent, MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CatalogType, GetConfigurationValue, GetProductIconUrl, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
-import { LayoutAvatarImageView, LayoutGridItem, LayoutGridItemProps, LayoutHabbiconImageView } from '../../../../../common';
+import { GetConfigurationValue, GetProductIconUrl, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
+import {
+    LayoutActivityPointIcon,
+    LayoutAvatarImageView,
+    LayoutGridItem,
+    LayoutGridItemProps,
+    LayoutHabbiconImageView,
+    UsesActivityPointIcon
+} from '../../../../../common';
 import { isAirBaseCatalogOffer } from './catalogAirGrid.helpers';
 
 export interface CatalogOfferTileViewProps extends LayoutGridItemProps {
     offer: IPurchasableOffer;
     selectOffer: (offer: IPurchasableOffer) => void;
     requestOfferToMover?: (offer: IPurchasableOffer) => void;
-    currentType?: string;
-    inventoryVisible?: boolean;
     readOnly?: boolean;
     tintColor?: string;
     showTechnicalDetails?: boolean;
@@ -21,8 +26,6 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
         offer = null,
         selectOffer = null,
         requestOfferToMover = null,
-        currentType = CatalogType.NORMAL,
-        inventoryVisible = false,
         readOnly = false,
         itemActive = false,
         tintColor = null,
@@ -69,7 +72,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
     }, [offer]);
 
     const getCurrencyIconUrl = (type: number) => (GetConfigurationValue<string>('currency.asset.icon.url', '') || '').replace('%type%', type.toString());
-    const priceTemplateClassName = isAirBaseCatalogOffer(offer, currentType)
+    const priceTemplateClassName = isAirBaseCatalogOffer(offer)
         ? 'uses-base-grid-template'
         : prices.length > 1
           ? 'uses-multi-price-template'
@@ -85,7 +88,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                 setMouseDown(false);
                 return;
             case MouseEventType.ROLL_OUT:
-                if (readOnly || !isMouseDown || !itemActive || currentType === CatalogType.BUILDER || !inventoryVisible) return;
+                if (readOnly || !isMouseDown || !itemActive) return;
                 requestOfferToMover?.(offer);
                 return;
         }
@@ -144,14 +147,18 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                         <i aria-hidden="true" className="octane-icon icon-catalogue-hc_small" />
                     </span>
                 )}
-                {showPrices && currentType !== CatalogType.BUILDER && prices.length > 0 && (
+                {showPrices && prices.length > 0 && (
                     <span className={`octane-catalog-grid-price ${prices.length > 1 ? 'is-multi-price' : 'is-single-price'}`}>
                         {prices.map((price, index) => (
                             <span key={`${price.type}-${index}`} className="octane-catalog-grid-price-entry">
                                 {index > 0 && <span className="octane-catalog-grid-price-plus">+</span>}
                                 <span className="octane-catalog-grid-price-amount">{price.amount}</span>
-                                {!!getCurrencyIconUrl(price.type) && (
-                                    <img className="octane-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
+                                {UsesActivityPointIcon(price.type) ? (
+                                    <LayoutActivityPointIcon type={price.type} />
+                                ) : (
+                                    !!getCurrencyIconUrl(price.type) && (
+                                        <img className="octane-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
+                                    )
                                 )}
                             </span>
                         ))}

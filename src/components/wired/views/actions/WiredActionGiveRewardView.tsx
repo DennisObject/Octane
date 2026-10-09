@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Button, Slider, Text } from '../../../../common';
+import { Button, Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';

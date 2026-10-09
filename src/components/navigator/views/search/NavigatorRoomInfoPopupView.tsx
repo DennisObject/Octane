@@ -1,9 +1,101 @@
 import { GetSessionDataManager, RoomSettingsComposer, UpdateHomeRoomMessageComposer } from '@octane/renderer';
-import { FC } from 'react';
+import { CSSProperties, FC, useEffect, useId, useState } from 'react';
 import { FriendlyTime, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, ReportType, SendMessageComposer } from '../../../../api';
-import { LayoutBadgeImageView, LayoutRoomThumbnailView, UserProfileIconView } from '../../../../common';
+import nativeAtlas from '../../../../assets/images/navigator/air/room-info-native-atlas.png';
+import { LayoutBadgeImageView, LayoutRoomThumbnailView } from '../../../../common';
 import { useHelp, useNavigatorData, useNavigatorFavourite, useNavigatorRoomInfoPopupStore, useNavigatorUiStore } from '../../../../hooks';
 import { classNames } from '../../../../layout';
+
+// Native bubble layout bounds are 27 × 38, including its null spacer.
+// Fixed corners copy their full source; scaled strips use the layout rectangle.
+const BUBBLE_PIECES: { source: number[]; style: CSSProperties }[] = [
+    { source: [0, 120, 7, 7], style: { left: 6, top: 6, width: 7, height: 7 } },
+    { source: [0, 127, 7, 7], style: { left: 6, top: 11, width: 5, height: 'calc(100% - 23px)' } },
+    { source: [0, 145, 7, 8], style: { left: 6, bottom: 6, width: 7, height: 8 } },
+    { source: [7, 120, 7, 7], style: { left: 11, top: 6, width: 'calc(100% - 22px)', height: 5 } },
+    { source: [7, 127, 7, 7], style: { left: 11, top: 11, width: 'calc(100% - 22px)', height: 'calc(100% - 23px)' } },
+    { source: [7, 146, 7, 8], style: { left: 11, bottom: 6, width: 'calc(100% - 22px)', height: 6 } },
+    { source: [27, 120, 7, 7], style: { right: 5, top: 6, width: 7, height: 7 } },
+    { source: [27, 127, 7, 7], style: { right: 6, top: 11, width: 5, height: 'calc(100% - 23px)' } },
+    { source: [27, 146, 7, 8], style: { right: 6, bottom: 6, width: 7, height: 8 } }
+];
+
+const BubbleSkin = () => (
+    <div aria-hidden="true" className="octane-navigator-air__room-bubble-skin">
+        {BUBBLE_PIECES.map(({ source, style }, index) => (
+            <svg key={index} style={style} viewBox={source.join(' ')} preserveAspectRatio="none">
+                <image href={nativeAtlas} width={256} height={256} />
+            </svg>
+        ))}
+    </div>
+);
+
+// Native style-2 colorless header: fixed six-pixel corners, source regions in the local atlas.
+const HeaderSkin = () => (
+    <svg aria-hidden="true" className="octane-navigator-air__room-popover-header-skin" width={345} height={125}>
+        {[
+            { source: 0, position: 0, size: 6 },
+            { source: 6, position: 6, size: 333 },
+            { source: 7, position: 339, size: 6 }
+        ].map((x, xi) =>
+            [
+                { source: 96, position: 0, size: 6 },
+                { source: 102, position: 6, size: 113 },
+                { source: 103, position: 119, size: 6 }
+            ].map((y, yi) => (
+                <svg
+                    key={xi + '-' + yi}
+                    x={x.position}
+                    y={y.position}
+                    width={x.size}
+                    height={y.size}
+                    viewBox={`${x.source} ${y.source} ${xi === 1 ? 1 : 6} ${yi === 1 ? 1 : 6}`}
+                    preserveAspectRatio="none"
+                >
+                    <image href={nativeAtlas} width={256} height={256} />
+                </svg>
+            ))
+        )}
+    </svg>
+);
+
+const EventSkin = () => {
+    const tintId = useId();
+    return (
+        <svg aria-hidden="true" className="octane-navigator-air__room-popover-event-skin" width={331} height={55}>
+            <defs>
+                <filter id={tintId} colorInterpolationFilters="sRGB">
+                    <feColorMatrix type="matrix" values="0.945098039 0 0 0 0 0 0.654901961 0 0 0 0 0 0 0 0 0 0 0 1 0" />
+                </filter>
+            </defs>
+            <g filter={'url(#' + tintId + ')'}>
+                {[
+                    { source: 24, position: 0, size: 3 },
+                    { source: 27, position: 3, size: 325 },
+                    { source: 28, position: 328, size: 3 }
+                ].map((x, xi) =>
+                    [
+                        { source: 96, position: 0, size: 3 },
+                        { source: 99, position: 3, size: 49 },
+                        { source: 100, position: 52, size: 3 }
+                    ].map((y, yi) => (
+                        <svg
+                            key={xi + '-' + yi}
+                            x={x.position}
+                            y={y.position}
+                            width={x.size}
+                            height={y.size}
+                            viewBox={`${x.source} ${y.source} ${xi === 1 ? 1 : 3} ${yi === 1 ? 1 : 3}`}
+                            preserveAspectRatio="none"
+                        >
+                            <image href={nativeAtlas} width={256} height={256} />
+                        </svg>
+                    ))
+                )}
+            </g>
+        </svg>
+    );
+};
 
 const getTradeModeText = (tradeMode: number) => {
     switch (tradeMode) {
@@ -24,15 +116,21 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
     const { navigatorData } = useNavigatorData();
     const { isFavourite, toggle: toggleFavourite } = useNavigatorFavourite(room?.roomId ?? 0);
     const { report = null } = useHelp();
+    const [homeOverride, setHomeOverride] = useState(0);
+
+    useEffect(() => {
+        setHomeOverride(0);
+    }, [room?.roomId, visible]);
 
     if (!visible || !room) return null;
 
     const hasGroup = room.groupBadgeCode?.length > 0;
-    const showOwner = room.showOwner && room.ownerName?.length > 0;
+    const showOwner = room.showOwner;
     const hasActiveRoomAd = room.roomAdExpiresInMin > 0;
     const rankingEnabled = GetConfigurationValue<boolean>('room.ranking.enabled', false);
-    const roomReportingEnabled = GetConfigurationValue<boolean>('room.report.enabled', true);
-    const isOwner = GetSessionDataManager().userId === room.ownerId;
+    const roomReportingEnabled = GetConfigurationValue<boolean>('room.report.enabled', false);
+    const isOwner = GetSessionDataManager().userName === room.ownerName;
+    const isHome = homeOverride === room.roomId || navigatorData?.homeRoomId === room.roomId;
 
     const closePopup = () => useNavigatorRoomInfoPopupStore.getState().hide();
 
@@ -53,14 +151,16 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
             onMouseLeave={() => useNavigatorRoomInfoPopupStore.getState().setHovered(false)}
             onClick={(event) => event.stopPropagation()}
         >
+            <BubbleSkin />
             <div className="octane-navigator-air__room-bubble-content">
                 <div className="octane-navigator-air__room-popover-header">
+                    <HeaderSkin />
                     <LayoutRoomThumbnailView className="octane-navigator-air__room-popover-thumbnail" customUrl={room.officialRoomPicRef} roomId={room.roomId}>
                         {hasGroup && <LayoutBadgeImageView badgeCode={room.groupBadgeCode} className="octane-navigator-air__room-badge" isGroup={true} />}
                     </LayoutRoomThumbnailView>
                     <div className="octane-navigator-air__room-popover-copy">
                         <div className="octane-navigator-air__room-popover-title">{room.roomName}</div>
-                        {room.description && <div className="octane-navigator-air__room-popover-description">{room.description}</div>}
+                        <div className="octane-navigator-air__room-popover-description">{room.description}</div>
                     </div>
                 </div>
                 {(showOwner || hasGroup) && (
@@ -74,7 +174,16 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                                     closePopup();
                                 }}
                             >
-                                <UserProfileIconView userId={room.ownerId} />
+                                <svg
+                                    aria-hidden="true"
+                                    className="octane-navigator-air__room-owner-eye"
+                                    width={15}
+                                    height={13}
+                                    viewBox="0 56 21 21"
+                                    preserveAspectRatio="none"
+                                >
+                                    <image href={nativeAtlas} width={256} height={256} />
+                                </svg>
                                 <span>{room.ownerName}</span>
                             </button>
                         )}
@@ -114,12 +223,13 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         <button
                             type="button"
                             onClick={() => {
-                                if (navigatorData?.homeRoomId !== room.roomId) {
+                                if (!isHome) {
                                     SendMessageComposer(new UpdateHomeRoomMessageComposer(room.roomId));
+                                    setHomeOverride(room.roomId);
                                 }
                             }}
                         >
-                            <i className={classNames('icon icon-navigator-my-room', navigatorData?.homeRoomId === room.roomId ? 'active' : '')} />
+                            <i className={classNames('icon icon-navigator-my-room', isHome ? 'active' : '')} />
                             <span>{LocalizeText('navigator.room.popup.room.info.home')}</span>
                         </button>
                         {isOwner && (
@@ -148,30 +258,34 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         )}
                     </div>
                 </div>
-                {room.tags && room.tags.length > 0 && (
-                    <div className="octane-navigator-air__room-popover-tags">
-                        {room.tags.map((tag) => (
-                            <button key={tag} type="button" className="octane-navigator-air__tag" onClick={() => searchTag(tag)}>
-                                #{tag}
-                            </button>
-                        ))}
-                    </div>
-                )}
-                {hasActiveRoomAd && (
-                    <div className="octane-navigator-air__room-popover-event">
-                        <i className="octane-navigator-air__room-popover-event-icon" aria-hidden="true" />
-                        <div className="octane-navigator-air__room-popover-event-copy">
-                            <span className="octane-navigator-air__room-popover-event-name">
-                                {LocalizeText('navigator.eventsettings.name')}: {room.roomAdName}
-                            </span>
-                            <span className="octane-navigator-air__room-popover-event-description">
-                                {LocalizeText('navigator.eventsettings.desc')}: {room.roomAdDescription}
-                                <br />
-                                {LocalizeText('roomad.event.expiration_time')} {FriendlyTime.format(room.roomAdExpiresInMin * 60)}
-                            </span>
+                <div className="octane-navigator-air__room-popover-bottom">
+                    <div className="octane-navigator-air__room-popover-tag-group">
+                        <div className="octane-navigator-air__room-popover-tags">
+                            {room.tags?.map((tag, index) => (
+                                <button key={index} type="button" className="octane-navigator-air__tag" onClick={() => searchTag(tag)}>
+                                    #{tag}
+                                </button>
+                            ))}
                         </div>
+                        {/* Native group role/type/decorate metadata is unavailable in this facade. */}
                     </div>
-                )}
+                    {hasActiveRoomAd && (
+                        <div className="octane-navigator-air__room-popover-event">
+                            <EventSkin />
+                            <i className="octane-navigator-air__room-popover-event-icon" aria-hidden="true" />
+                            <div className="octane-navigator-air__room-popover-event-copy">
+                                <span className="octane-navigator-air__room-popover-event-name">
+                                    {LocalizeText('navigator.eventsettings.name')}: {room.roomAdName}
+                                </span>
+                                <span className="octane-navigator-air__room-popover-event-description">
+                                    {LocalizeText('navigator.eventsettings.desc')}: {room.roomAdDescription}
+                                    <br />
+                                    {LocalizeText('roomad.event.expiration_time')} {FriendlyTime.format(room.roomAdExpiresInMin * 60)}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

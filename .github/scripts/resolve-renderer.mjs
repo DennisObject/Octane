@@ -27,13 +27,13 @@ const companionRefsFor = (headRef) => {
 
 export const resolveRenderer = async (input, hasRef) => {
     const contextRef = input.eventName === 'pull_request' ? input.baseRef : input.refName;
-    const automaticRef = contextRef === 'main' ? 'main' : 'Dev';
+    const automaticRef = contextRef === 'main' ? 'main' : contextRef === 'dev' ? 'dev' : 'Dev';
     const explicitRef = input.inputRef || input.variableRef;
     let ref = explicitRef || automaticRef;
     let repository = input.inputRepository || input.variableRepository;
     // A push carries no PR head, but the pushed branch may still have a companion in the renderer:
     // the push run of a feature branch then pairs like its pull_request run instead of falling to Dev.
-    const headRef = input.headRef || (input.eventName === 'push' && !['main', 'Dev'].includes(input.refName) ? input.refName : '');
+    const headRef = input.headRef || (input.eventName === 'push' && !['main', 'Dev', 'dev'].includes(input.refName) ? input.refName : '');
 
     if (!repository && input.headOwner && input.headOwner !== input.repositoryOwner) {
         const headRepository = `${input.headOwner}/Octane-Renderer`;

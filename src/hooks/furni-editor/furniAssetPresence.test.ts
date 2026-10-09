@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const config = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
 vi.mock('@octane/renderer', () => ({
-    GetConfiguration: () => ({ getValue: (key: string) => config.values[key] })
+    GetConfiguration: () => ({ getValue: (key: string) => config.values[key] }),
+    GetAssetBundleUrl: (url: string) => url
 }));
 
 import { assetUrlsFor, checkAssetPresence } from './furniAssetPresence';

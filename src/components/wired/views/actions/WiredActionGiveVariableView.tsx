@@ -1,16 +1,19 @@
+import { parseWiredScalarLiteral, readWiredScalarLiteral, writeWiredScalarLiteral } from '../../../../api/wired/WiredScalarLiteral';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetWiredTimeLocale, LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import contextVariableIcon from '../../../../assets/images/wired/var/icon_source_context_clean.png';
 import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_furni.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
-import { Button, Slider, Text } from '../../../../common';
+import { Button, Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import {
     buildWiredVariablePickerEntries,
+    canMutateWiredBuiltinPresence,
     createCustomVariableToken,
     createFallbackVariableEntry,
     flattenWiredVariablePickerEntries,
@@ -69,6 +72,8 @@ export const WiredActionGiveVariableView: FC<{}> = () => {
     const [selectedVariableToken, setSelectedVariableToken] = useState('');
     const [overrideExisting, setOverrideExisting] = useState(false);
     const [initialValueInput, setInitialValueInput] = useState('0');
+    const [exactLiteralShape, setExactLiteralShape] = useState(false);
+    const parsedLiteral = parseWiredScalarLiteral(initialValueInput);
     const [userSource, setUserSource] = useState(0);
     const [furniSource, setFurniSource] = useState(0);
 
@@ -123,13 +128,14 @@ export const WiredActionGiveVariableView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const parsedVariableItemId = parseInt((trigger.stringData || '').trim(), 10);
+        const wireToken = normalizeVariableTokenFromWire(trigger.stringData || '');
+        const parsedVariableItemId = getCustomVariableItemId(wireToken);
         const nextTargetType = normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER);
 
         setSelectedTargetType(nextTargetType);
         setSelectedVariableToken(
             normalizeVariableTokenFromWire(
-                !Number.isNaN(parsedVariableItemId) && parsedVariableItemId > 0
+                canMutateWiredBuiltinPresence(nextTargetType, wireToken) ? wireToken : !Number.isNaN(parsedVariableItemId) && parsedVariableItemId > 0
                     ? String(parsedVariableItemId)
                     : nextTargetType === 'user' && (trigger.selectedItems?.length ?? 0) > 0
                       ? String(trigger.selectedItems[0])
@@ -137,7 +143,8 @@ export const WiredActionGiveVariableView: FC<{}> = () => {
             )
         );
         setOverrideExisting(trigger.intData.length > 1 ? trigger.intData[1] === 1 : false);
-        setInitialValueInput((trigger.intData.length > 2 ? trigger.intData[2] : 0).toString());
+        setExactLiteralShape(trigger.intData.length === 7);
+        setInitialValueInput(readWiredScalarLiteral(trigger.intData, 5, 2));
         setUserSource(trigger.intData.length > 3 ? trigger.intData[3] : 0);
         setFurniSource(trigger.intData.length > 4 ? trigger.intData[4] : (trigger.selectedItems?.length ?? 0) > 0 ? SOURCE_SELECTED : 0);
     }, [trigger]);
@@ -151,15 +158,15 @@ export const WiredActionGiveVariableView: FC<{}> = () => {
 
     const save = () => {
         const targetValue = getTargetValue(selectedTargetType);
-        const parsedInitialValue = parseInt(initialValueInput.trim(), 10);
+        if (parsedLiteral === null) return;
         const variableItemId = getCustomVariableItemId(selectedVariableToken);
 
-        setStringParam(variableItemId ? String(variableItemId) : '');
-        setIntParams([targetValue, overrideExisting ? 1 : 0, Number.isFinite(parsedInitialValue) ? parsedInitialValue : 0, userSource, furniSource]);
+        setStringParam(variableItemId ? String(variableItemId) : canMutateWiredBuiltinPresence(selectedTargetType, selectedVariableToken) ? selectedVariableToken : '');
+        setIntParams(writeWiredScalarLiteral([targetValue, overrideExisting ? 1 : 0, 0, userSource, furniSource], 2, parsedLiteral, exactLiteralShape));
         setFurniIds(selectedTargetType === 'furni' && furniSource === SOURCE_SELECTED ? [...furniIds] : []);
     };
 
-    const validate = () => getCustomVariableItemId(selectedVariableToken) > 0;
+    const validate = () => parsedLiteral !== null && (getCustomVariableItemId(selectedVariableToken) > 0 || canMutateWiredBuiltinPresence(selectedTargetType, selectedVariableToken));
 
     const requiresFurni =
         selectedTargetType === 'furni' ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
@@ -241,10 +248,12 @@ export const WiredActionGiveVariableView: FC<{}> = () => {
                             <OctaneInput
                                 className={`octane-wired__give-var-number ${!selectedVariableDefinition?.hasValue ? 'octane-wired__give-var-number--blurred' : ''}`}
                                 readOnly={!selectedVariableDefinition?.hasValue}
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 value={initialValueInput}
                                 onChange={(event) => setInitialValueInput(event.target.value)}
                             />
+                            {parsedLiteral === null && <Text role="alert">Enter a signed 64-bit integer.</Text>}
                         </div>
                     </div>
 

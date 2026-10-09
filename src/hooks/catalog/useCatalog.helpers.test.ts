@@ -1,5 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
-import { BuilderFurniPlaceableStatus } from '../../api/catalog/BuilderFurniPlaceableStatus';
+import { describe, expect, it } from 'vitest';
 import { CatalogType } from '../../api/catalog/CatalogType';
 import {
     buildCatalogNodeTree,
@@ -7,24 +6,20 @@ import {
     findNodeByName,
     getNodesByOfferIdFromMap,
     normalizeCatalogType,
-    resolveBuilderFurniPlaceableStatus,
     restoreCatalogActivePath
 } from './useCatalog.helpers';
 
 describe('restoreCatalogActivePath', () => {
     it('rebinds the active path to nodes from a refreshed catalog tree', () => {
         const root: any = { pageId: -1, pageName: 'root', children: [] };
-        const parent: any = { pageId: 10, pageName: 'parent', parent: root, children: [], activate: vi.fn(), open: vi.fn() };
-        const child: any = { pageId: 11, pageName: 'child', parent, children: [], activate: vi.fn(), open: vi.fn() };
+        const parent: any = { pageId: 10, pageName: 'parent', parent: root, children: [] };
+        const child: any = { pageId: 11, pageName: 'child', parent, children: [] };
         root.children = [parent];
         parent.children = [child];
 
         const restored = restoreCatalogActivePath(root, 11);
 
         expect(restored).toEqual([parent, child]);
-        expect(parent.activate).toHaveBeenCalledOnce();
-        expect(child.activate).toHaveBeenCalledOnce();
-        expect(parent.open).toHaveBeenCalledOnce();
     });
 });
 
@@ -33,10 +28,6 @@ describe('restoreCatalogActivePath', () => {
 // ---------------------------------------------------------------------------
 
 describe('normalizeCatalogType', () => {
-    it('returns BUILDER when explicitly asked for BUILDER', () => {
-        expect(normalizeCatalogType(CatalogType.BUILDER)).toBe(CatalogType.BUILDER);
-    });
-
     it('returns NORMAL for the explicit NORMAL value', () => {
         expect(normalizeCatalogType(CatalogType.NORMAL)).toBe(CatalogType.NORMAL);
     });
@@ -212,95 +203,5 @@ describe('buildCatalogNodeTree', () => {
         const { rootNode } = buildCatalogNodeTree(rootData as any);
 
         expect(rootNode.children[0].parent).toBe(rootNode);
-    });
-});
-
-// ---------------------------------------------------------------------------
-// resolveBuilderFurniPlaceableStatus
-// ---------------------------------------------------------------------------
-
-describe('resolveBuilderFurniPlaceableStatus', () => {
-    const offer = { offerId: 1 } as any;
-
-    const baseInput = {
-        offer,
-        roomSession: { isGuildRoom: false, isRoomOwner: true, controllerLevel: 0 },
-        secondsLeft: 60,
-        furniCount: 0,
-        furniLimit: 10,
-        builderPlacementAllowedInCurrentRoom: false,
-        builderPlacementBlockedByVisitors: false,
-        visitorCount: 0
-    };
-
-    it('returns MISSING_OFFER when offer is null', () => {
-        expect(resolveBuilderFurniPlaceableStatus({ ...baseInput, offer: null })).toBe(BuilderFurniPlaceableStatus.MISSING_OFFER);
-    });
-
-    it('returns NOT_IN_ROOM when roomSession is null', () => {
-        expect(resolveBuilderFurniPlaceableStatus({ ...baseInput, roomSession: null })).toBe(BuilderFurniPlaceableStatus.NOT_IN_ROOM);
-    });
-
-    it('returns OKAY for the room owner with time on the clock', () => {
-        expect(resolveBuilderFurniPlaceableStatus(baseInput)).toBe(BuilderFurniPlaceableStatus.OKAY);
-    });
-
-    it('returns NOT_GROUP_ADMIN for a non-owner without group fallback or shared pool', () => {
-        const input = {
-            ...baseInput,
-            roomSession: { isGuildRoom: false, isRoomOwner: false, controllerLevel: 0 }
-        };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.NOT_GROUP_ADMIN);
-    });
-
-    it('returns OKAY for guild admin with subscription time remaining', () => {
-        const input = {
-            ...baseInput,
-            roomSession: { isGuildRoom: true, isRoomOwner: false, controllerLevel: 4 /* GUILD_ADMIN */ },
-            secondsLeft: 60
-        };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.OKAY);
-    });
-
-    it('returns FURNI_LIMIT_REACHED when count meets the limit and no shared pool applies', () => {
-        const input = { ...baseInput, furniCount: 10, furniLimit: 10 };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.FURNI_LIMIT_REACHED);
-    });
-
-    it('skips the furni limit when builderPlacementAllowedInCurrentRoom for a non-owner', () => {
-        const input = {
-            ...baseInput,
-            roomSession: { isGuildRoom: false, isRoomOwner: false, controllerLevel: 0 },
-            furniCount: 99,
-            furniLimit: 10,
-            builderPlacementAllowedInCurrentRoom: true
-        };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.OKAY);
-    });
-
-    it('returns VISITORS_IN_ROOM when the subscription has expired and the flag is set', () => {
-        const input = {
-            ...baseInput,
-            secondsLeft: 0,
-            builderPlacementBlockedByVisitors: true
-        };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.VISITORS_IN_ROOM);
-    });
-
-    it('returns VISITORS_IN_ROOM when the subscription has expired and there are visitors counted', () => {
-        const input = { ...baseInput, secondsLeft: 0, visitorCount: 3 };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.VISITORS_IN_ROOM);
-    });
-
-    it('returns OKAY when the subscription has expired but the room is empty', () => {
-        const input = { ...baseInput, secondsLeft: 0, visitorCount: 0 };
-
-        expect(resolveBuilderFurniPlaceableStatus(input)).toBe(BuilderFurniPlaceableStatus.OKAY);
     });
 });

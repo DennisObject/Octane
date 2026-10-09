@@ -11,7 +11,8 @@ import {
     RoomSessionPetStatusUpdateEvent,
     RoomSessionUserBadgesEvent,
     RoomSessionUserDataUpdateEvent,
-    RoomSessionUserFigureUpdateEvent
+    RoomSessionUserFigureUpdateEvent,
+    WiredClickUserResponseEvent
 } from '@octane/renderer';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -28,7 +29,7 @@ import {
     RoomWidgetUpdateRoomObjectEvent,
     UseProductItem
 } from '../../../api';
-import { useOctaneEvent, useUiEvent } from '../../events';
+import { useMessageEvent, useOctaneEvent, useUiEvent } from '../../events';
 import { useFriends } from '../../friends';
 import { useWired } from '../../wired';
 import { useObjectDeselectedEvent, useObjectRollOutEvent, useObjectRollOverEvent, useObjectSelectedEvent } from '../engine';
@@ -56,11 +57,13 @@ const useAvatarInfoWidgetState = () => {
     const [pendingPetId, setPendingPetId] = useState<number>(-1);
     const [isDecorating, setIsDecorating] = useState(false);
     const pendingAvatarInfoTimeout = useRef<ReturnType<typeof setTimeout>>(null);
+    const pendingWiredAvatarInfo = useRef<{ roomId: number; index: number; requestId: number; info: IAvatarInfo }>(null);
     const { friends = [] } = useFriends();
     const { selectObjectForWired = null } = useWired();
     const { roomSession = null } = useRoom();
 
     const clearPendingAvatarInfo = () => {
+        pendingWiredAvatarInfo.current = null;
         if (!pendingAvatarInfoTimeout.current) return;
 
         clearTimeout(pendingAvatarInfoTimeout.current);
@@ -159,6 +162,13 @@ const useAvatarInfoWidgetState = () => {
             return;
         }
 
+        const requestId = GetRoomEngine().pendingWiredUserClick(roomSession.roomId, objectId);
+        if (requestId) {
+            pendingWiredAvatarInfo.current = { roomId: roomSession.roomId, index: objectId, requestId, info };
+            setAvatarInfo(null);
+            return;
+        }
+
         pendingAvatarInfoTimeout.current = setTimeout(() => {
             pendingAvatarInfoTimeout.current = null;
 
@@ -169,6 +179,22 @@ const useAvatarInfoWidgetState = () => {
     };
 
     const processUsableRoomObject = (objectId: number) => {};
+
+    useMessageEvent<WiredClickUserResponseEvent>(WiredClickUserResponseEvent, (event) => {
+        const parser = event.getParser();
+        if (!parser.requestId) return;
+        const pending = pendingWiredAvatarInfo.current;
+        const accepted = GetRoomEngine().completeWiredUserClick(parser.roomId, parser.index, parser.requestId, parser.doNotRotate);
+        if (!pending || pending.roomId !== parser.roomId || pending.index !== parser.index || pending.requestId !== parser.requestId) return;
+        pendingWiredAvatarInfo.current = null;
+        if (accepted && roomSession?.roomId === parser.roomId && parser.openMenu) setAvatarInfo(pending.info);
+    });
+
+    useEffect(() => {
+        clearPendingAvatarInfo();
+        setAvatarInfo(null);
+        return clearPendingAvatarInfo;
+    }, [roomSession?.roomId]);
 
     const refreshPetInfo = () => {
         // roomSession.userDataManager.requestPetInfo(petData.id);
@@ -329,6 +355,7 @@ const useAvatarInfoWidgetState = () => {
 
     useObjectDeselectedEvent((event) => {
         clearPendingAvatarInfo();
+        GetRoomEngine().cancelWiredUserClick();
         setAvatarInfo(null);
         setProductBubbles([]);
     });

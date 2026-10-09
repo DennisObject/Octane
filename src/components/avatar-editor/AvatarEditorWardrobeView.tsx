@@ -4,6 +4,7 @@ import { GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageCom
 import hcIconSrc from '../../assets/images/avatareditor/air/wardrobe-hc.png';
 import emptySlotSrc from '../../assets/images/avatareditor/wardrobe-empty-slot.png';
 import { LayoutAvatarImageView } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 
 const SLOTS_PER_COL = 7;
@@ -73,7 +74,7 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
     return (
         <aside className="octane-avatar-editor-wardrobe" aria-label={LocalizeText('avatareditor.wardrobe.title')}>
             <div className="octane-avatar-editor-wardrobe-header">
-                <span className="octane-avatar-editor-wardrobe-title">{LocalizeText('avatareditor.wardrobe.title')}</span>
+                <NativeText className="octane-avatar-editor-wardrobe-title" text={LocalizeText('avatareditor.wardrobe.title')} textStyle="u_bold" background={0xe9e9e1} overrides={{ color: 0x83827e }} />
                 <img src={hcIconSrc} alt="" draggable={false} className="octane-avatar-editor-wardrobe-hc" />
             </div>
             <div className="octane-avatar-editor-wardrobe-slots">
@@ -86,7 +87,7 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                             const figureString = figureContainer?.getFigureString() ?? '';
 
                             return (
-                                <div className={`octane-avatar-editor-wardrobe-slot${enabled ? '' : ' is-locked'}`} key={`wardrobe-slot-${index}`}>
+                                <div className="octane-avatar-editor-wardrobe-slot" key={`wardrobe-slot-${index}`}>
                                     <div className="octane-avatar-editor-wardrobe-slot-shade" />
                                     {enabled && (
                                         <button
@@ -96,7 +97,7 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                                             onClick={() => saveFigureAtWardrobeIndex(index)}
                                         />
                                     )}
-                                    {enabled && figureContainer && (
+                                    {enabled && (
                                         <button
                                             type="button"
                                             className="octane-avatar-editor-wardrobe-slot-get"
@@ -111,11 +112,11 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                                         aria-label={LocalizeText('widget.generic_usable.button.use')}
                                         onClick={() => wearFigureAtIndex(index)}
                                     >
-                                        {figureContainer ? (
+                                        {enabled && figureContainer ? (
                                             <LayoutAvatarImageView direction={4} figure={figureString} gender={slotGender} fit />
-                                        ) : (
+                                        ) : !enabled ? (
                                             <img src={emptySlotSrc} alt="" draggable={false} className="octane-avatar-editor-wardrobe-empty" />
-                                        )}
+                                        ) : null}
                                     </button>
                                 </div>
                             );

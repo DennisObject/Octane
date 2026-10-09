@@ -6,10 +6,11 @@ interface FriendsListGroupViewProps {
     list: MessengerFriend[];
     selectedFriendsIds: number[];
     selectFriend: (userId: number) => void;
+    rowStartIndex?: number;
 }
 
 export const FriendsListGroupView: FC<FriendsListGroupViewProps> = (props) => {
-    const { list = null, selectedFriendsIds = null, selectFriend = null } = props;
+    const { list = null, selectedFriendsIds = null, selectFriend = null, rowStartIndex = 0 } = props;
 
     if (!list || !list.length) return null;
 
@@ -17,7 +18,8 @@ export const FriendsListGroupView: FC<FriendsListGroupViewProps> = (props) => {
         <>
             {list.map((item, index) => (
                 <FriendsListGroupItemView
-                    key={index}
+                    key={item.id}
+                    rowIndex={rowStartIndex + index}
                     friend={item}
                     selected={selectedFriendsIds && selectedFriendsIds.indexOf(item.id) >= 0}
                     selectFriend={selectFriend}

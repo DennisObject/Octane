@@ -4,6 +4,7 @@ import { LocalizeText } from '../../../api';
 import { Base } from '../../../common';
 import { AIR_FLOOR_ASSETS } from '../air/airAssets';
 import { FloorActionMode, FloorplanAction, FloorplanState } from '../state/types';
+import { FloorplanNativeText } from './FloorplanNativeText';
 
 type Props = {
     state: FloorplanState;
@@ -35,7 +36,9 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
 
     return (
         <div className="fp-control-group" data-testid="floorplan-toolbar">
-            <div className="fp-group-label">{LocalizeText('floor.plan.editor.draw.mode')}</div>
+            <div className="fp-group-label">
+                {extras ? LocalizeText('floor.plan.editor.draw.mode') : <FloorplanNativeText background={0xbdbdb5} text={LocalizeText('floor.plan.editor.draw.mode')} />}
+            </div>
             <div className="fp-tools">
                 {buttons.map((b, index) => {
                     const active = state.brush.action === b.mode && !panMode;

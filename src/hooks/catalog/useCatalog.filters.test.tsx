@@ -27,17 +27,11 @@ describe('useCatalog filter contract', () => {
             'currentOffer',
             'currentPage',
             'frontPageItems',
-            'furniCount',
-            'furniLimit',
             'isBusy',
-            'maxFurniLimit',
             'offersToNodes',
             'roomPreviewer',
             'rootNode',
-            'searchResult',
-            'secondsLeft',
-            'secondsLeftWithGrace',
-            'updateTime'
+            'searchResult'
         ]);
 
         expect(result.current.rootNode).toBeNull();
@@ -52,6 +46,7 @@ describe('useCatalog filter contract', () => {
         expect(Object.keys(result.current).sort()).toEqual([
             'activeNodes',
             'catalogPlaceMultipleObjects',
+            'currentTab',
             'currentType',
             'giftReceiver',
             'isVisible',
@@ -77,7 +72,6 @@ describe('useCatalog filter contract', () => {
 
         expect(Object.keys(result.current).sort()).toEqual([
             'activateNode',
-            'getBuilderFurniPlaceableStatus',
             'getNodeById',
             'getNodeByName',
             'getNodesByOfferId',
@@ -91,6 +85,7 @@ describe('useCatalog filter contract', () => {
             'resetPlacedOfferData',
             'retryCurrentPage',
             'selectCatalogOffer',
+            'showTab',
             'toggleCatalogByType'
         ]);
 
@@ -109,7 +104,7 @@ describe('useCatalog filter contract', () => {
         );
 
         const before = renders;
-        useCatalogStore.getState().setBuildersClubFurniCount(42);
+        useCatalogStore.getState().bumpLocalizationVersion();
 
         expect(renders).toBe(before);
     });

@@ -136,7 +136,7 @@ export const WiredVariableFxStatusView: FC<WiredVariableFxStatusViewProps> = (pr
                         Lv {level.level}
                         {level.maxLevel > 1 ? ` / ${level.maxLevel}` : ''}
                     </span>
-                    <span className="octane-wired-fx__value">{level.maxed ? 'MAX' : `${formatWiredVariableFxValue(status.value - range.min)} / ${formatWiredVariableFxValue(range.max - range.min)}`}</span>
+                    <span className="octane-wired-fx__value">{level.maxed ? 'MAX' : `${formatWiredVariableFxValue(BigInt(status.value) - range.min)} / ${formatWiredVariableFxValue(range.max - range.min)}`}</span>
                 </div>
             );
         }

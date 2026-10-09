@@ -1,5 +1,9 @@
 .octane-floorplan-window {
     --fp-text: #2b2b2b;
+    /* two pixel then one pixel step on every corner, the cut of the running client's bordered boxes */
+    --fp-stair-corners: polygon(2px 0, calc(100% - 2px) 0, calc(100% - 2px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 1px) calc(100% - 2px), calc(100% - 1px) calc(100% - 1px), calc(100% - 2px) calc(100% - 1px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 2px), 0 calc(100% - 2px), 0 2px, 1px 2px, 1px 1px, 2px 1px);
+    /* the outer panels only lose their right corners */
+    --fp-stair-right: polygon(0 0, calc(100% - 2px) 0, calc(100% - 2px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 1px) calc(100% - 2px), calc(100% - 1px) calc(100% - 1px), calc(100% - 2px) calc(100% - 1px), calc(100% - 2px) 100%, 0 100%);
 
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
     color: #111111;
@@ -28,6 +32,8 @@
     height: 567px;
     padding: 0 !important;
     overflow: hidden;
+    /* the frame bitmap supplies the cream fill and its white inner border */
+    background: transparent !important;
 }
 
 .octane-floorplan-window.octane-card-shell.octane-card-frame-3 .octane-card-content-shell {
@@ -601,7 +607,7 @@
     height: 100%;
     color: #111111;
     font-size: 12px;
-    background: #e9e9e1;
+    background: transparent;
 }
 
 .fp-bc-banner {
@@ -681,6 +687,7 @@
     content: "";
     position: absolute;
     inset: 0;
+    clip-path: var(--fp-stair-right);
     border: 3px solid transparent;
     border-image: url("../../assets/images/floorplan-editor/air/panel-border.png") 3 fill / 3px stretch;
     pointer-events: none;
@@ -797,6 +804,9 @@
     position: absolute;
     left: 0;
     top: 4px;
+    /* the running client's html text field does not draw the descender of the g past the 14th row */
+    height: 14px;
+    overflow: hidden;
 }
 
 .fp-bc-colormap {
@@ -847,14 +857,27 @@
     top: 132px;
     right: 0;
     bottom: 12px;
+    background: transparent;
+}
+
+/* the black map is one column wider than the scroll area and has stepped corners */
+.fp-bc-map::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(100% - 12px);
     background: #000000;
+    clip-path: var(--fp-stair-corners);
 }
 
 .fp-bc-scroll {
+    position: relative;
     width: calc(100% - 13px);
     height: 100%;
     overflow: auto;
-    background: #000000;
+    background: transparent;
     scrollbar-width: none;
 }
 
@@ -882,6 +905,8 @@
 
 .fp-bc-bitmap {
     display: block;
+    /* heightmap_bitmap sits at y=29 inside its 331x304 wrapper */
+    margin-top: 29px;
     background: #000000;
     image-rendering: pixelated;
     cursor: crosshair;
@@ -1016,13 +1041,14 @@
 }
 
 .fp-bc-vdivider {
-    width: 3px;
+    width: 2px;
+    margin-right: 1px;
     height: 97px;
     image-rendering: pixelated;
 }
 
 .fp-bc .fp-bc-vdivider {
-    flex: 0 0 3px;
+    flex: 0 0 2px;
 }
 
 .fp-bc-thickness {
@@ -1084,7 +1110,9 @@
 
 .fp-bc-wall-row.is-off .fp-bc-wall-label,
 .fp-bc-wall-row.is-off .fp-bc-wall-number,
-.fp-bc-wall-row.is-off .fp-bc-wall-slider {
+.fp-bc-wall-row.is-off .fp-bc-wall-slider-track,
+.fp-bc-wall-row.is-off .fp-bc-wall-slider-thumb {
+    /* disabled controls are each blended at 0.6 in the running client, so the thumb is drawn over the already faded track */
     opacity: 0.6;
 }
 
@@ -1138,7 +1166,7 @@
     font-size: 12px;
     font-weight: 700;
     line-height: 17px;
-    text-align: center;
+    text-align: left;
 }
 
 .fp-bc .fp-bc-wall-number {
@@ -1184,17 +1212,19 @@
 
 .fp-bc-preview-stage {
     position: absolute;
-    left: 1px;
-    top: 135px;
+    left: 0;
+    top: 133px;
     bottom: 14px;
-    width: 273px;
+    width: 275px;
     overflow: hidden;
     background: #ffffff;
+    /* the white border box has all four corners cut in two pixel steps */
+    clip-path: var(--fp-stair-corners);
 }
 
 .fp-bc-preview-scroll {
     position: absolute;
-    inset: 0;
+    inset: 0 1px 0 1px;
     overflow: auto;
     background: #ffffff;
     scrollbar-width: none;
@@ -1207,10 +1237,12 @@
 }
 
 .fp-bc-side > .fp-bc-preview-vbar {
+    /* the first art column is translucent over the white preview border, and the parent border clips the rest */
+    background: linear-gradient(90deg, #ffffff 1px, #bdbdb5 1px);
     position: absolute;
     left: 274px;
     top: 135px;
-    bottom: 14px;
+    bottom: 15px;
     z-index: 2;
 }
 
@@ -1228,18 +1260,19 @@
 
 .fp-bc-preview-bitmap {
     display: block;
-    margin: auto;
+    /* the preview bitmap is drawn at the origin of its 273x300 window, not centred; the window border starts 2px above it */
+    margin: 2px 0 0;
     image-rendering: pixelated;
     background: #ffffff;
 }
 
 .fp-bc-footer {
     position: absolute;
-    left: 10px;
+    left: 12px;
     right: 9px;
     bottom: 9px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     height: 40px;
 }
@@ -1247,9 +1280,11 @@
 .fp-bc-btn {
     flex: 0 0 auto;
     box-sizing: border-box;
-    width: 120px;
+    /* button_thick: width follows the caption inside the layout's min and max (reload 100-120, others 90-120) */
+    min-width: 90px;
+    max-width: 120px;
     height: 35px;
-    padding: 0 8px;
+    padding: 0 6px;
     border-style: solid;
     border-color: transparent;
     border-width: 5px;
@@ -1268,8 +1303,22 @@
 }
 
 .fp-bc-footer .fp-bc-btn {
-    padding: 5px 10px 6px;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 4px 0 5px;
+    line-height: 0;
     color: #111111;
+}
+
+.fp-bc-btn.is-reload {
+    min-width: 100px;
+}
+
+.fp-bc-btn-label {
+    display: block;
+    margin-top: 3px;
 }
 
 .fp-bc-btn:hover {
@@ -1288,35 +1337,35 @@
     gap: 8px;
 }
 
-.octane-floorplan-window .fp-bc-btn.is-save,
-.octane-floorplan-window .fp-bc-btn.is-save:hover,
-.octane-floorplan-window .fp-bc-btn.is-save:active,
-.octane-floorplan-window .fp-bc-btn.is-save:disabled {
-    border-width: 0;
-    border-image-source: initial;
-    border-image-width: 0;
-    border-image-slice: 0;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 120px 35px;
-    color: #111111;
+/* The footer buttons are 35px: the running client stretches the 14 centre rows of the skin by sampling the top of each row, so these slices are stretched to 35px already. */
+.fp-bc-footer .fp-bc-btn {
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-default-h35.png");
 }
 
+.fp-bc-footer .fp-bc-btn:hover {
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-hover-h35.png");
+}
+
+.fp-bc-footer .fp-bc-btn:active {
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-pressed-h35.png");
+}
+
+/* style 5 thick button with colour 0x0bb3e3: the thick skin multiplied by the window colour */
 .octane-floorplan-window .fp-bc-btn.is-save {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-default.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-default-0bb3e3-h35.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:hover {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-hover.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-hover-0bb3e3-h35.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:active {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-pressed.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-pressed-0bb3e3-h35.png");
 }
 
 .octane-floorplan-window .fp-bc-btn.is-save:disabled,
 .octane-floorplan-window .fp-bc-btn.is-save:disabled:hover {
-    background-image: url("../../assets/images/floorplan-editor/air/save-style5-disabled.png");
+    border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-disabled-0bb3e3-h35.png");
     cursor: default;
 }
 
@@ -1586,9 +1635,9 @@
 
 .fp-bc-thickness-menu .fp-bc-drop span {
     position: absolute;
-    left: 0;
-    top: -2px;
-    width: 102px;
+    left: -2px;
+    top: -1px;
+    width: 106px;
     height: 17px;
     padding: 0 2px;
     box-sizing: border-box;
@@ -1632,7 +1681,8 @@
     min-width: max-content;
     height: 23px;
     margin: 0;
-    padding: 2px 6px 4px;
+    padding: 2px 4px 4px;
+    line-height: 0;
     box-sizing: border-box;
     border: 0;
     background: #ffffff;
@@ -1649,22 +1699,175 @@
 .fp-bc-drop-item.is-highlighted { background: #ebebeb; }
 .fp-bc-drop-item[aria-selected="true"].is-highlighted { background: #dddddd; }
 
-/* The import frame overrides the style-3 default content margins in its XML. */
+/* v75 floor_plan_export_import_xml (379x374, colour 0x418db0): everything is placed in dialog coordinates measured on the running client. */
 .octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 {
-    padding: 30px 1px 1px !important;
+    padding: 0 !important;
+}
+
+/* The editor and its dialog share one drop shadow, fitted to the pixels around the running client's windows (offset 3.5px, blur 2.5px, 35%); the shared card default is 4px. */
+.draggable-window:has(.octane-floorplan-window),
+.draggable-window:has(.octane-floorplan-import) {
+    filter: drop-shadow(3.5px 3.5px 2.5px rgba(0, 0, 0, 0.35)) !important;
 }
 
 .octane-floorplan-import.is-official .octane-card-content-shell {
     position: absolute;
-    top: 30px;
-    right: 1px;
-    bottom: 1px;
-    left: 1px;
+    inset: 0;
     height: auto;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import {
+    position: absolute;
+    inset: 0;
+    height: auto;
+}
+
+.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: 379px !important;
+    height: 18px !important;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-data {
+    left: 9px;
+    top: 42px;
+    width: 348px;
+    height: 268px;
+    box-sizing: border-box;
+    padding: 1px 2px 2px 2px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    line-height: 13px;
+    overflow: scroll;
+    scrollbar-width: none;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-data::-webkit-scrollbar {
+    display: none;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-vbar {
+    position: absolute;
+    left: 357px;
+    top: 42px;
+    height: 268px;
+    width: 18px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-hbar {
+    position: absolute;
+    left: 9px;
+    top: 310px;
+    width: 349px;
+    height: 18px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import .fp-bc-btn {
+    position: absolute;
+    top: 335px;
+    box-sizing: border-box;
+    height: 27px;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    border-image: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    line-height: 0;
+    cursor: pointer;
+    image-rendering: pixelated;
 }
 
 .octane-floorplan-import.is-official .fp-bc-import-revert {
-    left: -3px;
+    left: 9px;
+    width: 158px;
+    /* button style 101 scale9: 4 rows above and 5 below the stretched centre, sampled by flooring, so the skin is stretched to the exact size */
+    background-image: url("../../assets/images/habbo-skin/slices/button-small-101-158x27.png");
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-save {
+    left: 313px;
+    width: 51px;
+    background-image: url("../../assets/images/habbo-skin/slices/button-small-101-51x27.png");
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-revert .fp-bc-import-label {
+    left: 13px;
+    top: 6px;
+}
+
+.octane-floorplan-import.is-official .fp-bc-import-save .fp-bc-import-label {
+    left: 13px;
+    top: 6px;
+}
+
+/* v75 text fields: left aligned native rasters, offsets measured against the running client */
+.fp-bc .fp-bc-room-controls .fp-bc-direction .fp-bc-direction-label {
+    left: 7px;
+    text-align: left;
+}
+
+.fp-bc .fp-bc-thickness .fp-bc-direction-label {
+    left: 14px;
+    text-align: left;
+}
+
+.octane-floorplan-window .fp-bc-subtitle {
+    left: 77px;
+    top: 11px;
+    line-height: 0;
+}
+
+.octane-floorplan-window .fp-bc-zoom {
+    left: 16px;
+    bottom: 11px;
+}
+
+/* frame 3 header: native title text centred on the whole window, help button 27px and close button 3px from the right edge */
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+    top: 3px !important;
+    right: auto !important;
+    left: -6px !important;
+    width: calc(100% + 12px) !important;
+    max-width: none !important;
+    height: 18px !important;
+    line-height: 0 !important;
+    text-align: left;
+}
+
+.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-floorplan-window .fp-bc-logo {
+    left: 12px;
+    top: 7px;
+}
+
+/* the heightmap bar sits over the black map, the track colour has to come from the bar itself */
+.fp-bc-map-vbar {
+    /* first column is the translucent edge of the art over the black map, which runs under it */
+    background: linear-gradient(90deg, transparent 1px, #bdbdb5 1px);
 }

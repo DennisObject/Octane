@@ -10,7 +10,7 @@ export const CatalogTotalPriceWidget: FC<CatalogSimplePriceWidgetViewProps> = (p
 
     return (
         <Column gap={gap} {...rest}>
-            <CatalogPriceDisplayWidgetView offer={currentOffer} separator />
+            <CatalogPriceDisplayWidgetView bigIcons offer={currentOffer} separator />
         </Column>
     );
 };

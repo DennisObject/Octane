@@ -3,6 +3,7 @@ import {
     GetAvatarRenderManager,
     GetCommunication,
     GetConfiguration,
+    GetFurnitureDataUrl,
     GetDesiredResolution,
     GetLocalizationManager,
     GetRoomEngine,
@@ -21,13 +22,15 @@ import {
     PrepareRenderer
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, fetchReconnectTicket, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
+import { clearRoomToolsHistory } from './components/room/widgets/room-tools/roomToolsHistoryStore';
 import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
+import { clearPerkAllowances, listenForPerkAllowances } from './state/perkAllowancesStore';
 import { SharedHookRegistry } from './state/useSharedHook';
 
 OctaneVersion.UI_VERSION = GetUIVersion();
@@ -45,6 +48,15 @@ const syncViewportCssVars = () => {
 
     document.documentElement.style.setProperty('--octane-app-width', `${width}px`);
     document.documentElement.style.setProperty('--octane-app-height', `${height}px`);
+};
+
+// bootstrap.ts starts the socket itself when the page was opened with a hand-off ticket.
+const takeEarlyCommunicationInit = (): Promise<void> | null => {
+    const early = (window as any).__octaneEarlyCommunicationInit as Promise<void> | undefined;
+
+    delete (window as any).__octaneEarlyCommunicationInit;
+
+    return early ?? null;
 };
 
 const preloadUrl = async (url: string): Promise<void> => {
@@ -106,6 +118,7 @@ export const App: FC<{}> = (props) => {
     const warmupPromiseRef = useRef<Promise<void>>(null);
     const rendererPromiseRef = useRef<Promise<any>>(null);
     const gameInitPromiseRef = useRef<Promise<void> | null>(null);
+    const communicationInitRef = useRef<Promise<void> | null>(null);
     const bootstrapDoneRef = useRef(false);
     const lastPrepareTriggerRef = useRef<number | null>(null);
     const tickersStartedRef = useRef(false);
@@ -123,6 +136,8 @@ export const App: FC<{}> = (props) => {
         endAuthSession();
         forgetAccessToken();
         ClearStoredChatHistory();
+        clearPerkAllowances();
+        clearRoomToolsHistory();
         if (authEnabled) void revokeSession(accessToken, ssoTicket);
         try {
             delete (window as any).OctaneConfig?.['sso.ticket'];
@@ -211,6 +226,8 @@ export const App: FC<{}> = (props) => {
     const applySsoTicket = useCallback((ssoTicket: string) => {
         if (!ssoTicket) return;
         ClearStoredChatHistory();
+        clearPerkAllowances();
+        clearRoomToolsHistory();
         window.OctaneConfig['sso.ticket'] = ssoTicket;
         GetConfiguration().setValue('sso.ticket', ssoTicket);
         if (authEnabled) void exchangeSsoTicketForAccessToken(ssoTicket);
@@ -331,12 +348,13 @@ export const App: FC<{}> = (props) => {
 
                 const interpolate = (value: string) => GetConfiguration().interpolate(value);
                 const assetUrls = asStringArray(GetConfiguration().getValue<unknown>('preload.assets.urls')).map(interpolate);
+                // LocalizationManager downloads external.texts.url itself, all at once, below.
+                // Furnidata is warmed at the exact URL the session loads it from (its boot version, if known).
                 const gamedataUrls = [
-                    ...asStringArray(GetConfiguration().getValue<unknown>('external.texts.url')).map(interpolate),
-                    ...['furnidata.url', 'productdata.url', 'avatar.actions.url', 'avatar.figuredata.url', 'avatar.figuremap.url', 'avatar.effectmap.url']
+                    interpolate(GetFurnitureDataUrl(true)),
+                    ...['productdata.url', 'avatar.actions.url', 'avatar.figuredata.url', 'avatar.figuremap.url', 'avatar.effectmap.url']
                         .map((key) => interpolate(GetConfiguration().getValue<string>(key, '')))
-                        .filter(Boolean)
-                ];
+                ].filter(Boolean);
                 const loginImages = (GetConfiguration().getValue<Record<string, unknown>>('loginview', {})?.images as Record<string, string>) ?? {};
                 const loginImageUrls = [
                     loginImages.background,
@@ -495,6 +513,17 @@ export const App: FC<{}> = (props) => {
                     }
                 }
 
+                // Connect and log in while the gamedata loads, as the official client does. The
+                // connection holds incoming messages until MainView calls ready(), so the managers
+                // below still register their handlers first.
+                if (!communicationInitRef.current) {
+                    listenForPerkAllowances();
+                    // Without the auth API a dropped session cannot get a new ticket; it ends instead.
+                    GetCommunication().setReconnectTicketProvider(authEnabled ? fetchReconnectTicket : async () => '');
+                    communicationInitRef.current = takeEarlyCommunicationInit() ?? GetCommunication().init();
+                    communicationInitRef.current.catch(() => {});
+                }
+
                 const renderer = await startRenderer(width, height);
                 bumpProgress(20);
 
@@ -509,7 +538,7 @@ export const App: FC<{}> = (props) => {
                         bumpProgress(85);
                         await GetRoomEngine().init();
                         bumpProgress(92);
-                        await GetCommunication().init();
+                        await communicationInitRef.current;
                         bumpProgress(98);
                     })();
                 }

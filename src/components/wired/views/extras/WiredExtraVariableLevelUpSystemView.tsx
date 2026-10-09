@@ -1,3 +1,4 @@
+import { parseWiredInt64, WIRED_INT64_MAX } from '@octane/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
@@ -38,7 +39,7 @@ interface IVariableLevelUpEditorData {
 
 interface ILevelEntry {
     level: number;
-    requiredXp: number;
+    requiredXp: bigint;
 }
 
 const localizeOrFallback = (key: string, fallback: string, params?: string[], values?: string[]) => {
@@ -101,104 +102,60 @@ const parseIntInput = (value: string, fallback: number) => {
     return Number.isFinite(parsedValue) ? parsedValue : fallback;
 };
 
-const parseManualAnchors = (value: string) => {
-    const anchors = new Map<number, number>();
-    const lines = normalizeInterpolationText(value).split('\n');
+const boundedXp = (value: bigint) => value < 0n ? 0n : value > WIRED_INT64_MAX ? WIRED_INT64_MAX : value;
 
-    for (const rawLine of lines) {
-        const trimmedLine = rawLine.trim();
-
-        if (!trimmedLine.length) continue;
-
-        const separator = trimmedLine.includes('=') ? '=' : trimmedLine.includes(',') ? ',' : '';
-
-        if (!separator.length) continue;
-
-        const [rawLevel, rawXp] = trimmedLine.split(separator, 2).map((part) => part.trim());
-        const level = parseInt(rawLevel, 10);
-        const xp = parseInt(rawXp, 10);
-
-        if (!Number.isFinite(level) || !Number.isFinite(xp) || level <= 0) continue;
-
-        anchors.set(level, Math.max(0, xp));
-    }
-
-    if (!anchors.has(1)) anchors.set(1, 0);
-
-    return [...anchors.entries()].sort((left, right) => left[0] - right[0]);
+const previewInt = (value: number) => {
+    if (!Number.isInteger(value) || value < 0 || value > 2147483647) throw new RangeError('Invalid level setting');
+    return BigInt(value);
 };
 
-const buildLinearEntries = (stepSize: number, maxLevel: number) => {
+const buildManualEntries = (value: string): ILevelEntry[] => {
+    const anchors = new Map<number, bigint>();
+    for (const rawLine of normalizeInterpolationText(value).split('\n')) {
+        const line = rawLine.trim();
+        if (!line.length) continue;
+        const separator = line.includes('=') ? '=' : ',';
+        const splitAt = line.indexOf(separator);
+        if (splitAt <= 0) throw new RangeError('Invalid level anchor');
+        const rawLevel = line.slice(0, splitAt).trim();
+        const rawXp = line.slice(splitAt + 1).trim();
+        if (!/^[+-]?\d+$/.test(rawLevel) || !rawXp) throw new RangeError('Invalid level anchor');
+        const level = Number(rawLevel);
+        const xp = parseWiredInt64(rawXp.replace(/^\+/, ''));
+        if (level < 1 || level > 10000 || xp < 0n) throw new RangeError('Invalid level anchor');
+        anchors.set(level, xp);
+    }
+    if (!anchors.has(1)) anchors.set(1, 0n);
+    const sorted = [...anchors.entries()].sort((left, right) => left[0] - right[0]);
     const entries: ILevelEntry[] = [];
-
-    for (let level = 1; level <= maxLevel; level++) {
-        entries.push({
-            level,
-            requiredXp: Math.max(0, (level - 1) * stepSize)
-        });
-    }
-
-    return entries;
-};
-
-const buildExponentialEntries = (firstLevelXp: number, increaseFactor: number, maxLevel: number) => {
-    const entries: ILevelEntry[] = [{ level: 1, requiredXp: 0 }];
-    let nextIncrement = Math.max(0, firstLevelXp);
-    let threshold = 0;
-
-    for (let level = 2; level <= maxLevel; level++) {
-        threshold += nextIncrement;
-
-        entries.push({
-            level,
-            requiredXp: Math.max(0, Math.round(threshold))
-        });
-
-        nextIncrement = Math.max(0, Math.round(nextIncrement * ((100 + Math.max(0, increaseFactor)) / 100)));
-    }
-
-    return entries;
-};
-
-const buildManualEntries = (value: string) => {
-    const anchors = parseManualAnchors(value);
-
-    if (!anchors.length) return [{ level: 1, requiredXp: 0 }];
-
-    const entries = new Map<number, number>();
-
-    for (let index = 0; index < anchors.length; index++) {
-        const [currentLevel, currentXp] = anchors[index];
-
-        entries.set(currentLevel, currentXp);
-
-        if (index >= anchors.length - 1) continue;
-
-        const [nextLevel, nextXp] = anchors[index + 1];
-
-        if (nextLevel <= currentLevel) continue;
-
-        const deltaLevel = nextLevel - currentLevel;
-        const deltaXp = nextXp - currentXp;
-
-        for (let level = currentLevel + 1; level < nextLevel; level++) {
-            const progress = (level - currentLevel) / deltaLevel;
-            entries.set(level, Math.max(0, Math.round(currentXp + deltaXp * progress)));
+    let [previousLevel, previousXp] = sorted[0];
+    entries.push({ level: previousLevel, requiredXp: previousXp });
+    for (const [nextLevel, nextXp] of sorted.slice(1)) {
+        const distance = BigInt(nextLevel - previousLevel);
+        for (let level = previousLevel + 1; level <= nextLevel; level++) {
+            const numerator = previousXp * distance + (nextXp - previousXp) * BigInt(level - previousLevel);
+            entries.push({ level, requiredXp: boundedXp((2n * numerator + distance) / (2n * distance)) });
         }
+        previousLevel = nextLevel;
+        previousXp = nextXp;
     }
-
-    return [...entries.entries()].sort((left, right) => left[0] - right[0]).map(([level, requiredXp]) => ({ level, requiredXp }));
+    return entries;
 };
 
-const buildPreviewEntries = (mode: number, stepSize: number, maxLevel: number, firstLevelXp: number, increaseFactor: number, interpolationText: string) => {
-    switch (mode) {
-        case MODE_EXPONENTIAL:
-            return buildExponentialEntries(firstLevelXp, increaseFactor, maxLevel);
-        case MODE_MANUAL:
-            return buildManualEntries(interpolationText);
-        default:
-            return buildLinearEntries(stepSize, maxLevel);
+const buildPreviewEntries = (mode: number, stepSize: number, maxLevel: number, firstLevelXp: number, increaseFactor: number, interpolationText: string): ILevelEntry[] => {
+    if (mode === MODE_MANUAL) return buildManualEntries(interpolationText);
+    const step = previewInt(stepSize);
+    const maximum = Number(previewInt(maxLevel));
+    let increment = previewInt(firstLevelXp);
+    const factor = previewInt(increaseFactor);
+    let threshold = 0n;
+    const entries: ILevelEntry[] = [{ level: 1, requiredXp: 0n }];
+    for (let level = 2; level <= Math.min(10000, maximum); level++) {
+        threshold = mode === MODE_EXPONENTIAL ? boundedXp(threshold + increment) : boundedXp(BigInt(level - 1) * step);
+        entries.push({ level, requiredXp: threshold });
+        increment = boundedXp((increment * (100n + factor) + 50n) / 100n);
     }
+    return entries;
 };
 
 export const WiredExtraVariableLevelUpSystemView: FC<{}> = () => {
@@ -250,7 +207,10 @@ export const WiredExtraVariableLevelUpSystemView: FC<{}> = () => {
     const normalizedInterpolation = useMemo(() => normalizeInterpolationText(interpolationText), [interpolationText]);
 
     const previewEntries = useMemo(
-        () => buildPreviewEntries(mode, normalizedStepSize, normalizedMaxLevel, normalizedFirstLevelXp, normalizedIncreaseFactor, normalizedInterpolation),
+        () => {
+            try { return buildPreviewEntries(mode, normalizedStepSize, normalizedMaxLevel, normalizedFirstLevelXp, normalizedIncreaseFactor, normalizedInterpolation); }
+            catch { return null; }
+        },
         [mode, normalizedFirstLevelXp, normalizedIncreaseFactor, normalizedInterpolation, normalizedMaxLevel, normalizedStepSize]
     );
 
@@ -436,7 +396,8 @@ export const WiredExtraVariableLevelUpSystemView: FC<{}> = () => {
 
                     {isPreviewSectionOpen && (
                         <div className="octane-wired__levelup-preview">
-                            {previewEntries.map((entry) => (
+                            {previewEntries === null && <Text role="alert">Preview unavailable: use valid level settings and nonnegative signed 64-bit XP thresholds.</Text>}
+                            {previewEntries?.map((entry) => (
                                 <div key={entry.level} className="octane-wired__levelup-preview-entry">
                                     {localizeOrFallback(
                                         'wiredfurni.params.levelup.preview.entry',

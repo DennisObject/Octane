@@ -170,7 +170,7 @@ export const webApiEntryToHolder = (entry: WebApiEntry, scope: WebApiHolderScope
 export interface ExplorerProfileEntry {
     name: string;
     hasValue: boolean;
-    value: number | null;
+    value: bigint | number | null;
     createdAt: number;
     updatedAt: number;
 }
@@ -182,12 +182,12 @@ export const profileToEntries = (profile: WebApiProfile | null, variables: WebAp
     return Object.entries(profile.variables)
         .map(([name, stored]) => {
             const definition = variables.find((variable) => variable.name === name);
-            const hasValue = definition ? definition.hasValue : typeof stored?.value === 'number';
+            const hasValue = definition ? definition.hasValue : (typeof stored?.value === 'number' || typeof stored?.value === 'bigint');
 
             return {
                 name,
                 hasValue,
-                value: hasValue && typeof stored?.value === 'number' ? stored.value : null,
+                value: hasValue && (typeof stored?.value === 'number' || typeof stored?.value === 'bigint') ? stored.value : null,
                 createdAt: stored?.createdAt ?? 0,
                 updatedAt: stored?.updatedAt ?? 0
             };

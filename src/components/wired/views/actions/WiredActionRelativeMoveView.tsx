@@ -1,21 +1,22 @@
 import { FC, useEffect, useState } from 'react';
-import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp } from 'react-icons/fa';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
+import { WiredDirectionIcon } from '../WiredDirectionIcon';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 const MAX_DISTANCE = 20;
 
 const HORIZONTAL_OPTIONS = [
-    { value: 0, icon: <FaArrowLeft /> },
-    { value: 1, icon: <FaArrowRight /> }
+    { value: 0, direction: 6, label: '-X' },
+    { value: 1, direction: 2, label: '+X' }
 ];
 
 const VERTICAL_OPTIONS = [
-    { value: 0, icon: <FaArrowDown /> },
-    { value: 1, icon: <FaArrowUp /> }
+    { value: 0, direction: 0, label: '-Y' },
+    { value: 1, direction: 4, label: '+Y' }
 ];
 
 const normalizeDirection = (value: number, fallback = 1) => {
@@ -70,13 +71,14 @@ export const WiredActionRelativeMoveView: FC<{}> = () => {
                         return (
                             <label key={option.value} className="flex items-center gap-1">
                                 <input
+                                    aria-label={option.label}
                                     checked={horizontalDirection === option.value}
                                     className="form-check-input"
                                     name="relativeMoveHorizontal"
                                     type="radio"
                                     onChange={() => setHorizontalDirection(option.value)}
                                 />
-                                <Text>{option.icon}</Text>
+                                <WiredDirectionIcon direction={option.direction} selected={horizontalDirection === option.value} />
                             </label>
                         );
                     })}
@@ -91,13 +93,14 @@ export const WiredActionRelativeMoveView: FC<{}> = () => {
                         return (
                             <label key={option.value} className="flex items-center gap-1">
                                 <input
+                                    aria-label={option.label}
                                     checked={verticalDirection === option.value}
                                     className="form-check-input"
                                     name="relativeMoveVertical"
                                     type="radio"
                                     onChange={() => setVerticalDirection(option.value)}
                                 />
-                                <Text>{option.icon}</Text>
+                                <WiredDirectionIcon direction={option.direction} selected={verticalDirection === option.value} />
                             </label>
                         );
                     })}

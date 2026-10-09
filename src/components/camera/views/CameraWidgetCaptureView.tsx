@@ -1,4 +1,4 @@
-import { GetRenderer, OctaneTexture } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, OctaneLogger, OctaneTexture, RequestCameraConfigurationComposer } from '@octane/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -7,13 +7,17 @@ import {
     deleteTrustedCamera,
     getTrustedCameraViewport,
     getViewfinderRoomFrame,
+    loadTrustedCameraImage,
     LocalizeText,
+    NotificationAlertType,
     PlaySound,
+    SendMessageComposer,
     SoundNames
 } from '../../../api';
-import { Button, Column, DraggableWindow } from '../../../common';
+import { Column, DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
 import { getNextEmptyCameraSlot, willFillLastCameraSlot } from '../CameraAirUtilities';
+import { CameraCenteredText } from './CameraNativeText';
 
 export interface CameraWidgetCaptureViewProps {
     onClose: () => void;
@@ -30,6 +34,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
     const { onClose = null, onEdit = null, onDelete = null } = props;
     const {
         cameraRoll = Array(CAMERA_ROLL_LIMIT).fill(null),
+        cameraRollRef = null,
         setCameraRoll = null,
         selectedPictureIndex = -1,
         setSelectedPictureIndex = null,
@@ -41,6 +46,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
     const videoRef = useRef<HTMLVideoElement>(null);
     const flashRef = useRef<HTMLDivElement>(null);
     const isTakingPictureRef = useRef(false);
+    const hasRequestedPreparationRef = useRef(false);
     const isMountedRef = useRef(true);
     const pendingCapturedSlotRef = useRef(-1);
     const pendingShouldShowFullAlertRef = useRef(false);
@@ -106,6 +112,22 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                 }
             }
 
+            if (!hasRequestedPreparationRef.current) {
+                const roomFrame = getViewfinderRoomFrame(target, 320, 320);
+
+                if (roomFrame) {
+                    try {
+                        const viewport = getTrustedCameraViewport(roomFrame);
+
+                        // Preparation is best effort and sends the same geometry as the shutter.
+                        hasRequestedPreparationRef.current = true;
+                        SendMessageComposer(new RequestCameraConfigurationComposer(JSON.stringify(viewport)));
+                    } catch {
+                        // The room geometry may not be ready on the first animation frame.
+                    }
+                }
+            }
+
             // AIR registers CameraViewFinder as a 100 ms update receiver. Keep
             // that cadence only for browsers where canvas.captureStream is not
             // available; the normal path stays entirely in the compositor.
@@ -148,7 +170,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         if (pendingShouldShowFullAlertRef.current && !hasShownFullRollAlert) {
             hasShownFullRollAlert = true;
-            simpleAlert(LocalizeText('camera.full.body'), null, null, null, LocalizeText('camera.full.header'));
+            simpleAlert(LocalizeText('camera.full.body'), NotificationAlertType.WINDOW, null, null, LocalizeText('camera.full.header'));
         }
 
         pendingShouldShowFullAlertRef.current = false;
@@ -165,15 +187,30 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         const frame = getViewfinderRoomFrame(elementRef.current, 320, 320);
 
         if (!frame) {
-            simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
+            simpleAlert(LocalizeText('camera.error.creation'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             return;
         }
 
         isTakingPictureRef.current = true;
 
         const targetSlot = activePictureSlotIndex >= 0 && activePictureSlotIndex < CAMERA_ROLL_LIMIT ? activePictureSlotIndex : 0;
+        const captureSession = GetRoomSessionManager().getSession(-1);
         let texture: OctaneTexture = null;
         let capturedDraftId: string = null;
+
+        const setSlot = (picture: CameraPicture | null) => {
+            const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => (index === targetSlot ? picture : (cameraRollRef.current[index] ?? null)));
+
+            cameraRollRef.current = nextRoll;
+            setCameraRoll(nextRoll);
+        };
+
+        // Fills the empty slot and lets the roll move on to the next one, as AIR does.
+        const fillSlot = (picture: CameraPicture) => {
+            pendingCapturedSlotRef.current = targetSlot;
+            pendingShouldShowFullAlertRef.current = !hasShownFullRollAlert && willFillLastCameraSlot(cameraRollRef.current, targetSlot);
+            setSlot(picture);
+        };
 
         try {
             PlaySound(SoundNames.CAMERA_SHUTTER);
@@ -182,57 +219,43 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
             void flashRef.current?.offsetWidth;
             flashRef.current?.classList.add('octane-camera-capture__flash--active');
 
-            // Only this server-issued capture can enter the roll or checkout.
-            const previousDraft = cameraRoll[targetSlot]?.draftId;
-            if (previousDraft) {
-                deleteTrustedCamera(previousDraft);
-                setCameraRoll((previous) => previous.map((picture, index) => (index === targetSlot ? null : picture)));
+            const viewport = getTrustedCameraViewport(frame);
+            const previousPicture = cameraRollRef.current[targetSlot];
+
+            // Free the replaced draft first so a full roll stays within the server's draft limit.
+            if (previousPicture) {
+                deleteTrustedCamera(previousPicture.draftId);
+                previousPicture.texture?.destroy?.(true);
+                setSlot(null);
             }
-            const capture = await captureTrustedCamera(getTrustedCameraViewport(frame));
+
+            // Encoding a temporary PNG can block the persisted reply on the main thread.
+            const capture = await captureTrustedCamera(viewport);
             capturedDraftId = capture.draftId;
 
-            if (!isMountedRef.current) {
+            const image = await loadTrustedCameraImage(capture);
+
+            // Loading can finish after closing the camera or leaving the captured room.
+            if (cameraRollRef.current[targetSlot] || !isMountedRef.current || GetRoomSessionManager().getSession(-1) !== captureSession) {
                 deleteTrustedCamera(capture.draftId);
                 return;
             }
 
-            const image = new Image();
-            image.crossOrigin = 'anonymous';
-            await new Promise<void>((resolve, reject) => {
-                const timeout = window.setTimeout(() => reject(new Error('Camera image timed out')), 30_000);
-                image.onload = () => {
-                    window.clearTimeout(timeout);
-                    resolve();
-                };
-                image.onerror = () => {
-                    window.clearTimeout(timeout);
-                    reject(new Error('Camera image could not be loaded'));
-                };
-                image.src = capture.url;
-            });
-            if (!isMountedRef.current) {
-                deleteTrustedCamera(capture.draftId);
-                return;
-            }
             texture = OctaneTexture.from(image);
-            const imageUrl = capture.url;
 
-            cameraRoll[targetSlot]?.texture?.destroy?.(true);
+            const picture = new CameraPicture(texture, capture.url, capture.draftId, image.src);
 
-            const nextRoll = Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => cameraRoll[index] ?? null);
-
-            nextRoll[targetSlot] = new CameraPicture(texture, imageUrl, capture.draftId);
-            pendingCapturedSlotRef.current = targetSlot;
-            pendingShouldShowFullAlertRef.current = !hasShownFullRollAlert && willFillLastCameraSlot(cameraRoll, targetSlot);
             texture = null;
-            setCameraRoll(nextRoll);
             capturedDraftId = null;
-        } catch {
+
+            fillSlot(picture);
+        } catch (error) {
+            OctaneLogger.error('Failed to capture camera photo', error);
             if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
             texture?.destroy?.(true);
 
             if (isMountedRef.current) {
-                simpleAlert(LocalizeText('camera.alert.too_much_stuff'), null, null, null, LocalizeText('generic.alert.title'));
+                simpleAlert(LocalizeText('camera.error.creation'), NotificationAlertType.WINDOW, null, null, LocalizeText('generic.alert.title'));
             }
         } finally {
             isTakingPictureRef.current = false;
@@ -246,7 +269,16 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
         <DraggableWindow>
             <Column center className="octane-camera-capture" gap={0}>
                 <div className="octane-camera-capture__body drag-handler">
-                    <div className="octane-camera-capture__title">{LocalizeText('camera.interface.title')}</div>
+                    <div className="octane-camera-capture__title">
+                        <CameraCenteredText
+                            background={0x000000}
+                            color={0xffffff}
+                            text={LocalizeText('camera.interface.title')}
+                            textStyle="u_frame_title"
+                            width={340}
+                        />
+                    </div>
+                    <button type="button" className="octane-camera-capture__help" aria-label={LocalizeText('generic.help')} onClick={() => CreateLinkEvent('habbopages/camera')} />
                     <button type="button" className="octane-camera-capture__close" aria-label={LocalizeText('generic.close')} onClick={onClose} />
                     <div className="octane-camera-viewfinder">
                         {!selectedPicture && (
@@ -255,20 +287,29 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                 <video ref={videoRef} className="octane-camera-viewfinder__stream" aria-hidden="true" muted playsInline />
                             </>
                         )}
-                        {selectedPicture && <img alt="" className="octane-camera-viewfinder__photo" src={selectedPicture.imageUrl} />}
+                        {selectedPicture && <img alt="" className="octane-camera-viewfinder__photo" src={selectedPicture.displayUrl} />}
                     </div>
                     {!selectedPicture && <div className="octane-camera-capture__crosshair" aria-hidden="true" />}
                     <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
                     {selectedPicture && (
                         <div className="octane-camera-capture__preview-actions">
-                            <Button
-                                className="octane-camera-capture__editor-button"
+                            {/* A photo opened before the server's capture arrives can't be edited or bought yet. */}
+                            <button
+                                className="habbo-btn-primary octane-camera-capture__editor-button"
+                                disabled={!selectedPicture.draftId}
                                 title={LocalizeText('camera.editor.button.tooltip')}
-                                variant="success"
+                                type="button"
                                 onClick={onEdit}
                             >
-                                {LocalizeText('camera.editor.button.text')}
-                            </Button>
+                                <CameraCenteredText
+                                    background={0x000000}
+                                    color={0xffffff}
+                                    style={{ mixBlendMode: 'screen' }}
+                                    text={LocalizeText('camera.editor.button.text')}
+                                    textStyle="button_shiny_bold"
+                                    width={38}
+                                />
+                            </button>
                         </div>
                     )}
                     <button
@@ -291,13 +332,11 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                     className="octane-camera-roll__slot-button"
                                     aria-label={picture ? LocalizeText('camera.editor.button.tooltip') : LocalizeText('camera.take.photo.button.tooltip')}
                                     onClick={() => {
-                                        if (isTakingPictureRef.current) return;
-
                                         setActivePictureSlotIndex(index);
                                         setSelectedPictureIndex(picture ? index : -1);
                                     }}
                                 >
-                                    {picture && <img alt="" src={picture.imageUrl} />}
+                                    {picture && <img alt="" src={picture.displayUrl} />}
                                 </button>
                                 {picture && selectedPictureIndex === index && (
                                     <button
@@ -305,9 +344,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                         className="octane-camera-roll__delete"
                                         aria-label={LocalizeText('camera.delete.button.text')}
                                         title={LocalizeText('camera.delete.button.text')}
-                                        onClick={() => {
-                                            if (!isTakingPictureRef.current) onDelete();
-                                        }}
+                                        onClick={onDelete}
                                     />
                                 )}
                             </div>

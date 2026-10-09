@@ -1,0 +1,78 @@
+/* QuestTracker (official layout 192x132): a 195x135 bitmap with its fields at fixed offsets; stacked in the right-hand extension column. */
+.air-quest-tracker {
+    position: relative;
+    width: 195px;
+    height: 132px;
+    margin-right: -4px;
+    flex-shrink: 0;
+    pointer-events: auto;
+    color: #ffffff;
+    image-rendering: var(--octane-pixel-art, pixelated);
+    animation: air-quest-tracker-slide 0.7s cubic-bezier(0.1, 0.6, 0.3, 1);
+}
+
+/* The official window starts at its width + 10 and eases left by a share of the remaining distance each frame. */
+@keyframes air-quest-tracker-slide {
+    from {
+        transform: translateX(205px);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.air-quest-tracker-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 195px;
+    height: 135px;
+    max-width: none;
+}
+
+/* quest_pic_bitmap: 54x46 at (9, 32), the bitmap pivoted on its centre. */
+.air-quest-tracker-image {
+    position: absolute;
+    top: 32px;
+    left: 9px;
+    width: 54px;
+    height: 46px;
+    object-fit: none;
+    object-position: calc(50% - 0.01px) calc(50% - 0.01px);
+}
+
+/* success_pic_1..6: 41x47, drawn at (15, 31) in the official client although its layout says y = 32. */
+.air-quest-tracker-check {
+    position: absolute;
+    top: 31px;
+    left: 15px;
+    width: 41px;
+    height: 47px;
+}
+
+/* ProgressBar at (10, 87), 162 wide, with no frame. */
+.air-quest-tracker .air-quest-tracker-progress {
+    position: absolute;
+    top: 87px;
+    left: 10px;
+}
+
+/* more_info_region (15, 106, 162x18) over the centred more_info_txt field. */
+.air-quest-tracker-details {
+    position: absolute;
+    top: 106px;
+    left: 15px;
+    width: 162px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.air-quest-tracker-details .air-achievement-text {
+    top: 3px !important;
+    left: 12px !important;
+}

@@ -3,7 +3,7 @@ import { useFriends } from '../../../../../hooks';
 import { FriendsListRequestItemView } from './FriendsListRequestItemView';
 
 export const FriendsListRequestView: FC = () => {
-    const { requests = [] } = useFriends();
+    const { requestRows: requests = [] } = useFriends();
 
     return (
         <div className="hfl-requests">

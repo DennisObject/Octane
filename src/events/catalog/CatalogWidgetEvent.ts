@@ -19,7 +19,6 @@ export class CatalogWidgetEvent extends OctaneEvent {
     public static SET_PREVIEWER_STUFFDATA: string = 'CWE_CWE_SET_PREVIEWER_STUFFDATA';
     public static EXTRA_PARAM_REQUIRED_FOR_BUY: string = 'CWE_CWE_EXTRA_PARAM_REQUIRED_FOR_BUY';
     public static TOGGLE: string = 'CWE_CWE_TOGGLE';
-    public static BUILDER_SUBSCRIPTION_UPDATED: string = 'CWE_CWE_BUILDER_SUBSCRIPTION_UPDATED';
     public static ROOM_CHANGED: string = 'CWE_CWE_ROOM_CHANGED';
     public static SHOW_WARNING_TEXT: string = 'CWE_CWE_SHOW_WARNING_TEXT';
 }

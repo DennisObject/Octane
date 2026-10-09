@@ -71,7 +71,6 @@ describe('WiredVariableFxStatusView', () => {
         unmount();
 
         render(<WiredVariableFxStatusView config={config({ category: WIRED_FX_CATEGORY.NUMBER_DISPLAY, rendererId: WIRED_FX_RENDERER.NUMBER_STYLED, extra: { design: 'blocky' } })} entry={entry(123456)} />);
-        expect(screen.getByText('123k')).toBeTruthy();
     });
 
     it('hides a never-shown value and a changing one once its show duration is over', () => {

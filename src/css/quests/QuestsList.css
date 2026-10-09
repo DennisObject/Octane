@@ -1,0 +1,532 @@
+/* Quests list (512x448) and QuestDetails (493x253) of the quest engine: frame style 3 windows whose entries are flat
+   colour surfaces and questing bitmaps at the layout XML rects (HabboQuestEngineCom Quests, Campaign, Quest). */
+
+.octane-card-shell.octane-quests-air,
+.octane-card-shell.octane-quest-details-air {
+    position: relative;
+    box-sizing: border-box;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    resize: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    --octane-card-surface: #e9e9e1;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-card-shell.octane-quests-air {
+    width: 512px !important;
+    height: 448px !important;
+}
+
+.octane-card-shell.octane-quest-details-air {
+    width: 493px !important;
+}
+
+.draggable-window:has(> .octane-quests-air) {
+    width: 512px;
+    height: 448px;
+}
+
+.draggable-window:has(> .octane-quest-details-air) {
+    width: 493px;
+}
+
+.octane-quests-air *,
+.octane-quest-details-air * {
+    box-sizing: border-box;
+    font-family: HabboAirUbuntu, Ubuntu, sans-serif;
+}
+
+.octane-quests-air .air-quests-native-title,
+.octane-quest-details-air .air-quests-native-title {
+    position: absolute !important;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.octane-card-shell.octane-quests-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button,
+.octane-card-shell.octane-quest-details-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    top: 2px !important;
+    right: 3px !important;
+}
+
+.octane-quests-air .air-quests-content.octane-card-content-shell,
+.octane-quest-details-air .air-quest-details-content.octane-card-content-shell {
+    position: relative;
+    display: block;
+    margin: 33px 0 0;
+    padding: 0 !important;
+    background: transparent;
+    overflow: visible;
+}
+
+.octane-quests-air .air-quests-content.octane-card-content-shell {
+    width: 512px;
+    height: 415px;
+}
+
+.octane-quest-details-air .air-quest-details-content.octane-card-content-shell {
+    width: 493px;
+}
+
+/* ---- list ---- */
+
+.octane-quests-air .air-quests-list {
+    position: absolute;
+    top: 10px;
+    left: 13px;
+    width: 491px;
+    height: 362px;
+}
+
+.octane-quests-air .air-quests-list > .octane-classic-scroll-area-viewport {
+    width: 473px;
+    height: 362px;
+}
+
+.octane-quests-air .air-quests-entries {
+    width: 473px;
+}
+
+.octane-quests-air .air-quests-hc-info {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.octane-quests-air .air-quest-get-hc {
+    position: absolute;
+    top: 378px;
+    left: 378px;
+    width: 107px;
+    height: 30px;
+    pointer-events: auto;
+}
+
+/* ---- entry ---- */
+
+.air-quest-entry {
+    position: relative;
+    width: 473px;
+    height: 124px;
+}
+
+.air-quest-counter-text {
+    margin-top: var(--air-quest-extra, 0px);
+}
+
+.octane-quests-air .air-quest-entry:last-child {
+    height: 114px;
+}
+
+.octane-quest-details-air .air-quest-entry {
+    margin: 11px 0 0 11px;
+}
+
+.air-quest-campaign {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 103px;
+    height: calc(114px + var(--air-quest-extra, 0px));
+    background: #646464;
+}
+
+.air-quest-entry[data-accepted='true'] .air-quest-campaign {
+    background: #c29d3b;
+}
+
+.air-quest-campaign-top,
+.air-quest-campaign-bottom {
+    position: absolute;
+    left: 2px;
+    width: 99px;
+}
+
+.air-quest-campaign-top {
+    top: 2px;
+    height: calc(110px + var(--air-quest-extra, 0px));
+    background: #bababa;
+}
+
+.air-quest-campaign-bottom {
+    top: calc(57px + var(--air-quest-extra-floor, 0px));
+    height: calc(55px + var(--air-quest-extra-floor, 0px));
+    background: #ababab;
+}
+
+.air-quest-entry[data-accepted='true'] .air-quest-campaign-top {
+    background: #ffd788;
+}
+
+.air-quest-entry[data-accepted='true'] .air-quest-campaign-bottom {
+    background: #ffc758;
+}
+
+.air-quest-campaign-image {
+    position: absolute;
+    /* the picture field is centred in the campaign block that grows with the hint (floor), the arrow rounds up */
+    top: calc(21px + var(--air-quest-extra-floor, 0px));
+    left: 11px;
+    width: 84px;
+    height: 72px;
+    object-fit: none;
+    /* pivot_point center places the bitmap at floor((field - bitmap) / 2); CSS rounds half a pixel up */
+    object-position: calc(50% - 0.01px) calc(50% - 0.01px);
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.air-quest-counter {
+    position: absolute;
+    top: calc(84px + var(--air-quest-extra, 0px));
+    left: 27px;
+    width: 49px;
+    height: 20px;
+}
+
+.air-quest-arrow {
+    position: absolute;
+    top: calc(45px + var(--air-quest-extra-ceil, 0px));
+    left: 101px;
+    width: 15px;
+    height: 25px;
+}
+
+/* Rounded surfaces of the Quest layout: a 1px outline with the stair-step corner of the border skin (5, 3-4, 2, 1, 1, 0). */
+.air-quest-round {
+    --air-round-outline: #5d5d5a;
+    --air-round-fill: #c8c8c8;
+    background: var(--air-round-outline);
+    clip-path: polygon(
+        5px 0,
+        calc(100% - 5px) 0,
+        calc(100% - 5px) 1px,
+        calc(100% - 3px) 1px,
+        calc(100% - 3px) 2px,
+        calc(100% - 2px) 2px,
+        calc(100% - 2px) 3px,
+        calc(100% - 1px) 3px,
+        calc(100% - 1px) 5px,
+        100% 5px,
+        100% calc(100% - 5px),
+        calc(100% - 1px) calc(100% - 5px),
+        calc(100% - 1px) calc(100% - 3px),
+        calc(100% - 2px) calc(100% - 3px),
+        calc(100% - 2px) calc(100% - 2px),
+        calc(100% - 3px) calc(100% - 2px),
+        calc(100% - 3px) calc(100% - 1px),
+        calc(100% - 5px) calc(100% - 1px),
+        calc(100% - 5px) 100%,
+        5px 100%,
+        5px calc(100% - 1px),
+        3px calc(100% - 1px),
+        3px calc(100% - 2px),
+        2px calc(100% - 2px),
+        2px calc(100% - 3px),
+        1px calc(100% - 3px),
+        1px calc(100% - 5px),
+        0 calc(100% - 5px),
+        0 5px,
+        1px 5px,
+        1px 3px,
+        2px 3px,
+        2px 2px,
+        3px 2px,
+        3px 1px,
+        5px 1px
+    );
+}
+
+.air-quest-round::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: var(--air-round-fill);
+    clip-path: polygon(
+        4px 0,
+        calc(100% - 4px) 0,
+        calc(100% - 4px) 1px,
+        calc(100% - 2px) 1px,
+        calc(100% - 2px) 2px,
+        calc(100% - 1px) 2px,
+        calc(100% - 1px) 4px,
+        100% 4px,
+        100% calc(100% - 4px),
+        calc(100% - 1px) calc(100% - 4px),
+        calc(100% - 1px) calc(100% - 2px),
+        calc(100% - 2px) calc(100% - 2px),
+        calc(100% - 2px) calc(100% - 1px),
+        calc(100% - 4px) calc(100% - 1px),
+        calc(100% - 4px) 100%,
+        4px 100%,
+        4px calc(100% - 1px),
+        2px calc(100% - 1px),
+        2px calc(100% - 2px),
+        1px calc(100% - 2px),
+        1px calc(100% - 4px),
+        0 calc(100% - 4px),
+        0 4px,
+        1px 4px,
+        1px 2px,
+        2px 2px,
+        2px 1px,
+        4px 1px
+    );
+}
+
+.air-quest-block {
+    position: absolute;
+    top: 0;
+    left: 108px;
+    width: 362px;
+    height: 114px;
+}
+
+.air-quest-block[data-accepted='true'] {
+    --air-round-fill: #f3deb8;
+}
+
+.air-quest-block-header {
+    --air-round-outline: #505050;
+    --air-round-fill: #8d8d8d;
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    width: 351px;
+    height: 28px;
+}
+
+.air-quest-block[data-accepted='true'] .air-quest-block-header {
+    --air-round-outline: #61594a;
+    --air-round-fill: #edb23a;
+}
+
+.air-quest-image {
+    position: absolute;
+    top: 38px;
+    left: 6px;
+    width: 92px;
+    height: 72px;
+    object-fit: none;
+    object-position: calc(50% - 0.01px) calc(50% - 0.01px);
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.air-quest-completed-image {
+    position: absolute;
+    top: 25px;
+    left: 278px;
+    width: 53px;
+    height: 57px;
+}
+
+.air-quest-reward {
+    position: absolute;
+    top: 80px;
+    left: 99px;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.air-quest-reward > .air-achievement-text {
+    margin-top: 2px;
+}
+
+.air-quest-reward-icon {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+
+.air-quest-accept,
+.air-quest-get-hc {
+    position: absolute;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-style: solid;
+    border-image-source: var(--habbo-skin-shiny-thick);
+    border-image-slice: 5 fill;
+    border-image-width: 5px;
+    border-image-repeat: stretch;
+    background: transparent;
+    cursor: pointer;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.air-quest-accept:hover,
+.air-quest-get-hc:hover {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.air-quest-accept:active,
+.air-quest-get-hc:active {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+/* get_hc_btn is coloured 0x01a101: the thick skin multiplied by that colour. */
+.air-quest-get-hc.air-quest-get-hc-green {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-default.png');
+}
+
+.air-quest-get-hc.air-quest-get-hc-green:hover {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-hover.png');
+}
+
+.air-quest-get-hc.air-quest-get-hc-green:active {
+    border-image-source: url('../../assets/images/quests/button-shiny-thick-01a101-pressed.png');
+}
+
+.air-quest-accept {
+    top: 76px;
+    left: 246px;
+    width: 108px;
+    height: 29px;
+}
+
+/* The stretched skin switches from the light to the dark band one row early; this row restores the official seam. */
+.air-quest-button-seam {
+    position: absolute;
+    top: 14px;
+    right: 4px;
+    left: 4px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.air-quest-button-band {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.air-quest-accept .air-achievement-text,
+.air-quest-get-hc .air-achievement-text {
+    top: 5px !important;
+    left: 0 !important;
+}
+
+.air-quest-cancel {
+    position: absolute;
+    top: 81px;
+    left: 275px;
+    width: 100px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.air-quest-reward-icon--credit {
+    background-image: url('../../assets/images/catalog/air/currency-credit-big.png');
+}
+
+.air-quest-reward-icon--ducket {
+    background-image: url('../../assets/images/catalog/air/currency-ducket-big.png');
+}
+
+.air-quest-reward-icon--diamond {
+    background-image: url('../../assets/images/catalog/air/currency-diamond-big.png');
+}
+
+/* ---- style 0 scrollbar (habbo_skin_scrollbar): 17x16 buttons, 1px track, lift = 2 row cap + stretched row + 2 row foot + a 7px grip ---- */
+
+.air-style0-scroll-area > .octane-classic-scroll-area-viewport {
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-width: none !important;
+}
+
+.air-style0-scroll-area > .octane-classic-scroll-area-viewport::-webkit-scrollbar {
+    display: none !important;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar {
+    top: 0;
+    right: 0;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-up-pressed.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-down-pressed.png');
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-track {
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-track-v.png');
+    background-repeat: repeat-y;
+    background-size: 17px 1px;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
+    position: relative;
+    min-height: 0;
+    box-sizing: border-box;
+    border: 0;
+    background-color: transparent;
+    background-image: repeating-linear-gradient(#b8b7b7 0 1px, transparent 1px 2px), linear-gradient(to right, #535353 0 1px, #ffffff 1px 16px, #535353 16px 17px);
+    background-repeat: no-repeat, no-repeat;
+    /* the grip fills the lift between 7px under the cap and 7px above the foot */
+    background-size: 7px calc(100% - 14px), 17px 100%;
+    background-position: 5px 7px, 0 0;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before,
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+    position: absolute;
+    left: 0;
+    width: 17px;
+    height: 2px;
+    content: '';
+    background-image: url('../../assets/images/habbo-skin/slices/scroll-thumb-v.png');
+    background-repeat: no-repeat;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before {
+    top: 0;
+    background-position: 0 0;
+}
+
+.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+    bottom: 0;
+    background-position: 0 -22px;
+}
+
+.octane-quest-details-air .air-quests-native-title {
+    margin-left: -2px;
+}
+
+/* The 30px tinted button draws its label one row lower than the 29px quest buttons. */
+.air-quest-get-hc.air-quest-get-hc-green .air-achievement-text {
+    top: 6px !important;
+}

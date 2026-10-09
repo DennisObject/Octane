@@ -59,6 +59,55 @@ const octaneAssetsServer = () => ({
     }
 });
 
+// The app bundle (src/index.tsx) is a dynamic import of bootstrap.ts, so the browser would only
+// request it once bootstrap has run. Preload it, its chunks and its CSS from the entry HTML so it
+// downloads alongside the bootstrap chunk instead.
+const preloadAppBundle = () =>
+{
+    let base = './';
+
+    return {
+        name: 'octane-preload-app-bundle',
+        apply: 'build',
+        configResolved(config)
+        {
+            base = config.base;
+        },
+        transformIndexHtml: {
+            order: 'post',
+            handler(html, ctx)
+            {
+                const bundle = ctx.bundle;
+                const app = bundle && Object.values(bundle).find(chunk => (chunk.type === 'chunk') && chunk.facadeModuleId?.replace(/\\/g, '/').endsWith('/src/index.tsx'));
+
+                if(!app) return html;
+
+                const scripts = new Set();
+                const styles = new Set();
+                const visit = fileName =>
+                {
+                    const chunk = bundle[fileName];
+
+                    if(!chunk || (chunk.type !== 'chunk') || scripts.has(fileName)) return;
+
+                    scripts.add(fileName);
+                    chunk.viteMetadata?.importedCss?.forEach(file => styles.add(file));
+                    chunk.imports.forEach(visit);
+                };
+
+                visit(app.fileName);
+
+                const tags = [
+                    ...[ ...scripts ].filter(file => !html.includes(file)).map(file => ({ tag: 'link', attrs: { rel: 'modulepreload', crossorigin: true, href: base + file }, injectTo: 'head' })),
+                    ...[ ...styles ].map(file => ({ tag: 'link', attrs: { rel: 'preload', as: 'style', href: base + file }, injectTo: 'head' }))
+                ];
+
+                return { html, tags };
+            }
+        }
+    };
+};
+
 // Where the dev server forwards /api/* (login, maintenance, auth). The
 // emulator serves that HTTP API on its WebSocket port. Resolution order:
 //   1. AUTH_PROXY_TARGET (cmd: set AUTH_PROXY_TARGET=...; PowerShell:
@@ -186,7 +235,8 @@ export default defineConfig({
                 ]
             }
         }),
-        octaneAssetsServer()
+        octaneAssetsServer(),
+        preloadAppBundle()
     ],
     define: {
         __OCTANE_JSON_MODE__: JSON.stringify(octaneJsonMode)

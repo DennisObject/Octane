@@ -1,148 +1,126 @@
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { FC, useLayoutEffect, useRef, useState } from 'react';
+import { FC, useLayoutEffect, useState } from 'react';
 import friendsBrowseArrowLeft from '../../../../assets/images/toolbar/air/friend-browse-arrow-left.png';
 import friendsBrowseArrowRight from '../../../../assets/images/toolbar/air/friend-browse-arrow-right.png';
 import friendsBrowseBg from '../../../../assets/images/toolbar/air/friends-browse-bg.png';
-import { LocalizeText, localizeWithFallback, MessengerFriend } from '../../../../api';
-import { AIR_RAIL_CHAT_RESERVED_HALF, AIR_RAIL_EDGE_GAP, resolveAirFriendTabCapacity } from '../../../toolbar/bottomDockLayout';
+import { localizeWithFallback, MessengerFriend } from '../../../../api';
 import { FriendBarItemView } from './FriendBarItemView';
 
-const AIR_TAB_WIDTH = 127;
-const AIR_TAB_SPACING = 3;
-const AIR_MIN_VISIBLE_SLOTS = 3;
-const BASE_PAD = 8;
-const RIGHT_SAFE = 24;
+// HabboFriendBarView (v4e): 127px tabs with 3px list spacing, the 150px friendtools block and a 16px reserve.
+const TAB_WIDTH = 127;
+const TAB_SPACING = 3;
+const FRIEND_TOOLS_WIDTH = 150;
+const BAR_RESERVE = 16;
+const MIN_TABS = 3;
 
-const containerVariants: Variants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.05 } },
-    exit: { transition: { staggerChildren: 0.03, staggerDirection: -1 } }
+// Bar width is the desktop width minus the left bottom bar's right edge.
+const resolveCapacity = () =>
+{
+    const leftDock = document.querySelector('.tb-left-dock');
+    const leftEdge = leftDock ? leftDock.getBoundingClientRect().right : 0;
+
+    return Math.max(0, Math.trunc((window.innerWidth - leftEdge - FRIEND_TOOLS_WIDTH - BAR_RESERVE) / (TAB_WIDTH + TAB_SPACING)));
 };
 
-const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 10, scale: 0.8 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 22 } },
-    exit: { opacity: 0, y: 6, scale: 0.85, transition: { duration: 0.1 } }
+// Add-friends tabs fill up to three tabs; at least one is added while there is room for it.
+const resolveFindFriendsCount = (capacity: number, used: number) =>
+{
+    if(used >= capacity) return 0;
+
+    if(used + 1 < MIN_TABS) return Math.min(capacity - used, MIN_TABS - used);
+
+    return 1;
 };
 
-export const FriendBarView: FC<{ onlineFriends: MessengerFriend[]; requestsCount?: number }> = (props) => {
-    const { onlineFriends = [], requestsCount = 0 } = props;
-    const [indexOffset, setIndexOffset] = useState(0);
-    const [maxVisible, setMaxVisible] = useState(AIR_MIN_VISIBLE_SLOTS);
-    const elementRef = useRef<HTMLDivElement>(null);
+export const FriendBarView: FC<{ onlineFriends: MessengerFriend[]; requestsCount?: number }> = (props) =>
+{
+    const { onlineFriends = [] } = props;
+    const [ indexOffset, setIndexOffset ] = useState(0);
+    const [ capacity, setCapacity ] = useState(MIN_TABS);
+    const [ selectedKey, setSelectedKey ] = useState<string | null>(null);
 
-    useLayoutEffect(() => {
-        const element = elementRef.current;
+    useLayoutEffect(() =>
+    {
+        const measure = () =>
+        {
+            const next = resolveCapacity();
 
-        if (!element) return;
-
-        const rail = element.closest('.tb-nav-clip') as HTMLElement | null;
-
-        const measure = () => {
-            const requestWidth = BASE_PAD + (requestsCount > 0 ? AIR_TAB_WIDTH + AIR_TAB_SPACING : 0);
-            let next: number;
-
-            if (rail) {
-                const railRect = rail.getBoundingClientRect();
-                const barRect = element.getBoundingClientRect();
-                const contentWidth = Math.max(railRect.width, rail.scrollWidth);
-                const preceding = Math.max(0, barRect.left - railRect.left);
-                const trailing = Math.max(0, railRect.left + contentWidth - barRect.right);
-                const reserved = document.querySelector('.tb-frame') ? AIR_RAIL_CHAT_RESERVED_HALF : AIR_RAIL_EDGE_GAP;
-                const available = Math.max(0, window.innerWidth / 2 - reserved) - preceding - trailing;
-
-                next = available - requestWidth < AIR_TAB_WIDTH ? 0 : resolveAirFriendTabCapacity(available, requestWidth, AIR_TAB_SPACING);
-            } else {
-                const left = element.getBoundingClientRect().left;
-                const available = window.innerWidth - left - RIGHT_SAFE;
-
-                next = Math.max(AIR_MIN_VISIBLE_SLOTS, resolveAirFriendTabCapacity(available, requestWidth, AIR_TAB_SPACING));
-            }
-
-            setMaxVisible((prev) => (prev === next ? prev : next));
+            setCapacity(prev => (prev === next ? prev : next));
         };
 
         measure();
 
         const observer = new ResizeObserver(measure);
+        const leftDock = document.querySelector('.tb-left-dock');
 
         observer.observe(document.documentElement);
-        if (rail) observer.observe(rail);
+        if(leftDock) observer.observe(leftDock);
         window.addEventListener('resize', measure);
 
-        return () => {
+        return () =>
+        {
             observer.disconnect();
             window.removeEventListener('resize', measure);
         };
-    }, [requestsCount, onlineFriends.length]);
+    }, []);
 
-    const validFriends = onlineFriends.filter(Boolean);
-    const maxOffset = maxVisible > 0 ? Math.max(0, validFriends.length - maxVisible) : 0;
-    const safeOffset = Math.min(indexOffset, maxOffset);
-    const canScrollLeft = safeOffset > 0;
-    const canScrollRight = safeOffset < maxOffset;
-    const showArrows = maxOffset > 0;
-    const visibleFriends = validFriends.slice(safeOffset, safeOffset + maxVisible);
-    const findFriendsSlotCount = Math.max(0, Math.min(AIR_MIN_VISIBLE_SLOTS, maxVisible) - visibleFriends.length);
+    const friends = onlineFriends.filter(Boolean);
+    const total = friends.length + 1;
+    const visibleCount = Math.min(capacity, total);
+    const offset = Math.max(0, Math.min(indexOffset, total - visibleCount));
+    const visibleFriends = friends.slice(offset, offset + capacity);
+    const findFriendsCount = resolveFindFriendsCount(capacity, visibleFriends.length);
+    const showPaging = (visibleFriends.length + findFriendsCount) < total && total > 0;
+    const canPageLeft = offset !== 0;
+    const canPageRight = (offset + visibleFriends.length + findFriendsCount) < total;
+
+    const toggleSelected = (key: string) => setSelectedKey(prev => (prev === key ? null : key));
 
     return (
-        <motion.div
-            ref={elementRef}
-            className="friend-bar flex h-[40px] items-center gap-[3px] px-[2px] py-[3px]"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-        >
-            {maxVisible > 0 && requestsCount > 0 && (
-                <motion.div variants={itemVariants}>
-                    <div className="friend-bar-item friend-bar-request find-friends-active flex h-[34px] items-center px-[10px] text-[0.83rem] whitespace-nowrap text-white">
-                        {requestsCount} {LocalizeText('friendbar.requests.title')}
-                    </div>
-                </motion.div>
+        <div className="friend-bar">
+            {showPaging && (
+                <button
+                    type="button"
+                    disabled={!canPageLeft}
+                    aria-label={localizeWithFallback('friendbar.scroll.left', 'Previous friends')}
+                    className="friend-bar-button left"
+                    onClick={() => { setSelectedKey(null); setIndexOffset(Math.max(0, offset - capacity)); }}
+                >
+                    <img src={friendsBrowseBg} alt="" className="friend-bar-browse-bg" />
+                    <img src={friendsBrowseArrowLeft} alt="" className="friend-bar-browse-arrow" />
+                </button>
             )}
-            {showArrows && (
-                <motion.div variants={itemVariants}>
-                    <button
-                        type="button"
-                        disabled={!canScrollLeft}
-                        aria-label={localizeWithFallback('friendbar.scroll.left', 'Previous friends')}
-                        className={`friend-bar-button left ${!canScrollLeft ? 'is-disabled' : ''}`}
-                        onClick={() => setIndexOffset(safeOffset - 1)}
-                    >
-                        <img src={friendsBrowseBg} alt="" className="friend-bar-browse-bg" />
-                        <img src={friendsBrowseArrowLeft} alt="" className="friend-bar-browse-arrow" />
-                    </button>
-                </motion.div>
-            )}
-
-            <AnimatePresence mode="popLayout">
-                {visibleFriends.map((friend) => (
-                    <motion.div key={friend.id} variants={itemVariants} layout initial="hidden" animate="visible" exit="exit">
-                        <FriendBarItemView friend={friend} />
-                    </motion.div>
+            <div className="friend-bar-list">
+                {visibleFriends.map(friend => (
+                    <FriendBarItemView
+                        key={friend.id}
+                        friend={friend}
+                        selected={selectedKey === `friend-${ friend.id }`}
+                        onToggle={() => toggleSelected(`friend-${ friend.id }`)}
+                        onDeselect={() => setSelectedKey(null)}
+                    />
                 ))}
-                {Array.from({ length: findFriendsSlotCount }, (_, index) => (
-                    <motion.div key={`friend-search-${index}`} variants={itemVariants} layout initial="hidden" animate="visible" exit="exit">
-                        <FriendBarItemView friend={null} />
-                    </motion.div>
+                {Array.from({ length: findFriendsCount }, (_, index) => (
+                    <FriendBarItemView
+                        key={`find-${ index }`}
+                        friend={null}
+                        selected={selectedKey === `find-${ index }`}
+                        onToggle={() => toggleSelected(`find-${ index }`)}
+                        onDeselect={() => setSelectedKey(null)}
+                    />
                 ))}
-            </AnimatePresence>
-
-            {showArrows && (
-                <motion.div variants={itemVariants}>
-                    <button
-                        type="button"
-                        disabled={!canScrollRight}
-                        aria-label={localizeWithFallback('friendbar.scroll.right', 'Next friends')}
-                        className={`friend-bar-button right ${!canScrollRight ? 'is-disabled' : ''}`}
-                        onClick={() => setIndexOffset(safeOffset + 1)}
-                    >
-                        <img src={friendsBrowseBg} alt="" className="friend-bar-browse-bg" />
-                        <img src={friendsBrowseArrowRight} alt="" className="friend-bar-browse-arrow" />
-                    </button>
-                </motion.div>
+            </div>
+            {showPaging && (
+                <button
+                    type="button"
+                    disabled={!canPageRight}
+                    aria-label={localizeWithFallback('friendbar.scroll.right', 'Next friends')}
+                    className="friend-bar-button right"
+                    onClick={() => { setSelectedKey(null); setIndexOffset(Math.min(total - capacity, offset + capacity)); }}
+                >
+                    <img src={friendsBrowseBg} alt="" className="friend-bar-browse-bg" />
+                    <img src={friendsBrowseArrowRight} alt="" className="friend-bar-browse-arrow" />
+                </button>
             )}
-        </motion.div>
+        </div>
     );
 };

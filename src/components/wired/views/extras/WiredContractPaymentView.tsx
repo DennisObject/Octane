@@ -5,32 +5,38 @@ import { useWired } from '../../../../hooks';
 import { CONTRACT_DIR_PAY, ContractTermRow, emptyRow, parseContractRules, serializeContractRules } from './contractTermWire';
 import { WiredContractRulesEditor } from './WiredContractRulesEditor';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
+import { readContractSettings, WiredContractSettingsView } from './WiredContractSettingsView';
 
 /** Payment: the player gives something and gets nothing back through the contract itself. */
 export const WiredContractPaymentView: FC<{}> = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
     const [giveRules, setGiveRules] = useState<ContractTermRow[][]>([[emptyRow(CONTRACT_DIR_PAY)]]);
 
+    const [settings, setSettings] = useState(readContractSettings());
+
     useEffect(() => {
         if (!trigger) return;
 
-        const parsed = parseContractRules(trigger.intData ?? [], trigger.stringData ?? '');
+        const metadata = readContractSettings(trigger.stringData ?? '');
+        setSettings(metadata);
+        const parsed = parseContractRules(trigger.intData ?? [], metadata.Posters);
         setGiveRules(parsed.giveRules.length ? parsed.giveRules : [[emptyRow(CONTRACT_DIR_PAY)]]);
     }, [trigger]);
 
     const save = () => {
-        const payload = serializeContractRules({ giveRules, getRule: [] });
+        const payload = serializeContractRules({ giveRules: settings.PaymentMode === 0 ? [] : giveRules, getRule: [] });
         setIntParams(payload.intParams);
-        setStringParam(payload.stringParam);
+        setStringParam('@contract:' + JSON.stringify({ ...settings, Posters: payload.stringParam }));
     };
 
     return (
-        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID} save={save} cardStyle={{ width: 400 }}>
+        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} cardStyle={{ width: 400 }}>
             <div className="flex flex-col gap-2">
+                <WiredContractSettingsView kind="payment" value={settings} onChange={setSettings} />
                 <Text bold>The user must PAY:</Text>
-                <WiredContractRulesEditor direction={CONTRACT_DIR_PAY} rules={giveRules} onChange={setGiveRules} />
+                {settings.PaymentMode === 1 && <WiredContractRulesEditor direction={CONTRACT_DIR_PAY} rules={giveRules} onChange={setGiveRules} />}
                 <Text small>Each option is an alternative — the player pays whichever one they can.</Text>
-                <Text small>Optional: pick a chest above to deposit the payment into (else it is removed).</Text>
+                <Text small>The Initiate Transaction effect chooses the chests that receive the payment.</Text>
             </div>
         </WiredExtraBaseView>
     );

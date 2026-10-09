@@ -32,7 +32,7 @@ import {
     localizeCatalogAdminMessage,
     localizeCatalogAdminPlainMessage
 } from './catalogAdminServerErrors.helpers';
-import { toStudioCatalogType } from './catalogAdminTree.helpers';
+import { isNormalCatalogRow, toStudioCatalogType } from './catalogAdminTree.helpers';
 import { useCatalogAdminUiStore } from './catalogAdminUiStore';
 import type { CatalogStudioSession } from './catalogStudio.types';
 import { nextCatalogStudioOperationId } from './catalogStudio.helpers';
@@ -97,9 +97,9 @@ const toMutationResult = (parser: CatalogAdminResultMessageParser, result: Catal
     code: result.code,
     message: parser.success ? localizeCatalogAdminMessage(parser.message) : localizeCatalogAdminCode(result.code, parser.message, result.fieldErrors),
     entityType: result.entityType,
-    catalogType: result.catalogType,
+    catalogType: toStudioCatalogType(result.catalogType),
     entityId: result.entityId,
-    entity: result.entity,
+    entity: result.entity && isNormalCatalogRow(result.entity) ? result.entity : null,
     historyGroup: result.historyGroup,
     fieldErrors: localizeCatalogAdminFieldErrors(result.fieldErrors),
     acknowledgedAt: Date.now()
@@ -267,14 +267,14 @@ export const useCatalogAdminMutations = (): CatalogAdminMutations => {
 
         // The revision moved on: fetch it, so the editor's next save is checked against the current one.
         if (smartSave.code === STALE_REVISION) studio.refresh();
-        if (!parser.success || !smartSave.entity || !smartSave.historyGroup) return;
+        if (!parser.success || !smartSave.entity || !isNormalCatalogRow(smartSave.entity) || !smartSave.historyGroup) return;
 
         studio.applyMutation({
             operationId: smartSave.operationId,
             action: smartSave.action,
             revision: smartSave.revision,
             entityType: smartSave.entityType,
-            catalogType: smartSave.catalogType,
+            catalogType: toStudioCatalogType(smartSave.catalogType),
             entity: smartSave.entity,
             historyGroup: smartSave.historyGroup
         });

@@ -1,10 +1,12 @@
+import { parseWiredScalarLiteral, readWiredScalarLiteral, writeWiredScalarLiteral } from '../../../../api/wired/WiredScalarLiteral';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetWiredTimeLocale, LocalizeText, WiredFurniType, WiredSelectionVisualizer } from '../../../../api';
 import contextVariableIcon from '../../../../assets/images/wired/var/icon_source_context_clean.png';
 import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_furni.png';
 import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_global.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
@@ -157,6 +159,8 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
     const [operation, setOperation] = useState(0);
     const [referenceMode, setReferenceMode] = useState<ReferenceMode>('constant');
     const [referenceConstantValueInput, setReferenceConstantValueInput] = useState('0');
+    const [exactLiteralShape, setExactLiteralShape] = useState(false);
+    const parsedLiteral = parseWiredScalarLiteral(referenceConstantValueInput);
     const [referenceTargetType, setReferenceTargetType] = useState<VariableTargetType>('user');
     const [referenceVariableToken, setReferenceVariableToken] = useState('');
     const [destinationUserSource, setDestinationUserSource] = useState(SOURCE_TRIGGER);
@@ -283,7 +287,8 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
         setDestinationVariableToken(normalizeVariableTokenFromWire(stringParts.length > 0 ? stringParts[0] : ''));
         setOperation(trigger.intData.length > 1 ? trigger.intData[1] : 0);
         setReferenceMode((trigger.intData.length > 2 ? trigger.intData[2] : REFERENCE_CONSTANT) === REFERENCE_VARIABLE ? 'variable' : 'constant');
-        setReferenceConstantValueInput((trigger.intData.length > 3 ? trigger.intData[3] : 0).toString());
+        setExactLiteralShape(trigger.intData.length === 11);
+        setReferenceConstantValueInput(readWiredScalarLiteral(trigger.intData, 9, 3));
         setReferenceTargetType(nextReferenceTargetType);
         setReferenceVariableToken(normalizeVariableTokenFromWire(stringParts.length > 1 ? stringParts[1] : ''));
         setDestinationUserSource(trigger.intData.length > 5 ? trigger.intData[5] : SOURCE_TRIGGER);
@@ -332,26 +337,27 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
     const save = () => {
         const nextDestinationFurniIds = selectionMode === 'destination' ? [...furniIds] : [...destinationFurniIds];
         const nextReferenceFurniIds = selectionMode === 'reference' ? [...furniIds] : [...referenceFurniIds];
-        const parsedReferenceConstantValue = parseInt(referenceConstantValueInput.trim(), 10);
+        if (parsedLiteral === null) return;
 
         setDestinationFurniIds(nextDestinationFurniIds);
         setReferenceFurniIds(nextReferenceFurniIds);
         setStringParam(serializeStringData(destinationVariableToken, referenceMode === 'variable' ? referenceVariableToken : '', nextReferenceFurniIds));
-        setIntParams([
+        setIntParams(writeWiredScalarLiteral([
             getTargetValue(destinationTargetType),
             operation,
             referenceMode === 'variable' ? REFERENCE_VARIABLE : REFERENCE_CONSTANT,
-            Number.isFinite(parsedReferenceConstantValue) ? parsedReferenceConstantValue : 0,
+            0,
             getTargetValue(referenceTargetType),
             destinationUserSource,
             destinationFurniSource,
             referenceUserSource,
             referenceFurniSource
-        ]);
+        ], 3, parsedLiteral, exactLiteralShape));
         setFurniIds(isFurniTarget(destinationTargetType) && destinationFurniSource === SOURCE_SELECTED ? [...nextDestinationFurniIds] : []);
     };
 
     const validate = () => {
+        if (parsedLiteral === null) return false;
         if (!destinationVariableToken) return false;
         if (referenceMode === 'variable' && !referenceVariableToken) return false;
 
@@ -435,10 +441,12 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                         <OctaneInput
                             className="octane-wired__give-var-number"
                             disabled={isUnaryOperation}
-                            type="number"
+                            type="text"
+                                inputMode="numeric"
                             value={referenceConstantValueInput}
                             onChange={(event) => setReferenceConstantValueInput(event.target.value)}
                         />
+                            {parsedLiteral === null && <Text role="alert">Enter a signed 64-bit integer.</Text>}
                     </label>
 
                     <div className="octane-wired__change-var-reference-block">

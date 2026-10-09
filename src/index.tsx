@@ -68,6 +68,8 @@ import './css/achievements/AchievementsView.css';
 import './css/notification/NotificationCenterView.css';
 import './css/notification/HotelAlertToast.css';
 
+import './css/octanepedia/OctanepediaView.css';
+
 import './css/purse/PurseView.css';
 import './css/radio/RadioView.css';
 
@@ -85,6 +87,7 @@ import './css/user-settings/UserSettingsView.css';
 
 import './css/vault/VaultView.css';
 import './css/widgets/FurnitureWidgets.css';
+import './css/widgets/FurnitureNativeDialogs.css';
 import './css/WiredView.css';
 import './css/camera/CameraWidget.css';
 import './css/catalog/CatalogGiftView.css';
@@ -92,21 +95,24 @@ import './css/navigator/NavigatorView.css';
 import './css/quests/RewardTrackView.css';
 import './css/common/ClassicScrollbar.css';
 
-document.documentElement.classList.add('has-classic-scrollbar');
+// bootstrap.ts mounts the app once the configuration has loaded.
+export const mountApp = () => {
+    document.documentElement.classList.add('has-classic-scrollbar');
 
-createRoot(document.getElementById('root')).render(
-    <StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <ErrorBoundary
-                fallbackRender={({ error }) => (
-                    <LoadingView
-                        isError={true}
-                        message={`Something went wrong.\n${(error as Error)?.message ?? 'Unknown error'}`}
-                    />
-                )}
-            >
-                <App />
-            </ErrorBoundary>
-        </QueryClientProvider>
-    </StrictMode>
-);
+    createRoot(document.getElementById('root')).render(
+        <StrictMode>
+            <QueryClientProvider client={queryClient}>
+                <ErrorBoundary
+                    fallbackRender={({ error }) => (
+                        <LoadingView
+                            isError={true}
+                            message={`Something went wrong.\n${(error as Error)?.message ?? 'Unknown error'}`}
+                        />
+                    )}
+                >
+                    <App />
+                </ErrorBoundary>
+            </QueryClientProvider>
+        </StrictMode>
+    );
+};

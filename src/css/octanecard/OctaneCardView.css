@@ -1,24 +1,3 @@
-@font-face {
-    font-family: HabboAirUbuntu;
-    src: url("../../assets/webfonts/Ubuntu.ttf");
-    font-style: normal;
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: HabboAirUbuntu;
-    src: url("../../assets/webfonts/Ubuntu-b.ttf");
-    font-style: normal;
-    font-weight: 700;
-}
-
-@font-face {
-    font-family: HabboAirUbuntu;
-    src: url("../../assets/webfonts/Ubuntu-i.ttf");
-    font-style: italic;
-    font-weight: 400;
-}
-
 :root {
     --octane-card-border: var(--habbo-frame-border, #283f5d);
     --octane-card-frame: #376275;
@@ -165,6 +144,14 @@
     image-rendering: var(--octane-pixel-art, pixelated);
 }
 
+/* The native window shadow bitmap (NativeFrameShadow): always behind the window (the draggable wrapper is a stacking context) and never a pointer target;
+   its image-rendering follows the device pixel ratio in the component. */
+.octane-native-frame-shadow {
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+}
+
 .octane-card-shell.octane-card-frame-3::before {
     content: "";
     position: absolute;
@@ -253,12 +240,6 @@
 .octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button::before,
 .octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button::after {
     display: none !important;
-}
-
-.octane-card-header-shell.builders-club-card-header {
-    border-color: #d79d2e;
-    border-bottom-color: var(--octane-card-border);
-    background: linear-gradient(180deg, #d89f2d 0%, #c68515 100%);
 }
 
 .octane-card-tabs,
@@ -359,17 +340,6 @@
     border-radius: 0 0 calc(var(--octane-card-radius) - 2px) calc(var(--octane-card-radius) - 2px);
     font-family: Ubuntu, sans-serif;
     color: var(--octane-card-text);
-}
-
-.builders-club-status-shell {
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-bottom: 2px solid var(--octane-card-border);
-    background: linear-gradient(180deg, rgba(84, 62, 46, 0.95) 0%, rgba(50, 38, 29, 0.97) 100%);
-}
-
-.builders-club-status-icon-shell {
-    background: rgba(255, 193, 70, 0.12);
-    border: 1px solid rgba(255, 193, 70, 0.26);
 }
 
 .octane-card-panel {
@@ -549,10 +519,6 @@
             font-size: 11.5px;
         }
     }
-
-    .builders-club-status-shell {
-        padding: 10px 12px;
-    }
 }
 
 .draggable-window .drag-handler {
@@ -560,7 +526,7 @@
 }
 
 @media (max-width: 640px) {
-    .draggable-window:not([data-window-key='octane-radio']) {
+    .draggable-window:not([data-window-key='octane-radio']):not([data-native-position]) {
         left: 50% !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;

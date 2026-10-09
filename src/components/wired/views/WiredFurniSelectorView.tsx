@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { LocalizeText } from '../../../api';
 import { Text } from '../../../common';
 import { useWired } from '../../../hooks';
+import { WiredSection } from './WiredSection';
 
 export const WiredFurniSelectorView: FC<{}> = () => {
     const { trigger = null, furniIds = [] } = useWired();
@@ -24,5 +25,21 @@ export const WiredFurniSelectorView: FC<{}> = () => {
                 {LocalizeText('wiredfurni.pickfurnis.desc')}
             </Text>
         </div>
+    );
+};
+
+/** The native "pick furnis" section: the caption is the section title, the explanation the soft body text. */
+export const WiredFurniSelectorSection: FC<{}> = () => {
+    const { trigger = null, furniIds = [] } = useWired();
+
+    const count = furniIds?.length ?? 0;
+    const limit = trigger?.maximumItemSelectionCount ?? 0;
+    const rawCaption = LocalizeText('wiredfurni.pickfurnis.caption', ['count', 'limit'], [count.toString(), limit.toString()]);
+    const caption = /\d+\s*\/\s*\d+/.test(rawCaption) ? rawCaption : rawCaption.replace(/\[\s*\//, `[${count}/`);
+
+    return (
+        <WiredSection className="octane-wired__section--selector" title={caption}>
+            <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">{LocalizeText('wiredfurni.pickfurnis.desc')}</span>
+        </WiredSection>
     );
 };

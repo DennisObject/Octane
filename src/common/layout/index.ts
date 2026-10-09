@@ -1,3 +1,4 @@
+export * from './LayoutActivityPointIcon';
 export * from './LayoutAvatarImageView';
 export * from './LayoutBackgroundImage';
 export * from './LayoutBadgeImageView';
@@ -25,3 +26,4 @@ export * from './LayoutTrophyView';
 export * from './limited-edition';
 export * from './UserProfileIconView';
 export * from './PixelArtRendering';
+export * from './NativeTextHaloFilter';

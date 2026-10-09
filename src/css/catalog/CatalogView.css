@@ -11,8 +11,6 @@
     --catalog-standard-blue-border: #376275;
     --catalog-standard-select: #63c5e9;
     --catalog-standard-select-outer: #82d1ed;
-    --catalog-standard-bc: #ff8d00;
-    --catalog-standard-bc-outer: #ffb53c;
     /* Quantity stepper +/- sprites, kept identical to origin/main so the
        glyphs stay put through hover/active/disabled states. */
     --habbo-stepper-plus: url("../../assets/images/catalog/buttons/plus.png");
@@ -24,10 +22,10 @@
     --habbo-stepper-minus-pressed: url("../../assets/images/catalog/buttons/minus_pressed.png");
     --habbo-stepper-minus-disabled: url("../../assets/images/catalog/buttons/minus_disabled.png");
 
-    width: var(--octane-catalog-window-width, 570px) !important;
-    height: var(--octane-catalog-window-height, 635px) !important;
-    min-width: var(--octane-catalog-window-width, 570px) !important;
-    max-width: var(--octane-catalog-window-width, 570px) !important;
+    width: 570px !important;
+    height: 635px;
+    min-width: 570px !important;
+    max-width: 570px !important;
     min-height: 570px !important;
     max-height: calc(100vh - 24px) !important;
     position: relative;
@@ -39,10 +37,9 @@
 }
 
 .draggable-window:has(> .octane-catalog-window) {
-    width: var(--octane-catalog-window-width, 570px) !important;
-    height: var(--octane-catalog-window-height, 635px) !important;
-    min-width: var(--octane-catalog-window-width, 570px) !important;
-    max-width: var(--octane-catalog-window-width, 570px) !important;
+    width: 570px !important;
+    min-width: 570px !important;
+    max-width: 570px !important;
 }
 
 .octane-catalog-window img,
@@ -57,8 +54,7 @@
 .octane-catalog-mobile-header,
 .octane-catalog-layout-header-shell,
 .octane-catalog-layout-hero,
-.octane-catalog-window .octane-catalog-header,
-.octane-catalog-window .builders-club-status-shell {
+.octane-catalog-window .octane-catalog-header {
     display: none !important;
 }
 
@@ -222,6 +218,7 @@
     flex: 0 0 90px;
     height: 90px;
     margin: 0 1px;
+    width: 568px;
     border: 2px solid #376275;
     background: #0e3f52;
     overflow: hidden;
@@ -299,34 +296,6 @@
     overflow: hidden;
 }
 
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-title {
-    height: 30px;
-    min-height: 30px;
-    font-size: 24px;
-    line-height: 30px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description {
-    position: absolute;
-    left: 0;
-    width: 475px;
-    height: 19px;
-    margin-top: 0;
-    display: block;
-    -webkit-line-clamp: initial;
-    line-clamp: initial;
-    max-height: 19px;
-    line-height: 19px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description.is-builder-membership {
-    top: 30px;
-}
-
-.octane-catalog-standard-header.is-builder .octane-catalog-standard-header-description.is-builder-limit {
-    top: 45px;
-}
-
 .octane-catalog-standard-header-description b,
 .octane-catalog-standard-header-description strong {
     font-weight: 400;
@@ -338,7 +307,9 @@
     min-height: 35px;
     max-height: 35px;
     gap: 0;
-    padding: 3px 6px 0 !important;
+    padding: 5px 0 0 !important;
+    width: 568px;
+    border: 0;
     align-items: flex-end;
     overflow: hidden;
     flex-wrap: nowrap;
@@ -346,89 +317,67 @@
     background: var(--catalog-standard-bg);
 }
 
-/*
- * A tab never shrinks on its own: the strip is measured to decide how wide the window should
- * be, so a tab whose width depended on that window would feed its own measurement. Past the
- * window's maximum width the strip used to run under the shell's `overflow: hidden` and the
- * last categories became unreachable - no scrolling, no wrapping, just gone. The hook adds
- * `is-condensed` in exactly that case, and only then are they allowed to shrink, the label
- * ellipsising down to its icon the way the original client's tab context does.
- */
 .octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item {
     display: inline-flex;
-    align-items: center;
+    align-items: center !important;
     justify-content: center;
     gap: 4px;
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
     min-width: 0;
-    flex: 0 0 auto;
+    flex: 1 1 0;
     max-width: none;
     /* 9px of the side padding is the tab's cap bitmap. */
-    padding: 4px 17px 8px !important;
+    padding: 0 9px !important;
     /* Tabs sit edge to edge: a gap would show the white shelf as a line. */
     margin: 0;
-    flex-shrink: 0;
     white-space: nowrap;
     overflow: hidden;
-}
-
-/* Only once the window has run out of room to widen. Until then the tabs keep their natural
-   width, which is what the strip is measured at. */
-.octane-catalog-window .octane-catalog-tabs-shell.is-condensed .octane-card-tab-item {
-    min-width: 34px;
-    flex: 0 1 auto;
-    flex-shrink: 1;
 }
 
 .octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item:last-of-type {
     margin-right: 0;
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item > div {
+.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item > .octane-card-tab-item-label {
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     gap: 4px;
     min-width: 0;
-    width: auto;
+    width: 100%;
     height: 18px;
     line-height: 17px;
 }
 
-.octane-catalog-tab-icon {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
-    flex-shrink: 0;
+.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item-label > div {
+    width: 100%;
+    min-width: 0;
 }
 
 .octane-catalog-tab-label {
+    display: block;
+    width: 100%;
+    text-align: center;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.octane-catalog-tab-count {
-    flex: 0 0 auto;
-    font-size: 10px;
-    opacity: 0.85;
-}
-
 .octane-catalog-content-shell {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    padding: 6px 8px 8px !important;
+    padding: 6px 4px 4px 8px !important;
     background: var(--catalog-standard-bg) !important;
     overflow: hidden;
 }
 
 .octane-catalog-stage {
     display: grid;
-    grid-template-columns: 184px 1fr;
+    grid-template-columns: 184px 360px;
     gap: 8px;
     width: 100%;
     height: 100%;
@@ -553,15 +502,6 @@
     background: linear-gradient(180deg, var(--catalog-standard-select-outer) 0 2px, var(--catalog-standard-select) 2px calc(100% - 2px), var(--catalog-standard-select-outer) calc(100% - 2px));
 }
 
-.octane-catalog-navigation-list.is-builders-club .octane-catalog-navigation-item::before {
-    --catalog-standard-select: var(--catalog-standard-bc);
-    --catalog-standard-select-outer: var(--catalog-standard-bc-outer);
-}
-
-.octane-catalog-navigation-list.is-builders-club .octane-catalog-navigation-node.is-child .octane-catalog-navigation-item {
-    color: #b77734;
-}
-
 .octane-catalog-navigation-item:hover::before,
 .octane-catalog-navigation-item.is-active::before {
     display: block;
@@ -669,9 +609,9 @@
     position: relative;
     display: block !important;
     width: 100%;
-    height: 460px;
-    min-height: 460px;
-    max-height: 460px;
+    height: calc(100% - 1px);
+    min-height: 0;
+    max-height: none;
 }
 
 .octane-catalog-grid-shell,
@@ -686,15 +626,6 @@
     background: var(--catalog-standard-panel);
 }
 
-/*
- * The original's `productViewWidget` is a fixed 360x240 because its window is a fixed 570. Ours
- * sizes itself from its tab strip, up to 1040, and pinning this box to 360 left the rest of that
- * width as dead grey beside the preview. It follows the page instead; 240 stays, since the room
- * canvas behind it is drawn taller than the box and cropped, exactly as the original does.
- *
- * Everything placed inside it is anchored to an edge rather than to an offset measured from the
- * old 360 - see `.octane-catalog-preview-limited` and `.octane-catalog-preview-controls`.
- */
 .octane-catalog-product-view {
     position: relative;
     top: 0;
@@ -754,9 +685,9 @@
     top: 0;
     left: 0;
     width: 100% !important;
-    height: 348px !important;
-    min-height: 348px !important;
-    max-height: 348px !important;
+    height: 240px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
     max-width: 100%;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -1426,7 +1357,8 @@
     left: 0;
     top: 245px;
     width: 360px;
-    height: 155px;
+    bottom: 60px;
+    height: auto;
     min-height: 0;
     padding: 3px;
     overflow: auto;
@@ -1557,14 +1489,6 @@
 .octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active.uses-base-grid-template::before {
     width: 36px;
     height: 36px;
-}
-
-.octane-catalog-window .octane-catalog-grid-density-standard.is-builder-grid .layout-grid-item.is-active::before {
-    border-color: var(--catalog-standard-bc-outer);
-}
-
-.octane-catalog-window .is-builder-grid .layout-grid-item.is-active {
-    border-color: var(--catalog-standard-bc-outer) !important;
 }
 
 .octane-catalog-window .layout-grid-item.has-highlight {
@@ -1968,7 +1892,7 @@
 .octane-catalog-price-row {
     position: absolute;
     left: 0;
-    top: 405px;
+    bottom: 30px;
     width: 360px;
     height: 25px;
     padding: 0;
@@ -2023,7 +1947,7 @@
 .octane-catalog-purchase-row {
     position: absolute;
     left: 0;
-    top: 430px;
+    bottom: 0;
     width: 360px;
     height: 30px;
     padding: 0;
@@ -2168,76 +2092,10 @@
     text-overflow: ellipsis;
 }
 
-/* The active AIR Ubuntu layout hides its legacy stacked spinner buttons.
-   Polaris intentionally keeps quantity controls visible, using the existing
-   Habbo +/- sprite family without increasing AIR's 25px purchase row. */
-.octane-catalog-window button.octane-catalog-standard-spinner-button {
-    appearance: none;
-    position: absolute;
-    top: 1px;
-    z-index: 3;
-    width: 22px !important;
-    min-width: 22px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    border-image: none !important;
-    outline: 0;
-    background-color: transparent !important;
-    background-position: 0 0 !important;
-    background-repeat: no-repeat !important;
-    background-size: 22px 22px !important;
-    box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
-    touch-action: none;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button:focus-visible {
-    outline: 1px dotted #000000;
-    outline-offset: -2px;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less {
-    left: 54px;
-    background-image: var(--habbo-stepper-minus) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:hover {
-    background-image: var(--habbo-stepper-minus-hover) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:active {
-    background-image: var(--habbo-stepper-minus-pressed) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-less:disabled {
-    background-image: var(--habbo-stepper-minus-disabled) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more {
-    left: 110px;
-    background-image: var(--habbo-stepper-plus) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:hover {
-    background-image: var(--habbo-stepper-plus-hover) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:active {
-    background-image: var(--habbo-stepper-plus-pressed) !important;
-}
-
-.octane-catalog-window button.octane-catalog-standard-spinner-button-more:disabled {
-    background-image: var(--habbo-stepper-plus-disabled) !important;
-}
-
 .octane-catalog-standard-spinner-input-frame {
     position: absolute;
     top: 0;
-    left: 78px;
+    left: 54px;
     width: 30px;
     height: 25px;
     z-index: 2;

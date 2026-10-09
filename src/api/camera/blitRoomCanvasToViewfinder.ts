@@ -143,7 +143,9 @@ export const blitRoomCanvasToViewfinder = (target: HTMLCanvasElement | null, wid
 
         snapshot.destroy?.(true);
 
-        const context = target.getContext('2d');
+        // The pixels already come from the CPU; keeping the canvas there lets the
+        // shutter copy it without waiting on the GPU.
+        const context = target.getContext('2d', { willReadFrequently: true });
 
         if(!context || !extracted) return false;
 

@@ -1,34 +1,57 @@
-import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, useLayoutEffect, useRef, useState } from 'react';
 import { AchievementUtilities, LocalizeText } from '../../api';
+import { AchievementText } from './AchievementText';
 
 interface AirAchievementProgressBarProps {
     progress: number;
     maxProgress: number;
+    identity?: number;
     localizationKey?: string;
     width: number;
     scoreAtStartOfLevel?: number;
+    /** The left/centre/right track frame; the quest tracker draws its track in its own bitmap and shows only the fill. */
+    hasFrame?: boolean;
+    /** The percent mode of the quest engine bar: the caption shows floor(100 * progress / max) instead of the raw amounts. */
+    percentCaption?: boolean;
     className?: string;
 }
 
 export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
     progress,
     maxProgress,
+    identity = 0,
     localizationKey,
     width,
     scoreAtStartOfLevel = 0,
+    hasFrame = true,
+    percentCaption = false,
     className = ''
 }) => {
     const targetWidth = maxProgress > 0 ? Math.max(0, Math.round((width * progress) / maxProgress)) : 0;
     const currentWidth = useRef(targetWidth);
+    const previousValues = useRef({ identity, maxProgress });
     const [animation, setAnimation] = useState({ width: targetWidth, opacity: 1, progress });
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        const shouldSnap = previousValues.current.identity !== identity || previousValues.current.maxProgress !== maxProgress;
+        previousValues.current = { identity, maxProgress };
+
+        if (shouldSnap || currentWidth.current === targetWidth) {
+            currentWidth.current = targetWidth;
+            setAnimation((current) =>
+                current.width === targetWidth && current.opacity === 1 && current.progress === progress
+                    ? current
+                    : { width: targetWidth, opacity: 1, progress }
+            );
+            return;
+        }
+
         const startWidth = currentWidth.current;
         let previousTime = performance.now();
         let frame = 0;
         const update = (time: number) => {
             const difference = targetWidth - currentWidth.current;
-            const step = Math.trunc(Math.max(1, ((time - previousTime) / 32) * Math.round(Math.sqrt(Math.abs(difference)))));
+            const step = Math.max(1, ((time - previousTime) / 32) * Math.round(Math.sqrt(Math.abs(difference))));
             currentWidth.current = difference > 0 ? Math.min(targetWidth, currentWidth.current + step) : Math.max(targetWidth, currentWidth.current - step);
             previousTime = time;
             const isComplete = currentWidth.current === targetWidth;
@@ -40,9 +63,9 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
             if (!isComplete) frame = requestAnimationFrame(update);
         };
 
-        frame = requestAnimationFrame(update);
+        update(previousTime);
         return () => cancelAnimationFrame(frame);
-    }, [maxProgress, progress, targetWidth, width]);
+    }, [identity, maxProgress, progress, targetWidth, width]);
 
     const style = {
         '--air-achievement-progress-left': `url(${AchievementUtilities.getAchievementImageUrl('ach_progressbar1')})`,
@@ -62,21 +85,36 @@ export const AirAchievementProgressBar: FC<AirAchievementProgressBarProps> = ({
             aria-valuemin={0}
             aria-valuemax={maxProgress}
         >
-            <span className="air-achievement-progress__left" aria-hidden="true" />
-            <span className="air-achievement-progress__track" style={{ width }} aria-hidden="true" />
-            <span className="air-achievement-progress__right" style={{ left: width + 4 }} aria-hidden="true" />
+            {hasFrame && (
+                <>
+                    <span className="air-achievement-progress__left" aria-hidden="true" />
+                    <span className="air-achievement-progress__track" style={{ width }} aria-hidden="true" />
+                    <span className="air-achievement-progress__right" style={{ left: width + 4 }} aria-hidden="true" />
+                </>
+            )}
             <span className="air-achievement-progress__fill-background" style={{ width: animation.width + 1 }} aria-hidden="true" />
             <span className="air-achievement-progress__fill" style={{ width: animation.width, opacity: animation.opacity }} aria-hidden="true" />
             <span className="air-achievement-progress__fill-cap" style={{ left: animation.width + 4 }} aria-hidden="true" />
-            <span className="air-achievement-progress__text" style={{ width }}>
-                {localizationKey
-                    ? LocalizeText(
-                          localizationKey,
-                          ['progress', 'limit'],
-                          [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
-                      )
-                    : `${animation.progress + scoreAtStartOfLevel}/${maxProgress + scoreAtStartOfLevel}`}
-            </span>
+            <AchievementText
+                bold
+                color={0xffffff}
+                text={
+                    localizationKey
+                        ? LocalizeText(
+                              localizationKey,
+                              ['progress', 'limit'],
+                              percentCaption
+                                  ? [String(Math.floor((animation.progress / maxProgress) * 100)), String(maxProgress)]
+                                  : [String(animation.progress + scoreAtStartOfLevel), String(maxProgress + scoreAtStartOfLevel)]
+                          )
+                        : `${animation.progress + scoreAtStartOfLevel}/${maxProgress + scoreAtStartOfLevel}`
+                }
+                height={17}
+                width={width}
+                x={7}
+                y={3}
+                align="center"
+            />
         </div>
     );
 };

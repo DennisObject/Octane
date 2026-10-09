@@ -1,12 +1,13 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Slider, Text } from '../../../../common';
+import { Text } from '../../../../common';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 const MIN_ALTITUDE = 0;
-const MAX_ALTITUDE = 40;
+const MAX_ALTITUDE = 80;
 const ALTITUDE_STEP = 0.01;
 const ALTITUDE_PATTERN = /^\d*(\.\d{0,2})?$/;
 

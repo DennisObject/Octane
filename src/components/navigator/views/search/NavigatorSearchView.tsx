@@ -1,6 +1,6 @@
-import { NavigatorSearchComposer, NavigatorSearchResultSet } from '@octane/renderer';
-import { FC, FormEvent, useEffect, useState } from 'react';
-import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions, SendMessageComposer } from '../../../../api';
+import { NavigatorSearchResultSet } from '@octane/renderer';
+import { FC, FormEvent, useEffect, useRef, useState } from 'react';
+import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import refreshIcon from '../../../../assets/images/navigator/air/refresh-search.png';
 import searchCloseIcon from '../../../../assets/images/navigator/air/search-close.png';
 import searchPenIcon from '../../../../assets/images/navigator/air/search-pen.png';
@@ -21,34 +21,25 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
     const { searchResult } = props;
     const [searchFilterIndex, setSearchFilterIndex] = useState(0);
     const [inputText, setInputText] = useState('');
+    const [showClearIcon, setShowClearIcon] = useState(false);
+    const [showRefresh, setShowRefresh] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
     const { topLevelContext } = useNavigatorData();
-    const tabCode = useNavigatorUiStore((state) => state.currentTabCode);
-    const currentFilter = useNavigatorUiStore((state) => state.currentFilter);
+    const searchResultVersion = useNavigatorUiStore((state) => state.searchResultVersion);
     const placeholder = LocalizeText('navigator.filter.input.placeholder');
     const hasQuery = inputText.length > 0;
 
     useEffect(() => {
         if (!searchResult) return;
 
-        const split = searchResult.data.split(':');
-
-        let filter: INavigatorSearchFilter = null;
-        let value: string = '';
-
-        if (split.length >= 2) {
-            const [query, ...rest] = split;
-
-            filter = SearchFilterOptions.find((option) => option.query === query);
-            value = rest.join(':');
-        } else {
-            value = searchResult.data;
-        }
-
-        if (!filter) filter = SearchFilterOptions[0];
+        const filter = SearchFilterOptions.find((option) => option.query && searchResult.data.startsWith(option.query + ':')) ?? SearchFilterOptions[0];
+        const value = filter.query ? searchResult.data.slice(filter.query.length + 1) : searchResult.data;
 
         setSearchFilterIndex(SearchFilterOptions.findIndex((option) => option === filter));
         setInputText(value);
-    }, [searchResult]);
+        setShowClearIcon(value.length > 0);
+        setShowRefresh(value.length > 0);
+    }, [searchResult, searchResultVersion]);
 
     const submitSearch = (value = inputText) => {
         if (!topLevelContext) return;
@@ -61,12 +52,13 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
     };
 
     const refreshSearch = () => {
-        if (!tabCode) return;
-        SendMessageComposer(new NavigatorSearchComposer(tabCode, currentFilter || buildQuery(searchFilterIndex, inputText)));
+        useNavigatorUiStore.getState().requestSearch();
     };
 
     const clearSearch = () => {
         setInputText('');
+        setShowClearIcon(false);
+        inputRef.current?.focus();
     };
 
     return (
@@ -74,24 +66,27 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
             <NavigatorFilterChipsView value={searchFilterIndex} onChange={setSearchFilterIndex} />
             <div className={`octane-navigator-air__search-field${hasQuery ? '' : ' is-placeholder'}`}>
                 <input
+                    ref={inputRef}
                     className="octane-navigator-air__search-input"
                     name="q"
                     placeholder={placeholder}
+                    aria-label={LocalizeText('navigator.tooltip.filter.input')}
                     type="text"
                     value={inputText}
                     onChange={(event) => setInputText(event.target.value)}
                 />
                 <button
-                    type={hasQuery ? 'button' : 'submit'}
+                    type="button"
                     className="octane-navigator-air__search-clear"
-                    aria-label={hasQuery ? LocalizeText('generic.clear') : placeholder}
-                    onClick={hasQuery ? clearSearch : undefined}
+                    aria-label={showClearIcon ? LocalizeText('generic.clear') : placeholder}
+                    onClick={clearSearch}
                 >
-                    <img src={hasQuery ? searchCloseIcon : searchPenIcon} alt="" />
+                    <img src={showClearIcon ? searchCloseIcon : searchPenIcon} alt="" />
                 </button>
             </div>
-            {hasQuery && (
+            {showRefresh && (
                 <button type="button" className="octane-navigator-air__search-refresh" aria-label={LocalizeText('generic.refresh')} onClick={refreshSearch}>
+                    <i className="octane-navigator-air__search-refresh-skin" aria-hidden="true" />
                     <img src={refreshIcon} alt="" />
                 </button>
             )}

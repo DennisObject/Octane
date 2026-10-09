@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
     filterRewardTrackTasks,
-    formatFriendlySeconds,
     getCampaignCounterStyle,
     getDailyTaskProgressPercent,
     getDailyTaskStyle,
@@ -74,12 +73,6 @@ describe('daily tasks', () => {
         ] as never[];
 
         expect(sortDailyTasks(tasks).map((task: { taskId: number }) => task.taskId)).toEqual([2, 3, 1]);
-    });
-
-    it('formats countdowns', () => {
-        expect(formatFriendlySeconds(59)).toBe('59s');
-        expect(formatFriendlySeconds(3725)).toBe('1h 2m');
-        expect(formatFriendlySeconds(90000)).toBe('1d 1h');
     });
 });
 

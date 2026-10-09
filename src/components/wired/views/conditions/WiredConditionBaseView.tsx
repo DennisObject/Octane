@@ -11,6 +11,7 @@ export interface WiredConditionBaseViewProps {
     footer?: ReactNode;
     footerCollapsible?: boolean;
     selectionPreview?: ReactNode;
+    nativeLayout?: boolean;
 }
 
 export const WiredConditionBaseView: FC<PropsWithChildren<WiredConditionBaseViewProps>> = (props) => {
@@ -23,7 +24,8 @@ export const WiredConditionBaseView: FC<PropsWithChildren<WiredConditionBaseView
         children = null,
         footer = null,
         footerCollapsible = true,
-        selectionPreview = null
+        selectionPreview = null,
+        nativeLayout = false
     } = props;
 
     const onSave = () => save && save();
@@ -39,6 +41,7 @@ export const WiredConditionBaseView: FC<PropsWithChildren<WiredConditionBaseView
             footer={footer}
             footerCollapsible={footerCollapsible}
             selectionPreview={selectionPreview}
+            nativeLayout={nativeLayout}
         >
             {children}
         </WiredBaseView>
