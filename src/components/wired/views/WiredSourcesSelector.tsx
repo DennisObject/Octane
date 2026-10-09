@@ -349,11 +349,13 @@ const SOURCE_BUTTON_HEIGHT = 20;
  * InputSourceSection's LR row: the centred list puts every item at int((height - itemHeight) / 2), the label wraps
  * in its centre column (TextParam wrap, align centre) and a two-line label makes the row taller than 23px.
  */
-const WiredSourceRow: FC<{ label: string; onPrevious: () => void; onNext: () => void }> = ({ label, onPrevious, onNext }) => {
+const WiredSourceRow: FC<{ label: string; onPrevious: () => void; onNext: () => void }> = ({ label, onPrevious, onNext }) =>
+{
     const labelRef = useRef<HTMLSpanElement>(null);
     const [labelHeight, setLabelHeight] = useState(16);
 
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         const element = labelRef.current;
 
         if (!element) return;

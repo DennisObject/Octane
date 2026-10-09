@@ -31,7 +31,7 @@ import {
     WiredMonitorRequestComposer,
     WiredUserInspectMoveComposer
 } from '@octane/renderer';
-import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, KeyboardEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     AddAnimationTickerCallback,
     AvatarInfoUtilities,
@@ -183,8 +183,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const [furniInternalRevision, setFurniInternalRevision] = useState(0);
     const [roomEnteredAt, setRoomEnteredAt] = useState(Date.now());
     const monitorSnapshot = useWiredCreatorToolsUiStore((s) => s.monitorSnapshot);
-    // WiredMenuMonitorTab.isDataReady: the tab stays in its loading state until the server answers.
-    const [monitorLoaded, setMonitorLoaded] = useState(false);
     const setMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.setMonitorSnapshot);
     const resetMonitorSnapshot = useWiredCreatorToolsUiStore((s) => s.resetMonitorSnapshot);
     const [selectedMonitorError, setSelectedMonitorError] = useState<{ type: string; category: string }>(null);
@@ -245,6 +243,19 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const selectedVariableKeys = useWiredCreatorToolsUiStore((s) => s.selectedVariableKeys);
     const setSelectedVariableKeys = useWiredCreatorToolsUiStore((s) => s.setSelectedVariableKeys);
     const { roomSession = null } = useRoom();
+    // WiredMenuMonitorTab.isDataReady: the tab stays in its loading state until the server answers. The answer is remembered for the room the monitor is
+    // being viewed in; closing the tab (or the window) clears it, so every opening starts in the loading state again.
+    const monitorViewKey = isVisible && activeTab === 'monitor' && roomSession?.roomId ? roomSession.roomId : 0;
+    const [monitorLoadedKey, setMonitorLoadedKey] = useState(0);
+    const monitorViewKeyRef = useRef(0);
+    const monitorLoaded = monitorViewKey !== 0 && monitorLoadedKey === monitorViewKey;
+
+    useLayoutEffect(() =>
+    {
+        monitorViewKeyRef.current = monitorViewKey;
+    });
+
+    if (monitorViewKey === 0 && monitorLoadedKey !== 0) setMonitorLoadedKey(0);
     const { ownUser: tradeOwnUser = null, otherUser: tradeOtherUser = null, isTrading = false } = useInventoryTrade();
     const {
         roomSettings,
@@ -712,7 +723,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             logs: [...(parser.logs ?? [])],
             history: [...(parser.history ?? [])]
         });
-        setMonitorLoaded(true);
+        setMonitorLoadedKey(monitorViewKeyRef.current);
     });
 
     useMessageEvent<WiredFurniRuntimeStateEvent>(WiredFurniRuntimeStateEvent, (event) => {
@@ -861,7 +872,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
     useEffect(() => {
         resetMonitorSnapshot();
-        setMonitorLoaded(false);
         setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
@@ -890,8 +900,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     useEffect(() => {
         if (!isVisible || activeTab !== 'monitor' || !roomSession?.roomId) return;
 
-        // startViewing clears the data and shows the loading state until the next answer.
-        setMonitorLoaded(false);
         requestMonitorSnapshot();
 
         const interval = window.setInterval(requestMonitorSnapshot, WIRED_MONITOR_POLL_MS);
@@ -3129,9 +3137,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 {(
                     <>
                     {activeTab === 'monitor' && (
-                        <WiredMonitorTabView
-                            loading={!monitorLoaded}
-                            canClear={roomSettings.canModify}
+                        <WiredMonitorTabView loading={!monitorLoaded} canClear={roomSettings.canModify}
                             monitorStats={monitorStats}
                             monitorLogs={monitorLogs}
                             monitorHistoryRows={monitorHistoryRows}

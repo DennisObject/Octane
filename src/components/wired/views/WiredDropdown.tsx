@@ -17,7 +17,8 @@ export interface WiredDropdownProps {
 }
 
 /** DropdownPreset: the Illumina dropmenu frame (22px) with the selected option or the caption as its text. */
-export const WiredDropdown: FC<WiredDropdownProps> = ({ options, value, caption = '', disabled = false, onChange }) => {
+export const WiredDropdown: FC<WiredDropdownProps> = ({ options, value, caption = '', disabled = false, onChange }) =>
+{
     const isNative = useWiredNative();
     const selected = options.find((option) => option.id === value) ?? null;
 

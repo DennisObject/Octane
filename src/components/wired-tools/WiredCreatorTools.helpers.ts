@@ -143,7 +143,8 @@ export const toVariableTextValues = (textConnector?: Array<{ key: number; value:
 };
 
 /** WiredMenuMonitorTab.colorize: share of the cap below t1 is green, below t2 orange, else (including 0/0) red. */
-export const colorizeMonitorStat = (amount: number, cap: number, t1: number, t2: number): string => {
+export const colorizeMonitorStat = (amount: number, cap: number, t1: number, t2: number): string =>
+{
     const ratio = amount / cap;
 
     if (ratio < t1) return MONITOR_COLOR_GREEN;

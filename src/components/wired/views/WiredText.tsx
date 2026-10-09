@@ -21,13 +21,15 @@ export interface WiredTextProps {
 }
 
 /** The il_regular text_view / text_bold_view of wired_style_illumina, drawn by the native glyph renderer. */
-export const WiredText: FC<WiredTextProps> = ({ text, bold = false, soft = false, underline = false, wrap = false, className = '' }) => {
+export const WiredText: FC<WiredTextProps> = ({ text, bold = false, soft = false, underline = false, wrap = false, className = '' }) =>
+{
     const isNative = useWiredNative();
     const background = useContext(WiredSurfaceContext);
     const boxRef = useRef<HTMLSpanElement>(null);
     const [width, setWidth] = useState<number>(undefined);
 
-    useLayoutEffect(() => {
+    useLayoutEffect(() =>
+    {
         if (!isNative || !wrap || !boxRef.current) return;
 
         const element = boxRef.current;
