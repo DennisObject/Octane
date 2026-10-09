@@ -233,7 +233,7 @@ export const BadgeLeaderboardView: FC<{}> = () => {
     const titleRef = useRef<HTMLDivElement>(null);
 
     const response = getCachedBadgeLeaderboard();
-    const hasUncommon = GetConfigurationValue<boolean>('badge_rarity.uncommon', false) || (response?.leaderboards?.rarity?.common?.totalPlayers ?? 0) > 0;
+    const hasUncommon = GetConfigurationValue<boolean>('badge_rarity.uncommon', false) || (response?.leaderboards?.rarity?.uncommon?.totalPlayers ?? 0) > 0;
     const supported = useMemo(() => getSupportedRarities(hasUncommon), [hasUncommon]);
 
     // Opening, switching category and paging all go through native showBadgeLeaderboard(type, rarity, page).

@@ -30,7 +30,7 @@ export const PAGE_SIZE = 10;
 /** BadgeLeaderboardController types: 0 total badges, 1 one rarity, 2 achievement level. */
 export type LeaderboardType = 0 | 1 | 2;
 
-/** class_3472 rarity numbers the leaderboard knows: 1 uncommon (the Plus "common" tier), 2 rare, 3 epic (very rare), 4 mythical, 5 legendary, 6 unique. */
+/** class_3472 rarity numbers the leaderboard knows: 1 uncommon, 2 rare, 3 epic (very rare), 4 mythical, 5 legendary, 6 unique. */
 export type LeaderboardRarity = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface LeaderboardTarget {
@@ -55,7 +55,7 @@ interface RarityDescriptor {
 // of that name, so the mythical frame is rarity_3 (frameLeaderboardRarityLegendary) and the legendary frame is rarity_4 (frameLeaderboardRarityMythical).
 const RARITIES: Record<LeaderboardRarity, RarityDescriptor> = {
     1: {
-        key: 'common',
+        key: 'uncommon',
         textKey: 'badge.rarity.uncommon',
         infoKey: 'badge_leaderboard.info.rarity.uncommon',
         frame: frameLeaderboardRarityCommon,
