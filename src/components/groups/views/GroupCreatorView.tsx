@@ -1,6 +1,6 @@
 import { GroupBadgePartsComposer, GroupBuyComposer, GroupBuyDataComposer, GroupBuyDataEvent } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
-import { CreateLinkEvent, HasHabboClub, IGroupData, LocalizeText, SendMessageComposer } from '../../../api';
+import { CreateLinkEvent, GroupBadgePart, HasHabboClub, IGroupData, LocalizeText, SendMessageComposer } from '../../../api';
 import creditIcon from '../../../assets/images/groups/native/gcreate_icon_credit.png';
 import vipIcon from '../../../assets/images/groups/native/icon-vip-square.png';
 import { useMessageEvent } from '../../../hooks';
@@ -36,19 +36,13 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
     const buyGroup = () => {
         if (!groupData || isBuyingGroup) return;
 
+        // The badge step does not let a badge without a base through; a list that still lacks one is never sent.
+        const badge = GroupBadgePart.serialize(groupData.groupBadgeParts);
+
+        if (!badge) return;
+
         isBuyingGroup = true;
         setTimeout(() => (isBuyingGroup = false), 5000);
-
-        const badge = [];
-
-        groupData.groupBadgeParts.forEach((part) => {
-            // The v75 client sends only the layers that hold a part, an unset base included.
-            if (part.previewCode) {
-                badge.push(part.key);
-                badge.push(part.color);
-                badge.push(part.position);
-            }
-        });
 
         SendMessageComposer(
             new GroupBuyComposer(

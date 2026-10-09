@@ -1,9 +1,10 @@
 import { GroupSaveBadgeComposer } from '@octane/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { GroupBadgePart, IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
+import { GroupBadgePart, IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { useGroup } from '../../../../hooks';
 import { GroupBadgeCreatorView } from '../GroupBadgeCreatorView';
+import { useGroupAlert } from '../GroupNativeAlertView';
 import { GroupBox, GroupButton, GroupText } from '../GroupNativeLayout';
 
 interface GroupTabBadgeViewProps {
@@ -20,6 +21,7 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
     const { groupData = null, setGroupData = null, setCloseAction = null, skipDefault = null } = props;
     const [badgeParts, setBadgeParts] = useState<GroupBadgePart[]>(null);
     const { groupCustomize = null } = useGroup();
+    const showAlert = useGroupAlert();
 
     const getModifiedBadgeCode = () => {
         if (!badgeParts || !badgeParts.length) return '';
@@ -33,6 +35,13 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
 
     const saveBadge = useCallback(() => {
         if (!groupData || !badgeParts || !badgeParts.length) return false;
+
+        // A badge needs its base: without one the server would read the first symbol as the base.
+        if (!GroupBadgePart.serialize(badgeParts)) {
+            showAlert({ title: LocalizeText('group.edit.error.title'), message: localizeWithFallback('group.edit.error.no.badge.base', 'Choose a base for the badge.') });
+
+            return false;
+        }
 
         if (groupData.groupBadgeParts.length === badgeParts.length && badgeParts.every((part, index) =>
             part.key === groupData.groupBadgeParts[index].key && part.color === groupData.groupBadgeParts[index].color && part.position === groupData.groupBadgeParts[index].position)) return true;
@@ -49,32 +58,23 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
             return true;
         }
 
-        const badge = [];
-
-        badgeParts.forEach((part) => {
-            // The v75 client sends only the layers that hold a part, an unset base included.
-            if (!part.previewCode) return;
-
-            badge.push(part.key);
-            badge.push(part.color);
-            badge.push(part.position);
-        });
+        const badge = GroupBadgePart.serialize(badgeParts);
 
         SendMessageComposer(new GroupSaveBadgeComposer(groupData.groupId, badge));
         setGroupData(prevValue => ({ ...prevValue, groupBadgeParts: badgeParts }));
 
         return true;
-    }, [groupData, badgeParts, setGroupData]);
+    }, [groupData, badgeParts, setGroupData, showAlert]);
 
     useEffect(() => {
         if (groupData.groupBadgeParts && groupData.groupBadgeParts.length) return;
 
-        if (!groupCustomize?.badgePartColors?.length) return;
+        if (!groupCustomize?.badgeBases?.length || !groupCustomize?.badgePartColors?.length) return;
 
-        // The layout opens with every layer empty (the "+" buttons), the first palette colour and position 0.
+        // The symbol layers open empty (the "+" buttons) with the first palette colour and position 0; the base starts on the first base so a badge is always valid.
         const color = groupCustomize.badgePartColors[0].id;
         const badgeParts = [
-            new GroupBadgePart(GroupBadgePart.BASE, 0, color, 0),
+            new GroupBadgePart(GroupBadgePart.BASE, groupCustomize.badgeBases[0].id, color, 0),
             new GroupBadgePart(GroupBadgePart.SYMBOL, 0, color, 0),
             new GroupBadgePart(GroupBadgePart.SYMBOL, 0, color, 0),
             new GroupBadgePart(GroupBadgePart.SYMBOL, 0, color, 0),

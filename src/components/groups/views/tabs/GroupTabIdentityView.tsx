@@ -40,7 +40,10 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
             return false;
         }
 
-        if (groupName === groupData.groupName && groupDescription === groupData.groupDescription) return true;
+        // A new group also carries the chosen home room, so a room-only change still has to be stored.
+        const isRoomChanged = groupData.groupId <= 0 && groupHomeroomId !== groupData.groupHomeroomId;
+
+        if (!isRoomChanged && groupName === groupData.groupName && groupDescription === groupData.groupDescription) return true;
 
         if (groupData.groupId <= 0) {
             if (groupHomeroomId <= 0) return false;
