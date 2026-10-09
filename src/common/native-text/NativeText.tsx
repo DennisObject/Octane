@@ -2,7 +2,7 @@ import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { compositeAir32RetainedToOpaque, resolveLineMetrics } from './Air32NativeTextRenderer';
 import { renderCanvasSpacedText, supportsCanvasSpacedText } from './CanvasSpacedText';
 import { loadNativeFont, measureNativeText, NativeFontStyle, supportsNativeText } from './NativeFont';
-import { useNativeTextScale } from './NativeTextScale';
+import { useNativeTextSampling, useNativeTextScale } from './NativeTextScale';
 import { NativeTextStyleName, nativeTextStyles } from './NativeTextStyles';
 
 interface NativeTextProps {
@@ -15,6 +15,11 @@ interface NativeTextProps {
     overrides?: Partial<NativeFontStyle>;
     className?: string;
     style?: CSSProperties;
+    /**
+     * Draw the raster at the client's own resolution: always 1x, enlarged by the browser like the native stage (without smoothing on an integer
+     * device pixel ratio, smoothed on a fractional one). The default keeps the sharper raster at the next whole display scale.
+     */
+    nativeResolution?: boolean;
 }
 
 // TextField.wrapText preserves whitespace and splits a long token only when a
@@ -60,12 +65,14 @@ function wrapNativeParagraph(text: string, width: number, measure: (text: string
 }
 
 /** A v75 TextField raster, retaining its 2px gutter and accessible DOM text. */
-export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, overrides, className, style }) => {
+export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, maxWidth, leading = 0, overrides, className, style, nativeResolution = false }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [size, setSize] = useState<{ width: number; height: number }>(null);
     const fontStyle = { ...nativeTextStyles[textStyle], ...overrides, background };
     const styleKey = JSON.stringify(fontStyle);
-    const scale = useNativeTextScale();
+    const displayScale = useNativeTextScale();
+    const sampling = useNativeTextSampling(nativeResolution);
+    const scale = nativeResolution ? 1 : displayScale;
 
     useEffect(() => {
         let disposed = false;
@@ -180,7 +187,7 @@ export const NativeText: FC<NativeTextProps> = ({ text, textStyle, background, m
             <canvas
                 ref={canvasRef}
                 aria-hidden="true"
-                style={{ display: size ? 'block' : 'none', width: size?.width, height: size?.height, imageRendering: scale > 1 ? 'auto' : 'pixelated' }}
+                style={{ display: size ? 'block' : 'none', width: size?.width, height: size?.height, imageRendering: nativeResolution ? sampling : scale > 1 ? 'auto' : 'pixelated' }}
             />
             <span
                 style={

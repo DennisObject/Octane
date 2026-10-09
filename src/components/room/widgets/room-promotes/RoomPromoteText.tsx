@@ -70,6 +70,7 @@ export const RoomPromoteText: FC<RoomPromoteTextProps> = ({ text, x, y, width, h
             <NativeText
                 background={0x000000}
                 maxWidth={wrap ? width : undefined}
+                nativeResolution
                 overrides={{ size, bold, underline, color: 0xffffff, sharpness: 0, thickness: 0, letterSpacing: spacing }}
                 text={text}
                 textStyle="u_regular"
