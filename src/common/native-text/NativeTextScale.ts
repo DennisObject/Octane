@@ -46,4 +46,3 @@ const subscribeNothing = () => () => {};
 
 /** Only a native-resolution text follows the pixel ratio; every other text keeps its constant answer and subscribes to nothing. */
 export const useNativeTextSampling = (enabled: boolean): 'pixelated' | 'auto' => useSyncExternalStore(enabled ? subscribe : subscribeNothing, enabled ? getNativeTextSampling : () => 'pixelated', () => 'pixelated');
-
