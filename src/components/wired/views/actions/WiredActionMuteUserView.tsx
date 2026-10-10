@@ -8,7 +8,7 @@ import { WiredTextInput } from '../WiredTextInput';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 export const WiredActionMuteUserView: FC<{}> = (props) => {
-    const [time, setTime] = useState(-1);
+    const [time, setTime] = useState(1);
     const [message, setMessage] = useState('');
     const { trigger = null, setIntParams = null, setStringParam = null, setUserSources } = useWired();
     const [userSource, setUserSource] = useState<number>(() => {
@@ -23,7 +23,7 @@ export const WiredActionMuteUserView: FC<{}> = (props) => {
     };
 
     useEffect(() => {
-        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 0);
+        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 1);
         setUserSource(trigger?.userSources[0] ?? 0);
         setMessage(trigger.stringData);
     }, [trigger]);
@@ -42,7 +42,7 @@ export const WiredActionMuteUserView: FC<{}> = (props) => {
             <WiredSliderSection
                 converter={WIRED_SLIDER_ECHO}
                 max={10}
-                min={0}
+                min={1}
                 titleKey="wiredfurni.params.length.minutes"
                 unit="minutes"
                 value={time}
