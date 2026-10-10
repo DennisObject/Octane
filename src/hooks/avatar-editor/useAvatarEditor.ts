@@ -1,7 +1,10 @@
 import {
     AvatarEditorFigureCategory,
     AvatarEffectActivatedComposer,
+    AvatarEffectActivatedEvent,
+    AvatarEffectExpiredEvent,
     AvatarEffectSelectedComposer,
+    AvatarEffectSelectedEvent,
     AvatarFigureContainer,
     AvatarFigurePartType,
     FigureSetIdsMessageEvent,
@@ -14,6 +17,7 @@ import {
     IFigurePartSet,
     IPalette,
     IPartColor,
+    RoomUnitEffectEvent,
     SetType,
     UserWardrobePageEvent
 } from '@octane/renderer';
@@ -25,6 +29,7 @@ import {
     CreateLinkEvent,
     GetClubMemberLevel,
     GetConfigurationValue,
+    GetRoomSession,
     IAvatarEditorCategory,
     IAvatarEditorCategoryPartItem,
     IsNftAvatarPartSet,
@@ -86,6 +91,8 @@ const useAvatarEditorState = () => {
             return { userId: userData.userId, direction: typeof next === 'function' ? next(direction) : next };
         });
     const effectChanged = useRef(false);
+    // HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it.
+    const editorOpened = useRef(false);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
@@ -101,6 +108,7 @@ const useAvatarEditorState = () => {
                 return staged[gender] === wornEffect && current.userId === userData.userId ? current : { userId: userData.userId, effects: { ...staged, [gender]: wornEffect } };
             });
         }
+        else editorOpened.current = true;
 
         setIsVisibleState(value);
     }, [gender, wornEffect, userData.userId]);
@@ -374,6 +382,35 @@ const useAvatarEditorState = () => {
         setSavedFigures(savedFigures);
     });
 
+    // AvatarEditorMessageHandler: once the editor exists, the effect the server activates, selects or puts on the own room user becomes the current gender's
+    // selection, and an expiring effect clears it only when it is the selected one. None of them counts as a change to save, nor as the worn effect.
+    const followServerEffect = (type: number, onlyIfSelected: number = null) =>
+    {
+        if (!editorOpened.current) return;
+
+        setGenderEffectsState((current) =>
+        {
+            const staged = current.userId === userData.userId ? current.effects : {};
+
+            if (onlyIfSelected !== null && (staged[gender] ?? -1) !== onlyIfSelected) return current;
+
+            return { userId: userData.userId, effects: { ...staged, [gender]: type } };
+        });
+    };
+
+    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => followServerEffect(event.getParser().type));
+    useMessageEvent<AvatarEffectSelectedEvent>(AvatarEffectSelectedEvent, (event) => followServerEffect(event.getParser().type));
+    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) => followServerEffect(-1, event.getParser().type));
+    useMessageEvent<RoomUnitEffectEvent>(RoomUnitEffectEvent, (event) =>
+    {
+        const parser = event.getParser();
+        const session = GetRoomSession();
+
+        if (!session || parser.unitId !== session.ownRoomIndex) return;
+
+        followServerEffect(parser.effectId);
+    });
+
     useMessageEvent<HotLooksEvent>(HotLooksEvent, (event) => setHotLooksState({ userId: userData.userId, looks: event.getParser().hotLooks }));
 
     useEffect(() =>
@@ -535,6 +572,7 @@ const useAvatarEditorState = () => {
     useEffect(() => {
         genderFigures.current = { userId: 0, figures: {} };
         effectChanged.current = false;
+        editorOpened.current = false;
     }, [userData.userId]);
 
     useEffect(() => {
