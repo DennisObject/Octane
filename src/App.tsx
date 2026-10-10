@@ -23,6 +23,7 @@ import {
 } from '@octane/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, fetchReconnectTicket, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { loadMarketplaceTexts } from './api/catalog/loadMarketplaceTexts';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { LoginView } from './components/login/LoginView';
@@ -330,9 +331,6 @@ export const App: FC<{}> = (props) => {
 
             warmupPromiseRef.current = (async () => {
                 await GetConfiguration().init();
-                const externalTextUrls = asStringArray(GetConfiguration().getValue<unknown>('external.texts.url'));
-                const marketplaceTextsUrl = new URL('configuration/marketplace-texts.json', document.baseURI).toString();
-                GetConfiguration().setValue('external.texts.url', [...externalTextUrls, marketplaceTextsUrl]);
                 bumpProgress(25);
 
                 // 0 = the display's refresh rate. A cap (the old 24 default) makes
@@ -375,7 +373,7 @@ export const App: FC<{}> = (props) => {
 
                 const warmupTasks: Promise<any>[] = [
                     GetAssetManager().downloadAssets(assetUrls),
-                    GetLocalizationManager().init(),
+                    GetLocalizationManager().init().then(loadMarketplaceTexts),
                     GetAvatarRenderManager().init(),
                     GetSoundManager().init()
                 ];
