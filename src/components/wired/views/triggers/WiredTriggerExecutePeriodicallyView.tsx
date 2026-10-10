@@ -11,7 +11,7 @@ export const WiredTriggeExecutePeriodicallyView: FC<{}> = () => {
     const save = () => setIntParams([time]);
 
     useEffect(() => {
-        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 0);
+        setTime(trigger.intData.length > 0 ? trigger.intData[0] : 1);
     }, [trigger]);
 
     return (
