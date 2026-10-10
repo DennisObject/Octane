@@ -14,7 +14,14 @@ export const NavigatorRoomSettingsConfirmView: FC<NavigatorRoomSettingsConfirmVi
     const { title, message, onConfirm, onClose } = props;
 
     return (
-        <OctaneCardView className="octane-ros-confirm" frameStyle={3} isResizable={false} offsetLeft={-0.5} offsetTop={-0.5} uniqueKey="octane-room-settings-confirm">
+        <OctaneCardView
+            className="octane-ros-confirm"
+            frameStyle={3}
+            isResizable={false}
+            offsetLeft={-0.5}
+            offsetTop={-0.5}
+            uniqueKey="octane-room-settings-confirm"
+        >
             <OctaneCardHeaderView headerText={title} onCloseClick={onClose} />
             <OctaneCardContentView className="octane-ros-confirm-content" gap={0}>
                 <div className="ros-confirm-message">{message}</div>
