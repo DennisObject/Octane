@@ -176,11 +176,17 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                     return newVal;
                 });
 
+                const sessionUserId = GetSessionDataManager().userId;
+
                 showConfirm(
                     LocalizeText('catalog.marketplace.confirm_higher_header') +
                         '\n' +
                         LocalizeText('catalog.marketplace.confirm_price', ['price'], [parser.newPrice.toString()]),
-                    () => buyOffer(parser.offerId),
+                    () =>
+                    {
+                        // A confirmation left open across a logout must not buy for another user.
+                        if (GetSessionDataManager().userId === sessionUserId) buyOffer(parser.offerId);
+                    },
                     null,
                     null,
                     null,
