@@ -16,6 +16,11 @@ interface ContextMenuViewProps extends BaseProps<HTMLDivElement> {
     freezePositionOnHover?: boolean;
     repositionKey?: string | number;
     showCaretIcon?: boolean;
+    /** ContextInfoView.getOffset of the AIR bubbles: the gap above the object for avatars and for everything else (replaces the default placement). */
+    anchorOffsets?: { user: number; other: number };
+    /** ContextInfoView CONTEXT_INFO_DELAY and fade length in ms. */
+    fadeDelay?: number;
+    fadeLength?: number;
 }
 
 const LOCATION_STACK_SIZE = 25;
@@ -39,6 +44,9 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
     freezePositionOnHover = false,
     repositionKey = null,
     showCaretIcon = true,
+    anchorOffsets = null,
+    fadeDelay = FADE_DELAY,
+    fadeLength = FADE_LENGTH,
     onMouseEnter = null,
     onMouseLeave = null,
     ...rest
@@ -66,7 +74,13 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
                 return;
 
             let offset = -elementRef.current.offsetHeight;
-            if (userType > -1 && [RoomObjectType.USER, RoomObjectType.BOT, RoomObjectType.RENTABLE_BOT].includes(userType))
+            const isAvatar = userType > -1 && [RoomObjectType.USER, RoomObjectType.BOT, RoomObjectType.RENTABLE_BOT].includes(userType);
+
+            if (anchorOffsets)
+            {
+                offset += isAvatar ? anchorOffsets.user : anchorOffsets.other;
+            }
+            else if (isAvatar)
             {
                 offset += bounds.height > 50 ? tallAvatarOffset : 0;
             }
@@ -105,7 +119,7 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
             setPos({ x, y });
             forcePositionUpdateRef.current = false;
         },
-        [freezePositionOnHover, maximumVerticalLeadRatio, tallAvatarOffset, userType]
+        [anchorOffsets, freezePositionOnHover, maximumVerticalLeadRatio, tallAvatarOffset, userType]
     );
 
     const getClassNames = useMemo(() =>
@@ -119,11 +133,11 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
         () => ({
             left: pos.x ?? 0,
             top: pos.y ?? 0,
-            transition: isFading ? 'opacity 75ms linear' : undefined,
+            transition: isFading ? `opacity ${fadeLength}ms linear` : undefined,
             opacity,
             ...style
         }),
-        [pos, opacity, isFading, style]
+        [pos, opacity, isFading, fadeLength, style]
     );
 
     useEffect(() =>
@@ -156,11 +170,11 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
         const timeout = setTimeout(() =>
         {
             setIsFading(true);
-            setTimeout(onClose, FADE_LENGTH);
-        }, FADE_DELAY);
+            setTimeout(onClose, fadeLength);
+        }, fadeDelay);
 
         return () => clearTimeout(timeout);
-    }, [fades, onClose]);
+    }, [fades, fadeDelay, fadeLength, onClose]);
 
     useEffect(() =>
     {
