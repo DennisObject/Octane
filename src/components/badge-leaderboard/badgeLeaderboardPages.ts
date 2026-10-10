@@ -121,7 +121,7 @@ export const LEADERBOARD_TEXT_FALLBACKS: Record<string, string> = {
     'badge_leaderboard.info.total_badges': 'Overview of players with the most badges.\\nThese users are on a grind!',
     'badge_leaderboard.info.achievement_level':
         'Players with the highest achievement level.\\nThe achievement level is the sum of all the user\'s achievement badge levels combined.',
-    'badge_leaderboard.info.rarity.uncommon': 'Players with the most uncommon badges.Uncommon badges are awarded to 200 or less users.',
+    'badge_leaderboard.info.rarity.uncommon': 'Players with the most uncommon badges.\\nUncommon badges are awarded to 200 or less users.',
     'badge_leaderboard.info.rarity.rare': 'Players with the most rare badges.\\nRare badges are awarded to 50 or less users.',
     'badge_leaderboard.info.rarity.epic': 'Players with the most epic badges.\\nEpic badges are awarded to 10 or less users.',
     'badge_leaderboard.info.rarity.mythical':
