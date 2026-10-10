@@ -41,6 +41,8 @@ import {
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
 import { useLiveState } from '../useLiveState';
+import { useWiredCatalog } from './useWiredCatalog';
+import { WiredCatalogState } from './WiredCatalogProvider';
 import { useWiredTools } from '../wired-tools/useWiredTools';
 
 /** English for server error keys a hotel's texts may not have yet. */
@@ -73,6 +75,22 @@ const useWiredState = () => {
     const setAllowedFurniCheck = useCallback((check: WiredFurniPickCheck | null) => setAllowedFurniCheckState(() => check), []);
     const { showConfirm = null, simpleAlert = null } = useNotification();
     const { requestUserVariables = null, roomSettings = null } = useWiredTools();
+    const { provider: catalogProvider, bind: bindCatalog } = useWiredCatalog();
+    const [nativeCatalog, setNativeCatalog] = useState<WiredCatalogState | null>(null);
+    const catalogGeneration = useRef(0);
+    useEffect(() => {
+        const generation = ++catalogGeneration.current;
+        setNativeCatalog(null);
+        const context = trigger?.contexts.find(context => context.type === 0);
+        if(!trigger || !context || context.type !== 0) return;
+        const captured = trigger;
+        bindCatalog(roomSettings?.roomId === GetRoomSession()?.roomId && !!roomSettings?.canInspect);
+        const cancel = catalogProvider.subscribe(state => {
+            if(catalogGeneration.current === generation && triggerRef.current === captured) setNativeCatalog(state);
+        }, context.hash);
+        return () => { catalogGeneration.current++; cancel(); };
+    }, [trigger, roomSettings?.roomId, roomSettings?.canInspect, catalogProvider, bindCatalog]);
+
     // The quick menu's clipboard: one entry per holder and code, kept for the session.
     const [clipboard, setClipboard] = useState<Map<string, WiredClipboardEntry>>(() => new Map());
     // "Save without closing": the next save success leaves the window open.
@@ -475,6 +493,7 @@ const useWiredState = () => {
     }, [trigger]);
 
     return {
+        nativeCatalog,
         trigger,
         setTrigger,
         intParams,
