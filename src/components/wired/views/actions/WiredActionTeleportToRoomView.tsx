@@ -21,7 +21,16 @@ const PICKED_SOURCE = 100;
  * teleporter leads to, arriving on the linker's or teleporter's pair, or else to the typed room.
  */
 export const WiredActionTeleportToRoomView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setIntParams = null, setStringParam = null, setAllowedFurniCheck = null, setAllowedInteractionErrorKey = null } = useWired();
+    const {
+        trigger = null,
+        furniIds = [],
+        setIntParams = null,
+        setStringParam = null,
+        setAllowedFurniCheck = null,
+        setAllowedInteractionErrorKey = null,
+        setFurniSources,
+        setUserSources
+    } = useWired();
     const [roomId, setRoomId] = useState('');
     const [userSource, setUserSource] = useState(0);
     const [furniSource, setFurniSource] = useState(PICKED_SOURCE);
@@ -29,18 +38,19 @@ export const WiredActionTeleportToRoomView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const params = readTeleportToRoomParams(trigger.intData);
-
         setRoomId(sanitizeTeleportRoomId(trigger.stringData ?? ''));
-        setUserSource(params.userSource);
-        setFurniSource(params.furniSource);
+        setUserSource(trigger.userSources[0] ?? 0);
+        setFurniSource(trigger.furniSources[0] ?? 100);
     }, [trigger]);
 
     useEffect(() => {
         if (!setAllowedFurniCheck) return;
 
         setAllowedFurniCheck((roomObject, furniData) =>
-            isTeleportToRoomPickable(roomObject?.model?.getValue<Record<string, unknown>>(RoomObjectVariable.FURNITURE_DATA), [furniData?.className, furniData?.name])
+            isTeleportToRoomPickable(roomObject?.model?.getValue<Record<string, unknown>>(RoomObjectVariable.FURNITURE_DATA), [
+                furniData?.className,
+                furniData?.name
+            ])
         );
         setAllowedInteractionErrorKey?.(localizeWithFallback('wiredfurni.error.require_room_linker', 'Pick a room linker.'));
 
@@ -54,7 +64,9 @@ export const WiredActionTeleportToRoomView: FC<{}> = () => {
 
     const save = () => {
         setStringParam(roomId);
-        setIntParams([userSource, furniSource]);
+        setIntParams([]);
+        setFurniSources([furniSource]);
+        setUserSources([userSource]);
     };
 
     return (
@@ -70,6 +82,7 @@ export const WiredActionTeleportToRoomView: FC<{}> = () => {
                 />
             }
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT}
             save={save}
             validate={() => (roomId.length ? isValidTeleportRoomId(roomId) : hasFurni)}
@@ -93,7 +106,10 @@ export const WiredActionTeleportToRoomView: FC<{}> = () => {
                     onChange={(event) => setRoomId(sanitizeTeleportRoomId(event.target.value))}
                 />
                 <Text small>
-                    {localizeWithFallback('wiredfurni.params.teleport_to_room.room_id.hint', 'Used when no picked furni leads anywhere. Leave empty to only use furni.')}
+                    {localizeWithFallback(
+                        'wiredfurni.params.teleport_to_room.room_id.hint',
+                        'Used when no picked furni leads anywhere. Leave empty to only use furni.'
+                    )}
                 </Text>
             </div>
         </WiredActionBaseView>

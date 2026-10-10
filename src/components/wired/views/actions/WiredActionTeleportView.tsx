@@ -1,105 +1,34 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { WiredActionLayoutCode } from '../../../../api/wired/WiredActionLayoutCode';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-export const WiredActionTeleportView: FC<{}> = (props) => {
-    const { trigger = null, setIntParams = null, setFurniSources = null, setUserSources = null } = useWired();
-    const isTeleportEffect = trigger?.code === WiredActionLayoutCode.TELEPORT;
-    const isUserToFurniEffect = trigger?.code === WiredActionLayoutCode.USER_TO_FURNI;
-    /** Same three slots as the teleport, but it walks — so no "teleport instantly" to offer. */
-    const isWalkToFurni = trigger?.code === WiredActionLayoutCode.WALK_TO_FURNI;
-    const usesTeleportSlots = isTeleportEffect || isWalkToFurni;
-    const [fastTeleport, setFastTeleport] = useState<boolean>(() => {
-        if (isTeleportEffect && trigger?.intData?.length >= 1) return trigger.intData[0] === 1;
-        return false;
-    });
-    const [walkMode, setWalkMode] = useState<number>(() => {
-        if (isUserToFurniEffect && trigger?.intData?.length >= 3) return trigger.intData[2];
-        return 1;
-    });
-
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (isTeleportEffect) return trigger?.furniSources?.[0] ?? 100;
-        if (usesTeleportSlots && trigger?.intData?.length >= 3) return trigger.intData[1];
-        if (isUserToFurniEffect && trigger?.intData?.length >= 3) return trigger.intData[0];
-        if (trigger?.intData?.length >= 1) return trigger.intData[0];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
-
-    const [userSource, setUserSource] = useState<number>(() => {
-        if (isTeleportEffect) return trigger?.userSources?.[0] ?? 0;
-        if (usesTeleportSlots && trigger?.intData?.length >= 3) return trigger.intData[2];
-        if (isUserToFurniEffect && trigger?.intData?.length >= 3) return trigger.intData[1];
-        if (trigger?.intData?.length >= 2) return trigger.intData[1];
-        return 0;
-    });
-
+export const WiredActionTeleportView: FC<{}> = () => {
+    const { trigger, setIntParams, setFurniSources, setUserSources } = useWired();
+    const isTeleport = trigger?.code === 8;
+    const isUserToFurni = trigger?.code === 43;
+    const [fast, setFast] = useState(false);
+    const [walkMode, setWalkMode] = useState(0);
+    const [furniSource, setFurniSource] = useState(100);
+    const [userSource, setUserSource] = useState(0);
     useEffect(() => {
-        if (!trigger) return;
-
-        if (isTeleportEffect) {
-            setFastTeleport(trigger.intData[0] === 1);
-            setFurniSource(trigger.furniSources[0] ?? 100);
-            setUserSource(trigger.userSources[0] ?? 0);
-            setWalkMode(1);
-            return;
-        }
-
-        if (usesTeleportSlots && trigger.intData.length >= 3) {
-            setFastTeleport(trigger.intData[0] === 1);
-            setFurniSource(trigger.intData[1]);
-            setUserSource(trigger.intData[2]);
-            setWalkMode(1);
-            return;
-        }
-
-        if (isUserToFurniEffect && trigger.intData.length >= 3) {
-            setFastTeleport(false);
-            setFurniSource(trigger.intData[0]);
-            setUserSource(trigger.intData[1]);
-            setWalkMode(trigger.intData[2]);
-            return;
-        }
-
-        setFastTeleport(false);
-        setWalkMode(1);
-
-        if (trigger.intData.length >= 1) setFurniSource(trigger.intData[0]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-
-        if (trigger.intData.length >= 2) setUserSource(trigger.intData[1]);
-        else setUserSource(0);
-    }, [isTeleportEffect, isUserToFurniEffect, isWalkToFurni, usesTeleportSlots, trigger]);
-
-    const onChangeFurniSource = (next: number) => setFurniSource(next);
-
+        setFast(trigger?.intData[0] === 1);
+        setWalkMode(trigger?.intData[0] ?? 0);
+        setFurniSource(trigger?.furniSources[0] ?? 100);
+        setUserSource(trigger?.userSources[0] ?? 0);
+    }, [trigger]);
     const save = () => {
-        if (isTeleportEffect) {
-            setIntParams([fastTeleport ? 1 : 0]);
-            setFurniSources([furniSource]);
-            setUserSources([userSource]);
-            return;
-        }
-
-        setIntParams(
-            usesTeleportSlots
-                ? [fastTeleport ? 1 : 0, furniSource, userSource]
-                : isUserToFurniEffect
-                  ? [furniSource, userSource, walkMode]
-                  : [furniSource, userSource]
-        );
+        setIntParams(isTeleport ? [fast ? 1 : 0] : isUserToFurni ? [walkMode] : []);
+        setFurniSources([furniSource]);
+        setUserSources([userSource]);
     };
-
-    const requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT;
-
     return (
         <WiredActionBaseView
+            nativeLayout={true}
             hasSpecialInput={true}
-            requiresFurni={requiresFurni}
+            requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT}
             save={save}
             footer={
                 <WiredSourcesSelector
@@ -107,29 +36,23 @@ export const WiredActionTeleportView: FC<{}> = (props) => {
                     showUsers={true}
                     furniSource={furniSource}
                     userSource={userSource}
-                    onChangeFurni={onChangeFurniSource}
+                    onChangeFurni={setFurniSource}
                     onChangeUsers={setUserSource}
                 />
             }
         >
-            {isTeleportEffect && (
-                <div className="flex items-center gap-1">
-                    <input checked={fastTeleport} className="form-check-input" type="checkbox" onChange={(event) => setFastTeleport(event.target.checked)} />
+            {isTeleport && (
+                <label className="flex items-center gap-1">
+                    <input type="checkbox" checked={fast} onChange={(event) => setFast(event.target.checked)} />
                     <Text>{LocalizeText('wiredfurni.params.teleport.options.0')}</Text>
-                </div>
+                </label>
             )}
-            {isUserToFurniEffect && (
+            {isUserToFurni && (
                 <div className="flex flex-col gap-1">
-                    {[0, 1, 2].map((option) => (
-                        <label key={option} className="flex items-center gap-1 cursor-pointer">
-                            <input
-                                checked={walkMode === option}
-                                className="form-check-input"
-                                name="userWalkMode"
-                                type="radio"
-                                onChange={() => setWalkMode(option)}
-                            />
-                            <Text>{LocalizeText(`wiredfurni.params.user_move.walkmode.${option}`)}</Text>
+                    {[0, 1, 2].map((value) => (
+                        <label key={value} className="flex items-center gap-1">
+                            <input type="radio" name="userWalkMode" checked={walkMode === value} onChange={() => setWalkMode(value)} />
+                            <Text>{LocalizeText(`wiredfurni.params.user_move.walkmode.${value}`)}</Text>
                         </label>
                     ))}
                 </div>

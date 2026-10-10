@@ -28,25 +28,23 @@ export const WiredActionWriteToLogsView: FC<{}> = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
     const [message, setMessage] = useState('');
     const [level, setLevel] = useState(DEFAULT_LEVEL);
-    const [userSource, setUserSource] = useState(0);
 
     useEffect(() => {
         if (!trigger) return;
 
         setMessage(trigger.stringData ?? '');
         setLevel(normalizeLevel(trigger.intData?.[0]));
-        setUserSource(trigger.intData?.[1] ?? 0);
     }, [trigger]);
 
     const save = () => {
-        setStringParam(message.trim());
-        setIntParams([level, userSource]);
+        setStringParam(message);
+        setIntParams([level]);
     };
 
     return (
         <WiredActionBaseView
-            footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             validate={() => message.trim().length > 0}

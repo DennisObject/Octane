@@ -2,8 +2,8 @@ import { FC, useEffect, useState } from 'react';
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp } from 'react-icons/fa';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -32,34 +32,34 @@ const normalizeDistance = (value: number) => {
 };
 
 export const WiredActionRelativeMoveView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setFurniSources } = useWired();
 
     const [horizontalDirection, setHorizontalDirection] = useState(1);
     const [horizontalDistance, setHorizontalDistance] = useState(0);
     const [verticalDirection, setVerticalDirection] = useState(1);
     const [verticalDistance, setVerticalDistance] = useState(0);
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 4) return trigger.intData[4];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
+    const [furniSource, setFurniSource] = useState(100);
 
     useEffect(() => {
         if (!trigger) return;
 
-        setHorizontalDirection(trigger.intData.length > 0 ? normalizeDirection(trigger.intData[0], 1) : 1);
-        setHorizontalDistance(trigger.intData.length > 1 ? normalizeDistance(trigger.intData[1]) : 0);
-        setVerticalDirection(trigger.intData.length > 2 ? normalizeDirection(trigger.intData[2], 1) : 1);
-        setVerticalDistance(trigger.intData.length > 3 ? normalizeDistance(trigger.intData[3]) : 0);
+        setHorizontalDirection((trigger.intData[0] ?? 0) < 0 ? 0 : 1);
+        setHorizontalDistance(Math.abs(trigger.intData[0] ?? 0));
+        setVerticalDirection((trigger.intData[1] ?? 0) < 0 ? 0 : 1);
+        setVerticalDistance(Math.abs(trigger.intData[1] ?? 0));
 
-        if (trigger.intData.length > 4) setFurniSource(trigger.intData[4]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
+        setFurniSource(trigger.furniSources[0] ?? 100);
     }, [trigger]);
 
-    const save = () => setIntParams([horizontalDirection, horizontalDistance, verticalDirection, verticalDistance, furniSource]);
+    const save = () => {
+        setIntParams([horizontalDistance * (horizontalDirection === 0 ? -1 : 1), verticalDistance * (verticalDirection === 0 ? -1 : 1)]);
+        setFurniSources([furniSource]);
+    };
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT}
             save={save}
             footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={setFurniSource} />}

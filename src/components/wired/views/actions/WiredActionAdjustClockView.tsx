@@ -1,8 +1,8 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -35,12 +35,9 @@ const formatSeconds = (halfSeconds: number) => {
 };
 
 export const WiredActionAdjustClockView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null } = useWired();
+    const { trigger = null, setIntParams = null, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null, setFurniSources } = useWired();
     const [operator, setOperator] = useState(2);
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
+    const [furniSource, setFurniSource] = useState(100);
     const [minutes, setMinutes] = useState(0);
     const [halfSeconds, setHalfSeconds] = useState(0);
 
@@ -49,10 +46,10 @@ export const WiredActionAdjustClockView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        setOperator(trigger.intData.length > 0 ? normalizeOperator(trigger.intData[0]) : 2);
-        setFurniSource(trigger.intData.length > 1 ? trigger.intData[1] : (trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-        setMinutes(trigger.intData.length > 2 ? normalizeMinutes(trigger.intData[2]) : 0);
-        setHalfSeconds(trigger.intData.length > 3 ? normalizeHalfSeconds(trigger.intData[3]) : 0);
+        setOperator(normalizeOperator(trigger.intData[3] ?? 2));
+        setFurniSource(trigger.furniSources[0] ?? 100);
+        setMinutes(normalizeMinutes(trigger.intData[1] ?? 0));
+        setHalfSeconds(normalizeHalfSeconds((trigger.intData[0] ?? 0) * 2 + (trigger.intData[2] ?? 0)));
     }, [trigger]);
 
     useEffect(() => {
@@ -66,12 +63,14 @@ export const WiredActionAdjustClockView: FC<{}> = () => {
     }, [setAllowedInteractionErrorKey, setAllowedInteractionTypes]);
 
     const save = () => {
-        setIntParams([operator, furniSource, normalizeMinutes(minutes), normalizeHalfSeconds(halfSeconds)]);
+        setIntParams([Math.floor(halfSeconds / 2), minutes, halfSeconds % 2, operator]);
+        setFurniSources([furniSource]);
     };
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT}
             save={save}
             footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={setFurniSource} />}

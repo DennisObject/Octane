@@ -28,19 +28,23 @@ export const WiredActionClickSettingsView: FC<{}> = () => {
     const [userOption, setUserOption] = useState(0);
     const [furniOption, setFurniOption] = useState(0);
     const [userSource, setUserSource] = useState(0);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources } = useWired();
 
-    const save = () => setIntParams([userOption, furniOption, userSource]);
+    const save = () => {
+        setIntParams([userOption, furniOption]);
+        setUserSources([userSource]);
+    };
 
     useEffect(() => {
         setUserOption(normalize(trigger?.intData?.length > 0 ? trigger.intData[0] : 0, USER_OPTIONS));
-        setFurniOption(normalize(trigger?.intData?.length > 1 ? trigger.intData[1] : 0, FURNI_OPTIONS));
-        setUserSource(trigger?.intData?.length > 2 ? trigger.intData[2] : 0);
+        setFurniOption(normalize(trigger?.userSources[0] ?? 0, FURNI_OPTIONS));
+        setUserSource(trigger?.userSources[0] ?? 0);
     }, [trigger]);
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}

@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -26,27 +26,20 @@ const directionOptions: { value: number; icon: string }[] = [
 ];
 
 export const WiredActionMoveFurniToView: FC<{}> = (props) => {
-    const [spacing, setSpacing] = useState(-1);
-    const [movement, setMovement] = useState(-1);
-    const { trigger = null, setIntParams = null } = useWired();
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
-
-    const save = () => setIntParams([movement, spacing, furniSource]);
-
+    const [spacing, setSpacing] = useState(1);
+    const [movement, setMovement] = useState(0);
+    const { trigger = null, setIntParams = null, setFurniSources, setActivePickSlot, activePickSlot } = useWired();
+    const [furniSource, setFurniSource] = useState(100);
+    const [targetSource, setTargetSource] = useState(101);
+    const save = () => {
+        setIntParams([movement, spacing]);
+        setFurniSources([furniSource, targetSource]);
+    };
     useEffect(() => {
-        if (trigger.intData.length >= 2) {
-            setSpacing(trigger.intData[1]);
-            setMovement(trigger.intData[0]);
-        } else {
-            setSpacing(-1);
-            setMovement(-1);
-        }
-
-        if (trigger.intData.length > 2) setFurniSource(trigger.intData[2]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
+        setMovement(trigger?.intData[0] ?? 0);
+        setSpacing(trigger?.intData[1] ?? 1);
+        setFurniSource(trigger?.furniSources[0] ?? 100);
+        setTargetSource(trigger?.furniSources[1] ?? 101);
     }, [trigger]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);
@@ -56,9 +49,23 @@ export const WiredActionMoveFurniToView: FC<{}> = (props) => {
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={requiresFurni}
             save={save}
-            footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />}
+            footer={
+                <>
+                    <WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />
+                    <WiredSourcesSelector showFurni={true} furniSlot={1} furniSource={targetSource} onChangeFurni={setTargetSource} />
+                    <div className="flex gap-2">
+                        <button type="button" aria-pressed={activePickSlot === 0} onClick={() => setActivePickSlot(0)}>
+                            {LocalizeText('wiredfurni.params.sources.furni.100')}
+                        </button>
+                        <button type="button" aria-pressed={activePickSlot === 1} onClick={() => setActivePickSlot(1)}>
+                            {LocalizeText('wiredfurni.params.sources.furni.101')}
+                        </button>
+                    </div>
+                </>
+            }
         >
             <div className="flex flex-col gap-1">
                 <Text bold>{LocalizeText('wiredfurni.params.emptytiles', ['tiles'], [spacing.toString()])}</Text>

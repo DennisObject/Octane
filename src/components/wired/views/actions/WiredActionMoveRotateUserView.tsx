@@ -1,16 +1,15 @@
 import { FC, useEffect, useState } from 'react';
-import { localizeWithFallback, LocalizeText, WiredActionLayoutCode, WiredFurniType } from '../../../../api';
+import { LocalizeText, WiredFurniType } from '../../../../api';
 import iconRotateClockwise from '../../../../assets/images/wired/icon_wired_rotate_clockwise.png';
 import iconRotateCounterClockwise from '../../../../assets/images/wired/icon_wired_rotate_counter_clockwise.png';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
 import { WIRED_DIRECTION_GRID, WiredDirectionIcon } from '../WiredDirectionIcon';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-const ROTATION_CLOCKWISE = 8;
-const ROTATION_COUNTER_CLOCKWISE = 9;
+const ROTATION_CLOCKWISE = 9;
+const ROTATION_COUNTER_CLOCKWISE = 10;
 
 interface DirectionExtraOption {
     value: number;
@@ -77,36 +76,15 @@ const DirectionPicker: FC<DirectionPickerProps> = (props) => {
     );
 };
 
-const MIN_TILE_COUNT = 1;
-const MAX_TILE_COUNT = 10;
-
-const clampTileCount = (value: number) => {
-    if (isNaN(value)) return MIN_TILE_COUNT;
-
-    return Math.max(MIN_TILE_COUNT, Math.min(MAX_TILE_COUNT, Math.floor(value)));
-};
-
 export const WiredActionMoveRotateUserView: FC<{}> = (props) => {
     const [movementDirection, setMovementDirection] = useState(-1);
     const [rotationDirection, setRotationDirection] = useState(-1);
-    const { trigger = null, setIntParams = null } = useWired();
-    /**
-     * "Move user N tiles" reads a fourth slot the window never sent, so it always moved exactly one
-     * tile whatever the box was meant to do. The server keeps it between 1 and 10.
-     */
-    const hasTileCount = trigger?.code === WiredActionLayoutCode.MOVE_USER_TILES;
-    const [tileCount, setTileCount] = useState(MIN_TILE_COUNT);
-    const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        return 0;
-    });
-
-    const save = () =>
-        setIntParams(
-            hasTileCount
-                ? [movementDirection, rotationDirection, userSource, tileCount]
-                : [movementDirection, rotationDirection, userSource]
-        );
+    const { trigger = null, setIntParams, setUserSources } = useWired();
+    const [userSource, setUserSource] = useState(0);
+    const save = () => {
+        setIntParams([movementDirection, rotationDirection]);
+        setUserSources([userSource]);
+    };
 
     const rotationExtraOptions: DirectionExtraOption[] = [
         { value: ROTATION_CLOCKWISE, icon: iconRotateClockwise, label: LocalizeText('wiredfurni.params.rotatefurni.1') },
@@ -116,13 +94,13 @@ export const WiredActionMoveRotateUserView: FC<{}> = (props) => {
     useEffect(() => {
         setMovementDirection(trigger.intData.length > 0 ? trigger.intData[0] : -1);
         setRotationDirection(trigger.intData.length > 1 ? trigger.intData[1] : -1);
-        setUserSource(trigger.intData.length > 2 ? trigger.intData[2] : 0);
-        setTileCount(clampTileCount(trigger.intData.length > 3 ? trigger.intData[3] : MIN_TILE_COUNT));
+        setUserSource(trigger.userSources[0] ?? 0);
     }, [trigger]);
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
@@ -142,18 +120,6 @@ export const WiredActionMoveRotateUserView: FC<{}> = (props) => {
                 value={rotationDirection}
                 onChange={setRotationDirection}
             />
-            {hasTileCount && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{localizeWithFallback('wiredfurni.params.tilecount', 'Tiles to move')}</Text>
-                    <OctaneInput
-                        max={MAX_TILE_COUNT}
-                        min={MIN_TILE_COUNT}
-                        type="number"
-                        value={tileCount}
-                        onChange={(event) => setTileCount(clampTileCount(parseInt(event.target.value)))}
-                    />
-                </div>
-            )}
         </WiredActionBaseView>
     );
 };
