@@ -1,9 +1,10 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { FC, useCallback, useEffect, useRef } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
 import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
+import { useCatalogPageQuery } from '../../hooks/catalog/useCatalogQueries';
 import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
 import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
 import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
@@ -31,8 +32,11 @@ const CatalogViewInner: FC<{}> = () => {
         setNavigationHidden = null,
         currentTab = null,
         activeNodes = [],
-        setSearchResult = null
+        setSearchResult = null,
+        pageId: openPageId = -1,
+        currentType = null
     } = useCatalogUiState();
+    const loadedPage = useCatalogPageQuery(currentType || CatalogType.NORMAL, openPageId, isVisible).data?.page ?? null;
     const {
         openPageById = null,
         openPageByName = null,
@@ -59,14 +63,10 @@ const CatalogViewInner: FC<{}> = () => {
 
     const hideCatalogNavigation = useCallback(() => setNavigationHidden(true), [setNavigationHidden]);
 
-    // Search draws into the page already open and does not move the left pane. Remember that pane while the synthetic result page is showing.
+    // Search draws into the page already open. The result page is synthetic, so the pane follows the page that stayed open.
     const searchKeepsOpenPane = !!searchResult && currentPage?.pageId === -1;
-    const openPageHidesLeftPane = catalogPageHidesLeftPane(currentPage?.layoutCode);
-    const leftPaneHiddenRef = useRef(false);
-
-    if (!searchKeepsOpenPane) leftPaneHiddenRef.current = openPageHidesLeftPane;
-
-    const sidebarHidden = searchKeepsOpenPane ? leftPaneHiddenRef.current : openPageHidesLeftPane;
+    const paneLayoutCode = searchKeepsOpenPane ? loadedPage?.layoutCode : currentPage?.layoutCode;
+    const sidebarHidden = catalogPageHidesLeftPane(paneLayoutCode);
 
     useEffect(() => {
         const linkTracker: ILinkEventTracker = {

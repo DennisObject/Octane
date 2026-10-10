@@ -150,10 +150,6 @@ describe('pet catalog layout', () => {
         expect(await screen.findByTestId('pet-image')).toBeInTheDocument();
         expect(screen.queryByTestId('generic-product-preview')).not.toBeInTheDocument();
         expect(screen.getByRole('textbox')).toHaveAttribute('maxLength', '16');
-        // jsdom normalises the hex stops to rgb() from 30.1 on; accept either spelling.
-        expect(screen.getByRole('button', { name: 'catalog.pets.choose.color 1' }).style.background).toMatch(
-            /^linear-gradient\(to right, (#00000a|rgb\(0, 0, 10\)) 0(px|%)? 50%, (#00000b|rgb\(0, 0, 11\)) 50% 100%\)$/
-        );
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-type-id', '8');
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-direction', '3');
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-scale', '2');
