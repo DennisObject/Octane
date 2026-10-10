@@ -90,12 +90,23 @@ const useAvatarEditorState = () => {
 
             return { userId: userData.userId, direction: typeof next === 'function' ? next(direction) : next };
         });
-    const effectChanged = useRef(false);
-    // HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it.
-    const editorOpened = useRef(false);
+    // Per signed-in user (the user id they were set for, 0 for none), so an identity change never needs an effect to clear them:
+    // - the effect choice still to save (HabboAvatarEditor var_3918);
+    // - HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it;
+    // - EffectsModel's view, created the first time the Effects tab is shown (CategoryBaseModel.getWindowContainer).
+    const effectChangedFor = useRef(0);
+    const editorOpenedFor = useRef(0);
+    const effectsViewFor = useRef(0);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
+    // Showing the Effects tab creates the native EffectsModel view (it then stays for that editor).
+    const selectModelKey = useCallback((key: string) =>
+    {
+        if (key === AvatarEditorFigureCategory.EFFECTS) effectsViewFor.current = userData.userId;
+
+        setActiveModelKey(key);
+    }, [userData.userId]);
     // A closed editor shows the worn effect for the current gender again: an effect picked but not saved is dropped.
     const setIsVisible = useCallback((value: boolean) =>
     {
@@ -108,7 +119,7 @@ const useAvatarEditorState = () => {
                 return staged[gender] === wornEffect && current.userId === userData.userId ? current : { userId: userData.userId, effects: { ...staged, [gender]: wornEffect } };
             });
         }
-        else editorOpened.current = true;
+        else editorOpenedFor.current = userData.userId;
 
         setIsVisibleState(value);
     }, [gender, wornEffect, userData.userId]);
@@ -127,12 +138,12 @@ const useAvatarEditorState = () => {
     const selectedEffect = genderEffects[gender] ?? -1;
     const selectEditorEffect = (type: number) =>
     {
-        effectChanged.current = true;
+        effectChangedFor.current = userData.userId;
         setGenderEffects(current => ({ ...current, [gender]: type }));
     };
     const saveEditorEffect = () =>
     {
-        if (!effectChanged.current) return;
+        if (!userData.userId || effectChangedFor.current !== userData.userId) return;
 
         if (selectedEffect !== -1)
         {
@@ -151,7 +162,7 @@ const useAvatarEditorState = () => {
             setWornEffect(-1);
         }
 
-        effectChanged.current = false;
+        effectChangedFor.current = 0;
     };
 
     const selectedColorParts = useMemo(() => {
@@ -383,10 +394,14 @@ const useAvatarEditorState = () => {
     });
 
     // AvatarEditorMessageHandler: once the editor exists, the effect the server activates, selects or puts on the own room user becomes the current gender's
-    // selection, and an expiring effect clears it only when it is the selected one. None of them counts as a change to save, nor as the worn effect.
-    const followServerEffect = (type: number, onlyIfSelected: number = null) =>
+    // selection, and an expiring effect clears it only when it is the selected one. None of them is the worn effect. Only the activated and expired
+    // handlers first call effects.reset(): once the Effects view exists that re-selects the current effect (EffectsView.reset -> selectPart(-1)), and with
+    // no effect selected EffectsModel.selectPart calls setAvatarEffectType(-1), which marks the editor changed.
+    const followServerEffect = (type: number, onlyIfSelected: number = null, resetsView: boolean = false) =>
     {
-        if (!editorOpened.current) return;
+        if (!userData.userId || editorOpenedFor.current !== userData.userId) return;
+
+        if (resetsView && effectsViewFor.current === userData.userId && selectedEffect === -1) effectChangedFor.current = userData.userId;
 
         setGenderEffectsState((current) =>
         {
@@ -398,9 +413,9 @@ const useAvatarEditorState = () => {
         });
     };
 
-    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => followServerEffect(event.getParser().type));
+    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => followServerEffect(event.getParser().type, null, true));
     useMessageEvent<AvatarEffectSelectedEvent>(AvatarEffectSelectedEvent, (event) => followServerEffect(event.getParser().type));
-    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) => followServerEffect(-1, event.getParser().type));
+    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) => followServerEffect(-1, event.getParser().type, true));
     useMessageEvent<RoomUnitEffectEvent>(RoomUnitEffectEvent, (event) =>
     {
         const parser = event.getParser();
@@ -571,8 +586,6 @@ const useAvatarEditorState = () => {
 
     useEffect(() => {
         genderFigures.current = { userId: 0, figures: {} };
-        effectChanged.current = false;
-        editorOpened.current = false;
     }, [userData.userId]);
 
     useEffect(() => {
@@ -615,7 +628,7 @@ const useAvatarEditorState = () => {
         setClothingChangeData,
         avatarModels,
         activeModelKey,
-        setActiveModelKey,
+        setActiveModelKey: selectModelKey,
         maxPaletteCount,
         selectedColorParts,
         selectEditorColor,
