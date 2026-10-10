@@ -105,21 +105,22 @@ const useAvatarEditorState = () => {
         });
     // Per signed-in user (the user id they were set for, 0 for none), so an identity change never needs an effect to clear them:
     // - the effect choice still to save (HabboAvatarEditor var_3918);
-    // - HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it;
-    // - EffectsModel's view, created the first time the Effects tab is shown (CategoryBaseModel.getWindowContainer).
+    // - HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it.
     const effectChangedFor = useRef(0);
     const editorOpenedFor = useRef(0);
-    const effectsViewFor = useRef(0);
+    // EffectsModel's view belongs to the editor, not to a user: created the first time the Effects tab is shown (CategoryBaseModel.getWindowContainer)
+    // and kept from then on (CategoryBaseModel.var_18), whichever tab is open and whoever is signed in.
+    const effectsViewCreated = useRef(false);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
     // Showing the Effects tab creates the native EffectsModel view (it then stays for that editor).
     const selectModelKey = useCallback((key: string) =>
     {
-        if (key === AvatarEditorFigureCategory.EFFECTS) effectsViewFor.current = userData.userId;
+        if (key === AvatarEditorFigureCategory.EFFECTS) effectsViewCreated.current = true;
 
         setActiveModelKey(key);
-    }, [userData.userId]);
+    }, []);
     // A closed editor shows the worn effect for the current gender again: an effect picked but not saved is dropped.
     const setIsVisible = useCallback((value: boolean) =>
     {
@@ -411,10 +412,7 @@ const useAvatarEditorState = () => {
 
         const selected = stagedEffectFor(gender);
 
-        // The native Effects view persists once created: an Effects tab still on screen after a user change is that view for the current user.
-        if (effectsViewFor.current !== userData.userId && isVisible && activeModelKey === AvatarEditorFigureCategory.EFFECTS) effectsViewFor.current = userData.userId;
-
-        if (resetsView && effectsViewFor.current === userData.userId && selected === -1) effectChangedFor.current = userData.userId;
+        if (resetsView && effectsViewCreated.current && selected === -1) effectChangedFor.current = userData.userId;
 
         if (onlyIfSelected !== null && selected !== onlyIfSelected) return;
 
