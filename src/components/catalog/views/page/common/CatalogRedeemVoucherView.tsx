@@ -1,10 +1,7 @@
 import { RedeemVoucherMessageComposer, VoucherRedeemErrorMessageEvent, VoucherRedeemOkMessageEvent } from '@octane/renderer';
-import { FC, useState } from 'react';
-import { FaTag } from 'react-icons/fa';
-import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button } from '../../../../../common';
+import { FC, KeyboardEvent, useState } from 'react';
+import { LocalizeText, SanitizeHtml, SendMessageComposer } from '../../../../../api';
 import { useMessageEvent, useNotification } from '../../../../../hooks';
-import { OctaneInput } from '../../../../../layout';
 
 export interface CatalogRedeemVoucherViewProps {
     text: string;
@@ -16,11 +13,16 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
     const [isWaiting, setIsWaiting] = useState(false);
     const { simpleAlert = null } = useNotification();
 
-    const redeemVoucher = () => {
-        if (!voucher || !voucher.length || isWaiting) return;
+    const redeemVoucher = (event?: KeyboardEvent<HTMLInputElement>) => {
+        event?.preventDefault();
+
+        if (isWaiting) return;
+
+        if (!voucher || !voucher.length)
+            return simpleAlert(LocalizeText('catalog.voucher.empty.desc'), null, null, null, LocalizeText('catalog.voucher.empty.title'));
 
         SendMessageComposer(new RedeemVoucherMessageComposer(voucher));
-
+        setVoucher('');
         setIsWaiting(true);
     };
 
@@ -57,11 +59,20 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
     });
 
     return (
-        <div className="flex gap-1">
-            <OctaneInput placeholder={text} value={voucher} onChange={(event) => setVoucher(event.target.value)} />
-            <Button disabled={isWaiting} variant="primary" onClick={redeemVoucher}>
-                <FaTag className="fa-icon" />
-            </Button>
+        <div className="octane-cfp-voucher">
+            <div className="octane-cfp-voucher-text" dangerouslySetInnerHTML={{ __html: SanitizeHtml(text ?? '') }} />
+            <div className="octane-cfp-voucher-input">
+                <input
+                    name="voucher_code"
+                    type="text"
+                    value={voucher}
+                    onChange={(event) => setVoucher(event.target.value)}
+                    onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && redeemVoucher(event)}
+                />
+            </div>
+            <button className="octane-cfp-voucher-button" type="button" onClick={() => redeemVoucher()}>
+                {LocalizeText('redeem')}
+            </button>
         </div>
     );
 };

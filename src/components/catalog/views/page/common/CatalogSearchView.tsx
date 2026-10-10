@@ -1,6 +1,5 @@
 import { GetSessionDataManager } from '@octane/renderer';
 import { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa';
 import {
     CatalogPage,
     FilterCatalogNode,
@@ -26,6 +25,7 @@ export const CatalogSearchView: FC<{}> = () => {
     const [searchValue, setSearchValue] = useState('');
     const searchTimeout = useRef<ReturnType<typeof setTimeout>>(null);
     const { rootNode = null } = useCatalogData();
+    const inputRef = useRef<HTMLInputElement>(null);
     const { currentType = null, setSearchResult = null, setCurrentPage = null } = useCatalogUiState();
 
     const runSearch = useCallback(
@@ -75,11 +75,15 @@ export const CatalogSearchView: FC<{}> = () => {
 
             const search = normalizeCatalogSearchText(value);
 
-            if (!shouldRunCatalogSearch(search)) {
+            // An empty field restores the page underneath the result override. One or two characters keep the last results.
+            if (!search) {
                 setSearchResult(null);
+                setCurrentPage(null);
 
                 return;
             }
+
+            if (!shouldRunCatalogSearch(search)) return;
 
             if (immediate) {
                 runSearch(search);
@@ -89,7 +93,7 @@ export const CatalogSearchView: FC<{}> = () => {
 
             searchTimeout.current = setTimeout(() => runSearch(search), CATALOG_SEARCH_DEBOUNCE_MS);
         },
-        [runSearch, setSearchResult]
+        [runSearch, setCurrentPage, setSearchResult]
     );
 
     const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -111,6 +115,8 @@ export const CatalogSearchView: FC<{}> = () => {
 
         setSearchValue('');
         setSearchResult(null);
+        setCurrentPage(null);
+        inputRef.current?.focus();
     };
 
     useEffect(() => {
@@ -119,28 +125,26 @@ export const CatalogSearchView: FC<{}> = () => {
 
     useEffect(() => () => searchTimeout.current && clearTimeout(searchTimeout.current), []);
 
+    const hasQuery = searchValue.length > 0;
+
     return (
-        <div className="relative w-full">
-            <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] text-muted pointer-events-none" />
+        <div className="octane-catalog-search">
             <input
-                aria-label={LocalizeText('generic.search')}
-                className="w-full pl-6 pr-6 py-[3px] text-[11px] rounded border-2 border-card-grid-item-border bg-white text-dark placeholder-muted focus:outline-none focus:border-primary transition-colors"
-                placeholder={LocalizeText('generic.search')}
+                ref={inputRef}
+                aria-label={LocalizeText('catalog.search')}
+                className="octane-catalog-search-input"
+                placeholder={LocalizeText('catalog.search')}
                 type="text"
                 value={searchValue}
                 onChange={onSearchChange}
                 onKeyDown={onSearchKeyDown}
             />
-            {searchValue && searchValue.length > 0 && (
-                <button
-                    aria-label={localizeWithFallback('generic.clear', 'Clear')}
-                    type="button"
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-muted hover:text-danger cursor-pointer transition-colors"
-                    onClick={clearSearch}
-                >
-                    <FaTimes />
-                </button>
-            )}
+            <button
+                aria-label={hasQuery ? localizeWithFallback('generic.clear', 'Clear') : LocalizeText('catalog.search')}
+                className={`octane-catalog-search-pen${hasQuery ? ' is-filled' : ' is-empty'}`}
+                type="button"
+                onClick={clearSearch}
+            />
         </div>
     );
 };

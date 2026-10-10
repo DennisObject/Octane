@@ -8,7 +8,7 @@ import {
     RoomContentLoadedEvent,
     SellablePetPaletteData
 } from '@octane/renderer';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaCheck, FaLock, FaTimes } from 'react-icons/fa';
 import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../../api';
 import { LayoutPetImageView } from '../../../../../../common';
@@ -235,7 +235,15 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
     if (!currentOffer) return null;
 
     const controlsDisabled = approvalPending || purchasePending;
-    const colorLabel = LocalizeText('catalog.pets.choose.color');
+    // pets text fields: 1 = ctlg_text_1, 2 = ctlg_text_2, 3 = ctlg_text_3. Legacy uses those as name, colour, breed.
+    // The new layout puts the name on ctlg_text_2 and the colour caption on ctlg_text_3. pet_breed_text is the selected breed.
+    const pageText = (index: number, fallbackKey: string) => page?.localization?.getText(index) || LocalizeText(fallbackKey);
+    const colorLabel = pageText(legacyPet ? 2 : 3, 'catalog.pets.choose.color');
+    const breedLabel = pageText(3, 'catalog.pets.choose.breed');
+    const nameLabel = pageText(legacyPet ? 1 : 2, 'widgets.petpackage.name.title');
+    const swatchFill = (colors: string[]): CSSProperties => ({
+        background: colors.length > 1 ? `linear-gradient(to right, ${colors[0]} 0 50%, ${colors[1]} 50% 100%)` : colors[0]
+    });
 
     return (
         <div
@@ -251,6 +259,13 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                             scale={petIndex === 15 ? 1 : 2}
                             typeId={petIndex}
                         />
+                    </div>
+                )}
+                {!legacyPet && (
+                    <div className="octane-catalog-pet-breed-title">
+                        {selectedPalette
+                            ? localizeWithFallback(`pet.breed.${petIndex}.${selectedPalette.breedId}`, currentOffer.localizationName || '')
+                            : currentOffer.localizationName || ''}
                     </div>
                 )}
                 <CatalogAddOnBadgeWidgetView className="octane-catalog-pet-preview-badge" />
@@ -277,16 +292,18 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                                         aria-pressed={selectedColorIndex === index}
                                         className="octane-catalog-pet-color-swatch"
                                         disabled={controlsDisabled}
-                                        style={{ backgroundColor: ColorConverter.int2rgb(colors[0]) }}
+                                        style={swatchFill([ColorConverter.int2rgb(colors[0])])}
                                         type="button"
                                         onClick={() => setSelectedColorIndex(index)}
-                                    />
+                                    >
+                                        {selectedColorIndex === index && <span className="octane-catalog-pet-swatch-chosen" />}
+                                    </button>
                                 ))}
                             </CatalogScrollAreaView>
                         </div>
                         {selectablePalettes.length > 1 && (
                             <label className="octane-catalog-pet-breed-selector">
-                                <span>{LocalizeText('catalog.pets.choose.breed')}</span>
+                                <span>{breedLabel}</span>
                                 <select
                                     value={selectedPaletteIndex}
                                     disabled={controlsDisabled}
@@ -317,12 +334,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                         >
                             {newPetChoices.map((choice, index) => {
                                 const colors = choice.colors.map((color) => ColorConverter.int2rgb(color));
-                                const style = {
-                                    background:
-                                        colors.length > 1
-                                            ? `linear-gradient(135deg, ${colors[0]} 0 50%, ${colors[1]} 50% 100%)`
-                                            : colors[0]
-                                };
+                                const style = swatchFill(colors);
                                 const locked = isBreedLocked(choice.palette);
 
                                 return (
@@ -337,6 +349,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                                         type="button"
                                         onClick={() => setSelectedPaletteIndex(index)}
                                     >
+                                        {selectedPaletteIndex === index && <span className="octane-catalog-pet-swatch-chosen" />}
                                         {locked && <FaLock className="octane-catalog-pet-swatch-lock" />}
                                     </button>
                                 );
@@ -347,12 +360,11 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
 
                 <div className="octane-catalog-pet-purchase mt-auto">
                     <label className="octane-catalog-pet-name-field">
-                        <span>{LocalizeText('widgets.petpackage.name.title')}</span>
+                        <span>{nameLabel}</span>
                         <span className="relative flex-1">
                             <input
                                 disabled={controlsDisabled}
                                 maxLength={getPetNameMaxLength(petIndex)}
-                                placeholder={LocalizeText('widgets.petpackage.name.title')}
                                 type="text"
                                 value={petName}
                                 onChange={(event) => setPetName(event.target.value)}
