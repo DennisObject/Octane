@@ -1126,7 +1126,6 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         if (!monitorLoaded) return MONITOR_STAT_CAPTIONS.map((label) => ({ label, value: '' }));
 
         const floorFurniCount = monitorRoomStats.roomFurniCount - monitorRoomStats.wallFurniCount;
-        const itemLimit = monitorRoomStats.roomItemLimit;
         const usageColor = colorizeMonitorStat(monitorSnapshot.usageCurrentWindow, monitorSnapshot.usageLimitPerWindow, 0.3, 0.7);
 
         return [
@@ -1136,15 +1135,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 value: monitorSnapshot.isHeavy ? localizeWithFallback('wiredmenu.bool.yes', 'Yes') : localizeWithFallback('wiredmenu.bool.no', 'No'),
                 color: monitorSnapshot.isHeavy ? MONITOR_COLOR_ORANGE : MONITOR_COLOR_GREEN
             },
-            // Without a room item limit from the server there is no cap to show or to colour against.
-            itemLimit > 0
-                ? { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}/${itemLimit}`, color: colorizeMonitorStat(floorFurniCount, itemLimit, 0.6, 0.85) }
-                : { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}` },
-            itemLimit > 0
-                ? { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}/${itemLimit}`, color: colorizeMonitorStat(monitorRoomStats.wallFurniCount, itemLimit, 0.6, 0.85) }
-                : { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}` },
-            // The server sends no permanent variable count or cap, so this client-side figure keeps no colour (AIR colours it from WiredRoomStatsData).
-            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}/60` },
+            // AIR colours these rows from WiredRoomStatsData (server counts and separate floor/wall caps). The monitor packet carries neither, and the room's
+            // single item limit from the guest room data is not that per-category cap, so the client-side counts are shown without a cap or a colour.
+            { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}` },
+            { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}` },
+            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}` },
             { label: MONITOR_STAT_CAPTIONS[5], value: '' },
             { label: MONITOR_STAT_CAPTIONS[6], value: '' },
             // Octane's executor metrics, not part of the official list: kept after the official rows.
@@ -1229,7 +1224,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 lines: [
                     `Room furni: ${monitorRoomStats.roomFurniCount}/${Math.max(0, monitorRoomStats.roomItemLimit) || 0}`,
                     `Wall furni: ${monitorRoomStats.wallFurniCount}/${Math.max(0, monitorRoomStats.roomItemLimit) || 0}`,
-                    `Permanent furni vars: ${monitorRoomStats.permanentFurniVariables}/60 renderer-side custom variable entries currently attached to room items.`
+                    `Permanent furni vars: ${monitorRoomStats.permanentFurniVariables} renderer-side custom variable entries currently attached to room items.`
                 ]
             }
         ];
