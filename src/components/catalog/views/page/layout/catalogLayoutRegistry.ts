@@ -133,7 +133,8 @@ const STANDARD_CATALOG_PAGE_WIDTH = 360;
 const FEATURED_FRONT_PAGE_WIDTH = 552;
 const FEATURED_FRONT_PAGE_LAYOUTS = new Set(['frontpage', 'frontpage4', 'frontpage_featured']);
 
-export const catalogPageHidesLeftPane = (layoutCode: string | null | undefined): boolean => {
+export const catalogPageHidesLeftPane = (layoutCode: string | null | undefined): boolean =>
+{
     const pageWidth = layoutCode && FEATURED_FRONT_PAGE_LAYOUTS.has(layoutCode) ? FEATURED_FRONT_PAGE_WIDTH : STANDARD_CATALOG_PAGE_WIDTH;
 
     return CATALOG_FRAME_WIDTH - pageWidth - CATALOG_PAGE_RIGHT_MARGIN < CATALOG_LEFT_PANE_MIN_X;

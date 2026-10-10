@@ -13,14 +13,13 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
     const [isWaiting, setIsWaiting] = useState(false);
     const { simpleAlert = null } = useNotification();
 
-    const redeemVoucher = () => {
+    const redeemVoucher = (event?: KeyboardEvent<HTMLInputElement>) => {
+        event?.preventDefault();
+
         if (isWaiting) return;
 
-        if (!voucher || !voucher.length) {
-            simpleAlert(LocalizeText('catalog.voucher.empty.desc'), null, null, null, LocalizeText('catalog.voucher.empty.title'));
-
-            return;
-        }
+        if (!voucher || !voucher.length)
+            return simpleAlert(LocalizeText('catalog.voucher.empty.desc'), null, null, null, LocalizeText('catalog.voucher.empty.title'));
 
         SendMessageComposer(new RedeemVoucherMessageComposer(voucher));
         setVoucher('');
@@ -68,15 +67,10 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
                     type="text"
                     value={voucher}
                     onChange={(event) => setVoucher(event.target.value)}
-                    onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-                        if (event.key !== 'Enter') return;
-
-                        event.preventDefault();
-                        redeemVoucher();
-                    }}
+                    onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && redeemVoucher(event)}
                 />
             </div>
-            <button className="octane-cfp-voucher-button" type="button" onClick={redeemVoucher}>
+            <button className="octane-cfp-voucher-button" type="button" onClick={() => redeemVoucher()}>
                 {LocalizeText('redeem')}
             </button>
         </div>
