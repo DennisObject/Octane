@@ -1,8 +1,11 @@
 import {
     BuyMarketplaceOfferMessageComposer,
+    GetCommunication,
     GetMarketplaceOffersMessageComposer,
+    GetSessionDataManager,
     MarketPlaceOffersEvent,
-    MarketplaceBuyOfferResultEvent
+    MarketplaceBuyOfferResultEvent,
+    OctaneEventType
 } from '@octane/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -14,7 +17,7 @@ import {
     SendMessageComposer
 } from '../../../../../../api';
 import { Button, Column, Text } from '../../../../../../common';
-import { useMessageEvent, useNotification, usePurse } from '../../../../../../hooks';
+import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, PUBLIC_OFFER } from './CatalogLayoutMarketplaceItemView';
 import { SearchFormView } from './CatalogLayoutMarketplaceSearchFormView';
@@ -31,7 +34,23 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     const [lastSearch, setLastSearch] = useState<IMarketplaceSearchOptions>({ minPrice: -1, maxPrice: -1, query: '', type: 3 });
     const { getCurrencyAmount = null } = usePurse();
     const { simpleAlert = null, showConfirm = null } = useNotification();
-    const isBuyingRef = useRef<boolean>(false);
+    const pendingOfferIdRef = useRef<number>(null);
+
+    const buyOffer = useCallback((offerId: number) =>
+    {
+        if (pendingOfferIdRef.current !== null) return;
+
+        pendingOfferIdRef.current = offerId;
+        SendMessageComposer(new BuyMarketplaceOfferMessageComposer(offerId));
+    }, []);
+
+    // The server forgets a buy with its socket and answers nothing for it on the next connection.
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    {
+        if (GetCommunication().connection.connectionState.authenticated) return;
+
+        pendingOfferIdRef.current = null;
+    });
 
     const requestOffers = useCallback((options: IMarketplaceSearchOptions) => {
         setLastSearch(options);
@@ -64,14 +83,13 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
             }
 
             const offerId = offerData.offerId;
+            const sessionUserId = GetSessionDataManager().userId;
 
             showConfirm(
                 LocalizeText('catalog.marketplace.confirm_header'),
                 () => {
-                    if (isBuyingRef.current) return;
-
-                    isBuyingRef.current = true;
-                    SendMessageComposer(new BuyMarketplaceOfferMessageComposer(offerId));
+                    // A confirmation left open across a logout must not buy for another user.
+                    if (GetSessionDataManager().userId === sessionUserId) buyOffer(offerId);
                 },
                 null,
                 null,
@@ -79,7 +97,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                 LocalizeText('catalog.marketplace.confirm_title')
             );
         },
-        [getCurrencyAmount, simpleAlert, showConfirm]
+        [getCurrencyAmount, simpleAlert, showConfirm, buyOffer]
     );
 
     useMessageEvent<MarketPlaceOffersEvent>(MarketPlaceOffersEvent, (event) => {
@@ -111,9 +129,11 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     useMessageEvent<MarketplaceBuyOfferResultEvent>(MarketplaceBuyOfferResultEvent, (event) => {
         const parser = event.getParser();
 
-        isBuyingRef.current = false;
+        if (!parser || parser.requestedOfferId !== pendingOfferIdRef.current || ![1, 2, 3, 4].includes(parser.result)) return;
 
-        if (!parser) return;
+        // Typed marketplace results carry the requested offer id; unrelated purchases,
+        // alerts and search refreshes cannot release an active buy.
+        pendingOfferIdRef.current = null;
 
         switch (parser.result) {
             case 1:
@@ -156,12 +176,16 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                     return newVal;
                 });
 
+                const sessionUserId = GetSessionDataManager().userId;
+
                 showConfirm(
                     LocalizeText('catalog.marketplace.confirm_higher_header') +
                         '\n' +
                         LocalizeText('catalog.marketplace.confirm_price', ['price'], [parser.newPrice.toString()]),
-                    () => {
-                        SendMessageComposer(new BuyMarketplaceOfferMessageComposer(parser.offerId));
+                    () =>
+                    {
+                        // A confirmation left open across a logout must not buy for another user.
+                        if (GetSessionDataManager().userId === sessionUserId) buyOffer(parser.offerId);
                     },
                     null,
                     null,
