@@ -44,7 +44,14 @@ const MENU_ITEM_HEIGHT = 19;
 const MENU_CHROME = 6;
 
 const text = (key: string, parameters: string[] = null, replacements: string[] = null) =>
-    localizeWithFallback(key, LEADERBOARD_TEXT_FALLBACKS[key] ?? key, parameters, replacements);
+{
+    // The fallback copies keep the official placeholders; they are filled the way LocalizeText fills a loaded text.
+    let fallback = LEADERBOARD_TEXT_FALLBACKS[key] ?? key;
+
+    parameters?.forEach((parameter, index) => (fallback = fallback.replaceAll(`%${parameter}%`, replacements?.[index] ?? '')));
+
+    return localizeWithFallback(key, fallback, parameters, replacements);
+};
 
 // The official texts keep line breaks as a literal backslash-n; the v75 text loader turns them into real ones.
 const lines = (value: string) => value.replace(/\\n/g, '\n').replace(/\n+$/, '');
