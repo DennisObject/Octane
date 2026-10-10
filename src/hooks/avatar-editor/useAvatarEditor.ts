@@ -81,8 +81,21 @@ const useAvatarEditorState = () => {
     const hotLooks = userData.userId && hotLooksState.userId === userData.userId ? hotLooksState.looks : NO_HOT_LOOKS;
     const genderEffects = genderEffectsState.userId === userData.userId ? genderEffectsState.effects : NO_GENDER_EFFECTS;
     const previewDirection = previewDirectionState.userId === userData.userId ? previewDirectionState.direction : 4;
-    const setGenderEffects = (update: (current: Record<string, number>) => Record<string, number>) =>
-        setGenderEffectsState((current) => ({ userId: userData.userId, effects: update(current.userId === userData.userId ? current.effects : {}) }));
+    // The staged effect per gender as the editor model holds it (HabboAvatarEditor figureData), mirrored synchronously: several server messages can arrive
+    // before React renders again, and each one must see the selection the previous one left, as the native FigureData mutation does.
+    const stagedEffects = useRef<{ userId: number; effects: Record<string, number> }>({ userId: 0, effects: {} });
+    const setGenderEffects = useCallback((update: (current: Record<string, number>) => Record<string, number>) =>
+    {
+        const owned = stagedEffects.current.userId === userData.userId;
+        const current = owned ? stagedEffects.current.effects : {};
+        const next = update(current);
+
+        if (owned && next === current) return;
+
+        stagedEffects.current = { userId: userData.userId, effects: next };
+        setGenderEffectsState(stagedEffects.current);
+    }, [userData.userId]);
+    const stagedEffectFor = (forGender: string) => (stagedEffects.current.userId === userData.userId ? stagedEffects.current.effects[forGender] : undefined) ?? -1;
     const setPreviewDirection = (next: number | ((current: number) => number)) =>
         setPreviewDirectionState((current) =>
         {
@@ -112,17 +125,12 @@ const useAvatarEditorState = () => {
     {
         if (!value)
         {
-            setGenderEffectsState((current) =>
-            {
-                const staged = current.userId === userData.userId ? current.effects : {};
-
-                return staged[gender] === wornEffect && current.userId === userData.userId ? current : { userId: userData.userId, effects: { ...staged, [gender]: wornEffect } };
-            });
+            setGenderEffects((staged) => (staged[gender] === wornEffect ? staged : { ...staged, [gender]: wornEffect }));
         }
         else editorOpenedFor.current = userData.userId;
 
         setIsVisibleState(value);
-    }, [gender, wornEffect, userData.userId]);
+    }, [gender, wornEffect, userData.userId, setGenderEffects]);
 
     const setGender = useCallback((nextGender: string) => {
         if (nextGender === gender) return;
@@ -401,16 +409,16 @@ const useAvatarEditorState = () => {
     {
         if (!userData.userId || editorOpenedFor.current !== userData.userId) return;
 
-        if (resetsView && effectsViewFor.current === userData.userId && selectedEffect === -1) effectChangedFor.current = userData.userId;
+        const selected = stagedEffectFor(gender);
 
-        setGenderEffectsState((current) =>
-        {
-            const staged = current.userId === userData.userId ? current.effects : {};
+        // The native Effects view persists once created: an Effects tab still on screen after a user change is that view for the current user.
+        if (effectsViewFor.current !== userData.userId && isVisible && activeModelKey === AvatarEditorFigureCategory.EFFECTS) effectsViewFor.current = userData.userId;
 
-            if (onlyIfSelected !== null && (staged[gender] ?? -1) !== onlyIfSelected) return current;
+        if (resetsView && effectsViewFor.current === userData.userId && selected === -1) effectChangedFor.current = userData.userId;
 
-            return { userId: userData.userId, effects: { ...staged, [gender]: type } };
-        });
+        if (onlyIfSelected !== null && selected !== onlyIfSelected) return;
+
+        setGenderEffects((staged) => ({ ...staged, [gender]: type }));
     };
 
     useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => followServerEffect(event.getParser().type, null, true));
