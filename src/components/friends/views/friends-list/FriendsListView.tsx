@@ -117,11 +117,13 @@ export const FriendsListView: FC<{}> = (props) => {
     const categoryManagementEnabled = GetConfigurationValue<boolean>('friendship.category.management.enabled', false) && GetConfigurationValue<number>('spaweb', 0) !== 1;
     const friendListReceivedRef = useRef(false);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!friendListReceived || friendListReceivedRef.current) return;
 
         friendListReceivedRef.current = true;
-        setClosedCategories((previous) => {
+        setClosedCategories((previous) =>
+        {
             const next = new Set(previous);
 
             if (onlineFriends.length) next.add(-1);
@@ -502,7 +504,8 @@ export const FriendsListView: FC<{}> = (props) => {
                                 type="button"
                                 className="hfl-edit-categories"
                                 {...hoverTip('friendlist.tip.preferences')}
-                                onClick={() => {
+                                onClick={() =>
+                                {
                                     const url = GetOptionalConfigurationValue<string>('link.format.friendlist.pref', '');
 
                                     if (url) HabboWebTools.openWebPage(url);
