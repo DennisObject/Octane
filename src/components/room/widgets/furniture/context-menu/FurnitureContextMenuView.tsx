@@ -1,5 +1,5 @@
 import { ContextMenuEnum, CustomUserNotificationMessageEvent, GetSessionDataManager, RoomObjectCategory } from '@octane/renderer';
-import { FC } from 'react';
+import { CSSProperties, FC } from 'react';
 import { GetGroupInformation, LocalizeText } from '../../../../../api';
 import {
     EFFECTBOX_OPEN,
@@ -78,34 +78,41 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
 
     const isOwner = GetSessionDataManager().userId === objectOwnerId;
 
-    // Title and single action of each context menu, straight from the *_menu layouts.
-    const menus: Record<string, { title: string; action: { name: string; label: string } }> = {
+    // Title, its x in the header (the layouts differ: friendfurni_menu and mysterybox_menu start at 0, the others at 23) and the single action of each context menu, straight from the *_menu layouts.
+    const menus: Record<string, { title: string; titleX: number; action: { name: string; label: string } }> = {
         [ContextMenuEnum.FRIEND_FURNITURE]: {
             title: LocalizeText('friendfurni.context.title'),
+            titleX: 0,
             action: { name: 'use_friend_furni', label: LocalizeText('friendfurni.context.use') }
         },
         [ContextMenuEnum.MONSTERPLANT_SEED]: {
             title: LocalizeText('furni.mnstr_seed.name'),
+            titleX: 23,
             action: { name: 'use_monsterplant_seed', label: LocalizeText('widget.monsterplant_seed.button.use') }
         },
         [ContextMenuEnum.RANDOM_TELEPORT]: {
             title: LocalizeText('furni.random_teleport.name'),
+            titleX: 23,
             action: { name: 'use_random_teleport', label: LocalizeText('widget.random_teleport.button.use') }
         },
         [ContextMenuEnum.PURCHASABLE_CLOTHING]: {
             title: LocalizeText('furni.generic_usable.name'),
+            titleX: 23,
             action: { name: 'use_purchaseable_clothing', label: LocalizeText('widget.generic_usable.button.use') }
         },
         [ContextMenuEnum.MYSTERY_BOX]: {
             title: LocalizeText('mysterybox.context.title'),
+            titleX: 0,
             action: { name: 'use_mystery_box', label: LocalizeText('mysterybox.context.' + (isOwner ? 'owner' : 'other') + '.use') }
         },
         [ContextMenuEnum.MYSTERY_TROPHY]: {
             title: LocalizeText('mysterytrophy.header.title'),
+            titleX: 23,
             action: { name: 'use_mystery_trophy', label: LocalizeText('friendfurni.context.use') }
         }
     };
-    const { title = '', action = null } = menus[mode] ?? {};
+    const { title = '', titleX = 23, action = null } = menus[mode] ?? {};
+    const isGuildMenu = mode === GROUP_FURNITURE && !!groupData;
 
     return (
         <>
@@ -117,15 +124,20 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
             {objectId >= 0 && mode && (
                 <ContextMenuView
                     category={RoomObjectCategory.FLOOR}
-                    classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--furni']}
+                    anchorOffsets={{ user: -4, other: -4 }}
+                    classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--furni', ...(isGuildMenu ? ['octane-avatar-action-menu--furni-guild'] : [])]}
                     collapsable={true}
+                    fadeDelay={3000}
+                    fadeLength={500}
                     fades={true}
+                    freezePositionOnHover={true}
                     objectId={objectId}
                     showCaretIcon={false}
+                    style={{ '--air-menu-title-x': isGuildMenu ? '22px' : `${titleX}px` } as CSSProperties}
                     onClose={onClose}
                 >
                     {mode === GROUP_FURNITURE && groupData ? (
-                        <ContextMenuHeaderView className="cursor-pointer text-truncate" onClick={() => GetGroupInformation(groupData.guildId)}>
+                        <ContextMenuHeaderView className="cursor-pointer" onClick={() => GetGroupInformation(groupData.guildId)}>
                             {groupData.guildName}
                         </ContextMenuHeaderView>
                     ) : (
