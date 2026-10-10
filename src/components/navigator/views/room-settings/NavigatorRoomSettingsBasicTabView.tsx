@@ -7,7 +7,7 @@ import {
     IRoomData,
     LocalizeText
 } from '../../../../api';
-import declineSrc from '../../../../assets/images/navigator/room-settings/decline.png';
+import removeIconSrc from '../../../../assets/images/navigator/room-settings/remove-icon-bb2200.png';
 import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
 import { useNavigatorData } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
@@ -190,12 +190,9 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                 </NavigatorRoomSettingsAtView>
                 {isEnteredRoom && (
                     <>
-                        <NavigatorRoomSettingsAtView className={isSafetyLocked ? 'ros-disabled' : ''} h={13} w={13} x={44} y={341}>
-                            <span className="ros-decline" style={{ maskImage: `url(${declineSrc})`, WebkitMaskImage: `url(${declineSrc})` }} />
-                        </NavigatorRoomSettingsAtView>
-                        <NavigatorRoomSettingsAtView className={isSafetyLocked ? 'ros-disabled' : ''} h={18} w={180} x={60} y={339}>
-                            <button type="button" className="ros-link" disabled={isSafetyLocked} onClick={onDelete}>
-                                {LocalizeText('navigator.roomsettings.delete')}
+                        <NavigatorRoomSettingsAtView className={isSafetyLocked ? 'ros-disabled' : ''} h={18} w={174} x={59} y={339}>
+                            <button type="button" className="ros-link ros-remove-link" disabled={isSafetyLocked} onClick={onDelete}>
+                                <span><img className="ros-remove-icon" src={removeIconSrc} alt="" />{LocalizeText('navigator.roomsettings.delete')}</span>
                             </button>
                         </NavigatorRoomSettingsAtView>
                     </>
