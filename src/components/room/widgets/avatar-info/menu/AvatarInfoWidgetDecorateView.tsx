@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@octane/renderer';
+import { RoomObjectCategory } from '@volt/renderer';
 import { Dispatch, FC, SetStateAction } from 'react';
 import { LocalizeText } from '../../../../../api';
 import { ContextMenuListItemView } from '../../context-menu/ContextMenuListItemView';

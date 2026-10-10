@@ -20,19 +20,19 @@ export const HelpAlertView: FC<{ message: string; onClose: () => void }> = ({ me
 
     return (
         <NativeModalView>
-            <section aria-label={title} aria-modal="true" className="octane-alert octane-card-shell octane-card-frame-3 octane-native-confirm octane-help-alert" role="alertdialog">
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">
+            <section aria-label={title} aria-modal="true" className="volt-alert volt-card-shell volt-card-frame-3 volt-native-confirm volt-help-alert" role="alertdialog">
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">
                         <HelpFrameTitle text={title} width={278} />
                     </span>
-                    <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={onClose} />
+                    <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={onClose} />
                 </div>
-                <div className="octane-help-alert-body">
-                    <div className="octane-help-alert-text">
+                <div className="volt-help-alert-body">
+                    <div className="volt-help-alert-text">
                         <HelpText text={message} maxWidth={210} />
                     </div>
-                    <button ref={okRef} className="octane-native-button is-thick octane-help-alert-ok" type="button" onClick={onClose}>
-                        <span className="octane-help-alert-ok-label">
+                    <button ref={okRef} className="volt-native-button is-thick volt-help-alert-ok" type="button" onClick={onClose}>
+                        <span className="volt-help-alert-ok-label">
                             <HelpCenteredText width={50} text="Ok" textStyle="u_regular" onButton="dark" />
                         </span>
                     </button>

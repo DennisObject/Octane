@@ -1,12 +1,12 @@
 /* layout_frontpage_featured (class_1085): 552x460. First promo 184x460, scroll list at x=192, voucher border at (200,399). */
-.octane-cfp {
+.volt-cfp {
     position: relative;
     width: 552px;
     height: 460px;
     overflow: hidden;
 }
 
-.octane-cfp-list {
+.volt-cfp-list {
     position: absolute;
     top: 0;
     left: 192px;
@@ -18,14 +18,14 @@
     overflow: auto;
 }
 
-.octane-cfp-item {
+.volt-cfp-item {
     position: relative;
     flex: 0 0 126px;
     width: 360px;
     height: 126px;
 }
 
-.octane-cfp-item.is-first {
+.volt-cfp-item.is-first {
     position: absolute;
     top: 0;
     left: 0;
@@ -33,7 +33,7 @@
     height: 460px;
 }
 
-.octane-cfp-item-image {
+.volt-cfp-item-image {
     position: absolute;
     inset: 0;
     background-position: center;
@@ -41,7 +41,7 @@
     background-size: auto;
 }
 
-.octane-cfp-item-title {
+.volt-cfp-item-title {
     position: absolute;
     top: 93px;
     left: 5px;
@@ -56,14 +56,14 @@
     line-height: 20px;
 }
 
-.octane-cfp-item.is-first .octane-cfp-item-title {
+.volt-cfp-item.is-first .volt-cfp-item-title {
     top: 428px;
     width: 174px;
     height: 29px;
     padding: 0 5px;
 }
 
-.octane-cfp-item-region {
+.volt-cfp-item-region {
     position: absolute;
     inset: 0;
     padding: 0;
@@ -72,11 +72,11 @@
     cursor: pointer;
 }
 
-.octane-cfp-item.is-first .octane-cfp-item-region {
+.volt-cfp-item.is-first .volt-cfp-item-region {
     height: 422px;
 }
 
-.octane-cfp-voucher {
+.volt-cfp-voucher {
     position: absolute;
     top: 399px;
     left: 200px;
@@ -86,7 +86,7 @@
 }
 
 /* The 9-slice is the widget border. Children are placed from the widget origin, so the slice must not inset them. */
-.octane-cfp-voucher::before {
+.volt-cfp-voucher::before {
     position: absolute;
     inset: 0;
     box-sizing: border-box;
@@ -94,10 +94,10 @@
     border-image: url('../../assets/images/catalog/air/skin/habbo-border-colorless-51bbee-13.png') 6 fill / 6px stretch;
     content: '';
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-cfp-voucher-text {
+.volt-cfp-voucher-text {
     position: absolute;
     top: 6px;
     left: 10px;
@@ -109,7 +109,7 @@
     line-height: 17px;
 }
 
-.octane-cfp-voucher-input {
+.volt-cfp-voucher-input {
     position: absolute;
     top: 25px;
     left: 10px;
@@ -120,7 +120,7 @@
     background: #fff;
 }
 
-.octane-cfp-voucher-input input {
+.volt-cfp-voucher-input input {
     width: 206px;
     height: 15px;
     margin: 4px;
@@ -132,7 +132,7 @@
     line-height: 15px;
 }
 
-.octane-cfp-voucher-button {
+.volt-cfp-voucher-button {
     position: absolute;
     top: 25px;
     left: 274px;
@@ -148,10 +148,10 @@
     cursor: pointer;
 }
 
-.octane-cfp-voucher-button:hover {
+.volt-cfp-voucher-button:hover {
     border-image-source: var(--habbo-skin-button-hover);
 }
 
-.octane-cfp-voucher-button:active {
+.volt-cfp-voucher-button:active {
     border-image-source: var(--habbo-skin-button-pressed);
 }

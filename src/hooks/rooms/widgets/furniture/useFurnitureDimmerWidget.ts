@@ -4,11 +4,11 @@ import {
     RoomEngineTriggerWidgetEvent,
     RoomId,
     RoomSessionDimmerPresetsEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useState } from 'react';
 import { HasPermission, Permission } from '../../../../api/permissions';
 import { DimmerFurnitureWidgetPresetItem, FurnitureDimmerUtilities } from '../../../../api';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useRoom } from '../../useRoom';
 
 const useFurnitureDimmerWidgetState = () => {
@@ -59,13 +59,13 @@ const useFurnitureDimmerWidgetState = () => {
         FurnitureDimmerUtilities.savePreset(preset.id, selectedEffectId, selectedColor, selectedBrightness, true);
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_DIMMER, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_DIMMER, (event) => {
         if (!canOpenWidget()) return;
 
         roomSession.requestMoodlightSettings();
     });
 
-    useOctaneEvent<RoomSessionDimmerPresetsEvent>(RoomSessionDimmerPresetsEvent.ROOM_DIMMER_PRESETS, (event) => {
+    useVoltEvent<RoomSessionDimmerPresetsEvent>(RoomSessionDimmerPresetsEvent.ROOM_DIMMER_PRESETS, (event) => {
         const presets: DimmerFurnitureWidgetPresetItem[] = [];
 
         let i = 0;
@@ -82,7 +82,7 @@ const useFurnitureDimmerWidgetState = () => {
         setSelectedPresetId(event.selectedPresetId);
     });
 
-    useOctaneEvent<RoomEngineDimmerStateEvent>(RoomEngineDimmerStateEvent.ROOM_COLOR, (event) => {
+    useVoltEvent<RoomEngineDimmerStateEvent>(RoomEngineDimmerStateEvent.ROOM_COLOR, (event) => {
         if (RoomId.isRoomPreviewerId(event.roomId)) return;
 
         setLastDimmerState(dimmerState);

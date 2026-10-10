@@ -1,4 +1,4 @@
-import { GroupBadgePartsComposer, GroupBuyComposer, GroupBuyDataComposer, GroupBuyDataEvent } from '@octane/renderer';
+import { GroupBadgePartsComposer, GroupBuyComposer, GroupBuyDataComposer, GroupBuyDataEvent } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { CreateLinkEvent, GroupBadgePart, HasHabboClub, IGroupData, LocalizeText, SendMessageComposer } from '../../../api';
 import creditIcon from '../../../assets/images/groups/native/gcreate_icon_credit.png';
@@ -125,7 +125,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
             {currentTab === 2 && <GroupTabBadgeView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
             {currentTab === 3 && <GroupTabColorsView groupData={groupData} setCloseAction={setCloseAction} setGroupData={setGroupData} />}
             {currentTab === 4 && <GroupTabCreatorConfirmationView groupData={groupData} purchaseCost={purchaseCost} setGroupData={setGroupData} />}
-            <div className="octane-group-native__footer">
+            <div className="volt-group-native__footer">
                 <GroupText
                     className="is-link"
                     overrides={flatText(12, { underline: true })}
@@ -136,14 +136,14 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = (props) => {
                 />
                 {currentTab === 4 && !hasClub && (
                     <GroupBox height={39} kind="red" width={248} x={126} y={364} onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
-                        <img alt="" className="octane-group-native__vip-icon" draggable={false} src={vipIcon} />
+                        <img alt="" className="volt-group-native__vip-icon" draggable={false} src={vipIcon} />
                         <GroupText background={0xcc0000} overrides={flatText(12, { bold: true, color: 0xffffff })} text={LocalizeText('group.create.confirm.viprequired')} x={38} y={4} />
                         <GroupText background={0xcc0000} overrides={flatText(12, { color: 0xffffff })} text={LocalizeText('group.create.confirm.getvip')} x={38} y={20} />
                     </GroupBox>
                 )}
                 {currentTab === 4 && (
                     <GroupBox height={39} kind={hasClub ? 'yellow' : 'gray'} width={248} x={126} y={410}>
-                        <img alt="" className="octane-group-native__buy-icon" draggable={false} src={creditIcon} />
+                        <img alt="" className="volt-group-native__buy-icon" draggable={false} src={creditIcon} />
                         <GroupText
                             background={hasClub ? 0xffc300 : 0xaaaaaa}
                             height={34}

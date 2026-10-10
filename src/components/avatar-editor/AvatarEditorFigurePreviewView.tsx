@@ -15,14 +15,14 @@ export const AvatarEditorFigurePreviewView: FC<{}> = (props) => {
     };
 
     return (
-        <div className="octane-avatar-editor-preview-shell">
+        <div className="volt-avatar-editor-preview-shell">
             <div className="figure-preview-container">
                 {selectedEffect === -1 ? <>
-                    <img className="octane-avatar-editor-preview-shadow" src={shadowSrc} alt="" draggable={false} />
+                    <img className="volt-avatar-editor-preview-shadow" src={shadowSrc} alt="" draggable={false} />
                     <LayoutAvatarImageView direction={direction} figure={getFigureString} gender={gender} scale={2} />
                 </> : <AvatarEditorEffectPreviewView direction={direction} figure={getFigureString} effect={selectedEffect} />}
             </div>
-            <button type="button" className="octane-avatar-editor-rotate" aria-label="Rotate avatar" onClick={rotateFigure}>
+            <button type="button" className="volt-avatar-editor-rotate" aria-label="Rotate avatar" onClick={rotateFigure}>
                 <img src={rotateSrc} alt="" draggable={false} />
             </button>
         </div>

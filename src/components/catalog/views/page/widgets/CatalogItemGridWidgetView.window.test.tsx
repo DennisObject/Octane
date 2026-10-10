@@ -40,7 +40,7 @@ const makeOffer = (offerId: number, priced: boolean) =>
         clubLevel: 0
     }) as any;
 
-const getViewport = (container: HTMLElement) => container.querySelector('.octane-classic-scroll-area-viewport') as HTMLElement;
+const getViewport = (container: HTMLElement) => container.querySelector('.volt-classic-scroll-area-viewport') as HTMLElement;
 
 const getRenderedIndexes = () =>
     Array.from(document.querySelectorAll('[data-air-offer-index]')).map((el) => Number(el.getAttribute('data-air-offer-index')));
@@ -63,10 +63,10 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'setTimeout'] });
 
-        const { container } = render(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        const { container } = render(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const grid = screen.getByRole('listbox', { name: 'Catalog items' });
-        const columnCount = Number(grid.style.getPropertyValue('--octane-air-column-count'));
+        const columnCount = Number(grid.style.getPropertyValue('--volt-air-column-count'));
         const expectedLayout = layoutAirCatalogOffers(offers, columnCount);
         expect(grid.style.height).toBe(`${expectedLayout.height}px`);
 
@@ -103,9 +103,9 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
         state.currentPage = { offers, pageId: 1 };
         state.adminMode = true;
 
-        const { container } = render(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        const { container } = render(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
-        expect(container.querySelector('.octane-catalog-grid-virtual')).not.toBeNull();
+        expect(container.querySelector('.volt-catalog-grid-virtual')).not.toBeNull();
     });
 
     it('resets the window before paint on page change so a shorter page is fully mounted on the same render', () => {
@@ -117,7 +117,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'setTimeout'] });
 
-        const { container, rerender } = render(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        const { container, rerender } = render(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const viewport = getViewport(container);
         Object.defineProperty(viewport, 'clientHeight', { value: 200, configurable: true });
@@ -139,7 +139,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
         ];
         state.currentPage = { offers: shortOffers, pageId: 2 };
 
-        rerender(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        rerender(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const renderedTestIds = Array.from(document.querySelectorAll('[data-testid^="tile-"]')).map((el) => el.getAttribute('data-testid'));
         for (const offer of shortOffers) {
@@ -156,7 +156,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'setTimeout'] });
 
-        const { container, rerender } = render(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        const { container, rerender } = render(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const viewport = getViewport(container);
         Object.defineProperty(viewport, 'clientHeight', { value: 200, configurable: true });
@@ -174,10 +174,10 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
         ];
         state.currentPage = { offers: tallerOffers, pageId: 2 };
 
-        rerender(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        rerender(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const grid = screen.getByRole('listbox', { name: 'Catalog items' });
-        const columnCount = Number(grid.style.getPropertyValue('--octane-air-column-count'));
+        const columnCount = Number(grid.style.getPropertyValue('--volt-air-column-count'));
         const newLayout = layoutAirCatalogOffers(tallerOffers, columnCount);
         const expectedTopIndexes = getVisibleAirGridEntries(newLayout.entries, 0, 200)
             .map((entry) => entry.index)
@@ -197,7 +197,7 @@ describe('CatalogItemGridWidgetView mixed-grid windowing', () => {
 
         vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'setTimeout'] });
 
-        const { container } = render(<CatalogItemGridWidgetView className="octane-catalog-grid-density-standard" />);
+        const { container } = render(<CatalogItemGridWidgetView className="volt-catalog-grid-density-standard" />);
 
         const viewport = getViewport(container);
         Object.defineProperty(viewport, 'clientHeight', { value: 200, configurable: true });

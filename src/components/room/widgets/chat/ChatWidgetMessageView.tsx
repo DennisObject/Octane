@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomChatSettings, RoomObjectCategory } from '@octane/renderer';
+import { GetRoomEngine, RoomChatSettings, RoomObjectCategory } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleMessage, GetConfigurationValue } from '../../../../api';
 import { useOnClickChat } from '../../../../hooks';

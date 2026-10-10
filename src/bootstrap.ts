@@ -1,15 +1,15 @@
-import { GetCommunication, GetConfiguration } from '@octane/renderer';
+import { GetCommunication, GetConfiguration } from '@volt/renderer';
 import { captureLaunchCredentials } from './api/auth/launchCredentials';
-import { derivePetConfig, DerivedPetConfig, PetDefinition } from './api/octane/PetData';
+import { derivePetConfig, DerivedPetConfig, PetDefinition } from './api/volt/PetData';
 import { parseJsonDocument, UiJsonMode } from './json/JsonDocumentParser';
 import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';
 
-declare const __OCTANE_JSON_MODE__: UiJsonMode | undefined;
+declare const __VOLT_JSON_MODE__: UiJsonMode | undefined;
 
 const resolveJsonMode = (): UiJsonMode => {
     try {
-        if (typeof __OCTANE_JSON_MODE__ !== 'undefined' && __OCTANE_JSON_MODE__) {
-            if (__OCTANE_JSON_MODE__ === 'legacy' || __OCTANE_JSON_MODE__ === 'jsonc' || __OCTANE_JSON_MODE__ === 'auto') return __OCTANE_JSON_MODE__;
+        if (typeof __VOLT_JSON_MODE__ !== 'undefined' && __VOLT_JSON_MODE__) {
+            if (__VOLT_JSON_MODE__ === 'legacy' || __VOLT_JSON_MODE__ === 'jsonc' || __VOLT_JSON_MODE__ === 'auto') return __VOLT_JSON_MODE__;
         }
     } catch {}
 
@@ -35,8 +35,8 @@ ensureMobileViewport();
 
 const setBootDebug = (message: string) => {
     try {
-        (window as any).__octaneBootDebug = message;
-        const secureNode = document.getElementById('octane-secure-debug');
+        (window as any).__voltBootDebug = message;
+        const secureNode = document.getElementById('volt-secure-debug');
 
         if (secureNode) secureNode.textContent = `${secureNode.textContent}\n${message}`;
     } catch {}
@@ -44,7 +44,7 @@ const setBootDebug = (message: string) => {
 
 const deployBaseUrl = (): string => {
     try {
-        const loaderBase = (window as any).__octaneLoaderBase;
+        const loaderBase = (window as any).__voltLoaderBase;
         if (typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
     } catch {}
 
@@ -65,11 +65,11 @@ const deployBaseUrl = (): string => {
 };
 
 // The entry HTML can carry the boot configuration (nginx SSI includes it into the
-// <script type="application/json" id="octane-boot-*"> blocks of index.html), which saves
+// <script type="application/json" id="volt-boot-*"> blocks of index.html), which saves
 // the round trips to fetch it. Without SSI the blocks still hold the include comment.
 // A missing file makes nginx include its error page, so only a block that parses counts.
 const readBootDocument = (name: string): string | null => {
-    const text = document.getElementById(`octane-boot-${name}`)?.textContent?.trim();
+    const text = document.getElementById(`volt-boot-${name}`)?.textContent?.trim();
 
     if (!text || text.startsWith('<!--')) return null;
 
@@ -86,12 +86,12 @@ const readBootDocument = (name: string): string | null => {
 
 const loadClientMode = async () => {
     try {
-        if ((window as any).__octaneClientMode) return;
+        if ((window as any).__voltClientMode) return;
 
         const inline = readBootDocument('client-mode');
 
         if (inline) {
-            (window as any).__octaneClientMode = parseJsonDocument(inline, resolveJsonMode(), 'client-mode.json');
+            (window as any).__voltClientMode = parseJsonDocument(inline, resolveJsonMode(), 'client-mode.json');
             setBootDebug('boot: client-mode inline');
 
             return;
@@ -107,7 +107,7 @@ const loadClientMode = async () => {
         const text = await response.text();
         const mode = resolveJsonMode();
 
-        (window as any).__octaneClientMode = parseJsonDocument(text, mode, url.toString());
+        (window as any).__voltClientMode = parseJsonDocument(text, mode, url.toString());
         setBootDebug(`boot: client-mode loaded (mode=${mode})`);
     } catch (error) {
         setBootDebug(`boot: client-mode fallback ${error?.message || error}`);
@@ -157,8 +157,8 @@ const search = new URLSearchParams(window.location.search);
 const clientMode = getClientMode();
 const petConfigLoad = loadPetConfig();
 
-(window as any).OctaneSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
-(window as any).OctaneClientMode = clientMode;
+(window as any).VoltSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
+(window as any).VoltClientMode = clientMode;
 const rendererConfigUrl = configFileUrl('renderer-config.json', true);
 const uiConfigUrl = configFileUrl('ui-config.json', true);
 
@@ -196,7 +196,7 @@ const gamedataVersions = (() => {
     return Object.keys(versions).length ? versions : null;
 })();
 
-(window as any).OctaneConfig = {
+(window as any).VoltConfig = {
     'config.urls': [rendererConfigUrl, uiConfigUrl],
     ...(furnidataVersion ? { 'furnidata.version': furnidataVersion } : {}),
     ...(gamedataVersions ? { 'gamedata.versions': gamedataVersions } : {}),
@@ -207,11 +207,11 @@ const gamedataVersions = (() => {
 };
 
 // Legacy aliases so external scripts written against the old Nitro globals keep working
-(window as any).NitroConfig = (window as any).OctaneConfig;
+(window as any).NitroConfig = (window as any).VoltConfig;
 (window as any).NitroClientMode = clientMode;
-(window as any).NitroSecureApiUrl = (window as any).OctaneSecureApiUrl;
+(window as any).NitroSecureApiUrl = (window as any).VoltSecureApiUrl;
 
-setBootDebug('boot: OctaneConfig assigned');
+setBootDebug('boot: VoltConfig assigned');
 
 // Load renderer-config.json + ui-config.json BEFORE rendering React. Otherwise
 // the first paint triggers a flood of "Missing configuration key" warnings for
@@ -258,14 +258,14 @@ if (launchCredentials.ssoTicket) {
     const communicationInit = GetCommunication().init();
 
     communicationInit.catch(() => {});
-    (window as any).__octaneEarlyCommunicationInit = communicationInit;
+    (window as any).__voltEarlyCommunicationInit = communicationInit;
     setBootDebug('boot: socket started');
 }
 
 // pets.json loads alongside the configuration. Its keys override the config files, as the
-// OctaneConfig defaults do, and stay on OctaneConfig for any later configuration reload.
+// VoltConfig defaults do, and stay on VoltConfig for any later configuration reload.
 if (petConfig) {
-    Object.assign((window as any).OctaneConfig, petConfig);
+    Object.assign((window as any).VoltConfig, petConfig);
     GetConfiguration().parseConfiguration(petConfig, true);
 }
 

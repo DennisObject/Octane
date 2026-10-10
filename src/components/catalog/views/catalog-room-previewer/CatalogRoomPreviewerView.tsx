@@ -1,4 +1,4 @@
-import { GetEventDispatcher, OctaneToolbarAnimateIconEvent, RoomPreviewer, TextureUtils, ToolbarIconEnum } from '@octane/renderer';
+import { GetEventDispatcher, VoltToolbarAnimateIconEvent, RoomPreviewer, TextureUtils, ToolbarIconEnum } from '@volt/renderer';
 import { FC, useRef } from 'react';
 import { LayoutRoomPreviewerView } from '../../../../common';
 import { CatalogPurchasedEvent } from '../../../../events';
@@ -31,7 +31,7 @@ export const CatalogRoomPreviewerView: FC<{
             const x = bounds.x + bounds.width / 2;
             const y = bounds.y + bounds.height / 2;
 
-            const animateEvent = new OctaneToolbarAnimateIconEvent(image, x, y);
+            const animateEvent = new VoltToolbarAnimateIconEvent(image, x, y);
 
             animateEvent.iconName = ToolbarIconEnum.INVENTORY;
 

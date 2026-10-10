@@ -1,1 +1,1 @@
-export * from './OctaneLimitedEditionStyledNumberView';
+export * from './VoltLimitedEditionStyledNumberView';

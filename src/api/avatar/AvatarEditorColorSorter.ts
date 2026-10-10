@@ -1,4 +1,4 @@
-import { IPartColor } from '@octane/renderer';
+import { IPartColor } from '@volt/renderer';
 
 export const AvatarEditorColorSorter = (a: IPartColor, b: IPartColor) => {
     const clubLevelA = !a ? -1 : a.clubLevel;

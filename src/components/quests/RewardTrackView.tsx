@@ -7,7 +7,7 @@ import {
     RewardTrackData,
     RewardTrackPrizeData,
     RewardTrackTaskData
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaCog } from 'react-icons/fa';
 import {
@@ -48,7 +48,7 @@ import taskListIcon from '../../assets/images/reward-track/air/task-list.png';
 import { DraggableWindowPosition, LayoutAvatarImageView, LayoutBadgeImageView, LayoutCurrencyIcon, LayoutFurniIconImageView } from '../../common';
 import { nativeTextStyles } from '../../common/native-text/NativeTextStyles';
 import { useHasPermission, useNotification, useRewardTracks } from '../../hooks';
-import { OctaneCard } from '../../layout';
+import { VoltCard } from '../../layout';
 import { useAirFieldWidth } from '../achievements/AchievementText';
 import { RewardTrackAdminView } from './RewardTrackAdminView';
 import { RewardTrackScrollList } from './RewardTrackScrollList';
@@ -122,7 +122,7 @@ const trackFallback = (trackId: string, suffix: 'name' | 'desc' | 'info'): strin
 const RewardIcon: FC<{ rewardTypeId: string; extraParams: string; productItemTypeId: number }> = ({ rewardTypeId, extraParams, productItemTypeId }) => {
     const type = (rewardTypeId || '').toLowerCase();
 
-    if (type in CURRENCY_TYPES) return <LayoutCurrencyIcon type={CURRENCY_TYPES[type]} className="octane-reward-track-prize-currency" />;
+    if (type in CURRENCY_TYPES) return <LayoutCurrencyIcon type={CURRENCY_TYPES[type]} className="volt-reward-track-prize-currency" />;
 
     if (type === 'badge') return <LayoutBadgeImageView badgeCode={extraParams} />;
 
@@ -131,11 +131,11 @@ const RewardIcon: FC<{ rewardTypeId: string; extraParams: string; productItemTyp
             <LayoutFurniIconImageView
                 productType={extraParams.startsWith('i:') ? 'i' : 's'}
                 productClassId={productItemTypeId}
-                className="octane-reward-track-prize-furni"
+                className="volt-reward-track-prize-furni"
             />
         );
 
-    return <div className="octane-reward-track-prize-generic">{rewardTypeId}</div>;
+    return <div className="volt-reward-track-prize-generic">{rewardTypeId}</div>;
 };
 
 /** RewardTrackTaskProgressBarView: the fill is round(width * ratio) wide and turns green once complete. */
@@ -143,10 +143,10 @@ const TaskProgressBar: FC<{ ratio: number; width: number }> = ({ ratio, width })
     const fill = Math.round(width * Math.max(0, Math.min(1, ratio)));
 
     return (
-        <span className="octane-reward-track-mini-bar">
+        <span className="volt-reward-track-mini-bar">
             {fill > 0 && (
-                <span className="octane-reward-track-mini-bar-fill" data-complete={ratio >= 1} style={{ width: fill }}>
-                    <span className="octane-reward-track-mini-bar-gloss" />
+                <span className="volt-reward-track-mini-bar-fill" data-complete={ratio >= 1} style={{ width: fill }}>
+                    <span className="volt-reward-track-mini-bar-gloss" />
                 </span>
             )}
         </span>
@@ -199,31 +199,31 @@ const RewardTrackPrizeView: FC<{
 
     return (
         <div
-            className="octane-reward-track-prize"
+            className="volt-reward-track-prize"
             data-tier={prize.premium ? 'premium' : 'free'}
             data-state={state}
             data-dimmed={dimmed}
             style={{ left, opacity: dimmed ? 0.75 : 1 }}
             title={getRewardTrackPrizeTooltip(state)}
         >
-            <button type="button" className="octane-reward-track-prize-hit" disabled={dimmed} onClick={onClick}>
-                <span className="octane-reward-track-prize-shadow" />
-                <span className="octane-reward-track-prize-plate">
-                    <span className="octane-reward-track-prize-product" data-shifted={prize.rewardAmount > 1}>
+            <button type="button" className="volt-reward-track-prize-hit" disabled={dimmed} onClick={onClick}>
+                <span className="volt-reward-track-prize-shadow" />
+                <span className="volt-reward-track-prize-plate">
+                    <span className="volt-reward-track-prize-product" data-shifted={prize.rewardAmount > 1}>
                         <RewardIcon rewardTypeId={prize.rewardTypeId} extraParams={prize.extraParams} productItemTypeId={prize.productItemTypeId} />
                     </span>
                     {prize.rewardAmount > 1 && (
-                        <span className="octane-reward-track-prize-amount">
+                        <span className="volt-reward-track-prize-amount">
                             <span>{prize.rewardAmount}</span>
                         </span>
                     )}
                 </span>
             </button>
-            <span className="octane-reward-track-prize-stem" />
+            <span className="volt-reward-track-prize-stem" />
             {state === 'premium_locked' && (
-                <img src={lockedReward} alt="" width={18} height={22} draggable={false} className="octane-reward-track-prize-lock" />
+                <img src={lockedReward} alt="" width={18} height={22} draggable={false} className="volt-reward-track-prize-lock" />
             )}
-            {state === 'claimed' && <img src={checkIcon} alt="" width={17} height={15} draggable={false} className="octane-reward-track-prize-check" />}
+            {state === 'claimed' && <img src={checkIcon} alt="" width={17} height={15} draggable={false} className="volt-reward-track-prize-check" />}
         </div>
     );
 };
@@ -238,7 +238,7 @@ const RewardTrackHintButton: FC<{ label: string; onClick: () => void }> = ({ lab
     const width = fieldWidth === undefined ? 109 : fieldWidth + 15;
 
     return (
-        <button type="button" className="octane-reward-track-btn" style={{ left: HINT_BUTTON_RIGHT - width, width }} onClick={onClick}>
+        <button type="button" className="volt-reward-track-btn" style={{ left: HINT_BUTTON_RIGHT - width, width }} onClick={onClick}>
             {label}
         </button>
     );
@@ -254,30 +254,30 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
     onConfirm,
     onCancel
 }) => (
-    <OctaneCard
-        className={`octane-reward-track-premium resize-none${pending ? ' is-pending' : ''}`}
+    <VoltCard
+        className={`volt-reward-track-premium resize-none${pending ? ' is-pending' : ''}`}
         uniqueKey="reward-track-premium"
         windowPosition={DraggableWindowPosition.CENTER}
         data-hidden-benefits={countHiddenPremiumBenefits(track)}
     >
-        <OctaneCard.Header headerText={rewardText('reward_track.premium.confirm.title', 'Unlock Premium Track')} onCloseClick={() => !pending && onCancel()} />
-        <OctaneCard.Content className="octane-reward-track-premium-content">
-            <div className="octane-reward-track-premium-body">
-                <div className="octane-reward-track-premium-panel">
-                    <div className="octane-reward-track-premium-frame">
+        <VoltCard.Header headerText={rewardText('reward_track.premium.confirm.title', 'Unlock Premium Track')} onCloseClick={() => !pending && onCancel()} />
+        <VoltCard.Content className="volt-reward-track-premium-content">
+            <div className="volt-reward-track-premium-body">
+                <div className="volt-reward-track-premium-panel">
+                    <div className="volt-reward-track-premium-frame">
                         <img src={premiumTrackIcon} alt="" width={58} height={45} draggable={false} />
                     </div>
-                    <div className="octane-reward-track-premium-panel-name">{rewardText('reward_track.rewards.premium', 'Premium')}</div>
-                    <div className="octane-reward-track-premium-panel-info">{rewardText('reward_track.rewards.premium.info', 'Extra rewards')}</div>
+                    <div className="volt-reward-track-premium-panel-name">{rewardText('reward_track.rewards.premium', 'Premium')}</div>
+                    <div className="volt-reward-track-premium-panel-info">{rewardText('reward_track.rewards.premium.info', 'Extra rewards')}</div>
                 </div>
-                <div className="octane-reward-track-premium-benefits">
-                    <div className="octane-reward-track-premium-gap" />
-                    <p className="octane-reward-track-premium-desc">
+                <div className="volt-reward-track-premium-benefits">
+                    <div className="volt-reward-track-premium-gap" />
+                    <p className="volt-reward-track-premium-desc">
                         {rewardText('reward_track.premium.confirm.desc', 'Get PREMIUM rewards and faster progress on this track!')}
                     </p>
-                    <div className="octane-reward-track-premium-gap" />
+                    <div className="volt-reward-track-premium-gap" />
                     {track.taskPointsBoost > 1 && (
-                        <div className="octane-reward-track-premium-benefit">
+                        <div className="volt-reward-track-premium-benefit">
                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                             <span>
                                 {rewardText('reward_track.premium.confirm.benefit.boost', '%percent%% faster progression', {
@@ -287,13 +287,13 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
                         </div>
                     )}
                     {track.hasPremiumPrizes && (
-                        <div className="octane-reward-track-premium-benefit">
+                        <div className="volt-reward-track-premium-benefit">
                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                             <span>{rewardText('reward_track.premium.confirm.benefit.rewards', 'More premium rewards!')}</span>
                         </div>
                     )}
                     {track.instantPoints > 0 && (
-                        <div className="octane-reward-track-premium-benefit">
+                        <div className="volt-reward-track-premium-benefit">
                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                             <span>
                                 {rewardText('reward_track.premium.confirm.benefit.instant_points', 'Instantly gain %points% points', {
@@ -303,21 +303,21 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
                         </div>
                     )}
                     {track.hasPremiumTasks && (
-                        <div className="octane-reward-track-premium-benefit">
+                        <div className="volt-reward-track-premium-benefit">
                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                             <span>{rewardText('reward_track.premium.confirm.benefit.tasks', 'Exclusive premium tasks')}</span>
                         </div>
                     )}
                     {track.hasPremiumLevels && (
-                        <div className="octane-reward-track-premium-benefit">
+                        <div className="volt-reward-track-premium-benefit">
                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                             <span>{rewardText('reward_track.premium.confirm.benefit.levels', 'Exclusive premium levels')}</span>
                         </div>
                     )}
                 </div>
-                <div className="octane-reward-track-premium-cost">
+                <div className="volt-reward-track-premium-cost">
                     <span>{rewardText('catalog.purchase.confirmation.dialog.cost', 'Cost')}</span>
-                    <span className="octane-reward-track-premium-price">
+                    <span className="volt-reward-track-premium-price">
                         {track.costCredits > 0 && (
                             <>
                                 <span>{track.costCredits}</span>
@@ -328,7 +328,7 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
                         {track.costDiamonds > 0 && (
                             <>
                                 <span>{track.costDiamonds}</span>
-                                <span className="octane-reward-track-premium-diamond">
+                                <span className="volt-reward-track-premium-diamond">
                                     <img src={diamondBigIcon} alt="" width={19} height={19} draggable={false} />
                                 </span>
                             </>
@@ -336,16 +336,16 @@ const RewardTrackPremiumConfirmView: FC<{ track: RewardTrackData; pending: boole
                     </span>
                 </div>
             </div>
-            <div className="octane-reward-track-premium-buttons">
-                <button type="button" className="octane-reward-track-btn" disabled={pending} onClick={onCancel}>
+            <div className="volt-reward-track-premium-buttons">
+                <button type="button" className="volt-reward-track-btn" disabled={pending} onClick={onCancel}>
                     {rewardText('reward_track.premium.confirm.cancel', 'Cancel')}
                 </button>
-                <button type="button" className="octane-reward-track-btn octane-reward-track-btn-premium" disabled={pending} onClick={onConfirm}>
+                <button type="button" className="volt-reward-track-btn volt-reward-track-btn-premium" disabled={pending} onClick={onConfirm}>
                     {rewardText('reward_track.premium.confirm.buy', 'Unlock')}
                 </button>
             </div>
-        </OctaneCard.Content>
-    </OctaneCard>
+        </VoltCard.Content>
+    </VoltCard>
 );
 
 /**
@@ -513,17 +513,17 @@ export const RewardTrackView: FC<{}> = () => {
 
     return (
         <>
-            <OctaneCard
-                className="octane-reward-track resize-none"
+            <VoltCard
+                className="volt-reward-track resize-none"
                 uniqueKey="reward-track"
                 windowPosition={DraggableWindowPosition.CENTER}
                 style={themeStyle}
                 data-theme={themeKey}
             >
-                <OctaneCard.Header headerText={rewardText('reward_track.title', 'Reward Track')} onCloseClick={() => setTrackId(null)} />
-                <OctaneCard.Content className="octane-reward-track-content">
+                <VoltCard.Header headerText={rewardText('reward_track.title', 'Reward Track')} onCloseClick={() => setTrackId(null)} />
+                <VoltCard.Content className="volt-reward-track-content">
                     {editMode && isEditor && (
-                        <div className="octane-reward-track-admin-host">
+                        <div className="volt-reward-track-admin-host">
                             <RewardTrackAdminView
                                 onClose={() => setEditMode(false)}
                                 onPreview={(id) => {
@@ -534,13 +534,13 @@ export const RewardTrackView: FC<{}> = () => {
                         </div>
                     )}
                     {!editMode && !track && (
-                        <div className="octane-reward-track-loading">{rewardText('reward_track.loading', 'Loading the reward track...')}</div>
+                        <div className="volt-reward-track-loading">{rewardText('reward_track.loading', 'Loading the reward track...')}</div>
                     )}
                     {!editMode && track && (
-                        <div className="octane-reward-track-stage">
+                        <div className="volt-reward-track-stage">
                             {/* reward_track_item / button dynamic styles: hover is RGB x1.1 + 15 */}
-                            <svg className="octane-reward-track-filters-svg" aria-hidden="true" focusable="false">
-                                <filter id="octane-reward-track-hover" colorInterpolationFilters="sRGB">
+                            <svg className="volt-reward-track-filters-svg" aria-hidden="true" focusable="false">
+                                <filter id="volt-reward-track-hover" colorInterpolationFilters="sRGB">
                                     <feComponentTransfer>
                                         <feFuncR type="linear" slope="1.1" intercept="0.0588" />
                                         <feFuncG type="linear" slope="1.1" intercept="0.0588" />
@@ -548,37 +548,37 @@ export const RewardTrackView: FC<{}> = () => {
                                     </feComponentTransfer>
                                 </filter>
                             </svg>
-                            <div className="octane-reward-track-header">
-                                <div className="octane-reward-track-rewards">
-                                    <div className="octane-reward-track-bg" />
-                                    <div className="octane-reward-track-sky" />
-                                    <img className="octane-reward-track-stars" src={prizesStars} alt="" width={843} height={226} draggable={false} />
-                                    <div className="octane-reward-track-main-bar">
-                                        <div className="octane-reward-track-main-bar-progress" style={{ width: progressFill }}>
-                                            <div className="octane-reward-track-main-bar-fill" style={{ width: progressShape }} />
-                                            <div className="octane-reward-track-main-bar-gloss" />
+                            <div className="volt-reward-track-header">
+                                <div className="volt-reward-track-rewards">
+                                    <div className="volt-reward-track-bg" />
+                                    <div className="volt-reward-track-sky" />
+                                    <img className="volt-reward-track-stars" src={prizesStars} alt="" width={843} height={226} draggable={false} />
+                                    <div className="volt-reward-track-main-bar">
+                                        <div className="volt-reward-track-main-bar-progress" style={{ width: progressFill }}>
+                                            <div className="volt-reward-track-main-bar-fill" style={{ width: progressShape }} />
+                                            <div className="volt-reward-track-main-bar-gloss" />
                                         </div>
                                     </div>
-                                    <div className="octane-reward-track-points-band-clip">
-                                        <div className="octane-reward-track-points-band" />
+                                    <div className="volt-reward-track-points-band-clip">
+                                        <div className="volt-reward-track-points-band" />
                                     </div>
-                                    <div className="octane-reward-track-band" data-tier="free">
-                                        <span className="octane-reward-track-band-bg" />
-                                        <span className="octane-reward-track-band-info" />
-                                        <span className="octane-reward-track-band-split" />
+                                    <div className="volt-reward-track-band" data-tier="free">
+                                        <span className="volt-reward-track-band-bg" />
+                                        <span className="volt-reward-track-band-info" />
+                                        <span className="volt-reward-track-band-split" />
                                         <img src={freeTrackIcon} alt="" width={49} height={48} draggable={false} />
-                                        <span className="octane-reward-track-band-title">{rewardText('reward_track.rewards.free', 'Free Track')}</span>
+                                        <span className="volt-reward-track-band-title">{rewardText('reward_track.rewards.free', 'Free Track')}</span>
                                     </div>
-                                    <div className="octane-reward-track-band" data-tier="premium">
-                                        <span className="octane-reward-track-band-bg" />
-                                        <span className="octane-reward-track-band-info" />
-                                        <span className="octane-reward-track-band-split" />
+                                    <div className="volt-reward-track-band" data-tier="premium">
+                                        <span className="volt-reward-track-band-bg" />
+                                        <span className="volt-reward-track-band-info" />
+                                        <span className="volt-reward-track-band-split" />
                                         <img src={premiumTrackIcon} alt="" width={58} height={45} draggable={false} />
-                                        <span className="octane-reward-track-band-title">{rewardText('reward_track.rewards.premium', 'Premium')}</span>
+                                        <span className="volt-reward-track-band-title">{rewardText('reward_track.rewards.premium', 'Premium')}</span>
                                         <small>{rewardText('reward_track.rewards.premium.info', 'Extra rewards')}</small>
                                     </div>
                                     {pagePrizes.points[safePage].map((points) => (
-                                        <div key={points} className="octane-reward-track-indicator" style={{ left: 196 + prizeLeft(points) }}>
+                                        <div key={points} className="volt-reward-track-indicator" style={{ left: 196 + prizeLeft(points) }}>
                                             <img
                                                 src={track.points >= points ? availableIcon : notAvailableIcon}
                                                 alt=""
@@ -586,13 +586,13 @@ export const RewardTrackView: FC<{}> = () => {
                                                 height={20}
                                                 draggable={false}
                                             />
-                                            <i className="octane-reward-track-indicator-dot" />
-                                            <i className="octane-reward-track-indicator-stem" />
-                                            <i className="octane-reward-track-indicator-connector" />
+                                            <i className="volt-reward-track-indicator-dot" />
+                                            <i className="volt-reward-track-indicator-stem" />
+                                            <i className="volt-reward-track-indicator-connector" />
                                             <span>{points}</span>
                                         </div>
                                     ))}
-                                    <div className="octane-reward-track-prize-layer">
+                                    <div className="volt-reward-track-prize-layer">
                                         {pagePrizes.free[safePage].map((prize) => (
                                             <RewardTrackPrizeView
                                                 key={prize.id}
@@ -616,7 +616,7 @@ export const RewardTrackView: FC<{}> = () => {
                                     </div>
                                     <button
                                         type="button"
-                                        className="octane-reward-track-page"
+                                        className="volt-reward-track-page"
                                         data-side="prev"
                                         disabled={safePage <= 0}
                                         onClick={() => setPage((current) => Math.max(0, current - 1))}
@@ -626,7 +626,7 @@ export const RewardTrackView: FC<{}> = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        className="octane-reward-track-page"
+                                        className="volt-reward-track-page"
                                         data-side="next"
                                         disabled={safePage >= layout.pageCount - 1}
                                         onClick={() => setPage((current) => Math.min(layout.pageCount - 1, current + 1))}
@@ -635,43 +635,43 @@ export const RewardTrackView: FC<{}> = () => {
                                         <img src={iconsForward} alt="" width={33} height={34} draggable={false} />
                                     </button>
                                     {unclaimedBefore > 0 && (
-                                        <span className="octane-reward-track-unclaimed" data-side="prev">
+                                        <span className="volt-reward-track-unclaimed" data-side="prev">
                                             {unclaimedBefore}
                                         </span>
                                     )}
                                     {unclaimedAfter > 0 && (
-                                        <span className="octane-reward-track-unclaimed" data-side="next">
+                                        <span className="volt-reward-track-unclaimed" data-side="next">
                                             {unclaimedAfter}
                                         </span>
                                     )}
                                 </div>
-                                <div className="octane-reward-track-cutout">
-                                    <div className="octane-reward-track-profile">
-                                        <div className="octane-reward-track-avatar">
+                                <div className="volt-reward-track-cutout">
+                                    <div className="volt-reward-track-profile">
+                                        <div className="volt-reward-track-avatar">
                                             <LayoutAvatarImageView figure={GetSessionDataManager().figure} direction={2} />
                                         </div>
-                                        <div className="octane-reward-track-info">
-                                            <div className="octane-reward-track-title">
+                                        <div className="volt-reward-track-info">
+                                            <div className="volt-reward-track-title">
                                                 {getRewardTrackText(track.id, 'name', trackFallback(track.id, 'name'))}
                                             </div>
-                                            <div className="octane-reward-track-desc">
+                                            <div className="volt-reward-track-desc">
                                                 {getRewardTrackText(track.id, 'desc', trackFallback(track.id, 'desc'))}
                                             </div>
-                                            <div className="octane-reward-track-instructions">
+                                            <div className="volt-reward-track-instructions">
                                                 {getRewardTrackText(track.id, 'info', trackFallback(track.id, 'info'))}
                                             </div>
                                         </div>
-                                        <div className="octane-reward-track-points">
-                                            <div className="octane-reward-track-points-value">
+                                        <div className="volt-reward-track-points">
+                                            <div className="volt-reward-track-points-value">
                                                 <img src={pointLarge} alt="" width={27} height={18} draggable={false} />
                                                 <span>{track.points}</span>
                                             </div>
-                                            <div className="octane-reward-track-points-label">
+                                            <div className="volt-reward-track-points-label">
                                                 {rewardText('reward_track.profile.points_collected', 'Points collected')}
                                             </div>
                                         </div>
-                                        <div className="octane-reward-track-splitter" />
-                                        <div className="octane-reward-track-collected">
+                                        <div className="volt-reward-track-splitter" />
+                                        <div className="volt-reward-track-collected">
                                             <img src={checkIcon} alt="" width={17} height={15} draggable={false} />
                                             <span>
                                                 {rewardText('reward_track.profile.rewards_collected', '%progress% / %total% rewards collected', {
@@ -682,11 +682,11 @@ export const RewardTrackView: FC<{}> = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="octane-reward-track-bulge" />
+                                <div className="volt-reward-track-bulge" />
                                 {isEditor && (
                                     <button
                                         type="button"
-                                        className="octane-reward-track-admin-toggle"
+                                        className="volt-reward-track-admin-toggle"
                                         title={rewardText('reward_track.admin.open', 'Edit the reward tracks')}
                                         data-testid="reward-track-admin-toggle"
                                         onClick={() => setEditMode(true)}
@@ -695,22 +695,22 @@ export const RewardTrackView: FC<{}> = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="octane-reward-track-body">
-                                <div className="octane-reward-track-tasks">
-                                    <img className="octane-reward-track-tasks-icon" src={taskListIcon} alt="" width={19} height={25} draggable={false} />
-                                    <div className="octane-reward-track-tasks-title">{rewardText('reward_track.tasks', 'Track Tasks')}</div>
-                                    <div className="octane-reward-track-tasks-progress">
+                            <div className="volt-reward-track-body">
+                                <div className="volt-reward-track-tasks">
+                                    <img className="volt-reward-track-tasks-icon" src={taskListIcon} alt="" width={19} height={25} draggable={false} />
+                                    <div className="volt-reward-track-tasks-title">{rewardText('reward_track.tasks', 'Track Tasks')}</div>
+                                    <div className="volt-reward-track-tasks-progress">
                                         {rewardText('reward_track.tasks.progress', '%progress% / %total% completed', {
                                             progress: track.completedTaskCount,
                                             total: track.totalTaskCount
                                         })}
                                     </div>
-                                    <div className="octane-reward-track-filters">
+                                    <div className="volt-reward-track-filters">
                                         {FILTERS.map((value) => (
                                             <button
                                                 key={value}
                                                 type="button"
-                                                className="octane-reward-track-filter"
+                                                className="volt-reward-track-filter"
                                                 data-active={filter === value}
                                                 onClick={() => onFilter(value)}
                                             >
@@ -718,7 +718,7 @@ export const RewardTrackView: FC<{}> = () => {
                                             </button>
                                         ))}
                                     </div>
-                                    <RewardTrackScrollList key={`${track.id}:${filter}`} className="octane-reward-track-task-list" contentClassName="octane-reward-track-task-list-content" height={259}>
+                                    <RewardTrackScrollList key={`${track.id}:${filter}`} className="volt-reward-track-task-list" contentClassName="volt-reward-track-task-list-content" height={259}>
                                         {filteredTasks.map((task) => {
                                             const level = task.activeLevel;
                                             const ratio = task.progressRatioFor(level);
@@ -727,24 +727,24 @@ export const RewardTrackView: FC<{}> = () => {
                                                 <button
                                                     key={task.id}
                                                     type="button"
-                                                    className="octane-reward-track-task"
+                                                    className="volt-reward-track-task"
                                                     data-selected={selectedTask?.id === task.id}
                                                     onClick={() => setSelectedTaskId(task.id)}
                                                 >
-                                                    <span className="octane-reward-track-task-glyph">
+                                                    <span className="volt-reward-track-task-glyph">
                                                         <TaskGlyph actionType={task.actionType} boxWidth={52} boxHeight={50} />
                                                     </span>
-                                                    <span className="octane-reward-track-task-name">
+                                                    <span className="volt-reward-track-task-name">
                                                         {getRewardTrackTaskText(track.id, task.id, 'name', task.id)}
                                                     </span>
-                                                    <span className="octane-reward-track-task-desc">
+                                                    <span className="volt-reward-track-task-desc">
                                                         {getRewardTrackTaskText(track.id, task.id, 'desc', '')}
                                                     </span>
                                                     <TaskProgressBar ratio={ratio} width={TASK_BAR_WIDTH} />
-                                                    <span className="octane-reward-track-task-count">
+                                                    <span className="volt-reward-track-task-count">
                                                         {task.progressCount} / {level ? level.requiredCount : 0}
                                                     </span>
-                                                    <span className="octane-reward-track-task-reward">
+                                                    <span className="volt-reward-track-task-reward">
                                                         <span>{level ? level.pointsReward : 0}</span>
                                                         <img src={pointSmall} alt="" width={19} height={14} draggable={false} />
                                                     </span>
@@ -753,11 +753,11 @@ export const RewardTrackView: FC<{}> = () => {
                                         })}
                                     </RewardTrackScrollList>
                                     {(!track.hasPremiumConfig || track.premium) && (
-                                        <div className="octane-reward-track-tip">
-                                            <img className="octane-reward-track-tip-gift" src={rewardGift} alt="" width={41} height={36} draggable={false} />
+                                        <div className="volt-reward-track-tip">
+                                            <img className="volt-reward-track-tip-gift" src={rewardGift} alt="" width={41} height={36} draggable={false} />
                                             <p>{rewardText('reward_track.tasks.tip', 'Complete tasks to earn points and unlock rewards')}</p>
                                             <img
-                                                className="octane-reward-track-tip-frank"
+                                                className="volt-reward-track-tip-frank"
                                                 src={frankAndPiccolo}
                                                 alt=""
                                                 width={88}
@@ -767,9 +767,9 @@ export const RewardTrackView: FC<{}> = () => {
                                         </div>
                                     )}
                                     {track.hasPremiumConfig && !track.premium && (
-                                        <div className="octane-reward-track-tip" data-upgrade="true">
+                                        <div className="volt-reward-track-tip" data-upgrade="true">
                                             <img
-                                                className="octane-reward-track-tip-gift"
+                                                className="volt-reward-track-tip-gift"
                                                 src={rewardGiftPremium}
                                                 alt=""
                                                 width={41}
@@ -777,44 +777,44 @@ export const RewardTrackView: FC<{}> = () => {
                                                 draggable={false}
                                             />
                                             <p>{rewardText('reward_track.tasks.tip_upgrade', 'Upgrade now for premium rewards and faster progression!')}</p>
-                                            <button type="button" className="octane-reward-track-btn octane-reward-track-btn-premium" onClick={onPremium}>
+                                            <button type="button" className="volt-reward-track-btn volt-reward-track-btn-premium" onClick={onPremium}>
                                                 {rewardText('reward_track.tasks.tip_upgrade.button', 'Get Premium')}
                                             </button>
                                         </div>
                                     )}
                                 </div>
                                 {filteredTasks.length > 0 && selectedTask && (
-                                    <div className="octane-reward-track-task-info">
-                                        <div className="octane-reward-track-detail-glyph">
+                                    <div className="volt-reward-track-task-info">
+                                        <div className="volt-reward-track-detail-glyph">
                                             <TaskGlyph actionType={selectedTask.actionType} boxWidth={104} boxHeight={100} zoom={2} />
                                         </div>
-                                        <div className="octane-reward-track-detail-name">
+                                        <div className="volt-reward-track-detail-name">
                                             {getRewardTrackTaskText(track.id, selectedTask.id, 'name', selectedTask.id)}
                                         </div>
-                                        <div className="octane-reward-track-detail-desc">{getRewardTrackTaskText(track.id, selectedTask.id, 'desc', '')}</div>
-                                        <div className="octane-reward-track-levels-rule" />
-                                        <div className="octane-reward-track-levels-title">{rewardText('reward_track.levels.title', 'Levels')}</div>
-                                        <div className="octane-reward-track-levels">
+                                        <div className="volt-reward-track-detail-desc">{getRewardTrackTaskText(track.id, selectedTask.id, 'desc', '')}</div>
+                                        <div className="volt-reward-track-levels-rule" />
+                                        <div className="volt-reward-track-levels-title">{rewardText('reward_track.levels.title', 'Levels')}</div>
+                                        <div className="volt-reward-track-levels">
                                             {selectedTask.levels.map((level, index) => {
                                                 const ratio = selectedTask.progressRatioFor(level);
 
                                                 return (
                                                     <div
                                                         key={index}
-                                                        className="octane-reward-track-level"
+                                                        className="volt-reward-track-level"
                                                         data-active={index === selectedTask.activeLevelIndex}
                                                     >
-                                                        <span className="octane-reward-track-level-name">
+                                                        <span className="volt-reward-track-level-name">
                                                             {rewardText('reward_track.levels.level', 'Level %level%', { level: index + 1 })}
                                                         </span>
                                                         <TaskProgressBar ratio={ratio} width={LEVEL_BAR_WIDTH} />
-                                                        <span className="octane-reward-track-level-count">
+                                                        <span className="volt-reward-track-level-count">
                                                             {selectedTask.progressCount} / {level.requiredCount}
                                                         </span>
-                                                        <span className="octane-reward-track-level-end">
+                                                        <span className="volt-reward-track-level-end">
                                                             {ratio >= 1 && (
                                                                 <img
-                                                                    className="octane-reward-track-level-check"
+                                                                    className="volt-reward-track-level-check"
                                                                     src={checkIcon}
                                                                     alt=""
                                                                     width={17}
@@ -822,7 +822,7 @@ export const RewardTrackView: FC<{}> = () => {
                                                                     draggable={false}
                                                                 />
                                                             )}
-                                                            <span className="octane-reward-track-level-reward">
+                                                            <span className="volt-reward-track-level-reward">
                                                                 <span>{level.pointsReward}</span>
                                                                 <img src={pointSmall} alt="" width={19} height={14} draggable={false} />
                                                             </span>
@@ -831,10 +831,10 @@ export const RewardTrackView: FC<{}> = () => {
                                                 );
                                             })}
                                         </div>
-                                        <div className="octane-reward-track-hint">
-                                            <img className="octane-reward-track-hint-frank" src={frankTips} alt="" width={52} height={88} draggable={false} />
-                                            <div className="octane-reward-track-hint-label">{rewardText('reward_track.levels.tip', 'Tip!')}</div>
-                                            <div className="octane-reward-track-hint-text">
+                                        <div className="volt-reward-track-hint">
+                                            <img className="volt-reward-track-hint-frank" src={frankTips} alt="" width={52} height={88} draggable={false} />
+                                            <div className="volt-reward-track-hint-label">{rewardText('reward_track.levels.tip', 'Tip!')}</div>
+                                            <div className="volt-reward-track-hint-text">
                                                 {getRewardTrackTaskText(track.id, selectedTask.id, 'hint.desc', '')}
                                             </div>
                                             {hintLink && (
@@ -849,8 +849,8 @@ export const RewardTrackView: FC<{}> = () => {
                             </div>
                         </div>
                     )}
-                </OctaneCard.Content>
-            </OctaneCard>
+                </VoltCard.Content>
+            </VoltCard>
             {premiumConfirm && track && (
                 <RewardTrackPremiumConfirmView
                     track={track}

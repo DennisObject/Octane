@@ -1,4 +1,4 @@
-import type { IWiredVariableHolder } from '@octane/renderer';
+import type { IWiredVariableHolder } from '@volt/renderer';
 import {
     VariablesWebApiError,
     WebApiEntry,
@@ -58,7 +58,7 @@ export const validateExplorerConnect = (
     return { errors, connection: { hotelUrl, roomId, readKey, writeKey } };
 };
 
-const REMEMBER_PREFIX = 'octane.variables_explorer.keys';
+const REMEMBER_PREFIX = 'volt.variables_explorer.keys';
 
 export const rememberedKeysStorageKey = (hotelUrl: string, roomId: number): string => `${REMEMBER_PREFIX}:${hotelUrl}:${roomId}`;
 

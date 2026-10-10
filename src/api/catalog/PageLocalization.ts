@@ -1,4 +1,4 @@
-import { GetConfigurationValue } from '../octane';
+import { GetConfigurationValue } from '../volt';
 import { IPageLocalization } from './IPageLocalization';
 
 export class PageLocalization implements IPageLocalization {

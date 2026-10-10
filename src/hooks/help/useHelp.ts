@@ -9,7 +9,7 @@ import {
     IssueCloseNotificationMessageEvent,
     SanctionStatusEvent,
     SanctionStatusMessageParser
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {

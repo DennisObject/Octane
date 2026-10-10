@@ -5,11 +5,11 @@ import {
     YouTubeRoomSettingsEvent,
     YouTubeRoomWatchersEvent,
     YouTubeRoomWatchingComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
 import { CopyToClipboard, GetRoomSession, getYoutubeRoomEnabled, LocalizeText, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../api';
-import { LayoutAvatarImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { LayoutAvatarImageView, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../common';
 import { useFurnitureYoutubeWidget, useHasPermission, useMessageEvent } from '../../hooks';
 import ReactPlayer from '../youtube/YoutubeReactPlayer';
 
@@ -225,9 +225,9 @@ export const YouTubePlayerView: FC<{}> = () => {
     );
 
     return (
-        <OctaneCardView className={`youtube-player-modal ${isFullscreen ? '!fixed inset-0 w-full h-full z-[9999] rounded-none' : 'w-[550px]'}`}>
-            <OctaneCardHeaderView headerText={isRoomMode ? '📺 YouTube TV' : '▶ YouTube'} onCloseClick={() => setIsOpen(false)} />
-            <OctaneCardContentView>
+        <VoltCardView className={`youtube-player-modal ${isFullscreen ? '!fixed inset-0 w-full h-full z-[9999] rounded-none' : 'w-[550px]'}`}>
+            <VoltCardHeaderView headerText={isRoomMode ? '📺 YouTube TV' : '▶ YouTube'} onCloseClick={() => setIsOpen(false)} />
+            <VoltCardContentView>
                 <div className="flex gap-1 mb-3 border-b border-gray-700 pb-2 flex-wrap">
                     <button
                         onClick={() => setTab('player')}
@@ -610,7 +610,7 @@ export const YouTubePlayerView: FC<{}> = () => {
                         </div>
                     </div>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

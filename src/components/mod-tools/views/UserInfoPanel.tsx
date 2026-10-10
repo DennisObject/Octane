@@ -1,4 +1,4 @@
-import { GetConfiguration, GetModeratorUserInfoMessageComposer, ModeratorInitData, ModeratorUserInfoData, ModeratorUserInfoEvent } from '@octane/renderer';
+import { GetConfiguration, GetModeratorUserInfoMessageComposer, ModeratorInitData, ModeratorUserInfoData, ModeratorUserInfoEvent } from '@volt/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { OpenUrl, SendMessageComposer } from '../../../api';
 import { useMessageEvent } from '../../../hooks';

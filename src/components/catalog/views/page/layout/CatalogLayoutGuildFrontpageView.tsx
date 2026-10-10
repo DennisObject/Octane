@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText, SanitizeHtml } from '../../../../../api';
 import { Button } from '../../../../../common/Button';

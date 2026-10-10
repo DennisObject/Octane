@@ -1,14 +1,14 @@
 :root {
-  --octane-native-text-halo: url('#octane-native-text-halo');
+  --volt-native-text-halo: url('#volt-native-text-halo');
 }
 
-.octane-use-product-confirmation {
+.volt-use-product-confirmation {
   width: min(350px, calc(100vw - 16px));
   min-width: 0;
   max-width: calc(100vw - 16px);
   max-height: calc(100vh - 16px);
 
-  .octane-card-content-shell {
+  .volt-card-content-shell {
     max-height: calc(100vh - 72px);
     overflow: auto;
   }
@@ -35,13 +35,13 @@
 }
 
 @media (max-width: 420px) {
-  .octane-use-product-confirmation .octane-card-content-shell > .flex {
+  .volt-use-product-confirmation .volt-card-content-shell > .flex {
     flex-direction: column;
   }
 }
 
 /* AIR user_view: border style-1 black 190px, list x=10 y=10 w=170. */
-.octane-infostand {
+.volt-infostand {
   position: relative;
   box-sizing: border-box;
   width: 190px;
@@ -58,7 +58,7 @@
   font-size: 9px;
   line-height: 12px;
   -webkit-font-smoothing: none;
-  image-rendering: var(--octane-pixel-art, pixelated);
+  image-rendering: var(--volt-pixel-art, pixelated);
 
   /* Painted on a layer of its own so the glyphs get greyscale antialiasing like the native bitmap text. */
   &::before {
@@ -92,7 +92,7 @@
     color: inherit;
   }
 
-  .octane-infostand__close {
+  .volt-infostand__close {
     position: absolute;
     top: 0;
     right: -2px;
@@ -103,11 +103,11 @@
     border: 0;
     background: transparent url('../../assets/images/habbo-skin/slices/close-black.png') left top / 15px 15px no-repeat;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
   }
 
   /* profile_link region x=18 y=0 135x12; home_icon bitmap 16x15 at border (8,11) = list (-2,1). */
-  .octane-infostand__header {
+  .volt-infostand__header {
     position: relative;
     box-sizing: border-box;
     width: 170px;
@@ -115,7 +115,7 @@
     height: 12px;
   }
 
-  .octane-infostand__home {
+  .volt-infostand__home {
     position: absolute;
     top: -2px;
     left: -5px;
@@ -133,11 +133,11 @@
       display: block;
       width: 11px;
       height: 10px;
-      image-rendering: var(--octane-pixel-art, pixelated);
+      image-rendering: var(--volt-pixel-art, pixelated);
     }
   }
 
-  .octane-infostand__profile-link {
+  .volt-infostand__profile-link {
     position: absolute;
     top: 1px;
     left: 21px;
@@ -153,13 +153,13 @@
     text-align: left;
     cursor: pointer;
 
-    &:hover .octane-infostand__identity,
-    &:hover .octane-infostand__identity .text-white {
+    &:hover .volt-infostand__identity,
+    &:hover .volt-infostand__identity .text-white {
       color: #91c9ff;
     }
   }
 
-  .octane-infostand__identity {
+  .volt-infostand__identity {
     color: #ffffff;
     font-family: Volter, monospace;
     font-size: 9px;
@@ -169,32 +169,32 @@
   }
 
   /* name_text of the pet and bot infostands: the Flash text field carries a 3px inset. */
-  .octane-infostand__identity--plain {
+  .volt-infostand__identity--plain {
     display: block;
     padding-left: 3px;
     margin-top: 1px;
   }
 
 
-  .octane-infostand__rule {
+  .volt-infostand__rule {
     height: 1px;
     margin: 3px 0;
     background: #333333;
   }
 
-  .octane-infostand__rule--footer {
+  .volt-infostand__rule--footer {
     margin-bottom: 0;
   }
 
   /* relationship_status_container: 170x55, kept even when it holds no rows. */
-  .octane-infostand__relationships {
+  .volt-infostand__relationships {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-height: 55px;
   }
 
-  .octane-infostand__figure-row {
+  .volt-infostand__figure-row {
     position: relative;
     display: flex;
     gap: 5px;
@@ -202,7 +202,7 @@
     min-height: 132px;
   }
 
-  .octane-infostand__avatar-well {
+  .volt-infostand__avatar-well {
     position: relative;
     display: flex;
     flex: 0 0 67px;
@@ -219,7 +219,7 @@
   }
 
   /* avatar_image widget (16,21) 34x84 inside the 67x130 grey_bg. */
-  .octane-infostand__avatar {
+  .volt-infostand__avatar {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -228,7 +228,7 @@
     pointer-events: none;
   }
 
-  .octane-infostand__badges {
+  .volt-infostand__badges {
     position: relative;
     z-index: 1;
     display: grid;
@@ -239,7 +239,7 @@
     margin: 0 0 0 -1px;
   }
 
-  .octane-infostand__badge-slot {
+  .volt-infostand__badge-slot {
     box-sizing: border-box;
     transition: opacity 150ms ease, background-color 150ms ease;
 
@@ -254,7 +254,7 @@
     }
   }
 
-  .octane-infostand__badge-slot-plus {
+  .volt-infostand__badge-slot-plus {
     color: rgba(255, 255, 255, 0.75);
     font-family: Arial, sans-serif;
     font-size: 10px;
@@ -262,7 +262,7 @@
     line-height: 1;
   }
 
-  .octane-infostand__motto {
+  .volt-infostand__motto {
     box-sizing: border-box;
     position: relative;
     display: flex;
@@ -279,11 +279,11 @@
 
   /* rentable_bot_view: infostand_bot_info_bg circuit over grey_bg, badge widget at list (100,21),
      description_text 170x31, owner_text 126x13, all in the list's 3px spacing. */
-  .octane-infostand__avatar-well--bot {
+  .volt-infostand__avatar-well--bot {
     background: url('@/assets/images/infostand/bot-info-bg.png') no-repeat 1px 1px, url('@/assets/images/infostand/avatar-well.png') no-repeat center;
   }
 
-  .octane-infostand__rentable-badge {
+  .volt-infostand__rentable-badge {
     position: absolute;
     top: 20px;
     left: 99px;
@@ -294,7 +294,7 @@
     height: 42px;
   }
 
-  .octane-infostand__description {
+  .volt-infostand__description {
     box-sizing: border-box;
     width: 170px;
     height: 31px;
@@ -309,7 +309,7 @@
     overflow-wrap: anywhere;
   }
 
-  .octane-infostand__owner-line {
+  .volt-infostand__owner-line {
     position: relative;
     top: 1px;
     box-sizing: border-box;
@@ -325,14 +325,14 @@
   }
 
   /* user_view motto_container: grey_bg border style, Volter regular line at x=20+3, y=2. */
-  .octane-infostand__motto--box {
+  .volt-infostand__motto--box {
     isolation: isolate;
     min-height: 26px;
     padding: 3px 6px 1px 23px;
     margin: 0;
   }
 
-  .octane-infostand__motto--box::before {
+  .volt-infostand__motto--box::before {
     position: absolute;
     inset: 0;
     z-index: -1;
@@ -343,7 +343,7 @@
     pointer-events: none;
   }
 
-  .octane-infostand__motto--box .octane-infostand__motto-text {
+  .volt-infostand__motto--box .volt-infostand__motto-text {
     padding-top: 0;
     font-family: Volter, monospace;
     font-size: 9px;
@@ -353,12 +353,12 @@
   }
 
   /* bot_view motto_text x=5 w=160 (no pen). */
-  .octane-infostand__motto--plain {
+  .volt-infostand__motto--plain {
     padding: 3px 5px 1px 8px;
   }
 
   /* handitem_txt: 170 wide, height = textHeight + 5. */
-  .octane-infostand__carry {
+  .volt-infostand__carry {
     box-sizing: content-box;
     width: 170px;
     padding-bottom: 5px;
@@ -368,7 +368,7 @@
     overflow-wrap: anywhere;
   }
 
-  .octane-infostand__motto-text {
+  .volt-infostand__motto-text {
     box-sizing: border-box;
     max-height: 50px;
     padding-top: 6px;
@@ -382,17 +382,17 @@
     }
   }
 
-  .octane-infostand__pen {
+  .volt-infostand__pen {
     position: absolute;
     top: 4px;
     left: 3px;
     width: 17px;
     height: 18px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
   }
 
   /* Achievement score: one Volter line, label and value. */
-  .octane-infostand__score {
+  .volt-infostand__score {
     display: block;
     box-sizing: border-box;
     min-width: 170px;
@@ -406,11 +406,11 @@
     -webkit-font-smoothing: none;
   }
 
-  .octane-infostand__score + .octane-infostand__score {
+  .volt-infostand__score + .volt-infostand__score {
     margin-top: 3px;
   }
 
-  .octane-infostand__score-link {
+  .volt-infostand__score-link {
     padding: 0 0 0 3px;
     border: 0;
     background: transparent;
@@ -423,7 +423,7 @@
   }
 
   /* Characters left in the motto while it is edited, in the score's Volter. */
-  .octane-infostand__motto-count {
+  .volt-infostand__motto-count {
     flex: 0 0 auto;
     align-self: center;
     margin-left: 4px;
@@ -542,7 +542,7 @@
   }
 }
 
-.octane-rarity-level {
+.volt-rarity-level {
     width: 36px;
     height: 28px;
     background: url('@/assets/images/infostand/rarity-level.png');
@@ -557,7 +557,7 @@
 
 /* furni_view: border style 2, #3d3d3d, 6px caps. Close style 1 uses
    one fixed 15px bitmap at (0,0) inside its 18x16 control for every state. */
-.octane-furni-infostand {
+.volt-furni-infostand {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
@@ -566,10 +566,10 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-furni-infostand::before {
+.volt-furni-infostand::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -584,7 +584,7 @@
 
 /* furni_view infostand_element_list: x=10 y=10 w=170, itemlist spacing 5, 1px #333333 spacers;
    controller: border.height = list.height + 20, name_text.height = textHeight + 5. */
-.octane-furni-infostand__list {
+.volt-furni-infostand__list {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -598,7 +598,7 @@
     -webkit-font-smoothing: none;
 }
 
-.octane-furni-infostand__name {
+.volt-furni-infostand__name {
     box-sizing: content-box;
     width: 159px;
     padding: 2px 0 2px 3px;
@@ -611,14 +611,14 @@
     overflow-wrap: anywhere;
 }
 
-.octane-furni-infostand__rule {
+.volt-furni-infostand__rule {
     flex: 0 0 1px;
     height: 1px;
     background: #333333;
 }
 
 /* image_container 170 x (image + 5px top/bottom), image box x=5 w=140 centred, plaque widgets at x=128 y=6. */
-.octane-furni-infostand__image {
+.volt-furni-infostand__image {
     position: relative;
     box-sizing: border-box;
     display: flex;
@@ -633,39 +633,39 @@
 }
 
 /* crackable_furni_view: the image box is 140 wide at x=0 and the container hugs the bitmap. */
-.octane-furni-infostand--crackable .octane-furni-infostand__image {
+.volt-furni-infostand--crackable .volt-furni-infostand__image {
     min-height: 0;
     padding: 0 30px 0 0;
 }
 
 /* hits_remaining: x=0 y=182 h=14 text field. */
-.octane-furni-infostand--crackable .octane-furni-infostand__text {
+.volt-furni-infostand--crackable .volt-furni-infostand__text {
     box-sizing: border-box;
     height: 14px;
     padding: 1px 0 1px 3px;
 }
 
 /* Flash centres the item bitmap with a floored offset; a half pixel would otherwise round up. */
-.octane-furni-infostand__image > :last-child {
+.volt-furni-infostand__image > :last-child {
     position: relative;
     top: -0.5px;
 }
 
 /* owner_region 170x17: owner_link icon x=0 y=2 (20x15), owner_name x=20 y=0 h=15. */
-.octane-furni-infostand__owner {
+.volt-furni-infostand__owner {
     position: relative;
     flex: 0 0 17px;
     width: 170px;
     height: 17px;
 }
 
-.octane-furni-infostand__owner-icon {
+.volt-furni-infostand__owner-icon {
     position: absolute;
     top: 2px;
     left: 0;
 }
 
-.octane-furni-infostand__owner-name {
+.volt-furni-infostand__owner-name {
     position: absolute;
     top: 1px;
     left: 23px;
@@ -676,7 +676,7 @@
 }
 
 /* group_details_container 170x40: group_badge_image 40x40 at 0,0; group_name x=45 y=10. */
-.octane-furni-infostand__group {
+.volt-furni-infostand__group {
     position: relative;
     flex: 0 0 40px;
     width: 170px;
@@ -684,7 +684,7 @@
     cursor: pointer;
 }
 
-.octane-furni-infostand__group-badge {
+.volt-furni-infostand__group-badge {
     position: absolute;
     top: 0;
     left: 0;
@@ -695,7 +695,7 @@
     justify-content: center;
 }
 
-.octane-furni-infostand__group-name {
+.volt-furni-infostand__group-name {
     position: absolute;
     top: 10px;
     left: 45px;
@@ -705,7 +705,7 @@
 }
 
 /* purchase_buttons 170x23; catalog_button container_button 72x23 (black skin): icon x=2 y=3 (20x18), text x=22 y=4. */
-.octane-furni-infostand__purchase {
+.volt-furni-infostand__purchase {
     display: flex;
     flex: 0 0 23px;
     gap: 5px;
@@ -713,7 +713,7 @@
     height: 23px;
 }
 
-.octane-furni-infostand__shop {
+.volt-furni-infostand__shop {
     position: relative;
     box-sizing: border-box;
     flex: 0 0 72px;
@@ -729,18 +729,18 @@
     color: #000000;
     text-shadow: none;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-furni-infostand__shop:hover {
+.volt-furni-infostand__shop:hover {
     border-image-source: var(--habbo-skin-button-hover);
 }
 
-.octane-furni-infostand__shop:active {
+.volt-furni-infostand__shop:active {
     border-image-source: var(--habbo-skin-button-pressed);
 }
 
-.octane-furni-infostand__shop-icon {
+.volt-furni-infostand__shop-icon {
     position: absolute;
     top: -1px;
     left: -1px;
@@ -749,7 +749,7 @@
     background: url("../../assets/images/infostand/furni-shop.png") center / 14px 17px no-repeat;
 }
 
-.octane-furni-infostand__shop-text {
+.volt-furni-infostand__shop-text {
     position: absolute;
     top: 2px;
     left: 22px;
@@ -759,17 +759,17 @@
     white-space: nowrap;
 }
 
-.octane-furni-infostand__text {
+.volt-furni-infostand__text {
     color: #fefefe;
     overflow-wrap: anywhere;
 }
 
-.octane-furni-infostand__link {
+.volt-furni-infostand__link {
     cursor: pointer;
     text-decoration: underline;
 }
 
-.octane-furni-infostand__close {
+.volt-furni-infostand__close {
     position: absolute;
     top: 6px;
     right: 4px;
@@ -780,16 +780,16 @@
     border: 0;
     background: transparent url("../../assets/images/habbo-skin/slices/close-black.png") 0 0 / 15px 15px no-repeat;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-furni-infostand-stack,
-.octane-furni-infostand__actions {
+.volt-furni-infostand-stack,
+.volt-furni-infostand__actions {
     gap: 10px;
 }
 
-.octane-infostand-actions .habbo-btn-black,
-.octane-furni-infostand__actions .habbo-btn-black {
+.volt-infostand-actions .habbo-btn-black,
+.volt-furni-infostand__actions .habbo-btn-black {
     font-family: Volter, monospace !important;
     font-size: 9px !important;
     font-weight: 400 !important;
@@ -800,32 +800,32 @@
     padding: 5px 5px 3px 8px !important;
 }
 
-.octane-infostand-actions {
+.volt-infostand-actions {
     gap: 10px;
 }
 
 /* rentable_bot_view button_list: right-aligned CMD_BUTTON regions, 5px apart. */
-.octane-infostand-actions--tight {
+.volt-infostand-actions--tight {
     gap: 5px;
 }
 
-.octane-infostand-stack {
+.volt-infostand-stack {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
 }
 
-.octane-infostand-actions {
+.volt-infostand-actions {
     display: flex;
     justify-content: flex-end;
 }
 
-.octane-pet-infostand-stack {
+.volt-pet-infostand-stack {
   gap: 10px;
 }
 
-.octane-pet-actions {
+.volt-pet-actions {
   flex-flow: row-reverse wrap;
   justify-content: flex-start !important;
   width: 250px;
@@ -833,37 +833,37 @@
 }
 
 /* pet_view (default pets): fixed 190x316 box, every element positioned from the layout rects and the controller. */
-.octane-infostand.octane-pet-infostand {
+.volt-infostand.volt-pet-infostand {
   box-sizing: border-box;
   height: 316px;
   padding: 0;
   border: 0;
 }
 
-.octane-pet-infostand::before {
+.volt-pet-infostand::before {
   inset: 0;
 }
 
-.octane-pet-infostand .octane-infostand__close {
+.volt-pet-infostand .volt-infostand__close {
   top: 6px;
   right: auto;
   left: 170px;
 }
 
-.octane-pet-infostand__name,
-.octane-pet-infostand__breed,
-.octane-pet-infostand__label,
-.octane-pet-infostand__line,
-.octane-pet-infostand__level,
-.octane-pet-infostand__bar-value,
-.octane-pet-infostand__respect {
-  filter: var(--octane-native-text-halo);
+.volt-pet-infostand__name,
+.volt-pet-infostand__breed,
+.volt-pet-infostand__label,
+.volt-pet-infostand__line,
+.volt-pet-infostand__level,
+.volt-pet-infostand__bar-value,
+.volt-pet-infostand__respect {
+  filter: var(--volt-native-text-halo);
 }
 
-.octane-pet-infostand__name,
-.octane-pet-infostand__breed,
-.octane-pet-infostand__label,
-.octane-pet-infostand__line {
+.volt-pet-infostand__name,
+.volt-pet-infostand__breed,
+.volt-pet-infostand__label,
+.volt-pet-infostand__line {
   position: absolute;
   left: 10px;
   height: 12px;
@@ -871,16 +871,16 @@
   white-space: nowrap;
 }
 
-.octane-pet-infostand__name {
+.volt-pet-infostand__name {
   top: 11px;
   font-weight: bold;
 }
 
-.octane-pet-infostand__breed {
+.volt-pet-infostand__breed {
   top: 24px;
 }
 
-.octane-pet-infostand__level {
+.volt-pet-infostand__level {
   position: absolute;
   top: 47px;
   left: 99px;
@@ -888,7 +888,7 @@
   white-space: nowrap;
 }
 
-.octane-pet-infostand__image {
+.volt-pet-infostand__image {
   position: absolute;
   top: 37px;
   left: 10px;
@@ -899,16 +899,16 @@
   height: 83px;
 }
 
-.octane-pet-infostand__status-icon {
+.volt-pet-infostand__status-icon {
   position: absolute;
   z-index: 1;
   left: 10px;
   width: 18px;
   height: 18px;
-  image-rendering: var(--octane-pixel-art, pixelated);
+  image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-pet-infostand__bar {
+.volt-pet-infostand__bar {
   position: absolute;
   left: 16px;
   width: 162px;
@@ -918,23 +918,23 @@
   background: #3a3a3a;
 }
 
-.octane-pet-infostand__bar-fill,
-.octane-pet-infostand__bar-highlight {
+.volt-pet-infostand__bar-fill,
+.volt-pet-infostand__bar-highlight {
   position: absolute;
   left: 0;
 }
 
-.octane-pet-infostand__bar-fill {
+.volt-pet-infostand__bar-fill {
   top: 4px;
   height: 10px;
 }
 
-.octane-pet-infostand__bar-highlight {
+.volt-pet-infostand__bar-highlight {
   top: 0;
   height: 4px;
 }
 
-.octane-pet-infostand__bar-value {
+.volt-pet-infostand__bar-value {
   position: absolute;
   top: 1px;
   left: -2px;
@@ -943,7 +943,7 @@
   white-space: nowrap;
 }
 
-.octane-pet-infostand__respect {
+.volt-pet-infostand__respect {
   position: absolute;
   top: 265px;
   left: 14px;
@@ -952,7 +952,7 @@
   white-space: nowrap;
 }
 
-.octane-pet-infostand__respect img {
+.volt-pet-infostand__respect img {
   position: relative;
   top: -3px;
   display: inline-block;
@@ -960,19 +960,19 @@
   height: 21px;
   margin-left: 3px;
   vertical-align: top;
-  image-rendering: var(--octane-pixel-art, pixelated);
+  image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* Monsterplant variant of pet_view: 190x307, no breed line. */
-.octane-infostand.octane-pet-infostand--plant {
+.volt-infostand.volt-pet-infostand--plant {
   height: 307px;
 }
 
-.octane-pet-infostand--plant .octane-pet-infostand__image {
+.volt-pet-infostand--plant .volt-pet-infostand__image {
   top: 27px;
 }
 
-.octane-pet-infostand__clock {
+.volt-pet-infostand__clock {
   position: absolute;
   top: 163px;
   width: 27px;
@@ -980,7 +980,7 @@
   background-repeat: no-repeat;
 }
 
-.octane-pet-infostand__clock span {
+.volt-pet-infostand__clock span {
   position: absolute;
   inset: 0;
   font-family: Ubuntu, sans-serif;
@@ -989,10 +989,10 @@
   line-height: 23px;
   color: #fff;
   text-align: center;
-  filter: var(--octane-native-text-halo);
+  filter: var(--volt-native-text-halo);
 }
 
-.octane-pet-infostand__clock em {
+.volt-pet-infostand__clock em {
   position: absolute;
   top: 27px;
   left: 0;
@@ -1002,10 +1002,10 @@
   line-height: 12px;
   color: #121212;
   text-align: center;
-  filter: var(--octane-native-text-halo);
+  filter: var(--volt-native-text-halo);
 }
 
-.octane-pet-infostand__clock i {
+.volt-pet-infostand__clock i {
   position: absolute;
   top: 5px;
   left: 29px;
@@ -1017,10 +1017,10 @@
   line-height: 13px;
   color: #121212;
   text-align: center;
-  filter: var(--octane-native-text-halo);
+  filter: var(--volt-native-text-halo);
 }
 
-.octane-pet-infostand__rarity {
+.volt-pet-infostand__rarity {
   position: absolute;
   top: 219px;
   left: 77px;
@@ -1029,7 +1029,7 @@
   background: url('@/assets/images/infostand/rarity-level.png') no-repeat;
 }
 
-.octane-pet-infostand__rarity div {
+.volt-pet-infostand__rarity div {
   font-family: Ubuntu, sans-serif;
   font-size: 13px;
   font-weight: bold;
@@ -1039,15 +1039,15 @@
 }
 
 /* Native Flash text halo on the dark infostand panels. */
-.octane-infostand__identity,
-.octane-infostand__score,
-.octane-infostand__motto-text,
-.octane-infostand__carry,
-.octane-infostand__description,
-.octane-infostand__owner-line,
-.octane-furni-infostand__name,
-.octane-furni-infostand__owner-name,
-.octane-furni-infostand__group-name,
-.octane-furni-infostand__text {
-    filter: var(--octane-native-text-halo);
+.volt-infostand__identity,
+.volt-infostand__score,
+.volt-infostand__motto-text,
+.volt-infostand__carry,
+.volt-infostand__description,
+.volt-infostand__owner-line,
+.volt-furni-infostand__name,
+.volt-furni-infostand__owner-name,
+.volt-furni-infostand__group-name,
+.volt-furni-infostand__text {
+    filter: var(--volt-native-text-halo);
 }

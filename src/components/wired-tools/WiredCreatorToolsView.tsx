@@ -30,7 +30,7 @@ import {
     WiredMonitorDataEvent,
     WiredMonitorRequestComposer,
     WiredUserInspectMoveComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, KeyboardEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     AddAnimationTickerCallback,
@@ -58,11 +58,11 @@ import {
     LayoutAvatarImageView,
     LayoutPetImageView,
     LayoutRoomObjectImageView,
-    OctaneCardContentView,
-    OctaneCardHeaderView,
-    OctaneCardTabsItemView,
-    OctaneCardTabsView,
-    OctaneCardView,
+    VoltCardContentView,
+    VoltCardHeaderView,
+    VoltCardTabsItemView,
+    VoltCardTabsView,
+    VoltCardView,
     Text
 } from '../../common';
 import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedEvent, useRoom, useWiredTools } from '../../hooks';
@@ -1142,7 +1142,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}` },
             { label: MONITOR_STAT_CAPTIONS[5], value: '' },
             { label: MONITOR_STAT_CAPTIONS[6], value: '' },
-            // Octane's executor metrics, not part of the official list: kept after the official rows.
+            // Volt's executor metrics, not part of the official list: kept after the official rows.
             { label: 'Delayed events', value: `${monitorSnapshot.delayedEventsPending}/${Math.max(0, monitorSnapshot.delayedEventsLimit)}` },
             { label: 'Average execution', value: `${monitorSnapshot.averageExecutionMs}ms` },
             { label: 'Peak execution', value: `${monitorSnapshot.peakExecutionMs}ms` },
@@ -3212,7 +3212,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 )}
             </WiredMenuFrame>
             {isMonitorHistoryOpen && (
-                <OctaneCardView
+                <VoltCardView
                     className="min-w-[760px] max-w-[760px] max-h-[520px]"
                     theme="primary-slim"
                     uniqueKey="wired-monitor-history"
@@ -3220,8 +3220,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     offsetLeft={40}
                     offsetTop={40}
                 >
-                    <OctaneCardHeaderView headerText="Wired Monitor Logs" onCloseClick={() => setIsMonitorHistoryOpen(false)} />
-                    <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
+                    <VoltCardHeaderView headerText="Wired Monitor Logs" onCloseClick={() => setIsMonitorHistoryOpen(false)} />
+                    <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
                         <div className="flex flex-wrap items-center gap-2 text-[12px]">
                             <span className="text-[#555]">Severity:</span>
                             {['ALL', 'WARNING', 'ERROR'].map((severity) => (
@@ -3282,11 +3282,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </OctaneCardContentView>
-                </OctaneCardView>
+                    </VoltCardContentView>
+                </VoltCardView>
             )}
             {isMonitorInfoOpen && (
-                <OctaneCardView
+                <VoltCardView
                     className="min-w-[560px] max-w-[560px] max-h-[520px]"
                     theme="primary-slim"
                     uniqueKey="wired-monitor-info"
@@ -3294,8 +3294,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     offsetLeft={610}
                     offsetTop={80}
                 >
-                    <OctaneCardHeaderView headerText="Wired Monitor Information" onCloseClick={() => setIsMonitorInfoOpen(false)} />
-                    <OctaneCardContentView className="text-black bg-[#f4efe3] p-4 flex flex-col gap-4 overflow-y-auto">
+                    <VoltCardHeaderView headerText="Wired Monitor Information" onCloseClick={() => setIsMonitorInfoOpen(false)} />
+                    <VoltCardContentView className="text-black bg-[#f4efe3] p-4 flex flex-col gap-4 overflow-y-auto">
                         {monitorInfoSections.map((section) => (
                             <div key={section.title} className="flex flex-col gap-1">
                                 <Text bold>{section.title}</Text>
@@ -3304,8 +3304,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                                 ))}
                             </div>
                         ))}
-                    </OctaneCardContentView>
-                </OctaneCardView>
+                    </VoltCardContentView>
+                </VoltCardView>
             )}
             {isVariableManageOpen && !!selectedVariableDefinition?.itemId && variablesType !== 'context' && (
                 <WiredVariableOwnersView
@@ -3399,7 +3399,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             )}
             {!!selectedMonitorErrorInfo && (
                 // Official error_info_view: 337 wide, frame 3, contents at (8, 3) and height = contents + 48.
-                <OctaneCardView
+                <VoltCardView
                     className="w-[337px]"
                     frameStyle={3}
                     isResizable={false}
@@ -3409,7 +3409,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                     offsetLeft={660}
                     offsetTop={120}
                 >
-                    <OctaneCardHeaderView
+                    <VoltCardHeaderView
                         headerText={localizeWithFallback('wiredmenu.error_info.title', 'Wired Error Information')}
                         onCloseClick={() => setSelectedMonitorError(null)}
                     />
@@ -3428,7 +3428,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                             </Text>
                         </div>
                     </div>
-                </OctaneCardView>
+                </VoltCardView>
             )}
         </>
     );

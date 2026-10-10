@@ -8,7 +8,7 @@ interface NavigatorFilterChipsViewProps {
 }
 
 export const NavigatorFilterChipsView: FC<NavigatorFilterChipsViewProps> = ({ value, onChange }) => (
-    <div className="octane-navigator-air__filter">
+    <div className="volt-navigator-air__filter">
         <HabboDropMenuView
             label={LocalizeText('navigator.filter.anything')}
             value={value}

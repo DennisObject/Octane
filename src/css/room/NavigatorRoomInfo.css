@@ -1,14 +1,14 @@
-.octane-room-info.octane-card-frame-3 {
+.volt-room-info.volt-card-frame-3 {
     width: 236px;
     min-width: 236px;
     max-width: 236px;
     max-height: none !important;
 }
 
-.octane-room-info.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell { width: calc(100% - 14px) !important; }
+.volt-room-info.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell { width: calc(100% - 14px) !important; }
 
 /* Native content extent +45: frame padding 36/3, content footer 6. */
-.octane-room-info.octane-card-frame-3 > .octane-room-info__content {
+.volt-room-info.volt-card-frame-3 > .volt-room-info__content {
     display: flex;
     flex-direction: column;
     gap: 3px;
@@ -20,14 +20,14 @@
     background: transparent !important;
 }
 
-.octane-room-info .octane-room-info__content,
-.octane-room-info .octane-room-info__content :where(div, p, span, label, button, input) {
+.volt-room-info .volt-room-info__content,
+.volt-room-info .volt-room-info__content :where(div, p, span, label, button, input) {
     color: #000 !important;
     font: 400 12px/14px HabboAirUbuntu, Ubuntu, sans-serif !important;
     font-kerning: normal;
 }
 
-.octane-room-info .octane-room-info__content button {
+.volt-room-info .volt-room-info__content button {
     position: relative;
     flex: none;
     margin: 0;
@@ -41,13 +41,13 @@
     image-rendering: pixelated;
 }
 
-.octane-room-info .octane-room-info__content .is-bold { font-weight: 700 !important; }
-.octane-room-info .octane-room-info__content .is-caption { color: #777 !important; }
-.octane-room-info .octane-room-info__content svg { image-rendering: pixelated; pointer-events: none; }
-.octane-room-info .octane-room-info__content button:focus-visible,
-.octane-room-info .octane-room-info__content input:focus-visible { outline: 1px solid #fff27a; outline-offset: 1px; }
+.volt-room-info .volt-room-info__content .is-bold { font-weight: 700 !important; }
+.volt-room-info .volt-room-info__content .is-caption { color: #777 !important; }
+.volt-room-info .volt-room-info__content svg { image-rendering: pixelated; pointer-events: none; }
+.volt-room-info .volt-room-info__content button:focus-visible,
+.volt-room-info .volt-room-info__content input:focus-visible { outline: 1px solid #fff27a; outline-offset: 1px; }
 
-.octane-room-info__details {
+.volt-room-info__details {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -55,7 +55,7 @@
     padding-top: 3px;
 }
 
-.octane-room-info__name {
+.volt-room-info__name {
     box-sizing: border-box;
     width: 153px;
     margin-left: 5px;
@@ -64,20 +64,20 @@
     white-space: pre-wrap;
 }
 
-.octane-room-info__quick-actions {
+.volt-room-info__quick-actions {
     position: absolute;
     inset: 1px 0 auto;
     height: 22px;
 }
 
-.octane-room-info .octane-room-info__quick-actions > :is(.is-home, .is-rights, .is-favourite) { position: absolute; top: 0; }
-.octane-room-info__quick-actions .is-rights { left: 163px; width: 18px; height: 22px; }
-.octane-room-info__quick-actions .is-home { left: 185px; width: 18px; height: 16px; }
-.octane-room-info__quick-actions svg { position: absolute; top: 0; left: 0; }
-.octane-room-info__quick-actions .is-favourite { left: 206px; width: 18px; height: 16px; }
+.volt-room-info .volt-room-info__quick-actions > :is(.is-home, .is-rights, .is-favourite) { position: absolute; top: 0; }
+.volt-room-info__quick-actions .is-rights { left: 163px; width: 18px; height: 22px; }
+.volt-room-info__quick-actions .is-home { left: 185px; width: 18px; height: 16px; }
+.volt-room-info__quick-actions svg { position: absolute; top: 0; left: 0; }
+.volt-room-info__quick-actions .is-favourite { left: 206px; width: 18px; height: 16px; }
 
-.octane-room-info .octane-room-info__owner,
-.octane-room-info__rating {
+.volt-room-info .volt-room-info__owner,
+.volt-room-info__rating {
     display: flex;
     width: 220px;
     height: 16px;
@@ -86,33 +86,33 @@
     gap: 3px;
 }
 
-.octane-room-info .octane-room-info__owner { width: 230px; margin-left: 0 !important; padding-left: 5px !important; }
+.volt-room-info .volt-room-info__owner { width: 230px; margin-left: 0 !important; padding-left: 5px !important; }
 
-.octane-room-info__owner > span,
-.octane-room-info__rating > span { display: block; flex: none; padding: 2px; white-space: nowrap; }
-.octane-room-info__owner > span { padding-right: 0; }
-.octane-room-info__eye { position: relative; width: 15px; height: 15px; padding: 4px 0 0 !important; }
-.octane-room-info__eye .is-hovering { display: none; }
-.octane-room-info__owner:hover .octane-room-info__eye .is-default { display: none; }
-.octane-room-info__owner:hover .octane-room-info__eye .is-hovering { display: block; }
-.octane-room-info__rating > .octane-room-info__rating-icon { width: 18px; height: 16px; padding: 0; margin-left: 2px; }
-.octane-room-info__padding { height: 10px; }
+.volt-room-info__owner > span,
+.volt-room-info__rating > span { display: block; flex: none; padding: 2px; white-space: nowrap; }
+.volt-room-info__owner > span { padding-right: 0; }
+.volt-room-info__eye { position: relative; width: 15px; height: 15px; padding: 4px 0 0 !important; }
+.volt-room-info__eye .is-hovering { display: none; }
+.volt-room-info__owner:hover .volt-room-info__eye .is-default { display: none; }
+.volt-room-info__owner:hover .volt-room-info__eye .is-hovering { display: block; }
+.volt-room-info__rating > .volt-room-info__rating-icon { width: 18px; height: 16px; padding: 0; margin-left: 2px; }
+.volt-room-info__padding { height: 10px; }
 
-.octane-room-info__tags { display: flex; width: 225px; margin-left: 5px; flex-wrap: wrap; }
-.octane-room-info .octane-room-info__tag { height: 14px; padding: 0 5px 0 3px !important; }
-.octane-room-info .octane-room-info__tag > span:last-child { position: relative; display: block; padding-top: 2px; color: #0e3139 !important; font: 400 10px/12px HabboAirUbuntu, Ubuntu, sans-serif !important; }
-.octane-room-info__tag-skin { position: absolute; inset: 0; pointer-events: none; }
-.octane-room-info__tag-skin svg { position: absolute; top: 0; height: 14px; }
-.octane-room-info__tag-skin .is-left { left: 0; width: 4px; }
-.octane-room-info__tag-skin .is-middle { left: 4px; width: calc(100% - 9px); }
-.octane-room-info__tag-skin .is-right { right: 0; width: 5px; }
-.octane-room-info__tag-skin.is-hovering { display: none; }
-.octane-room-info__tag:hover .octane-room-info__tag-skin.is-default { display: none; }
-.octane-room-info__tag:hover .octane-room-info__tag-skin.is-hovering { display: block; }
+.volt-room-info__tags { display: flex; width: 225px; margin-left: 5px; flex-wrap: wrap; }
+.volt-room-info .volt-room-info__tag { height: 14px; padding: 0 5px 0 3px !important; }
+.volt-room-info .volt-room-info__tag > span:last-child { position: relative; display: block; padding-top: 2px; color: #0e3139 !important; font: 400 10px/12px HabboAirUbuntu, Ubuntu, sans-serif !important; }
+.volt-room-info__tag-skin { position: absolute; inset: 0; pointer-events: none; }
+.volt-room-info__tag-skin svg { position: absolute; top: 0; height: 14px; }
+.volt-room-info__tag-skin .is-left { left: 0; width: 4px; }
+.volt-room-info__tag-skin .is-middle { left: 4px; width: calc(100% - 9px); }
+.volt-room-info__tag-skin .is-right { right: 0; width: 5px; }
+.volt-room-info__tag-skin.is-hovering { display: none; }
+.volt-room-info__tag:hover .volt-room-info__tag-skin.is-default { display: none; }
+.volt-room-info__tag:hover .volt-room-info__tag-skin.is-hovering { display: block; }
 
-.octane-room-info__description { box-sizing: border-box; width: 220px; margin-left: 5px; padding: 2px 2px 2px; overflow-wrap: break-word; white-space: pre-wrap; }
-.octane-room-info__thumbnail-container { position: relative; width: 227px; height: 114px; margin-left: 1px; }
-.octane-room-info__thumbnail {
+.volt-room-info__description { box-sizing: border-box; width: 220px; margin-left: 5px; padding: 2px 2px 2px; overflow-wrap: break-word; white-space: pre-wrap; }
+.volt-room-info__thumbnail-container { position: relative; width: 227px; height: 114px; margin-left: 1px; }
+.volt-room-info__thumbnail {
     position: absolute !important;
     top: 1px;
     left: 57px;
@@ -125,21 +125,21 @@
     background: #000 url("@/assets/images/navigator/air/default-room.png") center no-repeat !important;
 }
 
-.octane-room-info .octane-room-info__camera { position: absolute; top: 89px; left: 144px; width: 24px; height: 26px; }
-.octane-room-info__camera span { position: absolute; inset: 0 auto auto 0; width: 26px; height: 26px; background: url("@/assets/images/navigator/air/roomtools-camera.png") center no-repeat; image-rendering: pixelated; }
-.octane-room-info .octane-room-info__group { display: block; width: 230px; height: 49px; margin-left: 11px !important; }
-.octane-room-info__group-badge { position: absolute !important; top: 5px; left: 0; width: 39px !important; height: 39px !important; }
-.octane-room-info__group > span { position: absolute; top: 1px; left: 45px; box-sizing: border-box; width: 170px; height: 46px; padding: 2px; overflow: hidden; text-decoration: underline; }
+.volt-room-info .volt-room-info__camera { position: absolute; top: 89px; left: 144px; width: 24px; height: 26px; }
+.volt-room-info__camera span { position: absolute; inset: 0 auto auto 0; width: 26px; height: 26px; background: url("@/assets/images/navigator/air/roomtools-camera.png") center no-repeat; image-rendering: pixelated; }
+.volt-room-info .volt-room-info__group { display: block; width: 230px; height: 49px; margin-left: 11px !important; }
+.volt-room-info__group-badge { position: absolute !important; top: 5px; left: 0; width: 39px !important; height: 39px !important; }
+.volt-room-info__group > span { position: absolute; top: 1px; left: 45px; box-sizing: border-box; width: 170px; height: 46px; padding: 2px; overflow: hidden; text-decoration: underline; }
 
-.octane-room-info__embed { box-sizing: border-box; width: 230px; padding-bottom: 5px; }
-.octane-room-info .octane-room-info__embed-toggle { display: block; width: 230px; height: 20px; }
-.octane-room-info__embed-toggle img { position: absolute; top: 5px; left: 11px; image-rendering: pixelated; }
-.octane-room-info__embed-toggle span { position: absolute; top: 3px; left: 29px; padding: 2px; text-decoration: underline; }
-.octane-room-info .octane-room-info__embed-info { box-sizing: border-box; width: 216px; margin-left: 9px; padding: 2px 2px 3px; font: 400 10px/11px HabboAirUbuntu, Ubuntu, sans-serif !important; }
-.octane-room-info__embed-source { display: block; box-sizing: border-box; width: 208px; height: 15px; margin: 2px 0 0 11px; padding: 0 2px; border: 1px solid #000; border-radius: 0; background: #fff; }
+.volt-room-info__embed { box-sizing: border-box; width: 230px; padding-bottom: 5px; }
+.volt-room-info .volt-room-info__embed-toggle { display: block; width: 230px; height: 20px; }
+.volt-room-info__embed-toggle img { position: absolute; top: 5px; left: 11px; image-rendering: pixelated; }
+.volt-room-info__embed-toggle span { position: absolute; top: 3px; left: 29px; padding: 2px; text-decoration: underline; }
+.volt-room-info .volt-room-info__embed-info { box-sizing: border-box; width: 216px; margin-left: 9px; padding: 2px 2px 3px; font: 400 10px/11px HabboAirUbuntu, Ubuntu, sans-serif !important; }
+.volt-room-info__embed-source { display: block; box-sizing: border-box; width: 208px; height: 15px; margin: 2px 0 0 11px; padding: 0 2px; border: 1px solid #000; border-radius: 0; background: #fff; }
 
-.octane-room-info__actions { display: flex; width: 220px; margin-left: 5px; flex-direction: column; gap: 3px; }
-.octane-room-info .octane-room-info__action {
+.volt-room-info__actions { display: flex; width: 220px; margin-left: 5px; flex-direction: column; gap: 3px; }
+.volt-room-info .volt-room-info__action {
     box-sizing: border-box;
     width: 220px;
     height: 29px;
@@ -153,16 +153,16 @@
     text-align: center !important;
     text-shadow: none !important;
 }
-.octane-room-info .octane-room-info__action:hover { border-image-source: url("@/assets/images/habbo-skin/slices/button-shiny-hover.png") !important; }
-.octane-room-info .octane-room-info__action:active { border-image-source: url("@/assets/images/habbo-skin/slices/button-shiny-pressed.png") !important; }
-.octane-room-info .octane-room-info__report { position: relative; width: 218px; height: 55px; }
-.octane-room-info__report-skin { position: absolute; inset: 0; pointer-events: none; }
-.octane-room-info__report-skin.is-hovering,
-.octane-room-info__report-skin.is-pressed { display: none; }
-.octane-room-info__report:hover .octane-room-info__report-skin.is-default { display: none; }
-.octane-room-info__report:hover .octane-room-info__report-skin.is-hovering { display: block; }
-.octane-room-info__report:active .octane-room-info__report-skin.is-hovering { display: none; }
-.octane-room-info__report:active .octane-room-info__report-skin.is-pressed { display: block; }
-.octane-room-info__panic { position: absolute; top: 16px; left: 11px; display: flex; width: 39px; height: 25px; align-items: center; justify-content: center; }
-.octane-room-info__report-divider { position: absolute; top: 17px; left: 49px; }
-.octane-room-info .octane-room-info__report-caption { position: absolute; top: 18px; left: 56px; box-sizing: border-box; width: 151px; height: 24px; padding: 2px 20px 5px 2px; overflow: hidden; font: 700 14px/16px HabboAirUbuntu, Ubuntu, sans-serif !important; text-shadow: 0 1px rgba(255, 255, 255, 0.698); white-space: nowrap; }
+.volt-room-info .volt-room-info__action:hover { border-image-source: url("@/assets/images/habbo-skin/slices/button-shiny-hover.png") !important; }
+.volt-room-info .volt-room-info__action:active { border-image-source: url("@/assets/images/habbo-skin/slices/button-shiny-pressed.png") !important; }
+.volt-room-info .volt-room-info__report { position: relative; width: 218px; height: 55px; }
+.volt-room-info__report-skin { position: absolute; inset: 0; pointer-events: none; }
+.volt-room-info__report-skin.is-hovering,
+.volt-room-info__report-skin.is-pressed { display: none; }
+.volt-room-info__report:hover .volt-room-info__report-skin.is-default { display: none; }
+.volt-room-info__report:hover .volt-room-info__report-skin.is-hovering { display: block; }
+.volt-room-info__report:active .volt-room-info__report-skin.is-hovering { display: none; }
+.volt-room-info__report:active .volt-room-info__report-skin.is-pressed { display: block; }
+.volt-room-info__panic { position: absolute; top: 16px; left: 11px; display: flex; width: 39px; height: 25px; align-items: center; justify-content: center; }
+.volt-room-info__report-divider { position: absolute; top: 17px; left: 49px; }
+.volt-room-info .volt-room-info__report-caption { position: absolute; top: 18px; left: 56px; box-sizing: border-box; width: 151px; height: 24px; padding: 2px 20px 5px 2px; overflow: hidden; font: 700 14px/16px HabboAirUbuntu, Ubuntu, sans-serif !important; text-shadow: 0 1px rgba(255, 255, 255, 0.698); white-space: nowrap; }

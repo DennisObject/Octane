@@ -7,11 +7,11 @@ import {
     RequestAchievementsMessageComposer,
     RoomSessionEvent,
     WiredEnvironmentEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { AchievementCategory, AchievementUtilities, GetOptionalConfigurationValue, SendMessageComposer } from '../../api';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 
 const copyAchievement = (achievement: AchievementData): AchievementData => Object.assign(Object.create(AchievementData.prototype), achievement);
 
@@ -172,7 +172,7 @@ const useAchievementsState = () => {
 
     useMessageEvent<WiredEnvironmentEvent>(WiredEnvironmentEvent, (event) => setEnabledWiredAchievements(event.getParser().enabledAchievements));
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
         setEnabledWiredAchievements([]);
         close();
     });

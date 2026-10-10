@@ -13,10 +13,10 @@ import {
     WiredChestRoomLogsEvent,
     WiredChestTransactionDetailsComposer,
     WiredChestTransactionDetailsEvent,
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, Fragment, JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { localizeWithFallback, ProductImageUtility, SendMessageComposer } from '../../api';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useMessageEvent, useNotification, useRoom } from '../../hooks';
 import { WiredMenuButton, WiredMenuItem, WiredMenuPanel, WiredMenuTable, WiredMenuText } from './WiredMenuParts';
 
@@ -227,7 +227,7 @@ export const WiredChestsTabView: FC<{}> = () => {
     return (
         <>
             <WiredMenuItem h={17} w={84} x={14} y={18}>
-                <span className="octane-wired-menu__text octane-wired-menu__text--bold">Chest control:</span>
+                <span className="volt-wired-menu__text volt-wired-menu__text--bold">Chest control:</span>
             </WiredMenuItem>
             <WiredMenuPanel h={90} w={472} x={14} y={38}>
                 <WiredMenuButton disabled={!canManageOwn || lockBusy} h={30} w={221} x={10} y={10} onClick={() => sendLock(true, false)}>
@@ -246,15 +246,15 @@ export const WiredChestsTabView: FC<{}> = () => {
                 )}
             </WiredMenuPanel>
             <WiredMenuItem h={17} w={136} x={14} y={139}>
-                <span className="octane-wired-menu__text octane-wired-menu__text--bold">Room Transaction Logs:</span>
+                <span className="volt-wired-menu__text volt-wired-menu__text--bold">Room Transaction Logs:</span>
             </WiredMenuItem>
             <WiredMenuItem h={17} w={197} x={286} y={139}>
                 {onlyChestId ? (
-                    <button className="octane-wired-menu__link octane-wired-menu__text" type="button" onClick={() => setOnlyChestId(0)}>
+                    <button className="volt-wired-menu__link volt-wired-menu__text" type="button" onClick={() => setOnlyChestId(0)}>
                         {localizeWithFallback('wiredmenu.chests.room_logs.show_all_chests', 'All chests')}
                     </button>
                 ) : (
-                    <span className="octane-wired-menu__text octane-wired-menu__text--soft">PREVIEW - showing 10 most recent</span>
+                    <span className="volt-wired-menu__text volt-wired-menu__text--soft">PREVIEW - showing 10 most recent</span>
                 )}
             </WiredMenuItem>
             <WiredMenuTable
@@ -332,12 +332,12 @@ const WiredChestTransactionsWindow: FC<WiredChestTransactionsWindowProps> = (pro
     } = props;
 
     return (
-        <OctaneCardView className="min-w-[720px] max-w-[720px]" theme="primary-slim" uniqueKey="wired-chest-transactions">
-            <OctaneCardHeaderView
+        <VoltCardView className="min-w-[720px] max-w-[720px]" theme="primary-slim" uniqueKey="wired-chest-transactions">
+            <VoltCardHeaderView
                 headerText={localizeWithFallback('wiredchests.logs.room_title', 'Room transactions')}
                 onCloseClick={onClose}
             />
-            <OctaneCardContentView>
+            <VoltCardContentView>
                 <div className="flex flex-col gap-2">
                     <div className="max-h-[320px] overflow-y-auto border border-[#d1ccbf] rounded bg-white">
                         <table className="w-full text-[12px]">
@@ -427,7 +427,7 @@ const WiredChestTransactionsWindow: FC<WiredChestTransactionsWindowProps> = (pro
                         </Button>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

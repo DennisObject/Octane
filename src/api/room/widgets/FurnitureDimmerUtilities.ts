@@ -1,5 +1,5 @@
-import { GetRoomEngine } from '@octane/renderer';
-import { GetRoomSession } from '../../octane';
+import { GetRoomEngine } from '@volt/renderer';
+import { GetRoomSession } from '../../volt';
 
 export class FurnitureDimmerUtilities {
     public static AVAILABLE_COLORS: number[] = [7665141, 21495, 15161822, 15353138, 15923281, 8581961, 0];

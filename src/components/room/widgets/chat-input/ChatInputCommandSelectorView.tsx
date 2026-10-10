@@ -21,9 +21,9 @@ export const ChatInputCommandSelectorView: FC<ChatInputCommandSelectorViewProps>
     }, [selectedIndex]);
 
     return (
-        <div className="chat-input-command-popover octane-card-shell octane-card-frame-3">
-            <div className="octane-card-header-shell">
-                <span className="octane-card-title">: Command</span>
+        <div className="chat-input-command-popover volt-card-shell volt-card-frame-3">
+            <div className="volt-card-header-shell">
+                <span className="volt-card-title">: Command</span>
             </div>
             <div ref={listRef} className="chat-input-command-popover-list has-classic-scrollbar">
                 {commands.map((cmd, index) => {

@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchUiEvent, SendMessageComposer } from '../../../../../api';
@@ -31,7 +31,7 @@ const composerTypes = vi.hoisted(() => {
     return { PurchaseFromCatalogAsGiftComposer, PurchaseFromCatalogComposer };
 });
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     CreateLinkEvent: vi.fn(),
     GiftReceiverNotFoundEvent: class {},
     PurchaseFromCatalogAsGiftComposer: composerTypes.PurchaseFromCatalogAsGiftComposer,
@@ -56,19 +56,19 @@ vi.mock('../../../../../common', () => ({
     Grid: ({ children, ...props }: any) => <div {...props}>{children}</div>,
     LayoutCurrencyIcon: () => <span />,
     LayoutLoadingSpinnerView: () => <span />,
-    OctaneCardContentView: ({ children, classNames = [], overflow: _overflow, ...props }: any) => (
+    VoltCardContentView: ({ children, classNames = [], overflow: _overflow, ...props }: any) => (
         <div className={classNames.join(' ')} {...props}>
             {children}
         </div>
     ),
-    OctaneCardHeaderView: ({ headerText, onCloseClick }: any) => (
+    VoltCardHeaderView: ({ headerText, onCloseClick }: any) => (
         <header>
             <span>{headerText}</span>
             <button aria-label="close" type="button" onClick={onCloseClick} />
         </header>
     ),
-    OctaneCardView: ({ children, classNames = [], frameStyle, isResizable: _isResizable, theme: _theme, ...props }: any) => (
-        <div className={`${classNames.join(' ')} octane-card-frame-${frameStyle}`} {...props}>
+    VoltCardView: ({ children, classNames = [], frameStyle, isResizable: _isResizable, theme: _theme, ...props }: any) => (
+        <div className={`${classNames.join(' ')} volt-card-frame-${frameStyle}`} {...props}>
             {children}
         </div>
     ),
@@ -160,11 +160,11 @@ describe('club purchase layout', () => {
 
         expect(screen.queryByText('catalog.vip.item.header.months:1')).not.toBeInTheDocument();
         expect(screen.getByText('catalog.vip.item.header.months:2')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-vip-intro')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-vip-offers')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-columns')).not.toBeInTheDocument();
-        expect(document.querySelector('.is-vip-page .octane-club-vip-medium-mark')).toBeInTheDocument();
-        expect(document.querySelector('.is-vip-page .octane-club-compact-mark')).not.toBeInTheDocument();
+        expect(document.querySelector('.volt-club-vip-intro')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-vip-offers')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-columns')).not.toBeInTheDocument();
+        expect(document.querySelector('.is-vip-page .volt-club-vip-medium-mark')).toBeInTheDocument();
+        expect(document.querySelector('.is-vip-page .volt-club-compact-mark')).not.toBeInTheDocument();
     });
 
     it('renders the loyalty vip page as the VIP purchase page', () => {
@@ -173,22 +173,22 @@ describe('club purchase layout', () => {
 
         expect(screen.queryByText('catalog.vip.item.header.months:1')).not.toBeInTheDocument();
         expect(screen.getByText('catalog.vip.item.header.months:2')).toBeInTheDocument();
-        expect(document.querySelector('.is-vip-page .octane-club-vip-offers')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-columns')).not.toBeInTheDocument();
+        expect(document.querySelector('.is-vip-page .volt-club-vip-offers')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-columns')).not.toBeInTheDocument();
     });
 
     it('renders separate HC and VIP offer groups on the club page', () => {
         setCurrentPage('club_buy');
         renderLayout('club_buy');
 
-        expect(document.querySelector('.octane-club-columns')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-hc-column')).toBeInTheDocument();
-        expect(document.querySelector('.octane-club-vip-column')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-columns')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-hc-column')).toBeInTheDocument();
+        expect(document.querySelector('.volt-club-vip-column')).toBeInTheDocument();
         expect(screen.getByText('catalog.club.item.header:1')).toBeInTheDocument();
         expect(screen.getByText('catalog.club.item.header:2')).toBeInTheDocument();
         expect(screen.getAllByText('catalog.club.price:10')).toHaveLength(2);
-        expect(document.querySelector('.octane-club-offer.is-compact .octane-currency-icon')).not.toBeInTheDocument();
-        expect(document.querySelector('.octane-club-purchase-panel')).not.toBeInTheDocument();
+        expect(document.querySelector('.volt-club-offer.is-compact .volt-currency-icon')).not.toBeInTheDocument();
+        expect(document.querySelector('.volt-club-purchase-panel')).not.toBeInTheDocument();
     });
 
     it('renders safely while membership data is unavailable', () => {

@@ -186,10 +186,10 @@ export const WiredToolsSettingsTabView: FC<WiredToolsSettingsTabViewProps> = ({ 
                     Timezone:
                 </WiredMenuTitle>
                 <WiredMenuItem h={25} w={206} x={10} y={29}>
-                    <div className="octane-wired-menu__dropdown-wrap">
+                    <div className="volt-wired-menu__dropdown-wrap">
 <select
                         aria-label="Timezone"
-                        className="octane-wired-menu__dropdown"
+                        className="volt-wired-menu__dropdown"
                         disabled={!roomSettings.isLoaded || !canManageSettings}
                         value={selectedTimeZone}
                         onChange={(event) => saveRoomTimezone(event.target.value)}
@@ -234,9 +234,9 @@ export const WiredToolsSettingsTabView: FC<WiredToolsSettingsTabViewProps> = ({ 
                         {localizeWithFallback('wiredmenu.settings.preferences.wired_style', 'Wired style:')}
                     </WiredMenuTitle>
                     <WiredMenuItem h={25} w={206} x={10} y={29}>
-                        <div className="octane-wired-menu__dropdown-wrap">
+                        <div className="volt-wired-menu__dropdown-wrap">
 <select
-                            className="octane-wired-menu__dropdown"
+                            className="volt-wired-menu__dropdown"
                             value={normalizeWiredStyle(accountPreferences.wiredStyle)}
                             onChange={(event) => updateAccountPreferences({ wiredStyle: normalizeWiredStyle(event.target.value) })}
                         >

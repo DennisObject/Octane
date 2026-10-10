@@ -1,4 +1,4 @@
-import { GetEventDispatcher, OctaneEvent } from '@octane/renderer';
+import { GetEventDispatcher, VoltEvent } from '@volt/renderer';
 import { DispatchEvent } from './DispatchEvent';
 
-export const DispatchMainEvent = (event: OctaneEvent) => DispatchEvent(GetEventDispatcher(), event);
+export const DispatchMainEvent = (event: VoltEvent) => DispatchEvent(GetEventDispatcher(), event);

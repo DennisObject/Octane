@@ -1,4 +1,4 @@
-import { RoomChatSettings } from '@octane/renderer';
+import { RoomChatSettings } from '@volt/renderer';
 import { FC } from 'react';
 import { GetClubMemberLevel, IRoomData, LocalizeText, localizeWithFallback } from '../../../../api';
 import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';

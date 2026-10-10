@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, HabboWebTools, ILinkEventTracker, RemoveFriendComposer, RemoveLinkEventTracker, SendRoomInviteComposer } from '@octane/renderer';
+import { AddLinkEventTracker, HabboWebTools, ILinkEventTracker, RemoveFriendComposer, RemoveLinkEventTracker, SendRoomInviteComposer } from '@volt/renderer';
 import { CSSProperties, FC, PointerEvent, ReactNode, RefObject, useCallback, useEffect, useEffectEvent, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, GetOptionalConfigurationValue, LocalizeText, MessengerFriend, MessengerRequest, SendMessageComposer } from '../../../../api';
 import thumbDefault from '../../../../assets/images/habbo-skin/slices/scroll-thumb-v.png';
@@ -348,7 +348,7 @@ export const FriendsListView: FC<{}> = (props) => {
     return (
         <>
             <DraggableWindow
-                uniqueKey="octane-friends"
+                uniqueKey="volt-friends"
                 handleSelector=".hfl-titlebar"
                 windowPosition={DraggableWindowPosition.TOP_LEFT}
                 offsetLeft={60}

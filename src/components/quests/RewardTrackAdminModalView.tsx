@@ -9,13 +9,13 @@ export const RewardTrackAdminModalView: FC<{ title: ReactNode; width?: number; o
     };
 
     return createPortal(
-        <div className="octane-reward-track-admin-overlay" onClick={onClose} data-testid="rt-admin-modal">
-            <div className="octane-reward-track-admin-modal" style={{ width }} onClick={(event) => event.stopPropagation()}>
-                <div className="octane-reward-track-admin-modal-head">
-                    <span className="octane-reward-track-admin-modal-title">{title}</span>
-                    <div className="octane-card-close-button" onClick={onClose} onMouseDownCapture={onCloseMouseDown} />
+        <div className="volt-reward-track-admin-overlay" onClick={onClose} data-testid="rt-admin-modal">
+            <div className="volt-reward-track-admin-modal" style={{ width }} onClick={(event) => event.stopPropagation()}>
+                <div className="volt-reward-track-admin-modal-head">
+                    <span className="volt-reward-track-admin-modal-title">{title}</span>
+                    <div className="volt-card-close-button" onClick={onClose} onMouseDownCapture={onCloseMouseDown} />
                 </div>
-                <div className="octane-reward-track-admin-modal-body octane-reward-track-admin">{children}</div>
+                <div className="volt-reward-track-admin-modal-body volt-reward-track-admin">{children}</div>
             </div>
         </div>,
         document.body

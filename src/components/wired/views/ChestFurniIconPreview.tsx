@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { FC, useMemo } from 'react';
 import { localizeWithFallback, ProductTypeEnum } from '../../../api';
 import { LayoutFurniImageView, Text } from '../../../common';

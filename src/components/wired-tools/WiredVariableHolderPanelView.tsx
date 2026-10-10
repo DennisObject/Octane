@@ -1,5 +1,5 @@
 import { KeyboardEvent, ReactNode } from 'react';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 
 export interface WiredHolderPanelEntry {
     id: string;
@@ -95,7 +95,7 @@ export const WiredVariableHolderPanelView = (props: WiredVariableHolderPanelView
     const selectedGiveOption = giveOptions.find((option) => option.id === giveSelectedId) ?? null;
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[430px] max-w-[430px] max-h-[620px]"
             theme="primary-slim"
             uniqueKey={uniqueKey}
@@ -103,8 +103,8 @@ export const WiredVariableHolderPanelView = (props: WiredVariableHolderPanelView
             offsetLeft={offsetLeft}
             offsetTop={offsetTop}
         >
-            <OctaneCardHeaderView headerText={title} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 relative" overflow="hidden">
+            <VoltCardHeaderView headerText={title} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 relative" overflow="hidden">
                 <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
                     <div className="grow text-center">
                         <Text>{warningText}</Text>
@@ -237,7 +237,7 @@ export const WiredVariableHolderPanelView = (props: WiredVariableHolderPanelView
                         Give variable
                     </Button>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

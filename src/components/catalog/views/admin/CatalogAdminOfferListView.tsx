@@ -50,15 +50,15 @@ export const CatalogAdminOfferListView: FC<CatalogAdminOfferListViewProps> = ({ 
     };
 
     return (
-        <StaffSection className="octane-catalog-admin-offers" title={LocalizeText('catalog.admin.offers.count', ['count'], [String(offers.length)])}>
-            <div className="octane-staff-list octane-catalog-admin-offer-list" role="listbox" aria-label={LocalizeText('catalog.admin.offers')}>
+        <StaffSection className="volt-catalog-admin-offers" title={LocalizeText('catalog.admin.offers.count', ['count'], [String(offers.length)])}>
+            <div className="volt-staff-list volt-catalog-admin-offer-list" role="listbox" aria-label={LocalizeText('catalog.admin.offers')}>
                 {!page && <StaffEmpty>{LocalizeText('catalog.admin.offers.loading')}</StaffEmpty>}
                 {page && !offers.length && <StaffEmpty>{LocalizeText('catalog.admin.offers.empty')}</StaffEmpty>}
                 {offers.map((offer, index) => (
                     <div
                         key={offer.offerId}
                         aria-selected={offer === selected}
-                        className={`octane-staff-list-row is-interactive ${offer === selected ? 'is-selected' : ''} ${dragOverIndex === index ? 'is-drop-target' : ''}`}
+                        className={`volt-staff-list-row is-interactive ${offer === selected ? 'is-selected' : ''} ${dragOverIndex === index ? 'is-drop-target' : ''}`}
                         draggable
                         role="option"
                         tabIndex={0}
@@ -86,17 +86,17 @@ export const CatalogAdminOfferListView: FC<CatalogAdminOfferListViewProps> = ({ 
                             setCurrentOffer(offer);
                         }}
                     >
-                        <span className="octane-catalog-admin-offer-icon-box">
+                        <span className="volt-catalog-admin-offer-icon-box">
                             <CatalogAdminOfferIconView offer={offer} url={getCatalogAdminOfferIconUrl(offer)} />
                         </span>
-                        <span className="octane-catalog-admin-grow" title={offerName(offer)}>
+                        <span className="volt-catalog-admin-grow" title={offerName(offer)}>
                             {offerName(offer)}
                         </span>
                         <CatalogAdminOfferPriceView credits={offer.priceInCredits} points={offer.priceInActivityPoints} pointsType={offer.activityPointType} />
                     </div>
                 ))}
             </div>
-            <div className="octane-staff-row octane-catalog-admin-actions">
+            <div className="volt-staff-row volt-catalog-admin-actions">
                 <Button disabled={!page} variant="primary" onClick={() => page && createOffer(page.pageId, currentType)}>
                     {LocalizeText('catalog.admin.offer.new')}
                 </Button>
@@ -114,7 +114,7 @@ export const CatalogAdminOfferListView: FC<CatalogAdminOfferListViewProps> = ({ 
                 </Button>
             </div>
             {selected && getEditableFurniProducts(selected).length > 0 && (
-                <div className="octane-staff-row octane-catalog-admin-actions">
+                <div className="volt-staff-row volt-catalog-admin-actions">
                     {getEditableFurniProducts(selected).map((product, index) => (
                         <Button
                             key={`${product.productType}-${product.productClassId}-${index}`}

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { SnowWarLobbyPlayer } from '../../../../api/snowwar';
 import { SnowWarAnimation, SnowWarBitmap, SnowWarBox } from './SnowWarBitmap';
 import { SnowWarLobbyView } from './SnowWarLobbyView';
@@ -87,8 +87,8 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
     };
 
     return (
-        <OctaneCardView className="snowwar-window snowwar-games-main" frameStyle={3} isResizable={false} uniqueKey="snowwar-games-main" style={{ width: 413, height: 530 }}>
-            <OctaneCardHeaderView headerText={LocalizeText('games.main.title')} onCloseClick={onClose} />
+        <VoltCardView className="snowwar-window snowwar-games-main" frameStyle={3} isResizable={false} uniqueKey="snowwar-games-main" style={{ width: 413, height: 530 }}>
+            <VoltCardHeaderView headerText={LocalizeText('games.main.title')} onCloseClick={onClose} />
             <div className="snowwar-frame-content" style={{ width: 407, height: 491 }}>
                 <SnowWarBitmap bitmap="quick_play_background" name="quick_play_background" x={0} y={0} width={407} height={355} />
                 {!lobby && (
@@ -157,6 +157,6 @@ export const SnowWarGamesMainView: FC<SnowWarGamesMainViewProps> = props =>
                 )}
                 {lobby && <SnowWarLobbyView {...lobby} onCancel={onCancelLobby} />}
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

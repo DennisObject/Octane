@@ -5,7 +5,7 @@ import { useWiredNative } from './WiredNativeContext';
 import { WiredSection } from './WiredSection';
 import { WiredText } from './WiredText';
 
-const optionLabel = (label: ReactNode) => (typeof label === 'string' ? <WiredText wrap={true} text={label} /> : <span className="octane-wired__text">{label}</span>);
+const optionLabel = (label: ReactNode) => (typeof label === 'string' ? <WiredText wrap={true} text={label} /> : <span className="volt-wired__text">{label}</span>);
 
 export interface WiredRadioOption {
     id: number;
@@ -47,14 +47,14 @@ export const WiredRadioGroup: FC<WiredRadioGroupProps> = ({ name, options, value
     }
 
     return (
-        <div className="octane-wired__options octane-wired__options--radio" style={{ gridTemplateColumns: `repeat(${columns}, round(down, calc((100% - ${(columns - 1) * 5}px) / ${columns}), 1px))` }}>
+        <div className="volt-wired__options volt-wired__options--radio" style={{ gridTemplateColumns: `repeat(${columns}, round(down, calc((100% - ${(columns - 1) * 5}px) / ${columns}), 1px))` }}>
             {options.map((option, index) => (
-                <div key={option.id} className="octane-wired__option-cell" style={option.newLine ? { gridColumn: '1 / -1' } : undefined}>
-                    <label className={`octane-wired__option ${index === options.length - 1 ? 'is-last' : ''} ${option.disabled ? 'is-disabled' : ''}`}>
+                <div key={option.id} className="volt-wired__option-cell" style={option.newLine ? { gridColumn: '1 / -1' } : undefined}>
+                    <label className={`volt-wired__option ${index === options.length - 1 ? 'is-last' : ''} ${option.disabled ? 'is-disabled' : ''}`}>
                         <input checked={value === option.id} disabled={option.disabled} name={name} type="radio" onChange={() => onChange(option.id)} />
                         {optionLabel(option.label)}
                     </label>
-                    {option.extra && <div className="octane-wired__option-extra">{option.extra}</div>}
+                    {option.extra && <div className="volt-wired__option-extra">{option.extra}</div>}
                 </div>
             ))}
         </div>
@@ -83,14 +83,14 @@ export const WiredCheckboxOption: FC<WiredCheckboxOptionProps> = ({ label, check
     }
 
     return (
-        <label className={`octane-wired__option octane-wired__option--checkbox ${last ? 'is-last' : ''} ${disabled ? 'is-disabled' : ''}`}>
+        <label className={`volt-wired__option volt-wired__option--checkbox ${last ? 'is-last' : ''} ${disabled ? 'is-disabled' : ''}`}>
             <input checked={checked} disabled={disabled} type="checkbox" onChange={(event) => onChange(event.target.checked)} />
             {optionLabel(label)}
         </label>
     );
 };
 
-export const WiredCheckboxGroup: FC<{ children: ReactNode }> = ({ children }) => (useWiredNative() ? <div className="octane-wired__options octane-wired__options--checkbox">{children}</div> : <div className="flex flex-col gap-1">{children}</div>);
+export const WiredCheckboxGroup: FC<{ children: ReactNode }> = ({ children }) => (useWiredNative() ? <div className="volt-wired__options volt-wired__options--checkbox">{children}</div> : <div className="flex flex-col gap-1">{children}</div>);
 
 export interface WiredQuantifierSectionProps {
     name: string;

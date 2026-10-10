@@ -77,7 +77,7 @@
     text-shadow: none !important;
     box-shadow: none !important;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .habbo-btn-secondary:hover,
@@ -131,7 +131,7 @@
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35) !important;
     box-shadow: none !important;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .habbo-btn-primary:hover,
@@ -165,7 +165,7 @@
     cursor: not-allowed;
 }
 
-/* AIR has no dedicated red button style; Octane danger uses shiny × purse logout #DE5347. */
+/* AIR has no dedicated red button style; Volt danger uses shiny × purse logout #DE5347. */
 .habbo-btn-danger {
     display: inline-flex;
     align-items: center;
@@ -189,7 +189,7 @@
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35) !important;
     box-shadow: none !important;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .habbo-btn-danger:hover {
@@ -223,7 +223,7 @@
     box-shadow: none !important;
     color: #ffffff !important;
     text-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .habbo-btn-black.habbo-btn-black:hover {
@@ -275,7 +275,7 @@
 }
 
 /* Checkboxes and radios, drawn with the client's own artwork.
-   These rules used to live inside the .octane-wired block, so they only reached the
+   These rules used to live inside the .volt-wired block, so they only reached the
    wired dialogs: everywhere else in the client a checkbox was whatever the browser
    drew. The images come from the official client - the checkbox is the two states
    of illumina_light_checkbox_basic, the radio is radio_button_off/on - so the size
@@ -293,7 +293,7 @@ input[type='checkbox'],
     background: var(--habbo-skin-checkbox) no-repeat center / 19px 20px;
     box-shadow: none;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 input[type='checkbox']:checked,
@@ -314,7 +314,7 @@ input[type='radio'],
     background: var(--habbo-skin-radio) no-repeat center / 11px 12px;
     box-shadow: none;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 input[type='radio']:checked,

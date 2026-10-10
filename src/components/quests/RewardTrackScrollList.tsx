@@ -137,15 +137,15 @@ export const RewardTrackScrollList: FC<RewardTrackScrollListProps> = ({ classNam
 
     return (
         <div ref={rootRef} className={className}>
-            <div ref={viewportRef} className="octane-reward-track-scroll-viewport">
+            <div ref={viewportRef} className="volt-reward-track-scroll-viewport">
                 <div ref={contentRef} className={contentClassName}>
                     {children}
                 </div>
             </div>
             {overflow && (
-                <div className="octane-reward-track-scrollbar" onPointerDown={onTrackPointerDown}>
+                <div className="volt-reward-track-scrollbar" onPointerDown={onTrackPointerDown}>
                     <div
-                        className="octane-reward-track-scrollbar-lift"
+                        className="volt-reward-track-scrollbar-lift"
                         style={{ height: liftHeight, transform: `translateY(${liftY}px)` }}
                         onPointerCancel={onLiftPointerUp}
                         onPointerDown={onLiftPointerDown}

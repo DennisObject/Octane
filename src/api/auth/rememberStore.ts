@@ -10,6 +10,7 @@ import { adoptAccessToken } from './ssoTokenExchange';
 // same lock hold. Without the Web Locks API remember-me is off (fail closed).
 const STORAGE_KEY = 'nitro.auth.remember';
 const LEGACY_KEY = 'nitro.remember.token';
+// Kept from before the Volt rename: tabs still running an older build must share this lock.
 const LOCK_NAME = 'octane-remember';
 const DEFAULT_REMEMBER_SECONDS = 30 * 24 * 60 * 60;
 

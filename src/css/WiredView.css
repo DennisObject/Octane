@@ -1,4 +1,4 @@
-.octane-wired {
+.volt-wired {
     width: 240px;
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -10,7 +10,7 @@
     outline: none !important;
     overflow: hidden;
 
-    .octane-wired__content {
+    .volt-wired__content {
         position: relative;
         background: #efefef !important;
         border: 0 !important;
@@ -20,7 +20,7 @@
         overflow: hidden !important;
     }
 
-    .octane-wired__body {
+    .volt-wired__body {
         display: flex;
         flex-direction: column;
         padding: 8px 10px 10px;
@@ -32,14 +32,14 @@
         overflow-y: auto;
     }
 
-    .octane-wired__section {
+    .volt-wired__section {
         display: flex;
         flex-direction: column;
         gap: 5px;
         min-width: 0;
     }
 
-    .octane-wired__summary {
+    .volt-wired__summary {
         position: relative;
         min-height: 56px;
         flex-direction: row;
@@ -51,7 +51,7 @@
         color: #000;
     }
 
-    .octane-wired__summary-bg {
+    .volt-wired__summary-bg {
         position: absolute;
         width: auto;
         height: auto;
@@ -62,32 +62,32 @@
         -webkit-user-drag: none;
     }
 
-    .octane-wired__summary-bg--left {
+    .volt-wired__summary-bg--left {
         left: 50%;
         transform: translate(-150%, -50%);
         opacity: 0.45;
     }
 
-    .octane-wired__summary-bg--right {
+    .volt-wired__summary-bg--right {
         left: 50%;
         top: 72%;
         transform: translate(-46%, -50%);
         opacity: 0.24;
     }
 
-    .octane-wired__summary-copy {
+    .volt-wired__summary-copy {
         position: relative;
         z-index: 1;
     }
 
-    .octane-wired__summary-copy {
+    .volt-wired__summary-copy {
         display: flex;
         flex-direction: column;
         min-width: 0;
         gap: 1px;
     }
 
-    .octane-wired__summary-kind {
+    .volt-wired__summary-kind {
         color: #000;
         font-size: 10px;
         font-weight: 700;
@@ -96,7 +96,7 @@
         text-transform: uppercase;
     }
 
-    .octane-wired__summary-title {
+    .volt-wired__summary-title {
         color: #4a4a4a !important;
         font-size: 15px !important;
         font-weight: 700 !important;
@@ -106,31 +106,31 @@
         word-break: break-word;
     }
 
-    .octane-wired__section--body {
+    .volt-wired__section--body {
         overflow: visible !important;
     }
 
-    .octane-wired__section .font-bold:not(.octane-wired__summary-title) {
+    .volt-wired__section .font-bold:not(.volt-wired__summary-title) {
         width: 100%;
         font-size: 13px !important;
         font-weight: 700 !important;
         text-align: left;
     }
 
-    .octane-wired__summary-description,
-    .octane-wired__furni-selector-description,
-    .octane-wired__picker-label {
+    .volt-wired__summary-description,
+    .volt-wired__furni-selector-description,
+    .volt-wired__picker-label {
         font-size: 12px;
         line-height: 1.15;
     }
 
-    .octane-wired__source-row,
-    .octane-wired__give-var-section-title,
-    .octane-wired__advanced-toggle {
+    .volt-wired__source-row,
+    .volt-wired__give-var-section-title,
+    .volt-wired__advanced-toggle {
         font-size: 12px;
     }
 
-    .octane-wired__divider,
+    .volt-wired__divider,
     hr {
         height: 1px;
         border: 0;
@@ -230,9 +230,9 @@
         padding: 3px 6px;
     }
 
-    .octane-wired__button,
-    .octane-wired__picker-button,
-    .octane-slider-button {
+    .volt-wired__button,
+    .volt-wired__picker-button,
+    .volt-slider-button {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -246,31 +246,31 @@
         padding-bottom: 0 !important;
     }
 
-    .octane-wired__button:hover,
-    .octane-wired__picker-button:hover,
-    .octane-slider-button:hover {
+    .volt-wired__button:hover,
+    .volt-wired__picker-button:hover,
+    .volt-slider-button:hover {
         filter: brightness(0.98);
     }
 
-    .octane-wired__button--primary,
-    .octane-wired__button--secondary {
+    .volt-wired__button--primary,
+    .volt-wired__button--secondary {
         font-weight: 700;
     }
 
-    &.octane-card-shell {
+    &.volt-card-shell {
         resize: none !important;
     }
 
-    .octane-wired__actions {
+    .volt-wired__actions {
         padding-top: 2px;
     }
 
-    .octane-slider-wrapper {
+    .volt-slider-wrapper {
         align-items: center;
         gap: 4px;
     }
 
-    .octane-wired__advanced-toggle {
+    .volt-wired__advanced-toggle {
         width: 100%;
         padding: 0 !important;
         border: 0;
@@ -281,20 +281,20 @@
         text-decoration: underline;
     }
 
-    .octane-wired__advanced-body,
-    .octane-wired__source-detail {
+    .volt-wired__advanced-body,
+    .volt-wired__source-detail {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__source-row {
+    .volt-wired__source-row {
         display: flex;
         flex-direction: column;
         gap: 3px;
     }
 
-    .octane-wired__selection-toggle {
+    .volt-wired__selection-toggle {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -308,33 +308,33 @@
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
     }
 
-    .octane-wired__selection-toggle.is-active.octane-wired__selection-toggle--primary {
+    .volt-wired__selection-toggle.is-active.volt-wired__selection-toggle--primary {
         border-color: #66793c;
         background: linear-gradient(180deg, #a5b56e 0%, #8ea25a 100%);
         color: #fff;
     }
 
-    .octane-wired__selection-toggle.is-active.octane-wired__selection-toggle--secondary {
+    .volt-wired__selection-toggle.is-active.volt-wired__selection-toggle--secondary {
         border-color: #6172b7;
         background: linear-gradient(180deg, #8d9bdd 0%, #7383cb 100%);
         color: #fff;
     }
 
-    .octane-wired__selection-toggle:disabled {
+    .volt-wired__selection-toggle:disabled {
         opacity: 0.55;
     }
 
-    .octane-wired__selection-toggle svg {
+    .volt-wired__selection-toggle svg {
         font-size: 10px;
         margin: 0;
     }
 
-    .octane-wired__actions {
+    .volt-wired__actions {
         gap: 4px !important;
     }
 
-    .octane-wired__picker-button,
-    .octane-slider-button {
+    .volt-wired__picker-button,
+    .volt-slider-button {
         width: 22px;
         min-width: 22px !important;
         flex: 0 0 22px;
@@ -342,41 +342,41 @@
         padding-right: 0 !important;
     }
 
-    .octane-wired__picker-button svg,
-    .octane-slider-button svg {
+    .volt-wired__picker-button svg,
+    .volt-slider-button svg {
         margin: 0;
     }
 
-    .octane-wired__picker-label {
+    .volt-wired__picker-label {
         min-width: 0;
         text-align: center;
         word-break: break-word;
     }
 
-    .octane-wired__give-var {
+    .volt-wired__give-var {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__give-var--trigger-variable {
+    .volt-wired__give-var--trigger-variable {
         width: min(244px, 100%);
     }
 
-    .octane-wired__give-var-heading {
+    .volt-wired__give-var-heading {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 4px;
     }
 
-    .octane-wired__give-var-targets {
+    .volt-wired__give-var-targets {
         display: inline-flex;
         align-items: center;
         gap: 2px;
     }
 
-    .octane-wired__give-var-target {
+    .volt-wired__give-var-target {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -390,54 +390,54 @@
         transition: filter 0.12s ease-in-out;
     }
 
-    .octane-wired__give-var-target:hover {
+    .volt-wired__give-var-target:hover {
         filter: brightness(0.98);
     }
 
-    .octane-wired__give-var-target img {
+    .volt-wired__give-var-target img {
         width: auto;
         height: auto;
         max-width: 12px;
         max-height: 12px;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
-    .octane-wired__give-var-target--furni.is-active {
+    .volt-wired__give-var-target--furni.is-active {
         background: linear-gradient(180deg, #f7db6d 0%, #ddb948 100%);
     }
 
-    .octane-wired__give-var-target--user.is-active {
+    .volt-wired__give-var-target--user.is-active {
         background: linear-gradient(180deg, #74be68 0%, #4f9644 100%);
     }
 
-    .octane-wired__give-var-target--global.is-active {
+    .volt-wired__give-var-target--global.is-active {
         background: linear-gradient(180deg, #7bc4f0 0%, #5497d2 100%);
     }
 
-    .octane-wired__give-var-target--context.is-active {
+    .volt-wired__give-var-target--context.is-active {
         background: linear-gradient(180deg, #f0ad65 0%, #d68739 100%);
     }
 
-    .octane-wired__give-var-target.is-active {
+    .volt-wired__give-var-target.is-active {
         border-color: #4d4d4d;
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     }
 
-    .octane-wired__give-var-target:disabled {
+    .volt-wired__give-var-target:disabled {
         opacity: 0.72;
         cursor: default;
     }
 
-    .octane-wired__give-var-select {
+    .volt-wired__give-var-select {
         min-height: 23px;
     }
 
-    .octane-wired__variable-picker {
+    .volt-wired__variable-picker {
         position: relative;
         width: 100%;
     }
 
-    .octane-wired__variable-picker-trigger {
+    .volt-wired__variable-picker-trigger {
         display: flex;
         align-items: center;
         width: 100%;
@@ -452,7 +452,7 @@
         position: relative;
     }
 
-    .octane-wired__variable-picker-trigger::after {
+    .volt-wired__variable-picker-trigger::after {
         content: '';
         position: absolute;
         top: 50%;
@@ -465,11 +465,11 @@
         border-top: 5px solid #555;
     }
 
-    .octane-wired__variable-picker-placeholder {
+    .volt-wired__variable-picker-placeholder {
         color: #7a7a7a;
     }
 
-    .octane-wired__variable-picker-panel {
+    .volt-wired__variable-picker-panel {
         position: absolute;
         top: calc(100% + 2px);
         left: 0;
@@ -483,7 +483,7 @@
         overflow: visible;
     }
 
-    .octane-wired__variable-picker-panel.is-portal {
+    .volt-wired__variable-picker-panel.is-portal {
         position: fixed;
         top: 0;
         left: 0;
@@ -492,7 +492,7 @@
         pointer-events: auto;
     }
 
-    .octane-wired__variable-picker-toolbar {
+    .volt-wired__variable-picker-toolbar {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -500,7 +500,7 @@
         border-bottom: 1px solid #d0d0d0;
     }
 
-    .octane-wired__variable-picker-mode {
+    .volt-wired__variable-picker-mode {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -512,20 +512,20 @@
         background: transparent;
     }
 
-    .octane-wired__variable-picker-mode.is-active {
+    .volt-wired__variable-picker-mode.is-active {
         border-color: #8e8e8e;
         background: linear-gradient(180deg, #f3cc58 0%, #d2a93a 100%);
     }
 
-    .octane-wired__variable-picker-mode img {
+    .volt-wired__variable-picker-mode img {
         width: auto;
         height: auto;
         max-width: 13px;
         max-height: 13px;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
-    .octane-wired__variable-picker-search {
+    .volt-wired__variable-picker-search {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -537,16 +537,16 @@
         background: #fff;
     }
 
-    .octane-wired__variable-picker-search-icon {
+    .volt-wired__variable-picker-search-icon {
         width: auto;
         height: auto;
         max-width: 10px;
         max-height: 10px;
         opacity: 0.75;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
-    .octane-wired__variable-picker-search-input {
+    .volt-wired__variable-picker-search-input {
         flex: 1 1 auto;
         min-width: 0;
         border: 0;
@@ -556,7 +556,7 @@
         outline: none;
     }
 
-    .octane-wired__variable-picker-clear {
+    .volt-wired__variable-picker-clear {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -567,16 +567,16 @@
         background: transparent;
     }
 
-    .octane-wired__variable-picker-clear img {
+    .volt-wired__variable-picker-clear img {
         width: auto;
         height: auto;
         max-width: 10px;
         max-height: 10px;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
-    .octane-wired__variable-picker-list,
-    .octane-wired__variable-picker-submenu {
+    .volt-wired__variable-picker-list,
+    .volt-wired__variable-picker-submenu {
         display: flex;
         flex-direction: column;
         max-height: 140px;
@@ -587,7 +587,7 @@
         background: #fff;
     }
 
-    .octane-wired__variable-picker-row {
+    .volt-wired__variable-picker-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -600,34 +600,34 @@
         text-align: left;
     }
 
-    .octane-wired__variable-picker-row:nth-child(even) {
+    .volt-wired__variable-picker-row:nth-child(even) {
         background: #f3f3f3;
     }
 
-    .octane-wired__variable-picker-row:hover {
+    .volt-wired__variable-picker-row:hover {
         background: #dfe8f6;
     }
 
-    .octane-wired__variable-picker-row.is-selected {
+    .volt-wired__variable-picker-row.is-selected {
         background: #d7dfea;
     }
 
-    .octane-wired__variable-picker-row.is-disabled {
+    .volt-wired__variable-picker-row.is-disabled {
         color: #7b7b7b;
     }
 
-    .octane-wired__variable-picker-row-label {
+    .volt-wired__variable-picker-row-label {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .octane-wired__variable-picker-row-arrow {
+    .volt-wired__variable-picker-row-arrow {
         flex: 0 0 auto;
         font-size: 9px;
     }
 
-    .octane-wired__variable-picker-empty {
+    .volt-wired__variable-picker-empty {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -635,7 +635,7 @@
         color: #8a8a8a;
     }
 
-    .octane-wired__variable-picker-submenu {
+    .volt-wired__variable-picker-submenu {
         position: fixed;
         width: 120px;
         margin-top: 0;
@@ -644,7 +644,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
     }
 
-    .octane-wired__give-var-checkbox {
+    .volt-wired__give-var-checkbox {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -654,25 +654,25 @@
         line-height: 1;
     }
 
-    .octane-wired__give-var-section {
+    .volt-wired__give-var-section {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__give-var-section-title {
+    .volt-wired__give-var-section-title {
         font-size: 11px;
         font-weight: 700;
         line-height: 1.1;
     }
 
-    .octane-wired__give-var-input-row {
+    .volt-wired__give-var-input-row {
         display: flex;
         align-items: center;
         gap: 6px;
     }
 
-    .octane-wired__give-var-number {
+    .volt-wired__give-var-number {
         width: 48px;
         min-width: 48px;
         min-height: 18px !important;
@@ -682,31 +682,31 @@
         text-align: center;
     }
 
-    .octane-wired__give-var-number--blurred {
+    .volt-wired__give-var-number--blurred {
         filter: blur(0.8px) !important;
         opacity: 0.78;
         pointer-events: none;
     }
 
-    .octane-wired__resizable-textarea {
+    .volt-wired__resizable-textarea {
         min-height: 140px !important;
         resize: vertical !important;
         overflow: auto;
     }
 
-    .octane-wired__levelup {
+    .volt-wired__levelup {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .octane-wired__levelup-section {
+    .volt-wired__levelup-section {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__levelup-section-header {
+    .volt-wired__levelup-section-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -717,36 +717,36 @@
         text-align: left;
     }
 
-    .octane-wired__levelup-chevron {
+    .volt-wired__levelup-chevron {
         font-size: 12px;
         line-height: 1;
         transform: rotate(180deg);
         transition: transform 0.12s ease;
     }
 
-    .octane-wired__levelup-chevron.is-open {
+    .volt-wired__levelup-chevron.is-open {
         transform: rotate(0deg);
     }
 
-    .octane-wired__levelup-section-body {
+    .volt-wired__levelup-section-body {
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-    .octane-wired__projectile {
+    .volt-wired__projectile {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .octane-wired__projectile-section {
+    .volt-wired__projectile-section {
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
 
-    .octane-wired__projectile-section-header {
+    .volt-wired__projectile-section-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -760,59 +760,59 @@
         cursor: pointer;
     }
 
-    .octane-wired__projectile-chevron {
+    .volt-wired__projectile-chevron {
         flex-shrink: 0;
         width: 11px;
         height: 11px;
         color: #7a7a7a;
     }
 
-    .octane-wired__projectile-section-body {
+    .volt-wired__projectile-section-body {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .octane-wired__projectile-indent {
+    .volt-wired__projectile-indent {
         padding-left: 18px;
     }
 
-    .octane-wired__projectile-grid {
+    .volt-wired__projectile-grid {
         display: flex;
         justify-content: center;
         padding: 2px 0;
     }
 
-    .octane-wired__projectile-number {
+    .volt-wired__projectile-number {
         width: 72px;
         flex-shrink: 0;
     }
 
-    .octane-wired__levelup-mode-block {
+    .volt-wired__levelup-mode-block {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__levelup-mode-block.is-inactive {
+    .volt-wired__levelup-mode-block.is-inactive {
         opacity: 0.72;
     }
 
-    .octane-wired__levelup-mode-label {
+    .volt-wired__levelup-mode-label {
         display: flex;
         align-items: center;
         gap: 4px;
         cursor: pointer;
     }
 
-    .octane-wired__levelup-fields {
+    .volt-wired__levelup-fields {
         display: flex;
         flex-direction: column;
         gap: 4px;
         padding-left: 22px;
     }
 
-    .octane-wired__levelup-field-row {
+    .volt-wired__levelup-field-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -820,7 +820,7 @@
         min-height: 20px;
     }
 
-    .octane-wired__levelup-number {
+    .volt-wired__levelup-number {
         width: 74px;
         min-width: 74px;
         min-height: 20px !important;
@@ -830,38 +830,38 @@
         text-align: center;
     }
 
-    .octane-wired__levelup-textarea {
+    .volt-wired__levelup-textarea {
         min-height: 88px !important;
         resize: vertical !important;
         overflow: auto;
     }
 
-    .octane-wired__levelup-preview {
+    .volt-wired__levelup-preview {
         max-height: 120px;
         overflow-y: auto;
         padding-right: 2px;
     }
 
-    .octane-wired__levelup-preview-entry {
+    .volt-wired__levelup-preview-entry {
         padding: 1px 0;
         font-size: 11px;
         line-height: 1.25;
     }
 
-    .octane-wired__levelup-subvariables {
+    .volt-wired__levelup-subvariables {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-wired__levelup-subvariable-row {
+    .volt-wired__levelup-subvariable-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
     }
 
-    .octane-wired__levelup-subvariable-label {
+    .volt-wired__levelup-subvariable-label {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -870,7 +870,7 @@
         cursor: pointer;
     }
 
-    .octane-wired__levelup-subvariable-token {
+    .volt-wired__levelup-subvariable-token {
         width: 96px;
         min-width: 96px;
         height: 20px;
@@ -883,7 +883,7 @@
         line-height: 20px;
     }
 
-    .octane-wired__placeholder-preview {
+    .volt-wired__placeholder-preview {
         display: flex;
         width: 100%;
         align-items: flex-start;
@@ -896,33 +896,33 @@
         transition: background 0.12s ease, border-color 0.12s ease;
     }
 
-    .octane-wired__placeholder-preview:hover {
+    .volt-wired__placeholder-preview:hover {
         background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
         border-color: #909090;
     }
 
-    .octane-wired__placeholder-preview.is-copied {
+    .volt-wired__placeholder-preview.is-copied {
         border-color: #73a753;
         background: linear-gradient(180deg, #f8fff2 0%, #eef9e2 100%);
     }
 
-    .octane-wired__change-var-radio {
+    .volt-wired__change-var-radio {
         display: flex;
         align-items: center;
         gap: 4px;
     }
 
-    .octane-wired__change-var-reference-block {
+    .volt-wired__change-var-reference-block {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .octane-slider {
+    .volt-slider {
         height: 16px;
     }
 
-    .octane-slider .track {
+    .volt-slider .track {
         height: 4px;
         border-radius: 999px;
         border: 1px solid #9a9a9a;
@@ -937,7 +937,7 @@
         }
     }
 
-    .octane-slider .thumb {
+    .volt-slider .thumb {
         width: 12px;
         height: 12px;
         margin-top: 3px;
@@ -948,26 +948,26 @@
     }
 }
 
-.octane-wired :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-gray-50) {
+.volt-wired :where(.bg-white, .bg-light, .bg-muted, .bg-card-grid-item, .bg-gray-50) {
     background: #f7f7f7 !important;
     color: #111111 !important;
     box-shadow: none !important;
 }
 
-.octane-wired :where(.border, .border-muted, .border-card-grid-item-border, .border-white, .border-white\/10, .border-white\/20, .border-white\/30) {
+.volt-wired :where(.border, .border-muted, .border-card-grid-item-border, .border-white, .border-white\/10, .border-white\/20, .border-white\/30) {
     border-color: #b5b5b5 !important;
     box-shadow: none !important;
 }
 
-.octane-wired :where(.text-muted, .text-dark) {
+.volt-wired :where(.text-muted, .text-dark) {
     color: #5f5f5f !important;
 }
 
-.octane-wired :where(.text-primary) {
+.volt-wired :where(.text-primary) {
     color: #2f5f7a !important;
 }
 
-.octane-wired :where(select, input[type='text'], input[type='number'], textarea) {
+.volt-wired :where(select, input[type='text'], input[type='number'], textarea) {
     min-height: 22px;
     border: 1px solid #8b8b8b !important;
     border-radius: 3px !important;
@@ -977,26 +977,26 @@
     font-size: 11px !important;
 }
 
-.octane-wired :where(select, input[type='text'], input[type='number'], textarea):focus {
+.volt-wired :where(select, input[type='text'], input[type='number'], textarea):focus {
     border-color: #5c8fa8 !important;
     box-shadow: 0 0 0 2px rgba(92, 143, 168, 0.24), inset 0 1px 0 rgba(0, 0, 0, 0.14) !important;
     outline: none !important;
 }
 
-.octane-card-shell.octane-wired {
+.volt-card-shell.volt-wired {
     border: 1px solid #8d8d8d !important;
     border-color: #8d8d8d !important;
     box-shadow: inset 0 0 0 1px #fff !important;
     outline: none !important;
 }
 
-.octane-card-shell.octane-wired .octane-card-header-shell,
-.octane-card-shell.octane-wired .octane-card-content-shell {
+.volt-card-shell.volt-wired .volt-card-header-shell,
+.volt-card-shell.volt-wired .volt-card-content-shell {
     border: 0 !important;
     box-shadow: none !important;
 }
 
-.octane-wired__variable-picker-portal {
+.volt-wired__variable-picker-portal {
     position: fixed;
     inset: 0;
     z-index: 5000;
@@ -1009,7 +1009,7 @@
 }
 
 /* Wired's frame margins override the WindowManager's generic frame defaults. */
-.octane-wired.octane-wired--official {
+.volt-wired.volt-wired--official {
     --wired-section-spacing: 7px;
     --wired-footer-inset: 7px;
     --wired-body-font-size: 12px;
@@ -1042,7 +1042,7 @@
         pointer-events: none;
     }
 
-    .octane-wired__content {
+    .volt-wired__content {
         z-index: 1;
         height: auto !important;
         min-height: 0 !important;
@@ -1052,7 +1052,7 @@
         overflow: visible !important;
     }
 
-    .octane-wired__body {
+    .volt-wired__body {
         padding: 0;
         gap: 0;
         max-height: none;
@@ -1062,30 +1062,30 @@
         font-size: var(--wired-body-font-size) !important;
     }
 
-    .octane-wired__body :is(p, span, label, li, td, th, input, textarea, select, button) {
+    .volt-wired__body :is(p, span, label, li, td, th, input, textarea, select, button) {
         font-size: var(--wired-body-font-size) !important;
     }
 
-    .octane-wired__section {
+    .volt-wired__section {
         gap: 5px;
         font-size: inherit;
     }
 
     /* Ubuntu's summary is compatibility content; the v75 main header factory rejects that style. */
-    .octane-wired__summary {
+    .volt-wired__summary {
         padding: 5px;
         background: #e9e9e1;
         color: #222;
     }
 
-    .octane-wired__divider {
+    .volt-wired__divider {
         flex: none;
         height: var(--wired-section-spacing);
         background: transparent;
         box-shadow: none;
     }
 
-    .octane-wired__divider:has(+ .octane-wired__actions) {
+    .volt-wired__divider:has(+ .volt-wired__actions) {
         height: calc(var(--wired-section-spacing) * 2 + 1px);
         background: linear-gradient(
             to bottom,
@@ -1096,20 +1096,20 @@
         );
     }
 
-    .octane-wired__actions {
+    .volt-wired__actions {
         flex-direction: row !important;
         gap: 12px !important;
         padding: 0 var(--wired-footer-inset);
     }
 
-    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+    .volt-wired__actions :is(.volt-wired__shell-button, .volt-wired__shell-button-label) {
         font-size: 12px !important;
         font-weight: 400 !important;
         line-height: 17px !important;
     }
 }
 
-.octane-wired--official .octane-wired__shell-header {
+.volt-wired--official .volt-wired__shell-header {
     position: absolute;
     top: 0;
     left: 0;
@@ -1120,7 +1120,7 @@
     touch-action: none;
 }
 
-.octane-wired--official .octane-wired__shell-caption {
+.volt-wired--official .volt-wired__shell-caption {
     position: absolute;
     top: 8px;
     left: 10px;
@@ -1134,7 +1134,7 @@
     pointer-events: none;
 }
 
-.octane-wired--official :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+.volt-wired--official :is(.volt-wired__shell-close, .volt-wired__shell-menu-toggle) {
     position: absolute;
     top: 8px;
     right: 10px;
@@ -1149,15 +1149,15 @@
     cursor: pointer;
 }
 
-.octane-wired--official .octane-wired__shell-close:hover {
+.volt-wired--official .volt-wired__shell-close:hover {
     background-image: url('../assets/images/habbo-skin/slices/close-3-hover.png');
 }
 
-.octane-wired--official .octane-wired__shell-close:active {
+.volt-wired--official .volt-wired__shell-close:active {
     background-image: url('../assets/images/habbo-skin/slices/close-3-pressed.png');
 }
 
-.octane-wired.octane-wired--official.octane-wired--style-illumina {
+.volt-wired.volt-wired--official.volt-wired--style-illumina {
     --wired-section-spacing: 5px;
     --wired-footer-inset: 5px;
     --wired-body-font-size: 11px;
@@ -1170,15 +1170,15 @@
         border-image: url('../assets/images/friends/swf/illumina_light_border_frame.png') 4 4 7 4 fill / 4px 4px 7px 4px stretch;
     }
 
-    .octane-wired__body {
+    .volt-wired__body {
         background: transparent;
     }
 
-    .octane-wired__shell-header {
+    .volt-wired__shell-header {
         height: 30px;
     }
 
-    .octane-wired__shell-caption {
+    .volt-wired__shell-caption {
         top: 12px;
         left: 8px;
         right: 8px;
@@ -1189,8 +1189,8 @@
         text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
 
-    .octane-wired__shell-close,
-    .octane-wired__shell-menu-toggle {
+    .volt-wired__shell-close,
+    .volt-wired__shell-menu-toggle {
         top: 9px;
         right: 8px;
         width: 20px;
@@ -1199,35 +1199,35 @@
         background-position: 0 0;
     }
 
-    .octane-wired__shell-menu-toggle {
+    .volt-wired__shell-menu-toggle {
         left: 8px;
         right: auto;
         background-image: url('../assets/images/wired/illumina_light_button_frame_menu.png');
     }
 
-    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):hover {
+    :is(.volt-wired__shell-close, .volt-wired__shell-menu-toggle):hover {
         background-position: -52px 0;
     }
 
-    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle):active {
+    :is(.volt-wired__shell-close, .volt-wired__shell-menu-toggle):active {
         background-position: -26px 0;
     }
 
-    .octane-wired__summary {
+    .volt-wired__summary {
         min-height: 0;
         padding: 5px;
         background: transparent;
         overflow: visible;
     }
 
-    .octane-wired__summary-copy {
+    .volt-wired__summary-copy {
         position: relative;
         z-index: 1;
         gap: 0;
         padding: 1px 0 0 5px;
     }
 
-    .octane-wired__summary-kind {
+    .volt-wired__summary-kind {
         display: block;
         min-height: 16px;
         font-size: 11px !important;
@@ -1237,7 +1237,7 @@
         text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
 
-    .octane-wired__summary-title {
+    .volt-wired__summary-title {
         display: block;
         min-height: 17px;
         margin-top: -2px;
@@ -1250,7 +1250,7 @@
         text-shadow: 0 1px rgba(255, 255, 255, 0.698);
     }
 
-    .octane-wired__banner {
+    .volt-wired__banner {
         position: absolute;
         top: -24px;
         left: -5px;
@@ -1260,33 +1260,33 @@
         pointer-events: none;
     }
 
-    .octane-wired__summary-bg {
+    .volt-wired__summary-bg {
         width: auto;
         height: 160px;
         transform: none;
     }
 
-    .octane-wired__summary-bg--left {
+    .volt-wired__summary-bg--left {
         top: 0;
         left: 0;
         opacity: 0.1;
     }
 
-    .octane-wired__summary-bg--right {
+    .volt-wired__summary-bg--right {
         top: -19px;
         left: auto;
         right: 0;
         opacity: 0.12;
     }
 
-    .octane-wired__banner-darkening {
+    .volt-wired__banner-darkening {
         position: absolute;
         inset: 0;
         background: #000;
         opacity: 0.1;
     }
 
-    .octane-wired__divider:has(+ .octane-wired__actions) {
+    .volt-wired__divider:has(+ .volt-wired__actions) {
         background: linear-gradient(
             to bottom,
             transparent 5px,
@@ -1296,14 +1296,14 @@
         );
     }
 
-    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+    .volt-wired__actions :is(.volt-wired__shell-button, .volt-wired__shell-button-label) {
         font-size: 10px !important;
         font-weight: 700 !important;
         line-height: 13px !important;
     }
 }
 
-.octane-wired__shell-menu {
+.volt-wired__shell-menu {
     position: fixed;
     z-index: 10000;
     display: flex;
@@ -1319,7 +1319,7 @@
     line-height: 16px;
 }
 
-.octane-wired__shell-menu-item {
+.volt-wired__shell-menu-item {
     position: relative;
     display: block;
     width: 100%;
@@ -1335,17 +1335,17 @@
     cursor: pointer;
 }
 
-.octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+.volt-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
     background: #b2b2b2;
 }
 
-.octane-wired__shell-menu-item:disabled {
+.volt-wired__shell-menu-item:disabled {
     color: #888;
     cursor: default;
 }
 
 /* Existing checkbox artwork is a compatibility skin; Illumina style101 remains pending. */
-.octane-wired__shell-menu-check {
+.volt-wired__shell-menu-check {
     position: absolute;
     top: 1px;
     left: 6px;
@@ -1355,17 +1355,17 @@
     pointer-events: none;
 }
 
-.octane-wired__shell-menu-check.is-checked {
+.volt-wired__shell-menu-check.is-checked {
     background-image: url('../assets/images/habbo-skin/slices/checkbox-checked.png');
 }
 
-.octane-wired__shell-menu-spacer {
+.volt-wired__shell-menu-spacer {
     position: relative;
     height: 3px;
     background: #d6d6d6;
 }
 
-.octane-wired__shell-menu-spacer::before {
+.volt-wired__shell-menu-spacer::before {
     content: '';
     position: absolute;
     top: 1px;
@@ -1375,7 +1375,7 @@
     background: #aaa;
 }
 
-.octane-wired__shell-button {
+.volt-wired__shell-button {
     --wired-button-offset-x: 0px;
     --wired-button-right-offset-x: 0px;
     --wired-button-offset-y: 0px;
@@ -1395,25 +1395,25 @@
     cursor: pointer;
 }
 
-.octane-wired__shell-button:enabled:hover {
+.volt-wired__shell-button:enabled:hover {
     --wired-button-offset-x: -12px;
     --wired-button-right-offset-x: -13px;
 }
 
-.octane-wired__shell-button:enabled:active {
+.volt-wired__shell-button:enabled:active {
     --wired-button-offset-x: -25px;
     --wired-button-right-offset-x: -25px;
 }
 
-.octane-wired__shell-button:disabled {
+.volt-wired__shell-button:disabled {
     --wired-button-offset-x: -37px;
     --wired-button-right-offset-x: -37px;
     color: #888;
     cursor: default;
 }
 
-.octane-wired__shell-button-skin,
-.octane-wired__shell-button-etching {
+.volt-wired__shell-button-skin,
+.volt-wired__shell-button-etching {
     position: absolute;
     inset: 0;
     display: grid;
@@ -1422,7 +1422,7 @@
     pointer-events: none;
 }
 
-.octane-wired__shell-button svg {
+.volt-wired__shell-button svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -1430,25 +1430,25 @@
     image-rendering: pixelated;
 }
 
-.octane-wired__shell-button-patch image {
+.volt-wired__shell-button-patch image {
     transform: translate(var(--wired-button-offset-x), var(--wired-button-offset-y));
 }
 
-.octane-wired__shell-button-patch.is-right image {
+.volt-wired__shell-button-patch.is-right image {
     transform: translate(var(--wired-button-right-offset-x), var(--wired-button-offset-y));
 }
 
-.octane-wired__shell-button-label {
+.volt-wired__shell-button-label {
     position: relative;
     pointer-events: none;
 }
 
-.octane-wired__button-row {
+.volt-wired__button-row {
     display: grid;
     column-gap: 12px;
 }
 
-.octane-wired__shell-button--illumina {
+.volt-wired__shell-button--illumina {
     height: 22px;
     color: #333;
     font-size: 10px;
@@ -1457,33 +1457,33 @@
     text-shadow: 0 1px rgba(255, 255, 255, 0.698);
 }
 
-.octane-wired__shell-button--illumina:enabled:is(:hover, :active),
-.octane-wired__shell-button--illumina:disabled {
+.volt-wired__shell-button--illumina:enabled:is(:hover, :active),
+.volt-wired__shell-button--illumina:disabled {
     --wired-button-offset-x: 0px;
     --wired-button-right-offset-x: 0px;
 }
 
-.octane-wired__shell-button--illumina:enabled:hover {
+.volt-wired__shell-button--illumina:enabled:hover {
     --wired-button-offset-y: -86px;
 }
 
-.octane-wired__shell-button--illumina:enabled:active {
+.volt-wired__shell-button--illumina:enabled:active {
     --wired-button-offset-y: -50px;
 }
 
-.octane-wired__shell-button--illumina .octane-wired__shell-button-skin {
+.volt-wired__shell-button--illumina .volt-wired__shell-button-skin {
     grid-template-columns: 6px minmax(0, 1fr) 4px;
     grid-template-rows: 8px minmax(0, 1fr) 8px;
 }
 
-.octane-wired__shell-button--illumina .octane-wired__shell-button-etching {
+.volt-wired__shell-button--illumina .volt-wired__shell-button-etching {
     top: auto;
     height: 5px;
     grid-template-columns: 6px minmax(0, 1fr) 4px;
     grid-template-rows: 5px;
 }
 
-.octane-wired__shell-button .octane-wired__shell-button-curve {
+.volt-wired__shell-button .volt-wired__shell-button-curve {
     position: absolute;
     bottom: 7px;
     width: 3px;
@@ -1491,30 +1491,30 @@
     pointer-events: none;
 }
 
-.octane-wired__shell-button-curve.is-left {
+.volt-wired__shell-button-curve.is-left {
     left: 1px;
 }
 
-.octane-wired__shell-button-curve.is-right {
+.volt-wired__shell-button-curve.is-right {
     right: 1px;
 }
 
-.octane-wired__shell-button-curve image {
+.volt-wired__shell-button-curve image {
     transform: translateY(var(--wired-button-offset-y));
 }
 
-.octane-wired__shell-button:enabled:active .octane-wired__shell-button-curve {
+.volt-wired__shell-button:enabled:active .volt-wired__shell-button-curve {
     display: none;
 }
 
-.octane-wired--official button:focus-visible,
-.octane-wired__shell-menu-item:focus-visible {
+.volt-wired--official button:focus-visible,
+.volt-wired__shell-menu-item:focus-visible {
     outline: 2px solid #005fcc;
     outline-offset: 1px;
 }
 
 /* wx/TY/RY/SY use native frame0, Volter typography and subtype template widths. */
-.octane-wired.octane-wired--official.octane-wired--volter {
+.volt-wired.volt-wired--official.volt-wired--volter {
     --wired-frame-color: #3d3d3d;
     --wired-body-color: #3d3d3d;
     --wired-text-color: #fff;
@@ -1536,21 +1536,21 @@
         content: none;
     }
 
-    .octane-wired__content {
+    .volt-wired__content {
         color: var(--wired-text-color) !important;
     }
 
-    .octane-wired__body {
+    .volt-wired__body {
         background: transparent;
         line-height: 13px;
     }
 
-    .octane-wired__body :is(div, p, span, label, li, td, th) {
+    .volt-wired__body :is(div, p, span, label, li, td, th) {
         color: var(--wired-text-color) !important;
         line-height: 13px !important;
     }
 
-    .octane-wired__summary {
+    .volt-wired__summary {
         min-height: 0;
         align-items: flex-start;
         gap: 5px;
@@ -1559,20 +1559,20 @@
         color: var(--wired-text-color) !important;
     }
 
-    .octane-wired__summary-copy {
+    .volt-wired__summary-copy {
         flex: 1;
         padding: 0;
     }
 
-    .octane-wired__summary-title,
-    .octane-wired__section .font-bold:not(.octane-wired__summary-title) {
+    .volt-wired__summary-title,
+    .volt-wired__section .font-bold:not(.volt-wired__summary-title) {
         font-size: 9px !important;
         line-height: 13px;
         color: var(--wired-text-color) !important;
         text-shadow: none;
     }
 
-    .octane-wired__type-icon {
+    .volt-wired__type-icon {
         flex: none;
         width: 13px;
         height: 14px;
@@ -1580,11 +1580,11 @@
         image-rendering: pixelated;
     }
 
-    .octane-wired__shell-header {
+    .volt-wired__shell-header {
         height: 25px;
     }
 
-    .octane-wired__shell-caption {
+    .volt-wired__shell-caption {
         top: 6px;
         left: 50%;
         right: auto;
@@ -1601,7 +1601,7 @@
         white-space: nowrap;
     }
 
-    .octane-wired__volter-header-skin {
+    .volt-wired__volter-header-skin {
         position: absolute;
         top: 6px;
         left: 6px;
@@ -1612,7 +1612,7 @@
         pointer-events: none;
     }
 
-    :is(.octane-wired__shell-close, .octane-wired__shell-menu-toggle) {
+    :is(.volt-wired__shell-close, .volt-wired__shell-menu-toggle) {
         top: 6px;
         right: 6px;
         width: 15px;
@@ -1621,32 +1621,32 @@
         background-position: -377px 0;
     }
 
-    .octane-wired__shell-menu-toggle {
+    .volt-wired__shell-menu-toggle {
         left: 7px;
         right: auto;
         background-position: -470px 0;
     }
 
-    .octane-wired__shell-close:hover {
+    .volt-wired__shell-close:hover {
         background-position: -377px -16px;
     }
-    .octane-wired__shell-close:active {
+    .volt-wired__shell-close:active {
         background-position: -377px -32px;
     }
-    .octane-wired__shell-menu-toggle:hover {
+    .volt-wired__shell-menu-toggle:hover {
         background-position: -470px -16px;
     }
-    .octane-wired__shell-menu-toggle:active {
+    .volt-wired__shell-menu-toggle:active {
         background-position: -470px -32px;
     }
 
-    .octane-wired__footer-divider {
+    .volt-wired__footer-divider {
         position: relative;
         height: 9px;
         background: transparent;
     }
 
-    .octane-wired__footer-divider::after {
+    .volt-wired__footer-divider::after {
         content: '';
         position: absolute;
         top: 4px;
@@ -1656,115 +1656,115 @@
         background: #232323;
     }
 
-    .octane-wired__actions :is(.octane-wired__shell-button, .octane-wired__shell-button-label) {
+    .volt-wired__actions :is(.volt-wired__shell-button, .volt-wired__shell-button-label) {
         font-size: 9px !important;
         font-weight: 400 !important;
         line-height: 13px !important;
         color: var(--wired-text-color);
     }
 
-    .octane-wired__shell-button {
+    .volt-wired__shell-button {
         height: 22px;
         text-shadow: none;
     }
 
-    .octane-wired__shell-button-skin {
+    .volt-wired__shell-button-skin {
         grid-template-columns: 3px minmax(0, 1fr) 3px;
         grid-template-rows: 3px minmax(0, 1fr) 3px;
     }
 
-    .octane-wired__shell-button:enabled:hover {
+    .volt-wired__shell-button:enabled:hover {
         --wired-button-offset-x: 0px;
         --wired-button-right-offset-x: 0px;
         --wired-button-offset-y: -46px;
     }
 
-    .octane-wired__shell-button:enabled:active {
+    .volt-wired__shell-button:enabled:active {
         --wired-button-offset-x: -20px;
         --wired-button-right-offset-x: -20px;
         --wired-button-offset-y: 0px;
     }
 
-    .octane-wired__shell-button:disabled {
+    .volt-wired__shell-button:disabled {
         --wired-button-offset-x: -10px;
         --wired-button-right-offset-x: -10px;
         --wired-button-offset-y: 0px;
     }
 }
 
-.octane-wired.octane-wired--official.octane-wired--style-volter_blue {
+.volt-wired.volt-wired--official.volt-wired--style-volter_blue {
     --wired-frame-color: #7da9b5;
     --wired-body-color: #c7d0d4;
     --wired-text-color: #222;
 }
-.octane-wired.octane-wired--official.octane-wired--style-volter_green {
+.volt-wired.volt-wired--official.volt-wired--style-volter_green {
     --wired-frame-color: #78b090;
     --wired-body-color: #bfd6c9;
     --wired-text-color: #222;
 }
-.octane-wired.octane-wired--official.octane-wired--style-volter_yellow {
+.volt-wired.volt-wired--official.volt-wired--style-volter_yellow {
     --wired-frame-color: #fac200;
     --wired-body-color: #faea7c;
     --wired-text-color: #222;
 
-    :is(.octane-wired__shell-close, .octane-wired__shell-close:hover, .octane-wired__shell-close:active) {
+    :is(.volt-wired__shell-close, .volt-wired__shell-close:hover, .volt-wired__shell-close:active) {
         background-position: -377px -216px;
     }
 }
 
-.octane-wired.octane-wired--official.octane-wired--volter-colour {
-    .octane-wired__content {
+.volt-wired.volt-wired--official.volt-wired--volter-colour {
+    .volt-wired__content {
         gap: 5px !important;
     }
-    .octane-wired__body {
+    .volt-wired__body {
         gap: 5px;
     }
-    .octane-wired__volter-inner-skin + .octane-wired__divider,
-    .octane-wired__footer-divider {
+    .volt-wired__volter-inner-skin + .volt-wired__divider,
+    .volt-wired__footer-divider {
         display: none;
     }
 }
 
-.octane-wired__volter-frame,
-.octane-wired__volter-frame-grid,
-.octane-wired__volter-frame-shine {
+.volt-wired__volter-frame,
+.volt-wired__volter-frame-grid,
+.volt-wired__volter-frame-shine {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
-.octane-wired__volter-frame {
+.volt-wired__volter-frame {
     z-index: 0;
 }
-.octane-wired__volter-frame-grid {
+.volt-wired__volter-frame-grid {
     display: grid;
     grid-template-columns: 13px minmax(0, 1fr) 13px;
     grid-template-rows: 13px minmax(0, 1fr) 13px;
 }
-.octane-wired__volter-frame svg,
-.octane-wired__volter-inner-skin svg {
+.volt-wired__volter-frame svg,
+.volt-wired__volter-inner-skin svg {
     display: block;
     width: 100%;
     height: 100%;
     overflow: hidden;
     image-rendering: pixelated;
 }
-.octane-wired__volter-frame-shine svg {
+.volt-wired__volter-frame-shine svg {
     position: absolute;
     width: auto;
     height: auto;
 }
-.octane-wired__volter-inner {
+.volt-wired__volter-inner {
     position: relative;
     display: flex;
     flex-direction: column;
     padding: 8px 9px;
     background: transparent;
 }
-.octane-wired__volter-inner > :not(.octane-wired__volter-inner-skin) {
+.volt-wired__volter-inner > :not(.volt-wired__volter-inner-skin) {
     position: relative;
     z-index: 1;
 }
-.octane-wired__volter-inner-skin {
+.volt-wired__volter-inner-skin {
     position: absolute;
     inset: 0;
     display: grid;
@@ -1773,7 +1773,7 @@
     pointer-events: none;
 }
 
-.octane-wired__shell-menu--volter {
+.volt-wired__shell-menu--volter {
     padding: 2px;
     border: 0;
     background: transparent;
@@ -1783,47 +1783,47 @@
     line-height: 13px;
     box-shadow: none;
 
-    .octane-wired__shell-menu-item {
+    .volt-wired__shell-menu-item {
         padding-bottom: 4px;
         background: transparent;
     }
-    .octane-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
+    .volt-wired__shell-menu-item:enabled:is(:hover, :focus-visible) {
         background: #626262;
     }
-    .octane-wired__shell-menu-item:disabled {
+    .volt-wired__shell-menu-item:disabled {
         color: inherit;
         opacity: 0.5;
     }
-    .octane-wired__shell-menu-check {
+    .volt-wired__shell-menu-check {
         top: 3px;
         width: 16px;
         height: 16px;
         background: url('../assets/images/wired/volter_shell_atlas.png') -410px -100px no-repeat;
         image-rendering: pixelated;
     }
-    .octane-wired__shell-menu-check.is-checked {
+    .volt-wired__shell-menu-check.is-checked {
         background-position: -410px -116px;
     }
-    .octane-wired__shell-menu-spacer {
+    .volt-wired__shell-menu-spacer {
         background: #424242;
     }
-    .octane-wired__shell-menu-spacer::before {
+    .volt-wired__shell-menu-spacer::before {
         background: #666;
     }
 }
 
-.octane-wired__volter-menu-frame,
-.octane-wired__volter-menu-frame-grid {
+.volt-wired__volter-menu-frame,
+.volt-wired__volter-menu-frame-grid {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
-.octane-wired__volter-menu-frame-grid {
+.volt-wired__volter-menu-frame-grid {
     display: grid;
     grid-template-columns: 3px minmax(0, 1fr) 3px;
     grid-template-rows: 3px minmax(0, 1fr) 3px;
 }
-.octane-wired__volter-menu-frame-grid svg {
+.volt-wired__volter-menu-frame-grid svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -1832,33 +1832,33 @@
 }
 
 /* Native v75 section kit (SectionPreset, SliderPreset, NumberInputPreset) for the Illumina frame. */
-.octane-wired.octane-wired--official.octane-wired--native-layout {
-    .octane-wired__body {
+.volt-wired.volt-wired--official.volt-wired--native-layout {
+    .volt-wired__body {
         gap: 5px;
         padding-top: 5px;
     }
 
-    .octane-wired__native-footer {
+    .volt-wired__native-footer {
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
 }
 
-.octane-wired__splitter {
+.volt-wired__splitter {
     position: relative;
     flex: none;
     height: 2px;
     background: linear-gradient(to bottom, #aaa 0 1px, rgba(255, 255, 255, 0.686) 1px 2px);
 }
 
-.octane-wired__native-section {
+.volt-wired__native-section {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
-.octane-wired__native-section-inner {
+.volt-wired__native-section-inner {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -1866,7 +1866,7 @@
     min-width: 0;
 }
 
-.octane-wired__native-section-header {
+.volt-wired__native-section-header {
     position: relative;
     display: flex;
     align-items: flex-start;
@@ -1874,13 +1874,13 @@
     min-height: 16px;
 }
 
-.octane-wired__native-section-header-right {
+.volt-wired__native-section-header-right {
     display: flex;
     gap: 5px;
     margin-left: auto;
 }
 
-.octane-wired__text {
+.volt-wired__text {
     padding: 0 1px 0 2px;
     color: #000;
     font-size: 11px;
@@ -1889,18 +1889,18 @@
     white-space: nowrap;
 }
 
-.octane-wired__text--bold {
+.volt-wired__text--bold {
     font-weight: 700;
 }
 
-.octane-wired__input-box {
+.volt-wired__input-box {
     position: relative;
     flex: none;
     height: 21px;
     isolation: isolate;
 }
 
-.octane-wired__input-box::before {
+.volt-wired__input-box::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -1910,16 +1910,16 @@
 }
 
 /* The 21px Illumina input: background and border parts pre-composed at the template height. */
-.octane-wired__input-box::before,
-.octane-wired--native-layout .octane-wired__section--body :is(input[type='text'], input[type='number'], .form-control) {
+.volt-wired__input-box::before,
+.volt-wired--native-layout .volt-wired__section--body :is(input[type='text'], input[type='number'], .form-control) {
     background: url('../assets/images/wired/native/input_left.png') 0 0 no-repeat, url('../assets/images/wired/native/input_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/input_mid.png') 0 0 repeat-x;
 }
 
-.octane-wired__input-box.is-invalid::before {
+.volt-wired__input-box.is-invalid::before {
     filter: sepia(1) saturate(4) hue-rotate(-30deg);
 }
 
-.octane-wired .octane-wired__input-box .octane-wired__input-field {
+.volt-wired .volt-wired__input-box .volt-wired__input-field {
     position: absolute;
     left: 4px;
     top: 2px;
@@ -1936,21 +1936,21 @@
     outline: 0;
 }
 
-.octane-wired__slider-row {
+.volt-wired__slider-row {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 4px 9px;
 }
 
-.octane-wired__icon-button.octane-wired__shell-button {
+.volt-wired__icon-button.volt-wired__shell-button {
     flex: none;
     width: 20px;
     height: 20px;
     padding: 0;
 }
 
-.octane-wired__icon-button .octane-wired__shell-button-label {
+.volt-wired__icon-button .volt-wired__shell-button-label {
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -1958,12 +1958,12 @@
     padding-top: 5px;
 }
 
-.octane-wired__icon-button img {
+.volt-wired__icon-button img {
     display: block;
     image-rendering: pixelated;
 }
 
-.octane-wired__slider {
+.volt-wired__slider {
     position: relative;
     flex: 1 1 0;
     min-width: 0;
@@ -1972,12 +1972,12 @@
     image-rendering: pixelated;
 }
 
-.octane-wired__slider-area {
+.volt-wired__slider-area {
     position: absolute;
     inset: 1px 0 0;
 }
 
-.octane-wired__slider-thumb {
+.volt-wired__slider-thumb {
     position: absolute;
     top: 0;
     width: 12px;
@@ -1987,42 +1987,42 @@
     touch-action: none;
 }
 
-.octane-wired__banner-canvas {
+.volt-wired__banner-canvas {
     display: block;
     width: 100%;
     height: 100%;
     image-rendering: pixelated;
 }
 
-.octane-wired--native-layout {
-    .octane-wired__native-advanced {
+.volt-wired--native-layout {
+    .volt-wired__native-advanced {
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
 
-    .octane-wired__native-advanced-body {
+    .volt-wired__native-advanced-body {
         display: flex;
         flex-direction: column;
         gap: 5px;
         background: #ccc;
     }
 
-    .octane-wired__text--soft {
+    .volt-wired__text--soft {
         color: #444;
     }
 
-    .octane-wired__text--wrap {
+    .volt-wired__text--wrap {
         white-space: normal;
         line-height: 13px;
     }
 }
 
-.octane-wired .octane-wired__input-box .octane-wired__input-field.octane-wired__input-field--stretch {
+.volt-wired .volt-wired__input-box .volt-wired__input-field.volt-wired__input-field--stretch {
     width: calc(100% - 8px);
 }
 
-.octane-wired__input-limit {
+.volt-wired__input-limit {
     position: absolute;
     right: 0;
     bottom: 24px;
@@ -2034,17 +2034,17 @@
 }
 
 /* Option rows (RadioButtonPreset / CheckboxOptionPreset). */
-.octane-wired__options {
+.volt-wired__options {
     display: grid;
     column-gap: 5px;
 }
 
-.octane-wired__options--checkbox {
+.volt-wired__options--checkbox {
     display: flex;
     flex-direction: column;
 }
 
-.octane-wired__option {
+.volt-wired__option {
     display: flex;
     align-items: flex-start;
     gap: 3px;
@@ -2053,28 +2053,28 @@
     cursor: pointer;
 }
 
-.octane-wired__option.is-last {
+.volt-wired__option.is-last {
     height: 16px;
 }
 
-.octane-wired__option.is-disabled {
+.volt-wired__option.is-disabled {
     opacity: 0.5;
     cursor: default;
 }
 
-.octane-wired__option--checkbox {
+.volt-wired__option--checkbox {
     height: 25px;
 }
 
-.octane-wired__option--checkbox.is-last {
+.volt-wired__option--checkbox.is-last {
     height: 21px;
 }
 
-.octane-wired__option--checkbox .octane-wired__text {
+.volt-wired__option--checkbox .volt-wired__text {
     margin-top: 2px;
 }
 
-.octane-wired .octane-wired__option input[type='radio'] {
+.volt-wired .volt-wired__option input[type='radio'] {
     flex: none;
     appearance: none;
     width: 12px;
@@ -2089,11 +2089,11 @@
     image-rendering: pixelated;
 }
 
-.octane-wired .octane-wired__option input[type='radio']:checked {
+.volt-wired .volt-wired__option input[type='radio']:checked {
     background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
 }
 
-.octane-wired .octane-wired__option input[type='checkbox'] {
+.volt-wired .volt-wired__option input[type='checkbox'] {
     flex: none;
     appearance: none;
     width: 19px;
@@ -2108,16 +2108,16 @@
     image-rendering: pixelated;
 }
 
-.octane-wired .octane-wired__option input[type='checkbox']:checked {
+.volt-wired .volt-wired__option input[type='checkbox']:checked {
     background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
 }
 
-.octane-wired .octane-wired__option input[type='checkbox']::before,
-.octane-wired .octane-wired__option input[type='checkbox']::after {
+.volt-wired .volt-wired__option input[type='checkbox']::before,
+.volt-wired .volt-wired__option input[type='checkbox']::after {
     content: none;
 }
 
-.octane-wired--native-layout .octane-wired__native-advanced > .octane-wired__advanced-toggle {
+.volt-wired--native-layout .volt-wired__native-advanced > .volt-wired__advanced-toggle {
     height: 16px;
     padding: 0 2px !important;
     color: #000;
@@ -2127,25 +2127,25 @@
 }
 
 /* Views that still use the old free-form markup get the native section rhythm, option rows and text metrics. */
-.octane-wired.octane-wired--native-layout .octane-wired__section--body {
-    .octane-wired__native-section-inner > .flex.flex-col {
+.volt-wired.volt-wired--native-layout .volt-wired__section--body {
+    .volt-wired__native-section-inner > .flex.flex-col {
         gap: 0;
     }
 
-    .octane-wired__native-section-inner > .flex.flex-col > * + * {
+    .volt-wired__native-section-inner > .flex.flex-col > * + * {
         margin-top: 5px;
     }
 
-    .octane-wired__native-section-inner > .flex.flex-col > label.flex + label.flex {
+    .volt-wired__native-section-inner > .flex.flex-col > label.flex + label.flex {
         margin-top: 0;
     }
 
-    .octane-wired__native-section-inner > * + * {
+    .volt-wired__native-section-inner > * + * {
         position: relative;
         padding-top: 7px;
     }
 
-    .octane-wired__native-section-inner > * + *::before {
+    .volt-wired__native-section-inner > * + *::before {
         content: '';
         position: absolute;
         top: 0;
@@ -2202,7 +2202,7 @@
     }
 }
 
-.octane-wired.octane-wired--native-layout input[type='radio'] {
+.volt-wired.volt-wired--native-layout input[type='radio'] {
     flex: none;
     appearance: none;
     width: 12px;
@@ -2217,11 +2217,11 @@
     image-rendering: pixelated;
 }
 
-.octane-wired.octane-wired--native-layout input[type='radio']:checked {
+.volt-wired.volt-wired--native-layout input[type='radio']:checked {
     background: url('../assets/images/wired/native/radio.png') 0 -12px / 11px 24px no-repeat;
 }
 
-.octane-wired.octane-wired--native-layout input[type='checkbox'] {
+.volt-wired.volt-wired--native-layout input[type='checkbox'] {
     flex: none;
     appearance: none;
     width: 19px;
@@ -2236,17 +2236,17 @@
     image-rendering: pixelated;
 }
 
-.octane-wired.octane-wired--native-layout input[type='checkbox']:checked {
+.volt-wired.volt-wired--native-layout input[type='checkbox']:checked {
     background: url('../assets/images/wired/native/checkbox.png') 0 0 / 19px 43px no-repeat;
 }
 
-.octane-wired.octane-wired--native-layout input[type='checkbox']::before,
-.octane-wired.octane-wired--native-layout input[type='checkbox']::after {
+.volt-wired.volt-wired--native-layout input[type='checkbox']::before,
+.volt-wired.volt-wired--native-layout input[type='checkbox']::after {
     content: none;
 }
 
 /* Dropdowns: the Illumina dropmenu frame (22px) with its arrow/separator part on the right. */
-.octane-wired.octane-wired--native-layout :is(select, .form-select) {
+.volt-wired.volt-wired--native-layout :is(select, .form-select) {
     appearance: none;
     display: block;
     width: 100%;
@@ -2263,15 +2263,15 @@
     image-rendering: pixelated;
 }
 
-.octane-wired.octane-wired--native-layout :is(select, .form-select):hover {
+.volt-wired.volt-wired--native-layout :is(select, .form-select):hover {
     background: url('../assets/images/wired/native/dropdown_left_hover.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right_hover.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid_hover.png') 0 0 repeat-x !important;
 }
 
-.octane-wired__source-row {
+.volt-wired__source-row {
     min-height: 23px;
 }
 
-.octane-wired__source-label {
+.volt-wired__source-label {
     flex: 1 1 0;
     min-width: 0;
     text-align: center;
@@ -2279,7 +2279,7 @@
 }
 
 /* wired_menu_view: absolute client coordinates of the 500x500 Wired Creator Tools window. */
-.octane-wired-menu.octane-card-shell.octane-card-frame-3 {
+.volt-wired-menu.volt-card-shell.volt-card-frame-3 {
     width: 500px;
     min-width: 500px;
     height: 500px;
@@ -2289,11 +2289,11 @@
     font-size: 12px;
 }
 
-.octane-wired-menu.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+.volt-wired-menu.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-title {
     top: 4px !important;
 }
 
-.octane-wired-menu__client {
+.volt-wired-menu__client {
     position: absolute;
     left: 0;
     top: 36px;
@@ -2302,7 +2302,7 @@
     overflow: hidden;
 }
 
-.octane-wired-menu__tabs {
+.volt-wired-menu__tabs {
     position: absolute;
     left: 0;
     top: 2px;
@@ -2310,7 +2310,7 @@
     height: 30px;
 }
 
-.octane-wired-menu__tab {
+.volt-wired-menu__tab {
     position: absolute;
     top: 0;
     width: 96px;
@@ -2328,15 +2328,15 @@
     image-rendering: pixelated;
 }
 
-.octane-wired-menu__tab:hover {
+.volt-wired-menu__tab:hover {
     background-image: url('../assets/images/wired/native/menu_tab_hover_left.png'), url('../assets/images/wired/native/menu_tab_hover_right.png'), url('../assets/images/wired/native/menu_tab_hover_mid.png');
 }
 
-.octane-wired-menu__tab.is-active {
+.volt-wired-menu__tab.is-active {
     background-image: url('../assets/images/wired/native/menu_tab_selected_left.png'), url('../assets/images/wired/native/menu_tab_selected_right.png'), url('../assets/images/wired/native/menu_tab_selected_mid.png');
 }
 
-.octane-wired-menu__header {
+.volt-wired-menu__header {
     position: absolute;
     left: 1px;
     top: 32px;
@@ -2346,7 +2346,7 @@
     background: #486f81;
 }
 
-.octane-wired-menu__header-inner {
+.volt-wired-menu__header-inner {
     position: absolute;
     left: 2px;
     top: 2px;
@@ -2355,7 +2355,7 @@
     background: #235061;
 }
 
-.octane-wired-menu__box-lines {
+.volt-wired-menu__box-lines {
     position: absolute;
     width: 64px;
     height: 51px;
@@ -2364,7 +2364,7 @@
     pointer-events: none;
 }
 
-.octane-wired-menu__header-title {
+.volt-wired-menu__header-title {
     position: absolute;
     left: 0;
     top: 14px;
@@ -2378,7 +2378,7 @@
     text-align: center;
 }
 
-.octane-wired-menu__discord {
+.volt-wired-menu__discord {
     position: absolute;
     left: 472px;
     top: 3px;
@@ -2386,13 +2386,13 @@
     height: 25px;
 }
 
-.octane-wired-menu__discord img {
+.volt-wired-menu__discord img {
     position: absolute;
     left: 0;
     top: 1px;
 }
 
-.octane-wired-menu__body {
+.volt-wired-menu__body {
     position: absolute;
     left: 0;
     top: 82px;
@@ -2401,12 +2401,12 @@
     color: #000;
 }
 
-.octane-wired-menu__item {
+.volt-wired-menu__item {
     position: absolute;
     box-sizing: border-box;
 }
 
-.octane-wired-menu__panel {
+.volt-wired-menu__panel {
     background: #dadada;
     /* Skin border style 3: corners cut two pixels on the long side and one on the short. */
     clip-path: polygon(
@@ -2433,45 +2433,45 @@
     );
 }
 
-.octane-wired-menu__text {
+.volt-wired-menu__text {
     padding: 0 2px;
     font-size: 12px;
     line-height: 17px;
     white-space: nowrap;
 }
 
-.octane-wired-menu__text--bold {
+.volt-wired-menu__text--bold {
     font-weight: 700;
 }
 
-.octane-wired-menu__list {
+.volt-wired-menu__list {
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-.octane-wired-menu__stat {
+.volt-wired-menu__stat {
     height: 18px;
     line-height: 16px;
 }
 
-.octane-wired-menu__monitor-image img {
+.volt-wired-menu__monitor-image img {
     position: absolute;
     left: 0;
     top: 0;
 }
 
-.octane-wired-menu__option {
+.volt-wired-menu__option {
     display: flex;
     align-items: flex-start;
     margin: 0;
 }
 
-.octane-wired-menu__option .octane-wired-menu__text {
+.volt-wired-menu__option .volt-wired-menu__text {
     margin-left: 0;
     line-height: 17px;
 }
 
-.octane-wired-menu__option input[type='checkbox'] {
+.volt-wired-menu__option input[type='checkbox'] {
     flex: none;
     appearance: none;
     width: 20px;
@@ -2482,15 +2482,15 @@
     image-rendering: pixelated;
 }
 
-.octane-wired-menu__option input[type='checkbox']:checked {
+.volt-wired-menu__option input[type='checkbox']:checked {
     background-image: url('../assets/images/wired/native/menu_checkbox_checked.png');
 }
 
-.octane-wired-menu__option.is-disabled {
+.volt-wired-menu__option.is-disabled {
     opacity: 0.6;
 }
 
-.octane-wired-menu__button {
+.volt-wired-menu__button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2504,39 +2504,39 @@
     image-rendering: pixelated;
 }
 
-.octane-wired-menu__button:hover:enabled {
+.volt-wired-menu__button:hover:enabled {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.octane-wired-menu__button:active:enabled,
-.octane-wired-menu__button.is-selected {
+.volt-wired-menu__button:active:enabled,
+.volt-wired-menu__button.is-selected {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.octane-wired-menu__button:disabled {
+.volt-wired-menu__button:disabled {
     border-image-source: var(--habbo-skin-shiny-disabled);
     color: #8c8c88;
 }
 
-.octane-wired-menu__button.is-danger {
+.volt-wired-menu__button.is-danger {
     border-image-source: var(--habbo-skin-shiny-red);
     color: #fff;
 }
 
-.octane-wired-menu__button.is-danger:hover:enabled {
+.volt-wired-menu__button.is-danger:hover:enabled {
     border-image-source: var(--habbo-skin-shiny-red-hover);
 }
 
-.octane-wired-menu__button.is-danger:active:enabled {
+.volt-wired-menu__button.is-danger:active:enabled {
     border-image-source: var(--habbo-skin-shiny-red-pressed);
 }
 
-.octane-wired-menu__button.is-danger:disabled {
+.volt-wired-menu__button.is-danger:disabled {
     border-image-source: var(--habbo-skin-shiny-red-disabled);
     color: #fff;
 }
 
-.octane-wired-menu__dropdown {
+.volt-wired-menu__dropdown {
     appearance: none;
     box-sizing: border-box;
     width: 100%;
@@ -2550,45 +2550,45 @@
     image-rendering: pixelated;
 }
 
-.octane-wired-menu__dropdown:disabled {
+.volt-wired-menu__dropdown:disabled {
     color: #8c8c88;
 }
 
-.octane-wired-menu__table {
+.volt-wired-menu__table {
     border: 1px solid #5d5d5a;
     border-radius: 5px;
     background: #fff;
 }
 
-.octane-wired-menu__table-title {
+.volt-wired-menu__table-title {
     display: flex;
     height: 22px;
     margin: 5px 4px 0;
 }
 
-.octane-wired-menu__table-splitter {
+.volt-wired-menu__table-splitter {
     height: 1px;
     margin: 0 4px;
     background: #afafaf;
 }
 
-.octane-wired-menu__table-rows {
+.volt-wired-menu__table-rows {
     height: calc(100% - 29px);
     margin: 0 4px 4px;
     overflow-y: auto;
 }
 
-.octane-wired-menu__table-row {
+.volt-wired-menu__table-row {
     display: flex;
     height: 20px;
     background: #f9f9f9;
 }
 
-.octane-wired-menu__table-row.is-even {
+.volt-wired-menu__table-row.is-even {
     background: #eaeaea;
 }
 
-.octane-wired-menu__cell {
+.volt-wired-menu__cell {
     flex: none;
     height: 20px;
     padding: 0 4px;
@@ -2597,13 +2597,13 @@
     text-overflow: ellipsis;
 }
 
-.octane-wired-menu__table-empty {
+.volt-wired-menu__table-empty {
     padding-top: 47px;
     color: #333;
     text-align: center;
 }
 
-.octane-wired-menu__link {
+.volt-wired-menu__link {
     padding: 0;
     border: 0;
     background: transparent;
@@ -2612,22 +2612,22 @@
     text-decoration: underline;
 }
 
-.octane-wired-menu__text--soft {
+.volt-wired-menu__text--soft {
     color: #8c8c88;
 }
 
-.octane-wired-menu__box {
+.volt-wired-menu__box {
     border: 1px solid #b1b1ab;
     border-radius: 5px;
     background: #f2f2ed;
 }
 
-.octane-wired-menu__picker-list {
+.volt-wired-menu__picker-list {
     height: 100%;
     overflow-y: auto;
 }
 
-.octane-wired-menu__picker-row {
+.volt-wired-menu__picker-row {
     display: block;
     width: 100%;
     height: 20px;
@@ -2640,23 +2640,23 @@
     text-align: left;
 }
 
-.octane-wired-menu__picker-row.is-selected {
+.volt-wired-menu__picker-row.is-selected {
     background: #cbe3f0;
 }
 
-.octane-wired-menu__empty {
+.volt-wired-menu__empty {
     padding-top: 100px;
     color: #333;
     text-align: center;
 }
 
-.octane-wired-menu__type-icon {
+.volt-wired-menu__type-icon {
     display: block;
     margin: auto;
     image-rendering: pixelated;
 }
 
-.octane-wired-menu__preview-image {
+.volt-wired-menu__preview-image {
     position: absolute;
     inset: 0;
     display: flex;
@@ -2664,7 +2664,7 @@
     justify-content: center;
 }
 
-.octane-wired-menu__preview-instruction {
+.volt-wired-menu__preview-instruction {
     position: absolute;
     top: 104px;
     left: 0;
@@ -2672,16 +2672,16 @@
     text-align: center;
 }
 
-.octane-wired-menu__trash-icon {
+.volt-wired-menu__trash-icon {
     display: block;
     margin: 0 auto;
 }
 
-.octane-wired-menu__table-row.is-selected {
+.volt-wired-menu__table-row.is-selected {
     background: #cbe3f0;
 }
 
-.octane-wired-menu__cell-input {
+.volt-wired-menu__cell-input {
     width: 100%;
     height: 18px;
     padding: 0 3px;
@@ -2690,14 +2690,14 @@
     font-size: 12px;
 }
 
-.octane-wired-menu__bubble {
+.volt-wired-menu__bubble {
     z-index: 5;
     border: 1px solid #5e5e58;
     border-radius: 5px;
     background: #f2f2ed;
 }
 
-.octane-wired-menu__value-box input {
+.volt-wired-menu__value-box input {
     width: 100%;
     height: 22px;
     padding: 0 4px;
@@ -2706,13 +2706,13 @@
     font-size: 12px;
 }
 
-.octane-wired-menu__dropdown-wrap {
+.volt-wired-menu__dropdown-wrap {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.octane-wired-menu__dropdown-wrap::after {
+.volt-wired-menu__dropdown-wrap::after {
     content: '';
     position: absolute;
     right: 0;
@@ -2724,29 +2724,29 @@
     pointer-events: none;
 }
 
-.octane-wired-menu__discord img {
+.volt-wired-menu__discord img {
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.28));
 }
 
 /* Native glyph text (il_regular) inside the Illumina section kit. NativeText keeps the 2px TextField gutter but
    sizes the field ceil(lines x 12.3) + 4; an auto-sized TextField is floor(lines x 12.3 + 4), one pixel less. */
-.octane-wired__native-text {
+.volt-wired__native-text {
     display: block;
     flex: none;
     margin-bottom: -1px;
 }
 
-.octane-wired__native-text--wrap {
+.volt-wired__native-text--wrap {
     flex: 1 1 0;
     min-width: 0;
 }
 
-.octane-wired__native-text--offset {
+.volt-wired__native-text--offset {
     margin-top: 2px;
 }
 
 /* RadioButtonPreset: radio + 3px + text; 4px under every option but the last, never under 20px; extra2 3px lower at 25px. */
-.octane-wired__option-cell {
+.volt-wired__option-cell {
     display: flex;
     flex-direction: column;
     gap: 3px;
@@ -2755,45 +2755,45 @@
     padding-bottom: 4px;
 }
 
-.octane-wired__option-cell:has(> .octane-wired__option.is-last) {
+.volt-wired__option-cell:has(> .volt-wired__option.is-last) {
     min-height: 0;
     padding-bottom: 0;
 }
 
-.octane-wired__options--radio .octane-wired__option,
-.octane-wired__options--radio .octane-wired__option.is-last {
+.volt-wired__options--radio .volt-wired__option,
+.volt-wired__options--radio .volt-wired__option.is-last {
     height: auto;
     min-height: 16px;
 }
 
-.octane-wired__option-extra {
+.volt-wired__option-extra {
     margin-left: 25px;
 }
 
 /* DropdownPreset on the Illumina dropmenu bitmaps; the select stays on top for input. */
-.octane-wired__dropdown {
+.volt-wired__dropdown {
     position: relative;
     height: 22px;
     background: url('../assets/images/wired/native/dropdown_left.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid.png') 0 0 repeat-x;
     image-rendering: pixelated;
 }
 
-.octane-wired__dropdown:not(.is-disabled):hover {
+.volt-wired__dropdown:not(.is-disabled):hover {
     background: url('../assets/images/wired/native/dropdown_left_hover.png') 0 0 no-repeat, url('../assets/images/wired/native/dropdown_right_hover.png') 100% 0 no-repeat, url('../assets/images/wired/native/dropdown_mid_hover.png') 0 0 repeat-x;
 }
 
-.octane-wired__dropdown.is-disabled {
+.volt-wired__dropdown.is-disabled {
     opacity: 0.5;
 }
 
-.octane-wired__dropdown-label {
+.volt-wired__dropdown-label {
     position: absolute;
     left: 10px;
     top: 3px;
     pointer-events: none;
 }
 
-.octane-wired .octane-wired__dropdown select {
+.volt-wired .volt-wired__dropdown select {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -2802,50 +2802,50 @@
     cursor: pointer;
 }
 
-.octane-wired__wide-button.octane-wired__shell-button {
+.volt-wired__wide-button.volt-wired__shell-button {
     flex: none;
     width: 100%;
 }
 
 /* InputSourceSection: arrow, label, arrow in a centred list (min height 23, spacing 6) padded 9/4. The row sets the
-   item offsets itself (WiredSourceRow); the legacy .octane-wired__source-row column rule above must not stack it. */
-.octane-wired .octane-wired__slider-row.octane-wired__source-row {
+   item offsets itself (WiredSourceRow); the legacy .volt-wired__source-row column rule above must not stack it. */
+.volt-wired .volt-wired__slider-row.volt-wired__source-row {
     flex-direction: row;
     align-items: flex-start;
     gap: 6px;
     min-height: 0;
 }
 
-.octane-wired__slider-row.octane-wired__source-row .octane-wired__source-label-text {
+.volt-wired__slider-row.volt-wired__source-row .volt-wired__source-label-text {
     display: block;
     width: 100%;
     text-align: center;
 }
 
 /* AdvancedSettingsWrapperPreset blends the spacing under an expanded wrapper with advancedBackgroundColor. */
-.octane-wired--native-layout .octane-wired__native-advanced-body {
+.volt-wired--native-layout .volt-wired__native-advanced-body {
     margin-bottom: -5px;
     padding-bottom: 5px;
 }
 
-.octane-wired__slider-row.octane-wired__source-row .octane-wired__source-label {
+.volt-wired__slider-row.volt-wired__source-row .volt-wired__source-label {
     display: flex;
     flex: 1 1 0;
     min-width: 0;
 }
 
-.octane-wired--native-layout .octane-wired__native-advanced > .octane-wired__advanced-toggle {
+.volt-wired--native-layout .volt-wired__native-advanced > .volt-wired__advanced-toggle {
     display: flex;
     justify-content: center;
     text-decoration: none;
 }
 
-.octane-wired-menu__loading {
+.volt-wired-menu__loading {
     z-index: 5;
     background: rgba(233, 233, 225, 0.6);
 }
 
 /* CheckboxOptionPreset: the label sits checkboxYOffset (2px) lower than the 19x20 box. */
-.octane-wired__option--checkbox > .octane-wired__native-text {
+.volt-wired__option--checkbox > .volt-wired__native-text {
     margin-top: 2px;
 }

@@ -1,6 +1,6 @@
-import { GetRenderer, GetTicker, OctaneLogger, OctaneTicker, RoomPreviewer, TextureUtils } from '@octane/renderer';
+import { GetRenderer, GetTicker, VoltLogger, VoltTicker, RoomPreviewer, TextureUtils } from '@volt/renderer';
 import { FC, useEffect, useRef } from 'react';
-import { GetAnimationFrameInterval } from '../../api/octane/room/AddAnimationTickerCallback';
+import { GetAnimationFrameInterval } from '../../api/volt/room/AddAnimationTickerCallback';
 import { PIXEL_ART_RENDERING } from './PixelArtRendering';
 
 export const LayoutRoomPreviewerView: FC<{
@@ -50,7 +50,7 @@ export const LayoutRoomPreviewerView: FC<{
             renderFailuresRef.current += 1;
 
             if (renderFailuresRef.current >= MAX_RENDER_FAILURES) {
-                OctaneLogger.error(
+                VoltLogger.error(
                     `LayoutRoomPreviewerView ${label} failed ${renderFailuresRef.current} times; disabling further renders for this preview`,
                     error
                 );
@@ -91,7 +91,7 @@ export const LayoutRoomPreviewerView: FC<{
         const repositionInterval = GetAnimationFrameInterval();
         let repositionElapsed = repositionInterval;
 
-        const update = (ticker: OctaneTicker) => {
+        const update = (ticker: VoltTicker) => {
             if (renderFailuresRef.current >= MAX_RENDER_FAILURES) return;
 
             const wasUpdated = !!roomPreviewer.getRenderingCanvas()?.canvasUpdated;

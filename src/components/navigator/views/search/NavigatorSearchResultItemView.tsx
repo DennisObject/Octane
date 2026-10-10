@@ -1,4 +1,4 @@
-import { GetSessionDataManager, RoomDataParser } from '@octane/renderer';
+import { GetSessionDataManager, RoomDataParser } from '@volt/renderer';
 import { FC, KeyboardEvent, MouseEvent } from 'react';
 import { CreateRoomSession, DoorStateType, TryVisitRoom } from '../../../../api';
 import { LayoutBadgeImageView, LayoutRoomThumbnailView } from '../../../../common';
@@ -19,9 +19,9 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
     const title = eventTitle && roomData.roomAdName ? roomData.roomAdName : roomData.roomName;
 
     const doorClass = () => {
-        if (roomData.doorMode === RoomDataParser.DOORBELL_STATE) return 'octane-navigator-air__door octane-navigator-air__door--doorbell';
-        if (roomData.doorMode === RoomDataParser.PASSWORD_STATE) return 'octane-navigator-air__door octane-navigator-air__door--password';
-        if (roomData.doorMode === RoomDataParser.INVISIBLE_STATE) return 'octane-navigator-air__door octane-navigator-air__door--invisible';
+        if (roomData.doorMode === RoomDataParser.DOORBELL_STATE) return 'volt-navigator-air__door volt-navigator-air__door--doorbell';
+        if (roomData.doorMode === RoomDataParser.PASSWORD_STATE) return 'volt-navigator-air__door volt-navigator-air__door--password';
+        if (roomData.doorMode === RoomDataParser.INVISIBLE_STATE) return 'volt-navigator-air__door volt-navigator-air__door--invisible';
 
         return '';
     };
@@ -74,19 +74,19 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                 role="button"
                 tabIndex={0}
                 aria-label={title}
-                className={`octane-navigator-air__tile${stripe ? ' is-stripe' : ''}`}
+                className={`volt-navigator-air__tile${stripe ? ' is-stripe' : ''}`}
                 onClick={visitRoom}
                 onKeyDown={handleKeyDown}
                 onMouseEnter={retargetPopup}
             >
-                <LayoutRoomThumbnailView className="octane-navigator-air__tile-thumb" customUrl={roomData.officialRoomPicRef} roomId={roomData.roomId}>
+                <LayoutRoomThumbnailView className="volt-navigator-air__tile-thumb" customUrl={roomData.officialRoomPicRef} roomId={roomData.roomId}>
                     <NavigatorUserCountView userCount={roomData.userCount} maxUserCount={roomData.maxUserCount} />
-                    {roomData.doorMode !== RoomDataParser.OPEN_STATE && <i className={`octane-navigator-air__tile-door ${doorClass()}`} />}
+                    {roomData.doorMode !== RoomDataParser.OPEN_STATE && <i className={`volt-navigator-air__tile-door ${doorClass()}`} />}
                 </LayoutRoomThumbnailView>
                 {roomData.habboGroupId > 0 && (
-                    <LayoutBadgeImageView badgeCode={roomData.groupBadgeCode} className="octane-navigator-air__tile-badge" isGroup={true} />
+                    <LayoutBadgeImageView badgeCode={roomData.groupBadgeCode} className="volt-navigator-air__tile-badge" isGroup={true} />
                 )}
-                <div className="octane-navigator-air__tile-name">
+                <div className="volt-navigator-air__tile-name">
                     <span>{title}</span>
                     <NavigatorSearchResultItemInfoView roomData={roomData} thumbnail={true} />
                 </div>
@@ -98,15 +98,15 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
             role="button"
             tabIndex={0}
             aria-label={title}
-            className={`octane-navigator-air__row${stripe ? ' is-stripe' : ''}`}
+            className={`volt-navigator-air__row${stripe ? ' is-stripe' : ''}`}
             onClick={visitRoom}
             onKeyDown={handleKeyDown}
             onMouseEnter={retargetPopup}
         >
             <NavigatorUserCountView userCount={roomData.userCount} maxUserCount={roomData.maxUserCount} />
-            <span className="octane-navigator-air__row-name">{title}</span>
-            {roomData.doorMode !== RoomDataParser.OPEN_STATE && <i className={`octane-navigator-air__row-door ${doorClass()}`} />}
-            {roomData.habboGroupId > 0 && <i className="octane-navigator-air__row-group octane-navigator-air__group" />}
+            <span className="volt-navigator-air__row-name">{title}</span>
+            {roomData.doorMode !== RoomDataParser.OPEN_STATE && <i className={`volt-navigator-air__row-door ${doorClass()}`} />}
+            {roomData.habboGroupId > 0 && <i className="volt-navigator-air__row-group volt-navigator-air__group" />}
             <NavigatorSearchResultItemInfoView roomData={roomData} />
         </div>
     );

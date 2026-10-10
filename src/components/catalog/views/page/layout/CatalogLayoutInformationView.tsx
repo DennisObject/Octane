@@ -33,16 +33,16 @@ export const CatalogLayoutInformationView: FC<CatalogLayoutProps> = ({ page }) =
         const imageUrl = libraryUrl ? `${libraryUrl}${native.illustration.asset}` : null;
 
         return (
-            <div className="octane-catalog-info-native">
+            <div className="volt-catalog-info-native">
                 <div
-                    className="octane-catalog-info-native-text"
+                    className="volt-catalog-info-native-text"
                     style={{ left: native.text.x, top: native.text.y, width: native.text.width, height: native.text.height }}
                     dangerouslySetInnerHTML={{ __html: SanitizeHtml(toNativeHtml(page.localization.getText(0))) }}
                 />
                 {!!imageUrl && (
                     <img
                         alt=""
-                        className="octane-catalog-info-native-illustration"
+                        className="volt-catalog-info-native-illustration"
                         src={imageUrl}
                         style={{
                             left: native.illustration.x,
@@ -61,22 +61,22 @@ export const CatalogLayoutInformationView: FC<CatalogLayoutProps> = ({ page }) =
 
     if (!images.length && !texts.length) {
         return (
-            <div className="octane-catalog-specialized-state" role="status">
+            <div className="volt-catalog-specialized-state" role="status">
                 {localizeWithFallback('catalog.layout.info.empty', 'Information will be available here soon.')}
             </div>
         );
     }
 
     return (
-        <article className="octane-catalog-information-layout">
+        <article className="volt-catalog-information-layout">
             {!!images.length && (
-                <div className="octane-catalog-information-images">
+                <div className="volt-catalog-information-images">
                     {images.map((image, index) => (
                         <img key={`${image}-${index}`} alt="" src={image} />
                     ))}
                 </div>
             )}
-            <div className="octane-catalog-information-copy">
+            <div className="volt-catalog-information-copy">
                 {texts.map((text, index) => (
                     <section key={index} dangerouslySetInnerHTML={{ __html: SanitizeHtml(text) }} />
                 ))}

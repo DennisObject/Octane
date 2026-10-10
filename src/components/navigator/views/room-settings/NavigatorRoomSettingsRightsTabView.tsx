@@ -5,7 +5,7 @@ import {
     RoomGiveRightsComposer,
     RoomTakeRightsComposer,
     RoomUsersWithRightsComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetConfigurationValue, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { ClassicScrollAreaView, UserProfileIconView } from '../../../../common';

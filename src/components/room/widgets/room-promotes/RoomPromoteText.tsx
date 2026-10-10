@@ -63,7 +63,7 @@ export const RoomPromoteText: FC<RoomPromoteTextProps> = ({ text, x, y, width, h
     return (
         <div
             ref={textRef}
-            className={`octane-event-info__text${height === undefined ? '' : ' is-clipped'} ${className}`}
+            className={`volt-event-info__text${height === undefined ? '' : ' is-clipped'} ${className}`}
             style={{ left: x + (alignCenter ? centerShift : 0), top: y, width: wrap || alignRight ? width : undefined, textAlign: alignRight ? 'right' : undefined, height: height === undefined ? undefined : height - 2, mixBlendMode: 'screen' }}
             onClick={onClick}
         >

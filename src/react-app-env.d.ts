@@ -34,8 +34,9 @@ declare module '*.scss';
 declare module '*.sass';
 
 interface Window {
-    OctaneConfig?: Record<string, unknown>;
-    OctaneSecureApiUrl?: string;
+    VoltConfig?: Record<string, unknown>;
+    VoltSecureApiUrl?: string;
+    __voltLaunchCredentials?: { ssoTicket: string; rememberToken: string; rememberExpiresAt: number };
     __octaneLaunchCredentials?: { ssoTicket: string; rememberToken: string; rememberExpiresAt: number };
 }
 

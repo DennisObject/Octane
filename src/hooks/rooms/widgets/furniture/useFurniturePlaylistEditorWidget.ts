@@ -17,11 +17,11 @@ import {
     RoomControllerLevel,
     RoomEngineTriggerWidgetEvent,
     SongDiskInventoryReceivedEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useState } from 'react';
 import { HasPermission, Permission } from '../../../../api/permissions';
 import { IsOwnerOfFurniture, LocalizeText, NotificationAlertType, NotificationBubbleType, SendMessageComposer } from '../../../../api';
-import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useMessageEvent, useVoltEvent } from '../../../events';
 import { useNotification } from '../../../notification';
 import { useFurniRemovedEvent } from '../../engine';
 import { useRoom } from '../../useRoom';
@@ -46,7 +46,7 @@ const useFurniturePlaylistEditorWidgetState = () => {
 
     const togglePlayPause = useCallback((furniId: number, position: number) => SendMessageComposer(new FurnitureMultiStateComposer(furniId, position)), []);
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_PLAYLIST_EDITOR, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_PLAYLIST_EDITOR, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;
@@ -72,26 +72,26 @@ const useFurniturePlaylistEditorWidgetState = () => {
         onClose();
     });
 
-    useOctaneEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, (event) => {
+    useVoltEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, (event) => {
         setCurrentPlayingIndex(event.position);
     });
 
-    useOctaneEvent<NotifyPlayedSongEvent>(NotifyPlayedSongEvent.NOTIFY_PLAYED_SONG, (event) => {
+    useVoltEvent<NotifyPlayedSongEvent>(NotifyPlayedSongEvent.NOTIFY_PLAYED_SONG, (event) => {
         showSingleBubble(
             LocalizeText('soundmachine.notification.playing', ['songname', 'songauthor'], [event.name, event.creator]),
             NotificationBubbleType.SOUNDMACHINE
         );
     });
 
-    useOctaneEvent<SongDiskInventoryReceivedEvent>(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT, (event) => {
+    useVoltEvent<SongDiskInventoryReceivedEvent>(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT, (event) => {
         setDiskInventory(GetSoundManager().musicController?.songDiskInventory.clone());
     });
 
-    useOctaneEvent<PlayListStatusEvent>(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED, (event) => {
+    useVoltEvent<PlayListStatusEvent>(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED, (event) => {
         setPlaylist(GetSoundManager().musicController?.getRoomItemPlaylist()?.entries.concat());
     });
 
-    useOctaneEvent<PlayListStatusEvent>(PlayListStatusEvent.PLUE_PLAY_LIST_FULL, (event) => {
+    useVoltEvent<PlayListStatusEvent>(PlayListStatusEvent.PLUE_PLAY_LIST_FULL, (event) => {
         simpleAlert(
             LocalizeText('playlist.editor.alert.playlist.full'),
             NotificationAlertType.ALERT,

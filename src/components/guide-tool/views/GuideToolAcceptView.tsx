@@ -1,4 +1,4 @@
-import { GuideSessionGuideDecidesMessageComposer } from '@octane/renderer';
+import { GuideSessionGuideDecidesMessageComposer } from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../api';
 import { Button, Text } from '../../../common';
@@ -15,7 +15,7 @@ export const GuideToolAcceptView: FC<GuideToolAcceptViewProps> = (props) => {
 
     return (
         <div className="flex flex-col">
-            <div className="octane-card-panel flex flex-col gap-0 p-2">
+            <div className="volt-card-panel flex flex-col gap-0 p-2">
                 <Text bold>{LocalizeText('guide.help.request.guide.accept.request.title')}</Text>
                 <Text variant="muted">{LocalizeText('guide.help.request.type.1')}</Text>
                 <Text textBreak wrap>

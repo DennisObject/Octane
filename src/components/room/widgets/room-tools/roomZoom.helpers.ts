@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomGeometry } from '@octane/renderer';
+import { GetRoomEngine, RoomGeometry } from '@volt/renderer';
 
 export const ROOM_ZOOM_SCALES = [0.5, 1, 2, 4] as const;
 

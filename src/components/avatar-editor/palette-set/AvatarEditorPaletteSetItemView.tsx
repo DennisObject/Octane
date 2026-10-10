@@ -1,4 +1,4 @@
-import { IPartColor } from '@octane/renderer';
+import { IPartColor } from '@volt/renderer';
 import { ButtonHTMLAttributes, CSSProperties, FC } from 'react';
 import { ColorUtils, GetClubMemberLevel, GetConfigurationValue } from '../../../api';
 import hcSmallSrc from '../../../assets/images/avatareditor/air/hc-small.png';

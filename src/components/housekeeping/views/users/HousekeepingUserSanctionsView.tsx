@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { Permission } from '../../../../api/permissions';
 import { FC } from 'react';
 import { findTemplateById, HK_MAX_REASON_LENGTH, HK_SANCTION_TEMPLATES, HousekeepingSanctionType, LocalizeText } from '../../../../api';
@@ -72,7 +72,7 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                         onChange={(event) => update({ reason: event.target.value })}
                     />
                 </StaffField>
-                <div className="octane-housekeeping-durations">
+                <div className="volt-housekeeping-durations">
                     <HousekeepingNumberInput label={LocalizeText('housekeeping.unit.hours')} value={banHours} onChange={(value) => update({ banHours: value })} />
                     <Button
                         disabled={disabled}
@@ -90,7 +90,7 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                         {LocalizeText('housekeeping.action.trade_lock_h', ['h'], [String(tradeLockHours)])}
                     </Button>
                 </div>
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <Button disabled={disabled} variant="secondary" onClick={() => kickUser(selectedUser.id, reasonText)}>
                         {LocalizeText('housekeeping.action.kick')}
                     </Button>
@@ -103,7 +103,7 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                 <Button disabled={disabled || !canManageRoles} variant="secondary" onClick={() => CreateLinkEvent('housekeeping/tab/roles')}>
                     {LocalizeText('housekeeping.roles.manage_user')}
                 </Button>
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <Button disabled={disabled} variant="danger" onClick={() => ask('housekeeping.confirm.disconnect', () => forceDisconnectUser(selectedUser.id, reasonText))}>
                         {LocalizeText('housekeeping.action.force_disconnect')}
                     </Button>
@@ -111,7 +111,7 @@ export const HousekeepingUserSanctionsView: FC<HousekeepingUserSanctionsViewProp
                         {LocalizeText('housekeeping.action.reset_password')}
                     </Button>
                 </div>
-                <span className="octane-staff-muted">{LocalizeText('housekeeping.user.audit_hint')}</span>
+                <span className="volt-staff-muted">{LocalizeText('housekeeping.user.audit_hint')}</span>
             </StaffSection>
         </>
     );

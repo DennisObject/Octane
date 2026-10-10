@@ -13,7 +13,7 @@ import {
     QuestsMessageEvent,
     RejectQuestMessageComposer,
     StartCampaignMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useMemo, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { localizeWithFallback, NotificationAlertType, SendMessageComposer } from '../../api';

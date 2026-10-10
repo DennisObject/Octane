@@ -1,4 +1,4 @@
-import { GetLocalizationManager, OctaneLogger } from '@octane/renderer';
+import { GetLocalizationManager, VoltLogger } from '@volt/renderer';
 
 /**
  * Supplemental marketplace texts (public/configuration/marketplace-texts.json), applied over the loaded localization.
@@ -23,6 +23,6 @@ export const loadMarketplaceTexts = async (): Promise<void> =>
     }
     catch (error)
     {
-        OctaneLogger.warn(`[Localization] Marketplace texts unavailable at ${url}; the default texts stay in use`, error);
+        VoltLogger.warn(`[Localization] Marketplace texts unavailable at ${url}; the default texts stay in use`, error);
     }
 };

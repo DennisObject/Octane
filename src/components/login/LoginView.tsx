@@ -46,7 +46,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
     };
 
     return (
-        <div className={`octane-login-view login-flow${isEntering ? ' is-entering' : ''}`} lang={localeState.locale.code}>
+        <div className={`volt-login-view login-flow${isEntering ? ' is-entering' : ''}`} lang={localeState.locale.code}>
             <LandingBackdropView backdrop={backdrop} />
             <LoginFlowBackgroundView leftUrl={backdrop.leftUrl} rightUrl={backdrop.rightUrl} />
             <img className="login-flow-logo" src={habboLogo} alt="Habbo" draggable={false} />

@@ -1,4 +1,4 @@
-import { AvatarScaleType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, GetAvatarRenderManager } from '@volt/renderer';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { initialState } from '../state/reducer';

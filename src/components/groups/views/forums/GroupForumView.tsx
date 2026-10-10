@@ -13,7 +13,7 @@ import {
     UpdateForumReadMarkerEntry,
     UpdateForumReadMarkerMessageComposer,
     UpdateThreadMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { GetGroupInformation, LocalizeText, SendMessageComposer } from '../../../../api';
 import { useMessageEvent } from '../../../../hooks';
@@ -286,7 +286,7 @@ export const GroupForumView: FC<{}> = () =>
     return (
         <>
             <ForumFrame
-                className="octane-group-forum"
+                className="volt-group-forum"
                 height={WINDOW_HEIGHT}
                 initialPosition={initialPosition}
                 isResizable={true}

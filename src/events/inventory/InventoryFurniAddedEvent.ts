@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class InventoryFurniAddedEvent extends OctaneEvent {
+export class InventoryFurniAddedEvent extends VoltEvent {
     public static FURNI_ADDED: string = 'IFAE_FURNI_ADDED';
 
     constructor(

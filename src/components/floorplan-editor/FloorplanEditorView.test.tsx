@@ -1,9 +1,9 @@
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Capture handlers registered by useMessageEvent / useOctaneEvent so we can fire fake events.
+// Capture handlers registered by useMessageEvent / useVoltEvent so we can fire fake events.
 const messageHandlers = new Map<unknown, (event: unknown) => void>();
-const octaneHandlers = new Map<unknown, (event: unknown) => void>();
+const voltHandlers = new Map<unknown, (event: unknown) => void>();
 
 vi.mock('../../hooks', async () => {
     return {
@@ -12,8 +12,8 @@ vi.mock('../../hooks', async () => {
         useMessageEvent: (eventClass: unknown, handler: (event: unknown) => void) => {
             messageHandlers.set(eventClass, handler);
         },
-        useOctaneEvent: (eventType: unknown, handler: (event: unknown) => void) => {
-            octaneHandlers.set(eventType, handler);
+        useVoltEvent: (eventType: unknown, handler: (event: unknown) => void) => {
+            voltHandlers.set(eventType, handler);
         }
     };
 });
@@ -42,11 +42,11 @@ import {
     RoomOccupiedTilesMessageEvent,
     RoomVisualizationSettingsEvent,
     UpdateFloorPropertiesMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FloorplanEditorView } from './FloorplanEditorView';
 
 // The Button component in this codebase renders as a <div> (via Base), not <button>.
-// OctaneCardView portals everything into #draggable-windows-container.
+// VoltCardView portals everything into #draggable-windows-container.
 // Find a clickable element by its exact trimmed text content in the portal.
 const findByExactText = (text: string): Element | undefined => {
     const container = document.getElementById('draggable-windows-container') ?? document.body;
@@ -57,7 +57,7 @@ describe('FloorplanEditorView container', () => {
     beforeEach(() => {
         vi.useFakeTimers();
         messageHandlers.clear();
-        octaneHandlers.clear();
+        voltHandlers.clear();
         sendMessageComposer.mockClear();
         (AddLinkEventTracker as ReturnType<typeof vi.fn>).mockClear();
         (RemoveLinkEventTracker as ReturnType<typeof vi.fn>).mockClear();
@@ -177,9 +177,9 @@ describe('FloorplanEditorView container', () => {
         render(<FloorplanEditorView />);
         const tracker = (AddLinkEventTracker as ReturnType<typeof vi.fn>).mock.calls[0][0];
         act(() => tracker.linkReceived('floor-editor/show'));
-        // Editor should be visible — OctaneCardHeaderView renders the title
+        // Editor should be visible — VoltCardHeaderView renders the title
         expect(document.body.textContent).toContain('floor.plan.editor.title');
-        const disposeHandler = octaneHandlers.get(RoomEngineEvent.DISPOSED);
+        const disposeHandler = voltHandlers.get(RoomEngineEvent.DISPOSED);
         expect(disposeHandler).toBeTruthy();
         act(() => disposeHandler!({}));
         expect(document.body.textContent).not.toContain('floor.plan.editor.title');
@@ -232,7 +232,7 @@ describe('FloorplanEditorView container', () => {
         expect(portal.querySelector('[data-testid="floorplan-auto-pickup"]')).toBeNull();
     });
 
-    it('opens the official preview and leaves Octane extras on the legacy path', () => {
+    it('opens the official preview and leaves Volt extras on the legacy path', () => {
         openEditor();
         const container = document.getElementById('draggable-windows-container') ?? document.body;
         const absent = [
@@ -250,8 +250,8 @@ describe('FloorplanEditorView container', () => {
         ];
 
         expect(container.querySelector('[data-testid="floorplan-official"]')).toBeTruthy();
-        expect(container.querySelector('.octane-floorplan-window')?.classList.contains('resize')).toBe(true);
-        expect(container.querySelector('.octane-floorplan-window')?.classList.contains('resize-none')).toBe(false);
+        expect(container.querySelector('.volt-floorplan-window')?.classList.contains('resize')).toBe(true);
+        expect(container.querySelector('.volt-floorplan-window')?.classList.contains('resize-none')).toBe(false);
         expect(container.querySelector('[data-testid="floorplan-preview-2d"]')).toBeTruthy();
         expect(container.querySelector('[data-testid="tool-door"]')).toBeTruthy();
         expect(container.querySelector('[data-testid="floorplan-save"]')?.classList.contains('is-save')).toBe(true);

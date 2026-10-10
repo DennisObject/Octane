@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, LocalizeText } from '../../../../api';
 import { SnowWarLeaderboard, SnowWarLeaderboardEntry, SnowWarLeaderboardKind, SnowWarLeaderboardRequest } from '../../../../api/snowwar';
-import { LayoutBadgeImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { LayoutBadgeImageView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { SnowWarAvatarImage } from './SnowWarAvatarImage';
 import { SnowWarBitmap, SnowWarBox } from './SnowWarBitmap';
 import { localizeSnowWar, SnowWarStrokeText, SnowWarText } from './SnowWarText';
@@ -157,8 +157,8 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
     const scrollImage = (direction: 'up' | 'down', state: string) => setScrollImages(images => ({ ...images, [direction]: state }));
 
     return (
-        <OctaneCardView className="snowwar-window snowwar-leaderboard-window" frameStyle={3} isResizable={false} uniqueKey="snowwar-leaderboard" style={{ width: 437, height: 511 }}>
-            <OctaneCardHeaderView headerText={caption} onCloseClick={onClose} />
+        <VoltCardView className="snowwar-window snowwar-leaderboard-window" frameStyle={3} isResizable={false} uniqueKey="snowwar-leaderboard" style={{ width: 437, height: 511 }}>
+            <VoltCardHeaderView headerText={caption} onCloseClick={onClose} />
             <div className="snowwar-frame-content" style={{ width: 431, height: 472 }}>
                 <SnowWarBitmap bitmap="leaderboard_bg" name="background" x={0} y={0} width={431} height={472} />
                 <SnowWarBox className="snowwar-clickable" name="this_week_region" x={107} y={0} width={119} height={28} onClick={() => table.state === 0 ? show(3) : table.state === 1 ? show(2) : table.state === 5 ? show(4) : null}>
@@ -239,6 +239,6 @@ export const SnowWarLeaderboardView: FC<SnowWarLeaderboardViewProps> = ({ leader
                 <SnowWarText align="center" name="changeGroupView" size={13} text={LocalizeText('people.groups.title')} underline x={280} y={445} width={150} height={18} onClick={() => show(table.state === 5 ? 5 : 4)} />
                 <SnowWarText align="center" name="changeFriendsView" size={13} text={LocalizeText('snowwar.leaderboard.friends')} underline x={135} y={445} width={150} height={18} onClick={() => show(table.state === 0 ? 0 : 3)} />
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

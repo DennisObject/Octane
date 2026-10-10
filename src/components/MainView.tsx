@@ -7,12 +7,12 @@ import {
     ILinkEventTracker,
     RemoveLinkEventTracker,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
 import { GetConfigurationValue, IsTouchDevice } from '../api';
 import { NativeTextHaloFilter } from '../common';
-import { useOctaneEventReducer } from '../hooks';
+import { useVoltEventReducer } from '../hooks';
 import { AchievementsView } from './achievements/AchievementsView';
 import { GoogleAdsView } from './ads/GoogleAdsView';
 import { AvatarEditorView } from './avatar-editor';
@@ -39,8 +39,8 @@ import { HousekeepingView } from './housekeeping/HousekeepingView';
 import { InventoryView } from './inventory/InventoryView';
 import { ModToolsView } from './mod-tools/ModToolsView';
 import { NavigatorView } from './navigator/NavigatorView';
-import { OctanebubbleHiddenView } from './octanebubblehidden/OctanebubbleHiddenView';
-import { OctanepediaView } from './octanepedia/OctanepediaView';
+import { VoltbubbleHiddenView } from './voltbubblehidden/VoltbubbleHiddenView';
+import { VoltpediaView } from './voltpedia/VoltpediaView';
 import { ExternalPluginLoader } from './plugins/ExternalPluginLoader';
 import { DailyTasksView, QuestCompletedView, QuestsView, RewardTrackView } from './quests';
 import { RadioView } from './radio/RadioView';
@@ -63,7 +63,7 @@ export const MainView: FC<{}> = (props) =>
     const [isReady, setIsReady] = useState(false);
     const [localizationVersion, setLocalizationVersion] = useState(0);
 
-    const { landingViewVisible } = useOctaneEventReducer<{ sessionId: number | null; landingViewVisible: boolean }, RoomSessionEvent>(
+    const { landingViewVisible } = useVoltEventReducer<{ sessionId: number | null; landingViewVisible: boolean }, RoomSessionEvent>(
         [RoomSessionEvent.CREATED, RoomSessionEvent.ENDED],
         (state, event) =>
         {
@@ -131,9 +131,9 @@ export const MainView: FC<{}> = (props) =>
     {
         const refreshLocalization = () => setLocalizationVersion((value) => value + 1);
 
-        window.addEventListener('octane-localization-updated', refreshLocalization);
+        window.addEventListener('volt-localization-updated', refreshLocalization);
 
-        return () => window.removeEventListener('octane-localization-updated', refreshLocalization);
+        return () => window.removeEventListener('volt-localization-updated', refreshLocalization);
     }, []);
 
     return (
@@ -164,7 +164,7 @@ export const MainView: FC<{}> = (props) =>
             <AchievementsView />
             <HabbiconHubView />
             <NavigatorView />
-            <OctanebubbleHiddenView />
+            <VoltbubbleHiddenView />
             <InventoryView />
             <CatalogView />
             <FriendsView />
@@ -182,7 +182,7 @@ export const MainView: FC<{}> = (props) =>
             <GroupForumView />
             <CameraWidgetView />
             <HelpView />
-            <OctanepediaView />
+            <VoltpediaView />
             <GuideToolView />
             <HcCenterView />
             <CampaignView />

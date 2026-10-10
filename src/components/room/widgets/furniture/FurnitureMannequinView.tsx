@@ -1,10 +1,10 @@
-import { GetAvatarRenderManager, GetSessionDataManager, HabboClubLevelEnum, RoomControllerLevel } from '@octane/renderer';
+import { GetAvatarRenderManager, GetSessionDataManager, HabboClubLevelEnum, RoomControllerLevel } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { Permission } from '../../../../api/permissions';
 import { GetClubMemberLevel, GetRoomSession, LocalizeText, MannequinUtilities } from '../../../../api';
-import { Button, Column, LayoutAvatarImageView, LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { Button, Column, LayoutAvatarImageView, LayoutCurrencyIcon, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../../common';
 import { useFurnitureMannequinWidget, useHasPermission } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 
 const MODE_NONE: number = -1;
 const MODE_CONTROLLER: number = 0;
@@ -88,9 +88,9 @@ export const FurnitureMannequinView: FC<{}> = (props) => {
     if (objectId === -1) return null;
 
     return (
-        <OctaneCardView className="octane-mannequin no-resize" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('mannequin.widget.title')} onCloseClick={onClose} />
-            <OctaneCardContentView center>
+        <VoltCardView className="volt-mannequin no-resize" theme="primary-slim">
+            <VoltCardHeaderView headerText={LocalizeText('mannequin.widget.title')} onCloseClick={onClose} />
+            <VoltCardContentView center>
                 <div className="flex w-full gap-2 overflow-hidden">
                     <div className="flex flex-col">
                         <div className="relative mannequin-preview">
@@ -101,7 +101,7 @@ export const FurnitureMannequinView: FC<{}> = (props) => {
                     <Column grow justifyContent="between" overflow="auto">
                         {mode === MODE_CONTROLLER && (
                             <>
-                                <OctaneInput type="text" value={name} onBlur={saveName} onChange={(event) => setName(event.target.value)} />
+                                <VoltInput type="text" value={name} onBlur={saveName} onChange={(event) => setName(event.target.value)} />
                                 <div className="flex flex-col gap-1">
                                     <Button variant="success" onClick={(event) => setMode(MODE_UPDATE)}>
                                         {LocalizeText('mannequin.widget.style')}
@@ -147,7 +147,7 @@ export const FurnitureMannequinView: FC<{}> = (props) => {
                         {mode === MODE_WRONG_GENDER && <Text>{LocalizeText('mannequin.widget.wronggender')}</Text>}
                     </Column>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

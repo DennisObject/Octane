@@ -18,7 +18,7 @@ export const furnidataReasonText = (reason: string): string => {
 };
 
 export const FurniEditorFurnidataFlagView: FC<{ state: FurnidataState }> = ({ state }) => (
-    <span className={`octane-staff-flag ${FLAG_TONE[state]}`} title={LocalizeText(`furni.editor.furnidata.flag.${state}.tip`)}>
+    <span className={`volt-staff-flag ${FLAG_TONE[state]}`} title={LocalizeText(`furni.editor.furnidata.flag.${state}.tip`)}>
         {LocalizeText(`furni.editor.furnidata.flag.${state}`)}
     </span>
 );

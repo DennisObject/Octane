@@ -1,4 +1,4 @@
-import { CatalogGroupsComposer, GroupPurchasedEvent, GuildMembershipsMessageEvent, HabboGroupEntryData } from '@octane/renderer';
+import { CatalogGroupsComposer, GroupPurchasedEvent, GuildMembershipsMessageEvent, HabboGroupEntryData } from '@volt/renderer';
 import { useCallback, useEffect, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { SendMessageComposer } from '../../api';

@@ -1,4 +1,4 @@
-import { ConnectionStatePhase, IConnectionStateSnapshot } from '@octane/renderer';
+import { ConnectionStatePhase, IConnectionStateSnapshot } from '@volt/renderer';
 
 type ReconnectSnapshot = Pick<IConnectionStateSnapshot, 'phase' | 'reconnectAttempt' | 'maxReconnectAttempts'>;
 

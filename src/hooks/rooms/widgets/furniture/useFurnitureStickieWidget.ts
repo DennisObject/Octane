@@ -1,8 +1,8 @@
-import { GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@volt/renderer';
 import { useState } from 'react';
 import { Permission } from '../../../../api/permissions';
 import { GetRoomSession, IsOwnerOfFurniture } from '../../../../api';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useHasPermission } from '../../../session';
 import { useFurniRemovedEvent } from '../../engine';
 
@@ -41,7 +41,7 @@ const useFurnitureStickieWidgetState = () => {
 
     const trash = () => GetRoomEngine().deleteRoomObject(objectId, category);
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_STICKIE, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_STICKIE, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;

@@ -22,18 +22,18 @@ const CatalogAdminPageEditorWindow: FC<{ target: CatalogAdminPageEditorTarget }>
 
     return (
         <StaffWindow
-            className="octane-catalog-admin-editor"
+            className="volt-catalog-admin-editor"
             title={form.isNew ? LocalizeText('catalog.admin.create.page') : LocalizeText('catalog.admin.edit.title', ['name'], [form.displayName])}
             uniqueKey="catalog-admin-page-editor"
             onClose={form.requestClose}
         >
-            <div className="octane-catalog-admin-editor-layout" onKeyDown={form.onKeyDown}>
-                <div className="octane-catalog-admin-editor-scroll">
-                    <div className="octane-staff-row octane-catalog-admin-editor-head">
-                        <span className="octane-catalog-admin-editor-icon">{draft.iconImage > 0 && <CatalogIconView icon={draft.iconImage} />}</span>
-                        <div className="octane-catalog-admin-editor-titles">
+            <div className="volt-catalog-admin-editor-layout" onKeyDown={form.onKeyDown}>
+                <div className="volt-catalog-admin-editor-scroll">
+                    <div className="volt-staff-row volt-catalog-admin-editor-head">
+                        <span className="volt-catalog-admin-editor-icon">{draft.iconImage > 0 && <CatalogIconView icon={draft.iconImage} />}</span>
+                        <div className="volt-catalog-admin-editor-titles">
                             <strong title={form.displayName}>{form.displayName}</strong>
-                            <span className="octane-staff-muted">
+                            <span className="volt-staff-muted">
                                 {LocalizeText(
                                     'catalog.admin.page.meta',
                                     ['id', 'layout', 'mode'],
@@ -43,9 +43,9 @@ const CatalogAdminPageEditorWindow: FC<{ target: CatalogAdminPageEditorTarget }>
                         </div>
                     </div>
                     {form.readOnlyLayout && (
-                        <span className="octane-staff-muted">{LocalizeText('catalog.admin.page.readonly', ['layout'], [draft.pageLayout])}</span>
+                        <span className="volt-staff-muted">{LocalizeText('catalog.admin.page.readonly', ['layout'], [draft.pageLayout])}</span>
                     )}
-                    <fieldset className="octane-catalog-admin-fieldset" disabled={!form.detailsReady}>
+                    <fieldset className="volt-catalog-admin-fieldset" disabled={!form.detailsReady}>
                         <CatalogAdminPageSettingsView captionRef={captionRef} draft={draft} fieldErrors={form.fieldErrors} patch={form.patch} />
                         <CatalogAdminPageContentView draft={draft} fieldErrors={form.fieldErrors} patch={form.patch} />
                     </fieldset>

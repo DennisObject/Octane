@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { SnowWarBoxProps, SnowWarImage } from './SnowWarBitmap';
 

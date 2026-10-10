@@ -25,7 +25,7 @@ export const CatalogAdminPageDetailView: FC<CatalogAdminPageDetailViewProps> = (
 
     if (!node) {
         return (
-            <StaffSection className="octane-catalog-admin-detail">
+            <StaffSection className="volt-catalog-admin-detail">
                 <StaffEmpty>{LocalizeText('catalog.admin.page.select')}</StaffEmpty>
             </StaffSection>
         );
@@ -50,13 +50,13 @@ export const CatalogAdminPageDetailView: FC<CatalogAdminPageDetailViewProps> = (
     };
 
     return (
-        <div className="octane-catalog-admin-detail">
+        <div className="volt-catalog-admin-detail">
             <StaffSection>
-                <div className="octane-staff-row octane-catalog-admin-editor-head">
-                    <span className="octane-catalog-admin-editor-icon">{node.iconId > 0 && <CatalogIconView icon={node.iconId} />}</span>
-                    <div className="octane-catalog-admin-editor-titles">
+                <div className="volt-staff-row volt-catalog-admin-editor-head">
+                    <span className="volt-catalog-admin-editor-icon">{node.iconId > 0 && <CatalogIconView icon={node.iconId} />}</span>
+                    <div className="volt-catalog-admin-editor-titles">
                         <strong title={name}>{name}</strong>
-                        <span className="octane-staff-muted">
+                        <span className="volt-staff-muted">
                             {LocalizeText(
                                 'catalog.admin.page.summary',
                                 ['id', 'pages', 'offers', 'revision'],
@@ -64,9 +64,9 @@ export const CatalogAdminPageDetailView: FC<CatalogAdminPageDetailViewProps> = (
                             )}
                         </span>
                     </div>
-                    {!node.isVisible && <span className="octane-staff-flag is-muted">{LocalizeText('catalog.admin.hidden')}</span>}
+                    {!node.isVisible && <span className="volt-staff-flag is-muted">{LocalizeText('catalog.admin.hidden')}</span>}
                 </div>
-                <div className="octane-staff-row octane-catalog-admin-actions">
+                <div className="volt-staff-row volt-catalog-admin-actions">
                     <Button variant="secondary" onClick={() => editPage(node)}>
                         {LocalizeText('catalog.admin.edit.page')}
                     </Button>

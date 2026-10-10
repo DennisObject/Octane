@@ -1,5 +1,5 @@
 /* badge_leaderboard_view (HabboGroupsCom): a 412x650 frame, its client origin 18px right of the window (12px frame margin + 6px body), every child at its layout rectangle. */
-.octane-badge-leaderboard__window {
+.volt-badge-leaderboard__window {
     position: relative;
     width: 412px;
     height: 650px;
@@ -11,11 +11,11 @@
     filter: drop-shadow(2.828px 2.828px 3px rgba(0, 0, 0, 0.35));
 }
 
-.octane-badge-leaderboard__window img {
+.volt-badge-leaderboard__window img {
     max-width: none;
 }
 
-.octane-badge-leaderboard__frame {
+.volt-badge-leaderboard__frame {
     position: absolute;
     inset: 0;
     box-sizing: border-box;
@@ -25,7 +25,7 @@
     pointer-events: none;
 }
 
-.octane-badge-leaderboard__drag-handle {
+.volt-badge-leaderboard__drag-handle {
     position: absolute;
     top: 0;
     left: 0;
@@ -34,13 +34,13 @@
     cursor: move;
 }
 
-.octane-badge-leaderboard__text {
+.volt-badge-leaderboard__text {
     position: absolute;
     white-space: pre;
 }
 
 /* frame_header_override: the title and its dropdown arrow are one row (spacing 6), centred in the window. */
-.octane-badge-leaderboard__title {
+.volt-badge-leaderboard__title {
     position: absolute;
     top: 3px;
     height: 32px;
@@ -49,7 +49,7 @@
     gap: 6px;
 }
 
-.octane-badge-leaderboard__title-text {
+.volt-badge-leaderboard__title-text {
     position: relative;
     display: block;
     margin: 0;
@@ -59,13 +59,13 @@
     cursor: pointer;
 }
 
-.octane-badge-leaderboard__title-sizer {
+.volt-badge-leaderboard__title-sizer {
     display: block;
     visibility: hidden;
     padding: 5px 2px 6px 1px;
 }
 
-.octane-badge-leaderboard__opener {
+.volt-badge-leaderboard__opener {
     position: relative;
     top: 13px;
     left: -2px;
@@ -79,11 +79,11 @@
     cursor: pointer;
 }
 
-.octane-badge-leaderboard__opener img {
+.volt-badge-leaderboard__opener img {
     display: block;
 }
 
-.octane-badge-leaderboard__close {
+.volt-badge-leaderboard__close {
     position: absolute;
     left: 308px;
     top: 12px;
@@ -96,7 +96,7 @@
     cursor: pointer;
 }
 
-.octane-badge-leaderboard__close span {
+.volt-badge-leaderboard__close span {
     display: block;
     width: 15px;
     height: 16px;
@@ -104,16 +104,16 @@
     background-position: 0 0;
 }
 
-.octane-badge-leaderboard__close:hover span {
+.volt-badge-leaderboard__close:hover span {
     background-position: -18px 0;
 }
 
-.octane-badge-leaderboard__close:active span {
+.volt-badge-leaderboard__close:active span {
     background-position: -37px 0;
 }
 
 /* hidden_dropdown: the open menu hangs below the arrow. */
-.octane-badge-leaderboard__menu {
+.volt-badge-leaderboard__menu {
     position: absolute;
     left: 250px;
     top: 17px;
@@ -127,7 +127,7 @@
     background: #fff;
 }
 
-.octane-badge-leaderboard__menu-item {
+.volt-badge-leaderboard__menu-item {
     position: relative;
     display: block;
     width: 100%;
@@ -140,13 +140,13 @@
     cursor: pointer;
 }
 
-.octane-badge-leaderboard__menu-item:hover,
-.octane-badge-leaderboard__menu-item.is-selected {
+.volt-badge-leaderboard__menu-item:hover,
+.volt-badge-leaderboard__menu-item.is-selected {
     background: #dddddd;
 }
 
 /* info_container (376x54 at 18,59). */
-.octane-badge-leaderboard__info {
+.volt-badge-leaderboard__info {
     position: absolute;
     left: 18px;
     top: 59px;
@@ -155,21 +155,21 @@
     z-index: 2;
 }
 
-.octane-badge-leaderboard__info > img {
+.volt-badge-leaderboard__info > img {
     position: absolute;
 }
 
-.octane-badge-leaderboard__info-bg {
+.volt-badge-leaderboard__info-bg {
     left: 0;
     top: 0;
 }
 
-.octane-badge-leaderboard__info-emblem {
+.volt-badge-leaderboard__info-emblem {
     left: 4px;
 }
 
 /* ranking_list (362x428 at 25,119, rows 41px high, spacing 2) and own_container (370x43 at 21,551). */
-.octane-badge-leaderboard__list {
+.volt-badge-leaderboard__list {
     position: absolute;
     left: 25px;
     top: 119px;
@@ -178,21 +178,21 @@
     z-index: 2;
 }
 
-.octane-badge-leaderboard__slot {
+.volt-badge-leaderboard__slot {
     position: absolute;
     left: 0;
     width: 362px;
     height: 41px;
 }
 
-.octane-badge-leaderboard__own {
+.volt-badge-leaderboard__own {
     position: absolute;
     left: 21px;
     top: 551px;
     z-index: 2;
 }
 
-.octane-badge-leaderboard__state {
+.volt-badge-leaderboard__state {
     position: absolute;
     inset: 0;
     display: flex;
@@ -204,32 +204,32 @@
     font-size: 14px;
 }
 
-.octane-badge-leaderboard__entry {
+.volt-badge-leaderboard__entry {
     position: relative;
     width: 362px;
     height: 41px;
 }
 
-.octane-badge-leaderboard__entry.is-own {
+.volt-badge-leaderboard__entry.is-own {
     width: 370px;
     height: 43px;
 }
 
-.octane-badge-leaderboard__entry > * {
+.volt-badge-leaderboard__entry > * {
     position: absolute;
 }
 
-.octane-badge-leaderboard__entry-bg {
+.volt-badge-leaderboard__entry-bg {
     left: 0;
     top: 0;
 }
 
 /* border style 14 (25x25 circle, tinted per rank): a 9-slice with 10px corners. */
-.octane-badge-leaderboard__rank {
+.volt-badge-leaderboard__rank {
     height: 25px;
 }
 
-.octane-badge-leaderboard__rank::before {
+.volt-badge-leaderboard__rank::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -239,7 +239,7 @@
 }
 
 /* region_profile (44x35) holding a 50x70 holder at (-3, -18); the face bitmap sits in the middle of it at (0, 10). */
-.octane-badge-leaderboard__profile {
+.volt-badge-leaderboard__profile {
     width: 44px;
     height: 35px;
     padding: 0;
@@ -249,7 +249,7 @@
     cursor: pointer;
 }
 
-.octane-badge-leaderboard__face-holder {
+.volt-badge-leaderboard__face-holder {
     position: absolute;
     left: -3px;
     top: -18px;
@@ -258,7 +258,7 @@
     overflow: hidden;
 }
 
-.octane-badge-leaderboard__face {
+.volt-badge-leaderboard__face {
     position: absolute;
     left: 0;
     top: 10px;
@@ -266,14 +266,14 @@
     height: 50px;
 }
 
-.octane-badge-leaderboard__face img {
+.volt-badge-leaderboard__face img {
     display: block;
     width: 50px;
     height: 50px;
 }
 
 /* buttons (279x26 at 67,604): Previous at 0 and Next at 179, both 100x26 shiny. */
-.octane-badge-leaderboard__button {
+.volt-badge-leaderboard__button {
     position: absolute;
     top: 604px;
     z-index: 2;
@@ -293,27 +293,27 @@
     padding-left: 2px;
 }
 
-.octane-badge-leaderboard__button.is-previous {
+.volt-badge-leaderboard__button.is-previous {
     left: 67px;
 }
 
-.octane-badge-leaderboard__button.is-next {
+.volt-badge-leaderboard__button.is-next {
     left: 246px;
 }
 
-.octane-badge-leaderboard__button:hover:not(:disabled) {
+.volt-badge-leaderboard__button:hover:not(:disabled) {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.octane-badge-leaderboard__button:active:not(:disabled) {
+.volt-badge-leaderboard__button:active:not(:disabled) {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.octane-badge-leaderboard__button:disabled {
+.volt-badge-leaderboard__button:disabled {
     border-image-source: var(--habbo-skin-shiny-disabled);
     cursor: default;
 }
 
-.octane-badge-leaderboard__button-label {
+.volt-badge-leaderboard__button-label {
     mix-blend-mode: multiply;
 }

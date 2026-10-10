@@ -9,7 +9,7 @@ import {
     WiredUserVariablesDataEvent,
     WiredUserVariablesRequestComposer,
     WiredUserVariableUpdateComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook } from '@/state/useSharedHook';
 import {

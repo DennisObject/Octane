@@ -14,14 +14,14 @@ const previewMocks = vi.hoisted(() => ({
     render: vi.fn()
 }));
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     GetConfiguration: () => ({ getValue: (_key: string, value: unknown) => value }),
     GetRenderer: () => ({
         render: previewMocks.render,
         texture: { getPixels: previewMocks.getPixels }
     }),
     GetTicker: () => ({ add: previewMocks.add, remove: previewMocks.remove }),
-    OctaneLogger: { error: vi.fn() },
+    VoltLogger: { error: vi.fn() },
     TextureUtils: { createRenderTexture: previewMocks.createRenderTexture }
 }));
 

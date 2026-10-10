@@ -13,7 +13,7 @@ export interface RegistrationDraft {
     templateId: number | null;
 }
 
-const STORAGE_KEY = 'octane.registration.draft';
+const STORAGE_KEY = 'volt.registration.draft';
 const LEGACY_STORAGE_KEY = 'nitro.registration.draft.v1';
 const ALLOWED_SET_TYPES = new Set(AVATAR_SET_TYPES);
 

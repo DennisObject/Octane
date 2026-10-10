@@ -1,4 +1,4 @@
-import { HabbiconAssetManager, TriggerHabbiconComposer } from '@octane/renderer';
+import { HabbiconAssetManager, TriggerHabbiconComposer } from '@volt/renderer';
 import * as Popover from '@radix-ui/react-popover';
 import { FC, useEffect, useMemo, useState } from 'react';
 import {

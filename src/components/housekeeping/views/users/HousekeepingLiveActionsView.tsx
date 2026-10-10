@@ -17,7 +17,7 @@ export const HousekeepingLiveActionsView: FC = () => {
 
     return (
         <StaffSection title={LocalizeText('housekeeping.user.live.label')}>
-            <div className="octane-staff-row flex-wrap">
+            <div className="volt-staff-row flex-wrap">
                 <Button disabled={isActionPending} variant="secondary" onClick={() => kickFromCurrentRoom(id)}>
                     {LocalizeText('housekeeping.user.live.kick')}
                 </Button>

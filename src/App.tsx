@@ -16,13 +16,13 @@ import {
     HabboWebTools,
     LegacyExternalInterface,
     LoadGameUrlEvent,
-    OctaneEventType,
-    OctaneLogger,
-    OctaneVersion,
+    VoltEventType,
+    VoltLogger,
+    VoltVersion,
     PrepareRenderer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, fetchReconnectTicket, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isOctaneAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
+import { adoptAccessToken, adoptLaunchRememberToken, beginAuthSession, claimResumeReload, endAuthSession, exchangeSsoTicketForAccessToken, fetchReconnectTicket, forgetAccessToken, forgetRememberGrant, getAccessToken, getAuthSession, GetUIVersion, HabboOwner, hasRememberGrant, isVoltAuthEnabled, logoutSession, redeemRememberGrant, resetResumeReload, rotateRememberGrant, takeLaunchRememberToken } from './api';
 import { loadMarketplaceTexts } from './api/catalog/loadMarketplaceTexts';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
@@ -30,11 +30,11 @@ import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
 import { clearRoomToolsHistory } from './components/room/widgets/room-tools/roomToolsHistoryStore';
-import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useOctaneEvent } from './hooks';
+import { ClearStoredChatHistory, getConnectionFailureAction, shouldClearLoginAfterDisconnect, useConnectionState, useDevicePixelRatio, useMessageEvent, useVoltEvent } from './hooks';
 import { clearPerkAllowances, listenForPerkAllowances } from './state/perkAllowancesStore';
 import { SharedHookRegistry } from './state/useSharedHook';
 
-OctaneVersion.UI_VERSION = GetUIVersion();
+VoltVersion.UI_VERSION = GetUIVersion();
 
 const getViewportDimensions = () => {
     const viewport = window.visualViewport;
@@ -47,15 +47,15 @@ const getViewportDimensions = () => {
 const syncViewportCssVars = () => {
     const { width, height } = getViewportDimensions();
 
-    document.documentElement.style.setProperty('--octane-app-width', `${width}px`);
-    document.documentElement.style.setProperty('--octane-app-height', `${height}px`);
+    document.documentElement.style.setProperty('--volt-app-width', `${width}px`);
+    document.documentElement.style.setProperty('--volt-app-height', `${height}px`);
 };
 
 // bootstrap.ts starts the socket itself when the page was opened with a hand-off ticket.
 const takeEarlyCommunicationInit = (): Promise<void> | null => {
-    const early = (window as any).__octaneEarlyCommunicationInit as Promise<void> | undefined;
+    const early = (window as any).__voltEarlyCommunicationInit as Promise<void> | undefined;
 
-    delete (window as any).__octaneEarlyCommunicationInit;
+    delete (window as any).__voltEarlyCommunicationInit;
 
     return early ?? null;
 };
@@ -104,13 +104,13 @@ const asStringArray = (value: unknown): string[] => {
 
 
 export const App: FC<{}> = (props) => {
-    const authEnabled = isOctaneAuthEnabled();
+    const authEnabled = isVoltAuthEnabled();
     const connectionState = useConnectionState();
     const devicePixelRatio = useDevicePixelRatio();
     const [isReady, setIsReady] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [showLogin, setShowLogin] = useState(false);
-    const [isEnteringHotel, setIsEnteringHotel] = useState(() => !!window.OctaneConfig?.['sso.ticket'] || (authEnabled && hasRememberGrant()));
+    const [isEnteringHotel, setIsEnteringHotel] = useState(() => !!window.VoltConfig?.['sso.ticket'] || (authEnabled && hasRememberGrant()));
     const [prepareTrigger, setPrepareTrigger] = useState(0);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const bumpProgress = useCallback((value: number) => {
@@ -141,7 +141,7 @@ export const App: FC<{}> = (props) => {
         clearRoomToolsHistory();
         if (authEnabled) void revokeSession(accessToken, ssoTicket);
         try {
-            delete (window as any).OctaneConfig?.['sso.ticket'];
+            delete (window as any).VoltConfig?.['sso.ticket'];
         } catch {}
         try {
             GetConfiguration().setValue('sso.ticket', '');
@@ -229,13 +229,13 @@ export const App: FC<{}> = (props) => {
         ClearStoredChatHistory();
         clearPerkAllowances();
         clearRoomToolsHistory();
-        window.OctaneConfig['sso.ticket'] = ssoTicket;
+        window.VoltConfig['sso.ticket'] = ssoTicket;
         GetConfiguration().setValue('sso.ticket', ssoTicket);
         if (authEnabled) void exchangeSsoTicketForAccessToken(ssoTicket);
     }, [authEnabled]);
 
     useEffect(() => {
-        const ssoTicket = window.OctaneConfig?.['sso.ticket'];
+        const ssoTicket = window.VoltConfig?.['sso.ticket'];
 
         if (authEnabled && typeof ssoTicket === 'string' && ssoTicket.length) void exchangeSsoTicketForAccessToken(ssoTicket);
     }, [authEnabled]);
@@ -306,7 +306,7 @@ export const App: FC<{}> = (props) => {
     const startRenderer = useCallback((width: number, height: number) => {
         if (rendererPromiseRef.current) return rendererPromiseRef.current;
 
-        const rawUseBackBuffer = window.OctaneConfig?.['renderer.useBackBuffer'];
+        const rawUseBackBuffer = window.VoltConfig?.['renderer.useBackBuffer'];
         const useBackBuffer = rawUseBackBuffer === undefined ? true : rawUseBackBuffer === true || rawUseBackBuffer === 'true';
 
         rendererPromiseRef.current = PrepareRenderer({
@@ -339,13 +339,13 @@ export const App: FC<{}> = (props) => {
                 // clock (system.fps.animation) is sampled unevenly. Animation cadence
                 // is time based, so a higher tick rate does not speed anything up.
                 GetTicker().maxFPS = GetConfiguration().getValue<number>('system.fps.max', 0);
-                OctaneLogger.LOG_DEBUG = GetConfiguration().getValue<boolean>('system.log.debug', true);
-                OctaneLogger.LOG_WARN = GetConfiguration().getValue<boolean>('system.log.warn', false);
-                OctaneLogger.LOG_ERROR = GetConfiguration().getValue<boolean>('system.log.error', false);
-                OctaneLogger.LOG_EVENTS = GetConfiguration().getValue<boolean>('system.log.events', false);
-                OctaneLogger.LOG_PACKETS = GetConfiguration().getValue<boolean>('system.log.packets', false);
+                VoltLogger.LOG_DEBUG = GetConfiguration().getValue<boolean>('system.log.debug', true);
+                VoltLogger.LOG_WARN = GetConfiguration().getValue<boolean>('system.log.warn', false);
+                VoltLogger.LOG_ERROR = GetConfiguration().getValue<boolean>('system.log.error', false);
+                VoltLogger.LOG_EVENTS = GetConfiguration().getValue<boolean>('system.log.events', false);
+                VoltLogger.LOG_PACKETS = GetConfiguration().getValue<boolean>('system.log.packets', false);
 
-                startRenderer(width, height).catch((error) => OctaneLogger.error('[LoginScreen] Renderer warmup failed', error));
+                startRenderer(width, height).catch((error) => VoltLogger.error('[LoginScreen] Renderer warmup failed', error));
 
                 const interpolate = (value: string) => GetConfiguration().interpolate(value);
                 const assetUrls = asStringArray(GetConfiguration().getValue<unknown>('preload.assets.urls')).map(interpolate);
@@ -419,8 +419,8 @@ export const App: FC<{}> = (props) => {
     useEffect(() => {
         const prepare = async (width: number, height: number) => {
             console.warn('[App] prepare() start', {
-                hasOctaneConfig: !!window.OctaneConfig,
-                ssoTicketInConfig: !!window.OctaneConfig?.['sso.ticket'],
+                hasVoltConfig: !!window.VoltConfig,
+                ssoTicketInConfig: !!window.VoltConfig?.['sso.ticket'],
                 hasRememberLocal: hasRememberGrant()
             });
 
@@ -428,9 +428,9 @@ export const App: FC<{}> = (props) => {
             bumpProgress(5);
 
             try {
-                if (!window.OctaneConfig) throw new Error('OctaneConfig is not defined!');
+                if (!window.VoltConfig) throw new Error('VoltConfig is not defined!');
 
-                let ssoTicket = window.OctaneConfig['sso.ticket'];
+                let ssoTicket = window.VoltConfig['sso.ticket'];
                 if (ssoTicket) GetConfiguration().setValue('sso.ticket', ssoTicket);
                 // Website hand-offs (bootstrap already took them out of the URL). A remember
                 // token is used once, and only when it comes alone: next to an SSO ticket it is
@@ -482,7 +482,7 @@ export const App: FC<{}> = (props) => {
                     });
 
                     if (configInitError) {
-                        OctaneLogger.error('[LoginScreen] Failed to load renderer-config.json — cannot resolve login.screen.enabled', configInitError);
+                        VoltLogger.error('[LoginScreen] Failed to load renderer-config.json — cannot resolve login.screen.enabled', configInitError);
                     }
 
                     if (loginScreenEnabled) {
@@ -497,7 +497,7 @@ export const App: FC<{}> = (props) => {
                             setShowLogin(true);
                             // No remembered session after all: Sign In must be usable.
                             setIsEnteringHotel(false);
-                            startWarmup(width, height).catch((error) => OctaneLogger.error('[LoginScreen] Warmup failed', error));
+                            startWarmup(width, height).catch((error) => VoltLogger.error('[LoginScreen] Warmup failed', error));
                             return;
                         }
                     } else {
@@ -581,7 +581,7 @@ export const App: FC<{}> = (props) => {
             } catch (err) {
                 releaseRememberLockRef.current?.();
                 releaseRememberLockRef.current = null;
-                OctaneLogger.error('[App] Initialization failed — falling back to login', err);
+                VoltLogger.error('[App] Initialization failed — falling back to login', err);
                 onInitFailure();
             }
         };
@@ -600,7 +600,7 @@ export const App: FC<{}> = (props) => {
     }, [authEnabled, prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, bumpProgress]);
 
     return (
-        <Base fit overflow="hidden" className={`octane-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>
+        <Base fit overflow="hidden" className={`volt-app-root ${!(devicePixelRatio % 1) ? 'image-rendering-pixelated' : ''}`}>
             {!isReady && !showLogin && (
                 <LoadingView
                     isError={errorMessage.length > 0}

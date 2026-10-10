@@ -1,7 +1,7 @@
-import { GetRoomEngine, RoomObjectCategory, RoomObjectVariable } from '@octane/renderer';
+import { GetRoomEngine, RoomObjectCategory, RoomObjectVariable } from '@volt/renderer';
 import { FC, PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText } from '../../../../../api';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
+import { Button, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../../common';
 
 const PAD_W = 230;
 const PAD_H = 150;
@@ -96,9 +96,9 @@ export const ImagePositionEditorView: FC<Props> = (props) => {
     const clampedTop = Math.max(0, Math.min(PAD_H, dotTop));
 
     return (
-        <OctaneCardView className="no-resize" uniqueKey="image-position-editor" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('image.position.editor.title')} onCloseClick={cancel} />
-            <OctaneCardContentView>
+        <VoltCardView className="no-resize" uniqueKey="image-position-editor" theme="primary-slim">
+            <VoltCardHeaderView headerText={LocalizeText('image.position.editor.title')} onCloseClick={cancel} />
+            <VoltCardContentView>
                 <div className="flex flex-col gap-2">
                     <span className="text-[11px] text-black/60">{LocalizeText('image.position.editor.hint')}</span>
                     <div
@@ -171,7 +171,7 @@ export const ImagePositionEditorView: FC<Props> = (props) => {
                         </Button>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

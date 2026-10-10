@@ -1,4 +1,4 @@
-import { GetDesiredResolution, GetRenderer, GetRoomEngine, GetStage, OctaneSprite, OctaneTexture, RoomGeometry, RoomVariableEnum, Vector3d } from '@octane/renderer';
+import { GetDesiredResolution, GetRenderer, GetRoomEngine, GetStage, VoltSprite, VoltTexture, RoomGeometry, RoomVariableEnum, Vector3d } from '@volt/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { AddAnimationTickerCallback, ISnowWarEngine, SetActiveRoomId, SnowWarArenaPlayerName, SnowWarArenaRoom, SnowWarChatMessage, SnowWarEngineState, SNOWWAR_ROOM_ID } from '../../../../api';
 import { useSnowWar } from '../../../../hooks';
@@ -59,7 +59,7 @@ export const SnowWarArenaStageView: FC<{ engine: ISnowWarEngine; chatMessages: r
         // AIR RoomDesktop: a game session gets a scale 32 canvas centred on the room bounds, with no camera target.
         const displayObject = roomEngine.getRoomInstanceDisplay(SNOWWAR_ROOM_ID, CANVAS_ID, width, height, RoomGeometry.SCALE_ZOOMED_OUT);
         const canvas = roomEngine.getRoomInstanceRenderingCanvas(SNOWWAR_ROOM_ID, CANVAS_ID);
-        const background = new OctaneSprite(OctaneTexture.WHITE);
+        const background = new VoltSprite(VoltTexture.WHITE);
 
         background.tint = 0;
         background.width = width;

@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useEffect, useRef } from 'react';
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { GetConfigurationValue, localizeWithFallback } from '../../api';
 import { Flex, LayoutItemCountView } from '../../common';
 
@@ -36,7 +36,7 @@ export const ToolbarProgressionView: FC<ToolbarProgressionViewProps> = ({ achiev
     };
 
     return (
-        <Flex alignItems="center" className="octane-toolbar-me-popup octane-toolbar-progression-popup" gap={2} innerRef={elementRef}>
+        <Flex alignItems="center" className="volt-toolbar-me-popup volt-toolbar-progression-popup" gap={2} innerRef={elementRef}>
             {GetConfigurationValue('dailytasks.enabled') && (
                 <div className="tbme-item" onClick={() => open('dailytasks/open')}>
                     <span className="icon-me-dailytasks" />
@@ -51,12 +51,12 @@ export const ToolbarProgressionView: FC<ToolbarProgressionViewProps> = ({ achiev
                 </div>
             )}
             <div className="tbme-item" onClick={() => open('achievements/toggle')}>
-                <span className="octane-icon icon-me-achievements" />
+                <span className="volt-icon icon-me-achievements" />
                 <span>{localizeWithFallback('widget.progmenu.achievements', 'Achievements')}</span>
                 {achievementCount > 0 && <LayoutItemCountView count={achievementCount} />}
             </div>
             <div className="tbme-item" onClick={() => open('badge-leaderboard/show')}>
-                <span className="octane-icon icon-progression-leaderboards" />
+                <span className="volt-icon icon-progression-leaderboards" />
                 <span>{localizeWithFallback('widget.progmenu.leaderboards', 'Leaderboards')}</span>
             </div>
             <div className="tbme-item" onClick={() => open('reward_track/open/introduction')}>

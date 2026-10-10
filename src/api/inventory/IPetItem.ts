@@ -1,4 +1,4 @@
-import { PetData } from '@octane/renderer';
+import { PetData } from '@volt/renderer';
 
 export interface IPetItem {
     petData: PetData;

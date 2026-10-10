@@ -1,6 +1,6 @@
 /* Daily tasks window (428 wide, frame style 3) of the quest engine: task_template cards of 402x119 at the layout XML rects. */
 
-.octane-card-shell.octane-daily-tasks-air {
+.volt-card-shell.volt-daily-tasks-air {
     position: relative;
     box-sizing: border-box;
     min-width: 0 !important;
@@ -10,30 +10,30 @@
     resize: none !important;
     padding: 0 !important;
     border: 0 !important;
-    --octane-card-surface: #e9e9e1;
+    --volt-card-surface: #e9e9e1;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.draggable-window:has(> .octane-daily-tasks-air) {
+.draggable-window:has(> .volt-daily-tasks-air) {
     width: 428px;
 }
 
-.draggable-window:has(> .octane-daily-tasks-unclaimed) {
+.draggable-window:has(> .volt-daily-tasks-unclaimed) {
     width: 452px;
 }
 
-.octane-daily-tasks-air * {
+.volt-daily-tasks-air * {
     box-sizing: border-box;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
 }
 
-.octane-card-shell.octane-daily-tasks-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-card-shell.volt-daily-tasks-air.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     top: 2px !important;
     right: 3px !important;
 }
 
-.octane-daily-tasks-air .air-quests-native-title {
+.volt-daily-tasks-air .air-quests-native-title {
     position: absolute !important;
     top: 3px;
     right: auto !important;
@@ -41,7 +41,7 @@
     transform: translateX(-50%);
 }
 
-.octane-daily-tasks-air .air-dt-content.octane-card-content-shell {
+.volt-daily-tasks-air .air-dt-content.volt-card-content-shell {
     position: relative;
     display: block;
     width: 100%;
@@ -62,7 +62,7 @@
     height: auto;
 }
 
-.air-dt-scroll > .octane-classic-scroll-area-viewport {
+.air-dt-scroll > .volt-classic-scroll-area-viewport {
     width: 409px;
     height: 100%;
 }
@@ -294,7 +294,7 @@
     border-image-repeat: stretch;
     background: transparent;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-dt-claim:hover:not(:disabled) {
@@ -342,22 +342,22 @@
 }
 
 /* autoHideScrollBar is off: with nothing to scroll the official bar stays on screen with disabled buttons and no lift. */
-.air-dt-scroll > .octane-classic-scrollbar[data-visible='false'] {
+.air-dt-scroll > .volt-classic-scrollbar[data-visible='false'] {
     visibility: visible;
 }
 
-.air-dt-scroll > .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-up {
+.air-dt-scroll > .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-button.is-up {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up-3-disabled.png');
 }
 
-.air-dt-scroll > .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-down {
+.air-dt-scroll > .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-button.is-down {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down-3-disabled.png');
 }
 
-.air-dt-scroll > .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-thumb {
+.air-dt-scroll > .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-thumb {
     visibility: hidden;
 }
 
-.air-dt-scroll > .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-track {
+.air-dt-scroll > .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-track {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-track-v-disabled.png');
 }

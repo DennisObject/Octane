@@ -16,14 +16,14 @@ describe('responsive catalog item grid', () => {
         const grid = document.createElement('div');
 
         stylesheet.textContent = `${catalogCss}\n${experienceCss}`;
-        grid.className = 'octane-catalog-grid octane-catalog-grid-density-standard';
+        grid.className = 'volt-catalog-grid volt-catalog-grid-density-standard';
         document.head.append(stylesheet);
         document.body.append(grid);
 
         const style = getComputedStyle(grid);
 
-        expect(style.getPropertyValue('--octane-grid-column-min-width').trim()).toBe('53px');
-        expect(style.gridTemplateColumns.replaceAll(' ', '')).toBe('repeat(var(--octane-air-column-count,6),53px)');
+        expect(style.getPropertyValue('--volt-grid-column-min-width').trim()).toBe('53px');
+        expect(style.gridTemplateColumns.replaceAll(' ', '')).toBe('repeat(var(--volt-air-column-count,6),53px)');
     });
 
     it('keeps the last column clear of the visible classic scrollbar', () => {
@@ -33,9 +33,9 @@ describe('responsive catalog item grid', () => {
         const scrollbar = document.createElement('div');
 
         stylesheet.textContent = `${catalogCss}\n${experienceCss}`;
-        scrollArea.className = 'octane-classic-scroll-area octane-catalog-item-grid-scroll-area';
-        viewport.className = 'octane-classic-scroll-area-viewport';
-        scrollbar.className = 'octane-classic-scrollbar';
+        scrollArea.className = 'volt-classic-scroll-area volt-catalog-item-grid-scroll-area';
+        viewport.className = 'volt-classic-scroll-area-viewport';
+        scrollbar.className = 'volt-classic-scrollbar';
         scrollbar.dataset.visible = 'true';
         scrollArea.append(viewport, scrollbar);
         document.head.append(stylesheet);
@@ -52,10 +52,10 @@ describe('responsive catalog item grid', () => {
         const scrollbar = document.createElement('div');
 
         stylesheet.textContent = `${catalogCss}\n${experienceCss}`;
-        virtualGrid.className = 'octane-catalog-grid-virtual';
-        scrollArea.className = 'octane-classic-scroll-area';
-        viewport.className = 'octane-classic-scroll-area-viewport';
-        scrollbar.className = 'octane-classic-scrollbar';
+        virtualGrid.className = 'volt-catalog-grid-virtual';
+        scrollArea.className = 'volt-classic-scroll-area';
+        viewport.className = 'volt-classic-scroll-area-viewport';
+        scrollbar.className = 'volt-classic-scrollbar';
         scrollbar.dataset.visible = 'true';
         scrollArea.append(viewport, scrollbar);
         virtualGrid.append(scrollArea);
@@ -67,10 +67,10 @@ describe('responsive catalog item grid', () => {
 
     it('keeps auto-fill active at the compact catalog breakpoint', () => {
         const compactRule =
-            catalogCss.match(/@media \(max-width: 640px\)[\s\S]*?\.octane-catalog-grid:not\(\.octane-catalog-grid-density-standard\)\s*\{([^}]*)\}/)?.[1] ?? '';
+            catalogCss.match(/@media \(max-width: 640px\)[\s\S]*?\.volt-catalog-grid:not\(\.volt-catalog-grid-density-standard\)\s*\{([^}]*)\}/)?.[1] ?? '';
 
-        expect(compactRule.replaceAll(' ', '')).toContain('grid-template-columns:repeat(auto-fill,minmax(var(--octane-grid-column-min-width,47px),1fr))');
-        expect(compactRule).not.toContain('--octane-air-column-count');
+        expect(compactRule.replaceAll(' ', '')).toContain('grid-template-columns:repeat(auto-fill,minmax(var(--volt-grid-column-min-width,47px),1fr))');
+        expect(compactRule).not.toContain('--volt-air-column-count');
     });
 
     it('lets fixed-coordinate offer templates expose the full catalog width to auto-fill', () => {
@@ -81,10 +81,10 @@ describe('responsive catalog item grid', () => {
         const purchase = document.createElement('div');
 
         stylesheet.textContent = `${catalogCss}\n${experienceCss}`;
-        layout.className = 'octane-catalog-pet-customization-layout';
-        preview.className = 'octane-catalog-pet-customization-preview';
-        grid.className = 'octane-catalog-pet-customization-grid';
-        purchase.className = 'octane-catalog-pet-customization-purchase';
+        layout.className = 'volt-catalog-pet-customization-layout';
+        preview.className = 'volt-catalog-pet-customization-preview';
+        grid.className = 'volt-catalog-pet-customization-grid';
+        purchase.className = 'volt-catalog-pet-customization-purchase';
         layout.append(preview, grid, purchase);
         document.head.append(stylesheet);
         document.body.append(layout);

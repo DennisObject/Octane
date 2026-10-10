@@ -54,7 +54,7 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                     value={draft.itemIds}
                     onChange={(itemIds) => patch({ itemIds })}
                 />
-                <div className="octane-staff-grid octane-catalog-admin-grid-3">
+                <div className="volt-staff-grid volt-catalog-admin-grid-3">
                     <CatalogAdminNumberField
                         error={fieldErrors.amount}
                         fallback={1}
@@ -80,7 +80,7 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                 </div>
             </StaffSection>
             <StaffSection title={LocalizeText('catalog.admin.offer.prices')}>
-                <div className="octane-staff-grid octane-catalog-admin-grid-3">
+                <div className="volt-staff-grid volt-catalog-admin-grid-3">
                     <CatalogAdminNumberField
                         error={fieldErrors.costCredits}
                         label={LocalizeText('catalog.admin.offer.credits')}
@@ -105,7 +105,7 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                 </div>
             </StaffSection>
             <StaffSection title={LocalizeText('catalog.admin.offer.options')}>
-                <div className="octane-staff-grid octane-catalog-admin-grid-3">
+                <div className="volt-staff-grid volt-catalog-admin-grid-3">
                     <CatalogAdminNumberField
                         error={fieldErrors.limitedStack}
                         label={LocalizeText('catalog.admin.offer.limited.stack')}
@@ -128,7 +128,7 @@ export const CatalogAdminOfferFieldsView: FC<CatalogAdminOfferFieldsViewProps> =
                     value={draft.extradata}
                     onChange={(extradata) => patch({ extradata })}
                 />
-                <div className="octane-staff-row octane-catalog-admin-flags">
+                <div className="volt-staff-row volt-catalog-admin-flags">
                     <CatalogAdminCheckbox
                         label={LocalizeText('catalog.admin.offer.club.only')}
                         value={draft.clubOnly}

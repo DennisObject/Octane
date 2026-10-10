@@ -29,11 +29,11 @@ export const FurnitureStickieSheetView: FC<FurnitureStickieSheetViewProps> = (pr
 
     return (
         <div
-            className={'octane-stickie ' + (themeName ? 'octane-stickie-image stickie-' + themeName : 'stickie-plain')}
+            className={'volt-stickie ' + (themeName ? 'volt-stickie-image stickie-' + themeName : 'stickie-plain')}
             style={themeName ? undefined : ({ '--stickie-color': '#' + color } as CSSProperties)}
         >
             <div className="stickie-header drag-handler" />
-            {showDelete && <div className="octane-stickie-image stickie-trash header-trash" onClick={onDelete} />}
+            {showDelete && <div className="volt-stickie-image stickie-trash header-trash" onClick={onDelete} />}
             {showColors &&
                 STICKIE_COLORS.map((entry, index) => (
                     <div
@@ -43,7 +43,7 @@ export const FurnitureStickieSheetView: FC<FurnitureStickieSheetViewProps> = (pr
                         onClick={() => onColor(entry.color)}
                     />
                 ))}
-            <div className="octane-stickie-image stickie-close header-close" onClick={onClose} />
+            <div className="volt-stickie-image stickie-close header-close" onClick={onClose} />
             <div className="stickie-context">{children}</div>
         </div>
     );

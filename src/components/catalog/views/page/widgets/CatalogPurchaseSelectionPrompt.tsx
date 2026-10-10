@@ -9,7 +9,7 @@ export const CatalogPurchaseSelectionPrompt: FC = () => {
         !localizedText || localizedText === LOCALIZATION_KEY || localizedText === `\${${LOCALIZATION_KEY}}` ? 'Select an item to continue.' : localizedText;
 
     return (
-        <span className="octane-catalog-purchase-selection-prompt" role="status">
+        <span className="volt-catalog-purchase-selection-prompt" role="status">
             {text}
         </span>
     );

@@ -5,8 +5,8 @@ import {
     WiredVariableFxConfigsRemovedEvent,
     WiredVariableFxStatusEvent,
     WiredVariableFxStatusRemovedEvent
-} from '@octane/renderer';
-import { useMessageEvent, useOctaneEvent } from '../events';
+} from '@volt/renderer';
+import { useMessageEvent, useVoltEvent } from '../events';
 import { useWiredVariableFxStore } from './wiredVariableFxStore';
 
 /** Feeds the variable fx store from the four server packets and empties it with the room. */
@@ -41,6 +41,6 @@ export const useWiredVariableFxEvents = () => {
         if (parser) removeStatuses(parser.keys);
     });
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => clear());
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => clear());
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => clear());
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => clear());
 };

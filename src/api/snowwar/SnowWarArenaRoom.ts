@@ -1,5 +1,5 @@
-import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomPlaneParser, Vector3d } from '@octane/renderer';
-import { GetConfigurationValue } from '../octane/GetConfigurationValue';
+import { GetAvatarRenderManager, GetConfiguration, GetEventDispatcher, GetRoomEngine, GetSoundManager, IRoomGameInputHandler, IRoomObjectSpriteVisualization, ObjectDataUpdateMessage, RoomEngine, RoomEngineEvent, RoomPlaneParser, Vector3d } from '@volt/renderer';
+import { GetConfigurationValue } from '../volt/GetConfigurationValue';
 import { ISnowWarEngine, ISnowWarHuman, ISnowWarSnowball, SnowWarEngineEvent, SnowWarObjectType } from './SnowWarTypes';
 
 /** The arena is a client-only room (AIR game room id 1); an id in RoomId's previewer range (>= 0x7FFF0000) keeps the normal room UI away from it. */

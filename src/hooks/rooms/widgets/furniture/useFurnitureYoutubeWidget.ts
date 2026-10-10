@@ -9,10 +9,10 @@ import {
     YoutubeDisplayPlaylist,
     YoutubeDisplayPlaylistsEvent,
     YoutubeDisplayVideoMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useRef, useState } from 'react';
 import { IsOwnerOfFurniture, Permission, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../../../api';
-import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useMessageEvent, useVoltEvent } from '../../../events';
 import { useHasPermission } from '../../../session';
 import { useFurniRemovedEvent } from '../../engine';
 
@@ -73,7 +73,7 @@ const useFurnitureYoutubeWidgetState = () => {
         SendMessageComposer(new SetYoutubeDisplayPlaylistMessageComposer(objectId, video));
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_YOUTUBE, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_YOUTUBE, (event) => {
         if (RoomId.isRoomPreviewerId(event.roomId)) return;
 
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);

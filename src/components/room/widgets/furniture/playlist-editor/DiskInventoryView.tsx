@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetSoundManager, IAdvancedMap, MusicPriorities } from '@octane/renderer';
+import { CreateLinkEvent, GetSoundManager, IAdvancedMap, MusicPriorities } from '@volt/renderer';
 import { FC, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { CatalogPageName, GetConfigurationValue, GetDiskColor, LocalizeText, localizeWithFallback } from '../../../../../api';
 import { AutoGrid, Button, Flex, LayoutGridItem, Text } from '../../../../../common';

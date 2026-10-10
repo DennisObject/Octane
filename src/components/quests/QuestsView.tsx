@@ -5,10 +5,10 @@ import {
     ILinkEventTracker,
     QuestMessageData,
     RemoveLinkEventTracker
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { localizeWithFallback } from '../../api';
-import { ClassicScrollAreaView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { ClassicScrollAreaView, VoltCardHeaderView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useQuests } from '../../hooks';
 import { AchievementText } from '../achievements/AchievementText';
@@ -142,8 +142,8 @@ export const QuestsView: FC<{}> = () => {
     return (
         <>
             {isVisible && position && (
-                <OctaneCardView
-                    className="octane-quests-air"
+                <VoltCardView
+                    className="volt-quests-air"
                     uniqueKey="quests"
                     frameStyle={3}
                     isResizable={false}
@@ -152,10 +152,10 @@ export const QuestsView: FC<{}> = () => {
                     unconstrainedPosition
                     dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
                 >
-                    <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
+                    <VoltCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
                         <FrameTitle text={localizeWithFallback('quests.list.caption', 'Quests')} />
-                    </OctaneCardHeaderView>
-                    <div className="air-quests-content octane-card-content-shell">
+                    </VoltCardHeaderView>
+                    <div className="air-quests-content volt-card-content-shell">
                         <ClassicScrollAreaView className="air-quests-list air-style0-scroll-area" scrollStep={LIST_ARROW_STEP} viewportRef={setListViewport}>
                             <div className="air-quests-entries" style={{ height: Math.max(0, sorted.length * 124 - 10) }}>
                                 {sorted.map((quest) => (
@@ -181,11 +181,11 @@ export const QuestsView: FC<{}> = () => {
                             )}
                         </div>
                     </div>
-                </OctaneCardView>
+                </VoltCardView>
             )}
             {detailsQuest && detailsPosition && (
-                <OctaneCardView
-                    className="octane-quest-details-air"
+                <VoltCardView
+                    className="volt-quest-details-air"
                     uniqueKey="quest-details"
                     frameStyle={3}
                     isResizable={false}
@@ -195,13 +195,13 @@ export const QuestsView: FC<{}> = () => {
                     unconstrainedPosition
                     dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
                 >
-                    <OctaneCardHeaderView headerText="" onCloseClick={() => setDetailsQuest(null)}>
+                    <VoltCardHeaderView headerText="" onCloseClick={() => setDetailsQuest(null)}>
                         <FrameTitle text={localizeWithFallback('quests.details.caption', 'Quest')} />
-                    </OctaneCardHeaderView>
-                    <div className="air-quest-details-content octane-card-content-shell">
+                    </VoltCardHeaderView>
+                    <div className="air-quest-details-content volt-card-content-shell">
                         <QuestEntryView quest={detailsQuest} showHint onAccept={onDetailsAccept} onReject={onReject} onBlockHeight={setDetailsBlockHeight} />
                     </div>
-                </OctaneCardView>
+                </VoltCardView>
             )}
         </>
     );

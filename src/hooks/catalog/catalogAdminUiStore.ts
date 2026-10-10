@@ -1,6 +1,6 @@
 import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
 import type { IPurchasableOffer } from '../../api/catalog/IPurchasableOffer';
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 import type { CatalogAdminOfferEditorTarget, CatalogAdminPageEditorTarget } from './catalogAdmin.types';
 
 export type CatalogAdminEditorKind = 'page' | 'offer';
@@ -43,7 +43,7 @@ const nextEditorKey = (kind: CatalogAdminEditorKind) => `${kind}-${++editorSeque
  * UI state of the catalog admin editor: whether admin mode is on and which page/offer editor
  * windows are open. Server data and mutations live in CatalogAdminProvider.
  */
-export const useCatalogAdminUiStore = createOctaneStore<CatalogAdminUiState>()((set, get) => {
+export const useCatalogAdminUiStore = createVoltStore<CatalogAdminUiState>()((set, get) => {
     /** Opens `target` once the current editor of that kind agreed to give way. */
     const open = (kind: CatalogAdminEditorKind, target: CatalogAdminPageEditorTarget | CatalogAdminOfferEditorTarget) => {
         const current = kind === 'page' ? get().pageEditor : get().offerEditor;

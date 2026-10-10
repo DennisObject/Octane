@@ -1,4 +1,4 @@
-import { IFurnitureData } from '@octane/renderer';
+import { IFurnitureData } from '@volt/renderer';
 import { FurniCategory } from '../../../../../api';
 
 const parseNumberList = (value: string | undefined): number[] | null => {

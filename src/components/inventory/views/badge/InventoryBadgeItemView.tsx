@@ -27,7 +27,7 @@ export const InventoryBadgeItemView: FC<PropsWithChildren<{ badgeCode: string }>
     return (
         <div
             draggable
-            className={`octane-inventory-thumb octane-inventory-badge-cell ${selectedBadgeCode === badgeCode ? 'is-selected' : ''} ${unseen ? 'is-unseen' : ''} ${isDragging ? 'is-dragging' : ''}`}
+            className={`volt-inventory-thumb volt-inventory-badge-cell ${selectedBadgeCode === badgeCode ? 'is-selected' : ''} ${unseen ? 'is-unseen' : ''} ${isDragging ? 'is-dragging' : ''}`}
             onDoubleClick={() => toggleBadge(badgeCode)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}

@@ -11,8 +11,8 @@ import { buildLivePreviewPayload, LivePreviewPayload, livePreviewPayloadsEqual, 
 const applyMock = vi.fn<(model: string, wallHeight: number, scale: boolean) => boolean>();
 const thicknessMock = vi.fn<(roomId: number, wall: number, floor: number) => boolean>();
 
-vi.mock('@octane/renderer', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@octane/renderer')>();
+vi.mock('@volt/renderer', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@volt/renderer')>();
 
     return {
         ...actual,

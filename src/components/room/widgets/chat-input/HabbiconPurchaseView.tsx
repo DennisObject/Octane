@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { localizeHabbiconName, localizeWithFallback, useHabbiconCatalog } from '../../../../api';
-import { DraggableWindowPosition, LayoutCurrencyIcon, LayoutHabbiconImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { DraggableWindowPosition, LayoutCurrencyIcon, LayoutHabbiconImageView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { usePurse } from '../../../../hooks/purse/usePurse';
 import { HabbiconPrice } from './HabbiconHubView';
 
@@ -34,14 +34,14 @@ export const HabbiconPurchaseView: FC = () => {
     const progress = Math.min(set?.total || 0, ownedCount + 1);
 
     return (
-        <OctaneCardView
+        <VoltCardView
             classNames={['habbicon-purchase-window']}
             frameStyle={3}
             isResizable={false}
             uniqueKey="habbicon-purchase"
             windowPosition={DraggableWindowPosition.CENTER}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('habbicon_purchase.confirm.title', 'Confirm purchase')} onCloseClick={close} />
+            <VoltCardHeaderView headerText={localizeWithFallback('habbicon_purchase.confirm.title', 'Confirm purchase')} onCloseClick={close} />
             <div className="habbicon-purchase-body">
                 <div className="habbicon-purchase-top">
                     <div className="habbicon-purchase-preview">
@@ -110,6 +110,6 @@ export const HabbiconPurchaseView: FC = () => {
                     </button>
                 </div>
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

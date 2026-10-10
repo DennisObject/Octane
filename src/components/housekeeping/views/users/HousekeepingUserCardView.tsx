@@ -11,13 +11,13 @@ export const HousekeepingUserCardView: FC = () => {
 
     return (
         <StaffSection title={`${selectedUser.username} (#${selectedUser.id})`}>
-            <div className="octane-housekeeping-user">
-                <div className="octane-housekeeping-user-head">
+            <div className="volt-housekeeping-user">
+                <div className="volt-housekeeping-user-head">
                     {selectedUser.figure && (
-                        <LayoutAvatarImageView headOnly nativeCroppedHead trimmed classNames={['octane-housekeeping-user-head-image']} direction={2} figure={selectedUser.figure} />
+                        <LayoutAvatarImageView headOnly nativeCroppedHead trimmed classNames={['volt-housekeeping-user-head-image']} direction={2} figure={selectedUser.figure} />
                     )}
                 </div>
-                <table className="octane-staff-table octane-housekeeping-facts">
+                <table className="volt-staff-table volt-housekeeping-facts">
                     <tbody>
                         <tr>
                             <th>{LocalizeText('housekeeping.user.motto')}</th>
@@ -29,18 +29,18 @@ export const HousekeepingUserCardView: FC = () => {
                         </tr>
                         <tr>
                             <th>{LocalizeText('housekeeping.user.status')}</th>
-                            <td className="octane-staff-row">
-                                <span className={`octane-staff-flag ${selectedUser.online ? 'is-ok' : 'is-muted'}`}>
+                            <td className="volt-staff-row">
+                                <span className={`volt-staff-flag ${selectedUser.online ? 'is-ok' : 'is-muted'}`}>
                                     {LocalizeText(selectedUser.online ? 'housekeeping.user.online' : 'housekeeping.user.offline')}
                                 </span>
-                                {selectedUser.isBanned && <span className="octane-staff-flag is-danger">{LocalizeText('housekeeping.user.banned')}</span>}
-                                {selectedUser.isMuted && <span className="octane-staff-flag is-danger">{LocalizeText('housekeeping.user.muted')}</span>}
-                                {selectedUser.isTradeLocked && <span className="octane-staff-flag is-danger">{LocalizeText('housekeeping.user.trade_locked')}</span>}
+                                {selectedUser.isBanned && <span className="volt-staff-flag is-danger">{LocalizeText('housekeeping.user.banned')}</span>}
+                                {selectedUser.isMuted && <span className="volt-staff-flag is-danger">{LocalizeText('housekeeping.user.muted')}</span>}
+                                {selectedUser.isTradeLocked && <span className="volt-staff-flag is-danger">{LocalizeText('housekeeping.user.trade_locked')}</span>}
                             </td>
                         </tr>
                         <tr>
                             <th>{LocalizeText('housekeeping.user.balance')}</th>
-                            <td className="octane-staff-row octane-housekeeping-balance">
+                            <td className="volt-staff-row volt-housekeeping-balance">
                                 <span title={LocalizeText('housekeeping.user.credits')}>
                                     <LayoutCurrencyIcon type={-1} /> {selectedUser.creditsBalance.toLocaleString()}
                                 </span>
@@ -54,16 +54,16 @@ export const HousekeepingUserCardView: FC = () => {
                         </tr>
                         <tr>
                             <th>{LocalizeText('housekeeping.user.email')}</th>
-                            <td className={`truncate ${selectedUser.email ? '' : 'octane-staff-muted'}`}>{selectedUser.email || LocalizeText('housekeeping.user.hidden')}</td>
+                            <td className={`truncate ${selectedUser.email ? '' : 'volt-staff-muted'}`}>{selectedUser.email || LocalizeText('housekeeping.user.hidden')}</td>
                         </tr>
                         <tr>
                             <th>{LocalizeText('housekeeping.user.last_ip')}</th>
-                            <td className={`truncate ${selectedUser.ipLast ? '' : 'octane-staff-muted'}`}>{selectedUser.ipLast || LocalizeText('housekeeping.user.hidden')}</td>
+                            <td className={`truncate ${selectedUser.ipLast ? '' : 'volt-staff-muted'}`}>{selectedUser.ipLast || LocalizeText('housekeeping.user.hidden')}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div className="octane-staff-row justify-end">
+            <div className="volt-staff-row justify-end">
                 <Button variant="secondary" onClick={() => setSelectedUser(null)}>
                     {LocalizeText('housekeeping.user.clear')}
                 </Button>

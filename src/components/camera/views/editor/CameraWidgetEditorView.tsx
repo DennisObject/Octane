@@ -3,12 +3,12 @@ import {
     GetRoomCameraWidgetManager,
     IRoomCameraWidgetEffect,
     IRoomCameraWidgetSelectedEffect,
-    OctaneLogger,
+    VoltLogger,
     RoomCameraWidgetSelectedEffect
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CameraEditorTabs, CameraEffectSelection, CameraPicture, CameraPictureThumbnail, LocalizeText } from '../../../../api';
-import { OctaneCardView, Slider } from '../../../../common';
+import { VoltCardView, Slider } from '../../../../common';
 import { CameraCenteredText, CameraNativeText, CAMERA_BOX_COLOR } from '../CameraNativeText';
 import { CameraSkinButton } from '../CameraSkinButton';
 import { CameraWidgetEffectListView } from './effect-list';
@@ -204,7 +204,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                         new CameraPictureThumbnail(effect.name, image.src)
                     ]);
                 } catch (error) {
-                    OctaneLogger.error(`Failed to render camera effect thumbnail ${effect.name}`, error);
+                    VoltLogger.error(`Failed to render camera effect thumbnail ${effect.name}`, error);
                 }
             }
         };
@@ -245,7 +245,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                         setIsRendering(false);
                     }
 
-                    OctaneLogger.error('Failed to apply effects to picture', error);
+                    VoltLogger.error('Failed to apply effects to picture', error);
                 });
         }, EFFECT_RENDER_DEBOUNCE);
 
@@ -259,9 +259,9 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
     }, []);
 
     return (
-        <OctaneCardView className="octane-camera-editor" frameStyle={3} isResizable={false} style={{ resize: 'none' }}>
-            <div className="octane-card-header-shell">
-                <span className="octane-card-title">
+        <VoltCardView className="volt-camera-editor" frameStyle={3} isResizable={false} style={{ resize: 'none' }}>
+            <div className="volt-card-header-shell">
+                <span className="volt-card-title">
                     <CameraCenteredText
                         background={0x484949}
                         color={0xffffff}
@@ -270,27 +270,27 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                         width={584}
                     />
                 </span>
-                <button aria-label={LocalizeText('generic.help')} className="octane-camera-editor__help" type="button" onClick={() => CreateLinkEvent('habbopages/camera')} />
-                <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => processAction('close')} />
+                <button aria-label={LocalizeText('generic.help')} className="volt-camera-editor__help" type="button" onClick={() => CreateLinkEvent('habbopages/camera')} />
+                <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={() => processAction('close')} />
             </div>
-            <div className="octane-camera-editor__layout">
-                <div className="octane-camera-editor__effect-tabs" role="tablist">
+            <div className="volt-camera-editor__layout">
+                <div className="volt-camera-editor__effect-tabs" role="tablist">
                     {TABS.map((tab) => (
                         <button
                             type="button"
                             key={tab}
                             role="tab"
                             aria-selected={currentTab === tab}
-                            className={`octane-camera-editor__effect-tab${currentTab === tab ? ' octane-camera-editor__effect-tab--active' : ''}`}
+                            className={`volt-camera-editor__effect-tab${currentTab === tab ? ' volt-camera-editor__effect-tab--active' : ''}`}
                             title={LocalizeText(`camera.effect.category.${tab}`)}
                             onClick={() => processAction('change_tab', tab)}
                         >
-                            <i className={`octane-icon icon-camera-${tab}`} />
+                            <i className={`volt-icon icon-camera-${tab}`} />
                         </button>
                     ))}
                 </div>
 
-                <div className="octane-camera-editor__effect-grid-frame has-classic-scrollbar">
+                <div className="volt-camera-editor__effect-grid-frame has-classic-scrollbar">
                     <CameraWidgetEffectListView
                         myLevel={myLevel}
                         selectedEffectName={selectedEffectName}
@@ -301,13 +301,13 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                     />
                 </div>
 
-                <div className="octane-camera-editor__preview" onClick={() => setSelectedEffectName(null)}>
+                <div className="volt-camera-editor__preview" onClick={() => setSelectedEffectName(null)}>
                     {currentPictureUrl && <img alt="" src={currentPictureUrl} />}
                 </div>
 
                 {currentEffect && currentEffect.effect.type !== 'frame' && (
-                    <div className="octane-camera-editor__slider-panel">
-                        <div className="octane-camera-editor__slider-label">
+                    <div className="volt-camera-editor__slider-panel">
+                        <div className="volt-camera-editor__slider-label">
                             <CameraCenteredText
                                 background={0x000000}
                                 color={0xeeeeee}
@@ -319,7 +319,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                         </div>
                         <Slider
                             disabledButton
-                            className="octane-camera-editor__slider"
+                            className="volt-camera-editor__slider"
                             min={0}
                             max={100}
                             step={1}
@@ -332,24 +332,24 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                     </div>
                 )}
 
-                <button type="button" className="octane-camera-editor__tool octane-camera-editor__tool--save" onClick={() => processAction('download')}>
-                    <span className="octane-camera-editor__tool-icon" aria-hidden="true" />
+                <button type="button" className="volt-camera-editor__tool volt-camera-editor__tool--save" onClick={() => processAction('download')}>
+                    <span className="volt-camera-editor__tool-icon" aria-hidden="true" />
                     <CameraNativeText background={CAMERA_BOX_COLOR} color={0x000000} size={11} text={LocalizeText('floor.plan.editor.save')} textStyle="u_button_tab" underline />
                 </button>
                 <button
                     type="button"
-                    className="octane-camera-editor__tool octane-camera-editor__tool--zoom"
+                    className="volt-camera-editor__tool volt-camera-editor__tool--zoom"
                     aria-pressed={isZoomed}
                     onClick={() => processAction('zoom')}
                 >
-                    <span className="octane-camera-editor__tool-icon" aria-hidden="true" />
+                    <span className="volt-camera-editor__tool-icon" aria-hidden="true" />
                     <CameraNativeText background={CAMERA_BOX_COLOR} color={0x000000} size={11} text={LocalizeText('room.zoom.button.text')} textStyle="u_button_tab" underline />
                 </button>
 
-                <div className="octane-camera-editor__button-separator" />
-                <CameraSkinButton className="octane-camera-editor__cancel" label={LocalizeText('catalog.purchase_confirmation.cancel')} labelWidth={152} variant="gray-dark" onClick={() => processAction('cancel')} />
+                <div className="volt-camera-editor__button-separator" />
+                <CameraSkinButton className="volt-camera-editor__cancel" label={LocalizeText('catalog.purchase_confirmation.cancel')} labelWidth={152} variant="gray-dark" onClick={() => processAction('cancel')} />
                 <CameraSkinButton
-                    className="octane-camera-editor__purchase"
+                    className="volt-camera-editor__purchase"
                     disabled={isRendering || !currentPictureUrl}
                     label={LocalizeText('camera.preview.button.text')}
                     labelWidth={152}
@@ -357,6 +357,6 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = (props) =
                     onClick={() => processAction('checkout')}
                 />
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

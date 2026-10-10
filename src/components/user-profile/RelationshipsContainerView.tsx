@@ -1,4 +1,4 @@
-import { FindNewFriendsMessageComposer, RelationshipStatusEnum, RelationshipStatusInfoMessageParser } from '@octane/renderer';
+import { FindNewFriendsMessageComposer, RelationshipStatusEnum, RelationshipStatusInfoMessageParser } from '@volt/renderer';
 import { FC } from 'react';
 import { GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../api';
 import bobba from '../../assets/images/user-profile/swf/bobba.png';
@@ -40,12 +40,12 @@ export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (
         const relationshipName = RelationshipStatusEnum.RELATIONSHIP_NAMES[type].toLocaleLowerCase();
 
         return (
-            <div key={type} className="octane-extended-profile__relationship">
-                <img className="octane-extended-profile__relationship-icon" src={type === RelationshipStatusEnum.HEART ? heart : type === RelationshipStatusEnum.SMILE ? smile : bobba} alt="" />
-                <div className="octane-extended-profile__relationship-copy">
-                    <div className="octane-extended-profile__relationship-box">
+            <div key={type} className="volt-extended-profile__relationship">
+                <img className="volt-extended-profile__relationship-icon" src={type === RelationshipStatusEnum.HEART ? heart : type === RelationshipStatusEnum.SMILE ? smile : bobba} alt="" />
+                <div className="volt-extended-profile__relationship-copy">
+                    <div className="volt-extended-profile__relationship-box">
                         <button type="button"
-                            className="octane-extended-profile__relationship-name"
+                            className="volt-extended-profile__relationship-name"
                             onClick={(event) =>
                                 relationshipInfo && relationshipInfo.randomFriendId >= 1
                                     ? GetUserProfile(relationshipInfo.randomFriendId)
@@ -56,13 +56,13 @@ export const RelationshipsContainerView: FC<RelationshipsContainerViewProps> = (
                             {relationshipInfo && relationshipInfo.friendCount >= 1 && relationshipInfo.randomFriendName}
                         </button>
                         {relationshipInfo && relationshipInfo.friendCount >= 1 && (
-                            <div className="octane-extended-profile__relationship-head">
+                            <div className="volt-extended-profile__relationship-head">
                                 {/* Official avatar_image:direction "southwest", which the AIR widget maps to 4. */}
                                 <LayoutAvatarImageView direction={4} figure={relationshipInfo.randomFriendFigure} headOnly nativeCroppedHead />
                             </div>
                         )}
                     </div>
-                    <p className="octane-extended-profile__relationship-subcopy">
+                    <p className="volt-extended-profile__relationship-subcopy">
                         {(!relationshipInfo || relationshipInfo.friendCount === 0) && LocalizeText('extendedprofile.no.friends.in.this.category')}
                         {relationshipInfo &&
                             relationshipInfo.friendCount > 1 &&

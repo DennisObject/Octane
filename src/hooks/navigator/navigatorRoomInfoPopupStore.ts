@@ -1,5 +1,5 @@
-import { RoomDataParser } from '@octane/renderer';
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { RoomDataParser } from '@volt/renderer';
+import { createVoltStore } from '../../state/createVoltStore';
 
 export type NavigatorRoomInfoAnchorKind = 'info' | 'row' | 'tile';
 
@@ -52,7 +52,7 @@ const anchorPoint = (kind: NavigatorRoomInfoAnchorKind, rect: DOMRect) => {
     return { x: rect.right, y: midY };
 };
 
-export const useNavigatorRoomInfoPopupStore = createOctaneStore<NavigatorRoomInfoPopupState & NavigatorRoomInfoPopupActions>()((set, get) => ({
+export const useNavigatorRoomInfoPopupStore = createVoltStore<NavigatorRoomInfoPopupState & NavigatorRoomInfoPopupActions>()((set, get) => ({
     room: null,
     visible: false,
     x: 0,

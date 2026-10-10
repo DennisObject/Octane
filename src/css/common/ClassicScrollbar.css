@@ -30,7 +30,7 @@
     box-shadow: none !important;
     border: 0 !important;
     border-radius: 0 !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .has-classic-scrollbar *::-webkit-scrollbar-thumb:vertical,
@@ -46,7 +46,7 @@
     box-shadow: none !important;
     border: 0 !important;
     border-radius: 0 !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .has-classic-scrollbar *::-webkit-scrollbar-thumb:vertical:hover,
@@ -72,7 +72,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 .has-classic-scrollbar *::-webkit-scrollbar-button:single-button:vertical:decrement:hover,
 .has-classic-scrollbar::-webkit-scrollbar-button:single-button:vertical:decrement:hover {
@@ -92,7 +92,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 .has-classic-scrollbar *::-webkit-scrollbar-button:single-button:vertical:increment:hover,
 .has-classic-scrollbar::-webkit-scrollbar-button:single-button:vertical:increment:hover {
@@ -111,7 +111,7 @@
     box-shadow: none !important;
     border: 0 !important;
     border-radius: 0 !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .has-classic-scrollbar *::-webkit-scrollbar-thumb:horizontal,
@@ -127,7 +127,7 @@
     box-shadow: none !important;
     border: 0 !important;
     border-radius: 0 !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .has-classic-scrollbar *::-webkit-scrollbar-thumb:horizontal:hover,
@@ -153,7 +153,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 .has-classic-scrollbar *::-webkit-scrollbar-button:single-button:horizontal:decrement:hover,
 .has-classic-scrollbar::-webkit-scrollbar-button:single-button:horizontal:decrement:hover {
@@ -173,7 +173,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 .has-classic-scrollbar *::-webkit-scrollbar-button:single-button:horizontal:increment:hover,
 .has-classic-scrollbar::-webkit-scrollbar-button:single-button:horizontal:increment:hover {
@@ -189,23 +189,23 @@
     background: transparent !important;
 }
 
-.has-classic-scrollbar .octane-classic-scroll-area-viewport,
-.has-classic-scrollbar .octane-avatar-editor .octane-avatar-editor-subcategories {
+.has-classic-scrollbar .volt-classic-scroll-area-viewport,
+.has-classic-scrollbar .volt-avatar-editor .volt-avatar-editor-subcategories {
     scrollbar-width: none !important;
 }
 
-.has-classic-scrollbar .octane-classic-scroll-area-viewport::-webkit-scrollbar,
-.has-classic-scrollbar .octane-avatar-editor .octane-avatar-editor-subcategories::-webkit-scrollbar {
+.has-classic-scrollbar .volt-classic-scroll-area-viewport::-webkit-scrollbar,
+.has-classic-scrollbar .volt-avatar-editor .volt-avatar-editor-subcategories::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
 }
 
-/* OctaneCardView classicScrollbar={false}: the window drops the 17px skin for
+/* VoltCardView classicScrollbar={false}: the window drops the 17px skin for
    the slim native scrollbar. The standard properties win over the WebKit
    pseudo-elements in current engines, so one rule undoes the whole theme. */
-.has-classic-scrollbar .octane-scrollbar-native,
-.has-classic-scrollbar .octane-scrollbar-native * {
+.has-classic-scrollbar .volt-scrollbar-native,
+.has-classic-scrollbar .volt-scrollbar-native * {
     scrollbar-width: thin !important;
     scrollbar-color: #8d8d8d transparent !important;
 }

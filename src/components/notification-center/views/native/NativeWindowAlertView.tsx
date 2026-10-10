@@ -65,22 +65,22 @@ export const NativeWindowAlertView: FC<NativeWindowAlertViewProps> = ({ title, m
     }, []);
 
     return (
-        <DraggableWindow dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} handleSelector=".octane-card-header-shell" offsetTop={growth / 2}>
-            <section ref={frameRef} aria-label={title} className="octane-alert octane-card-shell octane-card-frame-3 octane-native-confirm octane-native-window-alert" role="alertdialog">
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">
+        <DraggableWindow dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} handleSelector=".volt-card-header-shell" offsetTop={growth / 2}>
+            <section ref={frameRef} aria-label={title} className="volt-alert volt-card-shell volt-card-frame-3 volt-native-confirm volt-native-window-alert" role="alertdialog">
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">
                         <CenteredField width={278}>
                             <NativeText background={0x377998} overrides={{ color: 0xffffff }} text={title} textStyle="u_frame_title" />
                         </CenteredField>
                     </span>
-                    <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={onClose} />
+                    <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={onClose} />
                 </div>
-                <div className="octane-native-window-alert-body">
-                    <div className="octane-native-window-alert-text">
+                <div className="volt-native-window-alert-body">
+                    <div className="volt-native-window-alert-text">
                         <NativeText text={message} textStyle="u_regular" background={0xe9e9e1} maxWidth={210} />
                     </div>
-                    <button ref={okRef} className="octane-native-button is-thick octane-native-window-alert-ok" type="button" onClick={onClose}>
-                        <span className="octane-native-window-alert-ok-label">
+                    <button ref={okRef} className="volt-native-button is-thick volt-native-window-alert-ok" type="button" onClick={onClose}>
+                        <span className="volt-native-window-alert-ok-label">
                             <CenteredField width={50}>
                                 <NativeText background={0xffffff} overrides={{ color: 0x000000 }} style={{ mixBlendMode: 'multiply' }} text="Ok" textStyle="button_shiny_bold" />
                             </CenteredField>

@@ -1,4 +1,4 @@
-.octane-hotel-view {
+.volt-hotel-view {
     background: #27afcf;
     background-image: var(--hotel-view-background);
     background-position: bottom left;
@@ -313,7 +313,7 @@
     width: 34px;
     height: 37px;
     margin-left: 1px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .hotelview-slot-nextlimitedrarecountdown .hotelview-slot-copy {
@@ -950,7 +950,7 @@
     display: block;
     max-width: none;
     user-select: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .landing-backdrop-sun {

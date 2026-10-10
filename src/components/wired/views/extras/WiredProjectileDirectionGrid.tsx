@@ -42,7 +42,7 @@ export const WiredProjectileDirectionGrid: FC<{ system: number; disabled?: boole
     }
 
     return (
-        <div className="octane-wired__projectile-grid" style={{ opacity: disabled ? 0.4 : 1 }}>
+        <div className="volt-wired__projectile-grid" style={{ opacity: disabled ? 0.4 : 1 }}>
             <svg aria-hidden="true" height={height + 4} viewBox={`-2 -2 ${width + 4} ${height + 4}`} width={width + 4}>
                 {tiles}
                 <polygon

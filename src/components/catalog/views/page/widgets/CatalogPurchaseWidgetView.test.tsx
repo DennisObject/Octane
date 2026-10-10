@@ -12,7 +12,7 @@ import {
 } from '../../../../../hooks';
 import { CatalogPurchaseWidgetView } from './CatalogPurchaseWidgetView';
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     CreateLinkEvent: vi.fn(),
     PurchaseFromCatalogComposer: class {}
 }));

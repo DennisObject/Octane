@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager, RoomObjectCategory } from '@octane/renderer';
+import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager, RoomObjectCategory } from '@volt/renderer';
 import { Dispatch, FC, PropsWithChildren, SetStateAction, useEffect, useRef } from 'react';
 import { DispatchUiEvent, GetConfigurationValue, GetRoomSession, GetUserProfile, localizeWithFallback } from '../../api';
 import { Flex } from '../../common';
@@ -48,27 +48,27 @@ export const ToolbarMeView: FC<
     };
 
     return (
-        <Flex alignItems="center" className="octane-toolbar-me-popup" gap={2} innerRef={elementRef}>
+        <Flex alignItems="center" className="volt-toolbar-me-popup" gap={2} innerRef={elementRef}>
             {GetConfigurationValue('guides.enabled') && useGuideTool && (
                 <div className="tbme-item" onClick={() => open(() => DispatchUiEvent(new GuideToolEvent(GuideToolEvent.TOGGLE_GUIDE_TOOL)))}>
-                    <span className="octane-icon icon-me-helper-tool" />
+                    <span className="volt-icon icon-me-helper-tool" />
                     <span>{localizeWithFallback('widget.memenu.guide', 'Helper tool')}</span>
                 </div>
             )}
             <div className="tbme-item" onClick={() => open(() => GetUserProfile(GetSessionDataManager().userId))}>
-                <span className="octane-icon icon-me-profile" />
+                <span className="volt-icon icon-me-profile" />
                 <span>{localizeWithFallback('widget.memenu.profile', 'My profile')}</span>
             </div>
             <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('navigator/search/myworld_view'))}>
-                <span className="octane-icon icon-me-rooms" />
+                <span className="volt-icon icon-me-rooms" />
                 <span>{localizeWithFallback('widget.memenu.myrooms', 'My rooms')}</span>
             </div>
             <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('avatar-editor/show'))}>
-                <span className="octane-icon icon-me-clothing" />
+                <span className="volt-icon icon-me-clothing" />
                 <span>{localizeWithFallback('widget.memenu.editavatar', 'Change looks')}</span>
             </div>
             <div className="tbme-item" onClick={() => open(() => CreateLinkEvent('groupforum/list/my'))}>
-                <span className="octane-icon icon-me-forums" />
+                <span className="volt-icon icon-me-forums" />
                 <span>{localizeWithFallback('widget.memenu.forums', 'Forums')}</span>
             </div>
             {children}

@@ -1,4 +1,4 @@
-import { IObjectData } from '@octane/renderer';
+import { IObjectData } from '@volt/renderer';
 
 export interface IFurnitureItem {
     id: number;

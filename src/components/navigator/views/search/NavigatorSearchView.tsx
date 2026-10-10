@@ -1,4 +1,4 @@
-import { NavigatorSearchResultSet } from '@octane/renderer';
+import { NavigatorSearchResultSet } from '@volt/renderer';
 import { FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import refreshIcon from '../../../../assets/images/navigator/air/refresh-search.png';
@@ -62,12 +62,12 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
     };
 
     return (
-        <form onSubmit={onSubmit} className="octane-navigator-air__search">
+        <form onSubmit={onSubmit} className="volt-navigator-air__search">
             <NavigatorFilterChipsView value={searchFilterIndex} onChange={setSearchFilterIndex} />
-            <div className={`octane-navigator-air__search-field${hasQuery ? '' : ' is-placeholder'}`}>
+            <div className={`volt-navigator-air__search-field${hasQuery ? '' : ' is-placeholder'}`}>
                 <input
                     ref={inputRef}
-                    className="octane-navigator-air__search-input"
+                    className="volt-navigator-air__search-input"
                     name="q"
                     placeholder={placeholder}
                     aria-label={LocalizeText('navigator.tooltip.filter.input')}
@@ -77,7 +77,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
                 />
                 <button
                     type="button"
-                    className="octane-navigator-air__search-clear"
+                    className="volt-navigator-air__search-clear"
                     aria-label={showClearIcon ? LocalizeText('generic.clear') : placeholder}
                     onClick={clearSearch}
                 >
@@ -85,8 +85,8 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = (props) => {
                 </button>
             </div>
             {showRefresh && (
-                <button type="button" className="octane-navigator-air__search-refresh" aria-label={LocalizeText('generic.refresh')} onClick={refreshSearch}>
-                    <i className="octane-navigator-air__search-refresh-skin" aria-hidden="true" />
+                <button type="button" className="volt-navigator-air__search-refresh" aria-label={LocalizeText('generic.refresh')} onClick={refreshSearch}>
+                    <i className="volt-navigator-air__search-refresh-skin" aria-hidden="true" />
                     <img src={refreshIcon} alt="" />
                 </button>
             )}

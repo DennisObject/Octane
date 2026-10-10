@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { useEffect } from 'react';
 import { useFurniEditorUiStore } from './furniEditorUiStore';
 

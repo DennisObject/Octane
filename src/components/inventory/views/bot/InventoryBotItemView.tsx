@@ -1,4 +1,4 @@
-import { MouseEventType } from '@octane/renderer';
+import { MouseEventType } from '@volt/renderer';
 import { FC, MouseEvent, PropsWithChildren, useState } from 'react';
 import { attemptBotPlacement, IBotItem, UnseenItemCategory } from '../../../../api';
 import { useInventoryBots, useInventoryUnseenTracker } from '../../../../hooks';
@@ -43,9 +43,9 @@ export const InventoryBotItemView: FC<
             onMouseLeave={onMouseEvent}
             onMouseUp={onMouseEvent}
             {...rest}
-            className={`octane-inventory-thumb${botItem === selectedBot ? ' is-selected' : ''}${unseen ? ' is-unseen' : ''}`}
+            className={`volt-inventory-thumb${botItem === selectedBot ? ' is-selected' : ''}${unseen ? ' is-unseen' : ''}`}
         >
-            <span className="octane-inventory-animal-thumb-image">
+            <span className="volt-inventory-animal-thumb-image">
                 <InventoryBotImageView figure={botItem.botData.figure} gender={botItem.botData.gender} />
             </span>
             {children}

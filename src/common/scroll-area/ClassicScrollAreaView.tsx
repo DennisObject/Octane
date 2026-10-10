@@ -165,17 +165,17 @@ export const ClassicScrollAreaView: FC<ClassicScrollAreaViewProps> = ({
     );
 
     return (
-        <div className={`octane-classic-scroll-area ${className}`.trim()} {...rest}>
-            <div ref={setViewportRef} id={viewportId} className={`octane-classic-scroll-area-viewport ${viewportClassName}`.trim()} onScroll={updateMetrics}>
+        <div className={`volt-classic-scroll-area ${className}`.trim()} {...rest}>
+            <div ref={setViewportRef} id={viewportId} className={`volt-classic-scroll-area-viewport ${viewportClassName}`.trim()} onScroll={updateMetrics}>
                 <div ref={contentRef} className={contentClassName} style={contentStyle}>
                     {children}
                 </div>
             </div>
-            <div className="octane-classic-scrollbar" data-visible={metrics.overflow}>
-                <button aria-label="Scroll up" className="octane-classic-scrollbar-button is-up" type="button" onClick={() => scrollBy(-scrollStep)} />
-                <div ref={trackRef} className="octane-classic-scrollbar-track" onPointerDown={handleTrackPointerDown}>
+            <div className="volt-classic-scrollbar" data-visible={metrics.overflow}>
+                <button aria-label="Scroll up" className="volt-classic-scrollbar-button is-up" type="button" onClick={() => scrollBy(-scrollStep)} />
+                <div ref={trackRef} className="volt-classic-scrollbar-track" onPointerDown={handleTrackPointerDown}>
                     <div
-                        className="octane-classic-scrollbar-thumb"
+                        className="volt-classic-scrollbar-thumb"
                         role="scrollbar"
                         aria-controls={viewportId}
                         aria-orientation="vertical"
@@ -191,7 +191,7 @@ export const ClassicScrollAreaView: FC<ClassicScrollAreaViewProps> = ({
                         onPointerUp={stopDragging}
                     />
                 </div>
-                <button aria-label="Scroll down" className="octane-classic-scrollbar-button is-down" type="button" onClick={() => scrollBy(scrollStep)} />
+                <button aria-label="Scroll down" className="volt-classic-scrollbar-button is-down" type="button" onClick={() => scrollBy(scrollStep)} />
             </div>
         </div>
     );

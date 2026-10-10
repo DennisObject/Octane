@@ -1,7 +1,7 @@
-import { FriendCategoryData } from '@octane/renderer';
+import { FriendCategoryData } from '@volt/renderer';
 import { FC, MouseEvent, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
-import { Button, Column, Flex, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { Button, Column, Flex, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useFriendsActions } from '../../../../hooks';
 
 interface FriendsCategoryManagerViewProps {
@@ -38,14 +38,14 @@ export const FriendsCategoryManagerView: FC<FriendsCategoryManagerViewProps> = (
     };
 
     return (
-        <OctaneCardView
-            className="octane-friends-category-manager min-w-0 max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
+        <VoltCardView
+            className="volt-friends-category-manager min-w-0 max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
             theme="primary-slim"
-            uniqueKey="octane-friends-category-manager"
+            uniqueKey="volt-friends-category-manager"
             isResizable={false}
         >
-            <OctaneCardHeaderView headerText={LocalizeText('friendlist.friends')} onCloseClick={onCloseClick} />
-            <OctaneCardContentView className="text-black" gap={1}>
+            <VoltCardHeaderView headerText={LocalizeText('friendlist.friends')} onCloseClick={onCloseClick} />
+            <VoltCardContentView className="text-black" gap={1}>
                 <Flex gap={1} alignItems="center">
                     <input
                         className="form-control form-control-sm w-full"
@@ -101,7 +101,7 @@ export const FriendsCategoryManagerView: FC<FriendsCategoryManagerViewProps> = (
                     ))}
                     {!categories.length && <span className="text-muted text-center py-2 text-sm">{LocalizeText('friendlist.search.nofriendsfound')}</span>}
                 </Column>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

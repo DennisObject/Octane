@@ -1,6 +1,6 @@
-# Octane
+# Volt
 
-Octane is a fork of [Nitro React](https://github.com/billsonnn/nitro-react) and its companion [Nitro Renderer](https://github.com/billsonnn/nitro-renderer) and is completely independently developed and has no further ties to Billsonnn / Nitro.
+Volt is a fork of [Nitro React](https://github.com/billsonnn/nitro-react) and its companion [Nitro Renderer](https://github.com/billsonnn/nitro-renderer) and is completely independently developed and has no further ties to Billsonnn / Nitro.
 
 
 ## Prerequisites
@@ -17,7 +17,7 @@ in one go: prerequisites check, renderer clone & link, dependency install,
 config copy, JSON parsing mode selection, URL prompt with validation, and the
 production build.
 
-After cloning Octane, from its root run:
+After cloning Volt, from its root run:
 
 ```
 # Windows
@@ -37,11 +37,11 @@ The installer walks through these steps:
 
 ```
 [1/9] Check prerequisites (node >= 18, yarn, git)
-[2/9] Clone octane-renderer
+[2/9] Clone volt-renderer
 [3/9] Setup renderer (yarn install + yarn link)
-[4/9] Setup client (yarn install + yarn link "@octane/renderer")
+[4/9] Setup client (yarn install + yarn link "@volt/renderer")
 [5/9] Copy public/configuration/*.example -> *.json
-[6/9] Choose JSON parsing mode (jsonc recommended) -> writes .octane-build.json
+[6/9] Choose JSON parsing mode (jsonc recommended) -> writes .volt-build.json
 [7/9] Configure URLs (interactive, validated)
 [8/9] Build (yarn build)
 [9/9] Summary
@@ -168,14 +168,14 @@ Both styles work; you can migrate one gamedata file at a time.
 
 ## Installation (manual)
 
--   First you should open terminal and navigate to the folder where you want to clone Octane and Octane Renderer
--   Clone Octane (Expl. C:\Github\)
+-   First you should open terminal and navigate to the folder where you want to clone Volt and Volt Renderer
+-   Clone Volt (Expl. C:\Github\)
   -   `git clone https://github.com/duckietm/Octane.git` <== For now switch to Dev-RendererV2
 	-   `git clone https://github.com/duckietm/Octane-Renderer.git`
-	-   Install the dependencies for the renderer : cd C:\Github\octane-renderer
+	-   Install the dependencies for the renderer : cd C:\Github\volt-renderer
     	-   `yarn install`
-	-	Now we will create a Link for the Octane Renderer : `yarn link` This will give you a link address `yarn link "@octane/renderer"`
-    -   Install the dependencies for Cool UI : cd C:\Github\octane
+	-	Now we will create a Link for the Volt Renderer : `yarn link` This will give you a link address `yarn link "@volt/renderer"`
+    -   Install the dependencies for Cool UI : cd C:\Github\volt
 	-   `yarn install`
  -  -   Rename a few files
     -   Copy `public/configuration/renderer-config.example` to `public/configuration/renderer-config.json`
@@ -187,11 +187,11 @@ Both styles work; you can migrate one gamedata file at a time.
     -   Open `public/configuration/ui-config.json`
         -   Update `camera.url, thumbnails.url, url.prefix, habbopages.url`
 	-   `yarn build` <== the final step to build the DIST folder this is where your browser needs to point / or upload this to your /client if you do the compile on a other machine (preferd)
-    -   You can override any variable by passing it to `OctaneConfig` in the index.html
+    -   You can override any variable by passing it to `VoltConfig` in the index.html
 
 ## JSON / JSONC configuration mode
 
-Starting with this version of Octane, you can choose how the client parses the
+Starting with this version of Volt, you can choose how the client parses the
 configuration files (`renderer-config.json`, `ui-config.json`, `client-mode.json`,
 and the gamedata JSONs served by the renderer):
 
@@ -208,7 +208,7 @@ which mode to use:
 
 ```
 ════════════════════════════════════════════════════════════
-  Octane — JSON mode configuration
+  Volt — JSON mode configuration
 ════════════════════════════════════════════════════════════
 
   1) JSONC  (recommended)
@@ -218,7 +218,7 @@ which mode to use:
 Choice [1=JSONC]:
 ```
 
-Your choice is stored in `.octane-build.json` at the project root (gitignored, so
+Your choice is stored in `.volt-build.json` at the project root (gitignored, so
 each deployment keeps its own setting). Subsequent builds reuse it silently.
 
 ### Changing the mode later
@@ -237,7 +237,7 @@ NITRO_JSON_MODE=legacy yarn build
 NITRO_JSON_MODE=jsonc  yarn build
 
 # write the choice persistently
-echo '{"jsonMode":"legacy"}' > .octane-build.json
+echo '{"jsonMode":"legacy"}' > .volt-build.json
 ```
 
 The recognized values are `legacy`, `jsonc`, and `auto` (auto = try strict JSON
@@ -246,10 +246,10 @@ first, fall back to JSONC — equivalent to the original Render V3 behaviour).
 ### How it propagates
 
 The chosen mode is injected at build time as the compile-time constant
-`__OCTANE_JSON_MODE__`. It is honoured by:
+`__VOLT_JSON_MODE__`. It is honoured by:
 
 -   `src/bootstrap.ts` when loading `client-mode.json`
--   `@octane/utils` → `JsonParser.ts` in Render V3, used for every config file
+-   `@volt/utils` → `JsonParser.ts` in Render V3, used for every config file
     and every gamedata JSON loaded by the renderer
 
 In `legacy` mode, an invalid file produces a clear error that suggests switching
@@ -257,12 +257,12 @@ to JSONC; nothing is silently coerced.
 
 ## Usage
 
--   To use Octane you need `.nitro` assets generated, see [octane-converter](https://git.krews.org/octane/octane-converter) for instructions
--   See [Morningstar Websockets](https://git.krews.org/octane/ms-websockets) for instructions on configuring websockets on your server
+-   To use Volt you need `.nitro` assets generated, see [volt-converter](https://git.krews.org/volt/volt-converter) for instructions
+-   See [Morningstar Websockets](https://git.krews.org/volt/ms-websockets) for instructions on configuring websockets on your server
 
 ### Development
 
-Run Octane in development mode when you are editing the files, this way you can see the changes in your browser instantly
+Run Volt in development mode when you are editing the files, this way you can see the changes in your browser instantly
 
 ```
 yarn start
@@ -270,11 +270,11 @@ yarn start
 
 ### Production
 
-To build a production version of Octane just run the following command
+To build a production version of Volt just run the following command
 
 ```
 yarn build:prod
 ```
 
 -   A `dist` folder will be generated, these are the files that must be uploaded to your webserver
--   Consult your CMS documentation for compatibility with Octane and how to add the production files
+-   Consult your CMS documentation for compatibility with Volt and how to add the production files

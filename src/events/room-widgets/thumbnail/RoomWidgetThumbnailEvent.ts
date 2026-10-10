@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class RoomWidgetThumbnailEvent extends OctaneEvent {
+export class RoomWidgetThumbnailEvent extends VoltEvent {
     public static SHOW_THUMBNAIL: string = 'NE_SHOW_THUMBNAIL';
     public static HIDE_THUMBNAIL: string = 'NE_HIDE_THUMBNAIL';
     public static TOGGLE_THUMBNAIL: string = 'NE_TOGGLE_THUMBNAIL';

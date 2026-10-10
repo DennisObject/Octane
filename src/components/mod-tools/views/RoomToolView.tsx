@@ -7,7 +7,7 @@ import {
     ModeratorInitData,
     ModeratorRoomInfoEvent,
     RoomModerationData
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { OpenUrl, SendMessageComposer } from '../../../api';
 import { showModAlert, useMessageEvent, useModWindowTrackerStore } from '../../../hooks';

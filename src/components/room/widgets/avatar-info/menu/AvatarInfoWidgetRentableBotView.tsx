@@ -6,7 +6,7 @@ import {
     RequestBotCommandConfigurationComposer,
     RoomObjectCategory,
     RoomObjectType
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     AvatarInfoRentableBot,
@@ -20,7 +20,7 @@ import {
 } from '../../../../../api';
 import { Button, Column, Text } from '../../../../../common';
 import { useMessageEvent } from '../../../../../hooks';
-import { OctaneInput } from '../../../../../layout';
+import { VoltInput } from '../../../../../layout';
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
 import { ContextMenuListItemView } from '../../context-menu/ContextMenuListItemView';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
@@ -149,7 +149,7 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--rentable-bot']}
+            classNames={['volt-avatar-action-menu', 'volt-avatar-action-menu--own', 'volt-avatar-action-menu--rentable-bot']}
             collapsable={true}
             freezePositionOnHover={true}
             objectId={avatarInfo.roomIndex}
@@ -212,7 +212,7 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
                 {mode === MODE_CHANGE_NAME && (
                     <Column className="menu-item" gap={1} onClick={null}>
                         <Text variant="white">{LocalizeText('bot.skill.name.configuration.new.name')}</Text>
-                        <OctaneInput
+                        <VoltInput
                             maxLength={GetConfigurationValue<number>('bot.name.max.length', 15)}
                             type="text"
                             value={newName}
@@ -231,7 +231,7 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
                 {mode === MODE_CHANGE_MOTTO && (
                     <Column className="menu-item" gap={1} onClick={null}>
                         <Text variant="white">{localizeWithFallback('bot.skill.name.configuration.new.motto', 'Choose a motto:')}</Text>
-                        <OctaneInput
+                        <VoltInput
                             maxLength={GetConfigurationValue<number>('motto.max.length', 38)}
                             type="text"
                             value={newMotto}

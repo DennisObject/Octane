@@ -1,4 +1,4 @@
-import { AdvancedMap } from '@octane/renderer';
+import { AdvancedMap } from '@volt/renderer';
 import { GroupItem } from './GroupItem';
 
 export class TradeUserData {

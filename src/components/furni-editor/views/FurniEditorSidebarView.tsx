@@ -23,14 +23,14 @@ import { FurniEditorPreviewView } from './FurniEditorPreviewView';
 const ASSET_TONE: Record<AssetPresence, string> = { present: 'is-ok', missing: 'is-danger', unknown: 'is-muted' };
 
 const Fact: FC<{ label: string; tone?: 'warning'; children: ReactNode }> = ({ label, tone, children }) => (
-    <tr className={tone === 'warning' ? 'octane-furni-editor-warning' : ''}>
+    <tr className={tone === 'warning' ? 'volt-furni-editor-warning' : ''}>
         <th>{label}</th>
         <td>{children}</td>
     </tr>
 );
 
 const Link: FC<{ onClick: () => void; title?: string; children: ReactNode }> = ({ onClick, title, children }) => (
-    <button className="octane-furni-editor-link" title={title} type="button" onClick={onClick}>
+    <button className="volt-furni-editor-link" title={title} type="button" onClick={onClick}>
         {children}
     </button>
 );
@@ -78,19 +78,19 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
     };
 
     return (
-        <aside className="octane-furni-editor-side">
-            <div className="octane-staff-row">
+        <aside className="volt-furni-editor-side">
+            <div className="volt-staff-row">
                 <Link onClick={onBack}>{LocalizeText('furni.editor.side.back')}</Link>
             </div>
             <FurniEditorPreviewView key={item.id} item={item} length={form.length} modes={form.interactionModesCount} width={form.width} />
-            <div className="octane-staff-row">
-                <strong className="octane-furni-editor-grow octane-furni-editor-ellipsis" title={displayName}>
+            <div className="volt-staff-row">
+                <strong className="volt-furni-editor-grow volt-furni-editor-ellipsis" title={displayName}>
                     {displayName}
                 </strong>
                 <FurniEditorFurnidataFlagView state={furnidataState} />
             </div>
             <FurniEditorCopyValueView value={furniEditorText('furni.editor.side.identity', { classname: item.itemName, id: item.id, sprite: item.spriteId })} />
-            <table className="octane-staff-table octane-furni-editor-facts">
+            <table className="volt-staff-table volt-furni-editor-facts">
                 <tbody>
                     <Fact label={LocalizeText('furni.editor.side.type')}>
                         {LocalizeText(item.type === 's' ? 'furni.editor.type.floor' : 'furni.editor.type.wall')}
@@ -147,7 +147,7 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                             return (
                                 <span
                                     key={kind}
-                                    className={`octane-staff-flag ${state ? ASSET_TONE[state] : 'is-muted'} octane-furni-editor-asset`}
+                                    className={`volt-staff-flag ${state ? ASSET_TONE[state] : 'is-muted'} volt-furni-editor-asset`}
                                     title={`${LocalizeText(`furni.editor.side.assets.${state ?? 'checking'}`)}${url ? `: ${url}` : ''}`}
                                 >
                                     {LocalizeText(`furni.editor.side.assets.${kind}`)}
@@ -166,7 +166,7 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                 </tbody>
             </table>
             {isDirty && (
-                <div className="octane-furni-editor-unsaved">
+                <div className="volt-furni-editor-unsaved">
                     <strong>{furniEditorText('furni.editor.side.unsaved', { count: changedFields.length })}</strong>
                     <ul>
                         {changedFields.map((field) => (
@@ -191,11 +191,11 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                     <option key={field} value={LocalizeText(fieldLabelKey(field))} />
                 ))}
             </datalist>
-            <div className="octane-furni-editor-actions">
+            <div className="volt-furni-editor-actions">
                 <Button disabled={isBusy || !isValid || !isDirty} fullWidth variant="primary" onClick={actions.save}>
                     {isDirty ? furniEditorText('furni.editor.side.save_count', { count: changedFields.length }) : LocalizeText('furni.editor.side.save')}
                 </Button>
-                <div className="octane-staff-row">
+                <div className="volt-staff-row">
                     {isDirty && (
                         <Button grow disabled={isBusy} variant="secondary" onClick={sheet.discard}>
                             {LocalizeText('furni.editor.side.discard')}
@@ -218,7 +218,7 @@ export const FurniEditorSidebarView: FC<FurniEditorSidebarViewProps> = (props) =
                         {LocalizeText('furni.editor.side.undo')}
                     </Button>
                 )}
-                <span className="octane-staff-muted octane-furni-editor-center">{LocalizeText('furni.editor.side.shortcut')}</span>
+                <span className="volt-staff-muted volt-furni-editor-center">{LocalizeText('furni.editor.side.shortcut')}</span>
             </div>
         </aside>
     );

@@ -17,7 +17,7 @@ const GrantRow: FC<GrantRowProps> = ({ icon, label, initial, unit, disabled, onG
     const [amount, setAmount] = useState(initial);
 
     return (
-        <div className="octane-housekeeping-grant">
+        <div className="volt-housekeeping-grant">
             <span>{icon !== null && <LayoutCurrencyIcon type={icon} />}</span>
             <HousekeepingNumberInput label={unit} value={amount} onChange={setAmount} />
             <Button disabled={disabled} variant="secondary" onClick={() => onGrant(amount)}>
@@ -85,7 +85,7 @@ export const HousekeepingEconomyTab: FC = () => {
                 />
             </StaffSection>
             <StaffSection title={LocalizeText('housekeeping.economy.grant_item.label')}>
-                <div className="octane-staff-row">
+                <div className="volt-staff-row">
                     <HousekeepingNumberInput label={LocalizeText('housekeeping.economy.item_id')} value={itemId} onChange={setItemId} />
                     <HousekeepingNumberInput label={amountUnit} value={itemQuantity} onChange={setItemQuantity} />
                     <Button classNames={['ml-auto']} disabled={disabled || itemId <= 0} variant="secondary" onClick={() => grantItem(userId, itemId, itemQuantity)}>

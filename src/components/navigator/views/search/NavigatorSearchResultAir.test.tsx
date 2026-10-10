@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useNavigatorUiStore } from '../../../../hooks';
 import { NavigatorSearchResultView } from './NavigatorSearchResultView';
 
-vi.mock('@octane/renderer', async () => {
-    const actual = await vi.importActual<typeof import('@octane/renderer')>('@octane/renderer');
+vi.mock('@volt/renderer', async () => {
+    const actual = await vi.importActual<typeof import('@volt/renderer')>('@volt/renderer');
 
     return {
         ...actual,

@@ -52,14 +52,14 @@ export const WiredSlider: FC<WiredSliderProps> = ({ min, max, step = 1, value, d
     };
 
     return (
-        <div className="octane-wired__slider-row">
-            <WiredShellButton className="octane-wired__icon-button" disabled={disabled} shellStyle="illumina" onClick={() => onChange(clamp(value - step))}>
+        <div className="volt-wired__slider-row">
+            <WiredShellButton className="volt-wired__icon-button" disabled={disabled} shellStyle="illumina" onClick={() => onChange(clamp(value - step))}>
                 <img alt="" draggable={false} src={arrowLeft} />
             </WiredShellButton>
-            <div className="octane-wired__slider" style={{ '--wired-slider-bg': `url(${sliderTrack})` } as CSSProperties}>
-                <div className="octane-wired__slider-area" ref={areaRef}>
+            <div className="volt-wired__slider" style={{ '--wired-slider-bg': `url(${sliderTrack})` } as CSSProperties}>
+                <div className="volt-wired__slider-area" ref={areaRef}>
                     <div
-                        className="octane-wired__slider-thumb"
+                        className="volt-wired__slider-thumb"
                         style={{ left: position, backgroundImage: `url(${sliderThumb})` }}
                         onPointerCancel={onThumbUp}
                         onPointerDown={onThumbDown}
@@ -68,7 +68,7 @@ export const WiredSlider: FC<WiredSliderProps> = ({ min, max, step = 1, value, d
                     />
                 </div>
             </div>
-            <WiredShellButton className="octane-wired__icon-button" disabled={disabled} shellStyle="illumina" onClick={() => onChange(clamp(value + step))}>
+            <WiredShellButton className="volt-wired__icon-button" disabled={disabled} shellStyle="illumina" onClick={() => onChange(clamp(value + step))}>
                 <img alt="" draggable={false} src={arrowRight} />
             </WiredShellButton>
         </div>

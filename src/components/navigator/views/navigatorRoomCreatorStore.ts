@@ -1,4 +1,4 @@
-import { createOctaneStore } from '../../../state/createOctaneStore';
+import { createVoltStore } from '../../../state/createVoltStore';
 
 interface RoomCreatorForm {
     name: string;
@@ -34,7 +34,7 @@ interface RoomCreatorState extends RoomCreatorForm {
     setPosition: (position: { x: number; y: number }) => void;
 }
 
-export const useRoomCreatorStore = createOctaneStore<RoomCreatorState>()((set) => ({
+export const useRoomCreatorStore = createVoltStore<RoomCreatorState>()((set) => ({
     ...initialForm,
     position: null,
     showVersion: 0,

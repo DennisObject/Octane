@@ -201,7 +201,7 @@ export const DraggableWindow: FC<DraggableWindowProps> = (props) => {
         if (!dragHandler) return;
 
         const onPointerDown = (event: PointerEvent) => {
-            if ((event.target as HTMLElement)?.closest?.('button, input, select, textarea, a, [role="button"], .octane-card-close-button, .octane-card-header-report-camera, .octane-card-header-info-habbopages, .header-trash, .stickie-color, .header-close')) return;
+            if ((event.target as HTMLElement)?.closest?.('button, input, select, textarea, a, [role="button"], .volt-card-close-button, .volt-card-header-report-camera, .volt-card-header-info-habbopages, .header-trash, .stickie-color, .header-close')) return;
             if (event.pointerType === 'mouse' && event.button !== 0) return;
 
             dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false };

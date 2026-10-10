@@ -1,4 +1,4 @@
-import { AchievementData } from '@octane/renderer';
+import { AchievementData } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { AchievementUtilities, GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, LocalizeText } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';

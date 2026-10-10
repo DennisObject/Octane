@@ -75,7 +75,7 @@ export const SnowWarChatInputView: FC<SnowWarChatInputViewProps> = ({ onSend }) 
             data-air-name="bubblecont"
             style={{ left: Math.trunc((desktop.width / 2) - (CHAT_INPUT_WIDTH / 2)), top: desktop.height - 104, width: CHAT_INPUT_WIDTH, height: CHAT_INPUT_HEIGHT }}
         >
-            <div className="octane-chat-input-container swf-chat-input relative flex w-full items-center justify-start overflow-visible">
+            <div className="volt-chat-input-container swf-chat-input relative flex w-full items-center justify-start overflow-visible">
                 {/* "styles" keeps its default look; a game session never builds the ChatStyleSelector. */}
                 <div aria-hidden="true" className="swf-chat-style-trigger flex items-center select-none">
                     <span className="swf-chat-style-arrow shrink-0" />

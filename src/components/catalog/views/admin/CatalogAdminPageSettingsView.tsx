@@ -42,7 +42,7 @@ export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps>
                     value={draft.captionSave}
                     onChange={(captionSave) => patch({ captionSave })}
                 />
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <CatalogAdminTextField
                         error={fieldErrors.requiredPermission}
                         label={LocalizeText('catalog.admin.page.required.permission')}
@@ -64,7 +64,7 @@ export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps>
                 </div>
             </StaffSection>
             <StaffSection title={LocalizeText('catalog.admin.page.section.display')}>
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <CatalogAdminTextField readOnly error={fieldErrors.catalogMode} label={LocalizeText('catalog.admin.page.mode')} value={modeLabel} />
                     <CatalogAdminSelectField
                         error={fieldErrors.pageLayout}
@@ -87,7 +87,7 @@ export const CatalogAdminPageSettingsView: FC<CatalogAdminPageSettingsViewProps>
                         onChange={(parentId) => patch({ parentId })}
                     />
                 </div>
-                <div className="octane-staff-row octane-catalog-admin-flags">
+                <div className="volt-staff-row volt-catalog-admin-flags">
                     <CatalogAdminCheckbox label={LocalizeText('catalog.admin.visible')} value={draft.visible} onChange={(visible) => patch({ visible })} />
                     <CatalogAdminCheckbox label={LocalizeText('catalog.admin.enabled')} value={draft.enabled} onChange={(enabled) => patch({ enabled })} />
                 </div>

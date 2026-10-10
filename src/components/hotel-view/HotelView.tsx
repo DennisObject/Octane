@@ -1,4 +1,4 @@
-import type { IHotelViewLandingScene, IHotelViewLandingSlot } from '@octane/renderer';
+import type { IHotelViewLandingScene, IHotelViewLandingSlot } from '@volt/renderer';
 import {
     CreateLinkEvent,
     GetSessionDataManager,
@@ -8,7 +8,7 @@ import {
     HotelViewLandingSaveComposer,
     HotelViewLandingSaveSceneComposer,
     HotelViewLandingVoteComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { CSSProperties, FC, FormEvent, PointerEvent, useEffect, useRef, useState } from 'react';
 import { GetConfigurationValue, getConfiguredLandingBackdrop, getRememberedLandingScene, hasLandingArtwork, rememberLandingScene, SendMessageComposer } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
@@ -504,7 +504,7 @@ export const HotelView: FC = () => {
     };
 
     return (
-        <div ref={containerRef} className="octane-hotel-view block fixed w-full h-[calc(100%-55px)]" style={containerStyle}>
+        <div ref={containerRef} className="volt-hotel-view block fixed w-full h-[calc(100%-55px)]" style={containerStyle}>
             {!hasLandingArtwork(scene) && <LandingBackdropView backdrop={getConfiguredLandingBackdrop()} />}
             {scene.leftUrl
                 ? <div className="hotelview-edge hotelview-edge-left"><img src={resolveImageUrl(scene.leftUrl, imageLibraryUrl, assetUrl)} alt="" /><LayoutAvatarImageView classNames={['hotelview-avatar']} figure={GetSessionDataManager().figure} gender={GetSessionDataManager().gender} direction={2} /></div>

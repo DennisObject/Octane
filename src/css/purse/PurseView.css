@@ -1,6 +1,6 @@
 /* AIR purse_xml (1262): container 230x77, border style-9 230x76 color 0x686661. */
 
-.octane-purse-container {
+.volt-purse-container {
     width: 100%;
     pointer-events: all;
     margin-top: 0;
@@ -10,7 +10,7 @@
     gap: 3px;
 }
 
-.octane-purse {
+.volt-purse {
     position: relative;
     box-sizing: border-box;
     width: 230px;
@@ -22,11 +22,11 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* Chrome is a sibling of the widgets so AIR x/y stay relative to the 230x77 box. */
-.octane-purse__chrome {
+.volt-purse__chrome {
     position: absolute;
     left: 0;
     top: 0;
@@ -41,10 +41,10 @@
     border-image-slice: 28 28 32 28 fill;
     border-image-width: 7px 7px 8px 7px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__body {
+.volt-purse__body {
     position: relative;
     z-index: 1;
     width: 230px;
@@ -52,7 +52,7 @@
 }
 
 /* itemlist_vertical x=7 y=9 w=52 h=55 */
-.octane-purse__currencies {
+.volt-purse__currencies {
     position: absolute;
     left: 7px;
     top: 9px;
@@ -65,17 +65,17 @@
 }
 
 /* credit/diamond rows are 52x19, the ducket row 52x17; the list reflows when a row is missing */
-.octane-purse__currencies > .octane-purse-currency {
+.volt-purse__currencies > .volt-purse-currency {
     width: 52px;
     height: 19px;
 }
 
-.octane-purse__currencies > .octane-purse-currency--0 {
+.volt-purse__currencies > .volt-purse-currency--0 {
     height: 17px;
 }
 
 /* region 52x19: count text (25,2) 10x17 anchored at its right edge x=35, icon 15x15 at (36,2) */
-.octane-purse .octane-purse-button {
+.volt-purse .volt-purse-button {
     appearance: none;
     position: relative;
     display: block;
@@ -91,7 +91,7 @@
     box-shadow: none !important;
 }
 
-.octane-purse .octane-purse-button .currency-text {
+.volt-purse .volt-purse-button .currency-text {
     position: absolute;
     top: 2px;
     right: 17px;
@@ -109,20 +109,20 @@
     white-space: nowrap;
 }
 
-.octane-purse .octane-purse-button.currency--1 .octane-purse-button__amount {
+.volt-purse .volt-purse-button.currency--1 .volt-purse-button__amount {
     color: #d5af22 !important;
 }
 
-.octane-purse .octane-purse-button.currency-0 .octane-purse-button__amount {
+.volt-purse .volt-purse-button.currency-0 .volt-purse-button__amount {
     color: #d787d7 !important;
 }
 
-.octane-purse .octane-purse-button.currency-5 .octane-purse-button__amount {
+.volt-purse .volt-purse-button.currency-5 .volt-purse-button__amount {
     color: #38caeb !important;
 }
 
-.octane-purse .octane-purse-button .octane-currency-icon,
-.octane-purse .octane-purse-air-currency {
+.volt-purse .volt-purse-button .volt-currency-icon,
+.volt-purse .volt-purse-air-currency {
     position: absolute;
     top: 2px;
     left: 36px;
@@ -133,17 +133,17 @@
     border-radius: 0 !important;
     background-color: transparent !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse .octane-purse-air-currency {
+.volt-purse .volt-purse-air-currency {
     display: block;
     object-fit: none;
 }
 
 /* HC + earnings: border style-2 colorless color 0x3b3933 blend 0.8, 101x28 at (64,7) and (64,39).
    Click regions start 1px lower; icon box 20x18 at (5,4), text at (25,4) of the region. */
-.octane-purse__col--primary {
+.volt-purse__col--primary {
     position: absolute;
     left: 64px;
     top: 7px;
@@ -154,8 +154,8 @@
     gap: 4px;
 }
 
-.octane-purse__btn--join,
-.octane-purse__btn--earnings {
+.volt-purse__btn--join,
+.volt-purse__btn--earnings {
     position: relative;
     display: block;
     width: 101px;
@@ -177,8 +177,8 @@
     box-shadow: none;
 }
 
-.octane-purse__btn--join::before,
-.octane-purse__btn--earnings::before {
+.volt-purse__btn--join::before,
+.volt-purse__btn--earnings::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -191,27 +191,27 @@
     border-image-width: 6px;
     border-image-repeat: stretch;
     opacity: 0.8;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__btn--join:hover,
-.octane-purse__btn--earnings:hover {
+.volt-purse__btn--join:hover,
+.volt-purse__btn--earnings:hover {
     filter: brightness(1.12);
 }
 
-.octane-purse__btn--join:active,
-.octane-purse__btn--earnings:active {
+.volt-purse__btn--join:active,
+.volt-purse__btn--earnings:active {
     filter: brightness(0.92);
 }
 
-.octane-purse__btn--join > *,
-.octane-purse__btn--earnings > * {
+.volt-purse__btn--join > *,
+.volt-purse__btn--earnings > * {
     position: absolute;
     z-index: 1;
 }
 
-.octane-purse__btn--join .octane-purse__btn-img,
-.octane-purse__btn--earnings .octane-purse__btn-img {
+.volt-purse__btn--join .volt-purse__btn-img,
+.volt-purse__btn--earnings .volt-purse__btn-img {
     top: 5px;
     left: 5px;
     width: 20px;
@@ -221,12 +221,12 @@
     object-fit: none;
     /* pivot_point center inside 20x18, truncated to whole pixels like the native bitmap window */
     object-position: 2px 1px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__btn--join .octane-purse__btn-days,
-.octane-purse__btn--join .octane-purse__btn-join,
-.octane-purse__btn--earnings .octane-purse__btn-earnings {
+.volt-purse__btn--join .volt-purse__btn-days,
+.volt-purse__btn--join .volt-purse__btn-join,
+.volt-purse__btn--earnings .volt-purse__btn-earnings {
     top: 5px;
     /* the text field's 2px left margin */
     padding-left: 2px;
@@ -236,7 +236,7 @@
 }
 
 /* days: (25,4) 50x28, at most two lines */
-.octane-purse__btn--join .octane-purse__btn-days {
+.volt-purse__btn--join .volt-purse__btn-days {
     left: 25px;
     width: 50px;
     height: 28px;
@@ -244,21 +244,21 @@
 }
 
 /* "Join" is written into the days field at (25,4); the 'join' label stays hidden in v75. */
-.octane-purse__btn--join .octane-purse__btn-join {
+.volt-purse__btn--join .volt-purse__btn-join {
     left: 25px;
     width: 50px;
     height: 17px;
 }
 
 /* earnings: (25,4) 79x17 */
-.octane-purse__btn--earnings .octane-purse__btn-earnings {
+.volt-purse__btn--earnings .volt-purse__btn-earnings {
     left: 25px;
     width: 79px;
     height: 17px;
 }
 
 /* background x=169 y=11 w=1 h=55 color 0xff444444 */
-.octane-purse__divider {
+.volt-purse__divider {
     position: absolute;
     left: 169px;
     top: 11px;
@@ -268,7 +268,7 @@
 }
 
 /* itemlist_vertical x=174 y=8, container_button 50x19 spacing 2 */
-.octane-purse__col--actions {
+.volt-purse__col--actions {
     position: absolute;
     left: 174px;
     top: 8px;
@@ -279,9 +279,9 @@
     gap: 2px;
 }
 
-.octane-purse__btn--help,
-.octane-purse__btn--logout,
-.octane-purse__btn--settings {
+.volt-purse__btn--help,
+.volt-purse__btn--logout,
+.volt-purse__btn--settings {
     display: inline-flex;
     width: 50px;
     height: 19px;
@@ -303,70 +303,70 @@
     border-image-slice: 3 fill;
     border-image-width: 3px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__btn--help {
+.volt-purse__btn--help {
     border-image-source: var(--habbo-skin-button-help);
 }
 
-.octane-purse__btn--help:hover {
+.volt-purse__btn--help:hover {
     border-image-source: var(--habbo-skin-button-help-hover);
 }
 
-.octane-purse__btn--help:active {
+.volt-purse__btn--help:active {
     border-image-source: var(--habbo-skin-button-help-pressed);
 }
 
-.octane-purse__btn--logout {
+.volt-purse__btn--logout {
     border-image-source: var(--habbo-skin-button-logout);
 }
 
-.octane-purse__btn--logout:hover {
+.volt-purse__btn--logout:hover {
     border-image-source: var(--habbo-skin-button-logout-hover);
 }
 
-.octane-purse__btn--logout:active {
+.volt-purse__btn--logout:active {
     border-image-source: var(--habbo-skin-button-logout-pressed);
 }
 
-.octane-purse__btn--settings {
+.volt-purse__btn--settings {
     border-image-source: var(--habbo-skin-button-settings);
 }
 
-.octane-purse__btn--settings:hover {
+.volt-purse__btn--settings:hover {
     border-image-source: var(--habbo-skin-button-settings-hover);
 }
 
-.octane-purse__btn--settings:active {
+.volt-purse__btn--settings:active {
     border-image-source: var(--habbo-skin-button-settings-pressed);
 }
 
-.octane-purse__btn--help span {
+.volt-purse__btn--help span {
     position: relative;
     top: 0;
     left: 1px;
 }
 
-.octane-purse__btn-img {
+.volt-purse__btn-img {
     display: block;
     width: auto;
     height: auto;
     max-width: 15px;
     max-height: 18px;
     object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__btn--logout .octane-purse__btn-img,
-.octane-purse__btn--settings .octane-purse__btn-img {
+.volt-purse__btn--logout .volt-purse__btn-img,
+.volt-purse__btn--settings .volt-purse__btn-img {
     max-width: 50px;
     max-height: 19px;
 }
 
 /* settings_xml dropdown: 192 wide, style-6 border 0x55534e (border_6 x 0x55534e) with a style-3 panel 0x201e19 (border_slot x 0x201e19) at (3,3) 186 wide; entries are
    setting_category_xml regions (120x17, label white u_regular) starting at y=7, 3px apart, 7px padding at the bottom */
-.octane-purse-menu {
+.volt-purse-menu {
     position: relative;
     box-sizing: border-box;
     width: 192px;
@@ -378,10 +378,10 @@
     flex-direction: column;
     gap: 3px;
     pointer-events: all;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse-menu::before {
+.volt-purse-menu::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -393,7 +393,7 @@
     pointer-events: none;
 }
 
-.octane-purse-menu::after {
+.volt-purse-menu::after {
     content: "";
     position: absolute;
     top: 3px;
@@ -408,7 +408,7 @@
     pointer-events: none;
 }
 
-.octane-purse-menu__item {
+.volt-purse-menu__item {
     position: relative;
     z-index: 1;
     appearance: none;
@@ -431,7 +431,7 @@
 
 /* purse_indicator_seasonal_xml: 192x29 style-9 border color 0x686661; name (5,6) 105x16, amount (90,6) 60x16 right-aligned,
    29x29 badge at (163,0) in the preset border colour with a 23x23 icon at (3,3) */
-.octane-purse__other {
+.volt-purse__other {
     display: flex;
     width: 192px;
     max-width: 192px;
@@ -441,7 +441,7 @@
     gap: 3px;
 }
 
-.octane-purse__other .octane-purse-seasonal-currency {
+.volt-purse__other .volt-purse-seasonal-currency {
     appearance: none;
     position: relative;
     box-sizing: border-box;
@@ -462,10 +462,10 @@
     font-weight: 700;
     line-height: 16px;
     text-align: left;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse__other .octane-purse-seasonal-currency::before {
+.volt-purse__other .volt-purse-seasonal-currency::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -477,11 +477,11 @@
     border-image-slice: 28 28 32 28 fill;
     border-image-width: 7px 7px 8px 7px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-purse-seasonal-currency .seasonal-text,
-.octane-purse-seasonal-currency .seasonal-amount {
+.volt-purse-seasonal-currency .seasonal-text,
+.volt-purse-seasonal-currency .seasonal-amount {
     position: absolute;
     top: 6px;
     height: 16px;
@@ -490,20 +490,20 @@
     white-space: nowrap;
 }
 
-.octane-purse-seasonal-currency .seasonal-text {
+.volt-purse-seasonal-currency .seasonal-text {
     left: 5px;
     width: 105px;
     color: var(--seasonal-name, #bb7dc3);
 }
 
-.octane-purse-seasonal-currency .seasonal-amount {
+.volt-purse-seasonal-currency .seasonal-amount {
     left: 90px;
     width: 60px;
     color: #ffffff;
     text-align: right;
 }
 
-.octane-purse-seasonal-currency .seasonal-badge {
+.volt-purse-seasonal-currency .seasonal-badge {
     position: absolute;
     top: 0;
     left: 163px;
@@ -516,7 +516,7 @@
     -webkit-mask-box-image-repeat: stretch;
 }
 
-.octane-purse-seasonal-currency .seasonal-image {
+.volt-purse-seasonal-currency .seasonal-image {
     position: absolute;
     top: 3px;
     left: 3px;
@@ -524,22 +524,22 @@
     width: 23px;
     height: 23px;
     object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* seasonal_icon: icon window at 3,3, fitted to its style's bitmap */
-.octane-purse-seasonal-currency .seasonal-icon {
+.volt-purse-seasonal-currency .seasonal-icon {
     position: absolute;
     top: 3px;
     left: 3px;
 }
 
-.octane-purse-seasonal-currency .seasonal-amount.is-info {
+.volt-purse-seasonal-currency .seasonal-amount.is-info {
     text-decoration: underline;
 }
 
 /* change_overlay: 33x29 in the preset colour, text margins 4/6/6/7, slides from x=0 to x=159 */
-.octane-purse-seasonal-currency .seasonal-change {
+.volt-purse-seasonal-currency .seasonal-change {
     position: absolute;
     top: 0;
     z-index: 1;

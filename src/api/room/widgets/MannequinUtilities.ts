@@ -1,4 +1,4 @@
-import { AvatarFigurePartType, GetAvatarRenderManager, IAvatarFigureContainer } from '@octane/renderer';
+import { AvatarFigurePartType, GetAvatarRenderManager, IAvatarFigureContainer } from '@volt/renderer';
 
 export class MannequinUtilities {
     public static MANNEQUIN_FIGURE: [string, number, number[]] = ['hd', 99999, [99998]];

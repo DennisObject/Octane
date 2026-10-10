@@ -1,4 +1,4 @@
-import { IPollQuestion } from '@octane/renderer';
+import { IPollQuestion } from '@volt/renderer';
 import { RoomWidgetUpdateEvent } from './RoomWidgetUpdateEvent';
 
 export class RoomWidgetPollUpdateEvent extends RoomWidgetUpdateEvent {

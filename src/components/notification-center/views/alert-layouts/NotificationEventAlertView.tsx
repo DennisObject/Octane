@@ -50,7 +50,7 @@ export const NotificationEventAlertView: FC<NotificationEventAlertViewProps> = (
         <LayoutNotificationAlertView
             title={title}
             onClose={onClose}
-            classNames={['octane-alert-hotel-event', ...classNames]}
+            classNames={['volt-alert-hotel-event', ...classNames]}
             {...rest}
             type="hotel-event"
         >

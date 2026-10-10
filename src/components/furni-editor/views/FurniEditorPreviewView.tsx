@@ -32,11 +32,11 @@ export const FurniEditorPreviewView: FC<FurniEditorPreviewViewProps> = ({ item, 
     const nextState = () => setState((previous) => (stateCount === 0 || previous + 1 >= stateCount ? -1 : previous + 1));
 
     return (
-        <div className="octane-furni-editor-preview">
+        <div className="volt-furni-editor-preview">
             <LayoutFurniImageView direction={direction} productClassId={item.spriteId} productType={item.type} state={state} />
             <div
                 aria-label={footprint}
-                className="octane-furni-editor-footprint"
+                className="volt-furni-editor-footprint"
                 role="img"
                 style={{ gridTemplateColumns: `repeat(${cols}, 6px)` }}
                 title={footprintWidth > FOOTPRINT_MAX || footprintLength > FOOTPRINT_MAX ? LocalizeText('furni.editor.preview.footprint_clipped') : footprint}
@@ -45,8 +45,8 @@ export const FurniEditorPreviewView: FC<FurniEditorPreviewViewProps> = ({ item, 
                     <span key={index} />
                 ))}
             </div>
-            <span className="octane-furni-editor-preview-size">{footprint}</span>
-            <div className="octane-furni-editor-preview-controls">
+            <span className="volt-furni-editor-preview-size">{footprint}</span>
+            <div className="volt-furni-editor-preview-controls">
                 <Button variant="secondary" onClick={() => setDirectionIndex((previous) => previous + 1)}>
                     {furniEditorText('furni.editor.preview.rotate', { direction })}
                 </Button>

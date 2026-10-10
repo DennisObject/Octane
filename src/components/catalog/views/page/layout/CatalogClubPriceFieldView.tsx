@@ -30,8 +30,8 @@ export const CatalogClubPriceFieldView: FC<CatalogClubPriceFieldViewProps> = ({ 
     }, [value]);
 
     return (
-        <span className="octane-club-price-field" style={{ width }}>
-            <span ref={textRef} className="octane-club-price-field-text">
+        <span className="volt-club-price-field" style={{ width }}>
+            <span ref={textRef} className="volt-club-price-field-text">
                 {value}
             </span>
         </span>

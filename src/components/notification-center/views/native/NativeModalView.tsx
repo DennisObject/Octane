@@ -29,9 +29,9 @@ export const NativeModalView: FC<{ children: ReactNode; offsetY?: number; baseWi
 
     return (
         <DraggableWindow disableDrag initialPosition={MODAL_ORIGIN} unconstrainedPosition>
-            <div className="octane-native-modal">
-                <div aria-hidden="true" className="octane-native-modal-dim" />
-                <div ref={slotRef} className="octane-native-modal-slot" style={{ left: position.x, top: position.y }}>
+            <div className="volt-native-modal">
+                <div aria-hidden="true" className="volt-native-modal-dim" />
+                <div ref={slotRef} className="volt-native-modal-slot" style={{ left: position.x, top: position.y }}>
                     {children}
                 </div>
             </div>

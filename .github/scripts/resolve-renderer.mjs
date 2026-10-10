@@ -36,7 +36,7 @@ export const resolveRenderer = async (input, hasRef) => {
     const headRef = input.headRef || (input.eventName === 'push' && !['main', 'Dev'].includes(input.refName) ? input.refName : '');
 
     if (!repository && input.headOwner && input.headOwner !== input.repositoryOwner) {
-        const headRepository = `${input.headOwner}/Octane-Renderer`;
+        const headRepository = `${input.headOwner}/Volt-Renderer`;
         const forkRefs = explicitRef ? [explicitRef] : companionRefsFor(headRef);
 
         for (const companionRef of forkRefs) {
@@ -49,7 +49,7 @@ export const resolveRenderer = async (input, hasRef) => {
     }
 
     if (!repository) {
-        const ownerRepository = `${input.repositoryOwner}/Octane-Renderer`;
+        const ownerRepository = `${input.repositoryOwner}/Volt-Renderer`;
         repository = (await hasRef(ownerRepository, ref)) ? ownerRepository : input.upstreamRepository;
     }
 

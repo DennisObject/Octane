@@ -6,12 +6,12 @@ import {
     RoomObjectCategory,
     RoomObjectVariable,
     Triggerable
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetRoomSession, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
-import { useMessageEvent, useOctaneEvent, useWired } from '../../../hooks';
+import { useMessageEvent, useVoltEvent, useWired } from '../../../hooks';
 import arrowLeft from '../../../assets/images/wired/native/arrow-left.png';
 import arrowRight from '../../../assets/images/wired/native/arrow-right.png';
 import { useWiredNative } from './WiredNativeContext';
@@ -180,7 +180,7 @@ export const useAvailableUserSources = (
         return () => window.clearInterval(intervalId);
     }, [refreshStackSources, trigger]);
 
-    useOctaneEvent<RoomEngineObjectEvent>(
+    useVoltEvent<RoomEngineObjectEvent>(
         [RoomEngineObjectEvent.ADDED, RoomEngineObjectEvent.REMOVED, RoomEngineObjectEvent.PLACED, RoomEngineObjectEvent.CONTENT_UPDATED],
         (event) => {
             if (!trigger) return;
@@ -300,19 +300,19 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
                 <>
                     <Text bold>{LocalizeText(furniTitle)}</Text>
                     <div className="flex items-center gap-1">
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={prevFurni}>
+                        <Button variant="primary" classNames={['volt-wired__picker-button']} className="px-2 py-1" onClick={prevFurni}>
                             <FaChevronLeft />
                         </Button>
-                        <div className="flex min-w-0 flex-1 items-center justify-center octane-wired__picker-label">
+                        <div className="flex min-w-0 flex-1 items-center justify-center volt-wired__picker-label">
                             <Text small className="text-center">
                                 {LocalizeText(orderedFurniSources[furniIndex].label)}
                             </Text>
                         </div>
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={nextFurni}>
+                        <Button variant="primary" classNames={['volt-wired__picker-button']} className="px-2 py-1" onClick={nextFurni}>
                             <FaChevronRight />
                         </Button>
                     </div>
-                    {furniDetail && <div className="octane-wired__source-detail">{furniDetail}</div>}
+                    {furniDetail && <div className="volt-wired__source-detail">{furniDetail}</div>}
                 </>
             )}
 
@@ -322,19 +322,19 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
                 <>
                     <Text bold>{LocalizeText(usersTitle)}</Text>
                     <div className="flex items-center gap-1">
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={prevUsers}>
+                        <Button variant="primary" classNames={['volt-wired__picker-button']} className="px-2 py-1" onClick={prevUsers}>
                             <FaChevronLeft />
                         </Button>
-                        <div className="flex min-w-0 flex-1 items-center justify-center octane-wired__picker-label">
+                        <div className="flex min-w-0 flex-1 items-center justify-center volt-wired__picker-label">
                             <Text small className="text-center">
                                 {LocalizeText(orderedUserSources[userIndex].label)}
                             </Text>
                         </div>
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={nextUsers}>
+                        <Button variant="primary" classNames={['volt-wired__picker-button']} className="px-2 py-1" onClick={nextUsers}>
                             <FaChevronRight />
                         </Button>
                     </div>
-                    {userDetail && <div className="octane-wired__source-detail">{userDetail}</div>}
+                    {userDetail && <div className="volt-wired__source-detail">{userDetail}</div>}
                 </>
             )}
         </div>
@@ -371,16 +371,16 @@ const WiredSourceRow: FC<{ label: string; onPrevious: () => void; onNext: () => 
     const buttonTop = Math.trunc((rowHeight - SOURCE_BUTTON_HEIGHT) / 2);
 
     return (
-        <div className="octane-wired__slider-row octane-wired__source-row" style={{ height: rowHeight + 8 }}>
-            <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onPrevious}>
+        <div className="volt-wired__slider-row volt-wired__source-row" style={{ height: rowHeight + 8 }}>
+            <WiredShellButton className="volt-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onPrevious}>
                 <img alt="" draggable={false} src={arrowLeft} />
             </WiredShellButton>
-            <span className="octane-wired__source-label" style={{ marginTop: Math.trunc((rowHeight - labelHeight) / 2) }}>
-                <span ref={labelRef} className="octane-wired__source-label-text">
+            <span className="volt-wired__source-label" style={{ marginTop: Math.trunc((rowHeight - labelHeight) / 2) }}>
+                <span ref={labelRef} className="volt-wired__source-label-text">
                     <WiredText text={label} wrap={true} />
                 </span>
             </span>
-            <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onNext}>
+            <WiredShellButton className="volt-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onNext}>
                 <img alt="" draggable={false} src={arrowRight} />
             </WiredShellButton>
         </div>

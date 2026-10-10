@@ -7,18 +7,18 @@ import {
     IRoomUserData,
     ISoundVolumesSnapshot,
     IUserDataSnapshot,
-    OctaneEventType
-} from '@octane/renderer';
+    VoltEventType
+} from '@volt/renderer';
 import { useMemo } from 'react';
 import { Permission, PermissionKey } from '../../api/permissions';
 import { useExternalSnapshot } from '../events/useExternalSnapshot';
 
 /**
  * React-side consumers for the referentially-stable snapshot getters
- * the renderer exposes (Octane Renderer v2.1.0+ pattern).
+ * the renderer exposes (Volt Renderer v2.1.0+ pattern).
  *
  * Every hook here is a thin `useSyncExternalStore` wrapper: it subscribes
- * to the corresponding `OctaneEventType.*_UPDATED` invalidation event and
+ * to the corresponding `VoltEventType.*_UPDATED` invalidation event and
  * reads the matching `getXxxSnapshot()`. Because the renderer guarantees
  * snapshot reference invariance until invalidation, React's bailout logic
  * skips re-renders when the snapshot is unchanged — so widgets that read
@@ -90,7 +90,7 @@ const subscribeTo =
     };
 
 export const useUserDataSnapshot = (): Readonly<IUserDataSnapshot> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.SESSION_DATA_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.SESSION_DATA_UPDATED), () => {
         const manager = GetSessionDataManager();
 
         if (!manager || typeof manager.getUserDataSnapshot !== 'function') return DEFAULT_USER_DATA;
@@ -99,7 +99,7 @@ export const useUserDataSnapshot = (): Readonly<IUserDataSnapshot> =>
     });
 
 export const useActiveRoomSessionSnapshot = (): Readonly<IRoomSessionSnapshot> | null =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.ROOM_SESSION_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.ROOM_SESSION_UPDATED), () => {
         const manager = GetRoomSessionManager();
 
         if (!manager || typeof manager.getActiveRoomSessionSnapshot !== 'function') return null;
@@ -108,7 +108,7 @@ export const useActiveRoomSessionSnapshot = (): Readonly<IRoomSessionSnapshot> |
     });
 
 export const useIgnoredUsersSnapshot = (): ReadonlyArray<string> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.IGNORED_USERS_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.IGNORED_USERS_UPDATED), () => {
         const inner = GetSessionDataManager()?.ignoredUsersManager;
 
         if (!inner || typeof inner.getIgnoredUsersSnapshot !== 'function') return EMPTY_IGNORED_LIST;
@@ -121,7 +121,7 @@ export const useIgnoredUsersSnapshot = (): ReadonlyArray<string> =>
  * keyed by user id and is separate from the ignore list.
  */
 export const useBlockedUsersSnapshot = (): ReadonlyArray<number> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.BLOCKED_USERS_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.BLOCKED_USERS_UPDATED), () => {
         const inner = GetSessionDataManager()?.blockedUsersManager;
 
         if (!inner || typeof inner.getBlockedUsersSnapshot !== 'function') return EMPTY_BLOCKED_LIST;
@@ -178,7 +178,7 @@ export const useUserRank = (): IUserRank => {
  * invalidates this snapshot on live role and permission changes.
  */
 export const useUserPermissions = (): ReadonlyMap<string, number> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.USER_PERMISSIONS_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.USER_PERMISSIONS_UPDATED), () => {
         const manager = GetSessionDataManager();
 
         if (!manager || typeof manager.getPermissionsSnapshot !== 'function') return EMPTY_PERMISSIONS;
@@ -197,7 +197,7 @@ export const useHasPermission = (key: PermissionKey): boolean => {
 export const useIsAmbassador = (): boolean => useHasPermission(Permission.Ambassador);
 
 export const useGroupBadgesSnapshot = (): ReadonlyMap<number, string> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.GROUP_BADGES_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.GROUP_BADGES_UPDATED), () => {
         const inner = GetSessionDataManager()?.groupInformationManager;
 
         if (!inner || typeof inner.getGroupBadgesSnapshot !== 'function') return EMPTY_GROUP_BADGES;
@@ -216,7 +216,7 @@ export const useGroupBadge = (groupId: number): string => {
 };
 
 export const useVolumesSnapshot = (): Readonly<ISoundVolumesSnapshot> =>
-    useExternalSnapshot(subscribeTo(OctaneEventType.SOUND_VOLUMES_UPDATED), () => {
+    useExternalSnapshot(subscribeTo(VoltEventType.SOUND_VOLUMES_UPDATED), () => {
         const manager = GetSoundManager();
 
         if (!manager || typeof manager.getVolumesSnapshot !== 'function') return DEFAULT_VOLUMES;
@@ -240,8 +240,8 @@ export const useRoomUserListSnapshot = (): ReadonlyArray<IRoomUserData> =>
 
             if (!dispatcher || typeof dispatcher.subscribe !== 'function') return NOOP_UNSUBSCRIBE;
 
-            const offList = dispatcher.subscribe(OctaneEventType.ROOM_USER_LIST_UPDATED, onChange);
-            const offSession = dispatcher.subscribe(OctaneEventType.ROOM_SESSION_UPDATED, onChange);
+            const offList = dispatcher.subscribe(VoltEventType.ROOM_USER_LIST_UPDATED, onChange);
+            const offSession = dispatcher.subscribe(VoltEventType.ROOM_SESSION_UPDATED, onChange);
 
             return () => {
                 offList();

@@ -1,19 +1,19 @@
 /* Housekeeping window on the staff frame (see StaffWindow.css). */
-.octane-staff-window.octane-housekeeping {
+.volt-staff-window.volt-housekeeping {
     width: 500px;
     height: 580px;
 }
 
-.octane-housekeeping .octane-housekeeping-durations .octane-staff-row > *,
-.octane-housekeeping .octane-housekeeping-durations > :not(label) {
+.volt-housekeeping .volt-housekeeping-durations .volt-staff-row > *,
+.volt-housekeeping .volt-housekeeping-durations > :not(label) {
     white-space: nowrap;
 }
 
-.octane-housekeeping .octane-housekeeping-search {
+.volt-housekeeping .volt-housekeeping-search {
     position: relative;
 }
 
-.octane-housekeeping .octane-housekeeping-suggestions {
+.volt-housekeeping .volt-housekeeping-suggestions {
     position: absolute;
     top: calc(100% + 2px);
     right: 0;
@@ -23,7 +23,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-.octane-housekeeping .octane-housekeeping-suggestion {
+.volt-housekeeping .volt-housekeeping-suggestion {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
@@ -38,7 +38,7 @@
     cursor: pointer;
 }
 
-.octane-housekeeping .octane-housekeeping-presence {
+.volt-housekeeping .volt-housekeeping-presence {
     flex: 0 0 auto;
     width: 7px;
     height: 7px;
@@ -46,17 +46,17 @@
     background: #9b9b9b;
 }
 
-.octane-housekeeping .octane-housekeeping-presence.is-online {
+.volt-housekeeping .volt-housekeeping-presence.is-online {
     background: #00a80b;
 }
 
-.octane-housekeeping .octane-housekeeping-user {
+.volt-housekeeping .volt-housekeeping-user {
     display: flex;
     align-items: flex-start;
     gap: 6px;
 }
 
-.octane-housekeeping .octane-housekeeping-user-head {
+.volt-housekeeping .volt-housekeeping-user-head {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -70,50 +70,50 @@
 }
 
 /* The renderer's cropped head at native scale, centred whole inside the panel. */
-.octane-housekeeping .octane-housekeeping-user-head-image {
+.volt-housekeeping .volt-housekeeping-user-head-image {
     position: static !important;
     flex: 0 0 auto;
     width: auto !important;
     height: auto !important;
 }
 
-.octane-housekeeping .octane-housekeeping-user-head-image img {
+.volt-housekeeping .volt-housekeeping-user-head-image img {
     display: block;
     max-width: 52px;
     max-height: 60px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-housekeeping .octane-housekeeping-facts {
+.volt-housekeeping .volt-housekeeping-facts {
     flex: 1 1 auto;
     min-width: 0;
     table-layout: fixed;
 }
 
-.octane-housekeeping .octane-housekeeping-facts th {
+.volt-housekeeping .volt-housekeeping-facts th {
     width: 78px;
 }
 
-.octane-housekeeping .octane-housekeeping-balance {
+.volt-housekeeping .volt-housekeeping-balance {
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.octane-housekeeping .octane-housekeeping-balance > span {
+.volt-housekeeping .volt-housekeeping-balance > span {
     display: inline-flex;
     align-items: center;
     gap: 3px;
 }
 
 /* Number + unit next to the button it feeds, two pairs per row. */
-.octane-housekeeping .octane-housekeeping-durations {
+.volt-housekeeping .volt-housekeeping-durations {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 5px;
 }
 
-.octane-housekeeping .octane-housekeeping-number {
+.volt-housekeeping .volt-housekeeping-number {
     display: inline-flex;
     white-space: nowrap;
     align-items: center;
@@ -121,59 +121,59 @@
     min-width: 0;
 }
 
-.octane-housekeeping .octane-housekeeping-number input {
+.volt-housekeeping .volt-housekeeping-number input {
     width: 64px;
 }
 
-.octane-housekeeping .octane-housekeeping-number.grow input {
+.volt-housekeeping .volt-housekeeping-number.grow input {
     width: 100%;
 }
 
-.octane-housekeeping .octane-housekeeping-grant {
+.volt-housekeeping .volt-housekeeping-grant {
     display: grid;
     grid-template-columns: 18px auto minmax(0, 1fr);
     align-items: center;
     gap: 5px;
 }
 
-.octane-housekeeping .octane-housekeeping-log {
+.volt-housekeeping .volt-housekeeping-log {
     flex: 1 1 auto;
 }
 
-.octane-housekeeping .octane-housekeeping-log-time {
+.volt-housekeeping .volt-housekeeping-log-time {
     flex: 0 0 92px;
     white-space: nowrap;
 }
 
-.octane-housekeeping .octane-housekeeping-log-actor {
+.volt-housekeeping .volt-housekeeping-log-actor {
     flex: 0 0 82px;
     font-weight: 700;
 }
 
-.octane-housekeeping .octane-housekeeping-log-action {
+.volt-housekeeping .volt-housekeeping-log-action {
     flex: 0 1 110px;
     text-align: right;
 }
 
-.octane-housekeeping .octane-housekeeping-sounds {
+.volt-housekeeping .volt-housekeeping-sounds {
     max-height: 220px;
 }
 
-.octane-housekeeping .octane-housekeeping-password-value {
+.volt-housekeeping .volt-housekeeping-password-value {
     font-family: monospace;
     font-size: 13px;
     letter-spacing: 1px;
 }
 
-.octane-staff-window.octane-housekeeping.is-roles { width: 720px; height: 700px; max-height: calc(100vh - 80px); }
-.octane-housekeeping-roles { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
-.octane-roles-tabs { flex-wrap: wrap; }
-.octane-roles-scroll { flex: 1; min-height: 0; overflow-y: auto; }
-.octane-roles-permissions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; margin: 8px 0; padding: 8px; border: 1px solid var(--staff-line); }
-.octane-roles-permissions label { display: flex; align-items: start; gap: 5px; overflow-wrap: anywhere; }
-.octane-roles-permissions .is-orphan { color: #9c3c20; }
-.octane-roles-limit { display: grid; grid-template-columns: minmax(0, 1fr) 80px auto auto; align-items: center; gap: 6px; }
-.octane-roles-member { display: flex; justify-content: space-between; gap: 8px; padding: 8px; border-bottom: 1px solid var(--staff-line); }
-.octane-roles-audit { border-bottom: 1px solid var(--staff-line); padding: 8px; }
-.octane-roles-audit summary { cursor: pointer; }
-.octane-roles-audit pre { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 8px; }
+.volt-staff-window.volt-housekeeping.is-roles { width: 720px; height: 700px; max-height: calc(100vh - 80px); }
+.volt-housekeeping-roles { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+.volt-roles-tabs { flex-wrap: wrap; }
+.volt-roles-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.volt-roles-permissions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; margin: 8px 0; padding: 8px; border: 1px solid var(--staff-line); }
+.volt-roles-permissions label { display: flex; align-items: start; gap: 5px; overflow-wrap: anywhere; }
+.volt-roles-permissions .is-orphan { color: #9c3c20; }
+.volt-roles-limit { display: grid; grid-template-columns: minmax(0, 1fr) 80px auto auto; align-items: center; gap: 6px; }
+.volt-roles-member { display: flex; justify-content: space-between; gap: 8px; padding: 8px; border-bottom: 1px solid var(--staff-line); }
+.volt-roles-audit { border-bottom: 1px solid var(--staff-line); padding: 8px; }
+.volt-roles-audit summary { cursor: pointer; }
+.volt-roles-audit pre { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 8px; }

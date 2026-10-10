@@ -11,11 +11,11 @@ import {
     RoomOccupiedTilesMessageEvent,
     RoomVisualizationSettingsEvent,
     UpdateFloorPropertiesMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { GetRoomSession, LocalizeText, localizeWithFallback, Permission, SendMessageComposer } from '../../api';
-import { OctaneCardContentView, OctaneCardView } from '../../common';
-import { useHasPermission, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
+import { VoltCardContentView, VoltCardView } from '../../common';
+import { useHasPermission, useMessageEvent, useNotification, useVoltEvent } from '../../hooks';
 import { AIR_FLOOR_ASSETS } from './air/airAssets';
 import { FloorplanEditorLegacyView } from './FloorplanEditorLegacyView';
 import {
@@ -119,7 +119,7 @@ const OfficialFloorplanEditor: FC = () => {
         brush: { h: drawingHeight, action: ACTION_FOR_MODE[drawMode] }
     }), [liveState, drawingHeight, drawMode]);
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => setRoomVisible(false));
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => setRoomVisible(false));
 
     useEffect(() => {
         if (!roomVisible) return;
@@ -297,14 +297,14 @@ const OfficialFloorplanEditor: FC = () => {
     return (
         <>
             {roomVisible && (
-                <OctaneCardView uniqueKey="floorpan-editor" frameStyle={3} className="w-[662px] h-[600px]" classNames={['octane-floorplan-window']} theme="primary" isResizable>
-                    <div className="octane-card-header-shell">
-                        <span className="octane-card-title">
+                <VoltCardView uniqueKey="floorpan-editor" frameStyle={3} className="w-[662px] h-[600px]" classNames={['volt-floorplan-window']} theme="primary" isResizable>
+                    <div className="volt-card-header-shell">
+                        <span className="volt-card-title">
                             <FloorplanCenteredText background={0xd77900} color={0xffffff} text={LocalizeText('floor.plan.editor.title')} textStyle="u_frame_title" />
                         </span>
-                        <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => setRoomVisible(false)} />
+                        <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={() => setRoomVisible(false)} />
                     </div>
-                    <OctaneCardContentView overflow="hidden">
+                    <VoltCardContentView overflow="hidden">
                         <div className="fp-bc" data-testid="floorplan-official">
                             <div className="fp-bc-banner">
                                 <img className="fp-bc-logo" src={AIR_FLOOR_ASSETS.logo} alt="" />
@@ -384,8 +384,8 @@ const OfficialFloorplanEditor: FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </OctaneCardContentView>
-                </OctaneCardView>
+                    </VoltCardContentView>
+                </VoltCardView>
             )}
             {importExportVisible && (
                 <FloorplanImportExport

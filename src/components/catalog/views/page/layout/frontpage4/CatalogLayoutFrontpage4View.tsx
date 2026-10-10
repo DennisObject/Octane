@@ -1,4 +1,4 @@
-import { CreateLinkEvent, FrontPageItem } from '@octane/renderer';
+import { CreateLinkEvent, FrontPageItem } from '@volt/renderer';
 import { FC, useCallback, useEffect } from 'react';
 import { useCatalogData } from '../../../../../../hooks';
 import { CatalogRedeemVoucherView } from '../../common/CatalogRedeemVoucherView';
@@ -26,9 +26,9 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = (props) => {
     }, [page, hideNavigation]);
 
     return (
-        <div className="octane-cfp">
+        <div className="volt-cfp">
             {frontPageItems[0] && <CatalogLayoutFrontPageItemView first item={frontPageItems[0]} onSelect={selectItem} />}
-            <div className="octane-cfp-list">
+            <div className="volt-cfp-list">
                 {frontPageItems.slice(1).map((item, index) => (
                     <CatalogLayoutFrontPageItemView key={`${item.itemName}-${index}`} item={item} onSelect={selectItem} />
                 ))}

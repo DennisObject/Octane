@@ -1,8 +1,8 @@
-import { OctaneTexture } from '@octane/renderer';
+import { VoltTexture } from '@volt/renderer';
 
 export class CameraPicture {
     constructor(
-        public texture: OctaneTexture,
+        public texture: VoltTexture,
         public imageUrl: string,
         public draftId: string = null,
         public displayUrl: string = imageUrl

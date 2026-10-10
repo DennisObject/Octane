@@ -1,4 +1,4 @@
-import { RoomObjectType } from '@octane/renderer';
+import { RoomObjectType } from '@volt/renderer';
 import { FC, useMemo } from 'react';
 import { ChatEntryType, IChatEntry, LocalizeText, ReportState, ReportType } from '../../../api';
 import { useChatHistory, useHelp } from '../../../hooks';

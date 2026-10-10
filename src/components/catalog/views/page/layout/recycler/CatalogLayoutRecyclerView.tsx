@@ -7,7 +7,7 @@ import {
     RecycleItemsMessageComposer,
     RecyclerFinishedMessageEvent,
     RecyclerStatusMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../../api';
 import { useInventoryFurni, useMessageEvent } from '../../../../../../hooks';
@@ -125,13 +125,13 @@ export const CatalogLayoutRecyclerView: FC<CatalogLayoutProps> = ({ page }) => {
             : LocalizeText('recycler.info.ready');
 
     return (
-        <div className="octane-catalog-recycler-layout">
-            <header className="octane-catalog-recycler-header">
+        <div className="volt-catalog-recycler-layout">
+            <header className="volt-catalog-recycler-header">
                 {!!page.localization.getImage(0) && <img alt="" src={page.localization.getImage(0)} />}
                 <p>{statusText}</p>
             </header>
 
-            <div aria-label={LocalizeText('catalog.recycler.button.recycle')} className="octane-catalog-recycler-slots" role="list">
+            <div aria-label={LocalizeText('catalog.recycler.button.recycle')} className="volt-catalog-recycler-slots" role="list">
                 {Array.from({ length: slotCount }, (_, index) => {
                     const slot = slots[index];
 
@@ -139,7 +139,7 @@ export const CatalogLayoutRecyclerView: FC<CatalogLayoutProps> = ({ page }) => {
                         <button
                             key={index}
                             aria-label={slot?.name ?? `${index + 1}`}
-                            className={`octane-catalog-recycler-slot${slot ? ' is-filled' : ''}`}
+                            className={`volt-catalog-recycler-slot${slot ? ' is-filled' : ''}`}
                             disabled={processing || !slot}
                             role="listitem"
                             type="button"
@@ -151,7 +151,7 @@ export const CatalogLayoutRecyclerView: FC<CatalogLayoutProps> = ({ page }) => {
                 })}
             </div>
 
-            <div className="octane-catalog-recycler-inventory">
+            <div className="volt-catalog-recycler-inventory">
                 {choices.length ? (
                     choices.map((choice) => (
                         <button key={choice.itemId} disabled={processing || slots.length >= slotCount} type="button" onClick={() => addChoice(choice)}>
@@ -160,12 +160,12 @@ export const CatalogLayoutRecyclerView: FC<CatalogLayoutProps> = ({ page }) => {
                         </button>
                     ))
                 ) : (
-                    <span className="octane-catalog-specialized-empty">{LocalizeText('inventory.furni.preview.not_recyclable')}</span>
+                    <span className="volt-catalog-specialized-empty">{LocalizeText('inventory.furni.preview.not_recyclable')}</span>
                 )}
             </div>
 
             <button
-                className="octane-catalog-standard-button octane-catalog-recycler-action"
+                className="volt-catalog-standard-button volt-catalog-recycler-action"
                 disabled={processing || !enabled || secondsLeft > 0 || slots.length !== slotCount}
                 type="button"
                 onClick={recycle}

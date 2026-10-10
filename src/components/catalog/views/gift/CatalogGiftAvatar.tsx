@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { dataUrlToBlob } from '../../../../common/layout/avatarImageCrop';
 
@@ -126,7 +126,7 @@ export const CatalogGiftAvatar: FC<{ figure?: string; imageUrl?: string }> = ({ 
     );
 
     return (
-        <div className="octane-catalog-gift-avatar">
+        <div className="volt-catalog-gift-avatar">
             {placed?.key === key && <img alt="" draggable={false} src={placed.url} style={{ left: placed.left, top: placed.top }} />}
         </div>
     );

@@ -6,10 +6,10 @@ import {
     LoveLockFurniStartEvent,
     RoomEngineTriggerWidgetEvent,
     RoomObjectVariable
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useState } from 'react';
 import { SendMessageComposer } from '../../../../api';
-import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useMessageEvent, useVoltEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 
 const useFurnitureFriendFurniWidgetState = () => {
@@ -64,7 +64,7 @@ const useFurnitureFriendFurniWidgetState = () => {
         setStage(2);
     });
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_FRIEND_FURNITURE_ENGRAVING, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_FRIEND_FURNITURE_ENGRAVING, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;

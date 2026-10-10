@@ -27,15 +27,15 @@ export const CatalogProductDetailsView: FC<{ offer: IPurchasableOffer }> = ({ of
     const recyclableLabel = LocalizeText('recycler.alert.non.recyclable');
 
     return (
-        <div aria-label={name} className="octane-catalog-product-details" role="group">
-            <strong className="octane-catalog-product-details-name">{name}</strong>
-            <span className="octane-catalog-product-details-description">{description}</span>
+        <div aria-label={name} className="volt-catalog-product-details" role="group">
+            <strong className="volt-catalog-product-details-name">{name}</strong>
+            <span className="volt-catalog-product-details-description">{description}</span>
             {(showNoTrade || showNoRecycle) && (
-                <div className="octane-catalog-product-details-badges" role="list">
+                <div className="volt-catalog-product-details-badges" role="list">
                     {showNoTrade && (
                         <span
                             aria-label={tradeableLabel}
-                            className="octane-catalog-product-capability is-no-trade"
+                            className="volt-catalog-product-capability is-no-trade"
                             data-capability="tradeable"
                             role="listitem"
                             title={tradeableLabel}
@@ -46,7 +46,7 @@ export const CatalogProductDetailsView: FC<{ offer: IPurchasableOffer }> = ({ of
                     {showNoRecycle && (
                         <span
                             aria-label={recyclableLabel}
-                            className="octane-catalog-product-capability is-no-recycle"
+                            className="volt-catalog-product-capability is-no-recycle"
                             data-capability="recyclable"
                             role="listitem"
                             title={recyclableLabel}

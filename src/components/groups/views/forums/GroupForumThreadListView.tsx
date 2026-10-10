@@ -7,7 +7,7 @@ import {
     PostThreadMessageEvent,
     UpdateThreadMessageComposer,
     UpdateThreadMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, ReportType, SendMessageComposer } from '../../../../api';
 import lockedIcon from '../../../../assets/images/groups/native/forum_forum_locked.png';
@@ -100,8 +100,8 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
     return (
         <>
             <GroupText background={FORUM_SURFACE} height={25} overrides={flatText(16, { bold: true, color: 0xa6a6a2 })} text={LocalizeText('groupforum.view.all_threads')} width={541} x={0} y={115} />
-            <div className="octane-forum__list">
-                <ClassicScrollAreaView className="octane-forum__scroll" contentClassName="octane-forum__scroll-content" minThumbSize={26} scrollStep={41}>
+            <div className="volt-forum__list">
+                <ClassicScrollAreaView className="volt-forum__scroll" contentClassName="volt-forum__scroll-content" minThumbSize={26} scrollStep={41}>
                     {sorted.map((thread, rowIndex) => {
                         const isHidden = thread.state === THREAD_HIDDEN_BY_ADMIN || thread.state === THREAD_DELETED_BY_STAFF;
                         const isUnread = thread.unreadMessagesCount > 0;
@@ -120,10 +120,10 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                         );
 
                         return (
-                            <div key={thread.threadId} className="octane-forum__thread">
-                                <div className="octane-forum__thread-flags" style={{ background: rowColor }}>
+                            <div key={thread.threadId} className="volt-forum__thread">
+                                <div className="volt-forum__thread-flags" style={{ background: rowColor }}>
                                     <button
-                                        className="octane-forum__flag"
+                                        className="volt-forum__flag"
                                         disabled={!canModerate}
                                         style={{ top: 0 }}
                                         type="button"
@@ -132,7 +132,7 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                                         <img alt="" draggable={false} src={thread.isLocked ? lockedIcon : unlockedIcon} style={{ left: 3, top: 1 }} />
                                     </button>
                                     <button
-                                        className="octane-forum__flag"
+                                        className="volt-forum__flag"
                                         disabled={!canModerate}
                                         style={{ top: 20 }}
                                         type="button"
@@ -141,11 +141,11 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                                         <img alt="" draggable={false} src={thread.isPinned ? pinnedIcon : unpinnedIcon} style={{ left: 3, top: 2 }} />
                                     </button>
                                 </div>
-                                <div className="octane-forum__thread-body" style={{ left: 21, width: textsWidth, background: rowColor }} onClick={() => !isHidden || canModerate ? onOpenThread(thread) : undefined}>
+                                <div className="volt-forum__thread-body" style={{ left: 21, width: textsWidth, background: rowColor }} onClick={() => !isHidden || canModerate ? onOpenThread(thread) : undefined}>
                                     <GroupText background={background} overrides={isUnread ? { bold: true } : undefined} text={header} x={0} y={0} />
                                     <GroupText background={background} overrides={flatText(10)} text={details} x={0} y={16} />
                                 </div>
-                                <div className="octane-forum__thread-counts" style={{ left: 21 + textsWidth + 1, background: rowColor }}>
+                                <div className="volt-forum__thread-counts" style={{ left: 21 + textsWidth + 1, background: rowColor }}>
                                     <GroupText
                                         background={background}
                                         overrides={flatText(10, { bold: isUnread })}
@@ -162,14 +162,14 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                                     />
                                 </div>
                                 {buttonCount > 0 && (
-                                    <div className="octane-forum__thread-actions" style={{ left: ROW_WIDTH - buttonsWidth, width: buttonsWidth }}>
+                                    <div className="volt-forum__thread-actions" style={{ left: ROW_WIDTH - buttonsWidth, width: buttonsWidth }}>
                                         {canModerate && (
-                                            <button className="octane-forum__action is-hide" type="button" onClick={() => moderate(thread)}>
+                                            <button className="volt-forum__action is-hide" type="button" onClick={() => moderate(thread)}>
                                                 <img alt="" draggable={false} src={thread.state === THREAD_HIDDEN_BY_ADMIN ? unhideIcon : hideIcon} style={{ left: 5, top: 11 }} />
                                             </button>
                                         )}
                                         {canReport && (
-                                            <button className="octane-forum__action is-report" style={{ left: canModerate ? BUTTON_WIDTH : 0 }} type="button" onClick={() => report(ReportType.THREAD, { groupId, threadId: thread.threadId })}>
+                                            <button className="volt-forum__action is-report" style={{ left: canModerate ? BUTTON_WIDTH : 0 }} type="button" onClick={() => report(ReportType.THREAD, { groupId, threadId: thread.threadId })}>
                                                 <img alt="" draggable={false} src={reportIcon} style={{ left: 4, top: 12 }} />
                                             </button>
                                         )}
@@ -180,13 +180,13 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = ({ fo
                     })}
                 </ClassicScrollAreaView>
             </div>
-            <div className="octane-forum__footer">
+            <div className="volt-forum__footer">
                 <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={onLeave} />
                 <ForumButton disabled={!canPostThread} label={LocalizeText('groupforum.view.start_thread')} right={178} tint="blue" width={95} onClick={onNewThread} />
                 <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={onPageChange} />
             </div>
             {statusKey && (
-                <div className="octane-forum__status">
+                <div className="volt-forum__status">
                     <GroupText align="center" background={FORUM_SURFACE} overrides={flatText(11)} text={forumPermissionText(statusKey, 'operation_post_thread')} width={300} x={3} y={3} />
                 </div>
             )}

@@ -1,5 +1,5 @@
-import { GetRenderer, OctaneRectangle, RenderRoomMessageComposer, RenderRoomThumbnailMessageComposer, RoomGeometry } from '@octane/renderer';
-import { SendMessageComposer } from '../octane/SendMessageComposer';
+import { GetRenderer, VoltRectangle, RenderRoomMessageComposer, RenderRoomThumbnailMessageComposer, RoomGeometry } from '@volt/renderer';
+import { SendMessageComposer } from '../volt/SendMessageComposer';
 import { GetCameraRoomCanvas } from './GetCameraRoomCanvas';
 import { getCameraMediaUrl } from './CameraMediaUrl';
 
@@ -64,7 +64,7 @@ const fitViewportAxis = (size: number, offset: number, crop: number, cropSize: n
 };
 
 /** The request contains only a viewpoint. The server supplies every room object and pixel. */
-export const getTrustedCameraViewport = (frame: InstanceType<typeof OctaneRectangle>): CameraViewport => {
+export const getTrustedCameraViewport = (frame: InstanceType<typeof VoltRectangle>): CameraViewport => {
     const canvas = GetCameraRoomCanvas();
     const geometry = canvas?.geometry as RoomGeometry;
     const location = geometry?.location;

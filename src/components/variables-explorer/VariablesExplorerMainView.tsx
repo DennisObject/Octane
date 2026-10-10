@@ -8,7 +8,7 @@ import {
     VariablesWebApiError,
     WebApiVariable
 } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { WiredVariablesTabView } from '../wired-tools/WiredVariablesTabView';
 import {
     EXPLORER_LOOKUP_KINDS,
@@ -109,7 +109,7 @@ export const VariablesExplorerMainView: FC<VariablesExplorerMainViewProps> = ({ 
 
     return (
         <>
-            <OctaneCardView
+            <VoltCardView
                 className="min-w-[560px] max-w-[560px]"
                 theme="primary-slim"
                 uniqueKey="variables-explorer"
@@ -117,8 +117,8 @@ export const VariablesExplorerMainView: FC<VariablesExplorerMainViewProps> = ({ 
                 offsetLeft={120}
                 offsetTop={60}
             >
-                <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.variables_explorer.title', 'Variables Explorer')} onCloseClick={onClose} />
-                <OctaneCardContentView className="text-black bg-[#e9e6d9]" gap={2}>
+                <VoltCardHeaderView headerText={localizeWithFallback('wiredmenu.variables_explorer.title', 'Variables Explorer')} onCloseClick={onClose} />
+                <VoltCardContentView className="text-black bg-[#e9e6d9]" gap={2}>
                     <div className="mx-3 mt-3 rounded border border-[#c8c2b2] bg-white px-3 py-2 flex items-center justify-between gap-3 text-[12px]">
                         <div className="flex flex-col min-w-0">
                             <Text bold truncate>
@@ -212,8 +212,8 @@ export const VariablesExplorerMainView: FC<VariablesExplorerMainViewProps> = ({ 
                             </div>
                         )}
                     </div>
-                </OctaneCardContentView>
-            </OctaneCardView>
+                </VoltCardContentView>
+            </VoltCardView>
             {isOwnersOpen && !!selectedDefinition && scope !== 'global' && (
                 <VariablesExplorerHoldersView
                     client={client}

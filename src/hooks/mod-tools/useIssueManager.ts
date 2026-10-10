@@ -7,7 +7,7 @@ import {
     ModeratorToolPreferencesEvent,
     PickIssuesMessageComposer,
     ReleaseIssuesMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useMemo } from 'react';
 import { PlaySound, SendMessageComposer, SoundNames } from '../../api';
 import { useMessageEvent } from '../events';

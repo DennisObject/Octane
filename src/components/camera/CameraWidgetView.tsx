@@ -7,10 +7,10 @@ import {
     RoomEngineEvent,
     RoomGeometry,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { CameraEffectSelection, deleteTrustedCamera, GetConfigurationValue, LocalizeText, NotificationAlertType } from '../../api';
-import { useAchievements, useCamera, useNotification, useOctaneEvent, useRoom } from '../../hooks';
+import { useAchievements, useCamera, useNotification, useVoltEvent, useRoom } from '../../hooks';
 import { getCameraAchievementLevel } from './CameraAirUtilities';
 import { CameraWidgetCaptureView } from './views/CameraWidgetCaptureView';
 import { CameraWidgetCheckoutView } from './views/CameraWidgetCheckoutView';
@@ -120,12 +120,12 @@ export const CameraWidgetView: FC<{}> = (props) => {
         setMode(MODE_CHECKOUT);
     };
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, (event) => {
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, (event) => {
         setSelectedPictureIndex(-1);
         setMode(MODE_NONE);
     });
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.ROOM_ZOOMED, (event) => {
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.ROOM_ZOOMED, (event) => {
         if (!roomSession || event.roomId !== roomSession.roomId || isDefaultRoomZoom(event.roomId)) return;
 
         setSelectedPictureIndex(-1);

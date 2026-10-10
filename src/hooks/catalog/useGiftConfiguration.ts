@@ -1,7 +1,7 @@
-import { GetGiftWrappingConfigurationComposer, GiftWrappingConfigurationEvent } from '@octane/renderer';
+import { GetGiftWrappingConfigurationComposer, GiftWrappingConfigurationEvent } from '@volt/renderer';
 import { UseQueryResult } from '@tanstack/react-query';
 import { GiftWrappingConfiguration } from '../../api';
-import { useOctaneQuery } from '../../api/octane-query';
+import { useVoltQuery } from '../../api/volt-query';
 
 /**
  * Wraps the GetGiftWrappingConfigurationComposer / GiftWrappingConfigurationEvent
@@ -17,8 +17,8 @@ import { useOctaneQuery } from '../../api/octane-query';
  * states.
  */
 export const useGiftConfiguration = (options: { enabled?: boolean } = {}): UseQueryResult<GiftWrappingConfiguration> =>
-    useOctaneQuery<GiftWrappingConfigurationEvent, GiftWrappingConfiguration>({
-        key: ['octane', 'catalog', 'giftConfiguration'],
+    useVoltQuery<GiftWrappingConfigurationEvent, GiftWrappingConfiguration>({
+        key: ['volt', 'catalog', 'giftConfiguration'],
         request: () => new GetGiftWrappingConfigurationComposer(),
         parser: GiftWrappingConfigurationEvent,
         select: (event) => new GiftWrappingConfiguration(event.getParser()),

@@ -11,7 +11,7 @@ interface HousekeepingNumberInputProps {
 
 /** Whole-number input with its unit after it; anything that isn't a number reads as 0. */
 export const HousekeepingNumberInput: FC<HousekeepingNumberInputProps> = ({ label, value, onChange, min = 1, max = undefined, className = '' }) => (
-    <label className={`octane-housekeeping-number ${className}`}>
+    <label className={`volt-housekeeping-number ${className}`}>
         <input
             aria-label={label}
             inputMode="numeric"
@@ -22,6 +22,6 @@ export const HousekeepingNumberInput: FC<HousekeepingNumberInputProps> = ({ labe
             value={value || ''}
             onChange={(event) => onChange(Math.trunc(Number(event.target.value)) || 0)}
         />
-        <span className="octane-staff-muted">{label}</span>
+        <span className="volt-staff-muted">{label}</span>
     </label>
 );

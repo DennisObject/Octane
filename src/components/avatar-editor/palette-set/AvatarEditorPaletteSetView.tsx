@@ -1,4 +1,4 @@
-import { IPartColor } from '@octane/renderer';
+import { IPartColor } from '@volt/renderer';
 import { CSSProperties, FC } from 'react';
 import { IAvatarEditorCategory } from '../../../api';
 import { useAvatarEditor } from '../../../hooks';

@@ -7,7 +7,7 @@ import { fieldInputId, FurniEditorFieldContext, FurniEditorHintsView, FurniEdito
 export const FurniEditorPlacementView: FC<{ fields: FurniEditorFieldContext }> = ({ fields }) => (
     <>
         <StaffSection title={LocalizeText('furni.editor.placement.dimensions')}>
-            <div className="octane-furni-editor-grid-3">
+            <div className="volt-furni-editor-grid-3">
                 <FurniEditorNumberFieldView field="width" fields={fields} max={64} min={1} />
                 <FurniEditorNumberFieldView field="length" fields={fields} max={64} min={1} />
                 <FurniEditorNumberFieldView field="stackHeight" fields={fields} max={99.99} min={0} step={0.01} />
@@ -15,16 +15,16 @@ export const FurniEditorPlacementView: FC<{ fields: FurniEditorFieldContext }> =
         </StaffSection>
         <StaffSection title={LocalizeText('furni.editor.placement.permissions')}>
             {PERMISSION_GROUPS.map((group) => (
-                <div key={group.labelKey} className="octane-staff-field">
-                    <span className="octane-staff-field-label">{LocalizeText(group.labelKey)}</span>
-                    <div className="octane-furni-editor-flags">
+                <div key={group.labelKey} className="volt-staff-field">
+                    <span className="volt-staff-field-label">{LocalizeText(group.labelKey)}</span>
+                    <div className="volt-furni-editor-flags">
                         {group.fields.map((field) => {
                             const unsupported = HOTEL_UNSUPPORTED_FIELDS.has(field);
 
                             return (
                                 <label
                                     key={field}
-                                    className={`octane-staff-row octane-furni-editor-flag ${unsupported ? 'octane-staff-muted' : ''} ${Object.is(fields.form[field], fields.stored[field]) ? '' : 'is-changed'}`}
+                                    className={`volt-staff-row volt-furni-editor-flag ${unsupported ? 'volt-staff-muted' : ''} ${Object.is(fields.form[field], fields.stored[field]) ? '' : 'is-changed'}`}
                                     title={unsupported ? LocalizeText('furni.editor.field.unsupported') : undefined}
                                 >
                                     <input

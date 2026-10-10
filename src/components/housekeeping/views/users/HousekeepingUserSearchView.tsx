@@ -40,8 +40,8 @@ export const HousekeepingUserSearchView: FC = () => {
     const showList = isOpen && (userSuggestions.length > 0 || showRecent);
 
     return (
-        <div className="octane-housekeeping-search">
-            <div className="octane-staff-row">
+        <div className="volt-housekeeping-search">
+            <div className="volt-staff-row">
                 <input
                     aria-label={LocalizeText('housekeeping.user.search.placeholder')}
                     autoComplete="off"
@@ -67,27 +67,27 @@ export const HousekeepingUserSearchView: FC = () => {
                 </Button>
             </div>
             {showList && (
-                <div className="octane-staff-list octane-housekeeping-suggestions" onMouseDown={(event) => event.preventDefault()}>
-                    {showRecent && <div className="octane-staff-list-row octane-staff-muted">{LocalizeText('housekeeping.dashboard.recent_lookups')}</div>}
+                <div className="volt-staff-list volt-housekeeping-suggestions" onMouseDown={(event) => event.preventDefault()}>
+                    {showRecent && <div className="volt-staff-list-row volt-staff-muted">{LocalizeText('housekeeping.dashboard.recent_lookups')}</div>}
                     {showRecent &&
                         recentUsers.map((entry) => (
-                            <button key={entry.id} className="octane-staff-list-row" type="button" onClick={() => pick(entry.id, entry.label)}>
+                            <button key={entry.id} className="volt-staff-list-row" type="button" onClick={() => pick(entry.id, entry.label)}>
                                 <span className="grow truncate">{entry.label}</span>
-                                <span className="octane-staff-muted">#{entry.id}</span>
+                                <span className="volt-staff-muted">#{entry.id}</span>
                             </button>
                         ))}
                     {userSuggestions.map((entry) => (
-                        <div key={entry.id} className="octane-staff-list-row is-interactive">
+                        <div key={entry.id} className="volt-staff-list-row is-interactive">
                             <input
                                 aria-label={LocalizeText('housekeeping.bulk.apply')}
                                 checked={selectedUserIds.includes(entry.id)}
                                 type="checkbox"
                                 onChange={() => toggleUserSelection(entry.id)}
                             />
-                            <button className="octane-housekeeping-suggestion" type="button" onClick={() => pick(entry.id, entry.username)}>
-                                <span className={`octane-housekeeping-presence ${entry.online ? 'is-online' : ''}`} />
+                            <button className="volt-housekeeping-suggestion" type="button" onClick={() => pick(entry.id, entry.username)}>
+                                <span className={`volt-housekeeping-presence ${entry.online ? 'is-online' : ''}`} />
                                 <span className="grow truncate">{entry.username}</span>
-                                <span className="octane-staff-muted">#{entry.id}</span>
+                                <span className="volt-staff-muted">#{entry.id}</span>
                             </button>
                         </div>
                     ))}

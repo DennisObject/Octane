@@ -112,11 +112,11 @@ export const InventoryFilterSelect: FC<InventoryFilterSelectProps> = ({ value, d
     }, [active, id, open]);
 
     return (
-        <span className="octane-inventory-filter-choice">
+        <span className="volt-inventory-filter-choice">
             <button
                 ref={trigger}
                 type="button"
-                className="octane-inventory-filter-select"
+                className="volt-inventory-filter-select"
                 role="combobox"
                 aria-label={label}
                 aria-expanded={open}
@@ -137,7 +137,7 @@ export const InventoryFilterSelect: FC<InventoryFilterSelectProps> = ({ value, d
                         aria-label={label}
                         aria-activedescendant={`${id}-${active}`}
                         tabIndex={-1}
-                        className="octane-inventory-filter-menu"
+                        className="volt-inventory-filter-menu"
                         style={{
                             left: position.left,
                             top: position.top,
@@ -152,7 +152,7 @@ export const InventoryFilterSelect: FC<InventoryFilterSelectProps> = ({ value, d
                                 id={`${id}-${index}`}
                                 role="option"
                                 aria-selected={index === selected}
-                                className={`octane-inventory-filter-option ${index === active ? 'is-active' : ''}`}
+                                className={`volt-inventory-filter-option ${index === active ? 'is-active' : ''}`}
                                 onPointerMove={() => setActive(index)}
                                 onPointerDown={(event) => event.preventDefault()}
                                 onClick={() => choose(index)}

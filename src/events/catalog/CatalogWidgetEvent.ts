@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class CatalogWidgetEvent extends OctaneEvent {
+export class CatalogWidgetEvent extends VoltEvent {
     public static WIDGETS_INITIALIZED: string = 'CWE_CWE_WIDGETS_INITIALIZED';
     public static SELECT_PRODUCT: string = 'CWE_SELECT_PRODUCT';
     public static SET_EXTRA_PARM: string = 'CWE_CWE_SET_EXTRA_PARM';

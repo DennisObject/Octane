@@ -1,4 +1,4 @@
-import { FriendRequestData } from '@octane/renderer';
+import { FriendRequestData } from '@volt/renderer';
 
 export class MessengerRequest {
     public static readonly PENDING = 1;

@@ -5,14 +5,14 @@ import {
     GetSessionDataManager,
     RoomObjectCategory,
     RoomObjectOperationType
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC } from 'react';
 import { attemptItemPlacement, CatalogPageName, ProductTypeEnum, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import giftCardImage from '../../../../assets/images/catalog/air/gift/gift-card-blank.png';
 import giftIncognitoImage from '../../../../assets/images/catalog/air/gift/incognito.png';
 import warningAlertImage from '../../../../assets/images/room-widgets/present-widget/warning-alert.png';
 import giftIconBackgroundImage from '../../../../assets/images/room-widgets/present-widget/gift-icon-background.png';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useCatalogUiState, useFurniturePresentWidget, useInventoryFurni } from '../../../../hooks';
 import { FurnitureGiftAvatar } from './FurnitureGiftAvatar';
 
@@ -74,13 +74,13 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
     );
 
     return (
-        <OctaneCardView
-            className={'octane-furni-gift ' + (isOpened ? 'is-opened' : 'is-closed')}
+        <VoltCardView
+            className={'volt-furni-gift ' + (isOpened ? 'is-opened' : 'is-closed')}
             frameStyle={3}
             isResizable={false}
-            uniqueKey="octane-furni-gift"
+            uniqueKey="volt-furni-gift"
         >
-            <OctaneCardHeaderView
+            <VoltCardHeaderView
                 headerText={LocalizeText(hasSender ? 'widget.furni.present.window.title_from' : 'widget.furni.present.window.title', ['name'], [senderName])}
                 onCloseClick={onClose}
             />
@@ -167,6 +167,6 @@ export const FurnitureGiftOpeningView: FC<{}> = (props) => {
                     )}
                 </div>
             )}
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

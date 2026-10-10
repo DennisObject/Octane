@@ -1,4 +1,4 @@
-import { RoomDataParser } from '@octane/renderer';
+import { RoomDataParser } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, localizeWithFallback } from '../../../../api';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';

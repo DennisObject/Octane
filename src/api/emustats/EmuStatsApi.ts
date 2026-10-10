@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 import { getAccessToken } from '../auth';
 
 export interface EmuStatsOverview {
@@ -137,7 +137,7 @@ const getUrl = (): string => {
 const buildHeaders = (): Record<string, string> => {
     const headers: Record<string, string> = {
         Accept: 'application/json',
-        'X-Requested-With': 'OctaneEmuStats'
+        'X-Requested-With': 'VoltEmuStats'
     };
 
     const token = getAccessToken();

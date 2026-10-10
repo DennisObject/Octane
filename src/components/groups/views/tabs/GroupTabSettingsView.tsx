@@ -1,4 +1,4 @@
-import { GroupSavePreferencesComposer } from '@octane/renderer';
+import { GroupSavePreferencesComposer } from '@volt/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import groupTypeIcon0 from '../../../../assets/images/groups/native/grouptype_icon_0.png';
@@ -21,7 +21,7 @@ interface GroupTabSettingsViewProps {
 const STEP_Y = 111;
 
 const Check: FC<{ checked: boolean; kind: 'radio' | 'checkbox'; x: number; y: number; onSelect: () => void }> = ({ checked, kind, x, y, onSelect }) => (
-    <button aria-checked={checked} className={`octane-group-native__check is-${kind}${checked ? ' is-checked' : ''}`} role={kind} style={{ left: x, top: y }} type="button" onClick={onSelect} />
+    <button aria-checked={checked} className={`volt-group-native__check is-${kind}${checked ? ' is-checked' : ''}`} role={kind} style={{ left: x, top: y }} type="button" onClick={onSelect} />
 );
 
 export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
@@ -85,7 +85,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
     }, [setCloseAction, saveSettings]);
 
     return (
-        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+        <div className="volt-group-native__step-body" style={{ top: STEP_Y }}>
             <GroupText align="center" text={LocalizeText('group.edit.settings.type.caption')} textStyle="u_headline_small" width={170} x={16} y={6} />
             <GroupBox height={199} kind="white" width={170} x={16} y={29}>
                 <GroupBox height={191} kind="tan" width={162} x={4} y={4}>
@@ -93,7 +93,7 @@ export const GroupTabSettingsView: FC<GroupTabSettingsViewProps> = (props) => {
                         <div key={state}>
                             <Check checked={groupState === index} kind="radio" x={5} y={7 + index * 60} onSelect={() => setGroupState(index)} />
                             <GroupText text={LocalizeText(`group.edit.settings.type.${state}.label`)} textStyle="u_bold" x={25} y={5 + index * 60} />
-                            <img alt="" className="octane-group-native__type-icon" draggable={false} src={TYPE_ICONS[index]} style={{ left: 5, top: 27 + index * 60 }} />
+                            <img alt="" className="volt-group-native__type-icon" draggable={false} src={TYPE_ICONS[index]} style={{ left: 5, top: 27 + index * 60 }} />
                             <GroupRichText html={LocalizeText(`group.edit.settings.type.${state}.help`)} width={132} x={25} y={20 + index * 60} />
                         </div>
                     ))}

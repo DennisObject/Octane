@@ -1,8 +1,8 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useCallback, useEffect } from 'react';
 import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
-import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
+import { LayoutCurrencyIcon, VoltCardContentView, VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../../common';
 import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
 import { useCatalogPageQuery } from '../../hooks/catalog/useCatalogQueries';
 import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
@@ -129,43 +129,43 @@ const CatalogViewInner: FC<{}> = () => {
     return (
         <>
             {isVisible && (
-                <OctaneCardView
-                    classNames={['octane-catalog-window']}
+                <VoltCardView
+                    classNames={['volt-catalog-window']}
                     frameStyle={3}
                     isResizable
                     resizeAxis="vertical"
                     uniqueKey="catalog"
                 >
-                    <OctaneCardHeaderView
+                    <VoltCardHeaderView
                         headerText={isBusy ? LocalizeText('generic.loading') || 'Loading...' : LocalizeText('catalog.title')}
                         onCloseClick={() => setIsVisible(false)}
                     />
-                    <div className="octane-catalog-mobile-header">
+                    <div className="volt-catalog-mobile-header">
                         {isMod && (
-                            <button className="octane-catalog-mobile-admin" type="button" onClick={() => setAdminMode(!adminMode)}>
+                            <button className="volt-catalog-mobile-admin" type="button" onClick={() => setAdminMode(!adminMode)}>
                                 {LocalizeText(adminMode ? 'catalog.admin.exit' : 'catalog.admin')}
                             </button>
                         )}
-                        <div className="octane-catalog-mobile-currency">
-                            <div className="octane-catalog-coin">
+                        <div className="volt-catalog-mobile-currency">
+                            <div className="volt-catalog-coin">
                                 <span>{LocalizeShortNumber(purse?.credits ?? 0)}</span>
                                 <LayoutCurrencyIcon type={-1} />
                             </div>
                             {displayedCurrencies.map((type) => (
-                                <div key={type} className="octane-catalog-coin">
+                                <div key={type} className="volt-catalog-coin">
                                     <span>{LocalizeShortNumber(purse?.activityPoints?.get(type) ?? 0)}</span>
                                     <LayoutCurrencyIcon type={type} />
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <OctaneCardTabsView classNames={['octane-catalog-tabs-shell']} justifyContent="start">
+                    <VoltCardTabsView classNames={['volt-catalog-tabs-shell']} justifyContent="start">
                         {rootNode &&
                             rootNode.children.length > 0 &&
                             rootNode.children.map((child) => {
                                 if (!child.isVisible) return null;
                                 return (
-                                    <OctaneCardTabsItemView
+                                    <VoltCardTabsItemView
                                         key={child.id}
                                         isActive={child === currentTab}
                                         title={child.localization}
@@ -176,33 +176,33 @@ const CatalogViewInner: FC<{}> = () => {
                                         }}
                                     >
                                         <div className="flex items-center gap-1">
-                                            <span className="octane-catalog-tab-label">{getSwfTabLabel(child.localization)}</span>
+                                            <span className="volt-catalog-tab-label">{getSwfTabLabel(child.localization)}</span>
                                         </div>
-                                    </OctaneCardTabsItemView>
+                                    </VoltCardTabsItemView>
                                 );
                             })}
                         {isMod && (
-                            <OctaneCardTabsItemView classNames={['octane-catalog-admin-tab']} isActive={adminMode} onClick={() => setAdminMode(!adminMode)}>
-                                <span className="octane-catalog-tab-label">{LocalizeText('catalog.admin')}</span>
-                            </OctaneCardTabsItemView>
+                            <VoltCardTabsItemView classNames={['volt-catalog-admin-tab']} isActive={adminMode} onClick={() => setAdminMode(!adminMode)}>
+                                <span className="volt-catalog-tab-label">{LocalizeText('catalog.admin')}</span>
+                            </VoltCardTabsItemView>
                         )}
-                    </OctaneCardTabsView>
-                    <div className="octane-catalog-standard-header">
+                    </VoltCardTabsView>
+                    <div className="volt-catalog-standard-header">
                         <div
-                            className="octane-catalog-standard-header-bg"
+                            className="volt-catalog-standard-header-bg"
                             style={currentPage?.localization?.getImage(0) ? { backgroundImage: `url(${currentPage.localization.getImage(0)})` } : undefined}
                         />
-                        <div className="octane-catalog-standard-header-icon">
+                        <div className="volt-catalog-standard-header-icon">
                             <CatalogIconView icon={activeCatalogNode?.iconId ?? rootNode?.iconId ?? 1} />
                         </div>
-                        <div className="octane-catalog-standard-header-copy">
-                            <div className="octane-catalog-standard-header-title">
+                        <div className="volt-catalog-standard-header-copy">
+                            <div className="volt-catalog-standard-header-title">
                                 {searchResult
                                     ? LocalizeText('catalog.search.header')
                                     : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title'))}
                             </div>
                             <div
-                                className="octane-catalog-standard-header-description"
+                                className="volt-catalog-standard-header-description"
                                 dangerouslySetInnerHTML={{
                                     __html: SanitizeHtml(
                                         searchResult
@@ -217,31 +217,31 @@ const CatalogViewInner: FC<{}> = () => {
                             />
                         </div>
                     </div>
-                    <OctaneCardContentView classNames={['octane-catalog-content-shell']}>
-                        <div className={`octane-catalog-stage ${sidebarHidden ? 'is-navigation-hidden' : ''}`}>
+                    <VoltCardContentView classNames={['volt-catalog-content-shell']}>
+                        <div className={`volt-catalog-stage ${sidebarHidden ? 'is-navigation-hidden' : ''}`}>
                             {!sidebarHidden && (
-                                <div className="octane-catalog-sidebar">
-                                    <div className="octane-catalog-search-shell">
+                                <div className="volt-catalog-sidebar">
+                                    <div className="volt-catalog-search-shell">
                                         <CatalogSearchView />
                                     </div>
-                                    <div className="octane-catalog-navigation-shell">
+                                    <div className="volt-catalog-navigation-shell">
                                         {currentTab && <CatalogNavigationView node={currentTab} />}
                                     </div>
                                 </div>
                             )}
-                            <div aria-busy={isBusy} className="octane-catalog-layout-shell">
-                                <div className="octane-catalog-layout-header-shell">
+                            <div aria-busy={isBusy} className="volt-catalog-layout-shell">
+                                <div className="volt-catalog-layout-header-shell">
                                     <CatalogBreadcrumbView />
-                                    <div className="octane-catalog-layout-hero">
+                                    <div className="volt-catalog-layout-hero">
                                         {!!currentPage?.localization?.getImage(0) && <img alt="" src={currentPage.localization.getImage(0)} />}
                                     </div>
                                 </div>
-                                <div className="octane-catalog-layout-container">{GetCatalogLayout(currentPage, hideCatalogNavigation)}</div>
+                                <div className="volt-catalog-layout-container">{GetCatalogLayout(currentPage, hideCatalogNavigation)}</div>
                             </div>
                         </div>
-                    </OctaneCardContentView>
+                    </VoltCardContentView>
                     {(isBusy || catalogLoadError) && <CatalogLoadingStateView error={catalogLoadError} onRetry={retryCurrentPage} />}
-                </OctaneCardView>
+                </VoltCardView>
             )}
             <CatalogAdminManagerView />
             <CatalogAdminPageEditView />

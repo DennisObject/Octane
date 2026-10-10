@@ -3,7 +3,7 @@ import {
     FurnitureListAddOrUpdateEvent,
     FurnitureListItemParser,
     FurnitureListRemovedEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import {
     addFurnitureItem,
     attemptItemPlacement,

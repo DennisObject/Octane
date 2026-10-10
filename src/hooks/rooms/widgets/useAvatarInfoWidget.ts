@@ -12,7 +12,7 @@ import {
     RoomSessionUserBadgesEvent,
     RoomSessionUserDataUpdateEvent,
     RoomSessionUserFigureUpdateEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import {
     AvatarInfoFurni,
@@ -28,7 +28,7 @@ import {
     RoomWidgetUpdateRoomObjectEvent,
     UseProductItem
 } from '../../../api';
-import { useOctaneEvent, useUiEvent } from '../../events';
+import { useVoltEvent, useUiEvent } from '../../events';
 import { useFriends } from '../../friends';
 import { useWired } from '../../wired';
 import { useObjectDeselectedEvent, useObjectRollOutEvent, useObjectRollOverEvent, useObjectSelectedEvent } from '../engine';
@@ -36,16 +36,16 @@ import { useRoom } from '../useRoom';
 import { applyFavouriteGroupUpdate, applyUserBadgesUpdate, applyUserFigureUpdate } from './avatarInfo.reducers';
 
 // Time window after a directional / move-state user click during
-// which the context menu must NOT open. Set on `globalThis.__octaneAvatarClickControl`
+// which the context menu must NOT open. Set on `globalThis.__voltAvatarClickControl`
 // by the click-routing code in the room engine.
 const CLICK_USER_DEBOUNCE_MS = 120;
 
-interface OctaneAvatarClickControl {
+interface VoltAvatarClickControl {
     suppressMenuUntil: number;
 }
 
-const getAvatarClickControl = (): OctaneAvatarClickControl | null =>
-    (globalThis as unknown as { __octaneAvatarClickControl?: OctaneAvatarClickControl }).__octaneAvatarClickControl ?? null;
+const getAvatarClickControl = (): VoltAvatarClickControl | null =>
+    (globalThis as unknown as { __voltAvatarClickControl?: VoltAvatarClickControl }).__voltAvatarClickControl ?? null;
 
 const useAvatarInfoWidgetState = () => {
     const [avatarInfo, setAvatarInfo] = useState<IAvatarInfo>(null);
@@ -174,7 +174,7 @@ const useAvatarInfoWidgetState = () => {
         // roomSession.userDataManager.requestPetInfo(petData.id);
     };
 
-    useOctaneEvent<RoomSessionUserDataUpdateEvent>(RoomSessionUserDataUpdateEvent.USER_DATA_UPDATED, (event) => {
+    useVoltEvent<RoomSessionUserDataUpdateEvent>(RoomSessionUserDataUpdateEvent.USER_DATA_UPDATED, (event) => {
         if (!event.addedUsers.length) return;
 
         let addedNameBubbles: AvatarInfoName[] = [];
@@ -208,7 +208,7 @@ const useAvatarInfoWidgetState = () => {
         });
     });
 
-    useOctaneEvent<RoomSessionPetInfoUpdateEvent>(RoomSessionPetInfoUpdateEvent.PET_INFO, (event) => {
+    useVoltEvent<RoomSessionPetInfoUpdateEvent>(RoomSessionPetInfoUpdateEvent.PET_INFO, (event) => {
         const petData = event.petInfo;
 
         if (!petData) return;
@@ -223,7 +223,7 @@ const useAvatarInfoWidgetState = () => {
         setPendingPetId(-1);
     });
 
-    useOctaneEvent<RoomSessionPetStatusUpdateEvent>(RoomSessionPetStatusUpdateEvent.PET_STATUS_UPDATE, (event) => {
+    useVoltEvent<RoomSessionPetStatusUpdateEvent>(RoomSessionPetStatusUpdateEvent.PET_STATUS_UPDATE, (event) => {
         /*     var _local_2:Boolean;
         var _local_3:Boolean;
         var _local_4:Boolean;
@@ -246,11 +246,11 @@ const useAvatarInfoWidgetState = () => {
             this._container.events.dispatchEvent(_local_7); */
     });
 
-    useOctaneEvent<RoomEngineUseProductEvent>(RoomEngineUseProductEvent.USE_PRODUCT_FROM_INVENTORY, (event) => {
+    useVoltEvent<RoomEngineUseProductEvent>(RoomEngineUseProductEvent.USE_PRODUCT_FROM_INVENTORY, (event) => {
         // this._Str_23199((k as RoomEngineUseProductEvent).inventoryStripId, (k as RoomEngineUseProductEvent).furnitureTypeId);
     });
 
-    useOctaneEvent<RoomEngineUseProductEvent>(RoomEngineUseProductEvent.USE_PRODUCT_FROM_ROOM, (event) => {
+    useVoltEvent<RoomEngineUseProductEvent>(RoomEngineUseProductEvent.USE_PRODUCT_FROM_ROOM, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(roomSession.roomId, event.objectId, RoomObjectCategory.FLOOR);
 
         if (!roomObject || !IsOwnerOfFurniture(roomObject)) return;
@@ -305,21 +305,21 @@ const useAvatarInfoWidgetState = () => {
         if (useProductBubbles.length) setProductBubbles(useProductBubbles);
     });
 
-    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_MANIPULATION, (event) => {
+    useVoltEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_MANIPULATION, (event) => {
         if (!CanManipulateFurniture(roomSession, event.objectId, event.category)) return;
 
         setIsDecorating(true);
     });
 
-    useOctaneEvent<RoomSessionUserBadgesEvent>(RoomSessionUserBadgesEvent.RSUBE_BADGES, (event) => {
+    useVoltEvent<RoomSessionUserBadgesEvent>(RoomSessionUserBadgesEvent.RSUBE_BADGES, (event) => {
         setAvatarInfo((prev) => applyUserBadgesUpdate(prev, event));
     });
 
-    useOctaneEvent<RoomSessionUserFigureUpdateEvent>(RoomSessionUserFigureUpdateEvent.USER_FIGURE, (event) => {
+    useVoltEvent<RoomSessionUserFigureUpdateEvent>(RoomSessionUserFigureUpdateEvent.USER_FIGURE, (event) => {
         setAvatarInfo((prev) => applyUserFigureUpdate(prev, event));
     });
 
-    useOctaneEvent<RoomSessionFavoriteGroupUpdateEvent>(RoomSessionFavoriteGroupUpdateEvent.FAVOURITE_GROUP_UPDATE, (event) => {
+    useVoltEvent<RoomSessionFavoriteGroupUpdateEvent>(RoomSessionFavoriteGroupUpdateEvent.FAVOURITE_GROUP_UPDATE, (event) => {
         setAvatarInfo((prev) => applyFavouriteGroupUpdate(prev, event, (groupId) => GetSessionDataManager().getGroupBadge(groupId)));
     });
 
@@ -398,9 +398,9 @@ const useAvatarInfoWidgetState = () => {
             });
         };
 
-        window.addEventListener('octane-localization-updated', refreshFurnitureInfo);
+        window.addEventListener('volt-localization-updated', refreshFurnitureInfo);
 
-        return () => window.removeEventListener('octane-localization-updated', refreshFurnitureInfo);
+        return () => window.removeEventListener('volt-localization-updated', refreshFurnitureInfo);
     }, []);
 
     useEffect(() => {

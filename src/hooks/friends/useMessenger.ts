@@ -16,7 +16,7 @@ import {
     RoomInviteEvent,
     SendMessageComposer as SendMessageComposerPacket,
     SendMessengerMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {

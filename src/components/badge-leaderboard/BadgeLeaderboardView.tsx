@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { CSSProperties, FC, Ref, RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     BadgeLeaderboardEntry,
@@ -94,7 +94,7 @@ const LeaderboardText: FC<LeaderboardTextProps> = ({
 }) => (
     <div
         ref={innerRef}
-        className={`octane-badge-leaderboard__text ${className}`}
+        className={`volt-badge-leaderboard__text ${className}`}
         style={{ ...(parentWidth === undefined ? { left: x } : { right: parentWidth - x }), top: y, mixBlendMode: blend }}
     >
         <NativeText
@@ -134,7 +134,7 @@ const HeaderEmblem: FC<{ src: string; yOffset: number }> = ({ src, yOffset }) =>
     return (
         <img
             alt=""
-            className="octane-badge-leaderboard__info-emblem"
+            className="volt-badge-leaderboard__info-emblem"
             draggable={false}
             src={src}
             style={{ left: 4 + Math.floor((65 - size[0]) / 2), top: Math.ceil((54 - size[1]) / 2) + yOffset }}
@@ -180,7 +180,7 @@ const RankBubble: FC<{ rank: number; isOwn: boolean }> = ({ rank, isOwn }) =>
 
     return (
         <div
-            className="octane-badge-leaderboard__rank"
+            className="volt-badge-leaderboard__rank"
             style={{ left: 5 + Math.floor((45 - width) / 2), top: isOwn ? 9 : 8, width, ['--rank-image' as string]: `url(${rankImage(rank)})` }}
         >
             <LeaderboardText bold size={15} value={rankText(rank)} x={7} y={3} />
@@ -204,30 +204,30 @@ const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }
     const right = isOwn ? 359 : 351;
 
     return (
-        <div className={`octane-badge-leaderboard__entry ${isOwn ? 'is-own' : ''}`} data-user-id={entry.userId}>
+        <div className={`volt-badge-leaderboard__entry ${isOwn ? 'is-own' : ''}`} data-user-id={entry.userId}>
             <img
                 alt=""
-                className="octane-badge-leaderboard__entry-bg"
+                className="volt-badge-leaderboard__entry-bg"
                 draggable={false}
                 src={isOwn ? leaderboardEntrySelf : isEven ? leaderboardEntryEven : leaderboardEntryUneven}
             />
             <RankBubble isOwn={isOwn} rank={entry.rank} />
             <button
                 aria-label={entry.username}
-                className="octane-badge-leaderboard__profile"
+                className="volt-badge-leaderboard__profile"
                 style={{ left: 51, top: isOwn ? 4 : 3 }}
                 type="button"
                 onClick={() => onProfile(entry.userId)}
                 onPointerDown={(event) => event.stopPropagation()}
             >
-                <span className="octane-badge-leaderboard__face-holder">
+                <span className="volt-badge-leaderboard__face-holder">
                     <BadgeLeaderboardFace figure={entry.figure} />
                 </span>
             </button>
             <LeaderboardText value={entry.username} x={isOwn ? 97 : 98} y={isOwn ? 13 : 12} />
             <img
                 alt=""
-                className="octane-badge-leaderboard__emblem"
+                className="volt-badge-leaderboard__emblem"
                 draggable={false}
                 src={emblem}
                 style={{ left: right - emblemWidth, top: 7 }}
@@ -398,26 +398,26 @@ export const BadgeLeaderboardView: FC<{}> = () =>
     if (!isVisible) return null;
 
     return (
-        <div className="octane-badge-leaderboard fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
+        <div className="volt-badge-leaderboard fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
             <DraggableWindow
-                handleSelector=".octane-badge-leaderboard__drag-handle"
+                handleSelector=".volt-badge-leaderboard__drag-handle"
                 uniqueKey="badge-leaderboard"
                 windowPosition={DraggableWindowPosition.CENTER}
             >
                 <div
-                    className="octane-badge-leaderboard__window pointer-events-auto"
+                    className="volt-badge-leaderboard__window pointer-events-auto"
                     role="dialog"
                     style={{ '--badge-leaderboard-frame': `url(${assets.frame})` } as CSSProperties}
                 >
-                    <div aria-hidden="true" className="octane-badge-leaderboard__frame" />
-                    <div className="octane-badge-leaderboard__drag-handle" />
+                    <div aria-hidden="true" className="volt-badge-leaderboard__frame" />
+                    <div className="volt-badge-leaderboard__drag-handle" />
                     <div
                         ref={titleRef}
-                        className="octane-badge-leaderboard__title"
+                        className="volt-badge-leaderboard__title"
                         style={{ left: titleLeft ?? 0, visibility: titleLeft === null ? 'hidden' : 'visible' }}
                     >
                         <button
-                            className="octane-badge-leaderboard__title-text"
+                            className="volt-badge-leaderboard__title-text"
                             type="button"
                             onClick={() => setIsMenuOpen((value) => !value)}
                             onPointerDown={(event) => event.stopPropagation()}
@@ -431,13 +431,13 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                                 <LeaderboardText key={`${x}-${y}`} bold size={16} value={titleText} x={x} y={y} />
                             ))}
                             <LeaderboardText blend="screen" bold color={0xffffff} size={16} thickness={50} value={titleText} x={1} y={5} />
-                            <span className="octane-badge-leaderboard__title-sizer">
+                            <span className="volt-badge-leaderboard__title-sizer">
                                 <NativeText background={0xffffff} overrides={{ size: 16 }} text={titleText} textStyle="u_bold" />
                             </span>
                         </button>
                         <button
                             aria-label={options[selectedIndex]?.label}
-                            className="octane-badge-leaderboard__opener"
+                            className="volt-badge-leaderboard__opener"
                             type="button"
                             onClick={() => setIsMenuOpen((value) => !value)}
                             onPointerDown={(event) => event.stopPropagation()}
@@ -447,7 +447,7 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                     </div>
                     <button
                         aria-label="Close"
-                        className="octane-badge-leaderboard__close"
+                        className="volt-badge-leaderboard__close"
                         type="button"
                         onClick={() => setIsVisible(false)}
                         onPointerDown={(event) => event.stopPropagation()}
@@ -455,12 +455,12 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                         <span style={{ backgroundImage: `url(${leaderboardButtonCloseSwf})` }} />
                     </button>
                     {isMenuOpen && (
-                        <div className="octane-badge-leaderboard__menu" role="listbox" style={{ height: MENU_CHROME + options.length * MENU_ITEM_HEIGHT }} onPointerDown={(event) => event.stopPropagation()}>
+                        <div className="volt-badge-leaderboard__menu" role="listbox" style={{ height: MENU_CHROME + options.length * MENU_ITEM_HEIGHT }} onPointerDown={(event) => event.stopPropagation()}>
                             {options.map((option, index) => (
                                 <button
                                     key={`${option.type}-${option.rarity}`}
                                     aria-selected={index === selectedIndex}
-                                    className={`octane-badge-leaderboard__menu-item ${index === selectedIndex ? 'is-selected' : ''}`}
+                                    className={`volt-badge-leaderboard__menu-item ${index === selectedIndex ? 'is-selected' : ''}`}
                                     role="option"
                                     type="button"
                                     onClick={() => show(option.type, option.rarity, 0)}
@@ -470,16 +470,16 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                             ))}
                         </div>
                     )}
-                    <div className="octane-badge-leaderboard__info">
-                        <img alt="" className="octane-badge-leaderboard__info-bg" draggable={false} src={leaderboardHeader} />
+                    <div className="volt-badge-leaderboard__info">
+                        <img alt="" className="volt-badge-leaderboard__info-bg" draggable={false} src={leaderboardHeader} />
                         <HeaderEmblem src={assets.extended} yOffset={assets.extendedYOffset} />
                         <InfoText value={lines(infoText)} />
                     </div>
-                    <div className="octane-badge-leaderboard__list">
+                    <div className="volt-badge-leaderboard__list">
                         {pageEntries.map((entry, index) => (
                             <div
                                 key={`${target.type}-${target.rarity}-${target.page}-${entry.userId}-${index}`}
-                                className="octane-badge-leaderboard__slot"
+                                className="volt-badge-leaderboard__slot"
                                 style={{ top: index * 43 }}
                             >
                                 <EntryRow
@@ -491,36 +491,36 @@ export const BadgeLeaderboardView: FC<{}> = () =>
                                 />
                             </div>
                         ))}
-                        {loadError && !board && <div className="octane-badge-leaderboard__state">{loadError}</div>}
+                        {loadError && !board && <div className="volt-badge-leaderboard__state">{loadError}</div>}
                     </div>
                     {ownEntry && (
-                        <div className="octane-badge-leaderboard__own">
+                        <div className="volt-badge-leaderboard__own">
                             <EntryRow isEven isOwn emblem={assets.emblem} entry={ownEntry} onProfile={openProfile} />
                         </div>
                     )}
                     <button
-                        className="octane-badge-leaderboard__button is-previous"
+                        className="volt-badge-leaderboard__button is-previous"
                         disabled={!canGoPrevious}
                         type="button"
                         onClick={() => show(target.type, target.rarity, target.page - 1)}
                     >
                         <NativeText
                             background={0xffffff}
-                            className="octane-badge-leaderboard__button-label"
+                            className="volt-badge-leaderboard__button-label"
                             overrides={!canGoPrevious ? { color: 0x777777 } : undefined}
                             text={text('badge_leaderboard.previous')}
                             textStyle="u_regular"
                         />
                     </button>
                     <button
-                        className="octane-badge-leaderboard__button is-next"
+                        className="volt-badge-leaderboard__button is-next"
                         disabled={!canGoNext}
                         type="button"
                         onClick={() => show(target.type, target.rarity, target.page + 1)}
                     >
                         <NativeText
                             background={0xffffff}
-                            className="octane-badge-leaderboard__button-label"
+                            className="volt-badge-leaderboard__button-label"
                             overrides={!canGoNext ? { color: 0x777777 } : undefined}
                             text={text('badge_leaderboard.next')}
                             textStyle="u_regular"

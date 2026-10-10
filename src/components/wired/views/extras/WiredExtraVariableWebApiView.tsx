@@ -1,4 +1,4 @@
-import { WiredGenerateWebApiKeyComposer, WiredWebApiKeyResultEvent } from '@octane/renderer';
+import { WiredGenerateWebApiKeyComposer, WiredWebApiKeyResultEvent } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import {
     buildWebApiBoxParams,
@@ -188,11 +188,11 @@ export const WiredExtraVariableWebApiView: FC<{}> = () => {
                         "Create API keys for reading and writing variables from dedicated HTTPS endpoints.\nNobody else can see the contents of this box, and you should not share these keys with anyone you don't trust.\n\nAfter changing variable configurations in the room, you may need to reload the room for the API to work properly."
                     )}
                 </Text>
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
                 {keySection(true)}
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
                 {keySection(false)}
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
                 <div className="flex flex-col gap-1">
                     <Text bold>{localizeText('wiredfurni.params.web_api.permissions', 'Extra permissions:')}</Text>
                     <label className={`flex items-center gap-1 ${canAllowBulkDelete(writeKey) ? 'cursor-pointer' : 'opacity-60'}`}>

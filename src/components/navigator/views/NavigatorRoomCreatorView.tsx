@@ -1,4 +1,4 @@
-import { CreateFlatMessageComposer, GetSessionDataManager } from '@octane/renderer';
+import { CreateFlatMessageComposer, GetSessionDataManager } from '@volt/renderer';
 import { FC, PointerEvent, ReactNode, RefObject, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfigurationValue, IRoomModel, LocalizeText, SendMessageComposer } from '../../../api';
 import scrollThumb from '../../../assets/images/habbo-skin/slices/scroll-thumb-v.png';
@@ -9,7 +9,7 @@ import popupArrowDown from '../../../assets/images/navigator/air/popup-arrow-dow
 import selectArrow from '../../../assets/images/navigator/air/select-arrow.png';
 import tileIconBlack from '../../../assets/images/navigator/air/tile-icon-black.png';
 import tileIconWhite from '../../../assets/images/navigator/air/tile-icon-white.png';
-import { OctaneCardView } from '../../../common';
+import { VoltCardView } from '../../../common';
 import { HabboDropMenuView } from '../../../common/dropmenu/HabboDropMenuView';
 import { useNavigatorData, useNavigatorUiStore, useUserDataSnapshot } from '../../../hooks';
 import { useRoomCreatorStore } from './navigatorRoomCreatorStore';
@@ -80,7 +80,7 @@ const LayoutScrollbarThumb = ({ pressed, id }: { pressed: boolean; id: string })
 
     return (
         <>
-            <svg className="octane-room-creator-air__thumb-middle" aria-hidden="true" width="17" height="100%">
+            <svg className="volt-room-creator-air__thumb-middle" aria-hidden="true" width="17" height="100%">
                 <defs>
                     <pattern id={id + '-middle'} width="17" height="1" patternUnits="userSpaceOnUse">
                         <svg width="17" height="1" viewBox="0 2 17 1">{image}</svg>
@@ -88,9 +88,9 @@ const LayoutScrollbarThumb = ({ pressed, id }: { pressed: boolean; id: string })
                 </defs>
                 <rect width="17" height="100%" fill={'url(#' + id + '-middle)'} />
             </svg>
-            <svg className="octane-room-creator-air__thumb-top" aria-hidden="true" viewBox="0 0 17 2">{image}</svg>
-            <svg className="octane-room-creator-air__thumb-bottom" aria-hidden="true" viewBox="0 22 17 2">{image}</svg>
-            <svg className="octane-room-creator-air__thumb-grip" aria-hidden="true" width="7" height="100%">
+            <svg className="volt-room-creator-air__thumb-top" aria-hidden="true" viewBox="0 0 17 2">{image}</svg>
+            <svg className="volt-room-creator-air__thumb-bottom" aria-hidden="true" viewBox="0 22 17 2">{image}</svg>
+            <svg className="volt-room-creator-air__thumb-grip" aria-hidden="true" width="7" height="100%">
                 <defs>
                     <pattern id={id + '-grip'} width="7" height="10" patternUnits="userSpaceOnUse">
                         <svg width="7" height="10" viewBox="5 7 7 10">{image}</svg>
@@ -136,17 +136,17 @@ const RoomLayoutScrollView = ({ children, viewportRef }: { children: ReactNode; 
     };
 
     return (
-        <div className="octane-room-creator-air__layouts">
-            <div id={id} ref={viewportRef} className="octane-room-creator-air__layout-viewport" onScroll={updateScroll}>
-                <div ref={contentRef} className="octane-room-creator-air__layout-rows">{children}</div>
+        <div className="volt-room-creator-air__layouts">
+            <div id={id} ref={viewportRef} className="volt-room-creator-air__layout-viewport" onScroll={updateScroll}>
+                <div ref={contentRef} className="volt-room-creator-air__layout-rows">{children}</div>
             </div>
-            <div className="octane-room-creator-air__scrollbar" onWheel={(event) => scrollBy(event.deltaY)}>
+            <div className="volt-room-creator-air__scrollbar" onWheel={(event) => scrollBy(event.deltaY)}>
                 <button
-                    type="button" className="octane-room-creator-air__scroll-up" aria-label="Scroll up" disabled={maxScroll === 0}
+                    type="button" className="volt-room-creator-air__scroll-up" aria-label="Scroll up" disabled={maxScroll === 0}
                     onPointerDown={(event) => { if (event.button === 0) scrollBy(-SCROLL_STEP); }}
                     onClick={(event) => { if (event.detail === 0) scrollBy(-SCROLL_STEP); }}
                 />
-                <div className="octane-room-creator-air__scroll-track" onPointerDown={(event) => {
+                <div className="volt-room-creator-air__scroll-track" onPointerDown={(event) => {
                     if (maxScroll === 0 || event.button !== 0 || event.target !== event.currentTarget) return;
                     const y = event.clientY - event.currentTarget.getBoundingClientRect().top;
                     if (y < thumbTop) scrollBy(-(LAYOUT_HEIGHT - SCROLL_STEP));
@@ -154,7 +154,7 @@ const RoomLayoutScrollView = ({ children, viewportRef }: { children: ReactNode; 
                 }}>
                     {maxScroll > 0 && (
                         <div
-                            className="octane-room-creator-air__scroll-thumb"
+                            className="volt-room-creator-air__scroll-thumb"
                             role="scrollbar" aria-orientation="vertical" aria-label={LocalizeText('navigator.createroom.chooselayoutcaption')}
                             aria-controls={id} aria-valuemin={0} aria-valuemax={maxScroll} aria-valuenow={scroll.top} tabIndex={0}
                             style={{ height: thumbHeight, top: thumbTop }}
@@ -188,7 +188,7 @@ const RoomLayoutScrollView = ({ children, viewportRef }: { children: ReactNode; 
                     )}
                 </div>
                 <button
-                    type="button" className="octane-room-creator-air__scroll-down" aria-label="Scroll down" disabled={maxScroll === 0}
+                    type="button" className="volt-room-creator-air__scroll-down" aria-label="Scroll down" disabled={maxScroll === 0}
                     onPointerDown={(event) => { if (event.button === 0) scrollBy(SCROLL_STEP); }}
                     onClick={(event) => { if (event.detail === 0) scrollBy(SCROLL_STEP); }}
                 />
@@ -212,7 +212,7 @@ export const NavigatorRoomCreatorView: FC = () => {
     useEffect(() => {
         if (!isCreatorOpen) return;
         const timer = window.setInterval(() => {
-            const arrow = layoutsRef.current?.querySelector<HTMLImageElement>('.is-selected .octane-room-creator-air__select-arrow');
+            const arrow = layoutsRef.current?.querySelector<HTMLImageElement>('.is-selected .volt-room-creator-air__select-arrow');
             if (!arrow) return;
             let y = Number.parseFloat(arrow.style.top || '0');
             const step = Math.abs(y) < 2 || Math.abs(y - 15) < 2 ? 1 : 2;
@@ -281,16 +281,16 @@ export const NavigatorRoomCreatorView: FC = () => {
     if (!isCreatorOpen || !position) return null;
 
     return (
-        <OctaneCardView key={showVersion} uniqueKey="navigator-room-creator" handleSelector=".octane-room-creator-air__caption" frameStyle={3} isResizable={false} dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} initialPosition={position} unconstrainedPosition={true} onPositionChange={onPositionChange} className="octane-room-creator-air" role="dialog" aria-label={LocalizeText('navigator.createroom.title')}>
-            <div className="octane-card-header-shell octane-room-creator-air__caption">
-                <span className="octane-card-title octane-room-creator-air__title">{LocalizeText('navigator.createroom.title')}</span>
-                <button type="button" className="octane-card-close-button octane-room-creator-air__close" aria-label={LocalizeText('generic.close')} onClick={closeCreator} />
+        <VoltCardView key={showVersion} uniqueKey="navigator-room-creator" handleSelector=".volt-room-creator-air__caption" frameStyle={3} isResizable={false} dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} initialPosition={position} unconstrainedPosition={true} onPositionChange={onPositionChange} className="volt-room-creator-air" role="dialog" aria-label={LocalizeText('navigator.createroom.title')}>
+            <div className="volt-card-header-shell volt-room-creator-air__caption">
+                <span className="volt-card-title volt-room-creator-air__title">{LocalizeText('navigator.createroom.title')}</span>
+                <button type="button" className="volt-card-close-button volt-room-creator-air__close" aria-label={LocalizeText('generic.close')} onClick={closeCreator} />
             </div>
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--name">{LocalizeText('navigator.roomname')}</span>
-            <div className={`octane-room-creator-air__field octane-room-creator-air__field--name${nameInvalid ? ' is-invalid' : ''}`}>
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--name">{LocalizeText('navigator.roomname')}</span>
+            <div className={`volt-room-creator-air__field volt-room-creator-air__field--name${nameInvalid ? ' is-invalid' : ''}`}>
                 <input
-                    className="octane-room-creator-air__input"
+                    className="volt-room-creator-air__input"
                     maxLength={25}
                     type="text"
                     aria-label={LocalizeText('navigator.roomname')}
@@ -304,18 +304,18 @@ export const NavigatorRoomCreatorView: FC = () => {
                 />
             </div>
             {nameError && (
-                <div className="octane-room-creator-air__error" role="alert">
-                    <div className="octane-room-creator-air__error-border">
+                <div className="volt-room-creator-air__error" role="alert">
+                    <div className="volt-room-creator-air__error-border">
                         <span>{nameError}</span>
                     </div>
-                    <img className="octane-room-creator-air__error-arrow" src={popupArrowDown} alt="" width={11} height={11} />
+                    <img className="volt-room-creator-air__error-arrow" src={popupArrowDown} alt="" width={11} height={11} />
                 </div>
             )}
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--desc">{LocalizeText('navigator.roomdesc')}</span>
-            <div className="octane-room-creator-air__field octane-room-creator-air__field--desc">
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--desc">{LocalizeText('navigator.roomdesc')}</span>
+            <div className="volt-room-creator-air__field volt-room-creator-air__field--desc">
                 <textarea
-                    className="octane-room-creator-air__input octane-room-creator-air__input--multiline"
+                    className="volt-room-creator-air__input volt-room-creator-air__input--multiline"
                     maxLength={128}
                     aria-label={LocalizeText('navigator.roomdesc')}
                     value={descriptionTouched ? description : descriptionPlaceholder.slice(0, 128)}
@@ -324,41 +324,41 @@ export const NavigatorRoomCreatorView: FC = () => {
                 />
             </div>
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--category">{LocalizeText('navigator.category')}</span>
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--category">{LocalizeText('navigator.category')}</span>
             <HabboDropMenuView
-                className="octane-room-creator-air__dropmenu octane-room-creator-air__dropmenu--category"
+                className="volt-room-creator-air__dropmenu volt-room-creator-air__dropmenu--category"
                 label={LocalizeText('navigator.category')}
                 options={selectableCategories.map((category, index) => ({ value: index, label: LocalizeText(category.name) }))}
                 value={safeCategoryIndex}
                 onSelect={(categoryIndex) => setForm({ categoryIndex })}
             />
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--visitors">{LocalizeText('navigator.maxvisitors')}</span>
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--visitors">{LocalizeText('navigator.maxvisitors')}</span>
             <HabboDropMenuView
-                className="octane-room-creator-air__dropmenu octane-room-creator-air__dropmenu--visitors"
+                className="volt-room-creator-air__dropmenu volt-room-creator-air__dropmenu--visitors"
                 label={LocalizeText('navigator.maxvisitors')}
                 options={visitorOptions.map((label, value) => ({ value, label }))}
                 value={safeVisitorsIndex}
                 onSelect={(visitorsIndex) => setForm({ visitorsIndex })}
             />
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--trade">{LocalizeText('navigator.tradesettings')}</span>
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--trade">{LocalizeText('navigator.tradesettings')}</span>
             <HabboDropMenuView
-                className="octane-room-creator-air__dropmenu octane-room-creator-air__dropmenu--trade"
+                className="volt-room-creator-air__dropmenu volt-room-creator-air__dropmenu--trade"
                 label={LocalizeText('navigator.tradesettings')}
                 options={AIR_TRADE_KEYS.map((key, value) => ({ value, label: LocalizeText(key) }))}
                 value={tradeIndex}
                 onSelect={(tradeIndex) => setForm({ tradeIndex })}
             />
 
-            <button type="button" className="octane-room-creator-air__button octane-room-creator-air__button--create" onClick={createRoom}>
+            <button type="button" className="volt-room-creator-air__button volt-room-creator-air__button--create" onClick={createRoom}>
                 {LocalizeText('navigator.createroom.create')}
             </button>
-            <button type="button" className="octane-room-creator-air__button octane-room-creator-air__button--cancel" onClick={closeCreator}>
+            <button type="button" className="volt-room-creator-air__button volt-room-creator-air__button--cancel" onClick={closeCreator}>
                 {LocalizeText('generic.cancel')}
             </button>
 
-            <span className="octane-room-creator-air__label octane-room-creator-air__label--layout">
+            <span className="volt-room-creator-air__label volt-room-creator-air__label--layout">
                 {LocalizeText('navigator.createroom.chooselayoutcaption')}
             </span>
             <RoomLayoutScrollView viewportRef={layoutsRef}>
@@ -368,7 +368,7 @@ export const NavigatorRoomCreatorView: FC = () => {
                     return (
                         <div
                             key={model.name}
-                            className={`octane-room-creator-air__thumbnail${isSelected ? ' is-selected' : ''}`}
+                            className={`volt-room-creator-air__thumbnail${isSelected ? ' is-selected' : ''}`}
                             role="button"
                             tabIndex={0}
                             aria-pressed={isSelected}
@@ -377,32 +377,32 @@ export const NavigatorRoomCreatorView: FC = () => {
                                 if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectModel(model); }
                             }}
                         >
-                            <span className="octane-room-creator-air__thumbnail-bg" aria-hidden="true" />
-                            <img className="octane-room-creator-air__select-arrow" src={selectArrow} alt="" width={18} height={20} />
-                            <img className="octane-room-creator-air__thumbnail-pic" src={getRoomModelImage(model.name)} alt="" />
+                            <span className="volt-room-creator-air__thumbnail-bg" aria-hidden="true" />
+                            <img className="volt-room-creator-air__select-arrow" src={selectArrow} alt="" width={18} height={20} />
+                            <img className="volt-room-creator-air__thumbnail-pic" src={getRoomModelImage(model.name)} alt="" />
                             <img
-                                className="octane-room-creator-air__thumbnail-tile-icon"
+                                className="volt-room-creator-air__thumbnail-tile-icon"
                                 src={isSelected ? tileIconWhite : tileIconBlack}
                                 alt=""
                                 width={18}
                                 height={10}
                             />
-                            <span className="octane-room-creator-air__thumbnail-tiles">
+                            <span className="volt-room-creator-air__thumbnail-tiles">
                                 {model.tileSize} {tileSizeLabel}
                             </span>
                             {model.clubLevel > 0 && (
-                                <img className="octane-room-creator-air__thumbnail-club" src={vipIconSmall} alt="" width={19} height={10} />
+                                <img className="volt-room-creator-air__thumbnail-club" src={vipIconSmall} alt="" width={19} height={10} />
                             )}
                         </div>
                     );
                 })}
                 {showVipPromo && (
-                    <div className="octane-room-creator-air__vip-promo">
-                        <img className="octane-room-creator-air__vip-promo-icon" src={vipIconBig} alt="" width={37} height={37} />
-                        <span className="octane-room-creator-air__vip-promo-text">{LocalizeText('navigator.createroom.vippromo.text')}</span>
+                    <div className="volt-room-creator-air__vip-promo">
+                        <img className="volt-room-creator-air__vip-promo-icon" src={vipIconBig} alt="" width={37} height={37} />
+                        <span className="volt-room-creator-air__vip-promo-text">{LocalizeText('navigator.createroom.vippromo.text')}</span>
                         <button
                             type="button"
-                            className="octane-room-creator-air__vip-promo-link"
+                            className="volt-room-creator-air__vip-promo-link"
                             onClick={() => CreateLinkEvent('habboUI/open/hccenter')}
                         >
                             {LocalizeText('navigator.createroom.vippromo.link')}
@@ -410,6 +410,6 @@ export const NavigatorRoomCreatorView: FC = () => {
                     </div>
                 )}
             </RoomLayoutScrollView>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

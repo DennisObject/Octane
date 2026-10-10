@@ -39,26 +39,26 @@ export const NotificationFriendOnlineBubbleView: FC<NotificationFriendOnlineBubb
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 340 }}
             transition={{ duration: 0.3 }}
-            className="octane-friendonline-notification"
+            className="volt-friendonline-notification"
             style={{ width: bubbleWidth }}
             onClick={openMessenger}
         >
-            <div className="octane-friendonline-notification__content" style={{ width: contentWidth }}>
-                <img alt="" className="octane-friendonline-notification__left" src={friendOnlineLeft} draggable={false} />
-                <div className="octane-friendonline-notification__middle" style={{ backgroundImage: `url(${friendOnlineMiddle})` }}>
-                    <div className="octane-friendonline-notification__message">
+            <div className="volt-friendonline-notification__content" style={{ width: contentWidth }}>
+                <img alt="" className="volt-friendonline-notification__left" src={friendOnlineLeft} draggable={false} />
+                <div className="volt-friendonline-notification__middle" style={{ backgroundImage: `url(${friendOnlineMiddle})` }}>
+                    <div className="volt-friendonline-notification__message">
                         <img alt="" src={friendOnlineSlide} draggable={false} />
                         <span>{item.message}</span>
                     </div>
                 </div>
-                <img alt="" className="octane-friendonline-notification__right" src={friendOnlineRight} draggable={false} />
+                <img alt="" className="volt-friendonline-notification__right" src={friendOnlineRight} draggable={false} />
             </div>
-            <div className="octane-friendonline-notification__avatar" style={{ left: contentWidth - 10 }}>
-                <img alt="" className="octane-friendonline-notification__circle-inner" src={friendOnlineCircleInner} draggable={false} />
-                <div className="octane-friendonline-notification__head">
+            <div className="volt-friendonline-notification__avatar" style={{ left: contentWidth - 10 }}>
+                <img alt="" className="volt-friendonline-notification__circle-inner" src={friendOnlineCircleInner} draggable={false} />
+                <div className="volt-friendonline-notification__head">
                     {item.iconUrl && <LayoutAvatarImageView figure={item.iconUrl} headOnly direction={2} />}
                 </div>
-                <img alt="" className="octane-friendonline-notification__circle" src={friendOnlineCircle} draggable={false} />
+                <img alt="" className="volt-friendonline-notification__circle" src={friendOnlineCircle} draggable={false} />
             </div>
         </motion.div>
     );

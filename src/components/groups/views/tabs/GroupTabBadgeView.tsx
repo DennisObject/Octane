@@ -1,4 +1,4 @@
-import { GroupSaveBadgeComposer } from '@octane/renderer';
+import { GroupSaveBadgeComposer } from '@volt/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { GroupBadgePart, IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
@@ -105,11 +105,11 @@ export const GroupTabBadgeView: FC<GroupTabBadgeViewProps> = (props) => {
     }, [setCloseAction, saveBadge]);
 
     return (
-        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+        <div className="volt-group-native__step-body" style={{ top: STEP_Y }}>
             <GroupText text={LocalizeText('group.edit.badge.badge')} textStyle="u_bold" x={25} y={8} />
             <GroupBox height={94} kind="white" width={94} x={17} y={29}>
                 <GroupBox height={86} kind="tan" width={86} x={4} y={4} />
-                <div className="octane-group-native__badge" style={{ left: 27, top: 27 }}>
+                <div className="volt-group-native__badge" style={{ left: 27, top: 27 }}>
                     <LayoutBadgeImageView badgeCode={getModifiedBadgeCode()} isGroup={true} />
                 </div>
             </GroupBox>

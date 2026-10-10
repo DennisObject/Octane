@@ -1,4 +1,4 @@
-import { MouseEventType } from '@octane/renderer';
+import { MouseEventType } from '@volt/renderer';
 import { FC, MouseEvent, useState } from 'react';
 import { attemptItemPlacement, GroupItem } from '../../../../api';
 import { classNames, InfiniteGrid } from '../../../../layout';
@@ -39,7 +39,7 @@ export const InventoryFurnitureItemView: FC<{
 
     return (
         <InfiniteGrid.Item
-            className={classNames('octane-inventory-thumb', isActive && 'is-selected', groupItem.hasUnseenItems && 'is-unseen', !count && 'opacity-50')}
+            className={classNames('volt-inventory-thumb', isActive && 'is-selected', groupItem.hasUnseenItems && 'is-unseen', !count && 'opacity-50')}
             itemActive={isActive}
             itemCount={count}
             itemImage={groupItem.stuffData.uniqueNumber > 0 ? groupItem.iconUrl : undefined}

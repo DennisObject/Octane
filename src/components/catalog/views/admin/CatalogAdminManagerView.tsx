@@ -56,7 +56,7 @@ const CatalogAdminManagerWindow: FC = () => {
     return (
         <StaffWindow<ManagerTab>
             activeTab={activeTab}
-            className="octane-catalog-admin-manager"
+            className="volt-catalog-admin-manager"
             tabs={tabs}
             title={LocalizeText('catalog.admin.title')}
             uniqueKey="catalog-admin-manager"
@@ -72,7 +72,7 @@ const CatalogAdminManagerWindow: FC = () => {
                 <StaffStatus message={LocalizeText('catalog.admin.status.working')} tone="pending" />
             )}
             {activeTab === 'catalog' && (
-                <div className="octane-catalog-admin-workspace">
+                <div className="volt-catalog-admin-workspace">
                     <CatalogAdminPageTreeView root={draftRoot} selectedPageId={selectedPageId} onSelect={(node: ICatalogNode) => selectPage(node.pageId)} />
                     <CatalogAdminPageDetailView node={selectedNode} root={draftRoot} />
                 </div>

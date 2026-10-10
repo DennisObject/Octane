@@ -34,11 +34,11 @@ const bitmapRegion = (rect: number[], key: number, style?: CSSProperties) => (
 );
 
 export const WiredVolterFrameView: FC<{ shellStyle: WiredVolterStyle }> = ({ shellStyle }) => (
-    <div className="octane-wired__volter-frame" aria-hidden="true">
-        <div className="octane-wired__volter-frame-grid">
+    <div className="volt-wired__volter-frame" aria-hidden="true">
+        <div className="volt-wired__volter-frame-grid">
             {frameRegions.map(([x, y, width, height], index) => bitmapRegion([x + frameOffsets[shellStyle], y + 300, width, height], index))}
         </div>
-        <div className="octane-wired__volter-frame-shine">{shineRegions.map(({ rect, style }, index) => bitmapRegion(rect, index, style))}</div>
+        <div className="volt-wired__volter-frame-shine">{shineRegions.map(({ rect, style }, index) => bitmapRegion(rect, index, style))}</div>
     </div>
 );
 
@@ -57,8 +57,8 @@ const borderOffsets = { volter_blue: 192, volter_green: 224, volter_yellow: 256 
 
 /** cBe's native border13 body wrapper, with controller insets 9/8/9/8. */
 export const WiredVolterBorderView: FC<PropsWithChildren<{ shellStyle: Exclude<WiredVolterStyle, 'volter'> }>> = ({ shellStyle, children }) => (
-    <div className="octane-wired__volter-inner">
-        <div className="octane-wired__volter-inner-skin" aria-hidden="true">
+    <div className="volt-wired__volter-inner">
+        <div className="volt-wired__volter-inner-skin" aria-hidden="true">
             {borderRegions.map(([x, y, width, height], index) => bitmapRegion([x + borderOffsets[shellStyle], y + 300, width, height], index))}
         </div>
         {children}
@@ -67,9 +67,9 @@ export const WiredVolterBorderView: FC<PropsWithChildren<{ shellStyle: Exclude<W
 
 /** quick_menu's nested style3 / style11 / style11 native borders. */
 export const WiredVolterMenuFrameView: FC = () => (
-    <span className="octane-wired__volter-menu-frame" aria-hidden="true">
+    <span className="volt-wired__volter-menu-frame" aria-hidden="true">
         {[296, 304, 312].map((offset, inset) => (
-            <span key={offset} className="octane-wired__volter-menu-frame-grid" style={{ inset }}>
+            <span key={offset} className="volt-wired__volter-menu-frame-grid" style={{ inset }}>
                 {[0, 3, 4].flatMap((y, row) =>
                     [0, 3, 4].map((x, column) => bitmapRegion([offset + x, 300 + y, column === 1 ? 1 : 3, row === 1 ? 1 : 3], row * 3 + column))
                 )}

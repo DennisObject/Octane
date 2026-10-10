@@ -12,7 +12,7 @@ export const FriendsRemoveConfirmationView: FC<FriendsRemoveConfirmationViewProp
     <FriendsDialogFrameView kind="remove" title={LocalizeText('friendlist.removefriendconfirm.title')}
         initialPosition={snapshot.initialPosition} onCloseClick={onCloseClick}>
         <FriendsDialogBorderView width={150} height={143} />
-        <div className="octane-friends-remove-confirmation-text">{snapshot.caption}</div>
+        <div className="volt-friends-remove-confirmation-text">{snapshot.caption}</div>
         <div className="friends-dialog-actions">
             <FriendsDialogButtonView thick caption={LocalizeText('generic.ok')} onClick={() => removeSelectedFriends(snapshot.ids)} />
             <FriendsDialogButtonView caption={LocalizeText('generic.cancel')} onClick={onCloseClick} />

@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { dataUrlToBlob } from '../../common/layout/avatarImageCrop';
 
@@ -137,5 +137,5 @@ export const BadgeLeaderboardFace: FC<{ figure: string }> = ({ figure }) =>
         []
     );
 
-    return <div className="octane-badge-leaderboard__face">{shown?.figure === figure && <img alt="" draggable={false} src={shown.url} />}</div>;
+    return <div className="volt-badge-leaderboard__face">{shown?.figure === figure && <img alt="" draggable={false} src={shown.url} />}</div>;
 };

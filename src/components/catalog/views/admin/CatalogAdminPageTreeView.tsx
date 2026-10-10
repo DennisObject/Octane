@@ -88,11 +88,11 @@ export const CatalogAdminPageTreeView: FC<CatalogAdminPageTreeViewProps> = ({ ro
     };
 
     return (
-        <StaffSection className="octane-catalog-admin-tree-section" title={LocalizeText('catalog.admin.pages')}>
-            <div className="octane-staff-row">
+        <StaffSection className="volt-catalog-admin-tree-section" title={LocalizeText('catalog.admin.pages')}>
+            <div className="volt-staff-row">
                 <input
                     aria-label={LocalizeText('catalog.admin.search.pages')}
-                    className="octane-catalog-admin-grow"
+                    className="volt-catalog-admin-grow"
                     placeholder={LocalizeText('catalog.admin.search.pages')}
                     type="search"
                     value={search}
@@ -103,7 +103,7 @@ export const CatalogAdminPageTreeView: FC<CatalogAdminPageTreeViewProps> = ({ ro
                 </Button>
             </div>
             <div
-                className={`octane-catalog-admin-root-drop ${rootDropActive ? 'is-active' : ''}`}
+                className={`volt-catalog-admin-root-drop ${rootDropActive ? 'is-active' : ''}`}
                 onDragLeave={() => setRootDropActive(false)}
                 onDragOver={(event) => {
                     if (!event.dataTransfer.types.includes(CATALOG_ADMIN_PAGE_DRAG_TYPE)) return;
@@ -121,7 +121,7 @@ export const CatalogAdminPageTreeView: FC<CatalogAdminPageTreeViewProps> = ({ ro
             </div>
             <div
                 aria-label={LocalizeText('catalog.admin.pages')}
-                className="octane-staff-list octane-catalog-admin-tree"
+                className="volt-staff-list volt-catalog-admin-tree"
                 role="tree"
                 onDragLeave={() => setDropTarget(null)}
             >

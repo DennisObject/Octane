@@ -1,4 +1,4 @@
-import { GetSessionDataManager, RoomObjectType } from '@octane/renderer';
+import { GetSessionDataManager, RoomObjectType } from '@volt/renderer';
 import { FC, useMemo, useState } from 'react';
 import { ChatEntryType, LocalizeText, ReportState } from '../../../api';
 import nativeBlueAtlas from '../../../assets/images/habbo-skin/2249_habbo_skin_blue_png$87fbbf84559e7bad0222a9c697b1104d-1406111769.png';

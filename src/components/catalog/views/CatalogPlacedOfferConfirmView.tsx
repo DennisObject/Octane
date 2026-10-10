@@ -1,4 +1,4 @@
-import { PurchaseFromCatalogComposer } from '@octane/renderer';
+import { PurchaseFromCatalogComposer } from '@volt/renderer';
 import { FC, useCallback, useEffect } from 'react';
 import { CatalogType, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { claimPlacedOfferPurchase, useCatalogActions, useCatalogPlacedOffer, useCatalogSkipPurchaseConfirmation, useNotification, usePurse } from '../../../hooks';

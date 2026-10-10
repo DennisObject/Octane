@@ -1,8 +1,8 @@
 import {
-    AvatarEffectActivatedEvent, AvatarEffectAddedEvent, AvatarEffectExpiredEvent, AvatarEffectsEvent, GetCommunication, OctaneEventType
-} from '@octane/renderer';
+    AvatarEffectActivatedEvent, AvatarEffectAddedEvent, AvatarEffectExpiredEvent, AvatarEffectsEvent, GetCommunication, VoltEventType
+} from '@volt/renderer';
 import { useState } from 'react';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 
 export interface AvatarEditorEffect {
     type: number;
@@ -30,7 +30,7 @@ export const useAvatarEditorEffects = () =>
     const [effects, setEffects] = useState<AvatarEditorEffect[]>(NO_EFFECTS);
     const [wornEffect, setWornEffect] = useState(-1);
 
-    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    useVoltEvent(VoltEventType.CONNECTION_STATE_CHANGED, () =>
     {
         if (GetCommunication().connection.connectionState.authenticated) return;
 

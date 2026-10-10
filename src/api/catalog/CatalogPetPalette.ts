@@ -1,4 +1,4 @@
-import { SellablePetPaletteData } from '@octane/renderer';
+import { SellablePetPaletteData } from '@volt/renderer';
 
 export class CatalogPetPalette {
     constructor(

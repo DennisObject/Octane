@@ -1,6 +1,6 @@
 /* v75 ros_room_settings: a fixed 341x477 frame (33px title + 441px client + 3px) whose controls sit at the
    XML coordinates of their tab. Every .ros-at box is placed with the x/y/width/height of its XML control. */
-.octane-room-settings {
+.volt-room-settings {
     width: 341px;
     min-width: 341px;
     max-width: 341px;
@@ -13,16 +13,16 @@
     font-size: 12px;
 }
 
-.octane-room-settings > .octane-card-header-shell,
-.octane-ros-confirm > .octane-card-header-shell,
-.octane-ros-filter > .octane-card-header-shell {
+.volt-room-settings > .volt-card-header-shell,
+.volt-ros-confirm > .volt-card-header-shell,
+.volt-ros-filter > .volt-card-header-shell {
     min-height: 33px !important;
     max-height: 33px !important;
     flex: 0 0 33px;
 }
 
 /* tab_context (-6,3) + tab_selector x=8: tabs start at x=2, y=3 of the client area; 32px tall. */
-.octane-room-settings .octane-room-settings-tabs.octane-card-tabs-shell {
+.volt-room-settings .volt-room-settings-tabs.volt-card-tabs-shell {
     position: absolute;
     top: 36px;
     left: 0;
@@ -39,7 +39,7 @@
     background: transparent;
 }
 
-.octane-room-settings .octane-room-settings-content.octane-card-content-shell {
+.volt-room-settings .volt-room-settings-content.volt-card-content-shell {
     position: absolute;
     top: 33px;
     left: 0;
@@ -56,7 +56,7 @@
 }
 
 /* content_container (10,42): the scroll area starts 6px higher so XML y values (labels sit at -3) stay inside it. */
-.octane-room-settings .ros-viewport {
+.volt-room-settings .ros-viewport {
     pointer-events: auto;
     position: absolute;
     top: 36px;
@@ -67,23 +67,23 @@
     overflow-y: auto;
 }
 
-.octane-room-settings .ros-tab {
+.volt-room-settings .ros-tab {
     position: relative;
     width: 321px;
     margin: 6px 0 0 6px;
 }
 
-.octane-room-settings .ros-tab.ros-tab-wide {
+.volt-room-settings .ros-tab.ros-tab-wide {
     width: 327px;
     margin-left: 0;
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-at {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-at {
     position: absolute;
     box-sizing: border-box;
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-text {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-text {
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
     font-size: 12px;
     font-weight: 400;
@@ -92,41 +92,41 @@
     white-space: nowrap;
 }
 
-.octane-room-settings .ros-text label {
+.volt-room-settings .ros-text label {
     cursor: pointer;
 }
 
-.octane-room-settings label,
-.octane-room-settings span {
+.volt-room-settings label,
+.volt-room-settings span {
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
 }
 
-.octane-room-settings .ros-bold {
+.volt-room-settings .ros-bold {
     font-weight: 700;
 }
 
-.octane-room-settings .ros-head {
+.volt-room-settings .ros-head {
     font-size: 14px;
     font-weight: 700;
     line-height: 19px;
 }
 
-.octane-room-settings .ros-multi {
+.volt-room-settings .ros-multi {
     white-space: normal;
 }
 
-.octane-room-settings .ros-error {
+.volt-room-settings .ros-error {
     overflow: hidden;
     color: #bb2200;
     text-overflow: ellipsis;
 }
 
-.octane-room-settings .ros-disabled {
+.volt-room-settings .ros-disabled {
     opacity: 0.5;
 }
 
 /* input: style 0 control with the border_4 skin, colour 0xfbfbf9 */
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-input {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-input {
     display: block;
     box-sizing: border-box;
     width: 100%;
@@ -147,39 +147,39 @@
     font-size: 12px;
     line-height: 15px;
     outline: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-room-settings .ros-input.ros-textarea {
+.volt-room-settings .ros-input.ros-textarea {
     padding: 3px 6px;
     overflow-y: auto;
     resize: none;
 }
 
 /* ros_room_settings idle inputs use the text field's 1px #959595 border. */
-.octane-room-settings .ros-input.ros-idle-timeout {
+.volt-room-settings .ros-input.ros-idle-timeout {
     border: 1px solid #959595 !important;
     border-image: none !important;
     padding: 1px;
 }
 
-.octane-room-settings .ros-input.is-invalid {
+.volt-room-settings .ros-input.is-invalid {
     background-color: #f18f9b !important;
 }
 
 /* the Habbo font has no bullet glyph, so masked password text uses the system face */
-.octane-room-settings .ros-input[type='password'] {
+.volt-room-settings .ros-input[type='password'] {
     font-family: sans-serif;
 }
 
 /* an errored field falls back to the text field's 1px #959595 border so the error colour fills it */
-.octane-room-settings .ros-input:not(.ros-idle-timeout).is-invalid {
+.volt-room-settings .ros-input:not(.ros-idle-timeout).is-invalid {
     border: 1px solid #959595 !important;
     border-image: none !important;
 }
 
 /* window-level layer for error popups: same origin as .ros-tab (viewport 10,36 + tab margin 6,6), never scrolled or clipped */
-.octane-room-settings .ros-overlay {
+.volt-room-settings .ros-overlay {
     position: absolute;
     top: 42px;
     left: 16px;
@@ -190,7 +190,7 @@
 }
 
 /* Qd/nav_error_popup: textWidth + 20, centered above the input, 33px high. */
-.octane-room-settings .ros-input-error {
+.volt-room-settings .ros-input-error {
     position: absolute;
     top: -30px;
     left: 50%;
@@ -201,17 +201,17 @@
     pointer-events: none;
 }
 
-.octane-room-settings .ros-input-error-border {
+.volt-room-settings .ros-input-error-border {
     box-sizing: border-box;
     height: 23px;
     padding: 4px 7px 0 8px;
     border: 0 solid transparent;
     border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
     white-space: nowrap;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-room-settings .ros-input-error-border > span {
+.volt-room-settings .ros-input-error-border > span {
     display: block;
     height: 20px;
     padding: 2px 3px 0 2px;
@@ -223,30 +223,30 @@
     -webkit-font-smoothing: none;
 }
 
-.octane-room-settings .ros-input-error-arrow {
+.volt-room-settings .ros-input-error-arrow {
     display: block;
     width: 11px;
     height: 11px;
     margin: -1px auto 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* dropmenu style 2 */
-.octane-room-settings .ros-drop {
+.volt-room-settings .ros-drop {
     position: relative;
 }
 
-.octane-room-settings .ros-drop.ros-at {
+.volt-room-settings .ros-drop.ros-at {
     position: absolute;
 }
 
 /* checkbox / radiobutton: the shared Habbo artwork (HabboTheme.css) at the XML size */
-.octane-room-settings .ros-check {
+.volt-room-settings .ros-check {
     display: block;
     margin: 0;
 }
 
-.octane-room-settings .ros-radio-row {
+.volt-room-settings .ros-radio-row {
     position: absolute;
     left: 0;
     display: flex;
@@ -260,12 +260,12 @@
     cursor: pointer;
 }
 
-.octane-room-settings .ros-radio-row input {
+.volt-room-settings .ros-radio-row input {
     margin: 0 0 0 2px;
 }
 
 /* remove_link_region: bold underlined #bb2200 text with the icon_9 symbol (habbo_icons 82,0 13x13) */
-.octane-room-settings .ros-link {
+.volt-room-settings .ros-link {
     appearance: none;
     display: block;
     width: 100%;
@@ -287,7 +287,7 @@
     white-space: nowrap;
 }
 
-.octane-room-settings .ros-decline {
+.volt-room-settings .ros-decline {
     display: block;
     width: 13px;
     height: 13px;
@@ -296,11 +296,11 @@
     mask-repeat: no-repeat;
     -webkit-mask-size: 13px 13px;
     -webkit-mask-repeat: no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* shiny buttons */
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button {
     appearance: none;
     position: absolute;
     left: 0;
@@ -329,10 +329,10 @@
     line-height: 15px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-fit {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-fit {
     position: relative;
     width: max-content;
     max-width: 137px;
@@ -342,60 +342,60 @@
     border-image-width: 5px;
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button-label {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button-label {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button:hover {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button:hover {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button:active {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button:active {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button:disabled {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button:disabled {
     cursor: default;
     border-image-source: var(--habbo-skin-shiny-disabled);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-thick {
     border-image-source: var(--habbo-skin-shiny-thick);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick:hover {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-thick:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick:active {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-thick:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick:disabled {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-thick:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-disabled);
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button:focus-visible,
-.octane-room-settings .ros-link:focus-visible {
-    outline: 2px solid var(--octane-card-focus, #ffd95a);
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button:focus-visible,
+.volt-room-settings .ros-link:focus-visible {
+    outline: 2px solid var(--volt-card-focus, #ffd95a);
     outline-offset: 1px;
 }
 
 /* rights / moderation lists: border_white boxes with a 17px scrollbar and 111x20 rows */
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-list-border {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-list-border {
     border: 0 solid transparent;
     border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-room-settings .ros-search {
+.volt-room-settings .ros-search {
     background: #e9e9e1;
 }
 
-.octane-room-settings .ros-list {
+.volt-room-settings .ros-list {
     position: absolute;
     top: 4px;
     left: 4px;
@@ -404,39 +404,39 @@
     overflow-y: scroll;
 }
 
-.octane-room-settings .ros-user-row {
+.volt-room-settings .ros-user-row {
     position: relative;
     width: 111px;
     height: 20px;
 }
 
 /* zI row colours: even e9e9e1, odd white, selected 9ab8d9, hover b6d9ff (hover wins); the hover arrow only shows on hover */
-.octane-room-settings .ros-user-row {
+.volt-room-settings .ros-user-row {
     background: #e9e9e1;
 }
 
-.octane-room-settings .ros-user-row.is-odd {
+.volt-room-settings .ros-user-row.is-odd {
     background: #fff;
 }
 
-.octane-room-settings .ros-user-row.is-selected {
+.volt-room-settings .ros-user-row.is-selected {
     background: #9ab8d9;
 }
 
-.octane-room-settings .ros-user-row:hover {
+.volt-room-settings .ros-user-row:hover {
     background: #b6d9ff;
 }
 
-.octane-room-settings .ros-user-arrow {
+.volt-room-settings .ros-user-arrow {
     display: none;
 }
 
-.octane-room-settings .ros-user-row:hover .ros-user-arrow {
+.volt-room-settings .ros-user-row:hover .ros-user-arrow {
     display: block;
 }
 
 /* bg_region 111x20: the whole row is the click target, the eye sits above it */
-.octane-room-settings .ros-user-bg {
+.volt-room-settings .ros-user-bg {
     appearance: none;
     position: absolute;
     inset: 0;
@@ -448,14 +448,14 @@
     background: transparent;
 }
 
-.octane-room-settings .ros-user-eye {
+.volt-room-settings .ros-user-eye {
     position: absolute;
     top: 4px;
     left: 9px;
     z-index: 1;
 }
 
-.octane-room-settings .ros-user-name {
+.volt-room-settings .ros-user-name {
     position: absolute;
     top: 1px;
     left: 24px;
@@ -471,25 +471,25 @@
     white-space: nowrap;
 }
 
-.octane-room-settings .ros-user-arrow {
+.volt-room-settings .ros-user-arrow {
     position: absolute;
     top: 4px;
     width: 6px;
     height: 11px;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-room-settings .ros-user-arrow.is-rights {
+.volt-room-settings .ros-user-arrow.is-rights {
     left: 104px;
 }
 
-.octane-room-settings .ros-user-arrow.is-friend {
+.volt-room-settings .ros-user-arrow.is-friend {
     left: 1px;
 }
 
 /* ros_room_delete_confirm: 215x203 frame, message (10,7 190x122) and the red 199x29 ok button at (5,129). */
-.octane-ros-confirm {
+.volt-ros-confirm {
     width: 215px;
     min-width: 215px;
     max-width: 215px;
@@ -502,7 +502,7 @@
     font-size: 12px;
 }
 
-.octane-ros-confirm .octane-ros-confirm-content.octane-card-content-shell {
+.volt-ros-confirm .volt-ros-confirm-content.volt-card-content-shell {
     position: absolute;
     top: 33px;
     left: 0;
@@ -516,7 +516,7 @@
     background: transparent;
 }
 
-.octane-ros-confirm .ros-confirm-message {
+.volt-ros-confirm .ros-confirm-message {
     position: absolute;
     top: 7px;
     left: 10px;
@@ -528,23 +528,23 @@
     word-wrap: break-word;
 }
 
-.octane-ros-confirm .ros-button.ros-button-red {
+.volt-ros-confirm .ros-button.ros-button-red {
     border-image-source: var(--habbo-skin-shiny-red);
     color: #fff;
     font-weight: 700;
 }
 
-.octane-ros-confirm .ros-button.ros-button-red:hover {
+.volt-ros-confirm .ros-button.ros-button-red:hover {
     border-image-source: var(--habbo-skin-shiny-red-hover);
 }
 
-.octane-ros-confirm .ros-button.ros-button-red:active {
+.volt-ros-confirm .ros-button.ros-button-red:active {
     border-image-source: var(--habbo-skin-shiny-red-pressed);
 }
 
 /* iro_room_filter_framed: 250x230 frame, add field border (5,8 130x30), add button (140,8), badword list border
    (5,50 235x100) and remove button (140,155). ros_badword rows are 20px with a 4,1 label. */
-.octane-ros-filter {
+.volt-ros-filter {
     width: 250px;
     min-width: 250px;
     max-width: 250px;
@@ -557,7 +557,7 @@
     font-size: 12px;
 }
 
-.octane-ros-filter .octane-ros-filter-content.octane-card-content-shell {
+.volt-ros-filter .volt-ros-filter-content.volt-card-content-shell {
     position: absolute;
     top: 33px;
     left: 0;
@@ -571,7 +571,7 @@
     background: transparent;
 }
 
-.octane-ros-filter .ros-filter-word {
+.volt-ros-filter .ros-filter-word {
     position: absolute;
     top: 6px;
     left: 5px;
@@ -589,7 +589,7 @@
     outline: 0;
 }
 
-.octane-ros-filter .ros-filter-list {
+.volt-ros-filter .ros-filter-list {
     position: absolute;
     top: 3px;
     left: 3px;
@@ -599,7 +599,7 @@
     overflow-y: scroll;
 }
 
-.octane-ros-filter .ros-filter-row {
+.volt-ros-filter .ros-filter-row {
     appearance: none;
     position: relative;
     display: block;
@@ -621,109 +621,109 @@
     white-space: nowrap;
 }
 
-.octane-ros-filter .ros-filter-row.is-odd {
+.volt-ros-filter .ros-filter-row.is-odd {
     background: #fff;
 }
 
-.octane-ros-filter .ros-filter-row.is-selected {
+.volt-ros-filter .ros-filter-row.is-selected {
     background: #9ab8d9;
 }
 
-.octane-ros-filter .ros-filter-row:hover {
+.volt-ros-filter .ros-filter-row:hover {
     background: #b6d9ff;
 }
 
-.octane-ros-filter .ros-button.ros-button-fit {
+.volt-ros-filter .ros-button.ros-button-fit {
     height: 30px;
 }
 
 /* remove_link is centred in its 174px field; icon_9 (bb2200) sits 17px left of that text */
-.octane-room-settings .ros-link.ros-remove-link {
+.volt-room-settings .ros-link.ros-remove-link {
     text-align: center;
     text-indent: 0;
 }
 
-.octane-room-settings .ros-remove-link > span {
+.volt-room-settings .ros-remove-link > span {
     position: relative;
     color: inherit;
     font: inherit;
 }
 
-.octane-room-settings .ros-remove-icon {
+.volt-room-settings .ros-remove-icon {
     position: absolute;
     top: -1px;
     left: -17px;
     width: 13px;
     height: 13px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* scrollbar_vertical stays visible; with nothing to scroll it is the disabled skin and has no thumb */
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll {
     position: absolute;
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .volt-classic-scrollbar[data-visible='false'] {
     visibility: visible;
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-up {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-button.is-up {
     background-image: url('../../assets/images/scrollbar/up_disabled.png');
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-down {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-button.is-down {
     background-image: url('../../assets/images/scrollbar/down_disabled.png');
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-track {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-track {
     background-image: url('../../assets/images/scrollbar/background_disabled.png');
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-thumb {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .volt-classic-scrollbar[data-visible='false'] .volt-classic-scrollbar-thumb {
     display: none;
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .ros-scroll-viewport {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .ros-scroll-viewport {
     width: 121px;
     scrollbar-width: none;
 }
 
-:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .ros-scroll-viewport::-webkit-scrollbar {
+:is(.volt-room-settings, .volt-ros-filter) .ros-scroll .ros-scroll-viewport::-webkit-scrollbar {
     display: none;
 }
 
-.octane-room-settings .ros-scroll-banned .ros-scroll-viewport {
+.volt-room-settings .ros-scroll-banned .ros-scroll-viewport {
     width: 129px;
     margin-top: 1px;
 }
 
-.octane-room-settings .ros-scroll-banned .octane-classic-scrollbar {
+.volt-room-settings .ros-scroll-banned .volt-classic-scrollbar {
     width: 19px;
 }
 
-:is(.octane-room-settings, .octane-ros-filter) :is(.ros-scroll-banned, .ros-scroll-filter) :is(.octane-classic-scrollbar-button, .octane-classic-scrollbar-track) {
+:is(.volt-room-settings, .volt-ros-filter) :is(.ros-scroll-banned, .ros-scroll-filter) :is(.volt-classic-scrollbar-button, .volt-classic-scrollbar-track) {
     background-position: left top;
 }
 
 /* filter_users_input is a 1px black text field on the search strip; the shared input skin is a border image */
-.octane-room-settings .ros-input.ros-filter-input {
+.volt-room-settings .ros-input.ros-filter-input {
     border: 1px solid #000 !important;
     border-image: none !important;
     background-color: transparent !important;
 }
 
-:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick {
+:is(.volt-room-settings, .volt-ros-confirm, .volt-ros-filter) .ros-button.ros-button-thick {
     padding: 0 8px 2px 10px;
     font-weight: 700;
 }
 
-.octane-ros-filter .ros-scroll-filter .ros-scroll-viewport {
+.volt-ros-filter .ros-scroll-filter .ros-scroll-viewport {
     width: 226px;
     height: 95px;
     margin-top: 1px;
 }
 
-.octane-ros-filter .ros-scroll-filter .octane-classic-scrollbar {
+.volt-ros-filter .ros-scroll-filter .volt-classic-scrollbar {
     width: 19px;
     height: 94px;
 }

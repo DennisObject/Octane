@@ -1,4 +1,4 @@
-import { IObjectData, TradingListAddItemComposer, TradingListAddItemsComposer } from '@octane/renderer';
+import { IObjectData, TradingListAddItemComposer, TradingListAddItemsComposer } from '@volt/renderer';
 import {
     FurniCategory,
     GroupItem,

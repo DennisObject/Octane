@@ -4,13 +4,13 @@ import {
     LimitedEditionSoldOutEvent,
     ProductOfferEvent,
     PurchaseOKMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CatalogNode, CatalogType } from '../../api';
-import { mockEventDispatcher } from '../../octane-renderer.mock';
+import { mockEventDispatcher } from '../../volt-renderer.mock';
 import { INITIAL_CATALOG_UI_STATE, useCatalogStore } from './catalogStore';
 import { useCatalogEffects } from './useCatalogEffects';
 import { catalogIndexKey, catalogPageKey } from './useCatalogQueries';
@@ -179,7 +179,7 @@ describe('useCatalogEffects', () => {
     it('a localization update bumps the version', () => {
         renderHook(() => useCatalogEffects(), { wrapper });
 
-        act(() => window.dispatchEvent(new CustomEvent('octane-localization-updated')));
+        act(() => window.dispatchEvent(new CustomEvent('volt-localization-updated')));
 
         expect(useCatalogStore.getState().catalogLocalizationVersion).toBe(1);
     });

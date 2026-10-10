@@ -1,4 +1,4 @@
-import { FurnitureListItemParser, GetRoomEngine, IObjectData, StringDataType } from '@octane/renderer';
+import { FurnitureListItemParser, GetRoomEngine, IObjectData, StringDataType } from '@volt/renderer';
 import { FurniCategory } from './FurniCategory';
 import { FurnitureItem } from './FurnitureItem';
 import { GroupItem } from './GroupItem';

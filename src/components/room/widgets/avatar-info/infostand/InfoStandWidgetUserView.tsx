@@ -7,13 +7,13 @@ import {
     RoomSessionUserBadgesEvent,
     RoomSessionUserFigureUpdateEvent,
     UserRelationshipsComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import React, { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../api';
 import homeIcon from '../../../../../assets/images/infostand/home-icon.png';
 import pencilIcon from '../../../../../assets/images/infostand/pencil-icon.png';
 import { Column, Flex, LayoutBadgeImageView, Text, UserIdentityView } from '../../../../../common';
-import { useMessageEvent, useOctaneEvent, useRoom } from '../../../../../hooks';
+import { useMessageEvent, useVoltEvent, useRoom } from '../../../../../hooks';
 import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandBadgeSlotView } from './InfoStandBadgeSlotView';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
@@ -55,7 +55,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
         }
     };
 
-    useOctaneEvent<RoomSessionUserBadgesEvent>(RoomSessionUserBadgesEvent.RSUBE_BADGES, (event) => {
+    useVoltEvent<RoomSessionUserBadgesEvent>(RoomSessionUserBadgesEvent.RSUBE_BADGES, (event) => {
         if (!avatarInfo || avatarInfo.webID !== event.userId) return;
 
         // Deduplicate badges from server
@@ -79,7 +79,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
         });
     });
 
-    useOctaneEvent<RoomSessionUserFigureUpdateEvent>(RoomSessionUserFigureUpdateEvent.USER_FIGURE, (event) => {
+    useVoltEvent<RoomSessionUserFigureUpdateEvent>(RoomSessionUserFigureUpdateEvent.USER_FIGURE, (event) => {
         if (!avatarInfo || avatarInfo.roomIndex !== event.roomIndex) return;
 
         setAvatarInfo((prevValue) => {
@@ -93,7 +93,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
         });
     });
 
-    useOctaneEvent<RoomSessionFavoriteGroupUpdateEvent>(RoomSessionFavoriteGroupUpdateEvent.FAVOURITE_GROUP_UPDATE, (event) => {
+    useVoltEvent<RoomSessionFavoriteGroupUpdateEvent>(RoomSessionFavoriteGroupUpdateEvent.FAVOURITE_GROUP_UPDATE, (event) => {
         if (!avatarInfo || avatarInfo.roomIndex !== event.roomIndex) return;
 
         setAvatarInfo((prevValue) => {
@@ -138,31 +138,31 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
 
     return (
         <>
-            <div className="octane-infostand pointer-events-auto z-30">
-                <button type="button" className="octane-infostand__close" aria-label="Close" onClick={onClose} />
-                <div className="octane-infostand__header">
+            <div className="volt-infostand pointer-events-auto z-30">
+                <button type="button" className="volt-infostand__close" aria-label="Close" onClick={onClose} />
+                <div className="volt-infostand__header">
                     <button
                         type="button"
-                        className="octane-infostand__home"
+                        className="volt-infostand__home"
                         aria-label={LocalizeText('infostand.profile.link.tooltip')}
                         onClick={handleProfileClick}
                     >
                         <img src={homeIcon} alt="" draggable={false} />
                     </button>
-                    <button type="button" className="octane-infostand__profile-link" onClick={handleProfileClick}>
+                    <button type="button" className="volt-infostand__profile-link" onClick={handleProfileClick}>
                         <UserIdentityView
-                            className="octane-infostand__identity"
+                            className="volt-infostand__identity"
                             nameClassName="text-white"
                             username={avatarInfo.name}
                         />
                     </button>
                 </div>
-                <div className="octane-infostand__rule" />
-                <div className="octane-infostand__figure-row">
-                    <div className="octane-infostand__avatar-well" onClick={handleProfileClick}>
+                <div className="volt-infostand__rule" />
+                <div className="volt-infostand__figure-row">
+                    <div className="volt-infostand__avatar-well" onClick={handleProfileClick}>
                         <InfoStandAvatarView direction={4} figure={avatarInfo.figure} top={24} left={17} />
                     </div>
-                    <div className="octane-infostand__badges">
+                    <div className="volt-infostand__badges">
                         {(() => {
                             const maxSlots = GetConfigurationValue<number>('user.badges.max.slots', 5);
                             const showGroup = maxSlots <= 5;
@@ -198,11 +198,11 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                         })()}
                     </div>
                 </div>
-                <div className="octane-infostand__rule" />
-                <div className="octane-infostand__motto octane-infostand__motto--box">
-                    {isOwnUser && <img src={pencilIcon} alt="" className="octane-infostand__pen" />}
+                <div className="volt-infostand__rule" />
+                <div className="volt-infostand__motto volt-infostand__motto--box">
+                    {isOwnUser && <img src={pencilIcon} alt="" className="volt-infostand__pen" />}
                     {!isOwnUser && (
-                        <Text fullWidth pointer textBreak wrap className="octane-infostand__motto-text" variant="white">
+                        <Text fullWidth pointer textBreak wrap className="volt-infostand__motto-text" variant="white">
                             {motto}
                         </Text>
                     )}
@@ -212,7 +212,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                             pointer
                             textBreak
                             wrap
-                            className={`octane-infostand__motto-text ${motto ? '' : 'is-placeholder'}`}
+                            className={`volt-infostand__motto-text ${motto ? '' : 'is-placeholder'}`}
                             variant="white"
                             onClick={() => setIsEditingMotto(true)}
                         >
@@ -231,42 +231,42 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = (props)
                                 onChange={(event) => setMotto(event.target.value)}
                                 onKeyDown={onMottoKeyDown}
                             />
-                            <span className="octane-infostand__motto-count">
+                            <span className="volt-infostand__motto-count">
                                 {motto.length}/{mottoMaxLength}
                             </span>
                         </>
                     )}
                 </div>
-                <div className="octane-infostand__rule" />
-                <div className="octane-infostand__score">{localizeWithFallback('infostand.text.badges_rank', `Badge rank: #${badgesRank}`, ['rank'], [`#${badgesRank}`])}</div>
+                <div className="volt-infostand__rule" />
+                <div className="volt-infostand__score">{localizeWithFallback('infostand.text.badges_rank', `Badge rank: #${badgesRank}`, ['rank'], [`#${badgesRank}`])}</div>
                 {showAchievementScore && (
                     <>
-                        <div className="octane-infostand__rule" />
+                        <div className="volt-infostand__rule" />
                         {isOwnUser ? (
                             <button
                                 type="button"
-                                className="octane-infostand__score octane-infostand__score-link"
+                                className="volt-infostand__score volt-infostand__score-link"
                                 title={localizeWithFallback('achievements.title', 'Achievements')}
                                 onClick={() => CreateLinkEvent('achievements/show')}
                             >
                                 {LocalizeText('infostand.text.achievement_score')}
                             </button>
                         ) : (
-                            <div className="octane-infostand__score">{LocalizeText('infostand.text.achievement_score')}</div>
+                            <div className="volt-infostand__score">{LocalizeText('infostand.text.achievement_score')}</div>
                         )}
-                        <div className="octane-infostand__score">{avatarInfo.achievementScore}</div>
+                        <div className="volt-infostand__score">{avatarInfo.achievementScore}</div>
                     </>
                 )}
                 {avatarInfo.carryItem > 0 && (
                     <>
-                        <div className="octane-infostand__rule" />
-                        <div className="octane-infostand__carry">
+                        <div className="volt-infostand__rule" />
+                        <div className="volt-infostand__carry">
                             {LocalizeText('infostand.text.handitem', ['item'], [LocalizeText('handitem' + avatarInfo.carryItem)])}
                         </div>
                     </>
                 )}
-                <div className="octane-infostand__rule" />
-                <div className="octane-infostand__relationships">
+                <div className="volt-infostand__rule" />
+                <div className="volt-infostand__relationships">
                     <InfoStandWidgetUserRelationshipsView relationships={relationships} />
                 </div>
                 {GetConfigurationValue('user.tags.enabled') && (

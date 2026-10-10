@@ -1,4 +1,4 @@
-import { GetRoomContentLoader, GetRoomObjectVisualizationFactory, RoomGeometry } from '@octane/renderer';
+import { GetRoomContentLoader, GetRoomObjectVisualizationFactory, RoomGeometry } from '@volt/renderer';
 
 // How many animation states the loaded asset of a furni defines, or null when
 // the asset is not loaded yet or the renderer does not expose the chain.

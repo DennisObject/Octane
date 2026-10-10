@@ -1,6 +1,6 @@
 /* QuestCompletedDialog (426x215): frame style 3, a 424x120 purple banner over the window colour and one button row. */
 
-.octane-card-shell.octane-quest-completed-air {
+.volt-card-shell.volt-quest-completed-air {
     position: relative;
     box-sizing: border-box;
     width: 426px !important;
@@ -12,22 +12,22 @@
     resize: none !important;
     padding: 0 !important;
     border: 0 !important;
-    --octane-card-surface: #e9e9e1;
+    --volt-card-surface: #e9e9e1;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.draggable-window:has(> .octane-quest-completed-air) {
+.draggable-window:has(> .volt-quest-completed-air) {
     width: 426px;
     height: 215px;
 }
 
-.octane-quest-completed-air * {
+.volt-quest-completed-air * {
     box-sizing: border-box;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
 }
 
-.octane-quest-completed-air .air-quests-native-title {
+.volt-quest-completed-air .air-quests-native-title {
     position: absolute !important;
     top: 3px;
     /* AIR centres on floor((window - title) / 2); the 0.01px keeps an odd width's half pixel from rounding up. */
@@ -36,16 +36,16 @@
 }
 
 /* Measured against the official dialog: the campaign title lands one pixel left of the quest title's centring. */
-.octane-quest-completed-air .air-quests-native-title-campaign {
+.volt-quest-completed-air .air-quests-native-title-campaign {
     margin-left: -1px;
 }
 
-.octane-card-shell.octane-quest-completed-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-card-shell.volt-quest-completed-air.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     top: 2px !important;
     right: 3px !important;
 }
 
-.octane-quest-completed-air .air-quest-completed-content.octane-card-content-shell {
+.volt-quest-completed-air .air-quest-completed-content.volt-card-content-shell {
     position: relative;
     display: block;
     width: 426px;
@@ -70,7 +70,7 @@
 .air-quest-completed-campaign {
     position: absolute;
     object-fit: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-quest-completed-icon {
@@ -130,7 +130,7 @@
     border-image-repeat: stretch;
     background: transparent;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-quest-completed-next:hover,

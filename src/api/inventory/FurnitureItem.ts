@@ -1,4 +1,4 @@
-import { GetTickerTime, IFurnitureItemData, IObjectData } from '@octane/renderer';
+import { GetTickerTime, IFurnitureItemData, IObjectData } from '@volt/renderer';
 import { IFurnitureItem } from './IFurnitureItem';
 
 export class FurnitureItem implements IFurnitureItem {

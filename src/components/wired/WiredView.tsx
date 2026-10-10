@@ -1,4 +1,4 @@
-import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@octane/renderer';
+import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@volt/renderer';
 import { FC, Fragment } from 'react';
 import { useWired } from '../../hooks';
 import { WiredActionLayoutView } from './views/actions/WiredActionLayoutView';

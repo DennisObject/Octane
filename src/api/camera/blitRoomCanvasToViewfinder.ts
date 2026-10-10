@@ -1,4 +1,4 @@
-import { GetRenderer, OctaneRectangle, TextureUtils } from '@octane/renderer';
+import { GetRenderer, VoltRectangle, TextureUtils } from '@volt/renderer';
 import { GetCameraRoomCanvas } from './GetCameraRoomCanvas';
 
 /**
@@ -57,7 +57,7 @@ const toMasterLocal = (master: { worldTransform?: { applyInverse?: (point: { x: 
     return { x: screenX, y: screenY };
 };
 
-export const getViewfinderRoomFrame = (target: HTMLCanvasElement | null, width?: number, height?: number): InstanceType<typeof OctaneRectangle> | null =>
+export const getViewfinderRoomFrame = (target: HTMLCanvasElement | null, width?: number, height?: number): InstanceType<typeof VoltRectangle> | null =>
 {
     if(!target) return null;
 
@@ -92,7 +92,7 @@ export const getViewfinderRoomFrame = (target: HTMLCanvasElement | null, width?:
         const frameWidth = Math.max(1, Math.round(Math.abs(bottomRight.x - topLeft.x)));
         const frameHeight = Math.max(1, Math.round(Math.abs(bottomRight.y - topLeft.y)));
 
-        return new OctaneRectangle(x, y, frameWidth, frameHeight);
+        return new VoltRectangle(x, y, frameWidth, frameHeight);
     }
     catch
     {

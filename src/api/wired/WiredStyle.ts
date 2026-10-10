@@ -25,7 +25,7 @@ export const resolveWiredStyle = (activeStyle: WiredShellStyle, furniClassName: 
     }
 };
 
-export const wiredStyleClassName = (value: WiredShellStyle): string => `octane-wired--style-${value}`;
+export const wiredStyleClassName = (value: WiredShellStyle): string => `volt-wired--style-${value}`;
 
 export const isWiredVolterStyle = (value: WiredShellStyle): value is WiredVolterStyle => value.startsWith('volter');
 

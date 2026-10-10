@@ -24,8 +24,8 @@ export const FurniEditorSearchTableView: FC<FurniEditorSearchTableViewProps> = (
     };
 
     return (
-        <div className="octane-furni-editor-results">
-            <table className="octane-staff-table">
+        <div className="volt-furni-editor-results">
+            <table className="volt-staff-table">
                 <thead>
                     <tr>
                         <th aria-label={LocalizeText('furni.editor.search.column.icon')} />
@@ -34,7 +34,7 @@ export const FurniEditorSearchTableView: FC<FurniEditorSearchTableViewProps> = (
 
                             return (
                                 <th key={field} aria-sort={active ? (criteria.sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}>
-                                    <button className="octane-furni-editor-sort" type="button" onClick={() => sortBy(field)}>
+                                    <button className="volt-furni-editor-sort" type="button" onClick={() => sortBy(field)}>
                                         {LocalizeText(`furni.editor.search.column.${field}`)}
                                         {active ? (criteria.sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
                                     </button>
@@ -50,30 +50,30 @@ export const FurniEditorSearchTableView: FC<FurniEditorSearchTableViewProps> = (
                         return (
                             <tr
                                 key={item.id}
-                                className="octane-furni-editor-result"
+                                className="volt-furni-editor-result"
                                 tabIndex={0}
                                 title={note}
                                 onClick={() => onOpen(item.id)}
                                 onKeyDown={(event) => openOnKey(event, item.id)}
                             >
-                                <td className="octane-furni-editor-result-icon">
+                                <td className="volt-furni-editor-result-icon">
                                     <LayoutFurniIconImageView productClassId={item.spriteId} productType={item.type} />
                                 </td>
                                 <td>{item.id}</td>
                                 <td>{item.spriteId}</td>
-                                <td className="octane-furni-editor-ellipsis">
+                                <td className="volt-furni-editor-ellipsis">
                                     {flag && (
-                                        <span aria-label={note} className="octane-staff-flag is-danger octane-furni-editor-row-flag">
+                                        <span aria-label={note} className="volt-staff-flag is-danger volt-furni-editor-row-flag">
                                             {LocalizeText('furni.editor.search.flag')}
                                         </span>
                                     )}
                                     {item.itemName}
                                 </td>
-                                <td className="octane-furni-editor-ellipsis" title={item.publicName}>
-                                    {item.publicName || <span className="octane-staff-muted">-</span>}
+                                <td className="volt-furni-editor-ellipsis" title={item.publicName}>
+                                    {item.publicName || <span className="volt-staff-muted">-</span>}
                                 </td>
                                 <td>{LocalizeText(item.type === 's' ? 'furni.editor.type.floor' : 'furni.editor.type.wall')}</td>
-                                <td className="octane-furni-editor-ellipsis">{item.interactionType || <span className="octane-staff-muted">-</span>}</td>
+                                <td className="volt-furni-editor-ellipsis">{item.interactionType || <span className="volt-staff-muted">-</span>}</td>
                             </tr>
                         );
                     })}

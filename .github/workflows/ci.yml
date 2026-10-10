@@ -36,14 +36,14 @@ jobs:
     name: Type check + tests
     runs-on: ubuntu-latest
     steps:
-      # The build/dev/typecheck setup expects the Octane renderer SDK to
+      # The build/dev/typecheck setup expects the Volt renderer SDK to
       # live as a sibling of this repo (see CLAUDE.md → Setup walkthrough).
-      # Mirror that here by checking the client into <workspace>/octane
-      # and the renderer into <workspace>/octane-renderer.
-      - name: Checkout Octane
+      # Mirror that here by checking the client into <workspace>/volt
+      # and the renderer into <workspace>/volt-renderer.
+      - name: Checkout Volt
         uses: actions/checkout@v7
         with:
-          path: octane
+          path: volt
 
       # Resolve the renderer pairing with a clear precedence, from most
       # specific to most generic — no fork names or feature branches are
@@ -56,7 +56,7 @@ jobs:
       #          to push and pull_request runs without editing this file.
       #   3. dynamic, owner-aware default (no hardcoded fork name)
       #        → a fork renderer only when it carries a branch specific to
-      #          the PR, otherwise <github.repository_owner>/Octane-Renderer
+      #          the PR, otherwise <github.repository_owner>/Volt-Renderer
       #          or UPSTREAM_RENDERER_REPO. Ref is `main` on a main build,
       #          otherwise `Dev`. A stale generic fork branch must never
       #          shadow the current upstream integration branch.
@@ -77,20 +77,20 @@ jobs:
           PR_HEAD_OWNER: ${{ github.event.pull_request.head.repo.owner.login || '' }}
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
         run: |
-          node --test octane/.github/scripts/resolve-renderer.test.mjs
-          node octane/.github/scripts/resolve-renderer.mjs
+          node --test volt/.github/scripts/resolve-renderer.test.mjs
+          node volt/.github/scripts/resolve-renderer.mjs
 
-      - name: Checkout Octane Renderer (sibling)
+      - name: Checkout Volt Renderer (sibling)
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.renderer.outputs.repo }}
           ref: ${{ steps.renderer.outputs.ref }}
-          path: octane-renderer
+          path: volt-renderer
 
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: 'octane/.nvmrc'
+          node-version-file: 'volt/.nvmrc'
 
       - name: Enable Corepack
         run: corepack enable
@@ -98,17 +98,17 @@ jobs:
       - name: Install renderer SDK deps
         env:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
-        working-directory: octane-renderer
+        working-directory: volt-renderer
         run: corepack yarn install --immutable
 
       - name: Install client deps
         env:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
-        working-directory: octane
+        working-directory: volt
         run: corepack yarn install --immutable
 
       # The renderer SDK is consumed via a filesystem symlink in
-      # node_modules/@octane/renderer; create it AFTER yarn
+      # node_modules/@volt/renderer; create it AFTER yarn
       # install (otherwise yarn would clean it up since the package
       # isn't declared in package.json). tsgo (TS 7 native preview)
       # then resolves the tsconfig `include` entry pointing at the
@@ -116,18 +116,18 @@ jobs:
       #
       # Use an absolute path so the link target is unambiguous
       # regardless of the cwd that reads it. A relative target like
-      # `../../../octane-renderer` resolves to
-      # `octane/octane-renderer` (one too few `..`), which doesn't
+      # `../../../volt-renderer` resolves to
+      # `volt/volt-renderer` (one too few `..`), which doesn't
       # exist and makes tsgo report TS2307 across the entire src/.
       - name: Symlink renderer into client node_modules
         run: |
-          mkdir -p octane/node_modules/@octane
-          ln -sfn "${{ github.workspace }}/octane-renderer" octane/node_modules/@octane/renderer
-          ls -la octane/node_modules/@octane/
-          ls octane/node_modules/@octane/renderer/packages/api/src/ | head -5
+          mkdir -p volt/node_modules/@volt
+          ln -sfn "${{ github.workspace }}/volt-renderer" volt/node_modules/@volt/renderer
+          ls -la volt/node_modules/@volt/
+          ls volt/node_modules/@volt/renderer/packages/api/src/ | head -5
 
       - name: Type check (tsgo)
-        working-directory: octane
+        working-directory: volt
         run: yarn typecheck
 
       # Hook-order lint gate — the full yarn eslint emits ~900 pre-existing
@@ -136,9 +136,9 @@ jobs:
       # "hook below early-return" pattern that produced two production
       # crashes this session (CatalogPurchaseWidgetView, CatalogItemGridWidgetView).
       - name: ESLint (hook-order gate)
-        working-directory: octane
+        working-directory: volt
         run: yarn lint:hooks
 
       - name: Vitest
-        working-directory: octane
+        working-directory: volt
         run: yarn test --run

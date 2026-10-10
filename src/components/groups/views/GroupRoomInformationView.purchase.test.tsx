@@ -1,5 +1,5 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
-import { CatalogGroupsComposer, GroupInformationComposer, GroupInformationEvent, GroupPurchasedEvent, GuildMembershipsMessageEvent, MessageEvent } from '@octane/renderer';
+import { CatalogGroupsComposer, GroupInformationComposer, GroupInformationEvent, GroupPurchasedEvent, GuildMembershipsMessageEvent, MessageEvent } from '@volt/renderer';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useUserGroups } from '../../../hooks/groups/useUserGroups';
 import { GroupRoomInformationView } from './GroupRoomInformationView';
@@ -10,7 +10,7 @@ const state = vi.hoisted(() => ({
     roomId: 42
 }));
 
-vi.mock('@octane/renderer', () =>
+vi.mock('@volt/renderer', () =>
 {
     class MessageEvent
     {

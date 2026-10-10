@@ -1,10 +1,10 @@
-import { FurniturePickupAllComposer, RoomObjectCategory } from '@octane/renderer';
+import { FurniturePickupAllComposer, RoomObjectCategory } from '@volt/renderer';
 import { FC, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { Permission } from '../../../../api/permissions';
 import { chooserSelectionVisualizer, LocalizeText, RoomObjectItem, SendMessageComposer } from '../../../../api';
-import { Button, Flex, InfiniteScroll, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { Button, Flex, InfiniteScroll, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../../common';
 import { useFurniPickupGuard, useHasPermission } from '../../../../hooks';
-import { classNames, OctaneInput } from '../../../../layout';
+import { classNames, VoltInput } from '../../../../layout';
 
 const LIMIT_FURNI_PICKALL = 100;
 
@@ -122,11 +122,11 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = (props) => {
     };
 
     return (
-        <OctaneCardView className="w-[420px] h-[400px]" theme="primary-slim">
-            <OctaneCardHeaderView headerText={title + ' (' + filteredItems.length + ')'} onCloseClick={handleClose} />
-            <OctaneCardContentView overflow="hidden" gap={1}>
+        <VoltCardView className="w-[420px] h-[400px]" theme="primary-slim">
+            <VoltCardHeaderView headerText={title + ' (' + filteredItems.length + ')'} onCloseClick={handleClose} />
+            <VoltCardContentView overflow="hidden" gap={1}>
                 <Flex gap={2}>
-                    <OctaneInput
+                    <VoltInput
                         type="text"
                         placeholder={LocalizeText('generic.search')}
                         value={searchValue}
@@ -190,7 +190,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = (props) => {
                         {LocalizeText('widget.chooser.btn.pickall')}
                     </Button>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

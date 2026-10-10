@@ -22,6 +22,6 @@ describe('catalog price display', () => {
             />
         );
 
-        expect(container.querySelector('.octane-catalog-standard-price-pill.is-credits')).toBeInTheDocument();
+        expect(container.querySelector('.volt-catalog-standard-price-pill.is-credits')).toBeInTheDocument();
     });
 });

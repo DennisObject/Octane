@@ -1,5 +1,5 @@
 import { InfiniteGrid } from '@layout/InfiniteGrid';
-import { GetSessionDataManager, IRoomSession, RoomPreviewer, Vector3d } from '@octane/renderer';
+import { GetSessionDataManager, IRoomSession, RoomPreviewer, Vector3d } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 import {
@@ -15,7 +15,7 @@ import {
 import { LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, LayoutRoomPreviewerView } from '../../../../common';
 import { CatalogPostMarketplaceOfferEvent, DeleteItemConfirmEvent } from '../../../../events';
 import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useNotification } from '../../../../hooks';
-import { OctaneButton } from '../../../../layout';
+import { VoltButton } from '../../../../layout';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryFurnitureItemView } from './InventoryFurnitureItemView';
 import { offerGroupItemsToTrade } from './inventoryTradeOffer';
@@ -152,8 +152,8 @@ export const InventoryFurnitureView: FC<{
     }
 
     return (
-        <div className="octane-inventory-furni">
-            <div className="octane-inventory-furni-grid">
+        <div className="volt-inventory-furni">
+            <div className="volt-inventory-furni-grid">
                 <InfiniteGrid<GroupItem>
                     squareItems
                     classicScrollbar
@@ -172,7 +172,7 @@ export const InventoryFurnitureView: FC<{
                     items={filteredGroupItems.slice(currentPage * 200, (currentPage + 1) * 200)}
                 />
                 {pageCount > 1 && (
-                    <div className="octane-inventory-pages">
+                    <div className="volt-inventory-pages">
                         {Array.from({ length: pageCount }, (_, index) => (
                             <button key={index} type="button" aria-current={index === currentPage ? 'page' : undefined} onClick={() => setPage(index)}>
                                 {index}
@@ -181,9 +181,9 @@ export const InventoryFurnitureView: FC<{
                     </div>
                 )}
             </div>
-            <div className="octane-inventory-furni-preview">
+            <div className="volt-inventory-furni-preview">
                 <div
-                    className="octane-inventory-furni-preview-stage"
+                    className="volt-inventory-furni-preview-stage"
                     onPointerDown={(event) => {
                         if (event.button !== 0 || !roomSession || !selectedItem) return;
                         if ([FurniCategory.FLOOR, FurniCategory.WALL_PAPER, FurniCategory.LANDSCAPE].includes(selectedItem.category)) return;
@@ -198,26 +198,26 @@ export const InventoryFurnitureView: FC<{
                         }}
                     />
                     {selectedItem && (
-                        <div className="octane-inventory-furni-status">
+                        <div className="volt-inventory-furni-status">
                             <div
-                                className={`octane-inventory-furni-status-icon ${tradeableCount > 0 ? 'is-trade' : 'is-no-trade'}`}
+                                className={`volt-inventory-furni-status-icon ${tradeableCount > 0 ? 'is-trade' : 'is-no-trade'}`}
                                 title={
                                     tradeableCount > 0
                                         ? LocalizeText('inventory.furni.trading.is_tradable', ['amount'], [String(tradeableCount)])
                                         : LocalizeText('inventory.furni.trading.is_not_tradable')
                                 }
                             >
-                                {tradeableCount > 0 && <span className="octane-inventory-furni-status-count is-trade-count">{tradeableCount}</span>}
+                                {tradeableCount > 0 && <span className="volt-inventory-furni-status-count is-trade-count">{tradeableCount}</span>}
                             </div>
                             <div
-                                className={`octane-inventory-furni-status-icon ${recyclableCount > 0 ? 'is-recycle' : 'is-no-recycle'}`}
+                                className={`volt-inventory-furni-status-icon ${recyclableCount > 0 ? 'is-recycle' : 'is-no-recycle'}`}
                                 title={
                                     recyclableCount > 0
                                         ? LocalizeText('inventory.furni.recycling.is_recyclable', ['amount'], [String(recyclableCount)])
                                         : LocalizeText('inventory.furni.recycling.is_not_recyclable')
                                 }
                             >
-                                {recyclableCount > 0 && <span className="octane-inventory-furni-status-count is-recycle-count">{recyclableCount}</span>}
+                                {recyclableCount > 0 && <span className="volt-inventory-furni-status-count is-recycle-count">{recyclableCount}</span>}
                             </div>
                         </div>
                     )}
@@ -234,18 +234,18 @@ export const InventoryFurnitureView: FC<{
                     )}
                 </div>
                 {selectedItem && (
-                    <div className="octane-inventory-furni-details">
-                        <div className="octane-inventory-furni-name">{selectedItem.name}</div>
-                        {selectedItem.description && <div className="octane-inventory-furni-desc">{selectedItem.description}</div>}
-                        <div className="octane-inventory-furni-actions">
-                            <OctaneButton
+                    <div className="volt-inventory-furni-details">
+                        <div className="volt-inventory-furni-name">{selectedItem.name}</div>
+                        {selectedItem.description && <div className="volt-inventory-furni-desc">{selectedItem.description}</div>}
+                        <div className="volt-inventory-furni-actions">
+                            <VoltButton
                                 disabled={!roomSession || isTrading || !selectedItem.getUnlockedCount()}
-                                className="octane-inventory-btn-place"
+                                className="volt-inventory-btn-place"
                                 onClick={() => attemptItemPlacement(selectedItem)}
                             >
                                 {LocalizeText('inventory.furni.placetoroom')}
-                            </OctaneButton>
-                            <div className="octane-inventory-preview-controls">
+                            </VoltButton>
+                            <div className="volt-inventory-preview-controls">
                                 <button type="button" onClick={() => roomPreviewer?.changeRoomObjectDirection()}>
                                     {localizeWithFallback('widget.furniture.button.rotate', 'Rotate')}
                                 </button>
@@ -254,27 +254,27 @@ export const InventoryFurnitureView: FC<{
                                 </button>
                             </div>
                             {isTrading && (
-                                <div className="octane-inventory-offer">
+                                <div className="volt-inventory-offer">
                                     <input
-                                        className="octane-inventory-offer-count"
+                                        className="volt-inventory-offer-count"
                                         aria-label={LocalizeText('inventory.trading.offer')}
                                         inputMode="numeric"
                                         value={offerCount}
                                         onChange={(event) => setOfferCount(event.target.value)}
                                     />
-                                    <OctaneButton
+                                    <VoltButton
                                         disabled={!tradeableCount || !ownUser || ownUser.accepts}
-                                        className="octane-inventory-btn-offer"
+                                        className="volt-inventory-btn-offer"
                                         onClick={attemptOffer}
                                     >
                                         {LocalizeText('inventory.trading.offer')}
-                                    </OctaneButton>
+                                    </VoltButton>
                                 </div>
                             )}
                             {selectedItem.isSellable && !isTrading && (
-                                <OctaneButton className="octane-inventory-btn-sell" onClick={() => attemptPlaceMarketplaceOffer(selectedItem)}>
+                                <VoltButton className="volt-inventory-btn-sell" onClick={() => attemptPlaceMarketplaceOffer(selectedItem)}>
                                     {LocalizeText('inventory.marketplace.sell')}
-                                </OctaneButton>
+                                </VoltButton>
                             )}
                         </div>
                     </div>

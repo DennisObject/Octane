@@ -22,7 +22,7 @@ import {
     UnseenItemsEvent,
     UserPermissionsEvent,
     Vector3d
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useQueryClient } from '@tanstack/react-query';
 import { FC, useEffect, useRef } from 'react';
 import {
@@ -45,7 +45,7 @@ import {
     CatalogPurchaseNotAllowedEvent,
     CatalogPurchaseSoldOutEvent
 } from '../../events';
-import { useConnectionState, useMessageEvent, useOctaneEvent, useUiEvent } from '../events';
+import { useConnectionState, useMessageEvent, useVoltEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
 import { useCatalogStore } from './catalogStore';
 import { getNodesByOfferIdFromMap, restoreCatalogActivePath, RoomObjectCategory } from './useCatalog.helpers';
@@ -248,9 +248,9 @@ export const useCatalogEffects = (): void => {
             cloneCachedCatalogPages();
         };
 
-        window.addEventListener('octane-localization-updated', refresh);
+        window.addEventListener('volt-localization-updated', refresh);
 
-        return () => window.removeEventListener('octane-localization-updated', refresh);
+        return () => window.removeEventListener('volt-localization-updated', refresh);
     }, []);
 
     useMessageEvent<PurchaseOKMessageEvent>(PurchaseOKMessageEvent, (event) => {
@@ -388,7 +388,7 @@ export const useCatalogEffects = (): void => {
 
     useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, () => PlaySound(SoundNames.CREDITS));
 
-    useOctaneEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, (event) => {
+    useVoltEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, (event) => {
         const state = useCatalogStore.getState();
 
         if (!state.objectMoverRequested || event.type !== RoomEngineObjectPlacedEvent.PLACED) return;

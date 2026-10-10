@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, FollowFriendMessageComposer, GetSessionDataManager, GroupInformationComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, FollowFriendMessageComposer, GetSessionDataManager, GroupInformationComposer, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { CSSProperties, FC, KeyboardEvent, PointerEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { GetUserProfile, LocalizeText, ReportType, SendMessageComposer, useHabbiconCatalog } from '../../../../api';
@@ -172,7 +172,7 @@ export const FriendsMessengerView: FC = () => {
     if (!isVisible) return null;
 
     return <>
-        <DraggableWindow uniqueKey="octane-messenger" handleSelector=".messenger-drag" windowPosition={DraggableWindowPosition.TOP_CENTER} offsetTop={8}>
+        <DraggableWindow uniqueKey="volt-messenger" handleSelector=".messenger-drag" windowPosition={DraggableWindowPosition.TOP_CENTER} offsetTop={8}>
             <div ref={windowRef} className="messenger-window" onPointerDown={(event) => {
                 if (pickerPosition && !habbiconRef.current?.contains(event.target as Node)) setPickerPosition(null);
             }}>

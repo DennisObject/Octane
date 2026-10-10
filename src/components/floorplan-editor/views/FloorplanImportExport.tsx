@@ -1,6 +1,6 @@
 import { Dispatch, FC, useRef, useState } from 'react';
 import { LocalizeText } from '../../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../common';
 import { localizeOr } from '../state/localize';
 import { serializeTilemap } from '../state/encoding';
 import { FloorplanAction, FloorplanState } from '../state/types';
@@ -34,18 +34,18 @@ export const FloorplanImportExport: FC<Props> = ({ state, dispatch, onClose, onS
     };
 
     return (
-        <OctaneCardView uniqueKey="floorplan-import-export" frameStyle={3} theme="primary" className="w-[379px] h-[374px]" classNames={['octane-floorplan-import', ...(!showLoad ? ['is-official'] : [])]} isResizable={false}>
+        <VoltCardView uniqueKey="floorplan-import-export" frameStyle={3} theme="primary" className="w-[379px] h-[374px]" classNames={['volt-floorplan-import', ...(!showLoad ? ['is-official'] : [])]} isResizable={false}>
             {showLoad ? (
-                <OctaneCardHeaderView headerText={LocalizeText('floor.plan.editor.import.export')} onCloseClick={onClose} />
+                <VoltCardHeaderView headerText={LocalizeText('floor.plan.editor.import.export')} onCloseClick={onClose} />
             ) : (
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">
                         <FloorplanCenteredText background={0x377998} color={0xffffff} text={LocalizeText('floor.plan.editor.import.export')} textStyle="u_frame_title" width={377} />
                     </span>
-                    <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={onClose} />
+                    <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={onClose} />
                 </div>
             )}
-            <OctaneCardContentView overflow="hidden" className="fp-bc-import">
+            <VoltCardContentView overflow="hidden" className="fp-bc-import">
                 <textarea ref={dataRef} className="fp-bc-import-data" name="data" value={raw} spellCheck={false} onChange={(event) => setRaw(event.target.value)} />
                 {!showLoad && (
                     <>
@@ -64,7 +64,7 @@ export const FloorplanImportExport: FC<Props> = ({ state, dispatch, onClose, onS
                 <button type="button" className="fp-bc-btn fp-bc-import-save" data-testid="import-save" disabled={saveDisabled} onClick={save}>
                     {showLoad ? LocalizeText('floor.plan.editor.save') : <span className="fp-bc-import-label"><FloorplanNativeText background={0xffffff} color={0x000000} style={{ mixBlendMode: 'multiply', opacity: saveDisabled ? 0.5 : 1 }} text={LocalizeText('floor.plan.editor.save')} size={10} textStyle="button_shiny_bold" /></span>}
                 </button>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

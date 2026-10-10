@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { FC, useCallback, useMemo } from 'react';
 import { CatalogPageName, GetConfigurationValue, LocalizeFormattedNumber, LocalizeShortNumber, localizeWithFallback } from '../../../api';
 import creditsIcon from '../../../assets/images/purse/air/credits.png';
@@ -52,10 +52,10 @@ export const CurrencyView: FC<CurrencyViewProps> = (props) => {
     }, [type]);
 
     return (
-        <div className={`octane-purse-currency group relative octane-purse-currency--${type}`}>
-            <button type="button" aria-label={tooltip} className={`octane-purse-button allcurrencypurse currency-info currency-${type}`} onClick={onClick}>
-                <span className="octane-purse-button__amount currency-text">{displayAmount}</span>
-                {airIcon ? <img src={airIcon} alt="" className="octane-purse-air-currency" /> : <LayoutCurrencyIcon type={type} />}
+        <div className={`volt-purse-currency group relative volt-purse-currency--${type}`}>
+            <button type="button" aria-label={tooltip} className={`volt-purse-button allcurrencypurse currency-info currency-${type}`} onClick={onClick}>
+                <span className="volt-purse-button__amount currency-text">{displayAmount}</span>
+                {airIcon ? <img src={airIcon} alt="" className="volt-purse-air-currency" /> : <LayoutCurrencyIcon type={type} />}
             </button>
             {short && (
                 <div

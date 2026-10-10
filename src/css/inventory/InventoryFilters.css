@@ -1,4 +1,4 @@
-.octane-inventory-window .octane-inventory-filter-bar {
+.volt-inventory-window .volt-inventory-filter-bar {
     position: relative;
     display: block;
     flex: 0 0 25px;
@@ -9,7 +9,7 @@
     background: transparent;
 }
 
-.octane-inventory-window .octane-inventory-filter-bar::before {
+.volt-inventory-window .volt-inventory-filter-bar::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -18,7 +18,7 @@
     border-image: url('@/assets/images/habbo-skin/slices/inventory-filter-bar-background.png') 3 fill / 3px stretch;
 }
 
-.octane-inventory-window .octane-inventory-filter-search {
+.volt-inventory-window .volt-inventory-filter-search {
     position: absolute;
     left: 4px;
     top: 3px;
@@ -28,7 +28,7 @@
     background: transparent;
 }
 
-.octane-inventory-window .octane-inventory-filter-search::before {
+.volt-inventory-window .volt-inventory-filter-search::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -37,7 +37,7 @@
     pointer-events: none;
 }
 
-.octane-inventory-window .octane-inventory-filter-input {
+.volt-inventory-window .volt-inventory-filter-input {
     position: absolute;
     left: 3px;
     top: 2px;
@@ -57,7 +57,7 @@
     line-height: 15px;
 }
 
-.octane-inventory-window .octane-inventory-filter-clear {
+.volt-inventory-window .volt-inventory-filter-clear {
     left: 120px;
     right: auto;
     top: 0;
@@ -65,10 +65,10 @@
     height: 20px;
     padding: 0;
     background: url('@/assets/images/habbo-skin/slices/inventory-search-clear.png') center no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-inventory-window .octane-inventory-filter-choice {
+.volt-inventory-window .volt-inventory-filter-choice {
     position: absolute;
     left: 150px;
     top: 2px;
@@ -76,11 +76,11 @@
     height: 21px;
 }
 
-.octane-inventory-window .octane-inventory-filter-choice + .octane-inventory-filter-choice {
+.volt-inventory-window .volt-inventory-filter-choice + .volt-inventory-filter-choice {
     left: 274px;
 }
 
-.octane-inventory-window .octane-inventory-filter-choice::before {
+.volt-inventory-window .volt-inventory-filter-choice::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -89,7 +89,7 @@
     pointer-events: none;
 }
 
-.octane-inventory-window .octane-inventory-filter-select {
+.volt-inventory-window .volt-inventory-filter-select {
     position: relative;
     appearance: none;
     width: 119px;
@@ -98,15 +98,15 @@
     padding: 4px 21px 3px 13px;
     background: url('@/assets/images/habbo-skin/slices/inventory-filter-dropdown-arrow.png') right 5px top 2px / 16px 16px no-repeat transparent !important;
     line-height: 14px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-inventory-window .octane-inventory-filter-select:focus-visible {
+.volt-inventory-window .volt-inventory-filter-select:focus-visible {
     outline: 1px dotted #000;
     outline-offset: -3px;
 }
 
-.octane-inventory-window .octane-inventory-filter-select {
+.volt-inventory-window .volt-inventory-filter-select {
     display: block;
     overflow: hidden;
     text-align: left;
@@ -116,7 +116,7 @@
     font-weight: normal;
 }
 
-.octane-inventory-filter-menu {
+.volt-inventory-filter-menu {
     position: fixed;
     z-index: 100000;
     box-sizing: border-box;
@@ -134,10 +134,10 @@
     font-size: 9px;
     line-height: 12px;
     color: #000;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-inventory-filter-menu::before {
+.volt-inventory-filter-menu::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -147,7 +147,7 @@
     pointer-events: none;
 }
 
-.octane-inventory-filter-option {
+.volt-inventory-filter-option {
     min-height: 15px;
     padding: 1px 4px 2px;
     white-space: nowrap;
@@ -155,19 +155,19 @@
     cursor: pointer;
 }
 
-.octane-inventory-filter-option[aria-selected='true'] {
+.volt-inventory-filter-option[aria-selected='true'] {
     background: #f2f2f2;
 }
 
-.octane-inventory-filter-option.is-active,
-.octane-inventory-filter-option:hover {
+.volt-inventory-filter-option.is-active,
+.volt-inventory-filter-option:hover {
     background: #d9d9d9;
 }
 
 /* Keep mobile text autosizing from inflating the native AIR captions. */
-.octane-inventory-window .octane-inventory-filter-select,
-.octane-inventory-filter-menu,
-.octane-inventory-filter-option {
+.volt-inventory-window .volt-inventory-filter-select,
+.volt-inventory-filter-menu,
+.volt-inventory-filter-option {
     -webkit-text-size-adjust: none !important;
     text-size-adjust: none !important;
     font-size: 9px !important;
@@ -175,21 +175,21 @@
 }
 
 /* v75 dropmenu rows: 16px pitch, caption 12px from the menu edge, the current choice painted #f2f2f2. */
-.octane-inventory-filter-menu {
+.volt-inventory-filter-menu {
     padding: 2px 6px 3px;
 }
 
-.octane-inventory-filter-option {
+.volt-inventory-filter-option {
     min-height: 16px;
     padding: 2px 4px 2px 7px;
 }
 
-.octane-inventory-filter-option[aria-selected='true'].is-active {
+.volt-inventory-filter-option[aria-selected='true'].is-active {
     background: #f2f2f2;
 }
 
 /* A disabled dropmenu keeps its frame and greys the caption to 50% black. */
-.octane-inventory-window .octane-inventory-filter-select:disabled {
+.volt-inventory-window .volt-inventory-filter-select:disabled {
     color: #7f7f7f;
     cursor: default;
 }

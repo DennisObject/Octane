@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect } from 'react';
 import { chooserSelectionVisualizer, LocalizeText } from '../../../../api';
 import { useFurniChooserWidget, useRoom } from '../../../../hooks';

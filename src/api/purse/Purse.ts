@@ -1,4 +1,4 @@
-import { GetTickerTime, HabboClubLevelEnum } from '@octane/renderer';
+import { GetTickerTime, HabboClubLevelEnum } from '@volt/renderer';
 import { IPurse } from './IPurse';
 
 export class Purse implements IPurse {

@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@octane/renderer';
+import { RoomObjectCategory } from '@volt/renderer';
 import { FC } from 'react';
 import { BaseProps } from '../../../../common';
 import { useRoom } from '../../../../hooks';

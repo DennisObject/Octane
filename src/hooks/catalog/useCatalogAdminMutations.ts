@@ -10,10 +10,10 @@ import {
     CatalogAdminResultMessageParser,
     CatalogAdminSetPageVisibleComposer,
     CatalogAdminSmartSaveResult
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { NotificationAlertType } from '../../api/notification/NotificationAlertType';
-import { SendMessageComposer } from '../../api/octane/SendMessageComposer';
+import { SendMessageComposer } from '../../api/volt/SendMessageComposer';
 import { LocalizeText } from '../../api/utils/LocalizeText';
 import { useMessageEvent } from '../events/useMessageEvent';
 import { useNotificationActions } from '../notification/useNotification';

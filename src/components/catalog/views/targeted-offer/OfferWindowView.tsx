@@ -1,7 +1,7 @@
-import { GetTargetedOfferComposer, PurchaseTargetedOfferComposer, TargetedOfferData } from '@octane/renderer';
+import { GetTargetedOfferComposer, PurchaseTargetedOfferComposer, TargetedOfferData } from '@volt/renderer';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { FriendlyTime, GetConfigurationValue, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { Button, Column, Flex, LayoutCurrencyIcon, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../../common';
 import { usePurse } from '../../../../hooks';
 
 let isBuyingOffer = false;
@@ -48,12 +48,12 @@ export const OfferWindowView = (props: { offer: TargetedOfferData; setOpen: Disp
     if (!offer) return;
 
     return (
-        <OctaneCardView className="octane-targeted-offer" theme="primary-slim" uniqueKey="targeted-offer">
-            <OctaneCardHeaderView headerText={LocalizeText(offer.title)} onCloseClick={(event) => setOpen(false)} />
+        <VoltCardView className="volt-targeted-offer" theme="primary-slim" uniqueKey="targeted-offer">
+            <VoltCardHeaderView headerText={LocalizeText(offer.title)} onCloseClick={(event) => setOpen(false)} />
             <div className="container-fluid p-1 relative justify-center items-center cursor-pointer gap-3 bg-danger">
                 {LocalizeText('targeted.offer.timeleft', ['timeleft'], [expirationTime()])}
             </div>
-            <OctaneCardContentView gap={1}>
+            <VoltCardContentView gap={1}>
                 <Flex fullHeight gap={1}>
                     <Flex column className="w-75 text-black" gap={1}>
                         <Column fullHeight className="bg-warning p-2">
@@ -100,7 +100,7 @@ export const OfferWindowView = (props: { offer: TargetedOfferData; setOpen: Disp
                         </div>
                     )}
                 </Flex>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

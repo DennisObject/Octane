@@ -6,7 +6,7 @@ import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Text } from '../../../../common';
 import { useWired, useWiredTools } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
 import { CLICKED_USER_SOURCE_VALUE, WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
@@ -286,7 +286,7 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
                     <Text>{LocalizeText('wiredfurni.params.texts.placeholder_name')}</Text>
-                    <OctaneInput
+                    <VoltInput
                         maxLength={MAX_PLACEHOLDER_NAME_LENGTH}
                         type="text"
                         value={placeholderName}
@@ -296,15 +296,15 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
 
                 <WiredPlaceholderPreview previewHtml={previewHtml} previewToken={previewToken} />
 
-                <div className="octane-wired__give-var-heading">
+                <div className="volt-wired__give-var-heading">
                     <Text>{LocalizeText('wiredfurni.params.variables.variable_selection')}</Text>
-                    <div className="octane-wired__give-var-targets">
+                    <div className="volt-wired__give-var-targets">
                         {TARGET_BUTTONS.map((button) => (
                             <button
                                 key={button.key}
                                 type="button"
                                 disabled={button.disabled}
-                                className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${targetType === button.key ? 'is-active' : ''}`}
+                                className={`volt-wired__give-var-target volt-wired__give-var-target--${button.key} ${targetType === button.key ? 'is-active' : ''}`}
                                 onClick={() => handleTargetChange(button.key)}
                             >
                                 <img src={button.icon} alt={button.key} />
@@ -320,7 +320,7 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
                     onSelect={(entry) => setVariableToken(entry.token)}
                 />
 
-                <div className="octane-wired__give-var-section">
+                <div className="volt-wired__give-var-section">
                     <Text>{LocalizeText('wiredfurni.params.texts.variable_display_type')}</Text>
                     <label className="flex items-center gap-1 cursor-pointer">
                         <input
@@ -373,7 +373,7 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
                 {placeholderType === TYPE_MULTIPLE && (
                     <div className="flex flex-col gap-1">
                         <Text>{LocalizeText('wiredfurni.params.texts.select_delimiter')}</Text>
-                        <OctaneInput
+                        <VoltInput
                             maxLength={MAX_DELIMITER_LENGTH}
                             type="text"
                             value={delimiter}

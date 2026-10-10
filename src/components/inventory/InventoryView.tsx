@@ -10,7 +10,7 @@ import {
     RoomEngineObjectPlacedEvent,
     RoomPreviewer,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import {
     filterFurnitureGroupItems,
@@ -22,7 +22,7 @@ import {
     setObjectMoverRequested,
     UnseenItemCategory
 } from '../../api';
-import { OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
+import { VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../../common';
 import {
     useInventoryBadges,
     useInventoryFurni,
@@ -30,7 +30,7 @@ import {
     useWiredTrading,
     useInventoryUnseenTracker,
     useMessageEvent,
-    useOctaneEvent
+    useVoltEvent
 } from '../../hooks';
 import { InventoryBadgeView } from './views/badge/InventoryBadgeView';
 import { InventoryBotView } from './views/bot/InventoryBotView';
@@ -191,13 +191,13 @@ export const InventoryView: FC<{}> = () => {
         setIsVisible(false);
     };
 
-    useOctaneEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectEvent.PLACED, (event) => {
+    useVoltEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectEvent.PLACED, (event) => {
         if (!isObjectMoverRequested()) return;
         setObjectMoverRequested(false);
         if (!event.placedInRoom) setIsVisible(true);
     });
 
-    useOctaneEvent<RoomSessionEvent>([RoomSessionEvent.CREATED, RoomSessionEvent.ENDED], (event) => {
+    useVoltEvent<RoomSessionEvent>([RoomSessionEvent.CREATED, RoomSessionEvent.ENDED], (event) => {
         switch (event.type) {
             case RoomSessionEvent.CREATED:
                 setRoomSession(event.session);
@@ -278,29 +278,29 @@ export const InventoryView: FC<{}> = () => {
 
     return (
         <>
-            <OctaneCardView
-                className={`octane-inventory-window max-w-[calc(100vw-16px)] ${isTrading ? (isTradeMinimized ? 'is-trading is-minimized' : `is-trading${hasCreditNote ? ' has-credit-note' : ''}`) : ''}`}
+            <VoltCardView
+                className={`volt-inventory-window max-w-[calc(100vw-16px)] ${isTrading ? (isTradeMinimized ? 'is-trading is-minimized' : `is-trading${hasCreditNote ? ' has-credit-note' : ''}`) : ''}`}
                 frameStyle={3}
                 resizeAxis="vertical"
                 uniqueKey="inventory"
             >
-                <OctaneCardHeaderView headerText={LocalizeText('inventory.title')} onCloseClick={onClose} />
+                <VoltCardHeaderView headerText={LocalizeText('inventory.title')} onCloseClick={onClose} />
                 {!showWiredTrade && (
                     <>
-                        <OctaneCardTabsView classNames={['octane-inventory-tabs-shell']}>
+                        <VoltCardTabsView classNames={['volt-inventory-tabs-shell']}>
                             {TABS.map((name, index) => (
-                                <OctaneCardTabsItemView
+                                <VoltCardTabsItemView
                                     key={name}
                                     style={tabBoxes[index]}
                                     count={getTabUnseenCount(name, getCount)}
                                     isActive={currentTab === name}
                                     onClick={() => setCurrentTab(name)}
                                 >
-                                    <span className="octane-inventory-tab-label">{tabLabel(name)}</span>
-                                </OctaneCardTabsItemView>
+                                    <span className="volt-inventory-tab-label">{tabLabel(name)}</span>
+                                </VoltCardTabsItemView>
                             ))}
-                        </OctaneCardTabsView>
-                        <div className="octane-inventory-body">
+                        </VoltCardTabsView>
+                        <div className="volt-inventory-body">
                             {showFilter && (
                                 <InventoryCategoryFilterView
                                     currentTab={currentTab}
@@ -319,7 +319,7 @@ export const InventoryView: FC<{}> = () => {
                                     onSearchApply={setAppliedSearch}
                                 />
                             )}
-                            <div className={`octane-inventory-content ${currentTab === TAB_FURNITURE ? 'is-furniture' : ''}`}>
+                            <div className={`volt-inventory-content ${currentTab === TAB_FURNITURE ? 'is-furniture' : ''}`}>
                                 {currentTab === TAB_FURNITURE && (
                                     <InventoryFurnitureView filteredGroupItems={filteredGroupItems} roomPreviewer={roomPreviewer} roomSession={roomSession} />
                                 )}
@@ -331,16 +331,16 @@ export const InventoryView: FC<{}> = () => {
                     </>
                 )}
                 {isTrading && (
-                    <div className="octane-inventory-subcontent">
+                    <div className="volt-inventory-subcontent">
                         <InventoryTradeView isMinimized={isTradeMinimized} cancelTrade={stopTrading} continueTrade={() => setCurrentTab(TAB_FURNITURE)} />
                     </div>
                 )}
                 {showWiredTrade && (
-                    <div className="octane-inventory-body is-trade">
+                    <div className="volt-inventory-body is-trade">
                         <InventoryWiredTradeView />
                     </div>
                 )}
-            </OctaneCardView>
+            </VoltCardView>
             <InventoryFurnitureDeleteView />
         </>
     );

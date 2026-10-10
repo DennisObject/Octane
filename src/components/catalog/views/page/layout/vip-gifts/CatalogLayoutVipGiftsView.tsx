@@ -1,4 +1,4 @@
-import { SelectClubGiftComposer } from '@octane/renderer';
+import { SelectClubGiftComposer } from '@volt/renderer';
 import { FC, useCallback, useMemo } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../../api';
 import { ClassicScrollAreaView } from '../../../../../../common';
@@ -55,7 +55,7 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
 
                     // The server replies with a fresh ClubGiftInfoEvent after
                     // accepting the selection; useClubGifts subscribes to that
-                    // event via useOctaneEventInvalidator, so giftsAvailable
+                    // event via useVoltEventInvalidator, so giftsAvailable
                     // refreshes from the authoritative source — no need to
                     // mutate the parser locally.
                     SendMessageComposer(new SelectClubGiftComposer(localizationId));
@@ -76,9 +76,9 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
 
     // Official clubGiftWidget: wrapped info line, the gift list, then the past HC length centred below it.
     return (
-        <div className="octane-catalog-club-gifts">
-            <div className="octane-catalog-club-gifts-info">{giftsAvailable()}</div>
-            <ClassicScrollAreaView className="octane-catalog-club-gifts-list" contentClassName="octane-catalog-club-gifts-list-content" scrollStep={59}>
+        <div className="volt-catalog-club-gifts">
+            <div className="volt-catalog-club-gifts-info">{giftsAvailable()}</div>
+            <ClassicScrollAreaView className="volt-catalog-club-gifts-list" contentClassName="volt-catalog-club-gifts-list-content" scrollStep={59}>
                 {clubGifts &&
                     clubGifts.offers.length > 0 &&
                     sortGifts.map((offer) => {
@@ -96,7 +96,7 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = (props) => {
                         );
                     })}
             </ClassicScrollAreaView>
-            {!!pastClubDaysText && <div className="octane-catalog-club-gifts-past">{pastClubDaysText}</div>}
+            {!!pastClubDaysText && <div className="volt-catalog-club-gifts-past">{pastClubDaysText}</div>}
         </div>
     );
 };

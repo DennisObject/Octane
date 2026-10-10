@@ -1,4 +1,4 @@
-import { GetStage, OctaneRectangle, RoomObjectType } from '@octane/renderer';
+import { GetStage, VoltRectangle, RoomObjectType } from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AddAnimationTickerCallback, FixedSizeStack, GetRoomObjectBounds, GetRoomObjectScreenLocation, GetRoomSession } from '../../../../api';
 import { BaseProps } from '../../../../common';
@@ -63,7 +63,7 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
     const maxStackRef = useRef(-1000000);
 
     const updatePosition = useCallback(
-        (bounds: OctaneRectangle, location: { x: number; y: number }) =>
+        (bounds: VoltRectangle, location: { x: number; y: number }) =>
         {
             if (
                 !bounds ||
@@ -124,7 +124,7 @@ export const ContextMenuView: FC<ContextMenuViewProps> = ({
 
     const getClassNames = useMemo(() =>
     {
-        const classes = ['octane-context-menu', pos.x !== null ? 'visible' : 'invisible'];
+        const classes = ['volt-context-menu', pos.x !== null ? 'visible' : 'invisible'];
         if (isCollapsed) classes.push('menu-hidden');
         return [...classes, ...classNames];
     }, [pos.x, isCollapsed, classNames]);

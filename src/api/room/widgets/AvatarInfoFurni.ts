@@ -1,4 +1,4 @@
-import { IObjectData } from '@octane/renderer';
+import { IObjectData } from '@volt/renderer';
 import { IAvatarInfo } from './IAvatarInfo';
 
 export class AvatarInfoFurni implements IAvatarInfo {

@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SendMessageComposer } from '../../../../../../api';
-import { useCatalogData, useCatalogUiState, useMessageEvent, useOctaneEvent, useSellablePetPalette, useUiEvent } from '../../../../../../hooks';
+import { useCatalogData, useCatalogUiState, useMessageEvent, useVoltEvent, useSellablePetPalette, useUiEvent } from '../../../../../../hooks';
 import { CatalogLayoutPetView } from './CatalogLayoutPetView';
 
 const composerTypes = vi.hoisted(() => {
@@ -26,7 +26,7 @@ const composerTypes = vi.hoisted(() => {
 
 const petAssetState = vi.hoisted(() => ({ colorsReady: true, downloadAsset: vi.fn() }));
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     ApproveNameMessageComposer: composerTypes.ApproveNameMessageComposer,
     ApproveNameMessageEvent: class {},
     ColorConverter: { int2rgb: (color: number) => `#${color.toString(16).padStart(6, '0')}` },
@@ -79,7 +79,7 @@ vi.mock('../../../../../../hooks', () => ({
     useCatalogData: vi.fn(),
     useCatalogUiState: vi.fn(),
     useMessageEvent: vi.fn(),
-    useOctaneEvent: vi.fn(),
+    useVoltEvent: vi.fn(),
     useSellablePetPalette: vi.fn(),
     useUiEvent: vi.fn(),
     useUserDataSnapshot: () => ({ clubLevel: userDataState.clubLevel })
@@ -131,7 +131,7 @@ beforeEach(() => {
     vi.mocked(useMessageEvent).mockImplementation((_event: unknown, handler: any) => {
         approveNameHandler = handler;
     });
-    vi.mocked(useOctaneEvent).mockImplementation((_type: any, handler: any) => {
+    vi.mocked(useVoltEvent).mockImplementation((_type: any, handler: any) => {
         contentLoadedHandler = handler;
     });
     vi.mocked(useUiEvent).mockImplementation((event: any, handler: any) => {
@@ -215,14 +215,14 @@ describe('pet catalog layout', () => {
         expect(screen.getByTestId('pet-image')).toHaveAttribute('data-direction', '2');
         expect(screen.getByRole('textbox')).toHaveAttribute('maxLength', '15');
         expect(screen.getByRole('button', { name: 'catalog.pets.choose.color 1' })).toHaveAttribute('aria-pressed', 'true');
-        expect(screen.getByTestId('pet-image').closest('.octane-catalog-pet-layout')).toHaveClass(
-            'octane-catalog-pet-layout--legacy'
+        expect(screen.getByTestId('pet-image').closest('.volt-catalog-pet-layout')).toHaveClass(
+            'volt-catalog-pet-layout--legacy'
         );
         expect(
             screen.getByLabelText('catalog.pets.choose.color').compareDocumentPosition(screen.getByRole('combobox')) &
                 Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
-        expect(screen.getByTestId('pet-image').closest('.octane-catalog-pet-preview')).toContainElement(screen.getByTestId('pet-price'));
+        expect(screen.getByTestId('pet-image').closest('.volt-catalog-pet-preview')).toContainElement(screen.getByTestId('pet-price'));
     });
 
     it('sends one approval request and purchases only after the matching approval succeeds', async () => {

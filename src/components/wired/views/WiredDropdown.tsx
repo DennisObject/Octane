@@ -31,9 +31,9 @@ export const WiredDropdown: FC<WiredDropdownProps> = ({ options, value, caption 
         );
 
     return (
-        <div className={`octane-wired__dropdown ${disabled ? 'is-disabled' : ''}`}>
+        <div className={`volt-wired__dropdown ${disabled ? 'is-disabled' : ''}`}>
             <WiredSurfaceContext.Provider value={0xffffff}>
-                <WiredText className="octane-wired__dropdown-label" text={selected ? selected.label : caption} />
+                <WiredText className="volt-wired__dropdown-label" text={selected ? selected.label : caption} />
             </WiredSurfaceContext.Provider>
             <select aria-label={caption} disabled={disabled} value={selected ? value : -1} onChange={(event) => onChange(parseInt(event.target.value))}>
                 {!selected && <option value={-1}>{caption}</option>}

@@ -40,8 +40,8 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
     const [airColumnCount, setAirColumnCount] = useState(columnCount);
-    const baseGridClassName = columnCount > 1 && !className.split(/\s+/).includes('octane-catalog-grid') ? `${className} octane-catalog-grid`.trim() : className;
-    const isAirStandardDensity = className.split(/\s+/).includes('octane-catalog-grid-density-standard');
+    const baseGridClassName = columnCount > 1 && !className.split(/\s+/).includes('volt-catalog-grid') ? `${className} volt-catalog-grid`.trim() : className;
+    const isAirStandardDensity = className.split(/\s+/).includes('volt-catalog-grid-density-standard');
 
     const offers = offersOverride ?? currentPage?.offers ?? [];
     const hasAirBaseOffer = offers.some((offer) => isAirBaseCatalogOffer(offer));
@@ -55,7 +55,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const useVirtualGrid = shouldVirtualizeCatalogOffers(offers.length, adminMode) && !usesAirMixedGridTemplate;
     const airGridStyle = {
         ...style,
-        ...(isAirStandardDensity && { '--octane-air-column-count': airColumnCount.toString() })
+        ...(isAirStandardDensity && { '--volt-air-column-count': airColumnCount.toString() })
     } as CSSProperties;
     const mixedLayout = useMemo(() => layoutAirCatalogOffers(offers, airColumnCount), [airColumnCount, offers]);
     const bundleCounterByOffer = useMemo(() => {
@@ -161,7 +161,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         return (
             <div
                 key={offer.offerId}
-                className={`${isDragging ? 'octane-catalog-admin-dragging' : ''} ${isDropTarget ? 'octane-catalog-admin-drop-target' : ''}`}
+                className={`${isDragging ? 'volt-catalog-admin-dragging' : ''} ${isDropTarget ? 'volt-catalog-admin-drop-target' : ''}`}
                 data-air-offer-index={airPosition ? index : undefined}
                 draggable={canReorder}
                 style={
@@ -189,10 +189,10 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
 
     if (usesAirMixedGridTemplate) {
         return (
-            <ClassicScrollAreaView className="octane-catalog-item-grid-scroll-area h-full min-h-0" viewportRef={elementRef}>
+            <ClassicScrollAreaView className="volt-catalog-item-grid-scroll-area h-full min-h-0" viewportRef={elementRef}>
                 <div
                     aria-label="Catalog items"
-                    className={`octane-catalog-air-mixed-grid ${gridClassName}`}
+                    className={`volt-catalog-air-mixed-grid ${gridClassName}`}
                     role="listbox"
                     style={{ ...airGridStyle, width: mixedLayout.width, minWidth: '100%', height: mixedLayout.height }}
                     onDragEnd={canReorder ? handleDragEnd : undefined}
@@ -208,13 +208,13 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         return (
             <div
                 aria-label="Catalog items"
-                className={`octane-catalog-grid-virtual h-full min-h-0 ${gridClassName}`.trim()}
+                className={`volt-catalog-grid-virtual h-full min-h-0 ${gridClassName}`.trim()}
                 role="listbox"
                 onDragEnd={canReorder ? handleDragEnd : undefined}
                 style={
                     {
-                        '--octane-grid-column-min-height': `${effectiveColumnMinHeight}px`,
-                        '--octane-grid-column-min-width': `${effectiveColumnMinWidth}px`,
+                        '--volt-grid-column-min-height': `${effectiveColumnMinHeight}px`,
+                        '--volt-grid-column-min-width': `${effectiveColumnMinWidth}px`,
                         ...airGridStyle
                     } as CSSProperties
                 }
@@ -238,7 +238,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     }
 
     return (
-        <ClassicScrollAreaView className="octane-catalog-item-grid-scroll-area h-full min-h-0" viewportRef={elementRef}>
+        <ClassicScrollAreaView className="volt-catalog-item-grid-scroll-area h-full min-h-0" viewportRef={elementRef}>
             <AutoGrid
                 aria-label="Catalog items"
                 className={gridClassName}

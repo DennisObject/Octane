@@ -1,4 +1,4 @@
-import { GetAssetBundleUrl, GetConfiguration } from '@octane/renderer';
+import { GetAssetBundleUrl, GetConfiguration } from '@volt/renderer';
 
 export type AssetPresence = 'present' | 'missing' | 'unknown';
 

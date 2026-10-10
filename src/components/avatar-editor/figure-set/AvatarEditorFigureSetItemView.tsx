@@ -1,11 +1,11 @@
-import { OctaneEventType } from '@octane/renderer';
+import { VoltEventType } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { AvatarEditorThumbnailsHelper, GetClubMemberLevel, GetConfigurationValue, IAvatarEditorCategoryPartItem } from '../../../api';
 import hcSmallSrc from '../../../assets/images/avatareditor/air/hc-small.png';
 import getMoreSrc from '../../../assets/images/avatareditor/air/get-more.png';
 import { LayoutCurrencyIcon, LayoutGridItemProps } from '../../../common';
 import { useAvatarEditor } from '../../../hooks';
-import { useOctaneEvent } from '../../../hooks/events';
+import { useVoltEvent } from '../../../hooks/events';
 import { InfiniteGrid } from '../../../layout';
 import { AvatarEditorIcon } from '../AvatarEditorIcon';
 
@@ -38,7 +38,7 @@ export const AvatarEditorFigureSetItemView: FC<
 
     assetUrlRef.current = assetUrl;
 
-    useOctaneEvent(OctaneEventType.AVATAR_ASSET_LOADED, () => {
+    useVoltEvent(VoltEventType.AVATAR_ASSET_LOADED, () => {
         if (!isHead || assetUrlRef.current || retryTimeoutRef.current) return;
 
         // Avatar libraries notify after their download callbacks. Give the

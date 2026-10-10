@@ -1,4 +1,4 @@
-import { IChestFurniStoredItem } from '@octane/renderer';
+import { IChestFurniStoredItem } from '@volt/renderer';
 
 /** Matches official {@code FurniChestView.itemTypeKey}. */
 export const chestFurniTypeKey = (item: IChestFurniStoredItem): string =>

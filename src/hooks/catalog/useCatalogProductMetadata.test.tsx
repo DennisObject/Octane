@@ -1,4 +1,4 @@
-import { CatalogProductMetadataEvent } from '@octane/renderer';
+import { CatalogProductMetadataEvent } from '@volt/renderer';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SendMessageComposer } from '../../api';
@@ -17,7 +17,7 @@ const composerTypes = vi.hoisted(() => {
     return { CatalogProductMetadataComposer };
 });
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     CatalogProductMetadataComposer: composerTypes.CatalogProductMetadataComposer,
     CatalogProductMetadataEvent: class {}
 }));

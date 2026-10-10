@@ -1,4 +1,4 @@
-import { GroupJoinComposer } from '@octane/renderer';
-import { SendMessageComposer } from '../octane';
+import { GroupJoinComposer } from '@volt/renderer';
+import { SendMessageComposer } from '../volt';
 
 export const TryJoinGroup = (groupId: number) => SendMessageComposer(new GroupJoinComposer(groupId));

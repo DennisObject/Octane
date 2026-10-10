@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager } from '@octane/renderer';
+import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager } from '@volt/renderer';
 import { CSSProperties, FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import {
     isWiredVolterStyle,
@@ -12,7 +12,7 @@ import {
     wiredWidthMultiplier
 } from '../../../api';
 import volterAtlas from '../../../assets/images/wired/volter_shell_atlas.png';
-import { OctaneCardContentView, OctaneCardView, Text } from '../../../common';
+import { VoltCardContentView, VoltCardView, Text } from '../../../common';
 import { useWired, useWiredTools } from '../../../hooks';
 import { WiredBannerCanvas } from './WiredBannerCanvas';
 import { WiredNativeContext } from './WiredNativeContext';
@@ -214,49 +214,49 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
 
     const advancedLabel = LocalizeText(showFooter ? 'wiredfurni.params.sources.collapse' : 'wiredfurni.params.sources.expand');
     const advancedToggle = (
-        <button className="octane-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
+        <button className="volt-wired__advanced-toggle" type="button" onClick={() => setShowFooter((value) => !value)}>
             {isNative ? <WiredText text={advancedLabel} underline={true} /> : advancedLabel}
         </button>
     );
 
     const bodySections = isNative ? (
         <>
-            {nativeLayout ? children : !!children && <WiredSection className="octane-wired__section--body">{children}</WiredSection>}
+            {nativeLayout ? children : !!children && <WiredSection className="volt-wired__section--body">{children}</WiredSection>}
             {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (selectionPreview || <WiredFurniSelectorSection />)}
             {delay}
             {footer &&
                 (footerCollapsible ? (
-                    <div className="octane-wired__native-advanced">
+                    <div className="volt-wired__native-advanced">
                         {advancedToggle}
                         {showFooter && (
                             <WiredSurfaceContext.Provider value={WIRED_ADVANCED_SURFACE_COLOR}>
-                                <div className="octane-wired__native-advanced-body">{footer}</div>
+                                <div className="volt-wired__native-advanced-body">{footer}</div>
                             </WiredSurfaceContext.Provider>
                         )}
                     </div>
                 ) : (
-                    <WiredSection className="octane-wired__section--footer">{footer}</WiredSection>
+                    <WiredSection className="volt-wired__section--footer">{footer}</WiredSection>
                 ))}
         </>
     ) : (
         <>
-            {!!children && <div className="octane-wired__divider" />}
-            {!!children && <div className="octane-wired__section octane-wired__section--body">{children}</div>}
+            {!!children && <div className="volt-wired__divider" />}
+            {!!children && <div className="volt-wired__section volt-wired__section--body">{children}</div>}
             {showSelection && requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE && (
                 <>
-                    <div className="octane-wired__divider" />
-                    <div className="octane-wired__section octane-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>
+                    <div className="volt-wired__divider" />
+                    <div className="volt-wired__section volt-wired__section--selector">{selectionPreview || <WiredFurniSelectorView />}</div>
                 </>
             )}
             {legacyDelay}
             {footer && (
                 <>
-                    <div className="octane-wired__divider" />
-                    <div className="octane-wired__section octane-wired__section--footer">
+                    <div className="volt-wired__divider" />
+                    <div className="volt-wired__section volt-wired__section--footer">
                         {footerCollapsible ? (
                             <>
                                 {advancedToggle}
-                                {showFooter && <div className="octane-wired__advanced-body">{footer}</div>}
+                                {showFooter && <div className="volt-wired__advanced-body">{footer}</div>}
                             </>
                         ) : (
                             footer
@@ -269,10 +269,10 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
 
     return (
         <WiredNativeContext.Provider value={isNative}>
-        <OctaneCardView
-            className={`octane-wired octane-wired--official ${isNative ? 'octane-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'octane-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'octane-wired--volter-colour' : ''}`}
+        <VoltCardView
+            className={`volt-wired volt-wired--official ${isNative ? 'volt-wired--native-layout' : ''} ${wiredStyleClassName(shellStyle)} ${isVolter ? 'volt-wired--volter' : ''} ${isVolter && shellStyle !== 'volter' ? 'volt-wired--volter-colour' : ''}`}
             theme="primary-slim"
-            uniqueKey="octane-wired"
+            uniqueKey="volt-wired"
             isResizable={false}
             style={resolvedCardStyle}
             initialPosition={{ x: Math.round((window.innerWidth - cardWidth) / 2), y: Math.round((window.innerHeight - WIRED_OPEN_HEIGHT) / 2) }}
@@ -285,39 +285,39 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                 onClose={onClose}
                 menuItems={shellMenuItems}
             />
-            <OctaneCardContentView classNames={['octane-wired__content']} gap={0}>
-                <div className="octane-wired__section octane-wired__summary">
+            <VoltCardContentView classNames={['volt-wired__content']} gap={0}>
+                <div className="volt-wired__section volt-wired__summary">
                     {shellStyle === 'illumina' && (
-                        <div className="octane-wired__banner" aria-hidden="true">
+                        <div className="volt-wired__banner" aria-hidden="true">
                             <WiredBannerCanvas />
                         </div>
                     )}
                     {isVolter && iconOffset !== undefined && (
-                        <svg className="octane-wired__type-icon" viewBox={`${iconOffset} 336 13 14`} aria-hidden="true">
+                        <svg className="volt-wired__type-icon" viewBox={`${iconOffset} 336 13 14`} aria-hidden="true">
                             <image href={volterAtlas} width={490} height={360} />
                         </svg>
                     )}
-                    <div className="octane-wired__summary-copy">
+                    <div className="volt-wired__summary-copy">
                         {shellStyle === 'illumina' ? (
                             <>
-                                <span className="octane-wired__summary-kind">{summaryKind.toUpperCase()}</span>
-                                <span className="octane-wired__summary-title">{summaryName.replace(/^ +/, '')}</span>
+                                <span className="volt-wired__summary-kind">{summaryKind.toUpperCase()}</span>
+                                <span className="volt-wired__summary-title">{summaryName.replace(/^ +/, '')}</span>
                             </>
                         ) : (
-                            <Text bold className="octane-wired__summary-title">
+                            <Text bold className="volt-wired__summary-title">
                                 {wiredName}
                             </Text>
                         )}
                     </div>
                 </div>
-                <div className="octane-wired__body">
+                <div className="volt-wired__body">
                     {isWiredVolterStyle(shellStyle) && shellStyle !== 'volter' ? (
                         <WiredVolterBorderView shellStyle={shellStyle}>{bodySections}</WiredVolterBorderView>
                     ) : bodySections}
-                    {!isNative && <div className="octane-wired__divider octane-wired__footer-divider" />}
-                    <div className={isNative ? 'octane-wired__native-footer' : 'contents'}>
+                    {!isNative && <div className="volt-wired__divider volt-wired__footer-divider" />}
+                    <div className={isNative ? 'volt-wired__native-footer' : 'contents'}>
                         {isNative && <WiredSplitter />}
-                        <div className="flex items-center gap-1 octane-wired__actions">
+                        <div className="flex items-center gap-1 volt-wired__actions">
                             <WiredShellButton shellStyle={shellStyle} disabled={!roomSettings.canModify} onClick={() => onSave(false)}>
                                 {LocalizeText('wiredfurni.ready')}
                             </WiredShellButton>
@@ -327,8 +327,8 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
                         </div>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
         </WiredNativeContext.Provider>
     );
 };

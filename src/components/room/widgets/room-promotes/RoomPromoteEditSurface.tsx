@@ -411,7 +411,7 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         };
         const onOver = (event: PointerEvent) =>
         {
-            if ((event.target as Element)?.closest?.('.octane-card-close-button'))
+            if ((event.target as Element)?.closest?.('.volt-card-close-button'))
             {
                 hover = true;
                 setClose();
@@ -421,7 +421,7 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         {
             const to = event.relatedTarget as Element | null;
 
-            if ((event.target as Element)?.closest?.('.octane-card-close-button') && !to?.closest?.('.octane-card-close-button'))
+            if ((event.target as Element)?.closest?.('.volt-card-close-button') && !to?.closest?.('.volt-card-close-button'))
             {
                 hover = false;
                 setClose();
@@ -429,7 +429,7 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
         };
         const onDown = (event: PointerEvent) =>
         {
-            if ((event.target as Element)?.closest?.('.octane-card-close-button'))
+            if ((event.target as Element)?.closest?.('.volt-card-close-button'))
             {
                 pressed = true;
                 setClose();
@@ -521,8 +521,8 @@ export const RoomPromoteEditSurface: FC<RoomPromoteEditSurfaceProps> = (props) =
 
     return (
         <>
-            <canvas ref={canvasRef} aria-hidden="true" className="octane-room-promote-edit__surface" />
-            <div aria-hidden="true" className="octane-room-promote-edit__sources">
+            <canvas ref={canvasRef} aria-hidden="true" className="volt-room-promote-edit__surface" />
+            <div aria-hidden="true" className="volt-room-promote-edit__sources">
                 <NativeText background={0x377998} nativeResolution overrides={{ color: 0xffffff }} text={props.caption} textStyle="u_frame_title" onRaster={rasterHandlers.caption} />
                 <NativeText background={0xe9e9e1} nativeResolution text={props.nameLabel} textStyle="u_bold" onRaster={rasterHandlers.nameLabel} />
                 <NativeText background={0xe9e9e1} nativeResolution text={props.descriptionLabel} textStyle="u_bold" onRaster={rasterHandlers.descriptionLabel} />

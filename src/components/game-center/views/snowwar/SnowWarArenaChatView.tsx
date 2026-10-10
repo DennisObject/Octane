@@ -1,4 +1,4 @@
-import { RoomChatSettings, RoomObjectCategory } from '@octane/renderer';
+import { RoomChatSettings, RoomObjectCategory } from '@volt/renderer';
 import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChatBubbleMessage, ChatBubbleUtilities, GetConfigurationValue, RoomChatFormatter, SnowWarChatMessage, SNOWWAR_ROOM_ID } from '../../../../api';
 import { getChatViewerHeight } from '../../../room/widgets/chat/freeFlowChatLayout';

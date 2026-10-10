@@ -1,4 +1,4 @@
-import { CatalogPageMessageOfferData } from '@octane/renderer';
+import { CatalogPageMessageOfferData } from '@volt/renderer';
 import { FC, useCallback } from 'react';
 import { LocalizeText, ProductImageUtility } from '../../../../../../api';
 import { LayoutImage } from '../../../../../../common';
@@ -53,17 +53,17 @@ export const VipGiftItem: FC<VipGiftItemViewProps> = (props) => {
     // Official club_gift_list_item: image box left, name / description / requirement stacked beside it,
     // Select bottom right (enabled only while this gift can be chosen), VIP mark in the corner.
     return (
-        <div className="octane-catalog-club-gift">
-            <div className="octane-catalog-club-gift-image">
+        <div className="volt-catalog-club-gift">
+            <div className="volt-catalog-club-gift-image">
                 <LayoutImage imageUrl={getImageUrlForOffer()} />
             </div>
-            {isVip && <span aria-hidden="true" className="octane-club-compact-mark is-vip octane-catalog-club-gift-vip" />}
-            <div className="octane-catalog-club-gift-name">{getItemTitle()}</div>
-            {!!description && <div className="octane-catalog-club-gift-desc">{description}</div>}
-            {!!requirementText && <div className="octane-catalog-club-gift-requirement">{requirementText}</div>}
+            {isVip && <span aria-hidden="true" className="volt-club-compact-mark is-vip volt-catalog-club-gift-vip" />}
+            <div className="volt-catalog-club-gift-name">{getItemTitle()}</div>
+            {!!description && <div className="volt-catalog-club-gift-desc">{description}</div>}
+            {!!requirementText && <div className="volt-catalog-club-gift-requirement">{requirementText}</div>}
             <button
                 aria-disabled={!isAvailable}
-                className="octane-catalog-standard-button octane-catalog-club-gift-select"
+                className="volt-catalog-standard-button volt-catalog-club-gift-select"
                 disabled={!isAvailable}
                 type="button"
                 onClick={() => {

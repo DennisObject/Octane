@@ -1,4 +1,4 @@
-import { RedeemVoucherMessageComposer, VoucherRedeemErrorMessageEvent, VoucherRedeemOkMessageEvent } from '@octane/renderer';
+import { RedeemVoucherMessageComposer, VoucherRedeemErrorMessageEvent, VoucherRedeemOkMessageEvent } from '@volt/renderer';
 import { FC, KeyboardEvent, useState } from 'react';
 import { LocalizeText, SanitizeHtml, SendMessageComposer } from '../../../../../api';
 import { useMessageEvent, useNotification } from '../../../../../hooks';
@@ -59,9 +59,9 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
     });
 
     return (
-        <div className="octane-cfp-voucher">
-            <div className="octane-cfp-voucher-text" dangerouslySetInnerHTML={{ __html: SanitizeHtml(text ?? '') }} />
-            <div className="octane-cfp-voucher-input">
+        <div className="volt-cfp-voucher">
+            <div className="volt-cfp-voucher-text" dangerouslySetInnerHTML={{ __html: SanitizeHtml(text ?? '') }} />
+            <div className="volt-cfp-voucher-input">
                 <input
                     name="voucher_code"
                     type="text"
@@ -70,7 +70,7 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = (prop
                     onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && redeemVoucher(event)}
                 />
             </div>
-            <button className="octane-cfp-voucher-button" type="button" onClick={() => redeemVoucher()}>
+            <button className="volt-cfp-voucher-button" type="button" onClick={() => redeemVoucher()}>
                 {LocalizeText('redeem')}
             </button>
         </div>

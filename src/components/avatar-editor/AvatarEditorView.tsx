@@ -7,7 +7,7 @@ import {
     RemoveLinkEventTracker,
     SetClothingChangeDataMessageComposer,
     UserFigureComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../api';
 import mainGenericSrc from '../../assets/images/avatareditor/air/main-generic.png';
@@ -19,7 +19,7 @@ import mainMiscSrc from '../../assets/images/avatareditor/air/main-misc.png';
 import mainTorsoSrc from '../../assets/images/avatareditor/air/main-torso.png';
 import wardrobeHangerSrc from '../../assets/images/avatareditor/wardrobe-hanger.png';
 import mainNftSrc from '../../assets/images/wardrobe/nft.png';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorFigurePreviewView } from './AvatarEditorFigurePreviewView';
@@ -185,44 +185,44 @@ export const AvatarEditorView: FC<{}> = (props) => {
     if (!isVisible) return null;
 
     return (
-        <OctaneCardView
-            className={`octane-avatar-editor${isWardrobeOpen ? ' is-wardrobe-open' : ''}`}
+        <VoltCardView
+            className={`volt-avatar-editor${isWardrobeOpen ? ' is-wardrobe-open' : ''}`}
             frameStyle={3}
             initialPosition={editorPosition}
             isResizable={false}
             onPositionChange={setEditorPosition}
             uniqueKey="avatar-editor"
         >
-            <OctaneCardHeaderView
+            <VoltCardHeaderView
                 headerText=""
                 onCloseClick={(event) => setIsVisible(false)}
             >
-                <NativeText className="octane-avatar-editor-title" text={LocalizeText(clothingChangeData ? 'widget.furni.clothingchange.editor.title' : 'avatareditor.title')} textStyle="u_frame_title" background={0x377998} overrides={{ color: 0xffffff }} />
-            </OctaneCardHeaderView>
-            <OctaneCardContentView className="octane-avatar-editor-content" gap={0}>
-                <div className="octane-avatar-editor-stage">
-                    <div className="octane-avatar-editor-nameplate">
-                        <div className="octane-avatar-editor-name-text"><NativeText text={GetSessionDataManager().userName} textStyle="u_headline_big" background={0x0e3f52} overrides={{ size: 12, color: 0xffffff }} /></div>
+                <NativeText className="volt-avatar-editor-title" text={LocalizeText(clothingChangeData ? 'widget.furni.clothingchange.editor.title' : 'avatareditor.title')} textStyle="u_frame_title" background={0x377998} overrides={{ color: 0xffffff }} />
+            </VoltCardHeaderView>
+            <VoltCardContentView className="volt-avatar-editor-content" gap={0}>
+                <div className="volt-avatar-editor-stage">
+                    <div className="volt-avatar-editor-nameplate">
+                        <div className="volt-avatar-editor-name-text"><NativeText text={GetSessionDataManager().userName} textStyle="u_headline_big" background={0x0e3f52} overrides={{ size: 12, color: 0xffffff }} /></div>
                     </div>
-                    <div className="octane-avatar-editor-tab-row">
-                        <OctaneCardTabsView classNames={['avatar-editor-tabs']}>
+                    <div className="volt-avatar-editor-tab-row">
+                        <VoltCardTabsView classNames={['avatar-editor-tabs']}>
                             {orderedModelKeys.map((modelKey) => (
-                                <OctaneCardTabsItemView
+                                <VoltCardTabsItemView
                                     key={modelKey}
-                                    classNames={['octane-avatar-editor-main-tab', `is-${modelKey}`]}
+                                    classNames={['volt-avatar-editor-main-tab', `is-${modelKey}`]}
                                     isActive={activeModelKey === modelKey}
                                     onClick={() => setActiveModelKey(modelKey)}
                                 >
-                                    <img className="octane-avatar-editor-main-tab-icon" src={MAIN_TAB_ICONS[modelKey]} alt="" draggable={false} />
-                                </OctaneCardTabsItemView>
+                                    <img className="volt-avatar-editor-main-tab-icon" src={MAIN_TAB_ICONS[modelKey]} alt="" draggable={false} />
+                                </VoltCardTabsItemView>
                             ))}
-                        </OctaneCardTabsView>
+                        </VoltCardTabsView>
                     </div>
                     {hasWardrobe && (
                         <button
                             type="button"
                             disabled={!canUseWardrobe}
-                            className={`octane-avatar-editor-wardrobe-toggle${isWardrobeOpen ? ' is-open' : ''}`}
+                            className={`volt-avatar-editor-wardrobe-toggle${isWardrobeOpen ? ' is-open' : ''}`}
                             aria-pressed={isWardrobeOpen}
                             aria-label={LocalizeText('avatareditor.wardrobe.title')}
                             onClick={() => setIsWardrobeOpen((open) => !open)}
@@ -230,7 +230,7 @@ export const AvatarEditorView: FC<{}> = (props) => {
                             <img alt="" draggable={false} src={wardrobeHangerSrc} />
                         </button>
                     )}
-                    <div className="octane-avatar-editor-main">
+                    <div className="volt-avatar-editor-main">
                         {activeModelKey.length > 0 && !isHotLooksOpen && !isEffectsOpen && !isNftOpen && (
                             <AvatarEditorModelView categories={avatarModels[activeModelKey]} name={activeModelKey} />
                         )}
@@ -238,14 +238,14 @@ export const AvatarEditorView: FC<{}> = (props) => {
                         {isEffectsOpen && <AvatarEditorEffectsView />}
                         {isNftOpen && <AvatarEditorNftView categories={avatarModels[activeModelKey]} />}
                         <AvatarEditorFigurePreviewView />
-                        <button type="button" className="octane-avatar-editor-save" disabled={isSaving} onClick={saveAvatar}>
-                            <NativeText className="octane-avatar-editor-save-label" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xffffff} />
-                            <NativeText className="octane-avatar-editor-save-label-disabled" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xc3c3c1} />
+                        <button type="button" className="volt-avatar-editor-save" disabled={isSaving} onClick={saveAvatar}>
+                            <NativeText className="volt-avatar-editor-save-label" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xffffff} />
+                            <NativeText className="volt-avatar-editor-save-label-disabled" text={LocalizeText('avatareditor.save')} textStyle="button_shiny_bold" background={0xc3c3c1} />
                         </button>
                     </div>
                 </div>
                 {isWardrobeOpen && canUseWardrobe && <AvatarEditorWardrobeView />}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

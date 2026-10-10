@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { FaArrowCircleRight } from 'react-icons/fa';
 import { CreateLinkEvent, LocalizeText } from '../../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../common';
 import { useHelp } from '../../../hooks';
 
 export const SanctionSatusView: FC<{}> = (props) => {
@@ -34,9 +34,9 @@ export const SanctionSatusView: FC<{}> = (props) => {
     if (!sanctionInfo) return null;
 
     return (
-        <OctaneCardView className="octane-help min-w-0 w-[min(420px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('help.sanction.info.title')} onCloseClick={() => setSanctionInfo(null)} />
-            <OctaneCardContentView className="text-black">
+        <VoltCardView className="volt-help min-w-0 w-[min(420px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]" theme="primary-slim">
+            <VoltCardHeaderView headerText={LocalizeText('help.sanction.info.title')} onCloseClick={() => setSanctionInfo(null)} />
+            <VoltCardContentView className="text-black">
                 <div className="flex min-h-[170px] flex-col">
                     <div className="flex flex-col gap-1">
                         {sanctionInfo.sanctionReason === 'cfh.reason.EMPTY' ? (
@@ -83,7 +83,7 @@ export const SanctionSatusView: FC<{}> = (props) => {
                         </button>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

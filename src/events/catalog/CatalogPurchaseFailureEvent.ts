@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class CatalogPurchaseFailureEvent extends OctaneEvent {
+export class CatalogPurchaseFailureEvent extends VoltEvent {
     public static PURCHASE_FAILED: string = 'CPFE_PURCHASE_FAILED';
 
     private _code: number;

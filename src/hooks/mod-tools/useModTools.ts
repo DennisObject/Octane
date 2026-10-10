@@ -6,7 +6,7 @@ import {
     ModeratorActionResultMessageEvent,
     ModeratorInitData,
     ModeratorInitMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { SendMessageComposer } from '../../api';

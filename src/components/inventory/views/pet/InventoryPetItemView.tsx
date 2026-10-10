@@ -1,4 +1,4 @@
-import { MouseEventType } from '@octane/renderer';
+import { MouseEventType } from '@volt/renderer';
 import { FC, MouseEvent, PropsWithChildren, useState } from 'react';
 import { attemptPetPlacement, IPetItem, UnseenItemCategory } from '../../../../api';
 import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
@@ -34,17 +34,17 @@ export const InventoryPetItemView: FC<PropsWithChildren<{ petItem: IPetItem }>> 
 
     return (
         <div
-            className={`octane-inventory-thumb${petItem === selectedPet ? ' is-selected' : ''}${unseen ? ' is-unseen' : ''}`}
+            className={`volt-inventory-thumb${petItem === selectedPet ? ' is-selected' : ''}${unseen ? ' is-unseen' : ''}`}
             onDoubleClick={onMouseEvent}
             onMouseDown={onMouseEvent}
             onMouseLeave={onMouseEvent}
             onMouseUp={onMouseEvent}
             {...rest}
         >
-            <span className="octane-inventory-animal-thumb-image">
+            <span className="volt-inventory-animal-thumb-image">
                 <InventoryPetImageView pet={petItem.petData} />
             </span>
-            <span className="octane-inventory-animal-level">{petItem.petData.level}</span>
+            <span className="volt-inventory-animal-level">{petItem.petData.level}</span>
             {children}
         </div>
     );

@@ -72,10 +72,10 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = ({ detail, grou
         if (!isBusy) actions.save();
     };
 
-    const pane = (id: FurniEditorGroup) => `octane-furni-editor-group ${group === id ? '' : 'is-hidden'}`;
+    const pane = (id: FurniEditorGroup) => `volt-furni-editor-group ${group === id ? '' : 'is-hidden'}`;
 
     return (
-        <fieldset aria-busy={isLocked} className="octane-furni-editor-sheet" disabled={isLocked} onKeyDown={onKeyDown}>
+        <fieldset aria-busy={isLocked} className="volt-furni-editor-sheet" disabled={isLocked} onKeyDown={onKeyDown}>
             <FurniEditorSidebarView
                 actions={actions}
                 detail={detail}
@@ -90,7 +90,7 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = ({ detail, grou
                 onGroup={setTab}
                 onJump={jumpToField}
             />
-            <div className="octane-furni-editor-pane">
+            <div className="volt-furni-editor-pane">
                 <div className={pane('names')}>
                     <FurniEditorNamesView
                         actions={actions}

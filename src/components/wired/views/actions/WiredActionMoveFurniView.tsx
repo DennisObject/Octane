@@ -144,7 +144,7 @@ export const WiredActionMoveFurniView: FC<{}> = (props) => {
                                 onChange={(event) => setRotation(option)}
                             />
                             <Text>
-                                {[1, 2].includes(option) && <i className={`octane-icon icon-rot-${option}`} />}
+                                {[1, 2].includes(option) && <i className={`volt-icon icon-rot-${option}`} />}
                                 {LocalizeText(`wiredfurni.params.rotatefurni.${option}`)}
                             </Text>
                         </div>

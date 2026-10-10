@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class GuideToolEvent extends OctaneEvent {
+export class GuideToolEvent extends VoltEvent {
     public static readonly SHOW_GUIDE_TOOL: string = 'GTE_SHOW_GUIDE_TOOL';
     public static readonly HIDE_GUIDE_TOOL: string = 'GTE_HIDE_GUIDE_TOOL';
     public static readonly TOGGLE_GUIDE_TOOL: string = 'GTE_TOGGLE_GUIDE_TOOL';

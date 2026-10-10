@@ -1,4 +1,4 @@
-.octane-avatar-editor {
+.volt-avatar-editor {
     width: 488px;
     min-width: 488px;
     max-width: 488px;
@@ -8,19 +8,19 @@
     resize: none !important;
 }
 
-.octane-avatar-editor.is-wardrobe-open {
+.volt-avatar-editor.is-wardrobe-open {
     width: 669px;
     min-width: 669px;
     max-width: 669px;
 }
 
-.octane-avatar-editor > .octane-card-header-shell {
+.volt-avatar-editor > .volt-card-header-shell {
     min-height: 33px !important;
     max-height: 33px !important;
     flex: 0 0 33px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-content.octane-card-content-shell {
+.volt-avatar-editor .volt-avatar-editor-content.volt-card-content-shell {
     position: absolute;
     left: 0;
     top: 33px;
@@ -36,7 +36,7 @@
     overflow: hidden !important;
 }
 
-.octane-avatar-editor-stage {
+.volt-avatar-editor-stage {
     position: relative;
     width: 490px;
     height: 490px;
@@ -46,7 +46,7 @@
     background: #e9e9e1;
 }
 
-.octane-avatar-editor-stage::before {
+.volt-avatar-editor-stage::before {
     content: '';
     position: absolute;
     left: 1px;
@@ -55,11 +55,11 @@
     width: 486px;
     height: 365px;
     background: url('@/assets/images/avatareditor/air/tab-content.png') 0 0 / 486px 365px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor-nameplate {
+.volt-avatar-editor-nameplate {
     position: absolute;
     left: 1px;
     top: 0;
@@ -71,7 +71,7 @@
     background: #0e3f52;
 }
 
-.octane-avatar-editor-name-text {
+.volt-avatar-editor-name-text {
     position: absolute;
     left: 40px;
     top: 15px;
@@ -82,16 +82,16 @@
     overflow: hidden;
 }
 
-.octane-avatar-editor-name-text > span { flex: none; }
+.volt-avatar-editor-name-text > span { flex: none; }
 
-.octane-avatar-editor-title {
+.volt-avatar-editor-title {
     position: absolute !important;
     top: 2px;
     left: calc(50% - 2px);
     transform: translateX(-50%);
 }
 
-.octane-avatar-editor-tab-row {
+.volt-avatar-editor-tab-row {
     position: absolute;
     left: 9px;
     top: 79px;
@@ -100,7 +100,7 @@
     height: 46px;
 }
 
-.octane-avatar-editor .avatar-editor-tabs.octane-card-tabs-shell {
+.volt-avatar-editor .avatar-editor-tabs.volt-card-tabs-shell {
     position: static;
     justify-content: flex-start !important;
     box-sizing: border-box;
@@ -115,7 +115,7 @@
     background: transparent;
 }
 
-.octane-avatar-editor .avatar-editor-tabs .octane-avatar-editor-main-tab {
+.volt-avatar-editor .avatar-editor-tabs .volt-avatar-editor-main-tab {
     box-sizing: border-box;
     width: 52px;
     min-width: 52px;
@@ -129,20 +129,20 @@
     border-radius: 0 !important;
     background: url('@/assets/images/avatareditor/air/tab-default.png') 0 0 / 52px 32px no-repeat !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .avatar-editor-tabs .octane-avatar-editor-main-tab:hover {
+.volt-avatar-editor .avatar-editor-tabs .volt-avatar-editor-main-tab:hover {
     background-image: url('@/assets/images/avatareditor/air/tab-hover.png') !important;
 }
 
-.octane-avatar-editor .avatar-editor-tabs .octane-avatar-editor-main-tab.octane-card-tab-item-active {
+.volt-avatar-editor .avatar-editor-tabs .volt-avatar-editor-main-tab.volt-card-tab-item-active {
     z-index: 2;
     background-image: url('@/assets/images/avatareditor/air/tab-selected.png') !important;
     box-shadow: none !important;
 }
 
-.octane-avatar-editor .avatar-editor-tabs .octane-avatar-editor-main-tab > .flex {
+.volt-avatar-editor .avatar-editor-tabs .volt-avatar-editor-main-tab > .flex {
     position: absolute;
     left: 0;
     top: 0;
@@ -153,7 +153,7 @@
     padding: 0;
 }
 
-.octane-avatar-editor .octane-avatar-editor-main-tab-icon {
+.volt-avatar-editor .volt-avatar-editor-main-tab-icon {
     position: absolute;
     left: 5px;
     top: 4px;
@@ -163,31 +163,31 @@
     height: auto;
     max-height: none;
     object-fit: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor .octane-avatar-editor-main-tab.is-hd .octane-avatar-editor-main-tab-icon {
+.volt-avatar-editor .volt-avatar-editor-main-tab.is-hd .volt-avatar-editor-main-tab-icon {
     left: 6px;
     top: 5px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-main-tab.is-misc .octane-avatar-editor-main-tab-icon {
+.volt-avatar-editor .volt-avatar-editor-main-tab.is-misc .volt-avatar-editor-main-tab-icon {
     left: 14px;
     top: 12px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-main-tab.is-nft .octane-avatar-editor-main-tab-icon {
+.volt-avatar-editor .volt-avatar-editor-main-tab.is-nft .volt-avatar-editor-main-tab-icon {
     left: 14px;
     top: 4px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-main-tab.is-pets .octane-avatar-editor-main-tab-icon {
+.volt-avatar-editor .volt-avatar-editor-main-tab.is-pets .volt-avatar-editor-main-tab-icon {
     left: 13px;
     top: 4px;
 }
 
-.octane-avatar-editor-wardrobe-toggle {
+.volt-avatar-editor-wardrobe-toggle {
     appearance: none;
     position: absolute;
     left: 424px;
@@ -207,10 +207,10 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-wardrobe-toggle > img {
+.volt-avatar-editor-wardrobe-toggle > img {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -218,43 +218,43 @@
     display: block;
     width: 29px;
     height: 21px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
-.octane-avatar-editor-wardrobe-toggle:hover {
+.volt-avatar-editor-wardrobe-toggle:hover {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.octane-avatar-editor-wardrobe-toggle:active {
+.volt-avatar-editor-wardrobe-toggle:active {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.octane-avatar-editor-wardrobe-toggle:disabled {
+.volt-avatar-editor-wardrobe-toggle:disabled {
     cursor: default;
     border-image-source: var(--habbo-skin-shiny-disabled);
 }
 
-.octane-avatar-editor-wardrobe-toggle:focus-visible,
-.octane-avatar-editor .category-item:focus-visible,
-.octane-avatar-editor-rotate:focus-visible,
-.octane-avatar-editor-save:focus-visible {
-    outline: 2px solid var(--octane-card-focus, #ffd95a);
+.volt-avatar-editor-wardrobe-toggle:focus-visible,
+.volt-avatar-editor .category-item:focus-visible,
+.volt-avatar-editor-rotate:focus-visible,
+.volt-avatar-editor-save:focus-visible {
+    outline: 2px solid var(--volt-card-focus, #ffd95a);
     outline-offset: 1px;
 }
 
-.octane-avatar-editor-main,
-.octane-avatar-editor-model {
+.volt-avatar-editor-main,
+.volt-avatar-editor-model {
     position: absolute;
     inset: 0;
 }
 
-.octane-avatar-editor-main {
+.volt-avatar-editor-main {
     z-index: 2;
 }
 
-.octane-avatar-editor .octane-avatar-editor-subcategories {
+.volt-avatar-editor .volt-avatar-editor-subcategories {
     position: absolute;
     left: 23px;
     top: 120px;
@@ -270,16 +270,16 @@
     overflow-y: hidden;
 }
 
-.octane-avatar-editor-subcategories.is-gender {
+.volt-avatar-editor-subcategories.is-gender {
     gap: 0;
     padding-left: 0;
 }
 
-.octane-avatar-editor-subcategories.is-paged {
+.volt-avatar-editor-subcategories.is-paged {
     width: 276px;
 }
 
-.octane-avatar-editor-nft-category-scroll {
+.volt-avatar-editor-nft-category-scroll {
     appearance: none;
     position: absolute;
     top: 129px;
@@ -293,36 +293,36 @@
     background-color: transparent;
     background-repeat: no-repeat;
     background-position: center;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-nft-category-scroll.is-left {
+.volt-avatar-editor-nft-category-scroll.is-left {
     left: 299px;
     background-image: url('@/assets/images/scrollbar/left.png');
 }
 
-.octane-avatar-editor-nft-category-scroll.is-left:hover {
+.volt-avatar-editor-nft-category-scroll.is-left:hover {
     background-image: url('@/assets/images/scrollbar/left_hover.png');
 }
 
-.octane-avatar-editor-nft-category-scroll.is-left:active {
+.volt-avatar-editor-nft-category-scroll.is-left:active {
     background-image: url('@/assets/images/scrollbar/left_active.png');
 }
 
-.octane-avatar-editor-nft-category-scroll.is-right {
+.volt-avatar-editor-nft-category-scroll.is-right {
     left: 316px;
     background-image: url('@/assets/images/scrollbar/right.png');
 }
 
-.octane-avatar-editor-nft-category-scroll.is-right:hover {
+.volt-avatar-editor-nft-category-scroll.is-right:hover {
     background-image: url('@/assets/images/scrollbar/right_hover.png');
 }
 
-.octane-avatar-editor-nft-category-scroll.is-right:active {
+.volt-avatar-editor-nft-category-scroll.is-right:active {
     background-image: url('@/assets/images/scrollbar/right_active.png');
 }
 
-.octane-avatar-editor .category-item {
+.volt-avatar-editor .category-item {
     appearance: none;
     display: flex;
     box-sizing: border-box;
@@ -339,7 +339,7 @@
     background: transparent;
 }
 
-.octane-avatar-editor .category-item.gender-category-item {
+.volt-avatar-editor .category-item.gender-category-item {
     position: relative;
     width: 100px;
     min-width: 100px;
@@ -353,51 +353,51 @@
     white-space: nowrap;
 }
 
-.octane-avatar-editor .gender-category-item .avatar-editor-icon {
+.volt-avatar-editor .gender-category-item .avatar-editor-icon {
     position: absolute;
     left: 0;
     top: 0;
 }
 
-.octane-avatar-editor .gender-category-item:first-child .avatar-editor-icon {
+.volt-avatar-editor .gender-category-item:first-child .avatar-editor-icon {
     left: 6px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-gender-text {
+.volt-avatar-editor .volt-avatar-editor-gender-text {
     position: absolute !important;
     left: 50px;
     top: 10px;
 }
 
-.octane-avatar-editor .avatar-editor-icon {
+.volt-avatar-editor .avatar-editor-icon {
     width: 47px;
     min-width: 47px;
     height: 35px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .avatar-editor-icon img {
+.volt-avatar-editor .avatar-editor-icon img {
     display: block;
     width: auto !important;
     max-width: 47px;
     height: auto !important;
     max-height: 35px;
     object-fit: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .avatar-editor-get-more {
+.volt-avatar-editor .avatar-editor-get-more {
     position: absolute !important;
     left: 3px;
     top: 3px;
     display: block;
     width: 43px;
     height: 44px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor-parts-grid {
+.volt-avatar-editor-parts-grid {
     position: absolute;
     left: 21px;
     top: 168px;
@@ -406,17 +406,17 @@
     overflow: hidden;
 }
 
-.octane-avatar-editor-parts-grid .octane-classic-scroll-area-viewport {
+.volt-avatar-editor-parts-grid .volt-classic-scroll-area-viewport {
     box-sizing: border-box;
     padding-right: 17px;
 }
 
-.octane-avatar-editor-parts-grid [data-index] {
+.volt-avatar-editor-parts-grid [data-index] {
     grid-template-columns: repeat(6, 50px) !important;
     justify-content: start;
 }
 
-.octane-avatar-editor .avatar-parts {
+.volt-avatar-editor .avatar-parts {
     position: relative;
     box-sizing: border-box;
     width: 50px !important;
@@ -433,31 +433,31 @@
     border-radius: 0 !important;
     background-color: transparent !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .avatar-parts::before {
+.volt-avatar-editor .avatar-parts::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 0;
     display: none;
     background: url('@/assets/images/avatareditor/air/part-highlight.png') center no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor .avatar-parts:hover::before {
+.volt-avatar-editor .avatar-parts:hover::before {
     display: block;
     opacity: 0.5;
 }
 
-.octane-avatar-editor .avatar-parts.part-selected::before {
+.volt-avatar-editor .avatar-parts.part-selected::before {
     display: block;
     opacity: 1;
 }
 
-.octane-avatar-editor .avatar-parts.is-loading::after {
+.volt-avatar-editor .avatar-parts.is-loading::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -465,26 +465,26 @@
     background: url('@/assets/images/avatareditor/air/download.png') center no-repeat;
     background-size: auto;
     animation: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor .avatar-parts > * {
+.volt-avatar-editor .avatar-parts > * {
     position: relative;
     z-index: 1;
 }
 
-.octane-avatar-editor .avatar-parts > img {
+.volt-avatar-editor .avatar-parts > img {
     display: block;
     width: auto;
     max-width: none;
     height: auto;
     max-height: none;
     object-fit: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .avatar-parts > .avatar-editor-face-thumbnail {
+.volt-avatar-editor .avatar-parts > .avatar-editor-face-thumbnail {
     width: auto;
     max-width: none;
     height: auto;
@@ -492,26 +492,26 @@
     object-fit: contain;
 }
 
-.octane-avatar-editor .avatar-parts > .avatar-editor-face-thumbnail.is-disabled {
+.volt-avatar-editor .avatar-parts > .avatar-editor-face-thumbnail.is-disabled {
     opacity: 0.2;
 }
 
-.octane-avatar-editor .avatar-parts > .avatar-editor-icon.absolute {
+.volt-avatar-editor .avatar-parts > .avatar-editor-icon.absolute {
     position: absolute;
 }
 
-.octane-avatar-editor .avatar-parts .avatar-editor-icon {
+.volt-avatar-editor .avatar-parts .avatar-editor-icon {
     width: 50px;
     min-width: 50px;
     height: 50px;
 }
 
-.octane-avatar-editor .avatar-parts .avatar-editor-icon img {
+.volt-avatar-editor .avatar-parts .avatar-editor-icon img {
     max-width: 50px;
     max-height: 50px;
 }
 
-.octane-avatar-editor .avatar-editor-part-hc {
+.volt-avatar-editor .avatar-editor-part-hc {
     position: absolute;
     right: 0;
     bottom: 1px;
@@ -520,7 +520,7 @@
     height: 9px;
 }
 
-.octane-avatar-editor .avatar-parts > .avatar-editor-sellable-icon {
+.volt-avatar-editor .avatar-parts > .avatar-editor-sellable-icon {
     position: absolute;
     left: 0;
     right: auto;
@@ -531,24 +531,24 @@
     align-items: flex-end;
 }
 
-.octane-avatar-editor .avatar-parts > .avatar-editor-sellable-icon img {
+.volt-avatar-editor .avatar-parts > .avatar-editor-sellable-icon img {
     width: 17px;
     height: 18px;
 }
 
-.octane-avatar-editor .pet-sellable-locked {
+.volt-avatar-editor .pet-sellable-locked {
     cursor: not-allowed !important;
     opacity: 0.5;
 }
 
-.octane-avatar-editor .pet-sellable-badge {
+.volt-avatar-editor .pet-sellable-badge {
     position: absolute;
     right: 1px;
     bottom: 1px;
     z-index: 3;
 }
 
-.octane-avatar-editor-empty-state {
+.volt-avatar-editor-empty-state {
     position: absolute;
     left: 21px;
     top: 168px;
@@ -562,7 +562,7 @@
     text-align: center;
 }
 
-.octane-avatar-editor-pet-equipped {
+.volt-avatar-editor-pet-equipped {
     display: flex;
     width: 250px;
     min-width: 0;
@@ -574,22 +574,22 @@
     font-size: 10px;
 }
 
-.octane-avatar-editor-pet-equipped > img,
-.octane-avatar-editor-pet-equipped > .avatar-editor-icon {
+.volt-avatar-editor-pet-equipped > img,
+.volt-avatar-editor-pet-equipped > .avatar-editor-icon {
     width: 35px;
     min-width: 35px;
     height: 35px;
     object-fit: contain;
 }
 
-.octane-avatar-editor-pet-equipped > span {
+.volt-avatar-editor-pet-equipped > span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.octane-avatar-editor-pet-remove {
+.volt-avatar-editor-pet-remove {
     appearance: none;
     display: flex;
     width: 35px;
@@ -604,13 +604,13 @@
     background: transparent;
 }
 
-.octane-avatar-editor-pet-remove .avatar-editor-icon {
+.volt-avatar-editor-pet-remove .avatar-editor-icon {
     width: 29px;
     min-width: 29px;
     height: 29px;
 }
 
-.octane-avatar-editor-palettes {
+.volt-avatar-editor-palettes {
     position: absolute;
     left: 21px;
     top: 378px;
@@ -621,7 +621,7 @@
     overflow: hidden;
 }
 
-.octane-avatar-editor-palettes .avatar-editor-palette-set-view {
+.volt-avatar-editor-palettes .avatar-editor-palette-set-view {
     width: 330px;
     height: 93px;
     flex: 0 0 330px;
@@ -629,7 +629,7 @@
     overflow: hidden;
 }
 
-.octane-avatar-editor-palettes.dual-palette .avatar-editor-palette-set-view {
+.volt-avatar-editor-palettes.dual-palette .avatar-editor-palette-set-view {
     width: 160px;
     flex-basis: 160px;
 }
@@ -659,7 +659,7 @@
     cursor: pointer;
     border: 0;
     background: transparent;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .avatar-editor-palette-color,
@@ -680,12 +680,12 @@
     background-blend-mode: multiply;
     -webkit-mask: url('@/assets/images/avatareditor/air/palette-color.png') center / 13px 21px no-repeat;
     mask: url('@/assets/images/avatareditor/air/palette-color.png') center / 13px 21px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .avatar-editor-palette-frame {
     background: url('@/assets/images/avatareditor/air/palette-default.png') center no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .avatar-editor-palette-item:hover .avatar-editor-palette-frame,
@@ -704,11 +704,11 @@
     z-index: 2;
     width: 10px;
     height: 9px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor-preview-shell {
+.volt-avatar-editor-preview-shell {
     position: absolute;
     left: 352px;
     top: 158px;
@@ -717,7 +717,7 @@
     height: 236px;
 }
 
-.octane-avatar-editor .figure-preview-container {
+.volt-avatar-editor .figure-preview-container {
     position: relative;
     width: 125px;
     height: 210px;
@@ -725,7 +725,7 @@
     background: transparent;
 }
 
-.octane-avatar-editor-preview-shadow {
+.volt-avatar-editor-preview-shadow {
     position: absolute;
     left: 25px;
     top: 166px;
@@ -733,11 +733,11 @@
     width: 68px;
     height: 34px;
     opacity: 0.196078;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor .figure-preview-container .avatar-image {
+.volt-avatar-editor .figure-preview-container .avatar-image {
     position: absolute;
     left: 15px;
     right: auto;
@@ -746,10 +746,10 @@
     width: 90px;
     height: 130px;
     margin: 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-rotate {
+.volt-avatar-editor-rotate {
     appearance: none;
     position: absolute;
     left: 38px;
@@ -763,15 +763,15 @@
     background: transparent;
 }
 
-.octane-avatar-editor-rotate img {
+.volt-avatar-editor-rotate img {
     display: block;
     width: 44px;
     height: 29px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor .octane-avatar-editor-save {
+.volt-avatar-editor .volt-avatar-editor-save {
     appearance: none;
     position: absolute;
     left: 368px;
@@ -803,18 +803,18 @@
     line-height: 15px !important;
     text-shadow: none !important;
     white-space: nowrap;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor .octane-avatar-editor-save:hover {
+.volt-avatar-editor .volt-avatar-editor-save:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover) !important;
 }
 
-.octane-avatar-editor .octane-avatar-editor-save:active {
+.volt-avatar-editor .volt-avatar-editor-save:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed) !important;
 }
 
-.octane-avatar-editor-wardrobe {
+.volt-avatar-editor-wardrobe {
     position: relative;
     z-index: 3;
     box-sizing: border-box;
@@ -828,7 +828,7 @@
     box-shadow: inset 1px 0 #000;
 }
 
-.octane-avatar-editor-wardrobe-header {
+.volt-avatar-editor-wardrobe-header {
     display: flex;
     box-sizing: border-box;
     width: 168px;
@@ -840,7 +840,7 @@
     margin-top: 19px;
 }
 
-.octane-avatar-editor .octane-avatar-editor-wardrobe-title {
+.volt-avatar-editor .volt-avatar-editor-wardrobe-title {
     overflow: hidden;
     color: #83827e;
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif !important;
@@ -851,15 +851,15 @@
     white-space: nowrap;
 }
 
-.octane-avatar-editor-wardrobe-hc {
+.volt-avatar-editor-wardrobe-hc {
     width: 15px;
     height: 15px;
     flex-shrink: 0;
     object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-wardrobe-slots {
+.volt-avatar-editor-wardrobe-slots {
     position: relative;
     display: flex;
     box-sizing: border-box;
@@ -871,10 +871,10 @@
     overflow: hidden;
     border: 0;
     background: #cbcbcb;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-wardrobe-slots::before {
+.volt-avatar-editor-wardrobe-slots::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -888,21 +888,21 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor-wardrobe-column {
+.volt-avatar-editor-wardrobe-column {
     display: flex;
     width: 64px;
     flex-direction: column;
     gap: 3px;
 }
 
-.octane-avatar-editor-wardrobe-slot {
+.volt-avatar-editor-wardrobe-slot {
     position: relative;
     width: 56px;
     height: 56px;
     flex-shrink: 0;
 }
 
-.octane-avatar-editor-wardrobe-slot-shade {
+.volt-avatar-editor-wardrobe-slot-shade {
     position: absolute;
     left: 29px;
     top: 3px;
@@ -912,8 +912,8 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor-wardrobe-slot-set,
-.octane-avatar-editor-wardrobe-slot-get {
+.volt-avatar-editor-wardrobe-slot-set,
+.volt-avatar-editor-wardrobe-slot-get {
     appearance: none;
     position: absolute;
     width: 22px;
@@ -925,31 +925,31 @@
     background-color: transparent;
     background-repeat: no-repeat;
     background-position: center;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-avatar-editor-wardrobe-slot-set {
+.volt-avatar-editor-wardrobe-slot-set {
     left: 3px;
     top: 3px;
     background-image: url('@/assets/images/avatareditor/wardrobe-arrow-save.png');
     background-position: center 12px;
 }
 
-.octane-avatar-editor-wardrobe-slot-get {
+.volt-avatar-editor-wardrobe-slot-get {
     left: 2px;
     top: 28px;
     background-image: url('@/assets/images/avatareditor/wardrobe-arrow-wear.png');
     background-position: center 3px;
 }
 
-.octane-avatar-editor-wardrobe-slot-set:focus-visible,
-.octane-avatar-editor-wardrobe-slot-get:focus-visible,
-.octane-avatar-editor-wardrobe-slot-figure:focus-visible {
-    outline: 2px solid var(--octane-card-focus, #ffd95a);
+.volt-avatar-editor-wardrobe-slot-set:focus-visible,
+.volt-avatar-editor-wardrobe-slot-get:focus-visible,
+.volt-avatar-editor-wardrobe-slot-figure:focus-visible {
+    outline: 2px solid var(--volt-card-focus, #ffd95a);
     outline-offset: 1px;
 }
 
-.octane-avatar-editor-wardrobe-slot-figure {
+.volt-avatar-editor-wardrobe-slot-figure {
     appearance: none;
     position: absolute;
     left: 30px;
@@ -964,46 +964,46 @@
     background: transparent;
 }
 
-.octane-avatar-editor-wardrobe-slot-figure:disabled {
+.volt-avatar-editor-wardrobe-slot-figure:disabled {
     cursor: default;
 }
 
-.octane-avatar-editor-wardrobe-slot-figure .avatar-image,
-.octane-avatar-editor-wardrobe-slot-figure .avatar-image-fit {
+.volt-avatar-editor-wardrobe-slot-figure .avatar-image,
+.volt-avatar-editor-wardrobe-slot-figure .avatar-image-fit {
     position: absolute !important;
     inset: 0 !important;
     width: 22px !important;
     height: 48px !important;
 }
 
-.octane-avatar-editor-wardrobe-empty {
+.volt-avatar-editor-wardrobe-empty {
     display: block;
     width: 17px;
     height: 43px;
     margin: 2px auto 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-avatar-editor-save > .octane-avatar-editor-save-label {
+.volt-avatar-editor-save > .volt-avatar-editor-save-label {
     position: relative;
     left: 1px;
     mix-blend-mode: multiply;
 }
 
-.octane-avatar-editor .octane-avatar-editor-save:disabled {
+.volt-avatar-editor .volt-avatar-editor-save:disabled {
     cursor: default;
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
 }
 
-.octane-avatar-editor.octane-card-frame-3::after {
+.volt-avatar-editor.volt-card-frame-3::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 3;
     border: solid transparent;
     border-width: 33px 10px 10px;
-    border-image-source: var(--octane-card-frame-3);
+    border-image-source: var(--volt-card-frame-3);
     border-image-slice: 33 10 10 10 fill;
     border-image-width: 33px 10px 10px;
     border-image-repeat: stretch;
@@ -1013,38 +1013,38 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-avatar-editor.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-avatar-editor-save-label-disabled,
-.octane-avatar-editor-save:disabled > .octane-avatar-editor-save-label {
+.volt-avatar-editor-save-label-disabled,
+.volt-avatar-editor-save:disabled > .volt-avatar-editor-save-label {
     display: none !important;
 }
 
-.octane-avatar-editor-save:disabled > .octane-avatar-editor-save-label-disabled {
+.volt-avatar-editor-save:disabled > .volt-avatar-editor-save-label-disabled {
     position: relative;
     left: 1px;
     display: inline-block !important;
     opacity: 0.5;
 }
 
-.octane-avatar-editor-hotlooks,
-.octane-avatar-editor-effects {
+.volt-avatar-editor-hotlooks,
+.volt-avatar-editor-effects {
     position: absolute;
     inset: 0;
 }
 
-.octane-avatar-editor-hotlooks-title,
-.octane-avatar-editor-hotlooks-choose {
+.volt-avatar-editor-hotlooks-title,
+.volt-avatar-editor-hotlooks-choose {
     position: absolute !important;
     left: 23px;
     top: 120px;
 }
 
-.octane-avatar-editor-hotlooks-choose { top: 148px; }
+.volt-avatar-editor-hotlooks-choose { top: 148px; }
 
-.octane-avatar-editor-hotlooks-grid {
+.volt-avatar-editor-hotlooks-grid {
     position: absolute;
     left: 27px;
     top: 185px;
@@ -1058,7 +1058,7 @@
     overflow: hidden;
 }
 
-.octane-avatar-editor-hotlook {
+.volt-avatar-editor-hotlook {
     position: relative;
     width: 35px;
     height: 60px;
@@ -1068,10 +1068,10 @@
     background: url('@/assets/images/avatareditor/air/outfit-button-default.png') 0 0 / 35px 60px no-repeat;
 }
 
-.octane-avatar-editor-hotlook:hover { background-image: url('@/assets/images/avatareditor/air/outfit-button-hover.png'); }
-.octane-avatar-editor-hotlook:active { background-image: url('@/assets/images/avatareditor/air/outfit-button-pressed.png'); }
+.volt-avatar-editor-hotlook:hover { background-image: url('@/assets/images/avatareditor/air/outfit-button-hover.png'); }
+.volt-avatar-editor-hotlook:active { background-image: url('@/assets/images/avatareditor/air/outfit-button-pressed.png'); }
 
-.octane-avatar-editor-hotlook-bitmap {
+.volt-avatar-editor-hotlook-bitmap {
     position: absolute;
     left: 0;
     top: 0;
@@ -1081,7 +1081,7 @@
     pointer-events: none;
 }
 
-.octane-avatar-editor-effects-heading {
+.volt-avatar-editor-effects-heading {
     position: absolute;
     left: 23px;
     top: 120px;
@@ -1089,7 +1089,7 @@
     height: 35px;
 }
 
-.octane-avatar-editor-effects-heading > img {
+.volt-avatar-editor-effects-heading > img {
     position: absolute;
     left: 5px;
     top: 0;
@@ -1098,9 +1098,9 @@
     image-rendering: pixelated;
 }
 
-.octane-avatar-editor-effects-heading > span { position: absolute !important; left: 40px; top: 4px; }
+.volt-avatar-editor-effects-heading > span { position: absolute !important; left: 40px; top: 4px; }
 
-.octane-avatar-editor-effects-shop {
+.volt-avatar-editor-effects-shop {
     position: absolute;
     left: 399px;
     top: 122px;
@@ -1115,20 +1115,20 @@
     background: url('../../assets/images/avatareditor/effects-shop/default.png');
 }
 
-.octane-avatar-editor-effects-shop:hover { background-image: url('../../assets/images/avatareditor/effects-shop/hover.png'); }
-.octane-avatar-editor-effects-shop:active { background-image: url('../../assets/images/avatareditor/effects-shop/pressed.png'); }
-.octane-avatar-editor-effects-shop:disabled { background-image: url('../../assets/images/avatareditor/effects-shop/disabled.png'); }
-.octane-avatar-editor-effects-shop > span { flex: none; filter: invert(1); mix-blend-mode: screen; }
+.volt-avatar-editor-effects-shop:hover { background-image: url('../../assets/images/avatareditor/effects-shop/hover.png'); }
+.volt-avatar-editor-effects-shop:active { background-image: url('../../assets/images/avatareditor/effects-shop/pressed.png'); }
+.volt-avatar-editor-effects-shop:disabled { background-image: url('../../assets/images/avatareditor/effects-shop/disabled.png'); }
+.volt-avatar-editor-effects-shop > span { flex: none; filter: invert(1); mix-blend-mode: screen; }
 
-.octane-avatar-editor-effects-empty { position: absolute; left: 21px; top: 168px; }
-.octane-avatar-editor-effects-notification { position: absolute !important; left: 0; top: 30px; }
+.volt-avatar-editor-effects-empty { position: absolute; left: 21px; top: 168px; }
+.volt-avatar-editor-effects-notification { position: absolute !important; left: 0; top: 30px; }
 
-.octane-avatar-editor-effect-items { display: grid; grid-template-columns: repeat(6, 50px); gap: 0; }
-.octane-avatar-editor-effects-grid > .octane-classic-scroll-area { height: 100%; }
-.octane-avatar-editor-effect-item { display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.octane-avatar-editor-effect-item > img { pointer-events: none; }
+.volt-avatar-editor-effect-items { display: grid; grid-template-columns: repeat(6, 50px); gap: 0; }
+.volt-avatar-editor-effects-grid > .volt-classic-scroll-area { height: 100%; }
+.volt-avatar-editor-effect-item { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.volt-avatar-editor-effect-item > img { pointer-events: none; }
 
-.octane-avatar-editor .octane-avatar-editor-effect-item > .octane-avatar-editor-effect-amount {
+.volt-avatar-editor .volt-avatar-editor-effect-item > .volt-avatar-editor-effect-amount {
     position: absolute;
     left: 30px;
     top: 2px;
@@ -1141,9 +1141,9 @@
     justify-content: flex-start;
 }
 
-.octane-avatar-editor-effect-amount > span { margin-left: 2px; }
+.volt-avatar-editor-effect-amount > span { margin-left: 2px; }
 
-.octane-avatar-editor .octane-avatar-editor-effect-item > .octane-avatar-editor-effect-duration {
+.volt-avatar-editor .volt-avatar-editor-effect-item > .volt-avatar-editor-effect-duration {
     position: absolute;
     left: 4px;
     top: 41px;
@@ -1153,17 +1153,17 @@
     background: #000;
 }
 
-.octane-avatar-editor-effect-duration > div { height: 3px; background: #20bf20; }
-.octane-avatar-editor-effect-name { position: absolute; left: 351px; top: 400px; width: 120px; display: flex; justify-content: center; }
-.octane-avatar-editor-effect-activate { position: absolute; left: 21px; top: 443px; width: 300px; display: flex; justify-content: center; }
-.octane-avatar-editor-effect-time { position: absolute; left: 357px; top: 417px; width: 120px; height: 17px; display: flex; justify-content: center; }
-.octane-avatar-editor-effect-time-bar { position: absolute; left: 1px; top: 1px; width: 120px; height: 16px; background: #000; }
-.octane-avatar-editor-effect-time-bar > div { height: 16px; background: #20bf20; }
-.octane-avatar-editor-effect-time > span { mix-blend-mode: multiply; }
-.octane-avatar-editor-effect-time > .octane-avatar-editor-effect-time-ink { position: absolute !important; filter: invert(1) brightness(0.4); mix-blend-mode: plus-lighter; }
+.volt-avatar-editor-effect-duration > div { height: 3px; background: #20bf20; }
+.volt-avatar-editor-effect-name { position: absolute; left: 351px; top: 400px; width: 120px; display: flex; justify-content: center; }
+.volt-avatar-editor-effect-activate { position: absolute; left: 21px; top: 443px; width: 300px; display: flex; justify-content: center; }
+.volt-avatar-editor-effect-time { position: absolute; left: 357px; top: 417px; width: 120px; height: 17px; display: flex; justify-content: center; }
+.volt-avatar-editor-effect-time-bar { position: absolute; left: 1px; top: 1px; width: 120px; height: 16px; background: #000; }
+.volt-avatar-editor-effect-time-bar > div { height: 16px; background: #20bf20; }
+.volt-avatar-editor-effect-time > span { mix-blend-mode: multiply; }
+.volt-avatar-editor-effect-time > .volt-avatar-editor-effect-time-ink { position: absolute !important; filter: invert(1) brightness(0.4); mix-blend-mode: plus-lighter; }
 
-.octane-avatar-editor-effect-preview { position: relative; width: 125px; height: 210px; }
-.octane-avatar-editor-effect-preview > div {
+.volt-avatar-editor-effect-preview { position: relative; width: 125px; height: 210px; }
+.volt-avatar-editor-effect-preview > div {
     position: absolute !important;
     left: -65px;
     top: -30px;

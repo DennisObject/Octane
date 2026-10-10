@@ -80,7 +80,7 @@ export const GroupText: FC<GroupTextProps> = ({
     };
 
     return (
-        <div ref={textRef} className={`octane-group-native__text${height === undefined ? '' : ' is-clipped'} ${className}`} style={style} onClick={onClick}>
+        <div ref={textRef} className={`volt-group-native__text${height === undefined ? '' : ' is-clipped'} ${className}`} style={style} onClick={onClick}>
             <NativeText
                 background={blend === 'multiply' ? 0xffffff : blend === 'screen' ? 0x000000 : background}
                 leading={leading}
@@ -109,7 +109,7 @@ interface GroupBoxProps {
 
 /** border style 0 (white, or tinted 0xffc300 / 0xcc0000 / 0xaaaaaa), 5 (outline), or style 3 (slot) white or tinted 0xe9e9e1 / 0xbebba5. */
 export const GroupBox: FC<GroupBoxProps> = ({ kind, x, y, width, height, className = '', onClick, children }) => (
-    <div className={`octane-group-native__box is-${kind} ${className}`} style={{ left: x, top: y, width, height }} onClick={onClick}>
+    <div className={`volt-group-native__box is-${kind} ${className}`} style={{ left: x, top: y, width, height }} onClick={onClick}>
         {children}
     </div>
 );
@@ -129,7 +129,7 @@ interface GroupButtonProps {
 /** button_thick, style 3 (habbo_skin_button_shiny_thick). */
 export const GroupButton: FC<GroupButtonProps> = ({ label, x, y, width, height, disabled = false, labelShift = 0, onClick }) => (
     <button
-        className="octane-group-native__button"
+        className="volt-group-native__button"
         disabled={disabled}
         style={{ left: x, top: y, width, height, paddingLeft: labelShift * 2 }}
         type="button"
@@ -141,9 +141,9 @@ export const GroupButton: FC<GroupButtonProps> = ({ label, x, y, width, height, 
 
 /** group_guild_color_btm tinted with the guild colour, group_guild_color_top drawn over it. */
 export const GroupSwatch: FC<{ color: string; x: number; y: number }> = ({ color, x, y }) => (
-    <div className="octane-group-native__swatch" style={{ left: x, top: y, '--group-color': '#' + color } as CSSProperties}>
+    <div className="volt-group-native__swatch" style={{ left: x, top: y, '--group-color': '#' + color } as CSSProperties}>
         <img alt="" draggable={false} src={guildColorBottom} />
-        <span className="octane-group-native__swatch-fill" />
+        <span className="volt-group-native__swatch-fill" />
     </div>
 );
 
@@ -205,7 +205,7 @@ export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y,
     const showRaster = !isEditing && rasterFits && value.length > 0;
     const inputProps = {
         'aria-label': label,
-        className: 'octane-group-native__input' + (showRaster ? ' is-raster' : ''),
+        className: 'volt-group-native__input' + (showRaster ? ' is-raster' : ''),
         maxLength,
         style: plain ? { fontSize, lineHeight: Math.round(fontSize * 1.25) + 'px', paddingLeft: inset, paddingRight: inset } : undefined,
         value,
@@ -214,13 +214,13 @@ export const GroupInput: FC<GroupInputProps> = ({ label, value, maxLength, x, y,
     };
 
     return (
-        <div className={`octane-group-native__field${multiline ? ' is-multiline' : ''}${plain ? ' is-plain' : ''}${plain && value.length === 0 ? ' is-empty' : ''}`} style={{ left: x, top: y, width, height }}>
+        <div className={`volt-group-native__field${multiline ? ' is-multiline' : ''}${plain ? ' is-plain' : ''}${plain && value.length === 0 ? ' is-empty' : ''}`} style={{ left: x, top: y, width, height }}>
             {multiline ? (
                 <textarea {...inputProps} onChange={(event) => onChange(event.target.value)} />
             ) : (
                 <input {...inputProps} type="text" onChange={(event) => onChange(event.target.value)} />
             )}
-            <div ref={overlayRef} aria-hidden="true" className={`octane-group-native__field-text${showRaster ? '' : ' is-hidden'}`} style={plain ? { top: 0, left: inset - 1 } : undefined}>
+            <div ref={overlayRef} aria-hidden="true" className={`volt-group-native__field-text${showRaster ? '' : ' is-hidden'}`} style={plain ? { top: 0, left: inset - 1 } : undefined}>
                 <NativeText background={0xffffff} maxWidth={multiline ? width - (plain ? 2 * (inset - 1) : 0) : undefined} overrides={flatText(fontSize)} text={value} textStyle="u_regular" />
             </div>
         </div>

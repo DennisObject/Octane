@@ -1,4 +1,4 @@
-import type { IWiredVariableHolder } from '@octane/renderer';
+import type { IWiredVariableHolder } from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import {
     EXPLORER_SORT_OPTIONS,

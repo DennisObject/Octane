@@ -12,7 +12,7 @@ import {
     validateExplorerConnect,
     WebApiVariable
 } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { VariablesExplorerPrefill } from '../../state/variablesExplorer';
 
 export interface VariablesExplorerConnectViewProps {
@@ -80,7 +80,7 @@ export const VariablesExplorerConnectView: FC<VariablesExplorerConnectViewProps>
         ) : null;
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[380px] max-w-[380px]"
             theme="primary-slim"
             uniqueKey="variables-explorer"
@@ -88,8 +88,8 @@ export const VariablesExplorerConnectView: FC<VariablesExplorerConnectViewProps>
             offsetLeft={120}
             offsetTop={60}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.variables_explorer.title', 'Variables Explorer')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3" overflow="auto">
+            <VoltCardHeaderView headerText={localizeWithFallback('wiredmenu.variables_explorer.title', 'Variables Explorer')} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3" overflow="auto">
                 <form
                     className="rounded border border-[#c8c2b2] bg-white p-4 flex flex-col gap-3"
                     noValidate
@@ -179,7 +179,7 @@ export const VariablesExplorerConnectView: FC<VariablesExplorerConnectViewProps>
                         {localizeWithFallback('wiredmenu.variables_explorer.open', 'Open explorer')}
                     </Button>
                 </form>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

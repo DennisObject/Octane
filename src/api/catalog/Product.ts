@@ -1,5 +1,5 @@
-import { GetRoomEngine, GetSessionDataManager, IFurnitureData, IObjectData, IProductData } from '@octane/renderer';
-import { GetConfigurationValue } from '../octane';
+import { GetRoomEngine, GetSessionDataManager, IFurnitureData, IObjectData, IProductData } from '@volt/renderer';
+import { GetConfigurationValue } from '../volt';
 import { GetPixelEffectIcon, GetSubscriptionProductIcon } from './CatalogUtilities';
 import { IProduct } from './IProduct';
 import { IPurchasableOffer } from './IPurchasableOffer';

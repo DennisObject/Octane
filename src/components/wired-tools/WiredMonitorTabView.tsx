@@ -42,7 +42,7 @@ export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
                 <WiredMenuItem h={89} w={197} x={5} y={5}>
                     <ClassicScrollAreaView className="size-full" scrollStep={18}>
                         {monitorStats.map((stat) => (
-                            <div key={stat.label} className="octane-wired-menu__text octane-wired-menu__stat">
+                            <div key={stat.label} className="volt-wired-menu__text volt-wired-menu__stat">
                                 {stat.label}
                                 {stat.value && (
                                     <>
@@ -55,7 +55,7 @@ export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
                     </ClassicScrollAreaView>
                 </WiredMenuItem>
             </WiredMenuPanel>
-            <WiredMenuItem className="octane-wired-menu__monitor-image" h={145} w={256} x={230} y={4}>
+            <WiredMenuItem className="volt-wired-menu__monitor-image" h={145} w={256} x={230} y={4}>
                 <img alt="" draggable={false} src={panicking ? monitorElementTwo : monitorElementOne} />
             </WiredMenuItem>
             <WiredMenuTitle h={19} w={106} x={14} y={152}>
@@ -81,7 +81,7 @@ export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
                 {localizeWithFallback('wiredmenu.monitor.log_overview', 'View full logs')}
             </WiredMenuButton>
             {/* loading_view: 500x382 over the tab body, 0x99e9e9e1, swallowing input. */}
-            {loading && <WiredMenuItem className="octane-wired-menu__loading" h={382} w={500} x={0} y={0} />}
+            {loading && <WiredMenuItem className="volt-wired-menu__loading" h={382} w={500} x={0} y={0} />}
         </>
     );
 };

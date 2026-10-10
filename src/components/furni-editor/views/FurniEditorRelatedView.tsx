@@ -15,12 +15,12 @@ export const FurniEditorRelatedView: FC<FurniEditorRelatedViewProps> = ({ duplic
     <>
         {duplicates.length > 0 && (
             <StaffSection title={furniEditorText('furni.editor.related.duplicates', { count: duplicates.length })}>
-                <p className="octane-furni-editor-warning">{LocalizeText('furni.editor.related.duplicates.hint')}</p>
-                <div className="octane-staff-list">
+                <p className="volt-furni-editor-warning">{LocalizeText('furni.editor.related.duplicates.hint')}</p>
+                <div className="volt-staff-list">
                     {duplicates.map((row) => (
-                        <button key={row.id} className="octane-staff-list-row" type="button" onClick={() => onOpen(row.id)}>
-                            <span className="octane-furni-editor-grow">{row.itemName}</span>
-                            <span className="octane-staff-muted">{furniEditorText('furni.editor.related.ids', { id: row.id, sprite: row.spriteId })}</span>
+                        <button key={row.id} className="volt-staff-list-row" type="button" onClick={() => onOpen(row.id)}>
+                            <span className="volt-furni-editor-grow">{row.itemName}</span>
+                            <span className="volt-staff-muted">{furniEditorText('furni.editor.related.ids', { id: row.id, sprite: row.spriteId })}</span>
                         </button>
                     ))}
                 </div>
@@ -28,15 +28,15 @@ export const FurniEditorRelatedView: FC<FurniEditorRelatedViewProps> = ({ duplic
         )}
         {siblings.length > 0 && (
             <StaffSection title={furniEditorText('furni.editor.related.siblings', { count: siblings.length })}>
-                <p className="octane-staff-muted">{LocalizeText('furni.editor.related.siblings.hint')}</p>
-                <div className="octane-staff-list">
+                <p className="volt-staff-muted">{LocalizeText('furni.editor.related.siblings.hint')}</p>
+                <div className="volt-staff-list">
                     {siblings.map((row) => (
-                        <button key={row.id} className="octane-staff-list-row" type="button" onClick={() => onOpen(row.id)}>
-                            <span className="octane-furni-editor-grow">{row.itemName}</span>
-                            <span className="octane-staff-muted">
+                        <button key={row.id} className="volt-staff-list-row" type="button" onClick={() => onOpen(row.id)}>
+                            <span className="volt-furni-editor-grow">{row.itemName}</span>
+                            <span className="volt-staff-muted">
                                 {furniEditorText('furni.editor.preview.footprint', { width: row.width, length: row.length })}
                             </span>
-                            <span className="octane-staff-muted">{row.interactionType || LocalizeText('furni.editor.interaction.none')}</span>
+                            <span className="volt-staff-muted">{row.interactionType || LocalizeText('furni.editor.interaction.none')}</span>
                         </button>
                     ))}
                 </div>

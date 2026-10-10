@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@octane/renderer';
+import { RoomObjectCategory } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { AddAnimationTickerCallback, GetRoomObjectBounds, GetRoomObjectScreenLocation, SnowWarArenaPlayerName, SNOWWAR_ROOM_ID } from '../../../../api';
 

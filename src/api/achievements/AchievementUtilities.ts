@@ -1,5 +1,5 @@
-import { AchievementData, GetLocalizationManager } from '@octane/renderer';
-import { GetConfigurationValue, GetOptionalConfigurationValue } from '../octane';
+import { AchievementData, GetLocalizationManager } from '@volt/renderer';
+import { GetConfigurationValue, GetOptionalConfigurationValue } from '../volt';
 import { getQuestingImageUrl } from '../quests/QuestUtilities';
 import { LocalizeText } from '../utils/LocalizeText';
 import { IAchievementCategory } from './IAchievementCategory';

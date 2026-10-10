@@ -75,7 +75,7 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                         dispatch({ type: 'APPLY_BRUSH_TO_SELECTION', source: 'local' });
                     }}
                 >
-                    <span className={`octane-icon ${state.brush.action === 'UNSET' ? 'icon-set-deselect' : 'icon-set-select'}`} />
+                    <span className={`volt-icon ${state.brush.action === 'UNSET' ? 'icon-set-deselect' : 'icon-set-select'}`} />
                 </Base>
                 <Base
                     pointer
@@ -88,7 +88,7 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                         dispatch({ type: 'SQUARE_SELECT_TOGGLE' });
                     }}
                 >
-                    <span className="octane-icon icon-set-squaresselect" />
+                    <span className="volt-icon icon-set-squaresselect" />
                 </Base>
                 {setPanMode && (
                     <Base
@@ -99,7 +99,7 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
                         className={`fp-tool is-extra ${panMode ? 'is-active' : ''}`}
                         onClick={() => setPanMode(!panMode)}
                     >
-                        <span className="octane-icon icon-hand-mode" />
+                        <span className="volt-icon icon-hand-mode" />
                     </Base>
                 )}
                 {(onUndo || onRedo) && (

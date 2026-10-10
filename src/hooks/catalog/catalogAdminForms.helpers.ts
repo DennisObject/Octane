@@ -1,9 +1,9 @@
-import type { CatalogAdminOfferDetailsMessageParser, CatalogAdminPageDetailsMessageParser } from '@octane/renderer';
+import type { CatalogAdminOfferDetailsMessageParser, CatalogAdminPageDetailsMessageParser } from '@volt/renderer';
 import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
 import type { IProduct } from '../../api/catalog/IProduct';
 import type { IPurchasableOffer } from '../../api/catalog/IPurchasableOffer';
 import { ProductTypeEnum } from '../../api/catalog/ProductTypeEnum';
-import { GetConfigurationValue } from '../../api/octane/GetConfigurationValue';
+import { GetConfigurationValue } from '../../api/volt/GetConfigurationValue';
 import { isCatalogStudioLayoutCode } from '../../components/catalog/views/page/layout/catalogLayoutRegistry';
 import type { CatalogAdminOfferForm, CatalogAdminPageForm } from './catalogAdmin.types';
 import type { CatalogStudioOfferSnapshot, CatalogStudioPageSnapshot } from './catalogStudio.types';

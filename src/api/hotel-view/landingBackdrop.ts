@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 
 // The artwork behind the hotel view. The login screen draws the same backdrop,
 // so landing and entering the hotel show one continuous scene.
@@ -19,7 +19,7 @@ export interface LandingSceneArtwork {
     drapeUrl: string;
 }
 
-const CACHE_KEY = 'octane.landing.backdrop';
+const CACHE_KEY = 'volt.landing.backdrop';
 const DEFAULT_COLOUR = '#6eadc8';
 const HOTEL_VIEW_COLOUR = '#27afcf';
 

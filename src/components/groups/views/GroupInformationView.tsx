@@ -1,4 +1,4 @@
-import { GroupConfirmMemberRemoveEvent, GroupDeleteComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@octane/renderer';
+import { GroupConfirmMemberRemoveEvent, GroupDeleteComposer, GetSessionDataManager, GroupInformationParser, GroupRemoveMemberComposer, CreateLinkEvent } from '@volt/renderer';
 import { FC, useEffect, useLayoutEffect, useRef } from 'react';
 import {
     CatalogPageName,
@@ -153,12 +153,12 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
     return (
         <>
             <GroupBox height={214} kind="cc" width={343} x={BASE_X} y={BASE_Y} />
-            <div className="octane-group-info__badge" style={{ left: BASE_X + 11, top: BASE_Y + 14 }}>
+            <div className="volt-group-info__badge" style={{ left: BASE_X + 11, top: BASE_Y + 14 }}>
                 <LayoutBadgeImageView badgeCode={groupInformation.badge} isGroup={true} scale={2} />
             </div>
-            <img alt="" className="octane-group-info__icon" draggable={false} src={TYPE_ICONS[groupInformation.type]} style={{ left: BASE_X + 107, top: BASE_Y + 10 }} title={LocalizeText(`group.edit.settings.type.${TYPE_HELP[groupInformation.type]}.help`)} />
+            <img alt="" className="volt-group-info__icon" draggable={false} src={TYPE_ICONS[groupInformation.type]} style={{ left: BASE_X + 107, top: BASE_Y + 10 }} title={LocalizeText(`group.edit.settings.type.${TYPE_HELP[groupInformation.type]}.help`)} />
             {groupInformation.canMembersDecorate && (
-                <img alt="" className="octane-group-info__icon" draggable={false} src={decorateIcon} style={{ left: BASE_X + 125, top: BASE_Y + 10 }} title={LocalizeText('group.memberscandecorate')} />
+                <img alt="" className="volt-group-info__icon" draggable={false} src={decorateIcon} style={{ left: BASE_X + 125, top: BASE_Y + 10 }} title={LocalizeText('group.memberscandecorate')} />
             )}
             <GroupText background={0xcccccc} height={17} overrides={flatText(12, { bold: true })} text={groupInformation.title} width={206} x={nameX} y={BASE_Y + 9} />
             <GroupText
@@ -210,7 +210,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 <>
                     <img
                         alt=""
-                        className="octane-group-info__icon"
+                        className="volt-group-info__icon"
                         draggable={false}
                         src={groupInformation.isAdmin ? adminIcon : memberIcon}
                         style={{ left: BASE_X + 40, top: BASE_Y + 183 }}
@@ -220,7 +220,7 @@ export const GroupInformationView: FC<GroupInformationViewProps> = (props) => {
                 </>
             )}
             {isRealOwner && (
-                <img alt="" className="octane-group-info__icon" draggable={false} src={ownerIcon} style={{ left: BASE_X + 40, top: BASE_Y + 183 }} title={LocalizeText('group.youareowner')} />
+                <img alt="" className="volt-group-info__icon" draggable={false} src={ownerIcon} style={{ left: BASE_X + 40, top: BASE_Y + 183 }} title={LocalizeText('group.youareowner')} />
             )}
             {isNotMember && groupInformation.type === GroupType.REGULAR && (
                 <GroupButton height={29} label={LocalizeText('group.join')} width={160} x={BASE_X + 99} y={BASE_Y + 179} onClick={() => TryJoinGroup(groupInformation.id)} />

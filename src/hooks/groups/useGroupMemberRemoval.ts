@@ -1,7 +1,7 @@
-import { GetCommunication, GetSessionDataManager, GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer, OctaneEventType } from '@octane/renderer';
+import { GetCommunication, GetSessionDataManager, GroupConfirmMemberRemoveEvent, GroupConfirmRemoveMemberComposer, VoltEventType } from '@volt/renderer';
 import { useCallback, useEffect, useState } from 'react';
 import { SendMessageComposer } from '../../api';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 
 /**
  * GroupConfirmMemberRemove is answered with only a userId and a furniture count: the reply names neither the group nor the request
@@ -111,7 +111,7 @@ export const useGroupMemberRemoval = (): GroupMemberRemovalActions =>
 export const useGroupMemberRemovalSink = () =>
 {
     // The server forgets the request with the socket: nothing is answered for it on the next connection.
-    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    useVoltEvent(VoltEventType.CONNECTION_STATE_CHANGED, () =>
     {
         if (GetCommunication().connection.connectionState.authenticated) return;
 

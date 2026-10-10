@@ -1,7 +1,7 @@
-import { NavigatorCategoryListModeComposer, NavigatorSearchCloseComposer, NavigatorSearchOpenComposer, NavigatorSettingsSaveComposer } from '@octane/renderer';
+import { NavigatorCategoryListModeComposer, NavigatorSearchCloseComposer, NavigatorSearchOpenComposer, NavigatorSettingsSaveComposer } from '@volt/renderer';
 import { SendMessageComposer } from '../../api';
 import { useRoomCreatorStore } from '../../components/navigator/views/navigatorRoomCreatorStore';
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 
 const QUICK_LINKS_STORAGE_KEY = 'nitro.navigator.air.quickLinksOpen';
 const COLLAPSED_RESULTS_STORAGE_KEY = 'nitro.navigator.air.collapsedResults';
@@ -124,7 +124,7 @@ export type NavigatorUiActions = {
     setResultViewMode(code: string, mode: number): void;
 };
 
-export const useNavigatorUiStore = createOctaneStore<NavigatorUiState & NavigatorUiActions>()((set) => ({
+export const useNavigatorUiStore = createVoltStore<NavigatorUiState & NavigatorUiActions>()((set) => ({
     isVisible: false,
     isReady: false,
     isCreatorOpen: false,

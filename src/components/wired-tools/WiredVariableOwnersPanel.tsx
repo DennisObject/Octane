@@ -1,7 +1,7 @@
-import { IWiredVariableHolder } from '@octane/renderer';
+import { IWiredVariableHolder } from '@volt/renderer';
 import { ReactNode } from 'react';
 import { localizeWithFallback } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { WiredPageRequests } from '../../hooks/wired-tools/useWiredPageRequests';
 import { VariablesElementType } from './WiredCreatorTools.types';
 import { WiredPagedTable, WiredTableCell, WiredTableColumn } from './WiredPagedTable';
@@ -147,7 +147,7 @@ export const WiredVariableOwnersPanel = (props: WiredVariableOwnersPanelProps) =
     };
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[860px] max-w-[860px] max-h-[620px]"
             theme="primary-slim"
             uniqueKey={uniqueKey}
@@ -155,8 +155,8 @@ export const WiredVariableOwnersPanel = (props: WiredVariableOwnersPanelProps) =
             offsetLeft={offsetLeft}
             offsetTop={offsetTop}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.variable_management.title', 'Variable Management')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
+            <VoltCardHeaderView headerText={localizeWithFallback('wiredmenu.variable_management.title', 'Variable Management')} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
                 <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
                     <div className="grow flex flex-col items-center text-center">
                         <Text>
@@ -206,7 +206,7 @@ export const WiredVariableOwnersPanel = (props: WiredVariableOwnersPanelProps) =
                     scrollResetKey={scrollResetKey}
                     bodyClassName="h-[360px]"
                 />
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

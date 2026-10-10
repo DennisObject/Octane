@@ -1,4 +1,4 @@
-import { IRoomCameraWidgetEffect, IRoomCameraWidgetSelectedEffect } from '@octane/renderer';
+import { IRoomCameraWidgetEffect, IRoomCameraWidgetSelectedEffect } from '@volt/renderer';
 import { FC } from 'react';
 import { CameraPictureThumbnail } from '../../../../../api';
 import { CameraWidgetEffectListItemView } from './CameraWidgetEffectListItemView';
@@ -16,7 +16,7 @@ export const CameraWidgetEffectListView: FC<CameraWidgetEffectListViewProps> = (
     const { myLevel = 0, selectedEffectName = null, selectedEffects = [], effects = [], thumbnails = [], processAction = null } = props;
 
     return (
-        <div className="octane-camera-effect-grid">
+        <div className="volt-camera-effect-grid">
             {effects &&
                 effects.length > 0 &&
                 effects.map((effect) => {

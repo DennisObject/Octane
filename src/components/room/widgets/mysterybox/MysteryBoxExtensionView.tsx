@@ -1,9 +1,9 @@
-import { MysteryBoxKeysUpdateEvent } from '@octane/renderer';
+import { MysteryBoxKeysUpdateEvent } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { ColorUtils, LocalizeText } from '../../../../api';
 import { Flex, LayoutGridItem, Text } from '../../../../common';
-import { useOctaneEvent } from '../../../../hooks';
+import { useVoltEvent } from '../../../../hooks';
 
 const colorMap = {
     purple: 9452386,
@@ -21,7 +21,7 @@ export const MysteryBoxExtensionView: FC<{}> = (props) => {
     const [keyColor, setKeyColor] = useState<string>('');
     const [boxColor, setBoxColor] = useState<string>('');
 
-    useOctaneEvent<MysteryBoxKeysUpdateEvent>(MysteryBoxKeysUpdateEvent.MYSTERY_BOX_KEYS_UPDATE, (event) => {
+    useVoltEvent<MysteryBoxKeysUpdateEvent>(MysteryBoxKeysUpdateEvent.MYSTERY_BOX_KEYS_UPDATE, (event) => {
         setKeyColor(event.keyColor);
         setBoxColor(event.boxColor);
     });

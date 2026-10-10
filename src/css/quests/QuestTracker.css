@@ -7,7 +7,7 @@
     flex-shrink: 0;
     pointer-events: auto;
     color: #ffffff;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     animation: air-quest-tracker-slide 0.7s cubic-bezier(0.1, 0.6, 0.3, 1);
 }
 

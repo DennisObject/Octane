@@ -47,7 +47,7 @@ export const WiredText: FC<WiredTextProps> = ({ text, bold = false, soft = false
 
     const native = (
         <NativeText
-            className={wrap ? '' : `octane-wired__native-text ${className}`}
+            className={wrap ? '' : `volt-wired__native-text ${className}`}
             background={background}
             maxWidth={wrap ? width : undefined}
             overrides={{ bold, underline, ...(soft ? { color: WIRED_SOFT_TEXT_COLOR } : null) }}
@@ -59,7 +59,7 @@ export const WiredText: FC<WiredTextProps> = ({ text, bold = false, soft = false
     if (!wrap) return native;
 
     return (
-        <span ref={boxRef} className={`octane-wired__native-text octane-wired__native-text--wrap ${className}`}>
+        <span ref={boxRef} className={`volt-wired__native-text volt-wired__native-text--wrap ${className}`}>
             {width !== undefined && native}
         </span>
     );

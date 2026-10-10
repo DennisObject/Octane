@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useState } from 'react';
 import { GetActivityPointName, GetConfigurationValue, LocalizeFormattedNumber, localizeWithFallback } from '../../../api';
 import { LayoutActivityPointIcon, UsesActivityPointIcon } from '../../../common';
@@ -91,7 +91,7 @@ export const SeasonalView: FC<SeasonalViewProps> = (props) => {
     return (
         <button
             type="button"
-            className="octane-purse-seasonal-currency"
+            className="volt-purse-seasonal-currency"
             style={{ '--seasonal-badge': badgeColor, '--seasonal-name': nameColor } as CSSProperties}
             onClick={() => {
                 if (page) CreateLinkEvent('catalog/open/' + page);

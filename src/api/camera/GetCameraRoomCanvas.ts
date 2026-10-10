@@ -1,4 +1,4 @@
-import { GetRoomEngine, GetRoomSessionManager } from '@octane/renderer';
+import { GetRoomEngine, GetRoomSessionManager } from '@volt/renderer';
 
 // The mouse-selected canvas can still be unset when the camera opens from the toolbar.
 export const GetCameraRoomCanvas = () => {

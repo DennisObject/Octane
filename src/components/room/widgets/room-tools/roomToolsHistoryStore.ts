@@ -1,4 +1,4 @@
-import { createOctaneStore } from '../../../../state/createOctaneStore';
+import { createVoltStore } from '../../../../state/createVoltStore';
 
 export interface RoomHistoryEntry
 {
@@ -73,7 +73,7 @@ export const getRoomHistoryList = (entries: RoomHistoryEntry[]): RoomHistoryEntr
 
 export const clearRoomToolsHistory = () => useRoomToolsHistoryStore.setState({ entries: [], index: -1 });
 
-export const useRoomToolsHistoryStore = createOctaneStore<RoomToolsHistoryState>()((set, get) => ({
+export const useRoomToolsHistoryStore = createVoltStore<RoomToolsHistoryState>()((set, get) => ({
     entries: [],
     index: -1,
     visit: (roomId, roomName) => set(state => visitRoomHistory(state.entries, state.index, roomId, roomName)),

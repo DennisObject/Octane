@@ -1,4 +1,4 @@
-import { FriendParser } from '@octane/renderer';
+import { FriendParser } from '@volt/renderer';
 
 export class MessengerFriend {
     public static RELATIONSHIP_NONE: number = 0;

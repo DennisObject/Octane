@@ -5,9 +5,9 @@ import {
     GetCatalogIndexComposer,
     GetCatalogPageComposer,
     NodeData
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { keepPreviousData, QueryClient, UseQueryResult } from '@tanstack/react-query';
-import { awaitOctaneResponse, useOctaneQuery } from '../../api/octane-query';
+import { awaitVoltResponse, useVoltQuery } from '../../api/volt-query';
 import {
     CatalogPage,
     GetFurnitureData,
@@ -22,7 +22,7 @@ import {
 } from '../../api';
 import { buildCatalogNodeTree, normalizeCatalogType } from './useCatalog.helpers';
 
-export const CATALOG_QUERY_ROOT = ['octane', 'catalog'] as const;
+export const CATALOG_QUERY_ROOT = ['volt', 'catalog'] as const;
 export const CATALOG_PAGE_TIMEOUT_MS = 10_000;
 export const CATALOG_PAGE_STALE_MS = 30_000;
 
@@ -157,7 +157,7 @@ const indexQueryConfig = (type: string) => ({
 });
 
 export const useCatalogIndexQuery = (type: string, enabled: boolean): UseQueryResult<CatalogIndexData> =>
-    useOctaneQuery<CatalogPagesListEvent, CatalogIndexData>({
+    useVoltQuery<CatalogPagesListEvent, CatalogIndexData>({
         ...indexQueryConfig(type),
         enabled,
         staleTime: Infinity,
@@ -165,7 +165,7 @@ export const useCatalogIndexQuery = (type: string, enabled: boolean): UseQueryRe
     });
 
 export const useCatalogPageQuery = (type: string, pageId: number, enabled: boolean): UseQueryResult<CatalogPageData> =>
-    useOctaneQuery<CatalogPageMessageEvent, CatalogPageData>({
+    useVoltQuery<CatalogPageMessageEvent, CatalogPageData>({
         key: catalogPageKey(type, pageId) as unknown as string[],
         request: () => new GetCatalogPageComposer(pageId, -1, type),
         parser: CatalogPageMessageEvent,
@@ -211,7 +211,7 @@ export const refetchCatalogPage = (type: string, pageId: number): void => {
 export const prefetchCatalogIndex = (type: string): void => {
     boundClient?.prefetchQuery({
         queryKey: catalogIndexKey(type),
-        queryFn: () => awaitOctaneResponse<CatalogPagesListEvent, CatalogIndexData>(indexQueryConfig(type)),
+        queryFn: () => awaitVoltResponse<CatalogPagesListEvent, CatalogIndexData>(indexQueryConfig(type)),
         staleTime: Infinity
     });
 };

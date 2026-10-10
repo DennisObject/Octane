@@ -116,21 +116,21 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                         y={5}
                         onClick={() => setInspectionType(element.key)}
                     >
-                        <img alt={element.label} className="octane-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
+                        <img alt={element.label} className="volt-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
                     </WiredMenuButton>
                 ))}
             </WiredMenuPanel>
             <WiredMenuTitle h={19} w={165} x={14} y={94}>
                 Preview:
             </WiredMenuTitle>
-            <WiredMenuPanel className="octane-wired-menu__preview" h={225} w={141} x={14} y={114}>
+            <WiredMenuPanel className="volt-wired-menu__preview" h={225} w={141} x={14} y={114}>
                 {inspectionType === 'furni' && selectedFurni && roomId !== null && (
-                    <div className="octane-wired-menu__preview-image">
+                    <div className="volt-wired-menu__preview-image">
                         <LayoutRoomObjectImageView category={selectedFurni.category} objectId={selectedFurni.objectId} roomId={roomId} />
                     </div>
                 )}
                 {inspectionType === 'user' && selectedUser && (
-                    <div className="octane-wired-menu__preview-image">
+                    <div className="volt-wired-menu__preview-image">
                         {selectedUser.kind === 'pet' ? (
                             <LayoutPetImageView direction={2} figure={selectedUser.figure} posture={selectedUser.posture} />
                         ) : (
@@ -139,12 +139,12 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                     </div>
                 )}
                 {inspectionType === 'global' && (
-                    <div className="octane-wired-menu__preview-image">
+                    <div className="volt-wired-menu__preview-image">
                         <img alt="" draggable={false} src={wiredGlobalPlaceholderImage} />
                     </div>
                 )}
                 {((inspectionType === 'furni' && !selectedFurni) || (inspectionType === 'user' && !selectedUser)) && (
-                    <div className="octane-wired-menu__text octane-wired-menu__preview-instruction">{previewPlaceholder}</div>
+                    <div className="volt-wired-menu__text volt-wired-menu__preview-instruction">{previewPlaceholder}</div>
                 )}
             </WiredMenuPanel>
             <WiredMenuCheckbox checked={keepSelected} h={18} label="Keep selected" w={197} x={14} y={348} onChange={onKeepSelectedChange} />
@@ -167,7 +167,7 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                             editingVariable === variable.key ? (
                                 <input
                                     autoFocus
-                                    className="octane-wired-menu__cell-input"
+                                    className="volt-wired-menu__cell-input"
                                     spellCheck={false}
                                     type="text"
                                     value={editingValue}
@@ -178,7 +178,7 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                                 />
                             ) : variable.editable ? (
                                 <button
-                                    className={`octane-wired-menu__link ${variable.valueClassName ?? ''}`}
+                                    className={`volt-wired-menu__link ${variable.valueClassName ?? ''}`}
                                     type="button"
                                     onClick={(event) => {
                                         event.stopPropagation();
@@ -203,14 +203,14 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                 Give variable
             </WiredMenuButton>
             {isInspectionGiveOpen && (
-                <WiredMenuItem className="octane-wired-menu__bubble" h={145} w={186} x={299} y={181}>
+                <WiredMenuItem className="volt-wired-menu__bubble" h={145} w={186} x={299} y={181}>
                     <WiredMenuTitle h={17} w={158} x={6} y={6}>
                         Variable:
                     </WiredMenuTitle>
                     <WiredMenuItem h={22} w={158} x={6} y={26}>
-                        <div className="octane-wired-menu__dropdown-wrap">
+                        <div className="volt-wired-menu__dropdown-wrap">
 <select
-                            className="octane-wired-menu__dropdown"
+                            className="volt-wired-menu__dropdown"
                             value={selectedInspectionGiveDefinition?.itemId ?? 0}
                             onChange={(event) => onSelectGiveVariable(Number(event.target.value))}
                         >
@@ -226,7 +226,7 @@ export const WiredInspectionTabView = (props: WiredInspectionTabViewProps) => {
                     <WiredMenuTitle h={17} w={158} x={6} y={52}>
                         Value:
                     </WiredMenuTitle>
-                    <WiredMenuItem className="octane-wired-menu__value-box" h={22} w={80} x={6} y={72}>
+                    <WiredMenuItem className="volt-wired-menu__value-box" h={22} w={80} x={6} y={72}>
                         <input
                             disabled={!selectedInspectionGiveDefinition?.hasValue}
                             type="number"

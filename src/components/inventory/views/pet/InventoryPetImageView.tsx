@@ -1,4 +1,4 @@
-import { GetRoomEngine, PetData, PetFigureData, Vector3d } from '@octane/renderer';
+import { GetRoomEngine, PetData, PetFigureData, Vector3d } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 
 export const InventoryPetImageView: FC<{ pet: PetData; preview?: boolean }> = ({ pet, preview = false }) => {

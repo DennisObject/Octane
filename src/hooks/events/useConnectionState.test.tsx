@@ -1,7 +1,7 @@
-import { GetCommunication, IConnectionStateSnapshot, OctaneEventType } from '@octane/renderer';
+import { GetCommunication, IConnectionStateSnapshot, VoltEventType } from '@volt/renderer';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMockEventDispatcher, mockEventDispatcher } from '../../octane-renderer.mock';
+import { clearMockEventDispatcher, mockEventDispatcher } from '../../volt-renderer.mock';
 import { useConnectionState } from './useConnectionState';
 
 describe('useConnectionState', () => {
@@ -24,7 +24,7 @@ describe('useConnectionState', () => {
         const { result } = renderHook(() => useConnectionState());
 
         snapshot = { ...snapshot, phase: 'reconnecting', reconnectAttempt: 2 };
-        act(() => mockEventDispatcher.dispatchEvent({ type: OctaneEventType.CONNECTION_STATE_CHANGED }));
+        act(() => mockEventDispatcher.dispatchEvent({ type: VoltEventType.CONNECTION_STATE_CHANGED }));
 
         expect(result.current).toBe(snapshot);
         expect(result.current.phase).toBe('reconnecting');

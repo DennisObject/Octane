@@ -36,18 +36,18 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutDefaultViewProps> = (prop
     const isBundleOffer = currentOffer?.pricingModel === 'pricing_model_bundle';
 
     return (
-        <div className={`octane-catalog-default-layout flex flex-col h-full gap-2 ${colourGrid ? 'has-colour-grid' : ''}`}>
-            <div className="octane-catalog-product-view">
+        <div className={`volt-catalog-default-layout flex flex-col h-full gap-2 ${colourGrid ? 'has-colour-grid' : ''}`}>
+            <div className="volt-catalog-product-view">
                 {currentOffer && (
-                    <div className="octane-catalog-offer-panel flex gap-0">
+                    <div className="volt-catalog-offer-panel flex gap-0">
                         <div
-                            className={`octane-catalog-offer-preview relative flex items-center justify-center ${currentOffer.product.productType === ProductTypeEnum.BADGE ? 'is-badge' : ''} ${isBundleOffer ? 'is-bundle' : ''}`}
+                            className={`volt-catalog-offer-preview relative flex items-center justify-center ${currentOffer.product.productType === ProductTypeEnum.BADGE ? 'is-badge' : ''} ${isBundleOffer ? 'is-bundle' : ''}`}
                             style={{ flex: '1 1 auto', minWidth: 0, width: '100%' }}
                         >
-                            <div className="octane-catalog-preview-details">
+                            <div className="volt-catalog-preview-details">
                                 <CatalogProductDetailsView offer={currentOffer} />
                             </div>
-                            <div className="octane-catalog-preview-limited">
+                            <div className="volt-catalog-preview-limited">
                                 <CatalogLimitedItemWidgetView />
                             </div>
                             {currentOffer.product.productType !== ProductTypeEnum.BADGE && (
@@ -63,7 +63,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutDefaultViewProps> = (prop
                 )}
 
                 {!currentOffer && (
-                    <div className={`octane-catalog-welcome flex items-center gap-3 ${hasTeaserText ? '' : 'justify-center is-image-only'}`}>
+                    <div className={`volt-catalog-welcome flex items-center gap-3 ${hasTeaserText ? '' : 'justify-center is-image-only'}`}>
                         {!!page.localization.getImage(1) && (
                             <img alt="" className="w-[70px] h-[70px] object-contain rounded shrink-0" src={page.localization.getImage(1)} />
                         )}
@@ -72,10 +72,10 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutDefaultViewProps> = (prop
                 )}
             </div>
 
-            <div className="octane-catalog-grid-shell flex-1 overflow-auto min-h-0">
+            <div className="volt-catalog-grid-shell flex-1 overflow-auto min-h-0">
                 {GetConfigurationValue('catalog.headers') && <CatalogHeaderView imageUrl={currentPage.localization.getImage(0)} />}
                 <CatalogItemGridWidgetView
-                    className={`octane-catalog-grid octane-catalog-grid-density-${density}`}
+                    className={`volt-catalog-grid volt-catalog-grid-density-${density}`}
                     isOfferActive={isGridOfferActive}
                     offers={gridOffers}
                     showPrices={showTilePrices}
@@ -86,20 +86,20 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutDefaultViewProps> = (prop
             {colourGrid}
 
             {showBundlePurchase && (
-                <div className="octane-catalog-price-row flex items-center justify-between gap-2">
-                    <div className="octane-catalog-spinner-slot">
+                <div className="volt-catalog-price-row flex items-center justify-between gap-2">
+                    <div className="volt-catalog-spinner-slot">
                         <CatalogSpinnerWidgetView />
                     </div>
-                    <div className="octane-catalog-total-price-slot">
-                        <span className="octane-catalog-total-price-label">{LocalizeText('catalog.bundlewidget.price')}</span>
-                        <CatalogTotalPriceWidget classNames={['octane-catalog-total-price-value']} />
+                    <div className="volt-catalog-total-price-slot">
+                        <span className="volt-catalog-total-price-label">{LocalizeText('catalog.bundlewidget.price')}</span>
+                        <CatalogTotalPriceWidget classNames={['volt-catalog-total-price-value']} />
                     </div>
                 </div>
             )}
 
-            <div className="octane-catalog-purchase-row flex items-start justify-end">
+            <div className="volt-catalog-purchase-row flex items-start justify-end">
                 {currentOffer ? (
-                    <div className="octane-catalog-offer-actions flex gap-1.5">
+                    <div className="volt-catalog-offer-actions flex gap-1.5">
                         <CatalogPurchaseWidgetView />
                     </div>
                 ) : (

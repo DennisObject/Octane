@@ -5,7 +5,7 @@ import {
     DailyTasksAddedMessageEvent,
     DailyTaskUpdatedMessageEvent,
     GetDailyTasksMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { localizeWithFallback, NotificationBubbleType, SendMessageComposer, sortDailyTasks } from '../../api';

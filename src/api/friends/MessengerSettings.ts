@@ -1,4 +1,4 @@
-import { FriendCategoryData } from '@octane/renderer';
+import { FriendCategoryData } from '@volt/renderer';
 
 export class MessengerSettings {
     constructor(

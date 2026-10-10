@@ -24,15 +24,15 @@ export const CatalogAdminHistoryView: FC = () => {
         );
 
     return (
-        <div className="octane-catalog-admin-history">
+        <div className="volt-catalog-admin-history">
             <StaffSection title={LocalizeText('catalog.admin.history')}>
-                <div className="octane-staff-list octane-catalog-admin-history-list">
+                <div className="volt-staff-list volt-catalog-admin-history-list">
                     {!history.length && <StaffEmpty>{LocalizeText('catalog.admin.history.empty')}</StaffEmpty>}
                     {history.map((group) => (
-                        <div key={group.id} className="octane-staff-list-row">
-                            <div className="octane-catalog-admin-grow octane-catalog-admin-history-main">
+                        <div key={group.id} className="volt-staff-list-row">
+                            <div className="volt-catalog-admin-grow volt-catalog-admin-history-main">
                                 <strong>{group.summary}</strong>
-                                <span className="octane-staff-muted">
+                                <span className="volt-staff-muted">
                                     {LocalizeText(
                                         'catalog.admin.history.meta',
                                         ['count', 'name'],

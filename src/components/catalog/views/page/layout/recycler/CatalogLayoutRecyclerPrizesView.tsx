@@ -2,7 +2,7 @@ import {
     GetRecyclerPrizesMessageComposer,
     RecyclerPrizeLevel,
     RecyclerPrizesMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetFurnitureData, LocalizeText, SendMessageComposer } from '../../../../../../api';
 import { LayoutFurniImageView } from '../../../../../../common';
@@ -21,28 +21,28 @@ export const CatalogLayoutRecyclerPrizesView: FC<CatalogLayoutProps> = () => {
     }, []);
 
     if (!levels) {
-        return <div className="octane-catalog-specialized-state" role="status">{LocalizeText('generic.loading')}</div>;
+        return <div className="volt-catalog-specialized-state" role="status">{LocalizeText('generic.loading')}</div>;
     }
 
     if (!levels.length) {
-        return <div className="octane-catalog-specialized-state" role="status">{LocalizeText('recycler.info.closed')}</div>;
+        return <div className="volt-catalog-specialized-state" role="status">{LocalizeText('recycler.info.closed')}</div>;
     }
 
     return (
-        <div className="octane-catalog-recycler-prizes">
+        <div className="volt-catalog-recycler-prizes">
             <h2>{LocalizeText('recycler.prizes.title')}</h2>
             {levels.map((level) => (
-                <section key={level.levelId} className="octane-catalog-recycler-prize-level">
+                <section key={level.levelId} className="volt-catalog-recycler-prize-level">
                     <header>
                         <strong>{LocalizeText(`recycler.prizes.category.${level.levelId}`)}</strong>
                         <span>{LocalizeText(`recycler.prizes.odds.${level.levelId}`, ['odds'], [level.chance.toString()])}</span>
                     </header>
-                    <div className="octane-catalog-recycler-prize-grid">
+                    <div className="volt-catalog-recycler-prize-grid">
                         {level.products.map((product, index) => {
                             const name = GetFurnitureData(product.productClassId, product.productType)?.name || product.name;
 
                             return (
-                                <div key={`${product.name}-${product.productClassId}-${index}`} className="octane-catalog-recycler-prize">
+                                <div key={`${product.name}-${product.productClassId}-${index}`} className="volt-catalog-recycler-prize">
                                     <LayoutFurniImageView productClassId={product.productClassId} productType={product.productType} />
                                     <span>{name}</span>
                                     {product.count > 1 && <small>x{product.count}</small>}

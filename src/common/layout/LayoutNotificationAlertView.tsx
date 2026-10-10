@@ -1,8 +1,8 @@
 import { FC, useEffect, useMemo, useRef } from 'react';
 import { NotificationAlertType } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, OctaneCardViewProps } from '../card';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView, VoltCardViewProps } from '../card';
 
-export interface LayoutNotificationAlertViewProps extends OctaneCardViewProps {
+export interface LayoutNotificationAlertViewProps extends VoltCardViewProps {
     title?: string;
     type?: string;
     /**
@@ -32,9 +32,9 @@ export const LayoutNotificationAlertView: FC<LayoutNotificationAlertViewProps> =
     }, [autoCloseSeconds]);
 
     const getClassNames = useMemo(() => {
-        const newClassNames: string[] = ['octane-alert'];
+        const newClassNames: string[] = ['volt-alert'];
 
-        newClassNames.push('octane-alert-' + type);
+        newClassNames.push('volt-alert-' + type);
 
         if (classNames.length) newClassNames.push(...classNames);
 
@@ -42,11 +42,11 @@ export const LayoutNotificationAlertView: FC<LayoutNotificationAlertViewProps> =
     }, [classNames, type]);
 
     return (
-        <OctaneCardView classNames={getClassNames} theme="primary-slim" {...rest}>
-            <OctaneCardHeaderView headerText={title} onCloseClick={onClose} />
-            <OctaneCardContentView grow className="text-black" gap={0} justifyContent="between" overflow="hidden">
+        <VoltCardView classNames={getClassNames} theme="primary-slim" {...rest}>
+            <VoltCardHeaderView headerText={title} onCloseClick={onClose} />
+            <VoltCardContentView grow className="text-black" gap={0} justifyContent="between" overflow="hidden">
                 {children}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

@@ -17,7 +17,7 @@ import {
 } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 import { WiredPlaceholderPreview } from './WiredPlaceholderPreview';
 
@@ -59,7 +59,7 @@ export const WiredExtraGlobalPlaceholderView: FC<{}> = () => {
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
                     <Text>{LocalizeText('wiredfurni.params.texts.placeholder_name')}</Text>
-                    <OctaneInput
+                    <VoltInput
                         maxLength={GLOBAL_PLACEHOLDER_NAME_MAX_LENGTH}
                         type="text"
                         value={form.name}
@@ -84,7 +84,7 @@ export const WiredExtraGlobalPlaceholderView: FC<{}> = () => {
                         <Text>{localizeWithFallback('wiredfurni.params.from_value', 'From a value')}</Text>
                     </label>
                     {form.mode === GLOBAL_PLACEHOLDER_FROM_VALUE && (
-                        <OctaneInput
+                        <VoltInput
                             maxLength={GLOBAL_PLACEHOLDER_VALUE_MAX_LENGTH}
                             type="text"
                             value={form.value}

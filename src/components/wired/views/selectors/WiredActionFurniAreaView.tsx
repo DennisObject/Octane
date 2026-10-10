@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomAreaSelectionManager } from '@octane/renderer';
+import { GetRoomEngine, RoomAreaSelectionManager } from '@volt/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { useWired } from '../../../../hooks';
@@ -107,7 +107,7 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
     return (
         <WiredSelectorBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: '385px' }}>
             <WiredSection title={LocalizeText('wiredfurni.params.area_selection')}>
-                <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">{LocalizeText('wiredfurni.params.area_selection.info')}</span>
+                <span className="volt-wired__text volt-wired__text--soft volt-wired__text--wrap">{LocalizeText('wiredfurni.params.area_selection.info')}</span>
                 <WiredButtonRow
                     buttons={[
                         { id: 'select', label: LocalizeText('wiredfurni.params.area_selection.select'), disabled: !isAreaActive || isSelecting, onClick: selectArea },

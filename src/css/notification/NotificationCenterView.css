@@ -1,4 +1,4 @@
-.octane-alert {
+.volt-alert {
     min-height: 150px;
     max-height: 350px;
 
@@ -12,30 +12,30 @@
         min-width: 250px;
     }
 
-    &.octane-alert-default,
-    &.octane-alert-motd {
+    &.volt-alert-default,
+    &.volt-alert-motd {
         width: 350px;
         .notification-text {
             min-width: auto;
         }
     }
 
-	&.octane-alert-credits {
+	&.volt-alert-credits {
         width: 370px;
         .notification-text {
             min-width: auto;
         }
     }
 
-    &.octane-alert-moderation,
-    &.octane-alert-alert {
+    &.volt-alert-moderation,
+    &.volt-alert-alert {
         width: 250px;
         .notification-text {
             min-width: 225px;
         }
     }
 
-    &.octane-alert-system {
+    &.volt-alert-system {
         width: 340px;
         max-width: 90vw;
         min-height: auto;
@@ -50,7 +50,7 @@
     /* Hotel event announcement. The box is a fixed 530x300 so that a one word
        message and a long one produce exactly the same window: the message is the
        only part that scrolls, and the button never moves. */
-    &.octane-alert-hotel-event {
+    &.volt-alert-hotel-event {
         width: 530px;
         height: 300px;
         min-height: 300px;
@@ -58,7 +58,7 @@
 
         animation: hotelEventPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-        .octane-card-content-shell {
+        .volt-card-content-shell {
             display: flex;
             flex-direction: column;
             /* The shell carries h-full from the card defaults, which inside a card
@@ -96,7 +96,7 @@
 
         .hotel-event-promo {
             width: 170px;
-            image-rendering: var(--octane-pixel-art, pixelated);
+            image-rendering: var(--volt-pixel-art, pixelated);
         }
 
         .hotel-event-avatar {
@@ -218,13 +218,13 @@
         }
     }
 
-    &.octane-alert-octane-info {
+    &.volt-alert-volt-info {
         width: 460px;
         min-height: 320px;
         max-height: 640px;
-        animation: octaneInfoPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: voltInfoPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-        .octane-info-hero {
+        .volt-info-hero {
             position: relative;
             display: flex;
             flex-direction: column;
@@ -241,7 +241,7 @@
             overflow: hidden;
         }
 
-        .octane-info-hero-stars {
+        .volt-info-hero-stars {
             position: absolute;
             inset: 0;
             background-image:
@@ -251,11 +251,11 @@
                 radial-gradient(1.5px 1.5px at 88% 78%, rgba(255, 255, 255, 0.75), transparent 60%),
                 radial-gradient(1px 1px at 12% 80%, rgba(255, 255, 255, 0.8), transparent 60%);
             opacity: 0.85;
-            animation: octaneInfoTwinkle 2.6s ease-in-out infinite alternate;
+            animation: voltInfoTwinkle 2.6s ease-in-out infinite alternate;
             pointer-events: none;
         }
 
-        .octane-info-version-badge {
+        .volt-info-version-badge {
             position: relative;
             display: inline-flex;
             align-items: center;
@@ -280,22 +280,22 @@
             max-width: 90%;
         }
 
-        .octane-info-version-spark {
+        .volt-info-version-spark {
             color: #fff;
             text-shadow: 0 0 6px rgba(255, 255, 200, 0.9);
-            animation: octaneInfoSpin 3s linear infinite;
+            animation: voltInfoSpin 3s linear infinite;
             display: inline-block;
         }
 
-        .octane-info-version-spark:last-child {
+        .volt-info-version-spark:last-child {
             animation-direction: reverse;
         }
 
-        .octane-info-content {
+        .volt-info-content {
             padding: 0 2px;
         }
 
-        .octane-info-avatar-wrap {
+        .volt-info-avatar-wrap {
             position: relative;
             width: 90px;
             display: flex;
@@ -305,26 +305,26 @@
             padding-top: 2px;
         }
 
-        .octane-info-avatar {
+        .volt-info-avatar {
             filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
-            animation: octaneInfoBob 2.6s ease-in-out infinite;
+            animation: voltInfoBob 2.6s ease-in-out infinite;
         }
 
-        .octane-info-avatar-shadow {
+        .volt-info-avatar-shadow {
             width: 60px;
             height: 8px;
             margin-top: -4px;
             background: radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
-            animation: octaneInfoShadowPulse 2.6s ease-in-out infinite;
+            animation: voltInfoShadowPulse 2.6s ease-in-out infinite;
         }
 
-        .octane-info-body {
+        .volt-info-body {
             font-family: Volter, Volter_Goldfish, "Ubuntu", sans-serif;
             color: #2f2f2f;
             padding-right: 4px;
         }
 
-        .octane-info-section {
+        .volt-info-section {
             background: linear-gradient(to bottom, #ffffff 0%, #eaf1fb 100%);
             border: 1px solid #6f8db5;
             border-radius: 6px;
@@ -336,7 +336,7 @@
             transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
 
-        .octane-info-section:hover {
+        .volt-info-section:hover {
             transform: translateY(-1px);
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.8),
@@ -344,7 +344,7 @@
                 0 0 0 1px rgba(110, 160, 230, 0.4);
         }
 
-        .octane-info-section-header {
+        .volt-info-section-header {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -357,34 +357,34 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
 
-        .octane-info-section-icon {
+        .volt-info-section-icon {
             font-size: 14px;
             filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4));
         }
 
-        .octane-info-section-hotel .octane-info-section-header {
+        .volt-info-section-hotel .volt-info-section-header {
             background: linear-gradient(180deg, #4fb3ff 0%, #1f6dc7 100%);
         }
 
-        .octane-info-section-server .octane-info-section-header {
+        .volt-info-section-server .volt-info-section-header {
             background: linear-gradient(180deg, #6bd66b 0%, #2a8a2a 100%);
         }
 
-        .octane-info-section-credits .octane-info-section-header {
+        .volt-info-section-credits .volt-info-section-header {
             background: linear-gradient(180deg, #ff9a44 0%, #d9591a 100%);
         }
 
-        .octane-info-section-generic .octane-info-section-header {
+        .volt-info-section-generic .volt-info-section-header {
             background: linear-gradient(180deg, #8da0bc 0%, #4b5d7a 100%);
         }
 
-        .octane-info-section-body {
+        .volt-info-section-body {
             padding: 6px 10px;
             color: #1f2f4a;
         }
 
-        .octane-info-stats-list,
-        .octane-info-credits-list {
+        .volt-info-stats-list,
+        .volt-info-credits-list {
             list-style: none;
             margin: 0;
             padding: 0;
@@ -393,7 +393,7 @@
             gap: 2px;
         }
 
-        .octane-info-stats-list li {
+        .volt-info-stats-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -402,18 +402,18 @@
             border-radius: 3px;
         }
 
-        .octane-info-stats-list li:nth-child(odd) {
+        .volt-info-stats-list li:nth-child(odd) {
             background: rgba(110, 160, 230, 0.08);
         }
 
-        .octane-info-stat-label {
+        .volt-info-stat-label {
             font-size: 12px;
             color: #4a5a76;
             font-weight: 500;
             flex-shrink: 0;
         }
 
-        .octane-info-stat-value {
+        .volt-info-stat-value {
             font-size: 12px;
             color: #1a3a6b;
             font-weight: 700;
@@ -426,7 +426,7 @@
             word-break: break-word;
         }
 
-        .octane-info-credits-list li {
+        .volt-info-credits-list li {
             display: flex;
             align-items: flex-start;
             gap: 6px;
@@ -438,18 +438,18 @@
             word-break: break-word;
         }
 
-        .octane-info-credits-list li:hover {
+        .volt-info-credits-list li:hover {
             background: rgba(255, 180, 80, 0.15);
         }
 
-        .octane-info-credit-star {
+        .volt-info-credit-star {
             color: #f0a318;
             text-shadow: 0 0 4px rgba(240, 163, 24, 0.6);
             font-size: 13px;
             flex-shrink: 0;
         }
 
-        .octane-info-footer {
+        .volt-info-footer {
             margin-top: 6px;
             padding-top: 8px;
             border-top: 1px dashed #b0b0b0;
@@ -458,11 +458,11 @@
             gap: 6px;
         }
 
-        .octane-info-actions {
+        .volt-info-actions {
             margin-top: 2px;
         }
 
-        .octane-info-report-btn {
+        .volt-info-report-btn {
             position: relative;
             overflow: hidden;
             background: linear-gradient(180deg, #ff6b6b 0%, #c92a2a 100%) !important;
@@ -475,7 +475,7 @@
             transition: transform 0.12s ease, box-shadow 0.12s ease;
         }
 
-        .octane-info-report-btn:hover {
+        .volt-info-report-btn:hover {
             transform: translateY(-1px);
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -484,11 +484,11 @@
                 0 0 18px rgba(255, 100, 100, 0.7);
         }
 
-        .octane-info-report-btn:active {
+        .volt-info-report-btn:active {
             transform: translateY(1px);
         }
 
-        .octane-info-report-btn::after {
+        .volt-info-report-btn::after {
             content: '';
             position: absolute;
             top: 0;
@@ -497,11 +497,11 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             transform: skewX(-20deg);
-            animation: octaneInfoShine 2.8s ease-in-out infinite;
+            animation: voltInfoShine 2.8s ease-in-out infinite;
         }
     }
 
-    &.octane-alert-furnidata {
+    &.volt-alert-furnidata {
         width: 400px;
         max-height: 520px;
 
@@ -658,38 +658,38 @@
     }
 }
 
-@keyframes octaneInfoPop {
+@keyframes voltInfoPop {
     0% { transform: scale(0.85); opacity: 0; }
     60% { transform: scale(1.04); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes octaneInfoTwinkle {
+@keyframes voltInfoTwinkle {
     0% { opacity: 0.4; }
     100% { opacity: 1; }
 }
 
-@keyframes octaneInfoSpin {
+@keyframes voltInfoSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-@keyframes octaneInfoBob {
+@keyframes voltInfoBob {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-3px); }
 }
 
-@keyframes octaneInfoShadowPulse {
+@keyframes voltInfoShadowPulse {
     0%, 100% { transform: scaleX(1); opacity: 0.55; }
     50% { transform: scaleX(0.8); opacity: 0.35; }
 }
 
-@keyframes octaneInfoShine {
+@keyframes voltInfoShine {
     0% { left: -120%; }
     60%, 100% { left: 140%; }
 }
 
-.octane-notification-bubble {
+.volt-notification-bubble {
     pointer-events: all;
     padding: 6px 5px;
     pointer-events: all;
@@ -710,19 +710,19 @@
     margin-top: -6px;
 }
 
-.octane-rightside-notifications {
+.volt-rightside-notifications {
     width: 100%;
     align-items: flex-end;
     gap: 4px;
     pointer-events: none;
 }
 
-.octane-rightside-notifications > * {
+.volt-rightside-notifications > * {
     margin-left: auto;
     pointer-events: auto;
 }
 
-.octane-swf-notification-bubble {
+.volt-swf-notification-bubble {
     width: 188px;
     max-width: 188px;
     min-height: 42px;
@@ -743,14 +743,14 @@
     text-shadow: 1px 1px 0 #000000;
 }
 
-.octane-swf-notification-bubble .w-\[50px\],
-.octane-swf-notification-bubble .h-\[50px\],
-.octane-swf-notification-bubble .bubble-image-container {
+.volt-swf-notification-bubble .w-\[50px\],
+.volt-swf-notification-bubble .h-\[50px\],
+.volt-swf-notification-bubble .bubble-image-container {
     width: 38px !important;
     height: 38px !important;
 }
 
-.octane-swf-notification-bubble img {
+.volt-swf-notification-bubble img {
     width: auto;
     height: auto;
     max-width: 38px;
@@ -758,8 +758,8 @@
     object-fit: contain;
 }
 
-.octane-swf-notification-bubble .btn,
-.octane-swf-notification-bubble button {
+.volt-swf-notification-bubble .btn,
+.volt-swf-notification-bubble button {
     min-height: 24px;
     padding: 0 8px;
     border: 3px solid transparent !important;
@@ -776,23 +776,23 @@
     text-shadow: none;
 }
 
-.octane-swf-notification-bubble .btn:hover,
-.octane-swf-notification-bubble button:hover {
+.volt-swf-notification-bubble .btn:hover,
+.volt-swf-notification-bubble button:hover {
     border-image-source: var(--habbo-skin-button-hover) !important;
 }
 
-.octane-friendonline-notification {
+.volt-friendonline-notification {
     position: relative;
     min-width: 86px;
     height: 58px;
     margin-left: auto;
     cursor: pointer;
     pointer-events: auto;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     user-select: none;
 }
 
-.octane-friendonline-notification__content {
+.volt-friendonline-notification__content {
     position: absolute;
     left: 0;
     top: 12px;
@@ -801,20 +801,20 @@
     overflow: hidden;
 }
 
-.octane-friendonline-notification__left,
-.octane-friendonline-notification__right {
+.volt-friendonline-notification__left,
+.volt-friendonline-notification__right {
     width: auto;
     height: auto;
     flex: 0 0 auto;
 }
 
-.octane-friendonline-notification__middle {
+.volt-friendonline-notification__middle {
     height: 34px;
     flex: 1 1 auto;
     background-repeat: repeat-x;
 }
 
-.octane-friendonline-notification__message {
+.volt-friendonline-notification__message {
     position: absolute;
     left: 8px;
     top: 6px;
@@ -830,21 +830,21 @@
     text-shadow: 0 1px 0 #000;
 }
 
-.octane-friendonline-notification__message span {
+.volt-friendonline-notification__message span {
     display: block;
     overflow: hidden;
     text-align: center;
     text-overflow: ellipsis;
 }
 
-.octane-friendonline-notification__message img {
+.volt-friendonline-notification__message img {
     width: auto;
     height: auto;
     margin-top: 1px;
     flex: 0 0 auto;
 }
 
-.octane-friendonline-notification__avatar {
+.volt-friendonline-notification__avatar {
     position: absolute;
     left: 33px;
     top: 3px;
@@ -852,8 +852,8 @@
     height: 53px;
 }
 
-.octane-friendonline-notification__circle-inner,
-.octane-friendonline-notification__circle {
+.volt-friendonline-notification__circle-inner,
+.volt-friendonline-notification__circle {
     position: absolute;
     inset: 0;
     width: auto;
@@ -861,7 +861,7 @@
     pointer-events: none;
 }
 
-.octane-friendonline-notification__head {
+.volt-friendonline-notification__head {
     position: absolute;
     left: 2px;
     top: 1px;
@@ -871,7 +871,7 @@
     border-radius: 50%;
 }
 
-.octane-friendonline-notification__head .avatar-image {
+.volt-friendonline-notification__head .avatar-image {
     width: 50px !important;
     height: 50px !important;
     background-size: 76px auto !important;
@@ -880,9 +880,9 @@
 }
 
 /* Command list produced by ":commands". NotificationDefaultAlertView tags the alert
-   with .octane-alert-command-list and renders one button per command; without these
+   with .volt-alert-command-list and renders one button per command; without these
    rules the buttons stay inline and several commands share a visual line. */
-.octane-alert.octane-alert-command-list {
+.volt-alert.volt-alert-command-list {
     width: 430px;
     max-height: 470px;
 }
@@ -1021,7 +1021,7 @@
 }
 
 /* Native v75 notification windows (simple_alert_xml, layout_notification_popup_xml, habbo_window_confirm_xml). Style 3 frame, Ubuntu text. */
-.octane-native-modal {
+.volt-native-modal {
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -1029,19 +1029,19 @@
     pointer-events: auto;
 }
 
-.octane-native-modal-slot {
+.volt-native-modal-slot {
     position: absolute;
     width: max-content;
 }
 
-.octane-native-modal-dim {
+.volt-native-modal-dim {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-alert,
-.octane-card-shell.octane-card-frame-3.octane-native-confirm {
+.volt-card-shell.volt-card-frame-3.volt-native-alert,
+.volt-card-shell.volt-card-frame-3.volt-native-confirm {
     position: relative;
     box-sizing: border-box;
     min-width: 0;
@@ -1057,39 +1057,39 @@
     text-align: left;
 }
 
-.octane-native-alert :is(button),
-.octane-native-confirm :is(button) {
+.volt-native-alert :is(button),
+.volt-native-confirm :is(button) {
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
     cursor: pointer;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-alert > .octane-card-header-shell .octane-card-title,
-.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+.volt-card-shell.volt-card-frame-3.volt-native-alert > .volt-card-header-shell .volt-card-title,
+.volt-card-shell.volt-card-frame-3.volt-native-confirm > .volt-card-header-shell .volt-card-title {
     top: 4px !important;
     letter-spacing: -0.2px;
     white-space: nowrap;
 }
 
 /* simple_alert_xml: content origin (1,30); list at (10,8); frame height is list height + 40 */
-.octane-card-shell.octane-card-frame-3.octane-native-alert.is-simple {
+.volt-card-shell.volt-card-frame-3.volt-native-alert.is-simple {
     width: 310px;
     padding: 38px 9px 2px 11px;
 }
 
 
-.octane-native-alert-list {
+.volt-native-alert-list {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 3px;
 }
 
-.octane-native-alert-row {
+.volt-native-alert-row {
     display: flex;
     align-items: flex-start;
 }
 
-.octane-native-alert-illustration {
+.volt-native-alert-illustration {
     flex: 0 0 auto;
     width: auto;
     height: auto;
@@ -1097,18 +1097,18 @@
     image-rendering: pixelated;
 }
 
-.octane-native-alert-top {
+.volt-native-alert-top {
     box-sizing: border-box;
     flex: 0 0 290px;
     width: 290px;
 }
 
-.octane-native-alert.has-image .octane-native-alert-top {
+.volt-native-alert.has-image .volt-native-alert-top {
     flex-basis: 291px;
     width: 291px;
 }
 
-.octane-native-alert-subtitle {
+.volt-native-alert-subtitle {
     height: 19px;
     color: #c30000;
     font-size: 14px;
@@ -1118,7 +1118,7 @@
     letter-spacing: 0.12px;
 }
 
-.octane-native-alert-message {
+.volt-native-alert-message {
     letter-spacing: 0.1px;
     line-height: 12px;
     position: relative;
@@ -1127,21 +1127,21 @@
     overflow-wrap: break-word;
 }
 
-.octane-native-alert-bottom {
+.volt-native-alert-bottom {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
 }
 
-.octane-native-alert-separator {
+.volt-native-alert-separator {
     width: 100%;
     height: 2px;
     margin-top: 11px;
     background: linear-gradient(#ccc 50%, #fff 50%);
 }
 
-.octane-native-button {
+.volt-native-button {
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
@@ -1163,15 +1163,15 @@
     image-rendering: pixelated;
 }
 
-.octane-native-button:hover {
+.volt-native-button:hover {
     border-image-source: var(--habbo-skin-shiny-hover);
 }
 
-.octane-native-button:active {
+.volt-native-button:active {
     border-image-source: var(--habbo-skin-shiny-pressed);
 }
 
-.octane-native-button.is-thick {
+.volt-native-button.is-thick {
     margin-left: 1px;
     padding: 0 7px 2px;
     border-image-source: var(--habbo-skin-shiny-thick);
@@ -1181,15 +1181,15 @@
     font-weight: 400;
 }
 
-.octane-native-button.is-thick:hover {
+.volt-native-button.is-thick:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover);
 }
 
-.octane-native-button.is-thick:active {
+.volt-native-button.is-thick:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed);
 }
 
-.octane-native-link {
+.volt-native-link {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -1202,7 +1202,7 @@
     text-decoration: underline;
 }
 
-.octane-native-alert-bottom .octane-native-link {
+.volt-native-alert-bottom .volt-native-link {
     font-size: 11px;
     line-height: 13px;
     width: 262px;
@@ -1211,7 +1211,7 @@
 }
 
 /* layout_notification_popup_xml: content origin (3,36); list at (3,2) min 46 high; message column at x=1, 293 wide; frame colour 0x67a3bf */
-.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup {
+.volt-card-shell.volt-card-frame-3.volt-native-alert.is-popup {
     width: max-content;
     min-width: 306px;
     padding: 38px 6px 3px 6px;
@@ -1219,7 +1219,7 @@
     line-height: 13px;
 }
 
-.octane-native-popup-tint {
+.volt-native-popup-tint {
     position: absolute;
     top: 1px;
     right: 2px;
@@ -1229,13 +1229,13 @@
     pointer-events: none;
 }
 
-.octane-native-popup-list {
+.volt-native-popup-list {
     position: relative;
     display: flex;
     align-items: flex-start;
 }
 
-.octane-native-popup-illustration {
+.volt-native-popup-illustration {
     flex: 0 0 auto;
     width: auto;
     height: auto;
@@ -1243,7 +1243,7 @@
     image-rendering: pixelated;
 }
 
-.octane-native-popup-column {
+.volt-native-popup-column {
     display: flex;
     flex: 0 0 293px;
     flex-direction: column;
@@ -1253,21 +1253,21 @@
 }
 
 /* the illustration replaces the 1px placeholder bitmap, so the list is one pixel narrower than image + column */
-.octane-native-popup-illustration + .octane-native-popup-column {
+.volt-native-popup-illustration + .volt-native-popup-column {
     margin-right: -1px;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-close-button {
+.volt-card-shell.volt-card-frame-3.volt-native-alert.is-popup > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-native-popup-column .octane-native-link {
+.volt-native-popup-column .volt-native-link {
     box-sizing: border-box;
     min-height: 26px;
     padding-bottom: 1px;
 }
 
-.octane-native-popup-column .octane-native-button {
+.volt-native-popup-column .volt-native-button {
     height: 30px;
     margin-top: 4px;
     margin-bottom: 5px;
@@ -1275,7 +1275,7 @@
     font-size: 12px;
 }
 
-.octane-native-popup-message {
+.volt-native-popup-message {
     line-height: 13.4px;
     position: relative;
     top: 2px;
@@ -1286,30 +1286,30 @@
 }
 
 /* the hidden link row still reserves its 13px in the native itemlist */
-.octane-native-popup-message:last-child {
+.volt-native-popup-message:last-child {
     margin-bottom: 12.5px;
 }
 
 /* habbo_window_confirm_xml: content origin (6,25); text (16,14) 253x72; cancel (20,102) 100x17; OK (196,98) 28 high */
-.octane-card-shell.octane-card-frame-3.octane-native-confirm {
+.volt-card-shell.volt-card-frame-3.volt-native-confirm {
     width: 300px;
     padding: 25px 6px 7px;
 }
 
-.octane-native-confirm-body {
+.volt-native-confirm-body {
     position: relative;
     box-sizing: border-box;
     width: 288px;
     padding: 14px 0 0;
 }
 
-.octane-native-confirm-body::after {
+.volt-native-confirm-body::after {
     content: "";
     display: block;
     height: 47px;
 }
 
-.octane-native-confirm-text {
+.volt-native-confirm-text {
     box-sizing: border-box;
     width: 253px;
     min-height: 72px;
@@ -1322,7 +1322,7 @@
     overflow-wrap: break-word;
 }
 
-.octane-native-confirm-cancel {
+.volt-native-confirm-cancel {
     position: absolute;
     bottom: 14px;
     left: 20px;
@@ -1330,7 +1330,7 @@
     height: 17px;
 }
 
-.octane-native-confirm-ok {
+.volt-native-confirm-ok {
     position: absolute;
     bottom: 7px;
     left: 195px;
@@ -1339,7 +1339,7 @@
 }
 
 /* motd_notification_xml: content origin (6,25); border (1,0) 420x160; list (5,6) 410x149; OK (200,168) 30x26 */
-.octane-native-motd .octane-native-motd-border {
+.volt-native-motd .volt-native-motd-border {
     position: absolute;
     left: 1px;
     top: 0;
@@ -1347,7 +1347,7 @@
     height: 160px;
 }
 
-.octane-native-motd-list {
+.volt-native-motd-list {
     position: absolute;
     left: 5px;
     top: 6px;
@@ -1359,7 +1359,7 @@
     scrollbar-width: thin;
 }
 
-.octane-native-motd-item {
+.volt-native-motd-item {
     box-sizing: border-box;
     width: 395px;
     padding: 8px 0 12px 9px;
@@ -1368,7 +1368,7 @@
     overflow-wrap: break-word;
 }
 
-.octane-native-motd .friends-dialog-close {
+.volt-native-motd .friends-dialog-close {
     top: 1px;
     right: 1px;
     width: 13px;
@@ -1376,11 +1376,11 @@
     background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'><rect width='13' height='13' fill='%23fff'/><rect x='1' y='1' width='11' height='11' fill='%23000'/><rect x='3' y='3' width='1' height='1' fill='%23fff'/><rect x='9' y='3' width='1' height='1' fill='%23fff'/><rect x='4' y='4' width='1' height='1' fill='%23fff'/><rect x='8' y='4' width='1' height='1' fill='%23fff'/><rect x='5' y='5' width='1' height='1' fill='%23fff'/><rect x='7' y='5' width='1' height='1' fill='%23fff'/><rect x='6' y='6' width='1' height='1' fill='%23fff'/><rect x='5' y='7' width='1' height='1' fill='%23fff'/><rect x='7' y='7' width='1' height='1' fill='%23fff'/><rect x='4' y='8' width='1' height='1' fill='%23fff'/><rect x='8' y='8' width='1' height='1' fill='%23fff'/><rect x='3' y='9' width='1' height='1' fill='%23fff'/><rect x='9' y='9' width='1' height='1' fill='%23fff'/></svg>") no-repeat;
 }
 
-.octane-native-motd .friends-dialog-close-skin {
+.volt-native-motd .friends-dialog-close-skin {
     display: none !important;
 }
 
-.octane-native-motd-ok {
+.volt-native-motd-ok {
     position: absolute;
     left: 200px;
     top: 168px;
@@ -1388,19 +1388,19 @@
     height: 26px;
 }
 
-.octane-native-motd .octane-native-motd-ok .friends-dialog-button {
+.volt-native-motd .volt-native-motd-ok .friends-dialog-button {
     left: 0;
 }
 
 /* layout_notification_xml: 190x66, config view height 70 per slot, 4 px apart, 5 px from the right edge */
-.octane-native-bubble-slot {
+.volt-native-bubble-slot {
     box-sizing: border-box;
     width: 190px;
     min-height: 70px;
     margin-right: 1px;
 }
 
-.octane-native-bubble {
+.volt-native-bubble {
     position: relative;
     box-sizing: border-box;
     width: 190px;
@@ -1413,7 +1413,7 @@
     user-select: none;
 }
 
-.octane-native-bubble-chrome {
+.volt-native-bubble-chrome {
     position: absolute;
     inset: 0;
     border: 6px solid transparent;
@@ -1426,7 +1426,7 @@
     pointer-events: none;
 }
 
-.octane-native-bubble-icon {
+.volt-native-bubble-icon {
     position: absolute;
     left: 8px;
     top: 8px;
@@ -1437,13 +1437,13 @@
     height: 50px;
 }
 
-.octane-native-bubble-icon img {
+.volt-native-bubble-icon img {
     max-width: 50px;
     max-height: 50px;
     object-fit: contain;
 }
 
-.octane-native-bubble-text {
+.volt-native-bubble-text {
     position: relative;
     box-sizing: border-box;
     width: 116px;
@@ -1454,7 +1454,7 @@
     overflow-wrap: break-word;
 }
 
-.octane-native-bubble-text.uses-native-text {
+.volt-native-bubble-text.uses-native-text {
     top: 8px;
     height: 50px;
     margin: 0 0 0 66px;
@@ -1464,7 +1464,7 @@
 }
 
 /* club_gift_notification_xml */
-.octane-native-club-gift {
+.volt-native-club-gift {
     position: relative;
     box-sizing: border-box;
     width: 192px;
@@ -1478,7 +1478,7 @@
     image-rendering: pixelated;
 }
 
-.octane-native-club-gift-chrome {
+.volt-native-club-gift-chrome {
     position: absolute;
     inset: 0;
     border: 7px solid transparent;
@@ -1490,7 +1490,7 @@
     pointer-events: none;
 }
 
-.octane-native-club-gift-icon {
+.volt-native-club-gift-icon {
     position: absolute;
     left: 6px;
     top: 7px;
@@ -1498,7 +1498,7 @@
     height: 16px;
 }
 
-.octane-native-club-gift-text {
+.volt-native-club-gift-text {
     position: absolute;
     left: 26px;
     top: 9px;
@@ -1509,7 +1509,7 @@
     letter-spacing: 0.2px;
 }
 
-.octane-native-club-gift-button {
+.volt-native-club-gift-button {
     position: absolute;
     right: 8px;
     top: 44px;
@@ -1530,15 +1530,15 @@
     cursor: pointer;
 }
 
-.octane-native-club-gift-button:hover {
+.volt-native-club-gift-button:hover {
     border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-hover.png");
 }
 
-.octane-native-club-gift-button:active {
+.volt-native-club-gift-button:active {
     border-image-source: url("../../assets/images/habbicons/slices/button-shiny-black-pressed.png");
 }
 
-.octane-native-club-gift-later {
+.volt-native-club-gift-later {
     position: absolute;
     letter-spacing: 0.2px;
     left: 11px;
@@ -1556,31 +1556,31 @@
     cursor: pointer;
 }
 
-.octane-native-club-gift-later:hover {
+.volt-native-club-gift-later:hover {
     color: #bae1f9;
 }
 
-.octane-native-motd .octane-native-motd-ok .friends-dialog-button span {
+.volt-native-motd .volt-native-motd-ok .friends-dialog-button span {
     position: relative;
     top: 1px;
     left: 1.5px;
 }
 
-.octane-native-motd .friends-dialog-title {
+.volt-native-motd .friends-dialog-title {
     padding-top: 2px;
     letter-spacing: 0.2px;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-alert.is-popup > .octane-card-header-shell .octane-card-title {
+.volt-card-shell.volt-card-frame-3.volt-native-alert.is-popup > .volt-card-header-shell .volt-card-title {
     letter-spacing: 0;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-confirm > .octane-card-header-shell .octane-card-title {
+.volt-card-shell.volt-card-frame-3.volt-native-confirm > .volt-card-header-shell .volt-card-title {
     letter-spacing: 0.2px;
 }
 
 /* NativeText already includes TextField's two-pixel glyph gutter. */
-.octane-native-alert-message.uses-native-text {
+.volt-native-alert-message.uses-native-text {
     letter-spacing: normal;
     line-height: 0;
     top: 0;
@@ -1588,19 +1588,19 @@
 }
 
 /* habbo_window_alert_xml: content origin (6,25); text (27,14) 210x57 min; thick Ok button (108,81) 50x24 */
-.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert {
+.volt-card-shell.volt-card-frame-3.volt-native-confirm.volt-native-window-alert {
     width: 278px;
     padding: 25px 6px 7px;
 }
 
-.octane-native-window-alert-body {
+.volt-native-window-alert-body {
     position: relative;
     box-sizing: border-box;
     width: 266px;
     padding: 14px 0 4px 27px;
 }
 
-.octane-native-window-alert-text {
+.volt-native-window-alert-text {
     box-sizing: border-box;
     width: 210px;
     min-height: 57px;
@@ -1610,7 +1610,7 @@
     overflow-wrap: break-word;
 }
 
-.octane-native-window-alert-ok.octane-native-button.is-thick {
+.volt-native-window-alert-ok.volt-native-button.is-thick {
     position: relative;
     display: block;
     width: 50px;
@@ -1622,7 +1622,7 @@
     -webkit-text-stroke: 0;
 }
 
-.octane-card-shell.octane-card-frame-3.octane-native-confirm.octane-native-window-alert > .octane-card-header-shell .octane-card-title {
+.volt-card-shell.volt-card-frame-3.volt-native-confirm.volt-native-window-alert > .volt-card-header-shell .volt-card-title {
     top: 3px !important;
     right: auto !important;
     left: -6px !important;
@@ -1634,11 +1634,11 @@
 }
 
 /* the header close button sits 3px further left than the shared frame-3 default */
-.octane-card-shell.octane-card-frame-3.octane-native-window-alert > .octane-card-header-shell .octane-card-close-button {
+.volt-card-shell.volt-card-frame-3.volt-native-window-alert > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-native-window-alert-ok-label {
+.volt-native-window-alert-ok-label {
     position: absolute;
     top: -2px;
     left: -4px;

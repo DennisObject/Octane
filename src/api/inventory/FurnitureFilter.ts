@@ -1,4 +1,4 @@
-import { GetSessionDataManager, IFurnitureData } from '@octane/renderer';
+import { GetSessionDataManager, IFurnitureData } from '@volt/renderer';
 import { LocalizeText } from '../utils';
 import { FurniCategory } from './FurniCategory';
 import { GroupItem } from './GroupItem';
@@ -150,7 +150,7 @@ const getDescription = (item: GroupItem): string => {
             break;
         case FurniCategory.TRAX_SONG:
             // AIR obtains song creator from music-controller metadata, which is
-            // not exposed by Octane GroupItem yet.
+            // not exposed by Volt GroupItem yet.
             return '';
         default:
             key = `${item.isWallItem ? 'wallItem' : 'roomItem'}.desc.${item.type}`;

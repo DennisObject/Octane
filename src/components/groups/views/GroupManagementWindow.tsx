@@ -11,7 +11,7 @@ import headerBadge from '../../../assets/images/groups/native/group_UI_badge.png
 import headerColors from '../../../assets/images/groups/native/group_UI_colors.png';
 import headerIdentity from '../../../assets/images/groups/native/group_UI_identity.png';
 import headerReady from '../../../assets/images/groups/native/group_UI_ready.png';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../common';
 import { GroupAlert, GroupAlertContext, GroupNativeAlertView } from './GroupNativeAlertView';
 import { flatText, GROUP_HEADER_SURFACE, GroupText, GroupWindowTitle } from './GroupNativeLayout';
 
@@ -59,26 +59,26 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
 
     return (
         <GroupAlertContext.Provider value={setAlert}>
-            <OctaneCardView
+            <VoltCardView
                 aria-label={LocalizeText('group.window.title')}
-                className="octane-group-native"
+                className="volt-group-native"
                 frameStyle={3}
                 isResizable={false}
                 role="dialog"
                 uniqueKey={uniqueKey}
             >
-                <OctaneCardHeaderView headerText="" onCloseClick={onClose} />
+                <VoltCardHeaderView headerText="" onCloseClick={onClose} />
                 <GroupWindowTitle title={LocalizeText('group.window.title')} width={392} />
-                <div className="octane-group-native__client">
-                    <div className="octane-group-native__header" />
+                <div className="volt-group-native__client">
+                    <div className="volt-group-native__header" />
                     {step > 0 && (
-                        <div className="octane-group-native__steps">
+                        <div className="volt-group-native__steps">
                             {STEPS.map(([x, width, inactive, active], index) =>
                             {
                                 const isActive = step === index + 1;
 
                                 return (
-                                    <div key={index} className={`octane-group-native__step-tab${isActive ? ' is-active' : ''}`} style={{ left: x, width }}>
+                                    <div key={index} className={`volt-group-native__step-tab${isActive ? ' is-active' : ''}`} style={{ left: x, width }}>
                                         <img alt="" draggable={false} src={isActive ? active : inactive} />
                                         <GroupText
                                             align="center"
@@ -92,7 +92,7 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                                         {index === 3 && (
                                             <img
                                                 alt=""
-                                                className="octane-group-native__credit"
+                                                className="volt-group-native__credit"
                                                 draggable={false}
                                                 src={creditIcon}
                                                 style={{ top: isActive ? 6 : 10 }}
@@ -105,7 +105,7 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                     )}
                     <img
                         alt=""
-                        className="octane-group-native__header-image"
+                        className="volt-group-native__header-image"
                         draggable={false}
                         src={HEADER_IMAGES[headerImageStep]}
                         style={{ top: isEditing ? 0 : 36 }}
@@ -132,7 +132,7 @@ export const GroupManagementWindow: FC<GroupManagementWindowProps> = ({
                     {tabs}
                     {children}
                 </div>
-            </OctaneCardView>
+            </VoltCardView>
             {alert && <GroupNativeAlertView alert={alert} onClose={() => setAlert(null)} />}
         </GroupAlertContext.Provider>
     );

@@ -18,19 +18,19 @@ export const FurniChestSearchBar: FC<{
     };
 
     return (
-        <div className="octane-chest__search">
+        <div className="volt-chest__search">
             {!draft && (
-                <span className="octane-chest__search-placeholder">{LocalizeText('catalog.search.title')}</span>
+                <span className="volt-chest__search-placeholder">{LocalizeText('catalog.search.title')}</span>
             )}
             <input
                 type="text"
-                className="octane-chest__search-input"
+                className="volt-chest__search-input"
                 value={draft}
                 onChange={(e) => onDraftChange(e.target.value)}
                 onKeyDown={onKeyDown}
             />
             {draft.length > 0 && (
-                <button type="button" className="octane-chest__search-clear" onClick={onClear} aria-label="Clear">
+                <button type="button" className="volt-chest__search-clear" onClick={onClear} aria-label="Clear">
                     ×
                 </button>
             )}

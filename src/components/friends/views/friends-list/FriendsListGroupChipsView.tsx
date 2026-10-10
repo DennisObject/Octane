@@ -1,4 +1,4 @@
-import { FriendCategoryData } from '@octane/renderer';
+import { FriendCategoryData } from '@volt/renderer';
 import { FC } from 'react';
 import { countFriendsByCategory, LocalizeText, MessengerFriend } from '../../../../api';
 

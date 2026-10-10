@@ -23,8 +23,8 @@ export const FurniEditorPaginationView: FC<FurniEditorPaginationViewProps> = ({ 
     const goTo = (target: number) => onPage(Math.min(Math.max(1, Math.trunc(target) || 1), totalPages));
 
     return (
-        <div className="octane-staff-row">
-            <span className="octane-staff-muted octane-furni-editor-grow">
+        <div className="volt-staff-row">
+            <span className="volt-staff-muted volt-furni-editor-grow">
                 {furniEditorText('furni.editor.search.total', { total: total.toLocaleString() })}
             </span>
             <Button disabled={page <= 1} title={LocalizeText('furni.editor.page.first')} variant="secondary" onClick={() => goTo(1)}>
@@ -35,7 +35,7 @@ export const FurniEditorPaginationView: FC<FurniEditorPaginationViewProps> = ({ 
             </Button>
             <input
                 aria-label={LocalizeText('furni.editor.page.number')}
-                className="octane-furni-editor-page-input"
+                className="volt-furni-editor-page-input"
                 inputMode="numeric"
                 type="text"
                 value={pageText}
@@ -44,7 +44,7 @@ export const FurniEditorPaginationView: FC<FurniEditorPaginationViewProps> = ({ 
                     if (event.key === 'Enter') goTo(Number(pageText));
                 }}
             />
-            <span className="octane-staff-muted">{furniEditorText('furni.editor.page.of', { pages: totalPages.toLocaleString() })}</span>
+            <span className="volt-staff-muted">{furniEditorText('furni.editor.page.of', { pages: totalPages.toLocaleString() })}</span>
             <Button disabled={page >= totalPages} title={LocalizeText('furni.editor.page.next')} variant="secondary" onClick={() => goTo(page + 1)}>
                 ›
             </Button>

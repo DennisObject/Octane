@@ -1,6 +1,6 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class CatalogPurchaseSoldOutEvent extends OctaneEvent {
+export class CatalogPurchaseSoldOutEvent extends VoltEvent {
     public static SOLD_OUT: string = 'CPSOE_SOLD_OUT';
 
     constructor() {

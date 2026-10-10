@@ -1,4 +1,4 @@
-import { ChooserSelectionFilter, GetRoomEngine, IRoomObjectSpriteVisualization, RoomObjectCategory } from '@octane/renderer';
+import { ChooserSelectionFilter, GetRoomEngine, IRoomObjectSpriteVisualization, RoomObjectCategory } from '@volt/renderer';
 
 export class chooserSelectionVisualizer {
     private static activeFilters: Map<string, ChooserSelectionFilter> = new Map();

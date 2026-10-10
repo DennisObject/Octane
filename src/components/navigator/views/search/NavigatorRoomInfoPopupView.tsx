@@ -1,4 +1,4 @@
-import { GetSessionDataManager, RoomSettingsComposer, UpdateHomeRoomMessageComposer } from '@octane/renderer';
+import { GetSessionDataManager, RoomSettingsComposer, UpdateHomeRoomMessageComposer } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useId, useState } from 'react';
 import { FriendlyTime, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, ReportType, SendMessageComposer } from '../../../../api';
 import nativeAtlas from '../../../../assets/images/navigator/air/room-info-native-atlas.png';
@@ -21,7 +21,7 @@ const BUBBLE_PIECES: { source: number[]; style: CSSProperties }[] = [
 ];
 
 const BubbleSkin = () => (
-    <div aria-hidden="true" className="octane-navigator-air__room-bubble-skin">
+    <div aria-hidden="true" className="volt-navigator-air__room-bubble-skin">
         {BUBBLE_PIECES.map(({ source, style }, index) => (
             <svg key={index} style={style} viewBox={source.join(' ')} preserveAspectRatio="none">
                 <image href={nativeAtlas} width={256} height={256} />
@@ -32,7 +32,7 @@ const BubbleSkin = () => (
 
 // Native style-2 colorless header: fixed six-pixel corners, source regions in the local atlas.
 const HeaderSkin = () => (
-    <svg aria-hidden="true" className="octane-navigator-air__room-popover-header-skin" width={345} height={125}>
+    <svg aria-hidden="true" className="volt-navigator-air__room-popover-header-skin" width={345} height={125}>
         {[
             { source: 0, position: 0, size: 6 },
             { source: 6, position: 6, size: 333 },
@@ -62,7 +62,7 @@ const HeaderSkin = () => (
 const EventSkin = () => {
     const tintId = useId();
     return (
-        <svg aria-hidden="true" className="octane-navigator-air__room-popover-event-skin" width={331} height={55}>
+        <svg aria-hidden="true" className="volt-navigator-air__room-popover-event-skin" width={331} height={55}>
             <defs>
                 <filter id={tintId} colorInterpolationFilters="sRGB">
                     <feColorMatrix type="matrix" values="0.945098039 0 0 0 0 0 0.654901961 0 0 0 0 0 0 0 0 0 0 0 1 0" />
@@ -145,30 +145,30 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
         <div
             role="dialog"
             aria-label={LocalizeText('navigator.room.info.popup.title')}
-            className="octane-navigator-air__room-bubble"
+            className="volt-navigator-air__room-bubble"
             style={bubbleStyle}
             onMouseEnter={() => useNavigatorRoomInfoPopupStore.getState().setHovered(true)}
             onMouseLeave={() => useNavigatorRoomInfoPopupStore.getState().setHovered(false)}
             onClick={(event) => event.stopPropagation()}
         >
             <BubbleSkin />
-            <div className="octane-navigator-air__room-bubble-content">
-                <div className="octane-navigator-air__room-popover-header">
+            <div className="volt-navigator-air__room-bubble-content">
+                <div className="volt-navigator-air__room-popover-header">
                     <HeaderSkin />
-                    <LayoutRoomThumbnailView className="octane-navigator-air__room-popover-thumbnail" customUrl={room.officialRoomPicRef} roomId={room.roomId}>
-                        {hasGroup && <LayoutBadgeImageView badgeCode={room.groupBadgeCode} className="octane-navigator-air__room-badge" isGroup={true} />}
+                    <LayoutRoomThumbnailView className="volt-navigator-air__room-popover-thumbnail" customUrl={room.officialRoomPicRef} roomId={room.roomId}>
+                        {hasGroup && <LayoutBadgeImageView badgeCode={room.groupBadgeCode} className="volt-navigator-air__room-badge" isGroup={true} />}
                     </LayoutRoomThumbnailView>
-                    <div className="octane-navigator-air__room-popover-copy">
-                        <div className="octane-navigator-air__room-popover-title">{room.roomName}</div>
-                        <div className="octane-navigator-air__room-popover-description">{room.description}</div>
+                    <div className="volt-navigator-air__room-popover-copy">
+                        <div className="volt-navigator-air__room-popover-title">{room.roomName}</div>
+                        <div className="volt-navigator-air__room-popover-description">{room.description}</div>
                     </div>
                 </div>
                 {(showOwner || hasGroup) && (
-                    <div className="octane-navigator-air__room-popover-owner-row">
+                    <div className="volt-navigator-air__room-popover-owner-row">
                         {showOwner && (
                             <button
                                 type="button"
-                                className="octane-navigator-air__room-owner"
+                                className="volt-navigator-air__room-owner"
                                 onClick={() => {
                                     GetUserProfile(room.ownerId);
                                     closePopup();
@@ -176,7 +176,7 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                             >
                                 <svg
                                     aria-hidden="true"
-                                    className="octane-navigator-air__room-owner-eye"
+                                    className="volt-navigator-air__room-owner-eye"
                                     width={15}
                                     height={13}
                                     viewBox="0 56 21 21"
@@ -190,20 +190,20 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         {hasGroup && (
                             <button
                                 type="button"
-                                className="octane-navigator-air__room-group"
+                                className="volt-navigator-air__room-group"
                                 onClick={() => {
                                     GetGroupInformation(room.habboGroupId);
                                     closePopup();
                                 }}
                             >
-                                <i className="octane-navigator-air__group" />
+                                <i className="volt-navigator-air__group" />
                                 <span>{room.groupName}</span>
                             </button>
                         )}
                     </div>
                 )}
-                <div className="octane-navigator-air__room-popover-details">
-                    <div className="octane-navigator-air__room-popover-properties">
+                <div className="volt-navigator-air__room-popover-details">
+                    <div className="volt-navigator-air__room-popover-properties">
                         <span className="is-label">{LocalizeText('navigator.roompopup.property.trading')}</span>
                         <span>{getTradeModeText(room.tradeMode)}</span>
                         {rankingEnabled && (
@@ -215,7 +215,7 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         <span className="is-label">{LocalizeText('navigator.roompopup.property.max_users')}</span>
                         <span>{room.maxUserCount}</span>
                     </div>
-                    <div className="octane-navigator-air__room-popover-actions">
+                    <div className="volt-navigator-air__room-popover-actions">
                         <button type="button" onClick={() => toggleFavourite()}>
                             <i className={classNames('icon icon-navigator-favorite-room', isFavourite ? 'active' : '')} />
                             <span>{LocalizeText('navigator.room.popup.room.info.favorite')}</span>
@@ -258,11 +258,11 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         )}
                     </div>
                 </div>
-                <div className="octane-navigator-air__room-popover-bottom">
-                    <div className="octane-navigator-air__room-popover-tag-group">
-                        <div className="octane-navigator-air__room-popover-tags">
+                <div className="volt-navigator-air__room-popover-bottom">
+                    <div className="volt-navigator-air__room-popover-tag-group">
+                        <div className="volt-navigator-air__room-popover-tags">
                             {room.tags?.map((tag, index) => (
-                                <button key={index} type="button" className="octane-navigator-air__tag" onClick={() => searchTag(tag)}>
+                                <button key={index} type="button" className="volt-navigator-air__tag" onClick={() => searchTag(tag)}>
                                     #{tag}
                                 </button>
                             ))}
@@ -270,14 +270,14 @@ export const NavigatorRoomInfoPopupView: FC<{}> = () => {
                         {/* Native group role/type/decorate metadata is unavailable in this facade. */}
                     </div>
                     {hasActiveRoomAd && (
-                        <div className="octane-navigator-air__room-popover-event">
+                        <div className="volt-navigator-air__room-popover-event">
                             <EventSkin />
-                            <i className="octane-navigator-air__room-popover-event-icon" aria-hidden="true" />
-                            <div className="octane-navigator-air__room-popover-event-copy">
-                                <span className="octane-navigator-air__room-popover-event-name">
+                            <i className="volt-navigator-air__room-popover-event-icon" aria-hidden="true" />
+                            <div className="volt-navigator-air__room-popover-event-copy">
+                                <span className="volt-navigator-air__room-popover-event-name">
                                     {LocalizeText('navigator.eventsettings.name')}: {room.roomAdName}
                                 </span>
-                                <span className="octane-navigator-air__room-popover-event-description">
+                                <span className="volt-navigator-air__room-popover-event-description">
                                     {LocalizeText('navigator.eventsettings.desc')}: {room.roomAdDescription}
                                     <br />
                                     {LocalizeText('roomad.event.expiration_time')} {FriendlyTime.format(room.roomAdExpiresInMin * 60)}

@@ -5,7 +5,7 @@ import {
     CatalogStudioSessionEvent,
     CatalogStudioUndoComposer,
     CatalogStudioUndoEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, ReactNode, useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react';
 import { SendMessageComposer } from '../../../../api';
 import { LocalizeText } from '../../../../api/utils/LocalizeText';

@@ -1,14 +1,14 @@
 import {
     AddLinkEventTracker,
     ILinkEventTracker,
-    OctaneSettingsEvent,
+    VoltSettingsEvent,
     RemoveLinkEventTracker,
     UserSettingsCameraFollowComposer,
     UserSettingsEvent,
     UserSettingsOnlineIndicatorComposer,
     UserSettingsRoomInvitesComposer,
     UserSettingsSoundComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { DispatchMainEvent, DispatchUiEvent, GetConfigurationValue, localizeWithFallback, SendMessageComposer } from '../../api';
 import { HabboDropMenuView } from '../../common/dropmenu/HabboDropMenuView';
@@ -43,7 +43,7 @@ const DropMenu: FC<{ label: string; left: number; top: number; width: number; va
 
 export const UserSettingsView: FC<{}> = () => {
     const [open, setOpen] = useState<Record<SettingsSection, boolean>>(CLOSED);
-    const [userSettings, setUserSettings] = useState<OctaneSettingsEvent>(null);
+    const [userSettings, setUserSettings] = useState<VoltSettingsEvent>(null);
     const [onlineIndicatorPreference, setOnlineIndicatorPreference] = useState<number>(null);
     const [disableWiredWhisper, setDisableWiredWhisper] = useState(false);
     const { chatPreferences, updateChatPreferences } = useChatPreferences();
@@ -90,7 +90,7 @@ export const UserSettingsView: FC<{}> = () => {
 
     useMessageEvent<UserSettingsEvent>(UserSettingsEvent, (event) => {
         const parser = event.getParser();
-        const settingsEvent = new OctaneSettingsEvent();
+        const settingsEvent = new VoltSettingsEvent();
 
         settingsEvent.volumeSystem = parser.volumeSystem;
         settingsEvent.volumeFurni = parser.volumeFurni;

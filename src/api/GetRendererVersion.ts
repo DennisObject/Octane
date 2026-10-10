@@ -1,3 +1,3 @@
-import { OctaneVersion } from '@octane/renderer';
+import { VoltVersion } from '@volt/renderer';
 
-export const GetRendererVersion = () => OctaneVersion.RENDERER_VERSION;
+export const GetRendererVersion = () => VoltVersion.RENDERER_VERSION;

@@ -112,7 +112,7 @@ export const FurniEditorView: FC = () => {
     return (
         <StaffWindow
             activeTab={shownTab}
-            className="octane-furni-editor"
+            className="volt-furni-editor"
             tabs={tabs}
             title={LocalizeText('furni.editor.title')}
             uniqueKey="furni-editor"
@@ -127,11 +127,11 @@ export const FurniEditorView: FC = () => {
                     onDismiss={notice && !pendingMutation ? clearNotice : undefined}
                 />
             )}
-            <div className={`octane-furni-editor-page ${shownTab === 'search' ? '' : 'is-hidden'}`}>
+            <div className={`volt-furni-editor-page ${shownTab === 'search' ? '' : 'is-hidden'}`}>
                 <FurniEditorSearchView onOpen={navigation.open} />
             </div>
             {detail && sheet.form && sheet.stored && (
-                <div className={`octane-furni-editor-page ${shownTab === 'search' ? 'is-hidden' : ''}`}>
+                <div className={`volt-furni-editor-page ${shownTab === 'search' ? 'is-hidden' : ''}`}>
                     <FurniEditorEditView
                         detail={detail}
                         draft={draft}

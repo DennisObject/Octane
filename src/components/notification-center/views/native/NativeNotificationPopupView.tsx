@@ -26,26 +26,26 @@ export const NativeNotificationPopupView: FC<NativeNotificationPopupViewProps> =
             <section
                 aria-label={title}
                 aria-modal="true"
-                className={`octane-alert octane-card-shell octane-card-frame-3 octane-native-alert is-popup`}
+                className={`volt-alert volt-card-shell volt-card-frame-3 volt-native-alert is-popup`}
                 role="dialog"
             >
-                <div aria-hidden="true" className="octane-native-popup-tint" />
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">{title}</span>
-                    <button aria-label={title} className="octane-card-close-button" type="button" onClick={onClose} />
+                <div aria-hidden="true" className="volt-native-popup-tint" />
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">{title}</span>
+                    <button aria-label={title} className="volt-card-close-button" type="button" onClick={onClose} />
                 </div>
-                <div className="octane-native-popup-list">
-                    {hasImage && <img alt="" className="octane-native-popup-illustration" src={imageUrl} onError={() => setImageFailed(true)} />}
-                    <div className="octane-native-popup-column">
-                        <div className="octane-native-popup-message" dangerouslySetInnerHTML={{ __html: SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')) }} />
+                <div className="volt-native-popup-list">
+                    {hasImage && <img alt="" className="volt-native-popup-illustration" src={imageUrl} onError={() => setImageFailed(true)} />}
+                    <div className="volt-native-popup-column">
+                        <div className="volt-native-popup-message" dangerouslySetInnerHTML={{ __html: SanitizeHtml(message.replace(/\r\n|\r|\n/g, '<br />')) }} />
                         {!!linkUrl && !isEvent && (
-                            <button className="octane-native-link" type="button" onClick={() => openNativeNotificationLink(linkUrl)}>
+                            <button className="volt-native-link" type="button" onClick={() => openNativeNotificationLink(linkUrl)}>
                                 {linkCaption}
                             </button>
                         )}
                         {!!linkUrl && isEvent && (
                             <button
-                                className="octane-native-button"
+                                className="volt-native-button"
                                 type="button"
                                 onClick={() => {
                                     openNativeNotificationLink(linkUrl);

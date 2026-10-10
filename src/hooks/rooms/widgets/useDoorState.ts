@@ -6,7 +6,7 @@ import {
     GetSessionDataManager,
     RoomDataParser,
     RoomDoorbellAcceptedEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { DoorStateType, GenericErrorCode } from '../../../api';

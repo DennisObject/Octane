@@ -1,7 +1,7 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText } from '../../../api';
-import { OctaneButton } from '../../../layout';
+import { VoltButton } from '../../../layout';
 
 export interface InventoryCategoryEmptyViewProps {
     title: string;
@@ -12,15 +12,15 @@ export const InventoryCategoryEmptyView: FC<InventoryCategoryEmptyViewProps> = (
     const { title = '', desc = '' } = props;
 
     return (
-        <div className="octane-inventory-empty">
-            <div className="octane-inventory-empty-image" aria-hidden="true" />
-            <div className="octane-inventory-empty-copy">
-                <div className="octane-inventory-empty-title">{title}</div>
-                <div className="octane-inventory-empty-desc">{desc}</div>
+        <div className="volt-inventory-empty">
+            <div className="volt-inventory-empty-image" aria-hidden="true" />
+            <div className="volt-inventory-empty-copy">
+                <div className="volt-inventory-empty-title">{title}</div>
+                <div className="volt-inventory-empty-desc">{desc}</div>
             </div>
-            <OctaneButton className="octane-inventory-empty-shop" onClick={() => CreateLinkEvent('catalog/toggle/normal')}>
+            <VoltButton className="volt-inventory-empty-shop" onClick={() => CreateLinkEvent('catalog/toggle/normal')}>
                 {LocalizeText('inventory.open.catalog')}
-            </OctaneButton>
+            </VoltButton>
         </div>
     );
 };

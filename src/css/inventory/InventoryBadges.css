@@ -1,19 +1,19 @@
 /* v75 badges tab: every box sits at the XML rect of its control inside the 468x261 content area; the filter bar
    above this block takes the first 25px, so y values below are the XML y minus 25. */
-.octane-inventory-badges {
+.volt-inventory-badges {
     position: relative;
     width: 468px;
     height: 100%;
     min-height: 0;
 }
 
-.octane-inventory-badges-main {
+.volt-inventory-badges-main {
     position: absolute;
     inset: 0;
 }
 
 /* inactive_items: scrollable_itemgrid_vertical (0,27) 328x143, 42px cells and 2px spacing. */
-.octane-inventory-badges-owned {
+.volt-inventory-badges-owned {
     position: absolute;
     left: 0;
     top: 2px;
@@ -21,7 +21,7 @@
     height: 143px;
 }
 
-.octane-inventory-badges-owned-grid {
+.volt-inventory-badges-owned-grid {
     display: grid;
     grid-template-columns: repeat(7, 42px);
     grid-auto-rows: 42px;
@@ -31,12 +31,12 @@
     overflow: hidden auto;
 }
 
-.octane-inventory-badge-cell {
+.volt-inventory-badge-cell {
     cursor: grab;
     flex: none;
 }
 
-.octane-inventory-badge-cell > div {
+.volt-inventory-badge-cell > div {
     position: absolute;
     inset: 1px;
     width: 40px !important;
@@ -47,15 +47,15 @@
     max-width: 40px;
     max-height: 40px;
     background-size: auto;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-inventory-badge-cell.is-dragging {
+.volt-inventory-badge-cell.is-dragging {
     opacity: .4;
 }
 
 /* item_grid_pages (0,170). */
-.octane-inventory-badges-pages {
+.volt-inventory-badges-pages {
     position: absolute;
     top: 143px;
     left: 0;
@@ -64,7 +64,7 @@
     height: 14px;
 }
 
-.octane-inventory-badges-pages button {
+.volt-inventory-badges-pages button {
     padding: 0;
     min-width: 8px;
     font-size: 9px;
@@ -72,24 +72,24 @@
     cursor: pointer;
 }
 
-.octane-inventory-badges-pages button.is-active {
+.volt-inventory-badges-pages button.is-active {
     color: #ff0000;
     text-decoration: underline;
 }
 
-.octane-inventory-badges-pages button:hover {
+.volt-inventory-badges-pages button:hover {
     color: #ff0000;
 }
 
 /* wearingTitle (330,32) 134x19 and active_items (335,58) 135x120. */
-.octane-inventory-badges-wearing {
+.volt-inventory-badges-wearing {
     position: absolute;
     left: 330px;
     top: 7px;
     width: 140px;
 }
 
-.octane-inventory-badges-wearing-title {
+.volt-inventory-badges-wearing-title {
     width: 134px;
     height: 19px;
     font-size: 12px;
@@ -98,7 +98,7 @@
     text-align: center;
 }
 
-.octane-inventory-badges-wearing-grid {
+.volt-inventory-badges-wearing-grid {
     display: grid;
     grid-template-columns: repeat(3, 42px);
     grid-auto-rows: 42px;
@@ -108,18 +108,18 @@
     margin-left: 5px;
 }
 
-.octane-inventory-badge-slot.is-empty {
+.volt-inventory-badge-slot.is-empty {
     width: 42px;
     height: 42px;
 }
 
-.octane-inventory-badge-slot.is-dragover,
-.octane-inventory-badges-owned.is-drop-remove {
+.volt-inventory-badge-slot.is-dragover,
+.volt-inventory-badges-owned.is-drop-remove {
     outline: 1px solid #418db0;
 }
 
 /* descriptionArea (0,184) 468x78. */
-.octane-inventory-badges-footer {
+.volt-inventory-badges-footer {
     position: absolute;
     left: 0;
     top: 159px;
@@ -131,7 +131,7 @@
 }
 
 /* badge_image (9,14) 50x50, centred. */
-.octane-inventory-badges-footer-image {
+.volt-inventory-badges-footer-image {
     position: absolute;
     left: 6px;
     top: 11px;
@@ -144,7 +144,7 @@
 }
 
 /* badgeDetailsList (63,3) 271x39: name, optional description, rarity tag. */
-.octane-inventory-badges-footer-details {
+.volt-inventory-badges-footer-details {
     position: absolute;
     left: 60px;
     top: 0;
@@ -155,7 +155,7 @@
     padding-left: 2px;
 }
 
-.octane-inventory-badges-footer-name {
+.volt-inventory-badges-footer-name {
     width: 271px;
     font-size: 12px;
     line-height: 17px;
@@ -163,7 +163,7 @@
     color: #000;
 }
 
-.octane-inventory-badges-footer-desc {
+.volt-inventory-badges-footer-desc {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -177,7 +177,7 @@
     color: #000;
 }
 
-.octane-inventory-badges-footer-meta {
+.volt-inventory-badges-footer-meta {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -185,7 +185,7 @@
     margin-left: -2px;
 }
 
-.octane-inventory-badge-rarity {
+.volt-inventory-badge-rarity {
     display: inline-block;
     flex: none;
     box-sizing: border-box;
@@ -202,15 +202,15 @@
 }
 
 /* wearBadge_button (282,40) 179x28 right aligned, fitted to its caption. */
-.octane-inventory-badges-footer-actions,
-.octane-inventory-badge-wear-empty {
+.volt-inventory-badges-footer-actions,
+.volt-inventory-badge-wear-empty {
     position: absolute;
     right: 4px;
     top: 37px;
     height: 28px;
 }
 
-.octane-inventory-badges-footer .octane-inventory-btn-wear {
+.volt-inventory-badges-footer .volt-inventory-btn-wear {
     box-sizing: border-box;
     width: 85px;
     height: 28px;
@@ -219,23 +219,23 @@
     font-weight: normal;
 }
 
-.octane-inventory-badges-footer .octane-inventory-btn-wear {
+.volt-inventory-badges-footer .volt-inventory-btn-wear {
     border: 5px solid transparent !important;
     border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch !important;
     background: transparent !important;
     padding: 0;
     white-space: nowrap;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-inventory-badges-footer .octane-inventory-btn-wear:hover { border-image-source: var(--habbo-skin-shiny-hover) !important; }
-.octane-inventory-badges-footer .octane-inventory-btn-wear:active { border-image-source: var(--habbo-skin-shiny-pressed) !important; }
-.octane-inventory-badges-footer .octane-inventory-btn-wear:disabled {
+.volt-inventory-badges-footer .volt-inventory-btn-wear:hover { border-image-source: var(--habbo-skin-shiny-hover) !important; }
+.volt-inventory-badges-footer .volt-inventory-btn-wear:active { border-image-source: var(--habbo-skin-shiny-pressed) !important; }
+.volt-inventory-badges-footer .volt-inventory-btn-wear:disabled {
     border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important;
     opacity: 1;
 }
 
-.octane-inventory-badges-footer .octane-inventory-btn-wear.is-clear {
+.volt-inventory-badges-footer .volt-inventory-btn-wear.is-clear {
     width: 84px;
 }

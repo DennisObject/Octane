@@ -24,7 +24,7 @@ export const HousekeepingBulkActionsView: FC<HousekeepingBulkActionsViewProps> =
 
     return (
         <StaffSection title={LocalizeText('housekeeping.bulk.label', ['count'], [count])}>
-            <div className="octane-staff-row flex-wrap">
+            <div className="volt-staff-row flex-wrap">
                 <Button disabled={isActionPending} variant="danger" onClick={() => ask(banLabel, () => banUsersBulk(selectedUserIds, reason, draft.banHours))}>
                     {banLabel}
                 </Button>

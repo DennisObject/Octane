@@ -6,7 +6,7 @@ import {
     WIRED_TRADE_STATE_ADDING_ITEMS,
     WIRED_TRADE_STATE_CONFIRMING,
     WIRED_TRADE_STATE_COUNTDOWN,
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, Fragment, useMemo, useState } from 'react';
 import { GroupItem, localizeWithFallback, ProductImageUtility } from '../../../../api';
 import { AutoGrid, Button, Column, Flex, Grid, LayoutGridItem, Text } from '../../../../common';

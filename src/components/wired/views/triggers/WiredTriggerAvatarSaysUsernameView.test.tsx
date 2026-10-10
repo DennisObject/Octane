@@ -21,7 +21,7 @@ vi.mock('../../../../common', () => ({
 }));
 
 vi.mock('../../../../layout', () => ({
-    OctaneInput: (props: { value: string }) => <input data-testid="keyword" readOnly value={props.value} />
+    VoltInput: (props: { value: string }) => <input data-testid="keyword" readOnly value={props.value} />
 }));
 
 vi.mock('./WiredTriggerBaseView', () => ({

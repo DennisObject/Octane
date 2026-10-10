@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { dataUrlToBlob } from '../../../../common/layout/avatarImageCrop';
 

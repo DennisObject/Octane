@@ -38,11 +38,11 @@ export const FurniEditorHintsView: FC<{ field: EditField; fields: FurniEditorFie
     if (!suggestions.length && !warnings.length) return null;
 
     return (
-        <div className="octane-furni-editor-hints">
+        <div className="volt-furni-editor-hints">
             {suggestions.map((suggestion) => (
                 <button
                     key={`${suggestion.field}:${String(suggestion.value)}`}
-                    className="octane-furni-editor-link"
+                    className="volt-furni-editor-link"
                     title={localizeFurniEditorText(suggestion.reason)}
                     type="button"
                     onClick={() => fields.applySuggestion(suggestion)}
@@ -55,7 +55,7 @@ export const FurniEditorHintsView: FC<{ field: EditField; fields: FurniEditorFie
                 </button>
             ))}
             {warnings.map((warning) => (
-                <span key={warning.field} className="octane-furni-editor-warning" role="note">
+                <span key={warning.field} className="volt-furni-editor-warning" role="note">
                     {localizeFurniEditorText(warning.message)}
                 </span>
             ))}
@@ -78,16 +78,16 @@ export const FurniEditorFieldView: FC<FurniEditorFieldViewProps> = ({ field, fie
     const label = LocalizeText(fieldLabelKey(field));
 
     return (
-        <div className={`octane-staff-field octane-furni-editor-field ${changed ? 'is-changed' : ''} ${error ? 'is-invalid' : ''} ${className}`}>
-            <div className="octane-staff-row">
-                <label className="octane-staff-field-label" htmlFor={fieldInputId(field)} title={tipKey ? LocalizeText(tipKey) : undefined}>
+        <div className={`volt-staff-field volt-furni-editor-field ${changed ? 'is-changed' : ''} ${error ? 'is-invalid' : ''} ${className}`}>
+            <div className="volt-staff-row">
+                <label className="volt-staff-field-label" htmlFor={fieldInputId(field)} title={tipKey ? LocalizeText(tipKey) : undefined}>
                     {label}
-                    {tipKey && <span className="octane-furni-editor-tip"> (?)</span>}
+                    {tipKey && <span className="volt-furni-editor-tip"> (?)</span>}
                 </label>
                 {changed && (
                     <button
                         aria-label={furniEditorText('furni.editor.field.revert', { field: label })}
-                        className="octane-furni-editor-link octane-furni-editor-revert"
+                        className="volt-furni-editor-link volt-furni-editor-revert"
                         title={LocalizeText('furni.editor.field.revert.tip')}
                         type="button"
                         onClick={() => fields.setField(field, fields.stored[field])}
@@ -97,7 +97,7 @@ export const FurniEditorFieldView: FC<FurniEditorFieldViewProps> = ({ field, fie
                 )}
             </div>
             {children}
-            {error && <span className="octane-staff-error-text">{localizeFurniEditorText(error)}</span>}
+            {error && <span className="volt-staff-error-text">{localizeFurniEditorText(error)}</span>}
             <FurniEditorHintsView field={field} fields={fields} />
         </div>
     );

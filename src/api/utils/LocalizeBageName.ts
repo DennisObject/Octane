@@ -1,4 +1,4 @@
-import { GetLocalizationManager } from '@octane/renderer';
+import { GetLocalizationManager } from '@volt/renderer';
 
 export const LocalizeBadgeName = (key: string) => {
     let badgeName = GetLocalizationManager().getBadgeName(key);

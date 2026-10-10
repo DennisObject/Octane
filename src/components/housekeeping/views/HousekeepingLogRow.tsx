@@ -6,12 +6,12 @@ export const formatLogTime = (timestamp: number): string =>
 
 /** One staff action: when, who, target, what. Failed actions are drawn in red. */
 export const HousekeepingLogRow: FC<{ entry: IHousekeepingActionLogEntry }> = ({ entry }) => (
-    <div className={`octane-staff-list-row octane-housekeeping-log-row ${entry.success ? '' : 'is-failed'}`} title={entry.detail || undefined}>
-        <span className="octane-housekeeping-log-time octane-staff-muted">{formatLogTime(entry.timestamp)}</span>
-        <span className="octane-housekeeping-log-actor truncate">{entry.actorName}</span>
+    <div className={`volt-staff-list-row volt-housekeeping-log-row ${entry.success ? '' : 'is-failed'}`} title={entry.detail || undefined}>
+        <span className="volt-housekeeping-log-time volt-staff-muted">{formatLogTime(entry.timestamp)}</span>
+        <span className="volt-housekeeping-log-actor truncate">{entry.actorName}</span>
         <span className="grow truncate">
-            <span className="octane-staff-muted">{LocalizeText(`housekeeping.audit.target.${entry.targetType}`)}</span> {entry.targetLabel}
+            <span className="volt-staff-muted">{LocalizeText(`housekeeping.audit.target.${entry.targetType}`)}</span> {entry.targetLabel}
         </span>
-        <span className="octane-housekeeping-log-action truncate">{entry.action}</span>
+        <span className="volt-housekeeping-log-action truncate">{entry.action}</span>
     </div>
 );

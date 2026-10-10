@@ -15,7 +15,7 @@ interface InfoStandAvatarViewProps {
  * in its 34x84 region at x=16 of the grey_bg, like the Flash widget does.
  */
 export const InfoStandAvatarView: FC<InfoStandAvatarViewProps> = ({ figure, direction = 4, top = 24, left = 16 }) => (
-    <div className="octane-infostand__avatar" style={{ top, left }}>
+    <div className="volt-infostand__avatar" style={{ top, left }}>
         <LayoutAvatarImageView nativeCroppedHead trimmed direction={direction} figure={figure} />
     </div>
 );

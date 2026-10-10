@@ -1,4 +1,4 @@
-import { GetAvatarRenderManager, GetRoomEngine, GetSessionDataManager, RoomObjectVariable, Vector3d } from '@octane/renderer';
+import { GetAvatarRenderManager, GetRoomEngine, GetSessionDataManager, RoomObjectVariable, Vector3d } from '@volt/renderer';
 import { FC, useEffect } from 'react';
 import { FurniCategory, GetProductIconUrl, Offer, ProductTypeEnum } from '../../../../../api';
 import dyndealBackground from '../../../../../assets/images/catalog/air/ctlg-dyndeal-background.png';
@@ -196,20 +196,20 @@ export const CatalogViewProductWidgetView: FC<{ height?: number }> = (props) => 
         const bundleProducts = currentOffer.products.filter((product) => product.productType !== ProductTypeEnum.BADGE);
 
         return (
-            <div className="octane-catalog-bundle-preview" style={{ height }}>
-                <img alt="" className="octane-catalog-bundle-preview-scene" draggable={false} src={dyndealBackground} />
-                <div className="octane-catalog-bundle-preview-grid" key={currentOffer.offerId}>
+            <div className="volt-catalog-bundle-preview" style={{ height }}>
+                <img alt="" className="volt-catalog-bundle-preview-scene" draggable={false} src={dyndealBackground} />
+                <div className="volt-catalog-bundle-preview-grid" key={currentOffer.offerId}>
                     {bundleProducts.map((product, index) => {
                         const iconUrl = GetProductIconUrl(product, currentOffer);
 
                         return (
-                            <div className="octane-catalog-bundle-preview-item" key={`${product.productType}-${product.productClassId}-${index}`}>
+                            <div className="volt-catalog-bundle-preview-item" key={`${product.productType}-${product.productClassId}-${index}`}>
                                 {product.productType === ProductTypeEnum.HABBICON ? (
-                                    <LayoutHabbiconImageView className="octane-catalog-bundle-preview-icon" id={product.productClassId} size={36} />
+                                    <LayoutHabbiconImageView className="volt-catalog-bundle-preview-icon" id={product.productClassId} size={36} />
                                 ) : (
-                                    iconUrl && <img alt="" className="octane-catalog-bundle-preview-icon" draggable={false} src={iconUrl} />
+                                    iconUrl && <img alt="" className="volt-catalog-bundle-preview-icon" draggable={false} src={iconUrl} />
                                 )}
-                                {product.productCount > 1 && <span className="octane-catalog-bundle-preview-count">{`x${product.productCount}`}</span>}
+                                {product.productCount > 1 && <span className="volt-catalog-bundle-preview-count">{`x${product.productCount}`}</span>}
                             </div>
                         );
                     })}

@@ -1,4 +1,4 @@
-import { PressKeybindComposer } from '@octane/renderer';
+import { PressKeybindComposer } from '@volt/renderer';
 import { FC, useEffect } from 'react';
 import { SendMessageComposer } from '../../../api';
 

@@ -1,4 +1,4 @@
-import { GetRoomEngine, IImageResult, Vector3d } from '@octane/renderer';
+import { GetRoomEngine, IImageResult, Vector3d } from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Base, BaseProps } from '../Base';
 import { PIXEL_ART_RENDERING } from './PixelArtRendering';

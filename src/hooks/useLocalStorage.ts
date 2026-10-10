@@ -1,4 +1,4 @@
-import { OctaneLogger } from '@octane/renderer';
+import { VoltLogger } from '@volt/renderer';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GetLocalStorage, SetLocalStorage } from '../api';
 
@@ -64,7 +64,7 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
             return;
         } catch (error) {
             if (!isQuotaError(error)) {
-                OctaneLogger.error(error);
+                VoltLogger.error(error);
                 return;
             }
         }
@@ -74,9 +74,9 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
         try {
             const trimmed = trimArrayForQuota(projected as T);
             SetLocalStorage(key, trimmed);
-            OctaneLogger.warn(`[useLocalStorage] quota exceeded for ${key}, trimmed payload`);
+            VoltLogger.warn(`[useLocalStorage] quota exceeded for ${key}, trimmed payload`);
         } catch (retryError) {
-            OctaneLogger.error(retryError);
+            VoltLogger.error(retryError);
             // Last resort: drop the key entirely so future writes have room.
             try {
                 window.localStorage.removeItem(key);
@@ -129,7 +129,7 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
 
             scheduleWrite(valueToStore);
         } catch (error) {
-            OctaneLogger.error(error);
+            VoltLogger.error(error);
         }
     };
 

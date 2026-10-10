@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 import { AccessTokenGrant } from './accessToken';
 
 // Typed client for the hotel's /api/auth/* endpoints. Every call resolves to an
@@ -234,7 +234,7 @@ const request = async (url: string, init: RequestInit): Promise<AuthResult<JsonO
 
 const jsonPost = (body: JsonObject, options: AuthRequestOptions): RequestInit => ({
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'OctaneLoginView' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'VoltLoginView' },
     body: JSON.stringify(body),
     signal: options.signal
 });
@@ -449,7 +449,7 @@ export const checkServerReachable = async (): Promise<boolean> =>
 // servers that still read them, the SSO ticket and remember token.
 export const logoutSession = async (credentials: { accessToken: string; ssoTicket: string; rememberToken: string }): Promise<void> =>
 {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'OctaneLogout' };
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'VoltLogout' };
 
     if (credentials.accessToken) headers.Authorization = `Bearer ${credentials.accessToken}`;
 

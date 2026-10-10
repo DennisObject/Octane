@@ -1,4 +1,4 @@
-import { RoomDataParser } from '@octane/renderer';
+import { RoomDataParser } from '@volt/renderer';
 
 export class RoomInfoData {
     private _enteredGuestRoom: RoomDataParser = null;

@@ -7,34 +7,34 @@ import stripJsonComments from 'strip-json-comments';
 import { isValidJsonMode } from './scripts/json-mode.mjs';
 
 const legacyRendererRoot = resolve(import.meta.dirname, '..', 'renderer');
-const currentRendererRoot = resolve(import.meta.dirname, '..', 'Octane-Renderer');
-// Checkouts cloned before the repository was renamed still use the lowercase
-// folder, which tsconfig.json also points at. Linux is case sensitive, so the
-// previous name has to stay in the lookup chain or those checkouts resolve to
-// the legacy path and the config throws.
-const previousRendererRoot = resolve(import.meta.dirname, '..', 'octane-renderer');
-const rendererRoot = [currentRendererRoot, previousRendererRoot, legacyRendererRoot].find(existsSync) ?? legacyRendererRoot;
+// Checkouts cloned before a repository rename keep their old folder name, which
+// tsconfig.json also points at. Linux is case sensitive, so every earlier name
+// (lowercase, and Octane from before the Volt rename) stays in the lookup chain
+// or those checkouts resolve to the legacy path and the config throws.
+const rendererRoot = ['Volt-Renderer', 'volt-renderer', 'Octane-Renderer', 'octane-renderer']
+    .map(folder => resolve(import.meta.dirname, '..', folder))
+    .find(existsSync) ?? legacyRendererRoot;
 
-// Game assets live outside the repo, in a sibling directory next to Octane.
+// Game assets live outside the repo, in a sibling directory next to Volt.
 // They are NOT placed under public/ on purpose: with ~177k files a symlink
 // under public/ makes chokidar try to install a watcher on each one and the
 // dev server takes minutes to start on Windows. Serving them with a
 // dedicated sirv middleware (below) bypasses chokidar entirely.
-const octaneFilesRoot = resolve(import.meta.dirname, '..', 'Nitro-Files');
-const octaneAssetsRoot = resolve(octaneFilesRoot, 'nitro-assets');
-const swfRoot = resolve(octaneFilesRoot, 'swf');
+const voltFilesRoot = resolve(import.meta.dirname, '..', 'Nitro-Files');
+const voltAssetsRoot = resolve(voltFilesRoot, 'nitro-assets');
+const swfRoot = resolve(voltFilesRoot, 'swf');
 
-const octaneAssetsServer = () => ({
+const voltAssetsServer = () => ({
     name: 'nitro-assets-serve',
     configureServer(server)
     {
-        if(existsSync(octaneAssetsRoot))
+        if(existsSync(voltAssetsRoot))
         {
-            server.middlewares.use('/nitro-assets', sirv(octaneAssetsRoot, { dev: true, etag: true, maxAge: 0 }));
+            server.middlewares.use('/nitro-assets', sirv(voltAssetsRoot, { dev: true, etag: true, maxAge: 0 }));
         }
         else
         {
-            server.config.logger.warn(`[nitro-assets-serve] ${ octaneAssetsRoot } not found — /nitro-assets/* requests will 404.`);
+            server.config.logger.warn(`[nitro-assets-serve] ${ voltAssetsRoot } not found — /nitro-assets/* requests will 404.`);
         }
 
         if(existsSync(swfRoot))
@@ -48,9 +48,9 @@ const octaneAssetsServer = () => ({
     },
     configurePreviewServer(server)
     {
-        if(existsSync(octaneAssetsRoot))
+        if(existsSync(voltAssetsRoot))
         {
-            server.middlewares.use('/nitro-assets', sirv(octaneAssetsRoot, { dev: false, etag: true }));
+            server.middlewares.use('/nitro-assets', sirv(voltAssetsRoot, { dev: false, etag: true }));
         }
         if(existsSync(swfRoot))
         {
@@ -67,7 +67,7 @@ const preloadAppBundle = () =>
     let base = './';
 
     return {
-        name: 'octane-preload-app-bundle',
+        name: 'volt-preload-app-bundle',
         apply: 'build',
         configResolved(config)
         {
@@ -148,17 +148,15 @@ const authProxyTarget = process.env.AUTH_PROXY_TARGET || readConfiguredApiUrl() 
 if(!existsSync(rendererRoot))
 {
     // Fail fast with a useful message instead of waiting for Rolldown to
-    // report "Failed to resolve import @octane/renderer" deep
+    // report "Failed to resolve import @volt/renderer" deep
     // inside the bundle pass.
     throw new Error(
-        '\n  Octane Renderer SDK not found.\n\n' +
-        '  vite.config.mjs expects one of these directories to exist as a sibling of this repo:\n' +
-        `    - ${ currentRendererRoot } (preferred)\n` +
-        `    - ${ previousRendererRoot } (previous name)\n` +
-        `    - ${ legacyRendererRoot } (legacy)\n\n` +
-        '  Clone Octane Renderer next to Octane and rerun:\n' +
-        '    git clone <renderer-repo> ../octane-renderer\n' +
-        '    cd ../octane-renderer && yarn install\n\n' +
+        '\n  Volt Renderer SDK not found.\n\n' +
+        '  vite.config.mjs expects ../Volt-Renderer (or an older name: ../volt-renderer,\n' +
+        '  ../Octane-Renderer, ../octane-renderer, ../renderer) next to this repo.\n\n' +
+        '  Clone Volt Renderer next to Volt and rerun:\n' +
+        '    git clone https://github.com/plus-emulator/Volt-Renderer ../Volt-Renderer\n' +
+        '    cd ../Volt-Renderer && yarn install\n\n' +
         '  (See CLAUDE.md "Commands" section for the full setup walkthrough.)\n'
     );
 }
@@ -185,7 +183,7 @@ const installedPixiVersion = readPackageVersion(resolve(rendererRoot, 'node_modu
 if(pinnedPixiVersion && (installedPixiVersion !== pinnedPixiVersion))
 {
     throw new Error(
-        '\n  Octane Renderer node_modules are out of date.\n\n' +
+        '\n  Volt Renderer node_modules are out of date.\n\n' +
         `  ${ rendererRoot }/package.json pins pixi.js ${ pinnedPixiVersion }, but ` +
         (installedPixiVersion ? `${ installedPixiVersion } is installed.` : 'it is not installed.') + '\n\n' +
         '  Run yarn install in the renderer and retry:\n' +
@@ -199,12 +197,12 @@ const ReactCompilerConfig = {
 
 const resolveJsonMode = () =>
 {
-    // OCTANE_* is the current name; NITRO_* stays as a fallback for existing setups
-    const envOverride = process.env.OCTANE_JSON_MODE ?? process.env.NITRO_JSON_MODE;
+    // VOLT_* is the current name; NITRO_* stays as a fallback for existing setups
+    const envOverride = process.env.VOLT_JSON_MODE ?? process.env.NITRO_JSON_MODE;
     if(isValidJsonMode(envOverride)) return envOverride;
 
     // .nitro-build.json is the legacy name kept for existing local setups
-    for(const name of ['.octane-build.json', '.nitro-build.json'])
+    for(const name of ['.volt-build.json', '.nitro-build.json'])
     {
         const configFile = resolve(import.meta.dirname, name);
         if(!existsSync(configFile)) continue;
@@ -220,10 +218,10 @@ const resolveJsonMode = () =>
     return 'auto';
 };
 
-const octaneJsonMode = resolveJsonMode();
-const octaneSingleBundle = (process.env.OCTANE_SINGLE_BUNDLE ?? process.env.NITRO_SINGLE_BUNDLE) === '1';
-process.stdout.write(`[vite] __OCTANE_JSON_MODE__ = ${ octaneJsonMode }\n`);
-process.stdout.write(`[vite] OCTANE_SINGLE_BUNDLE = ${ octaneSingleBundle ? '1' : '0' }\n`);
+const voltJsonMode = resolveJsonMode();
+const voltSingleBundle = (process.env.VOLT_SINGLE_BUNDLE ?? process.env.NITRO_SINGLE_BUNDLE) === '1';
+process.stdout.write(`[vite] __VOLT_JSON_MODE__ = ${ voltJsonMode }\n`);
+process.stdout.write(`[vite] VOLT_SINGLE_BUNDLE = ${ voltSingleBundle ? '1' : '0' }\n`);
 
 export default defineConfig({
     base: process.env.VITE_BASE || './',
@@ -235,11 +233,11 @@ export default defineConfig({
                 ]
             }
         }),
-        octaneAssetsServer(),
+        voltAssetsServer(),
         preloadAppBundle()
     ],
     define: {
-        __OCTANE_JSON_MODE__: JSON.stringify(octaneJsonMode)
+        __VOLT_JSON_MODE__: JSON.stringify(voltJsonMode)
     },
     server: {
         fs: {
@@ -270,7 +268,7 @@ export default defineConfig({
                                 : 'see the stack above';
 
                         console.error(
-                            `[octane] /api proxy: ${ req?.url || '' } -> ${ authProxyTarget } failed (${ code }); ${ hint }. ` +
+                            `[volt] /api proxy: ${ req?.url || '' } -> ${ authProxyTarget } failed (${ code }); ${ hint }. ` +
                             'Override the target with AUTH_PROXY_TARGET or "api.url" in public/configuration/renderer-config.json.');
                     });
                 }
@@ -284,27 +282,27 @@ export default defineConfig({
             '~': resolve(import.meta.dirname, 'node_modules'),
             // Force the umbrella to the source index.ts. Without this,
             // node-module resolution (via the symlink at
-            // node_modules/@octane/renderer -> ../octane-renderer)
+            // node_modules/@volt/renderer -> ../volt-renderer)
             // can land on the stale `dist/index.js` when one exists in
             // the renderer working tree — leaving the bundle with
             // pre-snapshot-pattern stubs and producing runtime errors
             // like "TypeError: (intermediate value)() is undefined"
             // when newer code calls getUserDataSnapshot() / .subscribe()
-            // / OctaneEventType.SESSION_DATA_UPDATED etc.
-            '@octane/renderer': resolve(rendererRoot, 'index.ts'),
-            '@octane/api': resolve(rendererRoot, 'packages/api/src/index.ts'),
-            '@octane/assets': resolve(rendererRoot, 'packages/assets/src/index.ts'),
-            '@octane/avatar': resolve(rendererRoot, 'packages/avatar/src/index.ts'),
-            '@octane/camera': resolve(rendererRoot, 'packages/camera/src/index.ts'),
-            '@octane/communication': resolve(rendererRoot, 'packages/communication/src/index.ts'),
-            '@octane/configuration': resolve(rendererRoot, 'packages/configuration/src/index.ts'),
-            '@octane/events': resolve(rendererRoot, 'packages/events/src/index.ts'),
-            '@octane/localization': resolve(rendererRoot, 'packages/localization/src/index.ts'),
-            '@octane/room': resolve(rendererRoot, 'packages/room/src/index.ts'),
-            '@octane/session': resolve(rendererRoot, 'packages/session/src/index.ts'),
-            '@octane/sound': resolve(rendererRoot, 'packages/sound/src/index.ts'),
-            '@octane/utils/src': resolve(rendererRoot, 'packages/utils/src'),
-            '@octane/utils': resolve(rendererRoot, 'packages/utils/src/index.ts'),
+            // / VoltEventType.SESSION_DATA_UPDATED etc.
+            '@volt/renderer': resolve(rendererRoot, 'index.ts'),
+            '@volt/api': resolve(rendererRoot, 'packages/api/src/index.ts'),
+            '@volt/assets': resolve(rendererRoot, 'packages/assets/src/index.ts'),
+            '@volt/avatar': resolve(rendererRoot, 'packages/avatar/src/index.ts'),
+            '@volt/camera': resolve(rendererRoot, 'packages/camera/src/index.ts'),
+            '@volt/communication': resolve(rendererRoot, 'packages/communication/src/index.ts'),
+            '@volt/configuration': resolve(rendererRoot, 'packages/configuration/src/index.ts'),
+            '@volt/events': resolve(rendererRoot, 'packages/events/src/index.ts'),
+            '@volt/localization': resolve(rendererRoot, 'packages/localization/src/index.ts'),
+            '@volt/room': resolve(rendererRoot, 'packages/room/src/index.ts'),
+            '@volt/session': resolve(rendererRoot, 'packages/session/src/index.ts'),
+            '@volt/sound': resolve(rendererRoot, 'packages/sound/src/index.ts'),
+            '@volt/utils/src': resolve(rendererRoot, 'packages/utils/src'),
+            '@volt/utils': resolve(rendererRoot, 'packages/utils/src/index.ts'),
             // Keep Pixi's exported registration entry ahead of the broad
             // package-directory alias, which would otherwise swallow this
             // subpath and resolve it to a directory that does not exist.
@@ -322,13 +320,13 @@ export default defineConfig({
             checks: {
                 pluginTimings: false
             },
-            output: octaneSingleBundle ? {
+            output: voltSingleBundle ? {
                 assetFileNames: 'src/assets/[name]-[hash].[ext]',
                 entryFileNames: 'assets/app.js',
                 inlineDynamicImports: true
             } : {
                 assetFileNames: 'src/assets/[name]-[hash].[ext]',
-                // Granular chunking: split the monolithic vendor / octane-renderer
+                // Granular chunking: split the monolithic vendor / volt-renderer
                 // bundles into smaller chunks so the browser can fetch them in
                 // parallel and CF can cache each independently. Splits chosen
                 // by size impact (pixi ~600KB, react ~150KB, framer-motion ~100KB,
@@ -336,9 +334,9 @@ export default defineConfig({
                 manualChunks: id =>
                 {
                     // Vendor checks first — pixi.js/howler are aliased to
-                    // ../octane-renderer/node_modules so they match
-                    // `octane-renderer` too. Without this priority, they end
-                    // up bundled into octane-renderer instead of getting their
+                    // ../volt-renderer/node_modules so they match
+                    // `volt-renderer` too. Without this priority, they end
+                    // up bundled into volt-renderer instead of getting their
                     // own chunks (pixi alone is ~600KB). Use `/pixi.js/` to
                     // avoid matching path fragments like `assets/pixi.js/`.
                     const norm = id.replace(/\\/g, '/');
@@ -347,21 +345,21 @@ export default defineConfig({
                     if(norm.includes('@emoji-mart')) return 'vendor-emoji';
                     if(norm.includes('jodit') || norm.includes('@react-page')) return 'vendor-editor';
 
-                    if(id.includes('Octane-Renderer') || id.includes(`${ rendererRoot }`))
+                    if(id.includes('Volt-Renderer') || id.includes(`${ rendererRoot }`))
                     {
                         // Heaviest renderer packages get their own chunks so
                         // pages that don't touch them (login flow, very early
                         // boot) don't have to pay for them upfront.
-                        if(id.includes('/packages/avatar/')) return 'octane-renderer-avatar';
-                        if(id.includes('/packages/communication/')) return 'octane-renderer-comm';
-                        if(id.includes('/packages/room/')) return 'octane-renderer-room';
-                        if(id.includes('/packages/assets/')) return 'octane-renderer-assets';
-                        return 'octane-renderer';
+                        if(id.includes('/packages/avatar/')) return 'volt-renderer-avatar';
+                        if(id.includes('/packages/communication/')) return 'volt-renderer-comm';
+                        if(id.includes('/packages/room/')) return 'volt-renderer-room';
+                        if(id.includes('/packages/assets/')) return 'volt-renderer-assets';
+                        return 'volt-renderer';
                     }
 
                     if(id.includes('node_modules'))
                     {
-                        if(id.includes('@octane/renderer') || id.includes('renderer3')) return 'octane-renderer';
+                        if(id.includes('@volt/renderer') || id.includes('renderer3')) return 'volt-renderer';
                         if(id.match(/\/react(-dom)?\/|\/scheduler\//) || id.includes('react-error-boundary')) return 'vendor-react';
                         if(id.includes('framer-motion')) return 'vendor-motion';
                         if(id.includes('@tanstack')) return 'vendor-query';

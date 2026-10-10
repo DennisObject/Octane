@@ -3,8 +3,8 @@ export class NotificationAlertType {
     public static MOTD: string = 'motd';
     public static MODERATION: string = 'moderation';
     public static EVENT: string = 'event';
-    public static OCTANE: string = 'octane';
-    public static OCTANE_INFO: string = 'octane-info';
+    public static VOLT: string = 'volt';
+    public static VOLT_INFO: string = 'volt-info';
     public static SEARCH: string = 'search';
     public static ALERT: string = 'alert';
     public static WINDOW: string = 'window';

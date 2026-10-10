@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatEntryType, SanitizeHtml } from '../../api';
 import { ChatBubbleUtilities } from '../../api/room/widgets/ChatBubbleUtilities';
@@ -90,16 +90,16 @@ export const ChatHistoryView: FC<{}> = (props) => {
     if (!isVisible) return null;
 
     return (
-        <div className="octane-chat-history">
-            <div className="octane-chat-history-tray-bar" />
-            <div className="octane-chat-history-content">
-                <div ref={elementRef} className="octane-chat-history-scroll">
+        <div className="volt-chat-history">
+            <div className="volt-chat-history-tray-bar" />
+            <div className="volt-chat-history-content">
+                <div ref={elementRef} className="volt-chat-history-scroll">
                     {filteredChatHistory.map((row, index) => (
-                        <div key={`${row.id}-${index}`} className="octane-chat-history-row">
-                            <div className="octane-chat-history-time">{row.timestamp}</div>
+                        <div key={`${row.id}-${index}`} className="volt-chat-history-row">
+                            <div className="volt-chat-history-time">{row.timestamp}</div>
                             {row.type === ChatEntryType.TYPE_CHAT && (
-                                <div className="octane-chat-history-message">
-                                    <div className="octane-chat-history-bubble-wrap bubble-container">
+                                <div className="volt-chat-history-message">
+                                    <div className="volt-chat-history-bubble-wrap bubble-container">
                                         {row.style === 0 && (
                                             <div
                                                 className="absolute -top-px left-px w-[30px] h-[calc(100%-0.5px)] rounded-[7px] z-1"
@@ -129,8 +129,8 @@ export const ChatHistoryView: FC<{}> = (props) => {
                                 </div>
                             )}
                             {row.type === ChatEntryType.TYPE_ROOM_INFO && (
-                                <div className="octane-chat-history-room-info">
-                                    <i className="octane-icon icon-small-room" />
+                                <div className="volt-chat-history-room-info">
+                                    <i className="volt-icon icon-small-room" />
                                     <span>{row.message || row.name}</span>
                                 </div>
                             )}
@@ -138,7 +138,7 @@ export const ChatHistoryView: FC<{}> = (props) => {
                     ))}
                 </div>
             </div>
-            <button className="octane-chat-history-handle" type="button" onClick={() => setIsVisible(false)} />
+            <button className="volt-chat-history-handle" type="button" onClick={() => setIsVisible(false)} />
         </div>
     );
 };

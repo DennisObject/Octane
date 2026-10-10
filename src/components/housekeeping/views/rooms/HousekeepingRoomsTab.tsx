@@ -23,7 +23,7 @@ export const HousekeepingRoomsTab: FC = () => {
 
     return (
         <>
-            <div className="octane-staff-row" onKeyDown={(event) => event.key === 'Enter' && lookup(roomIdDraft)}>
+            <div className="volt-staff-row" onKeyDown={(event) => event.key === 'Enter' && lookup(roomIdDraft)}>
                 <HousekeepingNumberInput className="grow" label={LocalizeText('housekeeping.room.search.placeholder')} value={roomIdDraft} onChange={setRoomIdDraft} />
                 <Button disabled={isRoomLoading || roomIdDraft <= 0} variant="secondary" onClick={() => lookup(roomIdDraft)}>
                     {LocalizeText('housekeeping.room.search.button')}
@@ -43,12 +43,12 @@ export const HousekeepingRoomsTab: FC = () => {
             </div>
             {selectedRoom ? (
                 <StaffSection title={`${selectedRoom.name} (#${selectedRoom.id})`}>
-                    <table className="octane-staff-table">
+                    <table className="volt-staff-table">
                         <tbody>
                             <tr>
                                 <th>{LocalizeText('housekeeping.room.owner')}</th>
                                 <td>
-                                    {selectedRoom.ownerName || '-'} <span className="octane-staff-muted">#{selectedRoom.ownerId}</span>
+                                    {selectedRoom.ownerName || '-'} <span className="volt-staff-muted">#{selectedRoom.ownerId}</span>
                                 </td>
                             </tr>
                             <tr>
@@ -63,17 +63,17 @@ export const HousekeepingRoomsTab: FC = () => {
                             </tr>
                             <tr>
                                 <th>{LocalizeText('housekeeping.user.status')}</th>
-                                <td className="octane-staff-row">
-                                    <span className={`octane-staff-flag ${selectedRoom.isLocked ? 'is-danger' : 'is-ok'}`}>
+                                <td className="volt-staff-row">
+                                    <span className={`volt-staff-flag ${selectedRoom.isLocked ? 'is-danger' : 'is-ok'}`}>
                                         {LocalizeText(selectedRoom.isLocked ? 'housekeeping.room.state.closed' : 'housekeeping.room.state.open')}
                                     </span>
-                                    {selectedRoom.isMuted && <span className="octane-staff-flag is-danger">{LocalizeText('housekeeping.room.state.muted')}</span>}
-                                    {selectedRoom.isPublic && <span className="octane-staff-flag is-muted">{LocalizeText('housekeeping.room.state.public')}</span>}
+                                    {selectedRoom.isMuted && <span className="volt-staff-flag is-danger">{LocalizeText('housekeeping.room.state.muted')}</span>}
+                                    {selectedRoom.isPublic && <span className="volt-staff-flag is-muted">{LocalizeText('housekeeping.room.state.public')}</span>}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <div className="octane-staff-row justify-end">
+                    <div className="volt-staff-row justify-end">
                         <Button variant="secondary" onClick={() => setSelectedRoom(null)}>
                             {LocalizeText('housekeeping.room.clear')}
                         </Button>
@@ -83,7 +83,7 @@ export const HousekeepingRoomsTab: FC = () => {
                 <StaffEmpty>{LocalizeText(isRoomLoading ? 'housekeeping.room.loading' : 'housekeeping.room.none')}</StaffEmpty>
             )}
             <StaffSection title={LocalizeText('housekeeping.section.room_actions')}>
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <Button disabled={disabled || !selectedRoom?.isLocked} variant="secondary" onClick={() => setRoomOpen(selectedRoom.id, true)}>
                         {LocalizeText('housekeeping.room.open')}
                     </Button>
@@ -94,7 +94,7 @@ export const HousekeepingRoomsTab: FC = () => {
                         {LocalizeText(selectedRoom?.isMuted ? 'housekeeping.room.unmute' : 'housekeeping.room.mute')}
                     </Button>
                 </div>
-                <div className="octane-staff-row">
+                <div className="volt-staff-row">
                     <HousekeepingNumberInput label={LocalizeText('housekeeping.room.transfer.new_owner')} value={newOwnerId} onChange={setNewOwnerId} />
                     <Button
                         classNames={['ml-auto']}
@@ -105,7 +105,7 @@ export const HousekeepingRoomsTab: FC = () => {
                         {LocalizeText('housekeeping.room.transfer')}
                     </Button>
                 </div>
-                <div className="octane-staff-grid">
+                <div className="volt-staff-grid">
                     <Button disabled={disabled} variant="danger" onClick={() => ask('housekeeping.room.kick_all.confirm', () => kickAllFromRoom(selectedRoom.id))}>
                         {LocalizeText('housekeeping.room.kick_all')}
                     </Button>

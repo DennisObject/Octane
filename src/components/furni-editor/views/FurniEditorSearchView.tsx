@@ -36,11 +36,11 @@ export const FurniEditorSearchView: FC<{ onOpen: (id: number) => void }> = ({ on
     const to = Math.min(page * SEARCH_PAGE_SIZE, total);
 
     return (
-        <div className="octane-furni-editor-search">
-            <div className="octane-staff-row">
+        <div className="volt-furni-editor-search">
+            <div className="volt-staff-row">
                 <input
                     aria-label={LocalizeText('furni.editor.search.placeholder')}
-                    className="octane-furni-editor-grow"
+                    className="volt-furni-editor-grow"
                     maxLength={100}
                     placeholder={LocalizeText('furni.editor.search.placeholder')}
                     type="search"
@@ -48,7 +48,7 @@ export const FurniEditorSearchView: FC<{ onOpen: (id: number) => void }> = ({ on
                     onChange={(event) => setQueryText(event.target.value)}
                 />
                 {TYPE_FILTERS.map((filter) => (
-                    <label key={filter.value || 'all'} className="octane-staff-row">
+                    <label key={filter.value || 'all'} className="volt-staff-row">
                         <input
                             checked={criteria.type === filter.value}
                             name="furni-editor-type"
@@ -59,14 +59,14 @@ export const FurniEditorSearchView: FC<{ onOpen: (id: number) => void }> = ({ on
                     </label>
                 ))}
             </div>
-            <div className="octane-staff-row">
-                <span className="octane-staff-muted octane-furni-editor-grow">
+            <div className="volt-staff-row">
+                <span className="volt-staff-muted volt-furni-editor-grow">
                     {total > 0
                         ? furniEditorText('furni.editor.search.showing', { from, to, total: total.toLocaleString() })
                         : LocalizeText(isSearching ? 'furni.editor.search.searching' : 'furni.editor.search.none')}
                 </span>
                 {flaggedCount > 0 && (
-                    <label className="octane-staff-row" title={LocalizeText('furni.editor.search.only_flagged.tip')}>
+                    <label className="volt-staff-row" title={LocalizeText('furni.editor.search.only_flagged.tip')}>
                         <input checked={onlyFlagged} type="checkbox" onChange={(event) => setOnlyFlagged(event.target.checked)} />
                         {furniEditorText('furni.editor.search.only_flagged', { count: flaggedCount })}
                     </label>

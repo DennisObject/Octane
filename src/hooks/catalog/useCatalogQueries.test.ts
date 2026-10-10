@@ -62,8 +62,8 @@ const parserNode = (pageId: number, children: any[] = [], offerIds: number[] = [
 
 describe('catalog query keys', () => {
     it('scope the index and the pages under the same root', () => {
-        expect(catalogIndexKey(CatalogType.NORMAL)).toEqual(['octane', 'catalog', 'index', 'NORMAL']);
-        expect(catalogPageKey(CatalogType.NORMAL, 7)).toEqual(['octane', 'catalog', 'page', CatalogType.NORMAL, 7]);
+        expect(catalogIndexKey(CatalogType.NORMAL)).toEqual(['volt', 'catalog', 'index', 'NORMAL']);
+        expect(catalogPageKey(CatalogType.NORMAL, 7)).toEqual(['volt', 'catalog', 'page', CatalogType.NORMAL, 7]);
     });
 });
 

@@ -5,7 +5,7 @@ import {
     FurniEditorInteractionsComposer,
     FurniEditorSearchComposer,
     IMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import type { FurniSearchCriteria } from './furniEditorData';
 
 /** How long a request may stay unanswered before the editor says the server is not answering. */

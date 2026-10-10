@@ -24,18 +24,18 @@ export const NativeConfirmView: FC<NativeConfirmViewProps> = ({ title, message, 
     }, [message]);
 
     return (
-        <DraggableWindow dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} handleSelector=".octane-card-header-shell" offsetTop={growth / 2}>
-            <section ref={frameRef} aria-label={title} className="octane-alert octane-card-shell octane-card-frame-3 octane-native-confirm" role="dialog">
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">{title}</span>
-                    <button aria-label={cancelText} className="octane-card-close-button" type="button" onClick={onCancel} />
+        <DraggableWindow dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }} handleSelector=".volt-card-header-shell" offsetTop={growth / 2}>
+            <section ref={frameRef} aria-label={title} className="volt-alert volt-card-shell volt-card-frame-3 volt-native-confirm" role="dialog">
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">{title}</span>
+                    <button aria-label={cancelText} className="volt-card-close-button" type="button" onClick={onCancel} />
                 </div>
-                <div className="octane-native-confirm-body">
-                    <div className="octane-native-confirm-text">{message}</div>
-                    <button className="octane-native-link octane-native-confirm-cancel" type="button" onClick={onCancel}>
+                <div className="volt-native-confirm-body">
+                    <div className="volt-native-confirm-text">{message}</div>
+                    <button className="volt-native-link volt-native-confirm-cancel" type="button" onClick={onCancel}>
                         {cancelText}
                     </button>
-                    <button className="octane-native-button is-thick octane-native-confirm-ok" type="button" onClick={onConfirm}>
+                    <button className="volt-native-button is-thick volt-native-confirm-ok" type="button" onClick={onConfirm}>
                         {confirmText}
                     </button>
                 </div>

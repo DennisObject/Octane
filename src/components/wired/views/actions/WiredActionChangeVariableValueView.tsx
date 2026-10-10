@@ -7,7 +7,7 @@ import userVariableIcon from '../../../../assets/images/wired/var/icon_source_us
 import { Text } from '../../../../common';
 import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
@@ -384,16 +384,16 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
             cardStyle={{ width: 244 }}
             hideDelay={true}
         >
-            <div className="octane-wired__give-var">
-                <div className="octane-wired__give-var-heading">
+            <div className="volt-wired__give-var">
+                <div className="volt-wired__give-var-heading">
                     <Text>{LocalizeText('wiredfurni.params.variables.variable_selection')}</Text>
-                    <div className="octane-wired__give-var-targets">
+                    <div className="volt-wired__give-var-targets">
                         {TARGET_BUTTONS.map((button) => (
                             <button
                                 key={button.key}
                                 type="button"
                                 disabled={button.disabled}
-                                className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${destinationTargetType === button.key ? 'is-active' : ''}`}
+                                className={`volt-wired__give-var-target volt-wired__give-var-target--${button.key} ${destinationTargetType === button.key ? 'is-active' : ''}`}
                                 onClick={() => handleDestinationTargetChange(button.key)}
                             >
                                 <img src={button.icon} alt={button.key} />
@@ -409,12 +409,12 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                     onSelect={(entry) => setDestinationVariableToken(entry.token)}
                 />
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__give-var-section">
-                    <div className="octane-wired__give-var-section-title">{LocalizeText('wiredfurni.params.variables.operation')}</div>
+                <div className="volt-wired__give-var-section">
+                    <div className="volt-wired__give-var-section-title">{LocalizeText('wiredfurni.params.variables.operation')}</div>
                     <select
-                        className="form-select form-select-sm octane-wired__give-var-select"
+                        className="form-select form-select-sm volt-wired__give-var-select"
                         value={operation}
                         onChange={(event) => setOperation(parseInt(event.target.value, 10))}
                     >
@@ -426,15 +426,15 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                     </select>
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__give-var-section">
-                    <div className="octane-wired__give-var-section-title">{LocalizeText('wiredfurni.params.variables.reference_value')}</div>
-                    <label className="octane-wired__change-var-radio">
+                <div className="volt-wired__give-var-section">
+                    <div className="volt-wired__give-var-section-title">{LocalizeText('wiredfurni.params.variables.reference_value')}</div>
+                    <label className="volt-wired__change-var-radio">
                         <input checked={referenceMode === 'constant'} disabled={isUnaryOperation} type="radio" onChange={() => setReferenceMode('constant')} />
                         <Text>{LocalizeText('wiredfurni.params.operator.2')}</Text>
-                        <OctaneInput
-                            className="octane-wired__give-var-number"
+                        <VoltInput
+                            className="volt-wired__give-var-number"
                             disabled={isUnaryOperation}
                             type="number"
                             value={referenceConstantValueInput}
@@ -442,8 +442,8 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                         />
                     </label>
 
-                    <div className="octane-wired__change-var-reference-block">
-                        <label className="octane-wired__change-var-radio">
+                    <div className="volt-wired__change-var-reference-block">
+                        <label className="volt-wired__change-var-radio">
                             <input
                                 checked={referenceMode === 'variable'}
                                 disabled={isUnaryOperation}
@@ -451,13 +451,13 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                                 onChange={() => setReferenceMode('variable')}
                             />
                             <Text>{LocalizeText('wiredfurni.params.variables.reference_value.from_variable')}</Text>
-                            <div className="octane-wired__give-var-targets">
+                            <div className="volt-wired__give-var-targets">
                                 {TARGET_BUTTONS.map((button) => (
                                     <button
                                         key={`reference-${button.key}`}
                                         type="button"
                                         disabled={button.disabled || referenceMode !== 'variable'}
-                                        className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${referenceTargetType === button.key ? 'is-active' : ''}`}
+                                        className={`volt-wired__give-var-target volt-wired__give-var-target--${button.key} ${referenceTargetType === button.key ? 'is-active' : ''}`}
                                         onClick={() => handleReferenceTargetChange(button.key)}
                                     >
                                         <img src={button.icon} alt={button.key} />
@@ -477,18 +477,18 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                     </div>
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__give-var-section">
-                    <div className="octane-wired__give-var-section-title">
+                <div className="volt-wired__give-var-section">
+                    <div className="volt-wired__give-var-section-title">
                         {LocalizeText('wiredfurni.params.delay', ['seconds'], [GetWiredTimeLocale(actionDelay)])}
                     </div>
                     <Slider max={20} min={0} value={actionDelay} onChange={(event) => setActionDelay(event)} />
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__give-var-section">
+                <div className="volt-wired__give-var-section">
                     <WiredFurniSelectionSourceRow
                         title="wiredfurni.params.sources.merged.title.variables_destination"
                         options={destinationSourceOptions}
@@ -513,8 +513,8 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
 
                 {referenceMode === 'variable' && (
                     <>
-                        <div className="octane-wired__divider" />
-                        <div className="octane-wired__give-var-section">
+                        <div className="volt-wired__divider" />
+                        <div className="volt-wired__give-var-section">
                             <WiredFurniSelectionSourceRow
                                 title="wiredfurni.params.sources.merged.title.variables_reference"
                                 options={referenceSourceOptions}

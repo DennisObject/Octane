@@ -37,10 +37,10 @@ describe('AIR navigator visual contract', () => {
 
         // left_hide_container: bitmap (3,3) 18x18, caption (20,2) h17 in id_heading_2.
         expect(view).not.toContain('gap={1}');
-        expect(rule('.octane-navigator-search-saves-result__header-icon')).toContain('left: 3px');
-        expect(rule('.octane-navigator-search-saves-result__header-icon')).toContain('top: 3px');
-        expect(rule('.octane-navigator-search-saves-result__header-label')).toContain('left: 20px');
-        expect(rule('.octane-navigator-search-saves-result__header-label')).toContain('top: 2px');
+        expect(rule('.volt-navigator-search-saves-result__header-icon')).toContain('left: 3px');
+        expect(rule('.volt-navigator-search-saves-result__header-icon')).toContain('top: 3px');
+        expect(rule('.volt-navigator-search-saves-result__header-label')).toContain('left: 20px');
+        expect(rule('.volt-navigator-search-saves-result__header-label')).toContain('top: 2px');
 
         // quick_link_text inherits the Ubuntu theme default u_regular: 12px, black.
         expect(rule('.saved-search-row__label')).toContain('font-size: 12px');

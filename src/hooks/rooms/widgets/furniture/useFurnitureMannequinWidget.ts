@@ -7,10 +7,10 @@ import {
     HabboClubLevelEnum,
     RoomEngineTriggerWidgetEvent,
     RoomObjectVariable
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useState } from 'react';
 import { MannequinUtilities, SendMessageComposer } from '../../../../api';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 
 const useFurnitureMannequinWidgetState = () => {
@@ -51,7 +51,7 @@ const useFurnitureMannequinWidgetState = () => {
         SendMessageComposer(new FurnitureMannequinSaveNameComposer(objectId, name));
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_MANNEQUIN, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_MANNEQUIN, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;

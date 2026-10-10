@@ -29,7 +29,7 @@ export const CatalogLayouGuildForumView: FC<CatalogLayoutProps> = (props) => {
             <Grid overflow="hidden">
                 <Column overflow="hidden" size={8}>
                     <div
-                        className="octane-catalog-forum-text grow! min-h-0 overflow-auto text-black"
+                        className="volt-catalog-forum-text grow! min-h-0 overflow-auto text-black"
                         dangerouslySetInnerHTML={{ __html: SanitizeHtml(page.localization.getText(1)) }}
                     />
                     {!!currentOffer && (
@@ -42,7 +42,7 @@ export const CatalogLayouGuildForumView: FC<CatalogLayoutProps> = (props) => {
                                 </div>
                             </Flex>
                             {selectedGroupHasForum && (
-                                <div className="octane-catalog-forum-warning text-center text-[11px] text-[#a81a12]" role="alert">
+                                <div className="volt-catalog-forum-warning text-center text-[11px] text-[#a81a12]" role="alert">
                                     {LocalizeText('catalog.alert.group_has_forum')}
                                 </div>
                             )}

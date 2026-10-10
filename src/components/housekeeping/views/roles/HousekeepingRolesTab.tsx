@@ -1,4 +1,4 @@
-import { HousekeepingAccessRole } from '@octane/renderer';
+import { HousekeepingAccessRole } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { HousekeepingRolesApi } from '../../../../api/housekeeping/HousekeepingRolesApi';
@@ -29,8 +29,8 @@ export const HousekeepingRolesTab: FC = () =>
 
     if (!allowed) return null;
 
-    return <div className="octane-housekeeping-roles">
-        <div className="octane-staff-row octane-roles-tabs" role="tablist" aria-label={t('title')}>
+    return <div className="volt-housekeeping-roles">
+        <div className="volt-staff-row volt-roles-tabs" role="tablist" aria-label={t('title')}>
             {(['roles', 'members', 'overrides', 'audit'] as const).map(id => <Button key={id} role="tab" aria-selected={tab === id} variant={tab === id ? 'primary' : 'secondary'} onClick={() => setTab(id)}>{t(`tab.${id}`)}</Button>)}
             <Button disabled={busy} variant="secondary" onClick={() => reload()}>{t('reload')}</Button>
         </div>
@@ -46,24 +46,24 @@ export const HousekeepingRolesTab: FC = () =>
                     {snapshot.roles.map(entry => <option key={entry.id} value={entry.id}>{entry.name} · {entry.weight} · {entry.memberCount} {t('members')}</option>)}
                 </select>
             </StaffField>}
-            {tab === 'roles' && <div className="octane-roles-scroll">
-                {!editable && <span className="octane-staff-muted">{t('readonly')}</span>}
+            {tab === 'roles' && <div className="volt-roles-scroll">
+                {!editable && <span className="volt-staff-muted">{t('readonly')}</span>}
                 <StaffSection title={t('details')}>
-                    <div className="octane-staff-grid">
+                    <div className="volt-staff-grid">
                         <StaffField label={t('slug')}><input maxLength={100} disabled={disabled || draft.id > 0} value={draft.slug} onChange={event => setDraft({ ...draft, slug: event.target.value })} /></StaffField>
                         <StaffField label={t('name')}><input maxLength={100} disabled={disabled} value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} /></StaffField>
                     </div>
                     <StaffField label={t('description')}><input maxLength={255} disabled={disabled} value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} /></StaffField>
-                    <div className="octane-staff-grid">
+                    <div className="volt-staff-grid">
                         <StaffField label={t('weight')}><input type="number" min={0} step={1} disabled={disabled} value={draft.weight} onChange={event => setDraft({ ...draft, weight: Number(event.target.value) })} /></StaffField>
                         <StaffField label={t('security')}><input type="number" min={0} max={7} step={1} disabled={disabled} value={draft.securityLevel} onChange={event => setDraft({ ...draft, securityLevel: Number(event.target.value) })} /></StaffField>
                         <StaffField label={t('badge')}><input maxLength={64} disabled={disabled} value={draft.badgeCode} onChange={event => setDraft({ ...draft, badgeCode: event.target.value })} /></StaffField>
-                        <div className="octane-staff-row">
+                        <div className="volt-staff-row">
                             <label><input type="checkbox" disabled={disabled} checked={draft.isStaff} onChange={event => setDraft({ ...draft, isStaff: event.target.checked })} /> {t('staff')}</label>
                             <label><input type="checkbox" disabled={disabled} checked={draft.isHidden} onChange={event => setDraft({ ...draft, isHidden: event.target.checked })} /> {t('hidden')}</label>
                         </div>
                     </div>
-                    <div className="octane-staff-row">
+                    <div className="volt-staff-row">
                         <Button disabled={disabled || !draft.name.trim() || !draft.slug.trim()} onClick={async () =>
                         {
                             if (await run(() => HousekeepingRolesApi.saveRole(snapshot.revision, draft), true)) setDraft(null);
@@ -84,7 +84,7 @@ export const HousekeepingRolesTab: FC = () =>
                         {
                             const permissions = snapshot.permissions.filter(permission => permission.category === category && `${permission.key} ${permission.description}`.toLowerCase().includes(search.toLowerCase()));
 
-                            return permissions.length > 0 && <fieldset key={category} className="octane-roles-permissions"><legend>{category}</legend>{permissions.map(permission =>
+                            return permissions.length > 0 && <fieldset key={category} className="volt-roles-permissions"><legend>{category}</legend>{permissions.map(permission =>
                             {
                                 const explicit = role.permissions.includes(permission.key);
                                 const inherited = !explicit && role.permissions.some(pattern => pattern === '*' || pattern.endsWith('.*') && permission.key.startsWith(pattern.slice(0, -1)));
@@ -112,7 +112,7 @@ const RoleLimit: FC<{ name: string; value?: number; max: number; disabled: boole
 {
     const [draft, setDraft] = useState(value ?? 0);
 
-    return <div className="octane-roles-limit">
+    return <div className="volt-roles-limit">
         <span>{name} {value === undefined && `(${t('fallback')})`}</span>
         <input aria-label={name} type="number" min={0} max={max} step={1} disabled={disabled} value={draft} onChange={event => setDraft(Number(event.target.value))} />
         <Button variant="secondary" disabled={disabled || !Number.isInteger(draft) || draft < 0} onClick={() => onSave(draft, false)}>{t('save')}</Button>

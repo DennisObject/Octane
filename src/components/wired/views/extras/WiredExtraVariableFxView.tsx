@@ -31,7 +31,7 @@ import {
 } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired, useWiredTools } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import { buildWiredVariablePickerEntries, IWiredVariablePickerEntry, WiredVariablePickerTarget } from '../WiredVariablePickerData';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
@@ -165,7 +165,7 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
         onChange: (enabled: boolean, target: number, token: string) => void,
         scope: string
     ) => (
-        <div className="flex flex-col gap-1 octane-wired-fx-editor__override">
+        <div className="flex flex-col gap-1 volt-wired-fx-editor__override">
             <label className="flex items-center gap-1 cursor-pointer">
                 <input type="checkbox" className="form-check-input" checked={enabled} onChange={(event) => onChange(event.target.checked, target, token)} />
                 <Text bold>{label}</Text>
@@ -195,7 +195,7 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
 
     return (
         <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} validate={validate} cardStyle={{ width: 420 }}>
-            <div className="flex flex-col gap-2 octane-wired-fx-editor">
+            <div className="flex flex-col gap-2 volt-wired-fx-editor">
                 <Text small={true}>
                     {localizeWithFallback(
                         'wiredfurni.params.variablefx.intro',
@@ -225,7 +225,7 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
                         {params.visibility === WIRED_FX_VISIBILITY.HAS_VARIABLE_WITH_VALUE && (
                             <div className="flex items-center gap-1">
                                 <Text>{localizeWithFallback('wiredfurni.params.variablefx.audience_value', 'with value')}</Text>
-                                <OctaneInput
+                                <VoltInput
                                     type="number"
                                     inputSize="sm"
                                     data-testid="fx-audience-value"
@@ -242,7 +242,7 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
                 {params.showMode === WIRED_FX_SHOW_MODE.WHEN_CHANGES && (
                     <div className="flex items-center gap-1 pl-4">
                         <Text>{localizeWithFallback('wiredfurni.params.variablefx.show_duration', 'for (ms)')}</Text>
-                        <OctaneInput
+                        <VoltInput
                             type="number"
                             inputSize="sm"
                             data-testid="fx-show-duration"
@@ -326,7 +326,7 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
                 {supportsSegments && (
                     <div className="flex items-center gap-1">
                         <Text bold>{localizeWithFallback('wiredfurni.params.variablefx.segments', 'Segments (0 = continuous)')}</Text>
-                        <OctaneInput
+                        <VoltInput
                             type="number"
                             inputSize="sm"
                             data-testid="fx-segments"
@@ -343,11 +343,11 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
                         <div className="flex gap-2">
                             <div className="flex flex-col gap-1 flex-1">
                                 <Text bold>{localizeWithFallback('wiredfurni.params.variablefx.min', 'Minimum')}</Text>
-                                <OctaneInput type="number" inputSize="sm" data-testid="fx-min" value={params.defaultMin} onChange={(event) => patch({ defaultMin: toInt(event.target.value, 0) })} />
+                                <VoltInput type="number" inputSize="sm" data-testid="fx-min" value={params.defaultMin} onChange={(event) => patch({ defaultMin: toInt(event.target.value, 0) })} />
                             </div>
                             <div className="flex flex-col gap-1 flex-1">
                                 <Text bold>{localizeWithFallback('wiredfurni.params.variablefx.max', 'Maximum')}</Text>
-                                <OctaneInput type="number" inputSize="sm" data-testid="fx-max" value={params.defaultMax} onChange={(event) => patch({ defaultMax: toInt(event.target.value, 100) })} />
+                                <VoltInput type="number" inputSize="sm" data-testid="fx-max" value={params.defaultMax} onChange={(event) => patch({ defaultMax: toInt(event.target.value, 100) })} />
                             </div>
                         </div>
                         {rangeError && (

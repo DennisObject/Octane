@@ -13,7 +13,7 @@ const BOOTSTRAP_JS = `(() => {
   (() => {
     const url = new URL(location.href);
     const keys = [ "sso", "token", "token_exp" ];
-    window.__octaneLaunchCredentials = {
+    window.__voltLaunchCredentials = {
       ssoTicket: url.searchParams.get("sso") || "",
       rememberToken: url.searchParams.get("token") || "",
       rememberExpiresAt: Number(url.searchParams.get("token_exp") || 0) || 0
@@ -32,7 +32,7 @@ const BOOTSTRAP_JS = `(() => {
   };
 
   const LOADER_BASE = getBase();
-  window.__octaneLoaderBase = LOADER_BASE.href;
+  window.__voltLoaderBase = LOADER_BASE.href;
 
   const withCacheBust = (url) => {
     url.searchParams.set("v", Date.now().toString(36));
@@ -104,11 +104,11 @@ const BOOTSTRAP_JS = `(() => {
       if(!response.ok) throw new Error("HTTP " + response.status);
       const payload = await response.json();
       if(payload && typeof payload === "object") {
-        window.__octaneClientMode = payload;
+        window.__voltClientMode = payload;
         return payload;
       }
     } catch(error) {
-      console.warn("[Octane] client-mode fetch failed:", error?.message || error);
+      console.warn("[Volt] client-mode fetch failed:", error?.message || error);
     }
     return null;
   };
@@ -157,7 +157,7 @@ const BOOTSTRAP_JS = `(() => {
     };
 
     const modeText = await fetchSecureConfig("client-mode.json");
-    window.__octaneClientMode = JSON.parse(modeText);
+    window.__voltClientMode = JSON.parse(modeText);
 
     const loaderText = await fetchSecureConfig("asset-loader.js");
     await importTextModule(loaderText);
@@ -173,7 +173,7 @@ const BOOTSTRAP_JS = `(() => {
         await loadSecureBootstrap(apiBase);
         return;
       } catch(error) {
-        console.warn("[Octane] Secure bootstrap fallback:", error?.message || error);
+        console.warn("[Volt] Secure bootstrap fallback:", error?.message || error);
       }
     }
 
@@ -204,28 +204,28 @@ const ASSET_LOADER_JS = `(() => {
 
   const debug = (message) => {
     try {
-      window.__octaneLoaderDebug = message;
-      const log = Array.isArray(window.__octaneLoaderDebugLog) ? window.__octaneLoaderDebugLog : [];
+      window.__voltLoaderDebug = message;
+      const log = Array.isArray(window.__voltLoaderDebugLog) ? window.__voltLoaderDebugLog : [];
       log.push(message);
-      window.__octaneLoaderDebugLog = log.slice(-30);
+      window.__voltLoaderDebugLog = log.slice(-30);
       if(!isDebug()) {
-        document.getElementById("octane-loader-debug")?.remove();
+        document.getElementById("volt-loader-debug")?.remove();
         return;
       }
-      let node = document.getElementById("octane-loader-debug");
+      let node = document.getElementById("volt-loader-debug");
       if(!node) {
         node = document.createElement("div");
-        node.id = "octane-loader-debug";
+        node.id = "volt-loader-debug";
         node.style.cssText = "position:fixed;left:8px;top:8px;z-index:2147483647;padding:6px 8px;max-width:70vw;background:rgba(0,0,0,.85);color:#fff;font:12px monospace;white-space:pre-wrap";
         document.body.appendChild(node);
       }
-      node.textContent = window.__octaneLoaderDebugLog.slice(-10).join("\\n");
+      node.textContent = window.__voltLoaderDebugLog.slice(-10).join("\\n");
     } catch {}
   };
 
   const getBase = () => {
-    if(typeof window.__octaneLoaderBase === "string" && window.__octaneLoaderBase) {
-      try { return new URL(window.__octaneLoaderBase); } catch {}
+    if(typeof window.__voltLoaderBase === "string" && window.__voltLoaderBase) {
+      try { return new URL(window.__voltLoaderBase); } catch {}
     }
     const source = document.currentScript?.src || location.href;
     return new URL(".", source);
@@ -382,22 +382,22 @@ const ASSET_LOADER_JS = `(() => {
 
   const readClientMode = async () => {
     try {
-      if(window.__octaneClientMode && typeof window.__octaneClientMode === "object") {
+      if(window.__voltClientMode && typeof window.__voltClientMode === "object") {
         debug("loader: client-mode preset");
-        return window.__octaneClientMode;
+        return window.__voltClientMode;
       }
       const url = withCacheBust(new URL("./client-mode.json", getBase()));
       const response = await fetch(url, { cache: "no-store" });
       if(!response.ok) throw new Error("client-mode " + response.status);
       const payload = await response.json();
       const mode = { ...MODE_DEFAULTS, ...(payload && typeof payload === "object" ? payload : {}) };
-      window.__octaneClientMode = mode;
+      window.__voltClientMode = mode;
       debug("loader: client-mode loaded");
       return mode;
     } catch(error) {
-      window.__octaneClientMode = { ...MODE_DEFAULTS };
+      window.__voltClientMode = { ...MODE_DEFAULTS };
       debug("loader: client-mode fallback " + (error?.message || error));
-      return window.__octaneClientMode;
+      return window.__voltClientMode;
     }
   };
 

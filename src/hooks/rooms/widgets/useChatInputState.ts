@@ -1,6 +1,6 @@
-import { RoomEngineObjectEvent, RoomObjectCategory, RoomSessionChatEvent } from '@octane/renderer';
+import { RoomEngineObjectEvent, RoomObjectCategory, RoomSessionChatEvent } from '@volt/renderer';
 import { useEffect, useState } from 'react';
-import { useOctaneEvent } from '../../events';
+import { useVoltEvent } from '../../events';
 import { useObjectSelectedEvent } from '../engine';
 import { useRoom } from '../useRoom';
 
@@ -26,7 +26,7 @@ export const useChatInputState = () => {
     const [floodBlockedSeconds, setFloodBlockedSeconds] = useState(0);
     const { roomSession = null } = useRoom();
 
-    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.FLOOD_EVENT, (event) => {
+    useVoltEvent<RoomSessionChatEvent>(RoomSessionChatEvent.FLOOD_EVENT, (event) => {
         setFloodBlocked(true);
         setFloodBlockedSeconds(parseFloat(event.message));
     });
@@ -41,7 +41,7 @@ export const useChatInputState = () => {
         setSelectedUsername(userData.name);
     });
 
-    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.DESELECTED, () => setSelectedUsername(''));
+    useVoltEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.DESELECTED, () => setSelectedUsername(''));
 
     useEffect(() => {
         if (!floodBlocked) return;

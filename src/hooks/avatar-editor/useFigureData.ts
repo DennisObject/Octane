@@ -1,4 +1,4 @@
-import { AvatarFigurePartType } from '@octane/renderer';
+import { AvatarFigurePartType } from '@volt/renderer';
 import { useCallback, useMemo, useState } from 'react';
 
 const useFigureDataState = () => {
