@@ -50,9 +50,7 @@ export const InventoryFurnitureItemView: FC<{
             onMouseOut={onMouseEvent}
             onMouseUp={onMouseEvent}
         >
-            {groupItem.stuffData.uniqueNumber <= 0 && (
-                <InventoryThumbIconView iconUrl={groupItem.iconUrl} />
-            )}
+            {groupItem.stuffData.uniqueNumber <= 0 && <InventoryThumbIconView iconUrl={groupItem.iconUrl} />}
         </InfiniteGrid.Item>
     );
 };

@@ -1,10 +1,10 @@
 import { FC, useEffect, useState } from 'react';
+import creditsIcon from '@/assets/images/inventory/trading/credits-icon.png';
 import { GetConfigurationValue, GroupItem, LocalizeText, TradeState, TradeUserData } from '../../../../api';
 import { useInventoryTrade } from '../../../../hooks';
 import { OctaneButton, OctaneItemCountBadge } from '../../../../layout';
-import { MAX_ITEMS_TO_TRADE } from './inventoryTradeOffer';
 import { InventoryThumbIconView } from '../InventoryThumbIconView';
-import creditsIcon from '@/assets/images/inventory/trading/credits-icon.png';
+import { MAX_ITEMS_TO_TRADE } from './inventoryTradeOffer';
 
 interface InventoryTradeViewProps {
     isMinimized?: boolean;
@@ -69,7 +69,9 @@ const TradeOfferView: FC<{
             {showTotals && (
                 <>
                     <div className="octane-trade-total is-items">{LocalizeText('inventory.trading.info.itemcount', ['value'], [String(user.itemCount)])}</div>
-                    <div className="octane-trade-total is-credits">{LocalizeText('inventory.trading.info.creditvalue', ['value'], [String(user.creditsCount)])}</div>
+                    <div className="octane-trade-total is-credits">
+                        {LocalizeText('inventory.trading.info.creditvalue', ['value'], [String(user.creditsCount)])}
+                    </div>
                 </>
             )}
         </div>

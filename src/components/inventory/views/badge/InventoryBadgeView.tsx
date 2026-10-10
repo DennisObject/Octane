@@ -179,7 +179,9 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                         </div>
                         <div className="octane-inventory-badges-footer-details">
                             <div className="octane-inventory-badges-footer-name">{LocalizeBadgeName(selectedBadgeCode)}</div>
-                            {description && description !== selectedBadgeCode && description !== `badge_desc_${selectedBadgeCode}` && <div className="octane-inventory-badges-footer-desc">{description}</div>}
+                            {description && description !== selectedBadgeCode && description !== `badge_desc_${selectedBadgeCode}` && (
+                                <div className="octane-inventory-badges-footer-desc">{description}</div>
+                            )}
                             <div className="octane-inventory-badges-footer-meta">
                                 <span className="octane-inventory-badge-rarity">{rarityText}</span>
                             </div>

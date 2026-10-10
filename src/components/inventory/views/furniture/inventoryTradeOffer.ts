@@ -1,5 +1,14 @@
 import { IObjectData, TradingListAddItemComposer, TradingListAddItemsComposer } from '@octane/renderer';
-import { FurniCategory, getGuildFurniType, GroupItem, IFurnitureItem, LocalizeText, NotificationAlertType, SendMessageComposer, TradeUserData } from '../../../../api';
+import {
+    FurniCategory,
+    GroupItem,
+    getGuildFurniType,
+    IFurnitureItem,
+    LocalizeText,
+    NotificationAlertType,
+    SendMessageComposer,
+    TradeUserData
+} from '../../../../api';
 
 export const MAX_ITEMS_TO_TRADE: number = 9;
 const MAX_TRADE_ITEM_COUNT: number = 1500;
@@ -45,7 +54,13 @@ export const offerGroupItemsToTrade = (
     }
 
     if (ownUser.itemCount + itemIds.length > MAX_TRADE_ITEM_COUNT) {
-        showAlert(LocalizeText('trading.items.too_many_items.desc'), NotificationAlertType.DEFAULT, null, null, LocalizeText('trading.items.too_many_items.title'));
+        showAlert(
+            LocalizeText('trading.items.too_many_items.desc'),
+            NotificationAlertType.DEFAULT,
+            null,
+            null,
+            LocalizeText('trading.items.too_many_items.title')
+        );
 
         return 0;
     }

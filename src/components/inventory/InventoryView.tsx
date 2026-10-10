@@ -251,9 +251,12 @@ export const InventoryView: FC<{}> = () => {
     }, [isVisible, isTrading, isWiredTrading]);
 
     // The v75 trade table sits under the furni list items are offered from.
-    useEffect(() => {
+    const [wasTrading, setWasTrading] = useState(false);
+
+    if (wasTrading !== isTrading) {
+        setWasTrading(isTrading);
         if (isTrading) setCurrentTab(TAB_FURNITURE);
-    }, [isTrading]);
+    }
 
     if (!isVisible) return null;
 

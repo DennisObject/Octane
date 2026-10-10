@@ -13,7 +13,21 @@ export const FURNI_MAIN_FILTER = {
 export type FurniMainFilter = (typeof FURNI_MAIN_FILTER)[keyof typeof FURNI_MAIN_FILTER];
 
 export const FURNI_TYPE_OPTIONS: Record<FurniMainFilter, string[]> = {
-    all: ['any', 'sittable', 'layable', 'tiles_or_rugs', 'ltd', 'wired', 'credit_furni', 'clothes', 'pet_food', 'collectibles', 'tradable', 'non_tradable', 'recyclable'],
+    all: [
+        'any',
+        'sittable',
+        'layable',
+        'tiles_or_rugs',
+        'ltd',
+        'wired',
+        'credit_furni',
+        'clothes',
+        'pet_food',
+        'collectibles',
+        'tradable',
+        'non_tradable',
+        'recyclable'
+    ],
     floor_items: [
         'any',
         'sittable',
