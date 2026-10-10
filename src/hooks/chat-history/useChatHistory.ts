@@ -34,8 +34,7 @@ export const ClearStoredChatHistory = () => {
  * head thumbnails for entries loaded from a previous session.
  *
  * `style` / `chatType` / `color` are kept because they're tiny but
- * meaningful for re-rendering the bubble. Translation fields are kept
- * because they're already text.
+ * meaningful for re-rendering the bubble.
  */
 const slimChatEntriesForStorage = (entries: IChatEntry[]): IChatEntry[] => entries.map((entry) => (entry.imageUrl ? { ...entry, imageUrl: undefined } : entry));
 

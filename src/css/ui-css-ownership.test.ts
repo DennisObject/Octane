@@ -8,14 +8,12 @@ describe('UI CSS ownership', () =>
 {
     it('keeps static widget styles in css files instead of React style tags', () =>
     {
-        const radioView = readSource('src/components/radio/RadioView.tsx');
         const toolbarView = readSource('src/components/toolbar/ToolbarView.tsx');
         const friendsBarView = readSource('src/components/friends/views/friends-bar/FriendsBarView.tsx');
         const userIdentityView = readSource('src/common/UserIdentityView.tsx');
         const bubbleHiddenView = readSource('src/components/voltbubblehidden/VoltbubbleHiddenView.tsx');
         const chatsCss = readSource('src/css/chat/Chats.css');
 
-        expect(radioView).not.toContain('RADIO_STYLES');
         expect(toolbarView).not.toContain('TOOLBAR_STYLES');
         expect(toolbarView).not.toContain('backgroundPosition: \'-25px -38px\'');
         expect(toolbarView).toContain('airMeMenu');

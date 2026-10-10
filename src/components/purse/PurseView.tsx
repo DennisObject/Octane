@@ -1,19 +1,17 @@
-import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@volt/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { endAuthSession, FriendlyTime, forgetAccessToken, isVoltAuthEnabled, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
+import { FriendlyTime, GetConfigurationValue, localizeWithFallback } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
-import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
 import settingsIcon from '../../assets/images/purse-swf/icons/2291_settings_icon_png$c9dcf215bb7a7e35a3f128c7c60151bc1008066621.png';
 import { Column } from '../../common';
-import { ClearStoredChatHistory, usePurse } from '../../hooks';
+import { usePurse } from '../../hooks';
 import { CurrencyView } from './views/CurrencyView';
 import { SeasonalView } from './views/SeasonalView';
 
 export const PurseView: FC<{}> = (props) => {
     const { purse = null, hcDisabled = false } = usePurse();
     const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
-    const authEnabled = isVoltAuthEnabled();
 
     const openSettingsSection = useCallback((section: string) => {
         CreateLinkEvent('user-settings/show/' + section);
@@ -73,7 +71,6 @@ export const PurseView: FC<{}> = (props) => {
 
     const earningsLabel = useMemo(() => localizeWithFallback('earnings.title', 'Earnings'), []);
     const helpLabel = useMemo(() => localizeWithFallback('toolbar.help', 'Help'), []);
-    const logoutLabel = useMemo(() => localizeWithFallback('toolbar.logout', 'Log out'), []);
     const settingsLabel = useMemo(() => localizeWithFallback('widget.memenu.settings', 'Settings'), []);
     const clubTitle = useMemo(() => localizeWithFallback('catalog.club.hc', 'Habbo Club'), []);
     const hasClubTime = clubDaysLeft >= 1;
@@ -87,52 +84,6 @@ export const PurseView: FC<{}> = (props) => {
         event.stopPropagation();
         CreateLinkEvent('habboUI/open/vault');
     }, []);
-
-    const handleLogout = useCallback(async (event: React.MouseEvent) => {
-        event.stopPropagation();
-
-        const ssoTicket = (window.VoltConfig?.['sso.ticket'] as string) ?? '';
-        const accessToken = getAccessToken();
-        // Taken under the remember lock, so a rotation in flight finishes first.
-        const rememberToken = (await forgetRememberGrant())[0] ?? '';
-
-        try {
-            SendMessageComposer(new DisconnectMessageComposer());
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        } catch {
-            /* best-effort — the HTTP logout below still performs server cleanup */
-        }
-
-        // Best effort: the server revokes the access token; local logout proceeds regardless.
-        if (authEnabled) await logoutSession({ accessToken, ssoTicket, rememberToken });
-
-        try {
-            GetCommunication().connection.dispose();
-        } catch {
-            /* best-effort — page reload will drop the transport if it is already closed */
-        }
-
-        endAuthSession();
-        forgetAccessToken();
-        ClearStoredChatHistory();
-        if (window.VoltConfig) window.VoltConfig['sso.ticket'] = '';
-
-        // When the client runs inside a CMS page, reloading the iframe alone
-        // leaves the user logged in on the site with a dead client. Send the
-        // whole window to the CMS logout instead, so both sessions end together.
-        const cmsLogoutUrl = GetConfigurationValue<string>('logout.redirect.url', '');
-
-        if (cmsLogoutUrl) {
-            try {
-                (window.top ?? window).location.href = cmsLogoutUrl;
-                return;
-            } catch {
-                /* blocked by the browser — fall through to the local reload */
-            }
-        }
-
-        window.location.reload();
-    }, [authEnabled]);
 
     if (!purse) return null;
 
@@ -181,14 +132,6 @@ export const PurseView: FC<{}> = (props) => {
                         >
                             <span>{helpLabel}</span>
                         </button>
-                        {authEnabled && <button
-                            type="button"
-                            className="volt-purse__btn volt-purse__btn--icon volt-purse__btn--logout volt-purse-right-button disconnect"
-                            onClick={handleLogout}
-                            aria-label={logoutLabel}
-                        >
-                            <img src={logoutIcon} alt="" className="volt-purse__btn-img" />
-                        </button>}
                         <button
                             type="button"
                             className="volt-purse__btn volt-purse__btn--icon volt-purse__btn--settings volt-purse-right-button settings"

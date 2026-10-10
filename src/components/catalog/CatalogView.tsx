@@ -1,18 +1,11 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useCallback, useEffect } from 'react';
-import { Permission } from '../../api/permissions';
 import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { LayoutCurrencyIcon, VoltCardContentView, VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../../common';
-import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
+import { CatalogEffectsHost, useCatalogActions, useCatalogData, useCatalogUiState, usePurse } from '../../hooks';
 import { useCatalogPageQuery } from '../../hooks/catalog/useCatalogQueries';
-import { useCatalogAdminUiStore } from '../../hooks/catalog/catalogAdminUiStore';
-import { CatalogStudioProvider } from './admin/studio/CatalogStudioProvider';
-import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
 import { getCatalogHeaderDescription } from './catalogLocalization.helpers';
 import { parseCatalogTabLabel } from './catalogTabLabel';
-import { CatalogAdminManagerView } from './views/admin/CatalogAdminManagerView';
-import { CatalogAdminOfferEditView } from './views/admin/CatalogAdminOfferEditView';
-import { CatalogAdminPageEditView } from './views/admin/CatalogAdminPageEditView';
 import { CatalogLoadingStateView } from './views/CatalogLoadingStateView';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
@@ -47,10 +40,6 @@ const CatalogViewInner: FC<{}> = () => {
         toggleCatalogByType = null,
         retryCurrentPage = null
     } = useCatalogActions();
-    const catalogAdmin = useCatalogAdmin();
-    const adminMode = catalogAdmin?.adminMode ?? false;
-    const setAdminMode = catalogAdmin?.setAdminMode ?? (() => {});
-    const isMod = catalogAdmin?.canEdit ?? false;
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
     // The header belongs to the open page: a folder (pageId -1) can be active without opening one.
@@ -141,11 +130,6 @@ const CatalogViewInner: FC<{}> = () => {
                         onCloseClick={() => setIsVisible(false)}
                     />
                     <div className="volt-catalog-mobile-header">
-                        {isMod && (
-                            <button className="volt-catalog-mobile-admin" type="button" onClick={() => setAdminMode(!adminMode)}>
-                                {LocalizeText(adminMode ? 'catalog.admin.exit' : 'catalog.admin')}
-                            </button>
-                        )}
                         <div className="volt-catalog-mobile-currency">
                             <div className="volt-catalog-coin">
                                 <span>{LocalizeShortNumber(purse?.credits ?? 0)}</span>
@@ -181,11 +165,6 @@ const CatalogViewInner: FC<{}> = () => {
                                     </VoltCardTabsItemView>
                                 );
                             })}
-                        {isMod && (
-                            <VoltCardTabsItemView classNames={['volt-catalog-admin-tab']} isActive={adminMode} onClick={() => setAdminMode(!adminMode)}>
-                                <span className="volt-catalog-tab-label">{LocalizeText('catalog.admin')}</span>
-                            </VoltCardTabsItemView>
-                        )}
                     </VoltCardTabsView>
                     <div className="volt-catalog-standard-header">
                         <div
@@ -243,9 +222,6 @@ const CatalogViewInner: FC<{}> = () => {
                     {(isBusy || catalogLoadError) && <CatalogLoadingStateView error={catalogLoadError} onRetry={retryCurrentPage} />}
                 </VoltCardView>
             )}
-            <CatalogAdminManagerView />
-            <CatalogAdminPageEditView />
-            <CatalogAdminOfferEditView />
             <CatalogGiftView />
             <CatalogPlacedOfferConfirmView />
             <MarketplacePostOfferView />
@@ -255,23 +231,12 @@ const CatalogViewInner: FC<{}> = () => {
 
 export const CatalogView: FC<{}> = () => {
     const { catalogLocalizationVersion = 0 } = useCatalogData();
-    const { isVisible = false } = useCatalogUiState();
 
-    const isCatalogAdmin = useHasPermission(Permission.CatalogEdit);
-    const adminWindowOpen = useCatalogAdminUiStore((state) => state.adminMode || !!state.pageEditor || !!state.offerEditor);
-
-    // Opening a studio session is expensive on the server: it loads every
-    // catalog item with FOR UPDATE and every items_base id, on the thread
-    // serving this client. Tying it to authentication meant every staff login
-    // stalled the hotel view — no room list, no catalog — until it finished.
-    // The session is only needed while the catalog or an admin editor window is open.
     return (
-        <CatalogStudioProvider active={isCatalogAdmin && (isVisible || adminWindowOpen)}>
+        <>
             <CatalogEffectsHost />
-            <CatalogAdminProvider>
-                <div className="hidden" data-catalog-localization-version={catalogLocalizationVersion} />
-                <CatalogViewInner />
-            </CatalogAdminProvider>
-        </CatalogStudioProvider>
+            <div className="hidden" data-catalog-localization-version={catalogLocalizationVersion} />
+            <CatalogViewInner />
+        </>
     );
 };

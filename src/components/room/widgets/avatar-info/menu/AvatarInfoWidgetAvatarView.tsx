@@ -17,7 +17,6 @@ import {
     DispatchUiEvent,
     GetOwnRoomObject,
     GetUserProfile,
-    isHousekeepingEnabled,
     LocalizeText,
     MessengerFriend,
     ReportType,
@@ -58,7 +57,6 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
     // scope here) so useSyncExternalStore installs against the real
     // React dispatcher.
     const isIgnored = useIsUserIgnored(avatarInfo.name);
-    const canOpenHousekeeping = useHasPermission(Permission.HousekeepingAccess) && isHousekeepingEnabled();
     // Reactive controller level: starts from the cached value at popup
     // open time, then updates from FlatControllerAdded/Removed events
     // and from optimistic clicks so the Give/Remove Rights buttons flip
@@ -207,9 +205,6 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
                 case 'report':
                     report(ReportType.BULLY, { reportedUserId: avatarInfo.webID });
                     break;
-                case 'housekeeping':
-                    CreateLinkEvent(`housekeeping/user/${avatarInfo.webID}/${encodeURIComponent(avatarInfo.name)}/${encodeURIComponent(avatarInfo.figure)}`);
-                    break;
                 case 'inspect':
                     openInspectionForUser(avatarInfo.roomIndex);
                     break;
@@ -309,9 +304,6 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
                         )}
                         <ContextMenuListItemView onClick={(event) => processAction('report')}>{LocalizeText('infostand.button.report')}</ContextMenuListItemView>
                         {showInspectButton && <ContextMenuListItemView onClick={(event) => processAction('inspect')}>Inspect</ContextMenuListItemView>}
-                        {canOpenHousekeeping && (
-                            <ContextMenuListItemView onClick={() => processAction('housekeeping')}>{LocalizeText('housekeeping.menu.send_to_hk')}</ContextMenuListItemView>
-                        )}
                         {moderateMenuHasContent && (
                             <ContextMenuListItemView onClick={(event) => processAction('moderate')}>
                                 <FaChevronRight className="right fa-icon" />

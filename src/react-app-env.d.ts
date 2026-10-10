@@ -36,8 +36,7 @@ declare module '*.sass';
 interface Window {
     VoltConfig?: Record<string, unknown>;
     VoltSecureApiUrl?: string;
-    __voltLaunchCredentials?: { ssoTicket: string; rememberToken: string; rememberExpiresAt: number };
-    __octaneLaunchCredentials?: { ssoTicket: string; rememberToken: string; rememberExpiresAt: number };
+    __voltLaunchCredentials?: { ssoTicket: string };
 }
 
 interface ImportMeta {

@@ -10,23 +10,17 @@ import {
 } from '@volt/renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, IsTouchDevice } from '../api';
 import { NativeTextHaloFilter } from '../common';
 import { useVoltEventReducer } from '../hooks';
 import { AchievementsView } from './achievements/AchievementsView';
-import { GoogleAdsView } from './ads/GoogleAdsView';
 import { AvatarEditorView } from './avatar-editor';
-import { BadgeCreatorView } from './badge-creator';
 import { BadgeLeaderboardView } from './badge-leaderboard/BadgeLeaderboardView';
 import { CameraWidgetView } from './camera/CameraWidgetView';
 import { CampaignView } from './campaign/CampaignView';
 import { CatalogView } from './catalog/CatalogView';
 import { ChatHistoryView } from './chat-history/ChatHistoryView';
-import { DiscordSettingsView } from './discord/DiscordSettingsView';
-import { EmuStatsView } from './emustats/EmuStatsView';
 import { FloorplanEditorView } from './floorplan-editor/FloorplanEditorView';
 import { FriendsView } from './friends/FriendsView';
-import { FurniEditorView } from './furni-editor/FurniEditorView';
 import { GameCenterView } from './game-center/GameCenterView';
 import { SnowWarView } from './game-center/views/snowwar/SnowWarView';
 import { GroupsView } from './groups/GroupsView';
@@ -35,21 +29,16 @@ import { GuideToolView } from './guide-tool/GuideToolView';
 import { HcCenterView } from './hc-center/HcCenterView';
 import { HelpView } from './help/HelpView';
 import { HotelView } from './hotel-view/HotelView';
-import { HousekeepingView } from './housekeeping/HousekeepingView';
 import { InventoryView } from './inventory/InventoryView';
 import { ModToolsView } from './mod-tools/ModToolsView';
 import { NavigatorView } from './navigator/NavigatorView';
 import { VoltbubbleHiddenView } from './voltbubblehidden/VoltbubbleHiddenView';
-import { VoltpediaView } from './voltpedia/VoltpediaView';
+import { HabboPagesViewer } from './habbopages/HabboPagesViewer';
 import { ExternalPluginLoader } from './plugins/ExternalPluginLoader';
 import { DailyTasksView, QuestCompletedView, QuestsView, RewardTrackView } from './quests';
-import { RadioView } from './radio/RadioView';
-import { RareValuesView } from './rare-values/RareValuesView';
 import { RightSideView } from './right-side/RightSideView';
 import { RoomView } from './room/RoomView';
 import { ToolbarView } from './toolbar/ToolbarView';
-import { TranslationBootstrap } from './translation/TranslationBootstrap';
-import { TranslationSettingsView } from './translation/TranslationSettingsView';
 import { TraxEditorView } from './trax-editor/TraxEditorView';
 import { UserProfileView } from './user-profile/UserProfileView';
 import { UserSettingsView } from './user-settings/UserSettingsView';
@@ -148,19 +137,14 @@ export const MainView: FC<{}> = (props) =>
                 )}
             </AnimatePresence>
             <ToolbarView isInRoom={!landingViewVisible} />
-            <TranslationBootstrap />
-            <GoogleAdsView />
             <ModToolsView />
-            <HousekeepingView />
             <WiredCreatorToolsView />
             <VariablesExplorerView />
             <RoomView />
             <ChatHistoryView />
             <WiredView />
             <AvatarEditorView />
-            <BadgeCreatorView />
             <BadgeLeaderboardView />
-            <EmuStatsView />
             <AchievementsView />
             <HabbiconHubView />
             <NavigatorView />
@@ -170,29 +154,24 @@ export const MainView: FC<{}> = (props) =>
             <FriendsView />
             <RightSideView />
             <UserSettingsView />
-            <DiscordSettingsView />
             <VaultView />
             <QuestsView />
             <QuestCompletedView />
             <DailyTasksView />
             <RewardTrackView />
-            <TranslationSettingsView />
             <UserProfileView />
             <GroupsView />
             <GroupForumView />
             <CameraWidgetView />
             <HelpView />
-            <VoltpediaView />
+            <HabboPagesViewer />
             <GuideToolView />
             <HcCenterView />
             <CampaignView />
             <GameCenterView />
             <SnowWarView />
             <FloorplanEditorView />
-            <FurniEditorView />
-            <RareValuesView />
             <TraxEditorView />
-            {GetConfigurationValue<boolean>('radio_ui.enabled', false) && !IsTouchDevice() && <RadioView />}
             <ExternalPluginLoader />
         </>
     );

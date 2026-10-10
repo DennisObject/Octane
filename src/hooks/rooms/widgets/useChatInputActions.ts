@@ -18,7 +18,6 @@ import { useCallback } from 'react';
 import { HasPermission, Permission } from '../../../api/permissions';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { useNotification } from '../../notification';
-import { useTranslation } from '../../translation';
 import { useWiredToolsActions } from '../../wired-tools';
 import { useRoom } from '../useRoom';
 
@@ -30,16 +29,13 @@ import { useRoom } from '../useRoom';
  *     `:screenshot`, `:pickall`, ...) and turns them into the matching
  *     renderer/composer call — these never reach the server as chat
  *     payload.
- *  2. Falls back to the regular default/shout/whisper composer path,
- *     optionally piping the text through the translation pipeline if
- *     outgoing translation is enabled.
+ *  2. Falls back to the regular default/shout/whisper composer path.
  *
  * No state lives in this hook — the typing/flood/idle state belongs
  * to useChatInputState.
  */
 export const useChatInputActions = () => {
     const { showVoltAlert = null, showConfirm = null } = useNotification();
-    const { settings, translateOutgoing, enqueueOutgoingTranslation } = useTranslation();
     const { roomSession = null } = useRoom();
     const { openMonitor } = useWiredToolsActions();
 
@@ -254,29 +250,11 @@ export const useChatInputActions = () => {
                 }
             };
 
-            const trimmedText = text.trimStart();
-            const shouldTranslateOutgoing = settings.enabled && !!trimmedText.length && trimmedText.charAt(0) !== ':';
-
-            if (!shouldTranslateOutgoing) {
-                dispatchChatMessage(text);
-                return null;
-            }
-
-            void (async () => {
-                const translation = await translateOutgoing(text);
-
-                if (translation) {
-                    enqueueOutgoingTranslation(translation);
-                    dispatchChatMessage(translation.translatedText);
-                    return;
-                }
-
-                dispatchChatMessage(text);
-            })();
+            dispatchChatMessage(text);
 
             return null;
         },
-        [roomSession, settings, translateOutgoing, enqueueOutgoingTranslation, showConfirm, showVoltAlert, openMonitor]
+        [roomSession, showConfirm, showVoltAlert, openMonitor]
     );
 
     return { sendChat };

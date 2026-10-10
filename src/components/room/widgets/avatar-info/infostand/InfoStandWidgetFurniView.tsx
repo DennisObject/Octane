@@ -46,7 +46,7 @@ import {
     UserProfileIconView
 } from '../../../../../common';
 import { Permission } from '../../../../../api/permissions';
-import { useFurniPickupGuard, useHasPermission, useMessageEvent, useVoltEvent, useRareValues, useRoom, useWiredTools } from '../../../../../hooks';
+import { useFurniPickupGuard, useHasPermission, useMessageEvent, useVoltEvent, useRoom, useWiredTools } from '../../../../../hooks';
 import { VoltInput } from '../../../../../layout';
 import { ImagePositionEditorView } from './ImagePositionEditorView';
 
@@ -128,9 +128,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
     const { avatarInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
     const { openInspectionForFurni, showInspectButton } = useWiredTools();
-    const canEditFurni = useHasPermission(Permission.CatalogEdit);
-    const { getValue: getRareValue } = useRareValues();
-    const rareValue = useMemo(() => (avatarInfo ? getRareValue(avatarInfo.spriteId) : null), [avatarInfo, getRareValue]);
 
     const externalImagePhotoUrl = useMemo(() => {
         if (!avatarInfo || !roomSession) return null;
@@ -636,13 +633,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
 
     if (!avatarInfo) return null;
 
-    const furniTypeId = roomSession
-        ? (GetRoomEngine()
-              .getRoomObject(roomSession.roomId, avatarInfo.id, avatarInfo.isWallItem ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR)
-              ?.model?.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID) ?? '?')
-        : '?';
     const showIds = canSeeFurniId;
-    const showEditFurni = godMode && canEditFurni && furniTypeId !== '?';
     const showBuildtools = godMode && !avatarInfo.isWallItem && canMove;
 
     return (
@@ -800,35 +791,11 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = (prop
                                 <div className="volt-furni-infostand__text">id: {avatarInfo.id}</div>
                             </>
                         )}
-                        {rareValue && rareValue.points > 0 && (
+                        {showBuildtools && (
                             <>
                                 <div className="volt-furni-infostand__rule" />
-                                <Flex alignItems="center" gap={2}>
-                                    <Text small variant="white">
-                                        {LocalizeText('rarevalues.infostand.label')}
-                                    </Text>
-                                    <Flex alignItems="center" gap={1}>
-                                        <Text small variant="white">
-                                            {rareValue.points}
-                                        </Text>
-                                        <LayoutCurrencyIcon type={rareValue.pointsType} />
-                                    </Flex>
-                                </Flex>
-                            </>
-                        )}
-                        {(showEditFurni || showBuildtools) && (
-                            <>
-                                <div className="volt-furni-infostand__rule" />
-                                {(showEditFurni || showBuildtools) && (
+                                {showBuildtools && (
                                     <div className="flex gap-1 w-full">
-                                        {showEditFurni && (
-                                            <button
-                                                className="flex-1 min-w-0 text-white text-xs bg-[#418db0] hover:bg-[#3789a8] border border-[#ffffff33] rounded px-2 py-1 cursor-pointer transition-colors"
-                                                onClick={() => CreateLinkEvent(`furni-editor/open/${furniTypeId}`)}
-                                            >
-                                                {localizeWithFallback('infostand.button.edit_furni', 'Edit furni')}
-                                            </button>
-                                        )}
                                         {showBuildtools && (
                                             <button
                                                 className="flex-1 min-w-0 text-white text-xs bg-[#2a2a3a] hover:bg-[#3a3a4a] border border-[#ffffff33] rounded px-2 py-1 cursor-pointer transition-colors"

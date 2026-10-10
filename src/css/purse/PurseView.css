@@ -280,7 +280,6 @@
 }
 
 .volt-purse__btn--help,
-.volt-purse__btn--logout,
 .volt-purse__btn--settings {
     display: inline-flex;
     width: 50px;
@@ -318,18 +317,6 @@
     border-image-source: var(--habbo-skin-button-help-pressed);
 }
 
-.volt-purse__btn--logout {
-    border-image-source: var(--habbo-skin-button-logout);
-}
-
-.volt-purse__btn--logout:hover {
-    border-image-source: var(--habbo-skin-button-logout-hover);
-}
-
-.volt-purse__btn--logout:active {
-    border-image-source: var(--habbo-skin-button-logout-pressed);
-}
-
 .volt-purse__btn--settings {
     border-image-source: var(--habbo-skin-button-settings);
 }
@@ -358,7 +345,6 @@
     image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.volt-purse__btn--logout .volt-purse__btn-img,
 .volt-purse__btn--settings .volt-purse__btn-img {
     max-width: 50px;
     max-height: 19px;

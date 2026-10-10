@@ -30,13 +30,7 @@ describe('catalog navigation item accessibility', () => {
         render(
             <CatalogNavigationItemView
                 node={node}
-                runtime={{
-                    activateNode,
-                    adminMode: false,
-                    createSubpage: vi.fn(),
-                    deletePage: vi.fn(),
-                    reorderPage: vi.fn()
-                }}
+                runtime={{ activateNode }}
             />
         );
 

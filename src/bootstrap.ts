@@ -1,5 +1,4 @@
 import { GetCommunication, GetConfiguration } from '@volt/renderer';
-import { captureLaunchCredentials } from './api/auth/launchCredentials';
 import { derivePetConfig, DerivedPetConfig, PetDefinition } from './api/volt/PetData';
 import { parseJsonDocument, UiJsonMode } from './json/JsonDocumentParser';
 import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';
@@ -28,8 +27,29 @@ const ensureMobileViewport = () => {
     viewport.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
 };
 
-// Before any request: lift sso/remember tokens out of the URL.
-const launchCredentials = captureLaunchCredentials();
+// Before any request: take the website's SSO ticket out of the URL. The production loader
+// (configuration/bootstrap.js) has usually done that already and left it in memory.
+const takeSsoTicket = (): string => {
+    const handedOver = window.__voltLaunchCredentials?.ssoTicket;
+
+    if (handedOver !== undefined) {
+        delete window.__voltLaunchCredentials;
+
+        return handedOver;
+    }
+
+    const url = new URL(window.location.href);
+    const ssoTicket = url.searchParams.get('sso') || '';
+
+    if (url.searchParams.has('sso')) {
+        url.searchParams.delete('sso');
+        window.history.replaceState(window.history.state, '', url.toString());
+    }
+
+    return ssoTicket;
+};
+
+const ssoTicket = takeSsoTicket();
 
 ensureMobileViewport();
 
@@ -200,7 +220,7 @@ const gamedataVersions = (() => {
     'config.urls': [rendererConfigUrl, uiConfigUrl],
     ...(furnidataVersion ? { 'furnidata.version': furnidataVersion } : {}),
     ...(gamedataVersions ? { 'gamedata.versions': gamedataVersions } : {}),
-    'sso.ticket': launchCredentials.ssoTicket || null,
+    'sso.ticket': ssoTicket || null,
     'forward.type': search.get('room') ? 2 : -1,
     'forward.id': search.get('room') || 0,
     'friend.id': search.get('friend') || 0
@@ -254,7 +274,7 @@ preconnectOrigins();
 // With a hand-off ticket, log in now: the socket opens and authenticates while the app bundle
 // evaluates. The connection holds incoming messages until MainView calls ready(), and App takes
 // over this init (see takeEarlyCommunicationInit) instead of starting its own.
-if (launchCredentials.ssoTicket) {
+if (ssoTicket) {
     const communicationInit = GetCommunication().init();
 
     communicationInit.catch(() => {});

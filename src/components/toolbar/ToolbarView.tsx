@@ -1,8 +1,8 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, VoltToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@volt/renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, VoltToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait } from '@volt/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
-import { GetConfigurationValue, isHousekeepingEnabled, localizeWithFallback, MessengerIconState, OpenMessengerChat, SendMessageComposer, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
+import { GetConfigurationValue, localizeWithFallback, MessengerIconState, OpenMessengerChat, SendMessageComposer, VisitDesktop } from '../../api';
 import dividerImg from '../../assets/images/toolbar/air/divider.png';
 import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
@@ -14,7 +14,6 @@ import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
 import { ToolbarProgressionView } from './ToolbarProgressionView';
 import { ToolbarUnseenCountView } from './ToolbarUnseenCountView';
-import { YouTubePlayerView } from './YouTubePlayerView';
 
 const containerVariants: Variants = {
     hidden: { transition: { staggerChildren: 0.015, staggerDirection: -1 } },
@@ -63,7 +62,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ staffStackBottom, setStaffStackBottom ] = useState<number | null>(null);
     const useGuideTool = usePerkAllowed(PerkEnum.USE_GUIDE_TOOL);
     const cameraAllowed = usePerkAllowed(PerkEnum.CAMERA);
-    const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const leftDockRef = useRef<HTMLDivElement>(null);
     const rightDockRef = useRef<HTMLDivElement>(null);
     const meSlotRef = useRef<HTMLDivElement>(null);
@@ -82,8 +80,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { openMonitor, showToolbarButton } = useWiredTools();
     const { available: buildHeightAvailable, toggle: toggleBuildHeight } = useBuildHeight();
     const isMod = useHasPermission(Permission.ModerationTool);
-    const isHk = useHasPermission(Permission.HousekeepingAccess);
-    const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const openIssueCount = useOpenIssueCount();
     const openTicketsCount = isMod ? openIssueCount : 0;
     const visibilityVariant = 'visible';
@@ -121,22 +117,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         hidden: { opacity: 0, y: 8, pointerEvents: 'none' },
         visible: { opacity: 1, y: 0, pointerEvents: 'auto' }
     }), []);
-
-    useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, event =>
-    {
-        const enabled = event.getParser().youtubeEnabled;
-        setYoutubeEnabled(enabled);
-        setYoutubeRoomEnabled(enabled);
-    });
-
-    useEffect(() =>
-    {
-        if(!isInRoom)
-        {
-            setYoutubeEnabled(false);
-            setYoutubeRoomEnabled(false);
-        }
-    }, [ isInRoom ]);
 
     useEffect(() =>
     {
@@ -243,7 +223,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         };
     }, [ isMeExpanded, isProgressionExpanded, leftCollapsed, touchLayout ]);
 
-    const openYouTubePlayer = () => window.dispatchEvent(new CustomEvent('youtube:toggle'));
 
     useVoltEvent<VoltToolbarAnimateIconEvent>(VoltToolbarAnimateIconEvent.ANIMATE_ICON, event =>
     {
@@ -284,7 +263,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
     return (
         <>
-            {youtubeEnabled && <YouTubePlayerView />}
 
             <AnimatePresence>
                 {!touchLayout && isProgressionExpanded && (
@@ -444,11 +422,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <img src={dividerImg} alt="" className="tb-divider" />
                     {!leftCollapsed && (
                         <>
-                            {isInRoom && youtubeEnabled && (
-                                <motion.div variants={itemVariants} className="tb-slot">
-                                    <ToolbarItemView icon="youtube" onClick={openYouTubePlayer} className="tb-icon" />
-                                </motion.div>
-                            )}
                             {isInRoom && buildHeightAvailable && (
                                 <motion.div variants={itemVariants} className="tb-slot">
                                     <ToolbarItemView icon="buildheight" onClick={toggleBuildHeight} className="tb-icon" />
@@ -460,11 +433,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                     {openTicketsCount > 0 && (
                                         <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />
                                     )}
-                                </motion.div>
-                            )}
-                            {isHk && hkEnabled && (
-                                <motion.div variants={itemVariants} className="tb-slot">
-                                    <ToolbarItemView icon="housekeeping" onClick={() => CreateLinkEvent('housekeeping/toggle')} className="tb-icon" />
                                 </motion.div>
                             )}
                         </>
@@ -593,11 +561,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             <ToolbarItemView icon="wired-tools" onClick={openMonitor} className="tb-icon" />
                         </motion.div>
                     )}
-                    {isInRoom && youtubeEnabled && (
-                        <motion.div variants={itemVariants}>
-                            <ToolbarItemView icon="youtube" onClick={openYouTubePlayer} className="tb-icon" />
-                        </motion.div>
-                    )}
                     {isInRoom && buildHeightAvailable && (
                         <motion.div variants={itemVariants}>
                             <ToolbarItemView icon="buildheight" onClick={toggleBuildHeight} className="tb-icon" />
@@ -634,11 +597,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     <motion.div variants={itemVariants} className="relative">
                         <ToolbarItemView icon="modtools" onClick={() => CreateLinkEvent('mod-tools/show')} className="tb-icon" />
                         {openTicketsCount > 0 && <LayoutItemCountView count={openTicketsCount} className="pointer-events-none absolute -right-1 -top-1 z-10" />}
-                    </motion.div>
-                )}
-                {isHk && hkEnabled && (
-                    <motion.div variants={itemVariants}>
-                        <ToolbarItemView icon="housekeeping" onClick={() => CreateLinkEvent('housekeeping/toggle')} className="tb-icon" />
                     </motion.div>
                 )}
                 {/* Below the compact breakpoint the right rail's social icons

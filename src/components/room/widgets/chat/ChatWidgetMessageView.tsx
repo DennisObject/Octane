@@ -44,14 +44,6 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     const makeRoomRef = useRef(makeRoom);
     const { onClickChat } = useOnClickChat();
     const formattedText = useMemo(() => `${chat.formattedText}`, [chat.formattedText]);
-    const originalFormattedText = useMemo(
-        () => `${chat.originalFormattedText || chat.formattedText}`,
-        [chat.originalFormattedText, chat.formattedText]
-    );
-    const translatedFormattedText = useMemo(
-        () => `${chat.translatedFormattedText || chat.formattedText}`,
-        [chat.translatedFormattedText, chat.formattedText]
-    );
 
     const getBubbleWidth = useMemo(() => {
         switch (bubbleWidth) {
@@ -85,9 +77,6 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
     }, [
         chat,
         chat.formattedText,
-        chat.originalFormattedText,
-        chat.showTranslation,
-        chat.translatedFormattedText,
         chatTextSize,
         isVisible,
         showPointer,
@@ -187,7 +176,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                     )}
                 </div>
                 <div className="chat-content">
-                    {!chat.showTranslation && nativeTextEnabled && (
+                    {nativeTextEnabled && (
                         <NativeChatText
                             username={chat.username}
                             html={formattedText}
@@ -198,29 +187,10 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                             onClick={onClickChat}
                         />
                     )}
-                    {!chat.showTranslation && !nativeTextEnabled && (
+                    {!nativeTextEnabled && (
                         <>
                             {!anonymous && <b className="username">{chat.username}: </b>}
                             <span className={messageClassName} dangerouslySetInnerHTML={{ __html: formattedText }} onClick={onClickChat} />
-                        </>
-                    )}
-                    {chat.showTranslation && (
-                        <>
-                            {!anonymous && <b className="username">{chat.username}: </b>}
-                            <div className="mt-[2px] flex flex-col gap-[2px]" onClick={onClickChat}>
-                                <div className="flex items-start gap-1 leading-[1.1]">
-                                    <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                        original:
-                                    </span>
-                                    <span className={messageClassName} dangerouslySetInnerHTML={{ __html: originalFormattedText }} />
-                                </div>
-                                <div className="flex items-start gap-1 leading-[1.1]">
-                                    <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                        translate:
-                                    </span>
-                                    <span className={messageClassName} dangerouslySetInnerHTML={{ __html: translatedFormattedText }} />
-                                </div>
-                            </div>
                         </>
                     )}
                 </div>

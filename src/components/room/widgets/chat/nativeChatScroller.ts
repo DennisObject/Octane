@@ -181,7 +181,7 @@ export class NativeChatScroller {
         const width = chat.width - overlap.x - overlap.width;
         const height = (geometry.unlimitedHeight ? chat.height : Math.min(Math.trunc(108 * this.fontScale), chat.height)) - 10 - overlap.y - overlap.height;
         if (existing) {
-            // Translation is custom: preserve its existing centered reflow without changing collider mode.
+            // A remeasured bubble keeps its centred reflow without changing collider mode.
             existing.body.x += (existing.body.width - width) / 2;
             if (existing.narrow) existing.offset += (width - existing.body.width) / 2;
             existing.body.width = width;

@@ -82,28 +82,6 @@
     height: 34px;
 }
 
-.volt-icon.icon-rare-values {
-    background-image: url("@/assets/images/toolbar/icons/catalog.png");
-    width: 37px;
-    height: 36px;
-    filter: hue-rotate(280deg) saturate(1.4);
-}
-
-.volt-icon.icon-housekeeping {
-    background-image: url("@/assets/images/toolbar/icons/housekeeping.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 40px;
-    height: 40px;
-}
-
-.volt-icon.icon-furnieditor {
-    background-image: url("@/assets/images/toolbar/icons/furnieditor.png");
-    width: 30px;
-    height: 34px;
-}
-
 .volt-icon.icon-friendall {
     background-image: url("@/assets/images/toolbar/air/all-friends.png");
     width: 32px;
@@ -164,15 +142,6 @@
     height: 30px;
 }
 
-.volt-icon.icon-me-badge-creator {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='b' x1='0' x2='0' y1='0' y2='1'><stop offset='0' stop-color='%23ffd966'/><stop offset='1' stop-color='%23e69138'/></linearGradient></defs><path d='M5 7 Q5 5 7 5 L19 5 Q21 5 21 7 L21 18 Q21 22 13 26 Q5 22 5 18 Z' fill='url(%23b)' stroke='%23222' stroke-width='1.6' stroke-linejoin='round'/><polygon points='13,8 14.4,12 18.6,12 15.2,14.6 16.5,18.6 13,16.2 9.5,18.6 10.8,14.6 7.4,12 11.6,12' fill='%23ffffff' stroke='%23222' stroke-width='0.7' stroke-linejoin='round'/><g transform='rotate(40 24 22)'><rect x='17' y='20' width='12' height='4' fill='%23ffd84d' stroke='%23222' stroke-width='1.2' rx='0.5'/><rect x='25' y='20' width='3' height='4' fill='%23ec5e5e' stroke='%23222' stroke-width='1.2'/><polygon points='17,20 17,24 13,22' fill='%23222'/><polygon points='15,21.4 17,21.4 17,22.6 15,22.6' fill='%23ffeb3b'/></g></svg>");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 30px 30px;
-    width: 32px;
-    height: 32px;
-}
-
 .volt-icon.icon-me-settings {
     background-image: url("@/assets/images/toolbar/icons/me-menu/cog.png");
     width: 28px;
@@ -207,13 +176,6 @@
     background-image: url("@/assets/images/toolbar/air/camera.png");
     width: 38px;
     height: 45px;
-}
-
-.volt-icon.icon-youtube {
-    background-image: url("@/assets/images/toolbar/icons/youtube.svg");
-    background-size: contain;
-    width: 36px;
-    height: 36px;
 }
 
 .volt-icon.icon-message {

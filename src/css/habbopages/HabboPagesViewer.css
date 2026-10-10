@@ -1,0 +1,161 @@
+.habbopages.volt-card-shell.volt-card-frame-3 {
+    box-sizing: border-box;
+    width: 418px;
+    height: 398px;
+    padding: 33px 3px 3px;
+    color: #111;
+    font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.habbopages.volt-card-shell.volt-card-frame-3::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: 33px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(#578ca5 0 31px, #05121a 31px 32px, #e9e9e1 32px 33px);
+    box-shadow: inset 0 2px #67a3bf;
+    content: '';
+    pointer-events: none;
+}
+
+.habbopages > .volt-card-header-shell { border-bottom-color: #e9e9e1; cursor: move; }
+.habbopages__native-title { position: absolute !important; top: 2px; left: 50%; transform: translateX(-50%); }
+.habbopages.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button { top: 1px !important; right: 2px !important; }
+
+.habbopages__viewport {
+    position: relative;
+    box-sizing: border-box;
+    width: calc(100% - 1px);
+    height: calc(100% - 23px);
+    margin: 3px 0 0 1px;
+    overflow: hidden;
+    border: 0;
+    background: #e9e9e1;
+}
+
+.habbopages__viewport > .volt-classic-scroll-area-viewport {
+    box-sizing: border-box;
+    height: calc(100% - 1px);
+    padding-right: 17px;
+    background: #fff;
+    scrollbar-width: none !important;
+}
+
+.habbopages__viewport > .volt-classic-scroll-area-viewport::-webkit-scrollbar { display: none !important; }
+
+.habbopages__viewport > .volt-classic-scrollbar { top: -1px; }
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-default.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up:hover {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-hover.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up:active {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-up-3-pressed.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-default.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down:hover {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-hover.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down:active {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-down-3-pressed.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-track {
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-track-3.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-thumb {
+    min-height: 0;
+    box-sizing: border-box;
+    border: 0 solid transparent;
+    border-image: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-default.png") 5 0 / 5px 0 stretch;
+    background: url("../../assets/images/habbo-skin/slices/scroll-grip-3-default.png") repeat-y;
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-thumb:hover {
+    border-image-source: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-hover.png");
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-grip-3-hover.png");
+}
+
+.habbopages__viewport > .volt-classic-scrollbar .volt-classic-scrollbar-thumb:active {
+    border-image-source: url("../../assets/images/habbo-skin/slices/scroll-thumb-3-pressed.png");
+    background-image: url("../../assets/images/habbo-skin/slices/scroll-grip-3-pressed.png");
+}
+
+.habbopages__content > div {
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: 3px 5px 8px;
+    overflow-wrap: break-word;
+    color: #111;
+    background: #fff;
+}
+
+.habbopages__content > .habbopages__native-container { margin-left: 1px; padding: 0; }
+
+.habbopages__native-page { position: relative; min-height: 100%; }
+.habbopages__native-page > canvas { image-rendering: pixelated; }
+.habbopages__native-link { position: absolute; display: block; background: transparent; }
+.habbopages__native-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+.habbopages__accessible-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: pre-wrap;
+}
+
+.habbopages__content :is(h1, h2, h3, p) { margin: 0; padding: 0; }
+
+.habbopages__content h1 {
+    color: #fc6204;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 28px;
+}
+
+.habbopages__content :is(h2, h3) {
+    color: #fc6204;
+    font-weight: 700;
+}
+
+.habbopages__content h2 { font-size: 19px; }
+.habbopages__content h3 { font-size: 15px; }
+
+.habbopages__content a { color: #fc6204; font-weight: 700; text-decoration: underline; }
+.habbopages__content img { max-width: none; }
+.habbopages__content img[height] { height: attr(height px); }
+.habbopages__content img[width] { width: attr(width px); }
+
+.habbopages__content .padding-top,
+.habbopages__content .padding-bottom {
+    display: block;
+    height: 9px;
+    line-height: 9px;
+}
+
+.habbopages__content .padding-top br,
+.habbopages__content .padding-bottom br { display: none; }
+.habbopages__content .bullet-item { line-height: 14px; }
+
+.habbopages__content font[size='12px'] { font-size: 12px; }
+.habbopages__content font[size='-1'] { font-size: 10px; }
+
+/* Legacy Flash HTML inserted empty FONT/P rows to reserve bitmap height.
+   Browser images already participate in flow, so retaining both doubles it. */
+.habbopages__content img + font { display: none; }
