@@ -1509,8 +1509,8 @@
     height: 11px;
 }
 
-/* avatar_info_widget: the 129x39 AIR bubble. Like the avatar menus the skin body sits 6px inside the window and the 13x9 pointer is bottom centred; the 8px layout
-   margin puts the relationship icon (16x14 at 2,4) at 10,12 and the name field (16,3) at 24,11. */
+/* avatar_info_widget: the 129x39 AIR bubble. The skin body sits 6px inside the window and the 13x9 pointer is bottom centred; the relationship icon (16x14 at 2,4) paints at 10,12.
+   Native auto_size keeps the name field at x=16 with a 32px remainder. The name view's 24/24 (left 24px, width raster+48) is Dennis's requested centering; the +48 total stays supported. */
 .octane-context-menu.air-name-bubble {
     isolation: isolate;
     box-sizing: border-box;
