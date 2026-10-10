@@ -6,10 +6,6 @@
     <meta name="referrer" content="strict-origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Volt</title>
-    <!-- Connection hints for the two domains the loader hits first.
-         dns-prefetch + preconnect halve the TLS round-trips on cold load. -->
-    <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin />
-    <script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
     <!-- The loading screen's photo frame paints with the page, before any script runs.
          LoadingView draws the same frame in the same place once React mounts. -->
     <style>

@@ -1,10 +1,8 @@
 import { InfiniteGrid } from '@layout/InfiniteGrid';
-import { CSSProperties, FC, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IPurchasableOffer, Offer } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView } from '../../../../../common';
 import { useCatalogActions, useCatalogData, useScrollWindow } from '../../../../../hooks';
-import { useCatalogAdminOfferReorder } from '../../../../../hooks/catalog/useCatalogAdminOfferReorder';
-import { useCatalogAdmin } from '../../../CatalogAdminContext';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { getAirCatalogColumnCount, getVisibleAirGridEntries, isAirBaseCatalogOffer, layoutAirCatalogOffers } from '../common/catalogAirGrid.helpers';
 import { shouldVirtualizeCatalogOffers } from './catalogGridPerformance.helpers';
@@ -12,7 +10,7 @@ import { shouldVirtualizeCatalogOffers } from './catalogGridPerformance.helpers'
 interface CatalogItemGridWidgetViewProps extends AutoGridProps {
     tintColor?: string;
     showPrices?: boolean;
-    /** Replaces the page's offers, e.g. one tile per colour family. Disables admin reordering. */
+    /** Replaces the page's offers, e.g. one tile per colour family. */
     offers?: IPurchasableOffer[];
     isOfferActive?: (offer: IPurchasableOffer) => boolean;
 }
@@ -33,12 +31,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     } = props;
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const { selectCatalogOffer = null } = useCatalogActions();
-    const adminMode = useCatalogAdmin()?.adminMode ?? false;
-    const canReorder = adminMode && !offersOverride;
-    const reorderOffers = useCatalogAdminOfferReorder();
     const elementRef = useRef<HTMLDivElement>(null);
-    const [dragIndex, setDragIndex] = useState<number | null>(null);
-    const [dropIndex, setDropIndex] = useState<number | null>(null);
     const [airColumnCount, setAirColumnCount] = useState(columnCount);
     const baseGridClassName = columnCount > 1 && !className.split(/\s+/).includes('volt-catalog-grid') ? `${className} volt-catalog-grid`.trim() : className;
     const isAirStandardDensity = className.split(/\s+/).includes('volt-catalog-grid-density-standard');
@@ -52,7 +45,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const effectiveColumnMinWidth = usesAirBaseGridTemplate ? 36 : columnMinWidth;
     const gridClassName =
         `${baseGridClassName} ${usesAirBaseGridTemplate ? 'uses-base-grid-template' : ''} ${usesAirMixedGridTemplate ? 'uses-mixed-grid-template' : ''}`.trim();
-    const useVirtualGrid = shouldVirtualizeCatalogOffers(offers.length, adminMode) && !usesAirMixedGridTemplate;
+    const useVirtualGrid = shouldVirtualizeCatalogOffers(offers.length) && !usesAirMixedGridTemplate;
     const airGridStyle = {
         ...style,
         ...(isAirStandardDensity && { '--volt-air-column-count': airColumnCount.toString() })
@@ -84,13 +77,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     const visibleMixedEntries = useMemo(
         () => getVisibleAirGridEntries(mixedLayout.entries, clampedScrollTop, scrollWindow.viewportHeight),
         [mixedLayout, clampedScrollTop, scrollWindow.viewportHeight]
-    );
-    const renderedMixedEntries = useMemo(
-        () =>
-            dragIndex === null || visibleMixedEntries.some((entry) => entry.index === dragIndex)
-                ? visibleMixedEntries
-                : [...visibleMixedEntries, ...mixedLayout.entries.filter((entry) => entry.index === dragIndex)],
-        [visibleMixedEntries, mixedLayout, dragIndex]
     );
 
     useLayoutEffect(() => {
@@ -124,30 +110,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
         return () => observer.disconnect();
     }, [columnCount, isAirStandardDensity, offers]);
 
-    const handleDragStart = useCallback((index: number) => {
-        setDragIndex(index);
-    }, []);
-
-    const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
-        e.preventDefault();
-        setDropIndex(index);
-    }, []);
-
-    const handleDrop = useCallback(
-        (index: number) => {
-            if (dragIndex !== null && currentPage) reorderOffers(currentPage, dragIndex, index, `#${currentPage.pageId}`);
-
-            setDragIndex(null);
-            setDropIndex(null);
-        },
-        [dragIndex, currentPage, reorderOffers]
-    );
-
-    const handleDragEnd = useCallback(() => {
-        setDragIndex(null);
-        setDropIndex(null);
-    }, []);
-
     if (!currentPage) return null;
 
     const selectOffer = (offer: IPurchasableOffer) => {
@@ -155,24 +117,15 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
     };
 
     const renderOfferTile = (offer: IPurchasableOffer, index: number, airPosition: { x: number; y: number; width: number; height: number } | null = null) => {
-        const isDragging = dragIndex === index;
-        const isDropTarget = dropIndex === index && dragIndex !== index;
-
         return (
             <div
                 key={offer.offerId}
-                className={`${isDragging ? 'volt-catalog-admin-dragging' : ''} ${isDropTarget ? 'volt-catalog-admin-drop-target' : ''}`}
                 data-air-offer-index={airPosition ? index : undefined}
-                draggable={canReorder}
                 style={
                     airPosition
                         ? { position: 'absolute', left: airPosition.x, top: airPosition.y, width: airPosition.width, height: airPosition.height }
                         : undefined
                 }
-                onDragEnd={canReorder ? handleDragEnd : undefined}
-                onDragOver={canReorder ? (e) => handleDragOver(e, index) : undefined}
-                onDragStart={canReorder ? () => handleDragStart(index) : undefined}
-                onDrop={canReorder ? () => handleDrop(index) : undefined}
             >
                 <CatalogGridOfferView
                     bundleCounter={bundleCounterByOffer.get(offer) ?? 0}
@@ -180,7 +133,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                     offer={offer}
                     selectOffer={selectOffer}
                     tintColor={tintColor}
-                    showTechnicalDetails={adminMode}
                     showPrices={showPrices}
                 />
             </div>
@@ -195,9 +147,8 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                     className={`volt-catalog-air-mixed-grid ${gridClassName}`}
                     role="listbox"
                     style={{ ...airGridStyle, width: mixedLayout.width, minWidth: '100%', height: mixedLayout.height }}
-                    onDragEnd={canReorder ? handleDragEnd : undefined}
                 >
-                    {renderedMixedEntries.map(({ offer, index, ...position }) => renderOfferTile(offer, index, position))}
+                    {visibleMixedEntries.map(({ offer, index, ...position }) => renderOfferTile(offer, index, position))}
                     {children}
                 </div>
             </ClassicScrollAreaView>
@@ -210,7 +161,6 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = (pr
                 aria-label="Catalog items"
                 className={`volt-catalog-grid-virtual h-full min-h-0 ${gridClassName}`.trim()}
                 role="listbox"
-                onDragEnd={canReorder ? handleDragEnd : undefined}
                 style={
                     {
                         '--volt-grid-column-min-height': `${effectiveColumnMinHeight}px`,

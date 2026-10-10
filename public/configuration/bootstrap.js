@@ -1,16 +1,11 @@
 (() => {
-  // Lift hand-off credentials out of the URL before the first request so they
-  // never reach history or Referer headers; the app reads them from memory.
+  // Lift the website's SSO ticket out of the URL before the first request so it
+  // never reaches history or Referer headers; the app reads it from memory.
   (() => {
     const url = new URL(location.href);
-    const keys = [ "sso", "token", "token_exp" ];
-    window.__voltLaunchCredentials = {
-      ssoTicket: url.searchParams.get("sso") || "",
-      rememberToken: url.searchParams.get("token") || "",
-      rememberExpiresAt: Number(url.searchParams.get("token_exp") || 0) || 0
-    };
-    if(keys.some((key) => url.searchParams.has(key))) {
-      keys.forEach((key) => url.searchParams.delete(key));
+    window.__voltLaunchCredentials = { ssoTicket: url.searchParams.get("sso") || "" };
+    if(url.searchParams.has("sso")) {
+      url.searchParams.delete("sso");
       history.replaceState(history.state, "", url.toString());
     }
   })();

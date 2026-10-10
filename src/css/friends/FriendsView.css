@@ -837,27 +837,6 @@
             white-space: pre-wrap;
         }
 
-        & .messenger-translation-block {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        & .messenger-translation-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 4px;
-            line-height: 1.2;
-        }
-
-        & .messenger-translation-label {
-            min-width: 48px;
-            flex-shrink: 0;
-            opacity: .7;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
         & .messenger-message-time {
             color: #666 !important;
             font-size: 11px !important;

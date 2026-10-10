@@ -526,7 +526,7 @@
 }
 
 @media (max-width: 640px) {
-    .draggable-window:not([data-window-key='volt-radio']):not([data-native-position]) {
+    .draggable-window:not([data-native-position]) {
         left: 50% !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;

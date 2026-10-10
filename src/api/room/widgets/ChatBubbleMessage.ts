@@ -15,13 +15,6 @@ export class ChatBubbleMessage {
     // The chat text size when the message arrived. A bubble keeps it for life, so
     // changing the setting never resizes bubbles already on screen.
     public textSize: ChatTextSize = null;
-    public originalText: string = '';
-    public originalFormattedText: string = '';
-    public translatedText: string = '';
-    public translatedFormattedText: string = '';
-    public showTranslation: boolean = false;
-    public translationDetectedLanguage: string = '';
-    public translationTargetLanguage: string = '';
     public imageScale: number = 1;
 
     private _top: number = 0;
@@ -41,8 +34,6 @@ export class ChatBubbleMessage {
         public color: string = null
     ) {
         this.id = ++ChatBubbleMessage.BUBBLE_COUNTER;
-        this.originalText = text;
-        this.originalFormattedText = formattedText;
     }
 
     public get top(): number {

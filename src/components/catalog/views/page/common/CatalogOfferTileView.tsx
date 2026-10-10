@@ -19,7 +19,6 @@ export interface CatalogOfferTileViewProps extends LayoutGridItemProps {
     bundleCounter?: number;
     readOnly?: boolean;
     tintColor?: string;
-    showTechnicalDetails?: boolean;
     showPrices?: boolean;
 }
 
@@ -32,7 +31,6 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
         readOnly = false,
         itemActive = false,
         tintColor = null,
-        showTechnicalDetails = false,
         showPrices = true,
         ...rest
     } = props;
@@ -118,7 +116,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
             aria-selected={itemActive}
             role="option"
             tabIndex={0}
-            title={showTechnicalDetails ? `ID: ${product.productClassId} | Offer: ${offer.offerId}` : offer.localizationName}
+            title={offer.localizationName}
             onKeyDown={onKeyDown}
         >
             <LayoutGridItem

@@ -1,5 +1,4 @@
 import { GetConfiguration } from '@volt/renderer';
-import { getAccessToken } from '../auth';
 
 // WIN63 badge rarity ids 0..6 in order; uncommon only appears when the hotel enables it.
 export type BadgeRarityKey = 'common' | 'uncommon' | 'rare' | 'epic' | 'mythical' | 'legendary' | 'unique';
@@ -52,18 +51,10 @@ const getUrl = (): string => {
     return interpolate(configured);
 };
 
-const authHeaders = (): Record<string, string> => {
-    const headers: Record<string, string> = {
-        Accept: 'application/json',
-        'X-Requested-With': 'VoltBadgeLeaderboard'
-    };
-
-    const token = getAccessToken();
-
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    return headers;
-};
+const authHeaders = (): Record<string, string> => ({
+    Accept: 'application/json',
+    'X-Requested-With': 'VoltBadgeLeaderboard'
+});
 
 const parseJson = async <T>(response: Response): Promise<T> => {
     const text = await response.text();

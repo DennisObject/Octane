@@ -31,7 +31,7 @@ export const ChatWidgetWindowView: FC<{}> = () => {
 
             if (!normalizedSearch.length) return true;
 
-            return `${chat.name} ${chat.message || ''} ${chat.originalMessage || ''} ${chat.translatedMessage || ''}`.toLowerCase().includes(normalizedSearch);
+            return `${chat.name} ${chat.message || ''}`.toLowerCase().includes(normalizedSearch);
         });
     }, [chatHistory, roomSession?.roomId, hidePets, search]);
 
@@ -144,27 +144,7 @@ export const ChatWidgetWindowView: FC<{}> = () => {
                                 {hideBalloons && (
                                     <div onClick={onClickChat}>
                                         <b dangerouslySetInnerHTML={{ __html: SanitizeHtml(`${chat.name}: `) }} />
-                                        {!chat.showTranslation && (
-                                            <span className={messageClassName} dangerouslySetInnerHTML={{ __html: SanitizeHtml(chat.message) }} />
-                                        )}
-                                        {chat.showTranslation && (
-                                            <div className="mt-[2px] flex flex-col gap-[2px]">
-                                                <div className="flex items-start gap-1 leading-[1.15]">
-                                                    <span className="inline-block min-w-[52px] font-bold opacity-75">original:</span>
-                                                    <span
-                                                        className={messageClassName}
-                                                        dangerouslySetInnerHTML={{ __html: SanitizeHtml(chat.originalMessage || chat.message || '') }}
-                                                    />
-                                                </div>
-                                                <div className="flex items-start gap-1 leading-[1.15]">
-                                                    <span className="inline-block min-w-[52px] font-bold opacity-75">translate:</span>
-                                                    <span
-                                                        className={messageClassName}
-                                                        dangerouslySetInnerHTML={{ __html: SanitizeHtml(chat.translatedMessage || chat.message || '') }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
+                                        <span className={messageClassName} dangerouslySetInnerHTML={{ __html: SanitizeHtml(chat.message) }} />
                                     </div>
                                 )}
                                 {!hideBalloons && (
@@ -191,39 +171,11 @@ export const ChatWidgetWindowView: FC<{}> = () => {
                                                 className={`chat-content py-[5px] px-[6px] leading-none min-h-[25px] ${!hideAvatars ? (isOwnMessage ? 'mr-[27px]' : 'ml-[27px]') : ''}`}
                                             >
                                                 <b className="username" dangerouslySetInnerHTML={{ __html: SanitizeHtml(`${chat.name}: `) }} />
-                                                {!chat.showTranslation && (
-                                                    <span
-                                                        className={messageClassName}
-                                                        dangerouslySetInnerHTML={{ __html: SanitizeHtml(`${chat.message}`) }}
-                                                        onClick={onClickChat}
-                                                    />
-                                                )}
-                                                {chat.showTranslation && (
-                                                    <div className="mt-[2px] flex flex-col gap-[2px]" onClick={onClickChat}>
-                                                        <div className="flex items-start gap-1 leading-[1.1]">
-                                                            <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                                                original:
-                                                            </span>
-                                                            <span
-                                                                className={messageClassName}
-                                                                dangerouslySetInnerHTML={{
-                                                                    __html: SanitizeHtml(`${chat.originalMessage || chat.message || ''}`)
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-start gap-1 leading-[1.1]">
-                                                            <span className="inline-block min-w-[52px] font-bold" style={{ opacity: 0.75 }}>
-                                                                translate:
-                                                            </span>
-                                                            <span
-                                                                className={messageClassName}
-                                                                dangerouslySetInnerHTML={{
-                                                                    __html: SanitizeHtml(`${chat.translatedMessage || chat.message || ''}`)
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                <span
+                                                    className={messageClassName}
+                                                    dangerouslySetInnerHTML={{ __html: SanitizeHtml(`${chat.message}`) }}
+                                                    onClick={onClickChat}
+                                                />
                                             </div>
                                         </div>
                                     </div>
