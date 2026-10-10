@@ -43,26 +43,51 @@ export const WiredActionChatView: FC<{}> = (props) => {
     const [visibilitySelection, setVisibilitySelection] = useState<number>(0);
     const [bubbleStyle, setBubbleStyle] = useState<number>(DEFAULT_SHOW_MESSAGE_STYLE_ID);
     const [bubbleWidth, setBubbleWidth] = useState<number>(-1);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
+    const nativeShow = trigger?.code === 7 && !!trigger.inputSources;
+    const [validationError, setValidationError] = useState(false);
     const [userSource, setUserSource] = useState<number>(() => {
         if (trigger?.intData?.length >= 1) return trigger.intData[0];
         return 0;
     });
     const bubbleStyleIds = useMemo(() => SHOW_MESSAGE_STYLE_IDS, []);
     /** Undefined for the three chat effects, which keep the composer as it is. */
-    const field = FIELDS[trigger?.code];
+    const field = nativeShow ? undefined : FIELDS[trigger?.code];
     const isChat = !field;
     const maxMessageLength = SHOW_MESSAGE_MAX_LENGTH;
 
     const save = () => {
         // Slots 1 and 2 keep their places so nothing about how these effects store changes; the two
         // controls that fill them simply stop being offered where they mean nothing.
-        setStringParam(isChat || field.multiline ? clampShowMessage(message) : message);
+        setStringParam(nativeShow ? message : isChat || field.multiline ? clampShowMessage(message) : message);
         // The width is the chat box's fourth slot; the six effect boxes never read past the first.
-        setIntParams(isChat ? [userSource, visibilitySelection, bubbleStyle, bubbleWidth] : [userSource, visibilitySelection, bubbleStyle]);
+        setIntParams(nativeShow ? [visibilitySelection, bubbleStyle, bubbleWidth]
+            : isChat ? [userSource, visibilitySelection, bubbleStyle, bubbleWidth] : [userSource, visibilitySelection, bubbleStyle]);
+        if (nativeShow) setUserSources([userSource]);
+    };
+
+    const validate = () => {
+        // Local form limits count CRLF once without changing the stored string.
+        const valid = !nativeShow || (message.length <= SHOW_MESSAGE_MAX_LENGTH
+            && message.split(/\r\n|\r|\n/).length <= SHOW_MESSAGE_MAX_LINES
+            && (visibilitySelection === 0 || visibilitySelection === 1)
+            && SHOW_MESSAGE_STYLE_IDS.includes(bubbleStyle) && [-1, 0, 1, 2].includes(bubbleWidth)
+            && [0, 11, 200, 201].includes(userSource));
+        setValidationError(!valid);
+        return valid;
     };
 
     useEffect(() => {
+        setValidationError(false);
+        if (nativeShow) {
+            setMessage(trigger.stringData ?? '');
+            setUserSource(trigger.userSources[0] ?? 0);
+            setVisibilitySelection(trigger.intData[0] ?? 0);
+            setBubbleStyle(trigger.intData[1] ?? DEFAULT_SHOW_MESSAGE_STYLE_ID);
+            setBubbleWidth(trigger.intData[2] ?? -1);
+            return;
+        }
+
         setMessage(FIELDS[trigger?.code] && !FIELDS[trigger.code].multiline ? (trigger.stringData ?? '') : clampShowMessage(trigger.stringData));
         if (trigger.intData.length >= 1) setUserSource(trigger.intData[0]);
         else setUserSource(0);
@@ -71,25 +96,27 @@ export const WiredActionChatView: FC<{}> = (props) => {
         if (trigger.intData.length >= 3 && SHOW_MESSAGE_STYLE_IDS.includes(trigger.intData[2])) setBubbleStyle(trigger.intData[2]);
         else setBubbleStyle(DEFAULT_SHOW_MESSAGE_STYLE_ID);
         setBubbleWidth(trigger.intData.length >= 4 ? trigger.intData[3] : -1);
-    }, [trigger]);
+    }, [trigger, nativeShow]);
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
+            validate={validate}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
+            {validationError && <Text className="text-danger">Use a supported source, style and width, with at most 200 characters and 8 lines.</Text>}
             <div className="flex flex-col gap-1">
                 <Text bold>{field ? localizeWithFallback(field.key, field.fallback) : LocalizeText('wiredfurni.params.message')}</Text>
                 {!field || field.multiline ? (
                     <>
                         <textarea
                             className="form-control form-control-sm octane-wired__resizable-textarea"
-                            maxLength={maxMessageLength}
+                            maxLength={nativeShow ? undefined : maxMessageLength}
                             rows={4}
                             value={message}
-                            onChange={(event) => setMessage(clampShowMessage(event.target.value))}
+                            onChange={(event) => setMessage(nativeShow ? event.target.value : clampShowMessage(event.target.value))}
                         />
                         <WiredTextCounter maxLength={maxMessageLength} value={message} />
                         {isChat && <WiredTextFormattingHelp />}

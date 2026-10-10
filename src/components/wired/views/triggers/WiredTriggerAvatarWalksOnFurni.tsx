@@ -7,19 +7,23 @@ import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 const FURNI_SOURCE_OPTIONS: WiredSourceOption[] = [
     { value: 100, label: 'wiredfurni.params.sources.furni.100' },
     { value: 200, label: 'wiredfurni.params.sources.furni.200' },
+    { value: 201, label: 'wiredfurni.params.sources.furni.201' },
     { value: 0, label: 'wiredfurni.params.sources.furni.0' }
 ];
 
 const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
 
 export const WiredTriggerAvatarWalksOnFurniView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setFurniSources = null } = useWired();
     const [furniSource, setFurniSource] = useState(100);
 
-    const save = () => setIntParams([furniSource]);
+    const save = () => {
+        setIntParams([]);
+        setFurniSources([furniSource]);
+    };
 
     useEffect(() => {
-        setFurniSource(trigger?.intData?.length > 0 ? normalizeFurniSource(trigger.intData[0]) : 100);
+        setFurniSource(normalizeFurniSource(trigger?.furniSources?.[0] ?? 100));
     }, [trigger]);
 
     return (

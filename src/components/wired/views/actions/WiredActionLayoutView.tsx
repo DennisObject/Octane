@@ -416,6 +416,7 @@ export const WiredActionLayoutView = (code: number) => {
 export const NativeWiredActionLayoutView = (code: number) => {
     switch (code) {
         case 28: return <WiredActionControlClockView />;
+        case 7: return <WiredActionChatView />;
         case 9: return <WiredActionJoinTeamView />;
         case 6: return <WiredActionGiveScoreView />;
         case 29: return <WiredActionSetAltitudeView />;
