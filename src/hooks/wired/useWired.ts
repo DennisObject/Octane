@@ -32,6 +32,7 @@ import {
     localizeWithFallback,
     pasteTriggerableData,
     resetTriggerableData,
+    withTriggerableData,
     SendMessageComposer,
     WiredClipboardEntry,
     wiredClipboardKeyOf,
@@ -64,6 +65,10 @@ const useWiredState = () => {
     const [variableIds, setVariableIds, variableIdsRef] = useLiveState<string[]>([]);
     const [activePickSlot, setActivePickSlot] = useState<0 | 1>(0);
     const [actionDelay, setActionDelay, actionDelayRef] = useLiveState<number>(0);
+    // Category fields travel outside the owned ints: quantifier (conditions), filter and inverse (selectors).
+    const [quantifier, setQuantifier, quantifierRef] = useLiveState<number>(0);
+    const [filter, setFilter, filterRef] = useLiveState<boolean>(false);
+    const [inverse, setInverse, inverseRef] = useLiveState<boolean>(false);
     const [allowsFurni, setAllowsFurni] = useState<number>(WiredFurniType.STUFF_SELECTION_OPTION_NONE);
     const selectByType = false;
     const [neighborhoodTiles, setNeighborhoodTiles] = useState<{ x: number; y: number }[] | null>(null);
@@ -112,9 +117,9 @@ const useWiredState = () => {
             } else if (trigger instanceof TriggerDefinition) {
                 SendMessageComposer(new UpdateTriggerMessageComposer(trigger.id, intParams, stringParam, furniIds, ...tails));
             } else if (trigger instanceof ConditionDefinition) {
-                SendMessageComposer(new UpdateConditionMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.quantifier, ...tails));
+                SendMessageComposer(new UpdateConditionMessageComposer(trigger.id, intParams, stringParam, furniIds, quantifierRef.current, ...tails));
             } else if (trigger instanceof WiredSelectorDefinition) {
-                SendMessageComposer(new UpdateSelectorMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.filter, trigger.inverse, ...tails));
+                SendMessageComposer(new UpdateSelectorMessageComposer(trigger.id, intParams, stringParam, furniIds, filterRef.current, inverseRef.current, ...tails));
             } else if (trigger instanceof WiredAddonDefinition) {
                 SendMessageComposer(new UpdateAddonMessageComposer(trigger.id, intParams, stringParam, furniIds, ...tails));
             } else if (trigger instanceof WiredVariableDefinition) {
@@ -372,9 +377,9 @@ const useWiredState = () => {
             secondaryFurniIds: [...secondaryFurniIdsRef.current],
             furniSources: [...furniSourcesRef.current], userSources: [...userSourcesRef.current],
             variableIds: [...variableIdsRef.current],
-            quantifier: current instanceof ConditionDefinition ? current.quantifier : undefined,
-            filter: current instanceof WiredSelectorDefinition ? current.filter : undefined,
-            inverse: current instanceof WiredSelectorDefinition ? current.inverse : undefined
+            quantifier: current instanceof ConditionDefinition ? quantifierRef.current : undefined,
+            filter: current instanceof WiredSelectorDefinition ? filterRef.current : undefined,
+            inverse: current instanceof WiredSelectorDefinition ? inverseRef.current : undefined
         };
 
         setClipboard((prevValue) => {
@@ -414,7 +419,8 @@ const useWiredState = () => {
 
         if (!current) return;
 
-        setTrigger(resetTriggerableData(current));
+        // The category fields go back to the pristine native values (quantifier 0, filter and inverse off), which the server also captures.
+        setTrigger(withTriggerableData(resetTriggerableData(current), { quantifier: 0, filter: false, inverse: false }));
     }, [setTrigger]);
 
     /** Drops every furni pick of the open box. */
@@ -466,6 +472,9 @@ const useWiredState = () => {
         setFurniSources([...trigger.furniSources]);
         setUserSources([...trigger.userSources]);
         setVariableIds([...trigger.variableIds]);
+        setQuantifier(trigger instanceof ConditionDefinition ? trigger.quantifier : 0);
+        setFilter(trigger instanceof WiredSelectorDefinition ? trigger.filter : false);
+        setInverse(trigger instanceof WiredSelectorDefinition ? trigger.inverse : false);
         setActivePickSlot(0);
 
         return () => {
@@ -473,6 +482,9 @@ const useWiredState = () => {
             setIntParams([]);
             setStringParam('');
             setActionDelay(0);
+            setQuantifier(0);
+            setFilter(false);
+            setInverse(false);
             setSecondaryFurniIds([]);
             setFurniSources([]);
             setUserSources([]);
@@ -507,6 +519,12 @@ const useWiredState = () => {
         activePickSlot, setActivePickSlot,
         actionDelay,
         setActionDelay,
+        quantifier,
+        setQuantifier,
+        filter,
+        setFilter,
+        inverse,
+        setInverse,
         setAllowsFurni,
         saveWired,
         saveWiredAndKeepOpen,

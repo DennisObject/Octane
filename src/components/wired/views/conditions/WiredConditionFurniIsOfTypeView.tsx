@@ -9,36 +9,12 @@ import { WiredConditionBaseView } from './WiredConditionBaseView';
 const SOURCE_TRIGGER = 0;
 const SOURCE_SELECTED = 100;
 const SOURCE_SECONDARY_SELECTED = 101;
-const FURNI_DELIMITER = ';';
-
 const MATCH_FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
     [...FURNI_SOURCES, { value: SOURCE_SECONDARY_SELECTED, label: 'wiredfurni.params.sources.furni.101' }],
     'furni'
 );
 
 type SelectionMode = 'primary' | 'secondary';
-
-const parseIds = (data: string): number[] => {
-    if (!data || !data.length) return [];
-
-    const ids = new Set<number>();
-
-    for (const part of data.split(/[;,\t]/)) {
-        const trimmed = part.trim();
-        if (!trimmed.length) continue;
-
-        const value = parseInt(trimmed, 10);
-        if (!isNaN(value) && value > 0) ids.add(value);
-    }
-
-    return Array.from(ids);
-};
-
-const serializeIds = (ids: number[]): string => {
-    if (!ids || !ids.length) return '';
-
-    return ids.filter((id) => id > 0).join(FURNI_DELIMITER);
-};
 
 interface WiredConditionFurniIsOfTypeViewProps {
     negative?: boolean;
@@ -54,7 +30,18 @@ export const WiredConditionFurniIsOfTypeView: FC<WiredConditionFurniIsOfTypeView
 
     const highlightedIds = useRef<number[]>([]);
 
-    const { trigger = null, furniIds = [], setFurniIds, setIntParams, setStringParam, setAllowsFurni } = useWired();
+    const {
+        trigger = null,
+        furniIds = [],
+        setFurniIds,
+        setIntParams,
+        setStringParam,
+        setAllowsFurni,
+        setSecondaryFurniIds: setNativeSecondaryFurniIds,
+        setFurniSources,
+        quantifier: nativeQuantifier,
+        setQuantifier: setNativeQuantifier
+    } = useWired();
 
     const syncHighlights = useCallback((nextPrimaryIds: number[], nextSecondaryIds: number[]) => {
         if (highlightedIds.current.length) {
@@ -94,10 +81,10 @@ export const WiredConditionFurniIsOfTypeView: FC<WiredConditionFurniIsOfTypeView
         if (!trigger) return;
 
         const nextPrimaryIds = trigger.selectedItems ?? [];
-        const nextSecondaryIds = parseIds(trigger.stringData);
-        const nextMatchSource = trigger.intData.length >= 1 ? trigger.intData[0] : nextPrimaryIds.length ? SOURCE_SELECTED : SOURCE_TRIGGER;
-        const nextCompareSource = trigger.intData.length >= 2 ? trigger.intData[1] : nextSecondaryIds.length ? SOURCE_SECONDARY_SELECTED : SOURCE_TRIGGER;
-        const nextQuantifier = trigger.intData.length >= 3 ? (trigger.intData[2] === 1 ? 1 : 0) : 0;
+        const nextSecondaryIds = [...trigger.secondarySelectedItems];
+        const nextMatchSource = trigger.furniSources[0] ?? SOURCE_SELECTED;
+        const nextCompareSource = trigger.furniSources[1] ?? SOURCE_SECONDARY_SELECTED;
+        const nextQuantifier = nativeQuantifier;
 
         setMatchSource(nextMatchSource);
         setCompareSource(nextCompareSource);
@@ -106,7 +93,7 @@ export const WiredConditionFurniIsOfTypeView: FC<WiredConditionFurniIsOfTypeView
         setSecondaryFurniIds(nextSecondaryIds);
         setSelectionMode('primary');
         setFurniIds([...nextPrimaryIds]);
-    }, [trigger, setFurniIds, negative]);
+    }, [trigger, nativeQuantifier, setFurniIds, negative]);
 
     useEffect(() => {
         if (selectionMode === 'primary') setPrimaryFurniIds(furniIds);
@@ -158,9 +145,26 @@ export const WiredConditionFurniIsOfTypeView: FC<WiredConditionFurniIsOfTypeView
             setFurniIds([...nextPrimaryIds]);
         }
 
-        setIntParams([matchSource, compareSource, quantifier]);
-        setStringParam(serializeIds(nextSecondaryIds));
-    }, [selectionMode, furniIds, primaryFurniIds, matchSource, compareSource, quantifier, secondaryFurniIds, setFurniIds, setIntParams, setStringParam]);
+        setIntParams([]);
+        setFurniSources([matchSource, compareSource]);
+        setNativeQuantifier(quantifier);
+        setNativeSecondaryFurniIds(nextSecondaryIds);
+        setStringParam('');
+    }, [
+        selectionMode,
+        furniIds,
+        primaryFurniIds,
+        matchSource,
+        compareSource,
+        quantifier,
+        secondaryFurniIds,
+        setFurniIds,
+        setIntParams,
+        setStringParam,
+        setFurniSources,
+        setNativeQuantifier,
+        setNativeSecondaryFurniIds
+    ]);
 
     const selectionLimit = trigger?.maximumItemSelectionCount ?? 0;
     const quantifierKeyPrefix = negative ? 'wiredfurni.params.quantifier.furni.neg' : 'wiredfurni.params.quantifier.furni';

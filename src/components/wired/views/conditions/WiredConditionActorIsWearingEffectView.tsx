@@ -20,20 +20,24 @@ interface WiredConditionActorIsWearingEffectViewProps {
 export const WiredConditionActorIsWearingEffectView: FC<WiredConditionActorIsWearingEffectViewProps> = ({ negative = false, showEffect = true }) => {
     const [effect, setEffect] = useState(-1);
     const [quantifier, setQuantifier] = useState(1);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources, quantifier: nativeQuantifier, setQuantifier: setNativeQuantifier } = useWired();
     const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
+        if (trigger?.userSources?.length > 0) return trigger.userSources[0];
         return 0;
     });
 
-    const save = () => setIntParams([effect, userSource, quantifier]);
+    const save = () => {
+        setIntParams([effect]);
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
+    };
 
     useEffect(() => {
         setEffect(trigger?.intData[0] ?? 0);
-        if (trigger?.intData?.length > 1) setUserSource(trigger.intData[1]);
+        if (trigger?.userSources?.length > 0) setUserSource(trigger.userSources[0]);
         else setUserSource(0);
-        setQuantifier(trigger?.intData?.length > 2 ? (trigger.intData[2] === 1 ? 1 : 0) : 1);
-    }, [trigger]);
+        setQuantifier(nativeQuantifier);
+    }, [trigger, nativeQuantifier]);
 
     return (
         <WiredConditionBaseView

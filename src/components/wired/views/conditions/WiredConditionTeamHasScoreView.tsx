@@ -31,7 +31,7 @@ interface WiredConditionTeamHasScoreViewProps {
 }
 
 export const WiredConditionTeamHasScoreView: FC<WiredConditionTeamHasScoreViewProps> = ({ scoped = true }) => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources, quantifier: nativeQuantifier, setQuantifier: setNativeQuantifier } = useWired();
     const ceiling = scoped ? MAX_SCORE : MAX_AMOUNT;
     const [team, setTeam] = useState(1);
     const [comparison, setComparison] = useState(scoped ? 1 : WIRED_CMP_GREATER_EQUAL);
@@ -45,10 +45,10 @@ export const WiredConditionTeamHasScoreView: FC<WiredConditionTeamHasScoreViewPr
         if (!trigger) return;
 
         const nextTeam = trigger.intData.length > 0 ? trigger.intData[0] : 1;
-        const nextComparison = trigger.intData.length > 1 ? trigger.intData[1] : scoped ? 1 : WIRED_CMP_GREATER_EQUAL;
-        const nextScore = clampScore(trigger.intData.length > 2 ? trigger.intData[2] : 0, ceiling);
-        const nextUserSource = trigger.intData.length > 3 ? trigger.intData[3] : 0;
-        const nextQuantifier = trigger.intData.length > 4 ? trigger.intData[4] : 0;
+        const nextComparison = trigger.intData[2] ?? (scoped ? 1 : WIRED_CMP_GREATER_EQUAL);
+        const nextScore = clampScore(trigger.intData[1] ?? 0, ceiling);
+        const nextUserSource = trigger.userSources[0] ?? 0;
+        const nextQuantifier = nativeQuantifier;
 
         setTeam(TEAM_OPTIONS.includes(nextTeam) ? nextTeam : 1);
         setComparison(scoped ? (COMPARISON_OPTIONS.includes(nextComparison) ? nextComparison : 1) : normalizeWiredComparison(nextComparison));
@@ -80,7 +80,9 @@ export const WiredConditionTeamHasScoreView: FC<WiredConditionTeamHasScoreViewPr
     };
 
     const save = () => {
-        setIntParams([team, comparison, clampScore(score, ceiling), userSource, quantifier]);
+        setIntParams([team, clampScore(score, ceiling), comparison]);
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
     };
 
     return (

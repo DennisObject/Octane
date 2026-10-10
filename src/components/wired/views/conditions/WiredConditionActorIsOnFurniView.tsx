@@ -10,36 +10,39 @@ interface WiredConditionActorIsOnFurniViewProps {
 }
 
 export const WiredConditionActorIsOnFurniView: FC<WiredConditionActorIsOnFurniViewProps> = ({ negative = false }) => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const {
+        trigger = null,
+        setIntParams = null,
+        setFurniSources,
+        setUserSources,
+        quantifier: nativeQuantifier,
+        setQuantifier: setNativeQuantifier
+    } = useWired();
     const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 0) return trigger.intData[0];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+        return trigger?.furniSources[0] ?? 100;
     });
     const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return 0;
+        return trigger?.userSources[0] ?? 0;
     });
     const [quantifier, setQuantifier] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        return 0;
+        return nativeQuantifier;
     });
 
     useEffect(() => {
         if (!trigger) return;
-
-        if (trigger.intData.length > 0) setFurniSource(trigger.intData[0]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-
-        if (trigger.intData.length > 1) setUserSource(trigger.intData[1]);
-        else setUserSource(0);
-
-        if (trigger.intData.length > 2) setQuantifier(trigger.intData[2] === 1 ? 1 : 0);
-        else setQuantifier(0);
-    }, [trigger]);
+        setFurniSource(trigger.furniSources[0] ?? 100);
+        setUserSource(trigger.userSources[0] ?? 0);
+        setQuantifier(nativeQuantifier);
+    }, [trigger, nativeQuantifier]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);
 
-    const save = () => setIntParams([furniSource, userSource, quantifier]);
+    const save = () => {
+        setIntParams([]);
+        setFurniSources([furniSource]);
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
+    };
 
     const requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_BY_ID;
 

@@ -15,25 +15,23 @@ export const WiredConditionFurniMatchesSnapshotView: FC<WiredConditionFurniMatch
     const [positionFlag, setPositionFlag] = useState(0);
     const [altitudeFlag, setAltitudeFlag] = useState(0);
     const [quantifier, setQuantifier] = useState(0);
-    const { trigger = null, setIntParams = null } = useWired();
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 4) return trigger.intData[4];
-        if (trigger?.intData?.length > 3) return trigger.intData[3];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
+    const { trigger = null, setIntParams = null, setFurniSources, quantifier: nativeQuantifier, setQuantifier: setNativeQuantifier } = useWired();
+    const [furniSource, setFurniSource] = useState(100);
 
-    const save = () => setIntParams([stateFlag, directionFlag, positionFlag, altitudeFlag, furniSource, quantifier]);
+    const save = () => {
+        setIntParams([stateFlag, directionFlag, positionFlag, altitudeFlag]);
+        setFurniSources([furniSource]);
+        setNativeQuantifier(quantifier);
+    };
 
     useEffect(() => {
         setStateFlag(trigger.getBoolean(0) ? 1 : 0);
         setDirectionFlag(trigger.getBoolean(1) ? 1 : 0);
         setPositionFlag(trigger.getBoolean(2) ? 1 : 0);
-        setAltitudeFlag(trigger.intData.length > 4 && trigger.getBoolean(3) ? 1 : 0);
-        if (trigger.intData.length > 4) setFurniSource(trigger.intData[4]);
-        else if (trigger.intData.length > 3) setFurniSource(trigger.intData[3]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-        setQuantifier(trigger.intData.length > 5 && trigger.intData[5] === 1 ? 1 : 0);
-    }, [trigger]);
+        setAltitudeFlag(trigger.getBoolean(3) ? 1 : 0);
+        setFurniSource(trigger.furniSources[0] ?? 100);
+        setQuantifier(nativeQuantifier);
+    }, [trigger, nativeQuantifier]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);
 

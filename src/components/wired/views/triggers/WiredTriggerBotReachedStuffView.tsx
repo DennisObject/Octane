@@ -17,24 +17,23 @@ const BOT_SOURCE_OPTIONS: WiredSourceOption[] = [
     { value: 200, label: 'wiredfurni.params.sources.users.200' }
 ];
 
-const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
-const normalizeBotSource = (value: number) => (BOT_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
-
 export const WiredTriggerBotReachedStuffView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
     const [furniSource, setFurniSource] = useState(100);
-    const [botSource, setBotSource] = useState(100);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const [botSource, setBotSource] = useState(0);
+    const { trigger = null, setStringParam = null, setIntParams = null, setFurniSources, setUserSources } = useWired();
 
     const save = () => {
-        setStringParam(botSource === 100 ? botName : '');
-        setIntParams([furniSource, botSource]);
+        setStringParam(botName);
+        setIntParams([]);
+        setFurniSources([furniSource]);
+        setUserSources([botSource]);
     };
 
     useEffect(() => {
         setBotName(trigger.stringData);
-        setFurniSource(trigger?.intData?.length > 0 ? normalizeFurniSource(trigger.intData[0]) : 100);
-        setBotSource(trigger?.intData?.length > 1 ? normalizeBotSource(trigger.intData[1]) : 100);
+        setFurniSource(trigger?.furniSources[0] ?? 100);
+        setBotSource(trigger?.userSources[0] ?? 0);
     }, [trigger]);
 
     return (
@@ -57,11 +56,11 @@ export const WiredTriggerBotReachedStuffView: FC<{}> = (props) => {
                 />
             }
         >
-            {botSource === 100 && (
+            {
                 <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
                     <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />
                 </WiredSection>
-            )}
+            }
         </WiredTriggerBaseView>
     );
 };

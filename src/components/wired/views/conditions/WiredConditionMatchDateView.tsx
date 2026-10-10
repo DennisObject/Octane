@@ -5,9 +5,7 @@ import { useWired } from '../../../../hooks';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 const MODE_SKIP = 0;
-const MODE_EXACT = 1;
 const MODE_RANGE = 2;
-const MODE_OPTIONS = [MODE_SKIP, MODE_EXACT, MODE_RANGE];
 const WEEKDAY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
 const MONTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
@@ -90,18 +88,6 @@ const MatchDateSection: FC<MatchDateSectionProps> = (props) => {
             </div>
             <div className="flex items-center gap-2">
                 <input
-                    checked={mode === MODE_EXACT}
-                    className="form-check-input"
-                    id={`${sectionId}1`}
-                    name={sectionId}
-                    type="radio"
-                    onChange={() => onModeChange(MODE_EXACT)}
-                />
-                <Text>{LocalizeText('wiredfurni.params.time.exact')}</Text>
-                <InlineNumberInput max={max} min={min} value={fromValue} onChange={onFromChange} />
-            </div>
-            <div className="flex items-center gap-2">
-                <input
                     checked={mode === MODE_RANGE}
                     className="form-check-input"
                     id={`${sectionId}2`}
@@ -133,24 +119,24 @@ export const WiredConditionMatchDateView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        setWeekdayMask(trigger.intData[0] && trigger.intData[0] > 0 ? trigger.intData[0] : ALL_WEEKDAYS_MASK);
-        setDayMode(MODE_OPTIONS.includes(trigger.intData[1]) ? trigger.intData[1] : MODE_SKIP);
-        setDayFrom(clampValue(trigger.intData[2] ?? 1, 1, 31));
-        setDayTo(clampValue(trigger.intData[3] ?? 31, 1, 31));
-        setMonthMask(trigger.intData[4] && trigger.intData[4] > 0 ? trigger.intData[4] : ALL_MONTHS_MASK);
-        setYearMode(MODE_OPTIONS.includes(trigger.intData[5]) ? trigger.intData[5] : MODE_SKIP);
+        setWeekdayMask(trigger.intData[2] ?? ALL_WEEKDAYS_MASK);
+        setDayMode(trigger.intData[0] === 1 ? MODE_RANGE : MODE_SKIP);
+        setDayFrom(clampValue(trigger.intData[3] ?? 1, 1, 31));
+        setDayTo(clampValue(trigger.intData[4] ?? 31, 1, 31));
+        setMonthMask(trigger.intData[5] ?? ALL_MONTHS_MASK);
+        setYearMode(trigger.intData[1] === 1 ? MODE_RANGE : MODE_SKIP);
         setYearFrom(clampValue(trigger.intData[6] ?? currentYear, 0, 9999));
         setYearTo(clampValue(trigger.intData[7] ?? currentYear, 0, 9999));
     }, [currentYear, trigger]);
 
     const save = () => {
         setIntParams([
-            weekdayMask || ALL_WEEKDAYS_MASK,
-            dayMode,
+            dayMode !== MODE_SKIP ? 1 : 0,
+            yearMode !== MODE_SKIP ? 1 : 0,
+            weekdayMask,
             clampValue(dayFrom, 1, 31),
             clampValue(dayTo, 1, 31),
-            monthMask || ALL_MONTHS_MASK,
-            yearMode,
+            monthMask,
             clampValue(yearFrom, 0, 9999),
             clampValue(yearTo, 0, 9999)
         ]);

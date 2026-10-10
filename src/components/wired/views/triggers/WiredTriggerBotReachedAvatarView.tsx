@@ -11,21 +11,20 @@ const BOT_SOURCE_OPTIONS: WiredSourceOption[] = [
     { value: 200, label: 'wiredfurni.params.sources.users.200' }
 ];
 
-const normalizeBotSource = (value: number) => (BOT_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
-
 export const WiredTriggerBotReachedAvatarView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
-    const [botSource, setBotSource] = useState(100);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const [botSource, setBotSource] = useState(0);
+    const { trigger = null, setStringParam = null, setIntParams = null, setFurniSources, setUserSources } = useWired();
 
     const save = () => {
-        setStringParam(botSource === 100 ? botName : '');
-        setIntParams([botSource]);
+        setStringParam(botName);
+        setIntParams([]);
+        setUserSources([botSource]);
     };
 
     useEffect(() => {
         setBotName(trigger.stringData);
-        setBotSource(trigger?.intData?.length > 0 ? normalizeBotSource(trigger.intData[0]) : 100);
+        setBotSource(trigger?.userSources[0] ?? 0);
     }, [trigger]);
 
     return (
@@ -44,11 +43,11 @@ export const WiredTriggerBotReachedAvatarView: FC<{}> = (props) => {
                 />
             }
         >
-            {botSource === 100 && (
+            {
                 <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
                     <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />
                 </WiredSection>
-            )}
+            }
         </WiredTriggerBaseView>
     );
 };

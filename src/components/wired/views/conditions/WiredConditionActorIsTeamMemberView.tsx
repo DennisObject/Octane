@@ -13,19 +13,23 @@ interface WiredConditionActorIsTeamMemberViewProps {
 export const WiredConditionActorIsTeamMemberView: FC<WiredConditionActorIsTeamMemberViewProps> = ({ negative = false }) => {
     const [selectedTeam, setSelectedTeam] = useState(-1);
     const [quantifier, setQuantifier] = useState(1);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources, quantifier: nativeQuantifier, setQuantifier: setNativeQuantifier } = useWired();
     const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
+        if (trigger?.userSources?.length > 0) return trigger.userSources[0];
         return 0;
     });
 
-    const save = () => setIntParams([selectedTeam, userSource, quantifier]);
+    const save = () => {
+        setIntParams([selectedTeam]);
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
+    };
 
     useEffect(() => {
         setSelectedTeam(trigger.intData.length > 0 ? trigger.intData[0] : 0);
-        setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
-        setQuantifier(trigger.intData.length > 2 ? (trigger.intData[2] === 1 ? 1 : 0) : 1);
-    }, [trigger]);
+        setUserSource(trigger.userSources[0] ?? 0);
+        setQuantifier(nativeQuantifier);
+    }, [trigger, nativeQuantifier]);
 
     // class_3962: "any" on its own row, then the four teams in two columns.
     const teamOptions = [

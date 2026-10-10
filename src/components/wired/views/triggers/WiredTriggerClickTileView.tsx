@@ -11,16 +11,17 @@ const FURNI_SOURCE_OPTIONS: WiredSourceOption[] = [
     { value: 0, label: 'wiredfurni.params.sources.furni.0' }
 ];
 
-const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
-
 export const WiredTriggerClickTileView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null } = useWired();
+    const { trigger = null, setIntParams = null, setFurniSources, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null } = useWired();
     const [furniSource, setFurniSource] = useState(100);
 
-    const save = () => setIntParams([furniSource]);
+    const save = () => {
+        setIntParams([]);
+        setFurniSources([furniSource]);
+    };
 
     useEffect(() => {
-        setFurniSource(trigger?.intData?.length > 0 ? normalizeFurniSource(trigger.intData[0]) : 100);
+        setFurniSource(trigger?.furniSources[0] ?? 100);
     }, [trigger]);
 
     useEffect(() => {
@@ -36,6 +37,7 @@ export const WiredTriggerClickTileView: FC<{}> = () => {
     return (
         <WiredTriggerBaseView
             hasSpecialInput={false}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT}
             save={save}
             footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} furniSources={FURNI_SOURCE_OPTIONS} onChangeFurni={setFurniSource} />}

@@ -20,18 +20,25 @@ export const WiredConditionActorIsGroupMemberView: FC<WiredConditionActorIsGroup
     const [groupType, setGroupType] = useState(GROUP_CURRENT_ROOM);
     const [selectedGroupId, setSelectedGroupId] = useState(0);
     const [quantifier, setQuantifier] = useState(0);
-    const { trigger = null, setIntParams = null } = useWired();
+    const {
+        trigger = null,
+        setIntParams = null,
+        setUserSources,
+        quantifier: nativeQuantifier,
+        setQuantifier: setNativeQuantifier,
+        setStringParam
+    } = useWired();
 
     useEffect(() => {
         if (!trigger) return;
 
-        const params = trigger.intData;
+        const groupId = Number(trigger.stringData || 0);
 
-        setUserSource(params.length > 0 ? params[0] : 0);
-        setGroupType(params.length > 1 ? params[1] : GROUP_CURRENT_ROOM);
-        setSelectedGroupId(params.length > 2 ? params[2] : 0);
-        setQuantifier(params.length > 3 && params[3] === 1 ? 1 : 0);
-    }, [trigger]);
+        setUserSource(trigger.userSources[0] ?? 0);
+        setGroupType(groupId > 0 ? GROUP_SELECTED : GROUP_CURRENT_ROOM);
+        setSelectedGroupId(groupId);
+        setQuantifier(nativeQuantifier);
+    }, [trigger, nativeQuantifier]);
 
     useEffect(() => {
         if (groupType !== GROUP_SELECTED || selectedGroupId || !groups.length) return;
@@ -41,7 +48,12 @@ export const WiredConditionActorIsGroupMemberView: FC<WiredConditionActorIsGroup
 
     const selectedGroupOptions = useMemo(() => groups.map((group) => ({ id: group.groupId, label: group.groupName })), [groups]);
 
-    const save = () => setIntParams([userSource, groupType, selectedGroupId, quantifier]);
+    const save = () => {
+        setIntParams([]);
+        setStringParam(groupType === GROUP_SELECTED ? String(selectedGroupId) : '');
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
+    };
 
     // class_3953: the group dropdown hangs under "Select from list" and is disabled while the other option is picked.
     const groupDropdown = (

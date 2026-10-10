@@ -5,9 +5,7 @@ import { useWired } from '../../../../hooks';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 const MODE_SKIP = 0;
-const MODE_EXACT = 1;
 const MODE_RANGE = 2;
-const MODE_OPTIONS = [MODE_SKIP, MODE_EXACT, MODE_RANGE];
 
 const clampValue = (value: number, min: number, max: number) => {
     if (isNaN(value)) return min;
@@ -78,18 +76,6 @@ const TimeFilterSection: FC<TimeFilterSectionProps> = (props) => {
             </div>
             <div className="flex items-center gap-2">
                 <input
-                    checked={mode === MODE_EXACT}
-                    className="form-check-input"
-                    id={`${sectionId}1`}
-                    name={sectionId}
-                    type="radio"
-                    onChange={() => onModeChange(MODE_EXACT)}
-                />
-                <Text>{LocalizeText('wiredfurni.params.time.exact')}</Text>
-                <InlineNumberInput max={max} min={min} value={fromValue} onChange={onFromChange} />
-            </div>
-            <div className="flex items-center gap-2">
-                <input
                     checked={mode === MODE_RANGE}
                     className="form-check-input"
                     id={`${sectionId}2`}
@@ -121,28 +107,28 @@ export const WiredConditionMatchTimeView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        setHourMode(MODE_OPTIONS.includes(trigger.intData[0]) ? trigger.intData[0] : MODE_SKIP);
-        setHourFrom(clampValue(trigger.intData[1] ?? 0, 0, 23));
-        setHourTo(clampValue(trigger.intData[2] ?? 0, 0, 23));
-        setMinuteMode(MODE_OPTIONS.includes(trigger.intData[3]) ? trigger.intData[3] : MODE_SKIP);
-        setMinuteFrom(clampValue(trigger.intData[4] ?? 0, 0, 59));
-        setMinuteTo(clampValue(trigger.intData[5] ?? 0, 0, 59));
-        setSecondMode(MODE_OPTIONS.includes(trigger.intData[6]) ? trigger.intData[6] : MODE_SKIP);
-        setSecondFrom(clampValue(trigger.intData[7] ?? 0, 0, 59));
-        setSecondTo(clampValue(trigger.intData[8] ?? 0, 0, 59));
+        setHourMode(trigger.intData[2] === 1 ? MODE_RANGE : MODE_SKIP);
+        setHourFrom(clampValue(trigger.intData[7] ?? 0, 0, 23));
+        setHourTo(clampValue(trigger.intData[8] ?? 23, 0, 23));
+        setMinuteMode(trigger.intData[1] === 1 ? MODE_RANGE : MODE_SKIP);
+        setMinuteFrom(clampValue(trigger.intData[5] ?? 0, 0, 59));
+        setMinuteTo(clampValue(trigger.intData[6] ?? 59, 0, 59));
+        setSecondMode(trigger.intData[0] === 1 ? MODE_RANGE : MODE_SKIP);
+        setSecondFrom(clampValue(trigger.intData[3] ?? 0, 0, 59));
+        setSecondTo(clampValue(trigger.intData[4] ?? 59, 0, 59));
     }, [trigger]);
 
     const save = () => {
         setIntParams([
-            hourMode,
-            clampValue(hourFrom, 0, 23),
-            clampValue(hourTo, 0, 23),
-            minuteMode,
+            secondMode !== MODE_SKIP ? 1 : 0,
+            minuteMode !== MODE_SKIP ? 1 : 0,
+            hourMode !== MODE_SKIP ? 1 : 0,
+            clampValue(secondFrom, 0, 59),
+            clampValue(secondTo, 0, 59),
             clampValue(minuteFrom, 0, 59),
             clampValue(minuteTo, 0, 59),
-            secondMode,
-            clampValue(secondFrom, 0, 59),
-            clampValue(secondTo, 0, 59)
+            clampValue(hourFrom, 0, 23),
+            clampValue(hourTo, 0, 23)
         ]);
     };
 

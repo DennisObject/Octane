@@ -13,7 +13,7 @@ const toggleDirection = (mask: number, direction: number, checked: boolean) => {
 };
 
 export const WiredConditionActorDirView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources, quantifier: nativeQuantifier, setQuantifier: setNativeQuantifier } = useWired();
     const [directionMask, setDirectionMask] = useState(0);
     const [userSource, setUserSource] = useState(0);
     const [quantifier, setQuantifier] = useState(0);
@@ -23,17 +23,19 @@ export const WiredConditionActorDirView: FC<{}> = () => {
         if (!trigger) return;
 
         const nextDirectionMask = trigger.intData.length > 0 ? trigger.intData[0] : 0;
-        const nextUserSource = trigger.intData.length > 1 ? trigger.intData[1] : 0;
-        const nextQuantifier = trigger.intData.length > 2 ? trigger.intData[2] : 0;
+        const nextUserSource = trigger.userSources[0] ?? 0;
+        const nextQuantifier = nativeQuantifier;
 
         setDirectionMask(nextDirectionMask);
         setUserSource(nextUserSource);
         setQuantifier(nextQuantifier === 1 ? 1 : 0);
         setShowAdvanced(nextUserSource !== 0 || nextQuantifier !== 0);
-    }, [trigger]);
+    }, [trigger, nativeQuantifier]);
 
     const save = () => {
-        setIntParams([directionMask, userSource, quantifier]);
+        setIntParams([directionMask]);
+        setUserSources([userSource]);
+        setNativeQuantifier(quantifier);
     };
 
     return (

@@ -14,14 +14,9 @@ interface WiredConditionFurniHasAvatarOnViewProps {
 
 export const WiredConditionFurniHasAvatarOnView: FC<WiredConditionFurniHasAvatarOnViewProps> = ({ negative = false }) => {
     const { trigger = null, setIntParams = null, setFurniSources = null } = useWired();
-    const nativeCard = !negative && trigger?.code === 1 && !!trigger.inputSources;
     const [error, setError] = useState(false);
     const [requireAll, setRequireAll] = useState(0);
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        if (trigger?.intData?.length >= 1 && trigger.intData[0] > 1) return trigger.intData[0];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
+    const [furniSource, setFurniSource] = useState(100);
 
     useEffect(() => {
         if (!trigger) return;
@@ -31,21 +26,18 @@ export const WiredConditionFurniHasAvatarOnView: FC<WiredConditionFurniHasAvatar
 
         setError(false);
 
-        if (nativeCard) setFurniSource(trigger.furniSources[0] ?? 100);
-        else if (trigger.intData.length > 1) setFurniSource(trigger.intData[1]);
-        else if (trigger.intData.length >= 1 && trigger.intData[0] > 1) setFurniSource(trigger.intData[0]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-    }, [trigger, nativeCard]);
+        setFurniSource(trigger.furniSources[0] ?? 100);
+    }, [trigger]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);
 
     const save = () => {
-        setIntParams(nativeCard ? [requireAll] : [requireAll, furniSource]);
-        if (nativeCard) setFurniSources([furniSource]);
+        setIntParams([requireAll]);
+        setFurniSources([furniSource]);
     };
 
     const validate = () => {
-        const valid = !nativeCard || (trigger as ConditionDefinition).quantifier === 0;
+        const valid = (trigger as ConditionDefinition).quantifier === 0;
         setError(!valid);
         return valid;
     };

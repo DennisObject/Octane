@@ -33,13 +33,22 @@ export const WiredConditionTriggererMatchView: FC<WiredConditionTriggererMatchVi
     const [compareUserSource, setCompareUserSource] = useState(0);
     const [quantifier, setQuantifier] = useState(0);
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const {
+        trigger = null,
+        setIntParams = null,
+        setStringParam = null,
+        setUserSources,
+        quantifier: nativeQuantifier,
+        setQuantifier: setNativeQuantifier
+    } = useWired();
 
     const needsUsername = avatarMode === AVATAR_MODE_CERTAIN || compareUserSource === SOURCE_SPECIFIED_USERNAME;
     const quantifierKeyPrefix = negative ? 'wiredfurni.params.quantifier.users.neg' : 'wiredfurni.params.quantifier.users';
 
     const save = () => {
-        setIntParams([entityType, avatarMode, matchUserSource, compareUserSource, quantifier]);
+        setIntParams([entityType]);
+        setUserSources([matchUserSource, avatarMode === AVATAR_MODE_CERTAIN ? SOURCE_SPECIFIED_USERNAME : compareUserSource]);
+        setNativeQuantifier(quantifier);
         setStringParam(username);
     };
 
@@ -47,13 +56,13 @@ export const WiredConditionTriggererMatchView: FC<WiredConditionTriggererMatchVi
         if (!trigger) return;
 
         setEntityType(trigger.intData.length > 0 ? trigger.intData[0] : ENTITY_HABBO);
-        setAvatarMode(trigger.intData.length > 1 ? trigger.intData[1] : AVATAR_MODE_ANY);
-        setMatchUserSource(trigger.intData.length > 2 ? trigger.intData[2] : 0);
-        setCompareUserSource(trigger.intData.length > 3 ? trigger.intData[3] : 0);
-        setQuantifier(trigger.intData.length > 4 ? trigger.intData[4] : 0);
+        setAvatarMode(trigger.userSources[1] === SOURCE_SPECIFIED_USERNAME ? AVATAR_MODE_CERTAIN : AVATAR_MODE_ANY);
+        setMatchUserSource(trigger.userSources[0] ?? 0);
+        setCompareUserSource(trigger.userSources[1] ?? 0);
+        setQuantifier(nativeQuantifier);
         setUsername(trigger.stringData || '');
-        setShowAdvanced(trigger.intData.length > 2 ? trigger.intData[2] !== 0 || trigger.intData[3] !== 0 || trigger.intData[4] !== 0 : false);
-    }, [trigger]);
+        setShowAdvanced((trigger.userSources[0] ?? 0) !== 0 || (trigger.userSources[1] ?? 0) !== 0 || nativeQuantifier !== 0);
+    }, [trigger, nativeQuantifier]);
 
     return (
         <WiredConditionBaseView
@@ -95,6 +104,7 @@ export const WiredConditionTriggererMatchView: FC<WiredConditionTriggererMatchVi
                             />
                             <WiredSourcesSelector
                                 showUsers={true}
+                                userSlot={1}
                                 userSource={compareUserSource}
                                 userSources={COMPARE_USER_SOURCES}
                                 usersTitle="wiredfurni.params.sources.users.title.match.1"
