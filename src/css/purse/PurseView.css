@@ -561,3 +561,11 @@
     white-space: nowrap;
     pointer-events: none;
 }
+
+/* Firefox has no mask-box-image. These steps are the 6px corner alpha of border-6; the middle stays open. */
+@supports not (-webkit-mask-box-image-source: none) {
+    .octane-purse-seasonal-currency .seasonal-badge,
+    .octane-purse-seasonal-currency .seasonal-change {
+        clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 1px, calc(100% - 2px) 1px, calc(100% - 2px) 2px, calc(100% - 1px) 2px, calc(100% - 1px) 4px, 100% 4px, 100% calc(100% - 3px), calc(100% - 1px) calc(100% - 3px), calc(100% - 1px) calc(100% - 1px), calc(100% - 3px) calc(100% - 1px), calc(100% - 3px) 100%, 3px 100%, 3px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 3px), 0 calc(100% - 3px), 0 4px, 1px 4px, 1px 2px, 2px 2px, 2px 1px, 4px 1px);
+    }
+}
