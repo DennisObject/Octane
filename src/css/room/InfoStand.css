@@ -479,23 +479,42 @@
     min-height: 18px;
   }
 
+  /* user_view motto_text is a style-0 input. Click recolors it; it does not gain a border, ring, or italic. */
   .motto-input {
     box-sizing: border-box;
-    width: 100%;
-    height: 23px;
-    min-height: 23px;
-    font-size: 11px;
-    line-height: 15px;
-    padding: 6px 0 0;
-    outline: 0;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 12px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    appearance: none;
+    outline: none;
     border: 0;
-    color: rgba(255, 255, 255, 1);
-    position: relative;
+    border-radius: 0;
+    box-shadow: none;
     background: transparent;
+    caret-color: #aaaaaa;
+    color: #aaaaaa;
+    font-family: Volter, monospace;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 12px;
+    position: relative;
     resize: none;
+    -webkit-font-smoothing: none;
 
-    &:focus {
-      font-style: italic;
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      color: #aaaaaa;
+      font-style: normal;
     }
   }
 
