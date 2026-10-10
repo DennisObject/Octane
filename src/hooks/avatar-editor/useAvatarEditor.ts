@@ -1,14 +1,23 @@
 import {
     AvatarEditorFigureCategory,
+    AvatarEffectActivatedComposer,
+    AvatarEffectActivatedEvent,
+    AvatarEffectExpiredEvent,
+    AvatarEffectSelectedComposer,
+    AvatarEffectSelectedEvent,
     AvatarFigureContainer,
     AvatarFigurePartType,
     FigureSetIdsMessageEvent,
     GetAvatarRenderManager,
+    GetHotLooksComposer,
     GetWardrobeMessageComposer,
+    HotLooksEvent,
+    IHotLookInfo,
     IAvatarFigureContainer,
     IFigurePartSet,
     IPalette,
     IPartColor,
+    RoomUnitEffectEvent,
     SetType,
     UserWardrobePageEvent
 } from '@octane/renderer';
@@ -20,6 +29,7 @@ import {
     CreateLinkEvent,
     GetClubMemberLevel,
     GetConfigurationValue,
+    GetRoomSession,
     IAvatarEditorCategory,
     IAvatarEditorCategoryPartItem,
     IsNftAvatarPartSet,
@@ -29,8 +39,11 @@ import {
 import { useMessageEvent } from '../events';
 import { useUserDataSnapshot } from '../session';
 import { useFigureData } from './useFigureData';
+import { useAvatarEditorEffects } from './useAvatarEditorEffects';
 
 const MAX_PALETTES: number = 2;
+const NO_HOT_LOOKS: IHotLookInfo[] = [];
+const NO_GENDER_EFFECTS: Record<string, number> = {};
 const DEFAULT_MALE_FIGURE = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
 const DEFAULT_FEMALE_FIGURE = 'hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68';
 
@@ -49,7 +62,7 @@ export interface IClothingChangeData {
 }
 
 const useAvatarEditorState = () => {
-    const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [isVisible, setIsVisibleState] = useState<boolean>(false);
     const [clothingChangeData, setClothingChangeData] = useState<IClothingChangeData>(null);
     const [avatarModels, setAvatarModels] = useState<{ [index: string]: IAvatarEditorCategory[] }>({});
     const [activeModelKey, setActiveModelKey] = useState<string>('');
@@ -58,10 +71,67 @@ const useAvatarEditorState = () => {
     const [boundFurnitureNames, setBoundFurnitureNames] = useState<string[]>([]);
     const [figureSetNames, setFigureSetNames] = useState<Record<number, string>>({});
     const [savedFigures, setSavedFigures] = useState<[IAvatarFigureContainer, string][]>(null);
+    // Hot looks, staged effects and the preview direction belong to the signed-in user they were made for; another user starts from nothing.
+    const [hotLooksState, setHotLooksState] = useState<{ userId: number; looks: IHotLookInfo[] }>({ userId: 0, looks: [] });
+    const hotLooksUser = useRef(0);
     const userData = useUserDataSnapshot();
+    const { effects, wornEffect, setWornEffect } = useAvatarEditorEffects();
+    const [genderEffectsState, setGenderEffectsState] = useState<{ userId: number; effects: Record<string, number> }>({ userId: 0, effects: {} });
+    const [previewDirectionState, setPreviewDirectionState] = useState<{ userId: number; direction: number }>({ userId: 0, direction: 4 });
+    const hotLooks = userData.userId && hotLooksState.userId === userData.userId ? hotLooksState.looks : NO_HOT_LOOKS;
+    const genderEffects = genderEffectsState.userId === userData.userId ? genderEffectsState.effects : NO_GENDER_EFFECTS;
+    const previewDirection = previewDirectionState.userId === userData.userId ? previewDirectionState.direction : 4;
+    // The staged effect per gender as the editor model holds it (HabboAvatarEditor figureData), mirrored synchronously: several server messages can arrive
+    // before React renders again, and each one must see the selection the previous one left, as the native FigureData mutation does.
+    const stagedEffects = useRef<{ userId: number; effects: Record<string, number> }>({ userId: 0, effects: {} });
+    const setGenderEffects = useCallback((update: (current: Record<string, number>) => Record<string, number>) =>
+    {
+        const owned = stagedEffects.current.userId === userData.userId;
+        const current = owned ? stagedEffects.current.effects : {};
+        const next = update(current);
+
+        if (owned && next === current) return;
+
+        stagedEffects.current = { userId: userData.userId, effects: next };
+        setGenderEffectsState(stagedEffects.current);
+    }, [userData.userId]);
+    const stagedEffectFor = (forGender: string) => (stagedEffects.current.userId === userData.userId ? stagedEffects.current.effects[forGender] : undefined) ?? -1;
+    const setPreviewDirection = (next: number | ((current: number) => number)) =>
+        setPreviewDirectionState((current) =>
+        {
+            const direction = current.userId === userData.userId ? current.direction : 4;
+
+            return { userId: userData.userId, direction: typeof next === 'function' ? next(direction) : next };
+        });
+    // Per signed-in user (the user id they were set for, 0 for none), so an identity change never needs an effect to clear them:
+    // - the effect choice still to save (HabboAvatarEditor var_3918);
+    // - HabboAvatarEditorManager.getEditor(0): the native editor exists once it has been opened, and only then do the effect messages reach it.
+    const effectChangedFor = useRef(0);
+    const editorOpenedFor = useRef(0);
+    // EffectsModel's view belongs to the editor, not to a user: created the first time the Effects tab is shown (CategoryBaseModel.getWindowContainer)
+    // and kept from then on (CategoryBaseModel.var_18), whichever tab is open and whoever is signed in.
+    const effectsViewCreated = useRef(false);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
+    // Showing the Effects tab creates the native EffectsModel view (it then stays for that editor).
+    const selectModelKey = useCallback((key: string) =>
+    {
+        if (key === AvatarEditorFigureCategory.EFFECTS) effectsViewCreated.current = true;
+
+        setActiveModelKey(key);
+    }, []);
+    // A closed editor shows the worn effect for the current gender again: an effect picked but not saved is dropped.
+    const setIsVisible = useCallback((value: boolean) =>
+    {
+        if (!value)
+        {
+            setGenderEffects((staged) => (staged[gender] === wornEffect ? staged : { ...staged, [gender]: wornEffect }));
+        }
+        else editorOpenedFor.current = userData.userId;
+
+        setIsVisibleState(value);
+    }, [gender, wornEffect, userData.userId, setGenderEffects]);
 
     const setGender = useCallback((nextGender: string) => {
         if (nextGender === gender) return;
@@ -73,7 +143,36 @@ const useAvatarEditorState = () => {
         loadAvatarData(figure, nextGender);
     }, [gender, getFigureString, loadAvatarData]);
 
-    const activeModel = useMemo(() => avatarModels[activeModelKey] ?? null, [activeModelKey, avatarModels]);
+    const activeModel = useMemo(() => avatarModels[activeModelKey] ?? [], [activeModelKey, avatarModels]);
+    const selectedEffect = genderEffects[gender] ?? -1;
+    const selectEditorEffect = (type: number) =>
+    {
+        effectChangedFor.current = userData.userId;
+        setGenderEffects(current => ({ ...current, [gender]: type }));
+    };
+    const saveEditorEffect = () =>
+    {
+        if (!userData.userId || effectChangedFor.current !== userData.userId) return;
+
+        if (selectedEffect !== -1)
+        {
+            const effect = effects.find(effect => effect.type === selectedEffect);
+
+            if (effect)
+            {
+                if (!effect.active) SendMessageComposer(new AvatarEffectActivatedComposer(selectedEffect));
+                SendMessageComposer(new AvatarEffectSelectedComposer(selectedEffect));
+                setWornEffect(selectedEffect);
+            }
+        }
+        else
+        {
+            SendMessageComposer(new AvatarEffectSelectedComposer(-1));
+            setWornEffect(-1);
+        }
+
+        effectChangedFor.current = 0;
+    };
 
     const selectedColorParts = useMemo(() => {
         const colorSets: { [index: string]: IPartColor[] } = {};
@@ -303,6 +402,52 @@ const useAvatarEditorState = () => {
         setSavedFigures(savedFigures);
     });
 
+    // AvatarEditorMessageHandler: once the editor exists, the effect the server activates, selects or puts on the own room user becomes the current gender's
+    // selection, and an expiring effect clears it only when it is the selected one. None of them is the worn effect. Only the activated and expired
+    // handlers first call effects.reset(): once the Effects view exists that re-selects the current effect (EffectsView.reset -> selectPart(-1)), and with
+    // no effect selected EffectsModel.selectPart calls setAvatarEffectType(-1), which marks the editor changed.
+    const followServerEffect = (type: number, onlyIfSelected: number = null, resetsView: boolean = false) =>
+    {
+        if (!userData.userId || editorOpenedFor.current !== userData.userId) return;
+
+        const selected = stagedEffectFor(gender);
+
+        if (resetsView && effectsViewCreated.current && selected === -1) effectChangedFor.current = userData.userId;
+
+        if (onlyIfSelected !== null && selected !== onlyIfSelected) return;
+
+        setGenderEffects((staged) => ({ ...staged, [gender]: type }));
+    };
+
+    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => followServerEffect(event.getParser().type, null, true));
+    useMessageEvent<AvatarEffectSelectedEvent>(AvatarEffectSelectedEvent, (event) => followServerEffect(event.getParser().type));
+    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) => followServerEffect(-1, event.getParser().type, true));
+    useMessageEvent<RoomUnitEffectEvent>(RoomUnitEffectEvent, (event) =>
+    {
+        const parser = event.getParser();
+        const session = GetRoomSession();
+
+        if (!session || parser.unitId !== session.ownRoomIndex) return;
+
+        followServerEffect(parser.effectId);
+    });
+
+    useMessageEvent<HotLooksEvent>(HotLooksEvent, (event) => setHotLooksState({ userId: userData.userId, looks: event.getParser().hotLooks }));
+
+    useEffect(() =>
+    {
+        if (!userData.userId)
+        {
+            hotLooksUser.current = 0;
+            return;
+        }
+
+        if (!isVisible || hotLooksUser.current === userData.userId) return;
+
+        hotLooksUser.current = userData.userId;
+        SendMessageComposer(new GetHotLooksComposer(20));
+    }, [isVisible, userData.userId]);
+
     useEffect(() => {
         if (!isVisible) return;
 
@@ -416,8 +561,12 @@ const useAvatarEditorState = () => {
         newAvatarModels[AvatarEditorFigureCategory.LEGS] = [AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY].map(
             (setType) => buildCategory(setType, buildModeDefault)
         );
-        newAvatarModels[AvatarEditorFigureCategory.PETS] = [AvatarFigurePartType.PET].map((setType) => buildCategory(setType)).filter(Boolean);
-        newAvatarModels[AvatarEditorFigureCategory.MISC] = [AvatarFigurePartType.MISC].map((setType) => buildCategory(setType)).filter(Boolean);
+        newAvatarModels[AvatarEditorFigureCategory.HOTLOOKS] = [];
+        if (GetConfigurationValue<boolean>('effects.in.avatar.editor', true)) newAvatarModels[AvatarEditorFigureCategory.EFFECTS] = [];
+        if (GetConfigurationValue<boolean>('clothing.misc.tab.enabled', false))
+        {
+            newAvatarModels[AvatarEditorFigureCategory.MISC] = [AvatarFigurePartType.MISC].map((setType) => buildCategory(setType)).filter(Boolean);
+        }
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
             AvatarFigurePartType.HEAD,
             AvatarFigurePartType.HAIR,
@@ -485,7 +634,7 @@ const useAvatarEditorState = () => {
         setClothingChangeData,
         avatarModels,
         activeModelKey,
-        setActiveModelKey,
+        setActiveModelKey: selectModelKey,
         maxPaletteCount,
         selectedColorParts,
         selectEditorColor,
@@ -500,6 +649,13 @@ const useAvatarEditorState = () => {
         randomizeCurrentFigure,
         savedFigures,
         setSavedFigures,
+        hotLooks,
+        effects,
+        selectedEffect,
+        selectEditorEffect,
+        saveEditorEffect,
+        previewDirection,
+        setPreviewDirection,
         getFirstSelectableColor
     };
 };

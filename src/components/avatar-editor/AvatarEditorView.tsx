@@ -12,19 +12,21 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../api';
 import mainGenericSrc from '../../assets/images/avatareditor/air/main-generic.png';
 import mainHeadSrc from '../../assets/images/avatareditor/air/main-head.png';
+import mainHotLooksSrc from '../../assets/images/avatareditor/air/main-hotlooks.png';
+import mainEffectsSrc from '../../assets/images/avatareditor/air/main-effects.png';
 import mainLegsSrc from '../../assets/images/avatareditor/air/main-legs.png';
 import mainMiscSrc from '../../assets/images/avatareditor/air/main-misc.png';
 import mainTorsoSrc from '../../assets/images/avatareditor/air/main-torso.png';
 import wardrobeHangerSrc from '../../assets/images/avatareditor/wardrobe-hanger.png';
 import mainNftSrc from '../../assets/images/wardrobe/nft.png';
-import mainPetsSrc from '../../assets/images/wardrobe/pets.png';
 import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorFigurePreviewView } from './AvatarEditorFigurePreviewView';
 import { AvatarEditorModelView } from './AvatarEditorModelView';
 import { AvatarEditorNftView } from './AvatarEditorNftView';
-import { AvatarEditorPetView } from './AvatarEditorPetView';
+import { AvatarEditorHotLooksView } from './AvatarEditorHotLooksView';
+import { AvatarEditorEffectsView } from './AvatarEditorEffectsView';
 import { AvatarEditorWardrobeView } from './AvatarEditorWardrobeView';
 
 const MAIN_TAB_ICONS: Record<string, string> = {
@@ -32,21 +34,23 @@ const MAIN_TAB_ICONS: Record<string, string> = {
     [AvatarEditorFigureCategory.HEAD]: mainHeadSrc,
     [AvatarEditorFigureCategory.TORSO]: mainTorsoSrc,
     [AvatarEditorFigureCategory.LEGS]: mainLegsSrc,
-    [AvatarEditorFigureCategory.PETS]: mainPetsSrc,
+    [AvatarEditorFigureCategory.HOTLOOKS]: mainHotLooksSrc,
+    [AvatarEditorFigureCategory.EFFECTS]: mainEffectsSrc,
     [AvatarEditorFigureCategory.MISC]: mainMiscSrc,
     [AvatarEditorFigureCategory.NFT]: mainNftSrc
 };
 
-// AIR removes unavailable tabs from this sequence without reordering the
-// survivors. Polaris-only categories are kept after the official tabs.
+// AIR removes unavailable tabs without reordering the survivors.
+// AvatarEditor layout mainTabs: generic, head, torso, legs, misc (only with clothing.misc.tab.enabled), hotlooks, effects, nfts.
 const MAIN_TAB_ORDER: string[] = [
     AvatarEditorFigureCategory.GENERIC,
     AvatarEditorFigureCategory.HEAD,
     AvatarEditorFigureCategory.TORSO,
     AvatarEditorFigureCategory.LEGS,
     AvatarEditorFigureCategory.MISC,
-    AvatarEditorFigureCategory.NFT,
-    AvatarEditorFigureCategory.PETS
+    AvatarEditorFigureCategory.HOTLOOKS,
+    AvatarEditorFigureCategory.EFFECTS,
+    AvatarEditorFigureCategory.NFT
 ];
 
 // The v75 AvatarEditor window opens at (100, 30) and is never recentred.
@@ -67,10 +71,12 @@ export const AvatarEditorView: FC<{}> = (props) => {
         activeModelKey,
         setActiveModelKey,
         gender,
+        saveEditorEffect,
         getFigureString = null
     } = useAvatarEditor();
 
-    const isPetsOpen = activeModelKey === AvatarEditorFigureCategory.PETS;
+    const isHotLooksOpen = activeModelKey === AvatarEditorFigureCategory.HOTLOOKS;
+    const isEffectsOpen = activeModelKey === AvatarEditorFigureCategory.EFFECTS;
     const isNftOpen = activeModelKey === AvatarEditorFigureCategory.NFT;
     const hasWardrobe = !clothingChangeData;
     const canUseWardrobe = hasWardrobe && !isNftOpen;
@@ -98,6 +104,7 @@ export const AvatarEditorView: FC<{}> = (props) => {
             SendMessageComposer(new SetClothingChangeDataMessageComposer(clothingChangeData.objectId, gender, getFigureString));
         } else {
             SendMessageComposer(new UserFigureComposer(gender, getFigureString));
+            saveEditorEffect();
         }
 
         setIsVisible(false);
@@ -224,10 +231,11 @@ export const AvatarEditorView: FC<{}> = (props) => {
                         </button>
                     )}
                     <div className="octane-avatar-editor-main">
-                        {activeModelKey.length > 0 && !isPetsOpen && !isNftOpen && (
+                        {activeModelKey.length > 0 && !isHotLooksOpen && !isEffectsOpen && !isNftOpen && (
                             <AvatarEditorModelView categories={avatarModels[activeModelKey]} name={activeModelKey} />
                         )}
-                        {isPetsOpen && <AvatarEditorPetView categories={avatarModels[activeModelKey]} />}
+                        {isHotLooksOpen && <AvatarEditorHotLooksView />}
+                        {isEffectsOpen && <AvatarEditorEffectsView />}
                         {isNftOpen && <AvatarEditorNftView categories={avatarModels[activeModelKey]} />}
                         <AvatarEditorFigurePreviewView />
                         <button type="button" className="octane-avatar-editor-save" disabled={isSaving} onClick={saveAvatar}>
