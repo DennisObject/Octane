@@ -1,4 +1,4 @@
-import { parseWiredInt64 } from '@octane/renderer';
+import { WIRED_WALL_INSPECTION_TOKENS, parseWiredInt64 } from '@octane/renderer';
 import {
     AddLinkEventTracker,
     AvatarExpressionEnum,
@@ -66,7 +66,7 @@ import {
     OctaneCardView,
     Text
 } from '../../common';
-import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedEvent, useRoom, useWiredTools } from '../../hooks';
+import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedEvent, useRoom, useWiredTools, useWiredFurniInspection } from '../../hooks';
 import { WiredChestsTabView } from './WiredChestsTabView';
 import {
     DIRECTION_NAMES,
@@ -1061,6 +1061,22 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     }, [isVisible, roomSession?.roomId, roomSettings.isLoaded, roomSettings.canInspect]);
 
     const [selectedRoomObject, setSelectedRoomObject] = useState<ReturnType<ReturnType<typeof GetRoomEngine>['getRoomObject']> | null>(null);
+    const isCurrentWallSelection = useCallback(() => {
+        const current = useWiredCreatorToolsUiStore.getState();
+        return current.isVisible && current.activeTab === 'inspection' && current.inspectionType === 'furni'
+            && current.selectedFurni === selectedFurni && selectedFurni?.category === RoomObjectCategory.WALL;
+    }, [selectedFurni]);
+    const wallInspection = useWiredFurniInspection(roomSession, selectedFurni?.objectId ?? 0, selectedRoomObject,
+        isVisible && activeTab === 'inspection' && inspectionType === 'furni' && selectedFurni?.category === RoomObjectCategory.WALL && roomSettings.canInspect,
+        roomSettings.canModify, isCurrentWallSelection);
+
+    useEffect(() => {
+        if (selectedFurni?.category !== RoomObjectCategory.WALL || wallInspection.canEdit
+            || !['@rotation', '@altitude', '@wallitem_offset'].includes(editingVariable)) return;
+        setEditingVariable(null);
+        setEditingValue('');
+    }, [selectedFurni, wallInspection.canEdit, editingVariable, setEditingVariable, setEditingValue]);
+
     const [selectedUserRoomObject, setSelectedUserRoomObject] = useState<ReturnType<ReturnType<typeof GetRoomEngine>['getRoomObject']> | null>(null);
 
     useEffect(() => {
@@ -1312,6 +1328,22 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             };
         });
 
+        if (selectedFurni.category === RoomObjectCategory.WALL) {
+            return [
+                ...customVariables,
+                { key: 'Server inspection', value: 'Server values', valueClassName: 'octane-wired-menu__text--bold' },
+                ...WIRED_WALL_INSPECTION_TOKENS.map(key => ({
+                    key,
+                    value: wallInspection.values?.get(key)?.toString() ?? 'Unavailable',
+                    editable: wallInspection.canEdit && ['@rotation', '@altitude', '@wallitem_offset'].includes(key)
+                })),
+                { key: 'Furniture controls', value: 'Client state / opacity local preview', valueClassName: 'octane-wired-menu__text--bold' },
+                { key: '@state', value: String(liveState?.state ?? 0), editable: canEditInspection },
+                { key: '@opacity', value: String(opacity), editable: canEditInspection },
+                { key: '@gravity', value: 'Unavailable' }
+            ];
+        }
+
         const variables: InspectionVariable[] = [
             ...customVariables,
             ...(Number(selectedFurni.info?.teleportTargetId ?? 0) > 0
@@ -1354,7 +1386,9 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         selectedFurniCustomVariableDefinitions,
         selectedFurniAssignmentMap,
         selectedFurniRuntimeState,
-        furniInternalRevision
+        furniInternalRevision,
+        wallInspection.values,
+        wallInspection.canEdit
     ]);
     const canEditSelectedUser = useMemo(() => {
         return !!selectedUser && !!roomSession && roomSettings.canModify;
@@ -2428,6 +2462,13 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const beginVariableEdit = (variable: InspectionVariable) => {
         if (!variable.editable) return;
 
+        if (inspectionType === 'furni' && selectedFurni?.category === RoomObjectCategory.WALL
+            && WIRED_WALL_INSPECTION_TOKENS.includes(variable.key)) {
+            if (!wallInspection.canEdit || !['@rotation', '@altitude', '@wallitem_offset'].includes(variable.key)) return;
+            setEditingVariable(variable.key);
+            setEditingValue(variable.value);
+            return;
+        }
         if (inspectionType === 'furni') {
             const isEditableBuiltIn = EDITABLE_FURNI_VARIABLES.includes(variable.key);
             const customDefinition = selectedFurniCustomVariableDefinitionMap.get(variable.key);
@@ -2616,7 +2657,25 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             return;
         }
 
+        if (selectedFurni?.category === RoomObjectCategory.WALL && WIRED_WALL_INSPECTION_TOKENS.includes(editingVariable)) {
+            try {
+                if (!wallInspection.write(editingVariable, editingValue)) {
+                    simpleAlert?.('Wall inspection is unavailable. Select the current wall and wait for its server values.');
+                    return;
+                }
+                setEditingVariable(null);
+                setEditingValue('');
+            } catch (error) {
+                simpleAlert?.(String(error instanceof Error ? error.message : error));
+            }
+            return;
+        }
+
         if (editingVariable === '@gravity') {
+            if (selectedFurni?.category === RoomObjectCategory.WALL) {
+                cancelVariableEdit();
+                return;
+            }
             const parsed = parseInt(editingValue.trim(), 10);
             if (!selectedFurni || !roomSession || (parsed !== 0 && parsed !== 1)) {
                 cancelVariableEdit();
@@ -2766,7 +2825,11 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             }
 
             selectedRoomObject.model.setValue(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER, nextOpacity / 100);
-            SendMessageComposer(new WiredFurniRuntimeStateRequestComposer(selectedFurni.objectId, WIRED_FURNI_RUNTIME_ACTION_WRITE, '@opacity', nextOpacity));
+            if (selectedFurni.category === RoomObjectCategory.WALL) {
+                setFurniInternalRevision((previousValue) => previousValue + 1);
+            } else {
+                SendMessageComposer(new WiredFurniRuntimeStateRequestComposer(selectedFurni.objectId, WIRED_FURNI_RUNTIME_ACTION_WRITE, '@opacity', nextOpacity));
+            }
             setEditingVariable(null);
             setEditingValue('');
             return;
@@ -3002,18 +3065,19 @@ export const WiredCreatorToolsView: FC<{}> = () => {
 
     const onVariableInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         event.stopPropagation();
+        const input = event.currentTarget;
 
         switch (event.key) {
             case 'Enter':
             case 'NumpadEnter':
                 event.preventDefault();
                 commitVariableEdit();
-                window.requestAnimationFrame(() => event.currentTarget.blur());
+                window.requestAnimationFrame(() => input.blur());
                 return;
             case 'Escape':
                 event.preventDefault();
                 cancelVariableEdit();
-                window.requestAnimationFrame(() => event.currentTarget.blur());
+                window.requestAnimationFrame(() => input.blur());
                 return;
         }
     };
