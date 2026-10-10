@@ -1,8 +1,11 @@
 import {
     BuyMarketplaceOfferMessageComposer,
+    GetCommunication,
     GetMarketplaceOffersMessageComposer,
+    GetSessionDataManager,
     MarketPlaceOffersEvent,
-    MarketplaceBuyOfferResultEvent
+    MarketplaceBuyOfferResultEvent,
+    OctaneEventType
 } from '@octane/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -14,7 +17,7 @@ import {
     SendMessageComposer
 } from '../../../../../../api';
 import { Button, Column, Text } from '../../../../../../common';
-import { useMessageEvent, useNotification, usePurse } from '../../../../../../hooks';
+import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, PUBLIC_OFFER } from './CatalogLayoutMarketplaceItemView';
 import { SearchFormView } from './CatalogLayoutMarketplaceSearchFormView';
@@ -39,6 +42,13 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
         pendingOfferIdRef.current = offerId;
         SendMessageComposer(new BuyMarketplaceOfferMessageComposer(offerId));
     }, []);
+
+    // The server forgets a buy with its socket and answers nothing for it on the next connection.
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () => {
+        if (GetCommunication().connection.connectionState.authenticated) return;
+
+        pendingOfferIdRef.current = null;
+    });
 
     const requestOffers = useCallback((options: IMarketplaceSearchOptions) => {
         setLastSearch(options);
@@ -71,10 +81,14 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
             }
 
             const offerId = offerData.offerId;
+            const sessionUserId = GetSessionDataManager().userId;
 
             showConfirm(
                 LocalizeText('catalog.marketplace.confirm_header'),
-                () => buyOffer(offerId),
+                () => {
+                    // A confirmation left open across a logout must not buy for another user.
+                    if (GetSessionDataManager().userId === sessionUserId) buyOffer(offerId);
+                },
                 null,
                 null,
                 null,

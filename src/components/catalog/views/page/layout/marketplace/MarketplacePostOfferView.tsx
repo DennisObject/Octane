@@ -1,4 +1,4 @@
-import { GetMarketplaceItemStatsComposer, MakeOfferMessageComposer, MarketplaceItemStatsEvent } from '@octane/renderer';
+import { GetMarketplaceItemStatsComposer, GetSessionDataManager, MakeOfferMessageComposer, MarketplaceItemStatsEvent } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } from '../../../../../../api';
 import { LayoutFurniImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../../../common';
@@ -87,6 +87,7 @@ export const MarketplacePostOfferView: FC<{}> = () => {
         const ids = itemIds.slice(0, amount);
 
         let submitted = false;
+        const sessionUserId = GetSessionDataManager().userId;
 
         showConfirm(
             amount > 1
@@ -97,7 +98,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                   )
                 : LocalizeText('inventory.marketplace.confirm_offer.info', ['furniname', 'price'], [furniTitle, revenue.toString()]),
             () => {
-                if (submitted) return;
+                // A confirmation left open across a logout must not list the old session's items in another user's.
+                if (submitted || GetSessionDataManager().userId !== sessionUserId) return;
 
                 submitted = true;
                 SendMessageComposer(new MakeOfferMessageComposer(askingPrice, item.isWallItem ? 2 : 1, ...ids));
