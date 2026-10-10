@@ -1,8 +1,7 @@
 import {
     GetMarketplaceItemStatsComposer,
-    MakeMultipleOffersMessageComposer,
-    MarketplaceItemStatsEvent,
-    MarketplaceItemStatsParser
+    MakeOfferMessageComposer,
+    MarketplaceItemStatsEvent
 } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } from '../../../../../../api';
@@ -14,16 +13,11 @@ import { OctaneButton } from '../../../../../../layout';
 
 const DEFAULT_BULK_OFFER_LIMIT = 500;
 
-interface V75MarketplaceItemStats {
+interface MarketplaceItemStats {
     averagePrice: number;
     historyLength: number;
-    lowestPrice: number;
+    lowestCurrentPrice: number;
     suggestedPrice: number;
-}
-
-interface V75MarketplaceCommission {
-    commissionPercentage: number;
-    commissionDivisor: number;
 }
 
 export const MarketplacePostOfferView: FC<{}> = () => {
@@ -31,7 +25,7 @@ export const MarketplacePostOfferView: FC<{}> = () => {
     const [itemIds, setItemIds] = useState<number[]>([]);
     const [priceText, setPriceText] = useState('');
     const [amountText, setAmountText] = useState('1');
-    const [itemStats, setItemStats] = useState<V75MarketplaceItemStats>(null);
+    const [itemStats, setItemStats] = useState<MarketplaceItemStats>(null);
     const { data: marketplaceConfiguration = null } = useMarketplaceConfiguration({ enabled: !!item });
     const { showConfirm = null } = useNotification();
 
@@ -44,15 +38,15 @@ export const MarketplacePostOfferView: FC<{}> = () => {
     });
 
     useMessageEvent<MarketplaceItemStatsEvent>(MarketplaceItemStatsEvent, (event) => {
-        const parser = event.getParser() as MarketplaceItemStatsParser & Partial<Pick<V75MarketplaceItemStats, 'lowestPrice' | 'suggestedPrice'>>;
+        const parser = event.getParser();
 
         if (!item || parser.furniTypeId !== item.type || parser.furniCategoryId !== (item.isWallItem ? 2 : 1)) return;
 
         setItemStats({
             averagePrice: parser.averagePrice,
             historyLength: parser.historyLength,
-            lowestPrice: parser.lowestPrice ?? 0,
-            suggestedPrice: parser.suggestedPrice ?? 0
+            lowestCurrentPrice: parser.lowestCurrentPrice,
+            suggestedPrice: parser.suggestedPrice
         });
     });
 
@@ -80,12 +74,10 @@ export const MarketplacePostOfferView: FC<{}> = () => {
     const isAmountValid = !isNaN(amount) && amount >= 1 && amount <= maxAmount;
 
     const furniTitle = LocalizeText(item.isWallItem ? 'wallItem.name.' + item.type : 'roomItem.name.' + item.type);
-    const v75Configuration = marketplaceConfiguration as typeof marketplaceConfiguration & Partial<V75MarketplaceCommission>;
-    const commissionPercentage = v75Configuration.commissionPercentage ?? marketplaceConfiguration.commission;
-    const commissionDivisor = v75Configuration.commissionDivisor ?? 0;
-    const commissionRate = commissionPercentage / 100 + (commissionDivisor > 0 ? (0.5 * askingPrice) / commissionDivisor : 0);
-    const commission = Math.ceil(Math.round(1000 * askingPrice * commissionRate) / 1000);
-    const revenue = askingPrice - commission;
+    // MarketplaceView.calculateFinalPrice: the parser only accepts a configuration whose halfTaxLimit is positive.
+    const finalPrice = (price: number) =>
+        price - Math.ceil(Math.round(1000 * price * (marketplaceConfiguration.sellingFeePercentage / 100 + (0.5 * price) / marketplaceConfiguration.halfTaxLimit)) / 1000);
+    const revenue = finalPrice(askingPrice);
     const suggestedPrice = itemStats?.suggestedPrice ?? 0;
 
     const close = () => setItem(null);
@@ -109,7 +101,7 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                 if (submitted) return;
 
                 submitted = true;
-                SendMessageComposer(new MakeMultipleOffersMessageComposer(askingPrice, item.isWallItem ? 2 : 1, ids));
+                SendMessageComposer(new MakeOfferMessageComposer(askingPrice, item.isWallItem ? 2 : 1, ...ids));
             },
             null,
             null,
@@ -158,10 +150,10 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                 </div>
                 <div className="octane-market-offer-list">
                     {itemStats?.averagePrice > 0 && (
-                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.average_price', ['days', 'price'], [marketplaceConfiguration.displayTime.toString(), itemStats.averagePrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
+                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.average_price', ['days', 'price', 'price_no_commission'], [marketplaceConfiguration.displayTime.toString(), itemStats.averagePrice.toString(), finalPrice(itemStats.averagePrice).toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
                     )}
-                    {itemStats?.lowestPrice > 0 && (
-                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestPrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
+                    {itemStats?.lowestCurrentPrice > 0 && (
+                        <div className="octane-market-offer-stat"><NativeText text={LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestCurrentPrice.toString()])} textStyle="u_regular" background={0xe9e9e1} /></div>
                     )}
                     {suggestedPrice > 0 && (
                         <>
