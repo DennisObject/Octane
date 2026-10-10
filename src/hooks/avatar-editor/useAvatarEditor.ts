@@ -37,6 +37,8 @@ import { useFigureData } from './useFigureData';
 import { useAvatarEditorEffects } from './useAvatarEditorEffects';
 
 const MAX_PALETTES: number = 2;
+const NO_HOT_LOOKS: IHotLookInfo[] = [];
+const NO_GENDER_EFFECTS: Record<string, number> = {};
 const DEFAULT_MALE_FIGURE = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
 const DEFAULT_FEMALE_FIGURE = 'hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68';
 
@@ -55,7 +57,7 @@ export interface IClothingChangeData {
 }
 
 const useAvatarEditorState = () => {
-    const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [isVisible, setIsVisibleState] = useState<boolean>(false);
     const [clothingChangeData, setClothingChangeData] = useState<IClothingChangeData>(null);
     const [avatarModels, setAvatarModels] = useState<{ [index: string]: IAvatarEditorCategory[] }>({});
     const [activeModelKey, setActiveModelKey] = useState<string>('');
@@ -64,16 +66,44 @@ const useAvatarEditorState = () => {
     const [boundFurnitureNames, setBoundFurnitureNames] = useState<string[]>([]);
     const [figureSetNames, setFigureSetNames] = useState<Record<number, string>>({});
     const [savedFigures, setSavedFigures] = useState<[IAvatarFigureContainer, string][]>(null);
-    const [hotLooks, setHotLooks] = useState<IHotLookInfo[]>([]);
+    // Hot looks, staged effects and the preview direction belong to the signed-in user they were made for; another user starts from nothing.
+    const [hotLooksState, setHotLooksState] = useState<{ userId: number; looks: IHotLookInfo[] }>({ userId: 0, looks: [] });
     const hotLooksUser = useRef(0);
     const userData = useUserDataSnapshot();
     const { effects, wornEffect, setWornEffect } = useAvatarEditorEffects(userData.userId);
-    const [genderEffects, setGenderEffects] = useState<Record<string, number>>({});
-    const [previewDirection, setPreviewDirection] = useState(4);
+    const [genderEffectsState, setGenderEffectsState] = useState<{ userId: number; effects: Record<string, number> }>({ userId: 0, effects: {} });
+    const [previewDirectionState, setPreviewDirectionState] = useState<{ userId: number; direction: number }>({ userId: 0, direction: 4 });
+    const hotLooks = userData.userId && hotLooksState.userId === userData.userId ? hotLooksState.looks : NO_HOT_LOOKS;
+    const genderEffects = genderEffectsState.userId === userData.userId ? genderEffectsState.effects : NO_GENDER_EFFECTS;
+    const previewDirection = previewDirectionState.userId === userData.userId ? previewDirectionState.direction : 4;
+    const setGenderEffects = (update: (current: Record<string, number>) => Record<string, number>) =>
+        setGenderEffectsState((current) => ({ userId: userData.userId, effects: update(current.userId === userData.userId ? current.effects : {}) }));
+    const setPreviewDirection = (next: number | ((current: number) => number)) =>
+        setPreviewDirectionState((current) =>
+        {
+            const direction = current.userId === userData.userId ? current.direction : 4;
+
+            return { userId: userData.userId, direction: typeof next === 'function' ? next(direction) : next };
+        });
     const effectChanged = useRef(false);
     const genderFigures = useRef<{ userId: number; figures: Record<string, string> }>({ userId: 0, figures: {} });
     const { selectedColors, gender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } =
         useFigureData();
+    // A closed editor shows the worn effect for the current gender again: an effect picked but not saved is dropped.
+    const setIsVisible = useCallback((value: boolean) =>
+    {
+        if (!value)
+        {
+            setGenderEffectsState((current) =>
+            {
+                const staged = current.userId === userData.userId ? current.effects : {};
+
+                return staged[gender] === wornEffect && current.userId === userData.userId ? current : { userId: userData.userId, effects: { ...staged, [gender]: wornEffect } };
+            });
+        }
+
+        setIsVisibleState(value);
+    }, [gender, wornEffect, userData.userId]);
 
     const setGender = useCallback((nextGender: string) => {
         if (nextGender === gender) return;
@@ -87,22 +117,28 @@ const useAvatarEditorState = () => {
 
     const activeModel = useMemo(() => avatarModels[activeModelKey] ?? [], [activeModelKey, avatarModels]);
     const selectedEffect = genderEffects[gender] ?? -1;
-    const selectEditorEffect = (type: number) => {
+    const selectEditorEffect = (type: number) =>
+    {
         effectChanged.current = true;
         setGenderEffects(current => ({ ...current, [gender]: type }));
     };
-    const saveEditorEffect = () => {
+    const saveEditorEffect = () =>
+    {
         if (!effectChanged.current) return;
 
-        if (selectedEffect !== -1) {
+        if (selectedEffect !== -1)
+        {
             const effect = effects.find(effect => effect.type === selectedEffect);
 
-            if (effect) {
+            if (effect)
+            {
                 if (!effect.active) SendMessageComposer(new AvatarEffectActivatedComposer(selectedEffect));
                 SendMessageComposer(new AvatarEffectSelectedComposer(selectedEffect));
                 setWornEffect(selectedEffect);
             }
-        } else {
+        }
+        else
+        {
             SendMessageComposer(new AvatarEffectSelectedComposer(-1));
             setWornEffect(-1);
         }
@@ -338,12 +374,13 @@ const useAvatarEditorState = () => {
         setSavedFigures(savedFigures);
     });
 
-    useMessageEvent<HotLooksEvent>(HotLooksEvent, (event) => setHotLooks(event.getParser().hotLooks));
+    useMessageEvent<HotLooksEvent>(HotLooksEvent, (event) => setHotLooksState({ userId: userData.userId, looks: event.getParser().hotLooks }));
 
-    useEffect(() => {
-        if (!userData.userId) {
+    useEffect(() =>
+    {
+        if (!userData.userId)
+        {
             hotLooksUser.current = 0;
-            setHotLooks([]);
             return;
         }
 
@@ -468,7 +505,8 @@ const useAvatarEditorState = () => {
         );
         newAvatarModels[AvatarEditorFigureCategory.HOTLOOKS] = [];
         if (GetConfigurationValue<boolean>('effects.in.avatar.editor', true)) newAvatarModels[AvatarEditorFigureCategory.EFFECTS] = [];
-        if (GetConfigurationValue<boolean>('clothing.misc.tab.enabled', false)) {
+        if (GetConfigurationValue<boolean>('clothing.misc.tab.enabled', false))
+        {
             newAvatarModels[AvatarEditorFigureCategory.MISC] = [AvatarFigurePartType.MISC].map((setType) => buildCategory(setType)).filter(Boolean);
         }
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
@@ -496,8 +534,6 @@ const useAvatarEditorState = () => {
 
     useEffect(() => {
         genderFigures.current = { userId: 0, figures: {} };
-        setGenderEffects({});
-        setPreviewDirection(4);
         effectChanged.current = false;
     }, [userData.userId]);
 
@@ -514,7 +550,6 @@ const useAvatarEditorState = () => {
         }
 
         if (!isVisible) {
-            setGenderEffects(current => ({ ...current, [gender]: wornEffect }));
             if (userData.userId && genderFigures.current.userId === userData.userId) {
                 genderFigures.current.figures[gender] = getFigureString;
             }

@@ -1,39 +1,54 @@
 import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 
-export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: string }> = ({ figure, gender }) => {
-    const [url, setUrl] = useState<string>(null);
+export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: string }> = ({ figure, gender }) =>
+{
+    // The bitmap is kept with the look it was drawn for, so a changed look shows nothing until its own bitmap is ready.
+    const key = `${gender}:${figure}`;
+    const [drawn, setDrawn] = useState<{ key: string; url: string }>(null);
+    const url = drawn?.key === key ? drawn.url : null;
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         let disposed = false;
         let revision = 0;
-        setUrl(null);
 
-        const render = async () => {
+        const render = async () =>
+        {
             if (disposed) return;
 
             const currentRevision = ++revision;
             const avatar = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, gender, {
                 resetFigure: render,
-                dispose: () => {},
-                get disposed() { return disposed; }
+                dispose: () =>
+                {},
+                get disposed()
+                {
+                    return disposed;
+                }
             });
             if (!avatar) return;
 
             let source: string;
-            try {
+            try
+            {
                 avatar.setDirection(AvatarSetType.FULL, 4);
                 source = avatar.processAsImageUrl(AvatarSetType.FULL);
-            } finally {
+            }
+            finally
+            {
                 avatar.dispose();
             }
             if (!source || disposed) return;
 
             const image = new Image();
             image.src = source;
-            try {
+            try
+            {
                 await image.decode();
-            } catch {
+            }
+            catch
+            {
                 return;
             }
             if (disposed || currentRevision !== revision) return;
@@ -53,12 +68,15 @@ export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: stri
             scaledContext.imageSmoothingEnabled = true;
             scaledContext.drawImage(image, 0, 0, scaled.width, scaled.height);
             outputContext.drawImage(scaled, Math.floor((35 - scaled.width) / 2), 60 - scaled.height);
-            setUrl(output.toDataURL('image/png'));
+            setDrawn({ key: `${gender}:${figure}`, url: output.toDataURL('image/png') });
             scaled.width = scaled.height = output.width = output.height = 0;
         };
 
         render();
-        return () => { disposed = true; revision++; };
+        return () =>
+        {
+            disposed = true; revision++;
+        };
     }, [figure, gender]);
 
     return url && <img className="octane-avatar-editor-hotlook-bitmap" src={url} alt="" draggable={false} />;

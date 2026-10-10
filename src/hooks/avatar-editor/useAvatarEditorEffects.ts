@@ -18,12 +18,14 @@ export const getEditorEffectSeconds = (effect: AvatarEditorEffect) => effect.act
     ? Math.max(0, effect.secondsLeft - Math.floor((Date.now() - effect.updatedAt) / 1000))
     : effect.duration;
 
-export const useAvatarEditorEffects = (userId: number) => {
+export const useAvatarEditorEffects = (userId: number) =>
+{
     const [effects, setEffects] = useState<AvatarEditorEffect[]>([]);
     const [wornEffect, setWornEffect] = useState(-1);
     const previousUserId = useRef(userId);
 
-    useMessageEvent<AvatarEffectsEvent>(AvatarEffectsEvent, (event) => {
+    useMessageEvent<AvatarEffectsEvent>(AvatarEffectsEvent, (event) =>
+    {
         const updatedAt = Date.now();
         const incoming = event.getParser().effects.map(effect => ({
             type: effect.type, duration: effect.duration,
@@ -32,10 +34,12 @@ export const useAvatarEditorEffects = (userId: number) => {
             active: effect.secondsLeftIfActive >= 0,
             permanent: effect.isPermanent, updatedAt
         }));
-        setEffects(current => {
+        setEffects(current =>
+        {
             const next = [...current];
 
-            for (const effect of incoming) {
+            for (const effect of incoming)
+            {
                 const index = next.findIndex(item => item.type === effect.type);
                 if (index < 0) next.push(effect);
                 else next[index] = { ...next[index], amount: next[index].amount + 1 };
@@ -45,7 +49,8 @@ export const useAvatarEditorEffects = (userId: number) => {
         });
     });
 
-    useMessageEvent<AvatarEffectAddedEvent>(AvatarEffectAddedEvent, (event) => {
+    useMessageEvent<AvatarEffectAddedEvent>(AvatarEffectAddedEvent, (event) =>
+    {
         const parser = event.getParser();
         setEffects(current => current.some(effect => effect.type === parser.type)
             ? current.map(effect => effect.type === parser.type ? { ...effect, amount: effect.amount + 1 } : effect)
@@ -53,23 +58,27 @@ export const useAvatarEditorEffects = (userId: number) => {
                 active: false, permanent: parser.isPermanent, updatedAt: Date.now() }]);
     });
 
-    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) => {
+    useMessageEvent<AvatarEffectActivatedEvent>(AvatarEffectActivatedEvent, (event) =>
+    {
         const parser = event.getParser();
         setEffects(current => current.map(effect => effect.type === parser.type && !effect.active
             ? { ...effect, active: true, updatedAt: Date.now() }
             : effect));
     });
 
-    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) => {
+    useMessageEvent<AvatarEffectExpiredEvent>(AvatarEffectExpiredEvent, (event) =>
+    {
         const type = event.getParser().type;
         setEffects(current => current.flatMap(effect => effect.type !== type ? [effect]
             : effect.amount > 1 ? [{ ...effect, amount: effect.amount - 1, active: false, secondsLeft: effect.duration }] : []));
         setWornEffect(-1);
     });
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         // The first authenticated identity can arrive in the same batch as the effects list.
-        if (!userId || (previousUserId.current && previousUserId.current !== userId)) {
+        if (!userId || (previousUserId.current && previousUserId.current !== userId))
+        {
             setEffects([]);
             setWornEffect(-1);
         }

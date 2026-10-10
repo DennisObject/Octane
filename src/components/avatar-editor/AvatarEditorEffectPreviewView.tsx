@@ -1,12 +1,17 @@
 import { GetRoomEngine, RoomPreviewer } from '@octane/renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Point } from 'pixi.js';
 import { LayoutRoomPreviewerView } from '../../common/layout/LayoutRoomPreviewerView';
 
-export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number; direction: number }> = ({ figure, effect, direction }) => {
+export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number; direction: number }> = ({ figure, effect, direction }) =>
+{
     const [previewer, setPreviewer] = useState<RoomPreviewer>(null);
 
-    useEffect(() => {
+    // The previewer lives as long as its container is mounted (the ref callback owns it, so no state is set from an effect).
+    const attach = useCallback((node: HTMLDivElement) =>
+    {
+        if (!node) return;
+
         const instance = new RoomPreviewer(GetRoomEngine(), ++RoomPreviewer.PREVIEW_COUNTER);
         instance.backgroundColor = null;
         instance.disableUpdate = true;
@@ -14,10 +19,15 @@ export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number;
         instance.updateRoomWallsAndFloorVisibility(false, false);
         setPreviewer(instance);
 
-        return () => instance.dispose();
+        return () =>
+        {
+            instance.dispose();
+            setPreviewer((current) => (current === instance ? null : current));
+        };
     }, []);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!previewer) return;
 
         previewer.addAvatarIntoRoom(figure, effect);
@@ -26,5 +36,6 @@ export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number;
         previewer.updatePreviewRoomView(true);
     }, [previewer, figure, effect, direction]);
 
-    return <div className="octane-avatar-editor-effect-preview">{previewer && <LayoutRoomPreviewerView roomPreviewer={previewer} height={210} onPreviewClick={() => {}} />}</div>;
+    return <div ref={attach} className="octane-avatar-editor-effect-preview">{previewer && <LayoutRoomPreviewerView roomPreviewer={previewer} height={210} onPreviewClick={() =>
+    {}} />}</div>;
 };

@@ -8,9 +8,10 @@ import { useAvatarEditor } from '../../hooks';
 import { getEditorEffectSeconds } from '../../hooks/avatar-editor/useAvatarEditorEffects';
 import { useAvatarEditorGridWheel } from '../../hooks/avatar-editor/useAvatarEditorGridWheel';
 
-const EFFECT_ICONS = import.meta.glob('../../assets/images/avatareditor/effects/*.png', { eager: true, import: 'default' }) as Record<string, string>;
+const EFFECT_ICONS = import.meta.glob('../../assets/images/avatareditor/effects/*.png', { eager: true, import: 'default' });
 
-export const AvatarEditorEffectsView: FC = () => {
+export const AvatarEditorEffectsView: FC = () =>
+{
     const container = useRef<HTMLDivElement>(null);
     useAvatarEditorGridWheel(container);
     const { effects, selectedEffect, selectEditorEffect } = useAvatarEditor();
@@ -22,7 +23,8 @@ export const AvatarEditorEffectsView: FC = () => {
         Math.floor(40 * (effect.permanent ? 1 : getEditorEffectSeconds(effect) / effect.duration))
     ])), [effects]);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!selected?.active || selected.permanent) return;
 
         const timer = window.setInterval(() => setTick(tick => tick + 1), 1000);
@@ -30,7 +32,8 @@ export const AvatarEditorEffectsView: FC = () => {
     }, [selected]);
 
     const secondsLeft = selected ? getEditorEffectSeconds(selected) : 0;
-    const getTimeText = () => {
+    const getTimeText = () =>
+    {
         if (selected.permanent) return LocalizeText('avatareditor.effects.active.permanent');
         if (secondsLeft > 86400) return LocalizeText('avatareditor.effects.active.daysleft', ['days_left'], [String(Math.floor(secondsLeft / 86400))]);
 
@@ -54,10 +57,14 @@ export const AvatarEditorEffectsView: FC = () => {
             <NativeText className="octane-avatar-editor-effects-notification" text={LocalizeText('avatar.editor.content.notification')} textStyle="u_regular" background={0xe9e9e1} maxWidth={298} />
         </div> : <div className="octane-avatar-editor-parts-grid octane-avatar-editor-effects-grid">
             <ClassicScrollAreaView contentClassName="octane-avatar-editor-effect-items" scrollStep={50}>
-                {[null, ...effects].map(effect => {
+                {[null, ...effects].map(effect =>
+                {
                     const type = effect?.type ?? -1;
                     const icon = effect ? EFFECT_ICONS[`../../assets/images/avatareditor/effects/fx_icon_${type}.png`] : clearSrc;
-                    return <button type="button" key={type} className={`octane-avatar-editor-effect-item avatar-parts${selectedEffect === type ? ' part-selected' : ''}`} aria-pressed={selectedEffect === type} aria-label={effect ? LocalizeText(`fx_${type}`) : LocalizeText('avatareditor.clear')} onMouseDown={() => selectEditorEffect(type)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') selectEditorEffect(type); }}>
+                    return <button type="button" key={type} className={`octane-avatar-editor-effect-item avatar-parts${selectedEffect === type ? ' part-selected' : ''}`} aria-pressed={selectedEffect === type} aria-label={effect ? LocalizeText(`fx_${type}`) : LocalizeText('avatareditor.clear')} onMouseDown={() => selectEditorEffect(type)} onKeyDown={event =>
+                    {
+                        if (event.key === 'Enter' || event.key === ' ') selectEditorEffect(type);
+                    }}>
                         {icon && <img src={icon} alt="" draggable={false} />}
                         {effect?.amount > 1 && <div className="octane-avatar-editor-effect-amount"><NativeText text={String(effect.amount)} textStyle="regular" background={0x666666} overrides={{ color: 0xeeeeee, antiAliasType: 'advanced', sharpness: 0, thickness: 0, kerning: false }} /></div>}
                         {effect && (effect.active || effect.permanent) && <div className="octane-avatar-editor-effect-duration"><div style={{ width: gridProgress.get(type) }} /></div>}

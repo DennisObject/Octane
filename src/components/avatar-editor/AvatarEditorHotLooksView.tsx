@@ -4,7 +4,8 @@ import { NativeText } from '../../common/native-text/NativeText';
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorHotLookThumbnailView } from './AvatarEditorHotLookThumbnailView';
 
-export const AvatarEditorHotLooksView: FC = () => {
+export const AvatarEditorHotLooksView: FC = () =>
+{
     const { hotLooks, gender, loadAvatarData } = useAvatarEditor();
 
     return <div className="octane-avatar-editor-hotlooks">
