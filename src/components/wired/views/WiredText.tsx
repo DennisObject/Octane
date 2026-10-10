@@ -1,4 +1,5 @@
 import { createContext, FC, useContext, useLayoutEffect, useRef, useState } from 'react';
+import { Text } from '../../../common';
 import { NativeText } from '../../../common/native-text/NativeText';
 import { useWiredNative } from './WiredNativeContext';
 
@@ -42,15 +43,7 @@ export const WiredText: FC<WiredTextProps> = ({ text, bold = false, soft = false
     }, [isNative, wrap]);
 
     // Only the Illumina frame draws il_regular; the other styles keep their own text.
-    if (!isNative)
-        return (
-            <span
-                className={`octane-wired__text ${bold ? 'octane-wired__text--bold' : ''} ${soft ? 'octane-wired__text--soft' : ''} ${wrap ? 'octane-wired__text--wrap' : ''} ${className}`}
-                style={underline ? { textDecoration: 'underline' } : undefined}
-            >
-                {text}
-            </span>
-        );
+    if (!isNative) return <Text bold={bold} className={className} underline={underline} variant={soft ? 'gray' : 'black'} wrap={wrap}>{text}</Text>;
 
     const native = (
         <NativeText

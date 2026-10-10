@@ -342,6 +342,7 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
 };
 
 /** Native height of the LR list (inputSourceListMinHeight) and of the arrow buttons. */
+const SOURCE_LIST_PADDING = 4;
 const SOURCE_LIST_MIN_HEIGHT = 23;
 const SOURCE_BUTTON_HEIGHT = 20;
 
@@ -368,14 +369,15 @@ const WiredSourceRow: FC<{ label: string; onPrevious: () => void; onNext: () => 
     }, []);
 
     const rowHeight = Math.max(SOURCE_LIST_MIN_HEIGHT, labelHeight);
-    const buttonTop = Math.trunc((rowHeight - SOURCE_BUTTON_HEIGHT) / 2);
+    // The list is padded by LRContainerTopBottomPadding (4) above and below, so every item also starts 4px below the row's top.
+    const buttonTop = SOURCE_LIST_PADDING + Math.trunc((rowHeight - SOURCE_BUTTON_HEIGHT) / 2);
 
     return (
-        <div className="octane-wired__slider-row octane-wired__source-row" style={{ height: rowHeight + 8 }}>
+        <div className="octane-wired__slider-row octane-wired__source-row" style={{ height: rowHeight + SOURCE_LIST_PADDING * 2 }}>
             <WiredShellButton className="octane-wired__icon-button" shellStyle="illumina" style={{ marginTop: buttonTop }} onClick={onPrevious}>
                 <img alt="" draggable={false} src={arrowLeft} />
             </WiredShellButton>
-            <span className="octane-wired__source-label" style={{ marginTop: Math.trunc((rowHeight - labelHeight) / 2) }}>
+            <span className="octane-wired__source-label" style={{ marginTop: SOURCE_LIST_PADDING + Math.trunc((rowHeight - labelHeight) / 2) }}>
                 <span ref={labelRef} className="octane-wired__source-label-text">
                     <WiredText text={label} wrap={true} />
                 </span>

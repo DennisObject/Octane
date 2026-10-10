@@ -11,6 +11,8 @@ export interface WiredMonitorTabViewProps {
     loading: boolean;
     /** Wired write permission; the official tab disables "Clear all" without it. */
     canClear: boolean;
+    /** WiredMenuController.hasReadPermission: the log overview needs read access. */
+    canOpenLogs: boolean;
     monitorStats: MonitorStat[];
     monitorLogs: MonitorLog[];
     /** Unused by the official layout; kept so the custom monitor history window keeps its entry point. */
@@ -26,7 +28,7 @@ export interface WiredMonitorTabViewProps {
 
 /** The "Monitor" tab (monitor_container of wired_menu_view): statistics, the monitor picture and the error log table. */
 export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
-    const { loading, canClear, monitorStats, monitorLogs, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorErrorInfo } = props;
+    const { loading, canClear, canOpenLogs, monitorStats, monitorLogs, onOpenRoomLogs, onClearMonitorLogs, onOpenMonitorErrorInfo } = props;
     // updateImageUI: Frank panics on a heavy room, any non-green figure or any thrown error; image 2 is the layout default.
     const panicking = loading || monitorStats.some((stat) => stat.color && stat.color !== MONITOR_COLOR_GREEN) || monitorLogs.some((log) => log.amount !== '0');
 
@@ -75,7 +77,7 @@ export const WiredMonitorTabView = (props: WiredMonitorTabViewProps) => {
             <WiredMenuButton danger={true} disabled={!canClear} h={30} w={110} x={14} y={337} onClick={onClearMonitorLogs}>
                 {localizeWithFallback('wiredmenu.monitor.clear_all', 'Clear all')}
             </WiredMenuButton>
-            <WiredMenuButton h={30} w={110} x={375} y={337} onClick={onOpenRoomLogs}>
+            <WiredMenuButton disabled={!canOpenLogs} h={30} w={110} x={375} y={337} onClick={onOpenRoomLogs}>
                 {localizeWithFallback('wiredmenu.monitor.log_overview', 'View full logs')}
             </WiredMenuButton>
             {/* loading_view: 500x382 over the tab body, 0x99e9e9e1, swallowing input. */}

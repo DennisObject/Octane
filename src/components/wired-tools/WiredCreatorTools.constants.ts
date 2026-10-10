@@ -16,7 +16,10 @@ export const MONITOR_LOG_ORDER: string[] = ['EXECUTION_CAP', 'DELAYED_EVENTS_CAP
 
 export const WIRED_MONITOR_ACTION_FETCH = 0;
 export const WIRED_MONITOR_ACTION_CLEAR_LOGS = 1;
-export const WIRED_MONITOR_POLL_MS = 250;
+// WiredMenuMonitorTab.POLL_MONITOR_MS
+export const WIRED_MONITOR_POLL_MS = 500;
+// WiredMenuMonitorTab.CLEAR_LOGS_TIMEOUT: Clear stays disabled this long after it was pressed.
+export const WIRED_MONITOR_CLEAR_LOCK_MS = 4000;
 export const WIRED_VARIABLES_POLL_MS = 250;
 export const WIRED_INSPECTION_REFRESH_MS = 50;
 export const WIRED_CLOCK_REFRESH_MS = 50;

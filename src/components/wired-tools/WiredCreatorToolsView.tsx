@@ -90,6 +90,7 @@ import {
     WIRED_INSPECTION_REFRESH_MS,
     WIRED_MONITOR_ACTION_CLEAR_LOGS,
     WIRED_MONITOR_ACTION_FETCH,
+    WIRED_MONITOR_CLEAR_LOCK_MS,
     WIRED_MONITOR_POLL_MS,
     WIRED_VARIABLES_POLL_MS
 } from './WiredCreatorTools.constants';
@@ -244,10 +245,14 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const setSelectedVariableKeys = useWiredCreatorToolsUiStore((s) => s.setSelectedVariableKeys);
     const { roomSession = null } = useRoom();
     // WiredMenuMonitorTab.isDataReady: the tab stays in its loading state until the server answers. The answer is remembered for the room the monitor is
-    // being viewed in; closing the tab (or the window) clears it, so every opening starts in the loading state again.
+    // being viewed in; leaving that room, closing the tab or closing the window clears it, so every opening or room change starts in the loading state again.
     const monitorViewKey = isVisible && activeTab === 'monitor' && roomSession?.roomId ? roomSession.roomId : 0;
     const [monitorLoadedKey, setMonitorLoadedKey] = useState(0);
     const monitorViewKeyRef = useRef(0);
+    const [isMonitorClearLocked, setIsMonitorClearLocked] = useState(false);
+    const monitorClearLockTimerRef = useRef<number>(0);
+
+    useEffect(() => () => window.clearTimeout(monitorClearLockTimerRef.current), []);
     const monitorLoaded = monitorViewKey !== 0 && monitorLoadedKey === monitorViewKey;
 
     useLayoutEffect(() =>
@@ -255,7 +260,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         monitorViewKeyRef.current = monitorViewKey;
     });
 
-    if (monitorViewKey === 0 && monitorLoadedKey !== 0) setMonitorLoadedKey(0);
+    // Any change of the viewed room (A -> B -> A included) or closing the tab starts a new view: the loading state returns until an answer arrives for it.
+    if (monitorLoadedKey !== 0 && monitorLoadedKey !== monitorViewKey) setMonitorLoadedKey(0);
     const { ownUser: tradeOwnUser = null, otherUser: tradeOtherUser = null, isTrading = false } = useInventoryTrade();
     const {
         roomSettings,
@@ -1137,7 +1143,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             itemLimit > 0
                 ? { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}/${itemLimit}`, color: colorizeMonitorStat(monitorRoomStats.wallFurniCount, itemLimit, 0.6, 0.85) }
                 : { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}` },
-            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}/60`, color: colorizeMonitorStat(monitorRoomStats.permanentFurniVariables, 60, 0.5, 0.8) },
+            // The server sends no permanent variable count or cap, so this client-side figure keeps no colour (AIR colours it from WiredRoomStatsData).
+            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}/60` },
             { label: MONITOR_STAT_CAPTIONS[5], value: '' },
             { label: MONITOR_STAT_CAPTIONS[6], value: '' },
             // Octane's executor metrics, not part of the official list: kept after the official rows.
@@ -2403,6 +2410,10 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     }, [selectedManagedVariableEntry, selectedManagedHolderVariableEntry, roomSettings.canModify, variablesType, removeUserVariable, removeFurniVariable]);
 
     const clearMonitorLogs = () => {
+        // updateButtonsUI: Clear is disabled for CLEAR_LOGS_TIMEOUT after it was pressed.
+        setIsMonitorClearLocked(true);
+        window.clearTimeout(monitorClearLockTimerRef.current);
+        monitorClearLockTimerRef.current = window.setTimeout(() => setIsMonitorClearLocked(false), WIRED_MONITOR_CLEAR_LOCK_MS);
         setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
@@ -3137,7 +3148,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 {(
                     <>
                     {activeTab === 'monitor' && (
-                        <WiredMonitorTabView loading={!monitorLoaded} canClear={roomSettings.canModify}
+                        <WiredMonitorTabView loading={!monitorLoaded} canClear={roomSettings.canModify && !isMonitorClearLocked} canOpenLogs={roomSettings.canInspect}
                             monitorStats={monitorStats}
                             monitorLogs={monitorLogs}
                             monitorHistoryRows={monitorHistoryRows}
