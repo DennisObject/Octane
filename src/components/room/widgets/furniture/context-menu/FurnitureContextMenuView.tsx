@@ -112,6 +112,7 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
         }
     };
     const { title = '', titleX = 23, action = null } = menus[mode] ?? {};
+    // GuildFurnitureContextMenuView clears ContextInfoView's fade flag (var_231), so the group furniture menu stays until it is closed; the other menus fade after 3000ms.
     const isGuildMenu = mode === GROUP_FURNITURE && !!groupData;
 
     return (
@@ -129,7 +130,7 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
                     collapsable={true}
                     fadeDelay={3000}
                     fadeLength={500}
-                    fades={true}
+                    fades={!isGuildMenu}
                     freezePositionOnHover={true}
                     objectId={objectId}
                     showCaretIcon={false}
