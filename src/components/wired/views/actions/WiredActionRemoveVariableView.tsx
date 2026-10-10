@@ -5,24 +5,23 @@ import contextVariableIcon from '../../../../assets/images/wired/var/icon_source
 import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_furni.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Button, Text } from '../../../../common';
+import { useWired } from '../../../../hooks';
+import { WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { WiredLegacySlider as Slider } from '../WiredSlider';
-import { useWired, useWiredTools } from '../../../../hooks';
-import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
+import { CLICKED_USER_SOURCE, FURNI_SOURCES, nativeSourceOptions, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
+import { normalizeNativeSource } from '../../../../api';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    getCustomVariableItemId,
-    normalizeVariableTokenFromWire
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 type VariableTargetType = 'user' | 'furni' | 'context';
 
-const TARGET_USER = 0;
-const TARGET_FURNI = 1;
-const TARGET_CONTEXT = 2;
+// Native variable target codes: furni 0, user 1, context -20.
+const TARGET_USER = 1;
+const TARGET_FURNI = 0;
+const TARGET_CONTEXT = -20;
 const SOURCE_SELECTED = 100;
 
 const TARGET_BUTTONS: Array<{ key: VariableTargetType; icon: string }> = [
@@ -61,13 +60,21 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
         setActionDelay = null,
         setIntParams = null,
         setFurniIds = null,
-        setStringParam = null
+        setStringParam = null,
+        setVariableIds = null,
+        setUserSources = null,
+        setFurniSources = null
     } = useWired();
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
+    const { userVariableDefinitions = [], furniVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
+    // The card's own groups and defaults decide which sources are valid.
+    const userAllowed = trigger?.inputSources?.usersAllowed[0];
+    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const furniAllowed = trigger?.inputSources?.furniAllowed[0];
+    const furniDefault = trigger?.inputSources?.furniDefaults[0] ?? SOURCE_SELECTED;
     const [selectedTargetType, setSelectedTargetType] = useState<VariableTargetType>('user');
     const [selectedVariableToken, setSelectedVariableToken] = useState('');
-    const [userSource, setUserSource] = useState(0);
-    const [furniSource, setFurniSource] = useState(0);
+    const [userSource, setUserSource] = useState(userDefault);
+    const [furniSource, setFurniSource] = useState(furniDefault);
 
     const targetDefinitions = useMemo(() => {
         const definitions = (() => {
@@ -96,9 +103,14 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
         return fallbackEntry ? [fallbackEntry, ...variableEntries] : variableEntries;
     }, [selectedTargetType, selectedVariableToken, variableEntries]);
 
-    const availableUserSources = useAvailableUserSources(trigger, USER_SOURCES);
+    const nativeUserOptions = useMemo(() => nativeSourceOptions(userAllowed, 'users'), [userAllowed]);
+    const nativeFurniOptions = useMemo(() => nativeSourceOptions(furniAllowed, 'furni'), [furniAllowed]);
+    const availableUserSources = useAvailableUserSources(trigger, nativeUserOptions.length ? nativeUserOptions : USER_SOURCES);
     const orderedUserSources = useMemo(() => sortWiredSourceOptions(availableUserSources, 'users'), [availableUserSources]);
-    const orderedFurniSources = useMemo(() => sortWiredSourceOptions(FURNI_SOURCES, 'furni'), []);
+    const orderedFurniSources = useMemo(
+        () => sortWiredSourceOptions(nativeFurniOptions.length ? nativeFurniOptions : FURNI_SOURCES, 'furni'),
+        [nativeFurniOptions]
+    );
     const sourceOptions = selectedTargetType === 'user' ? orderedUserSources : selectedTargetType === 'furni' ? orderedFurniSources : [];
     const selectedSourceValue = selectedTargetType === 'user' ? userSource : furniSource;
     const resolvedSourceOptions = useMemo(() => {
@@ -125,27 +137,24 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const parsedVariableItemId = parseInt((trigger.stringData || '').trim(), 10);
-        const nextTargetType = normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER);
-
-        setSelectedTargetType(nextTargetType);
-        setSelectedVariableToken(
-            normalizeVariableTokenFromWire(!Number.isNaN(parsedVariableItemId) && parsedVariableItemId > 0 ? String(parsedVariableItemId) : '')
-        );
-        setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
-        setFurniSource(trigger.intData.length > 2 ? trigger.intData[2] : (trigger.selectedItems?.length ?? 0) > 0 ? SOURCE_SELECTED : 0);
+        // owned: [target]; variableIds[0] the variable; the sources are the U and F tails.
+        setSelectedTargetType(normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER));
+        setSelectedVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
+        setUserSource(normalizeNativeSource(trigger.userSources.length > 0 ? trigger.userSources[0] : userDefault, userAllowed, userDefault));
+        setFurniSource(normalizeNativeSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : furniDefault, furniAllowed, furniDefault));
     }, [trigger]);
 
     const save = () => {
         const targetValue = getTargetValue(selectedTargetType);
-        const variableItemId = getCustomVariableItemId(selectedVariableToken);
-
-        setStringParam(variableItemId ? String(variableItemId) : '');
-        setIntParams([targetValue, userSource, furniSource]);
+        setStringParam('');
+        setIntParams([targetValue]);
+        setVariableIds([variableSlotOf(selectedVariableToken)]);
+        setUserSources([userSource]);
+        setFurniSources([furniSource]);
         setFurniIds(selectedTargetType === 'furni' && furniSource === SOURCE_SELECTED ? [...furniIds] : []);
     };
 
-    const validate = () => getCustomVariableItemId(selectedVariableToken) > 0;
+    const validate = () => !!getNativeVariableId(selectedVariableToken);
 
     const requiresFurni =
         selectedTargetType === 'furni' ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
@@ -220,7 +229,9 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
                         <div className="octane-wired__divider" />
 
                         <div className="octane-wired__give-var-section">
-                            <div className="octane-wired__give-var-section-title">{localizeWithFallback('wiredfurni.params.sources.merged.title.variables', 'Fonte variabile:')}</div>
+                            <div className="octane-wired__give-var-section-title">
+                                {localizeWithFallback('wiredfurni.params.sources.merged.title.variables', 'Fonte variabile:')}
+                            </div>
                             <div className="flex items-center gap-1">
                                 <Button
                                     disabled={resolvedSourceOptions.length <= 1}

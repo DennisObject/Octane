@@ -2,7 +2,8 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { WiredSourceOption, WiredSourcesSelector } from '../WiredSourcesSelector';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
+import { normalizeNativeSource } from '../../../../api';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 
 const MODE_ALL = 0;
@@ -19,18 +20,10 @@ const COMPARE_VALUE_PATTERN = /^\d*$/;
 const CONDITION_EVALUATION_INTERACTION_TYPES = ['wf_cnd_*', 'wf_xtra_*'];
 const CONDITION_EVALUATION_ERROR_KEY = 'wiredfurni.error.condition_evaluation_furni';
 
-const FURNI_SOURCES: WiredSourceOption[] = [
-    { value: 100, label: 'wiredfurni.params.sources.furni.100' },
-    { value: 0, label: 'wiredfurni.params.sources.furni.0' },
-    { value: 200, label: 'wiredfurni.params.sources.furni.200' },
-    { value: 201, label: 'wiredfurni.params.sources.furni.201' }
-];
-
 const MODE_OPTIONS = [MODE_ALL, MODE_AT_LEAST_ONE, MODE_NOT_ALL, MODE_NONE];
 const COMPARISON_OPTIONS = [MODE_LESS_THAN, MODE_EXACTLY, MODE_MORE_THAN];
 
 const normalizeEvaluationMode = (value: number) => ([...MODE_OPTIONS, ...COMPARISON_OPTIONS].includes(value) ? value : MODE_ALL);
-const normalizeFurniSource = (value: number) => (FURNI_SOURCES.some((option) => option.value === value) ? value : 0);
 const normalizeCompareValue = (value: number) => {
     if (isNaN(value)) return DEFAULT_COMPARE_VALUE;
 
@@ -38,11 +31,15 @@ const normalizeCompareValue = (value: number) => {
 };
 
 export const WiredExtraOrEvalView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, setFurniSources = null, setAllowedInteractionTypes = null, setAllowedInteractionErrorKey = null } = useWired();
     const [evaluationMode, setEvaluationMode] = useState(MODE_ALL);
     const [furniSource, setFurniSource] = useState(0);
     const [compareValue, setCompareValue] = useState(DEFAULT_COMPARE_VALUE);
     const [compareValueInput, setCompareValueInput] = useState(DEFAULT_COMPARE_VALUE.toString());
+    // The card's own furni group and default decide which sources are valid; nothing is hardcoded here.
+    const furniAllowed = trigger?.inputSources?.furniAllowed[0];
+    const furniDefault = trigger?.inputSources?.furniDefaults[0] ?? 0;
+    const normalizeFurniSource = (value: number) => normalizeNativeSource(value, furniAllowed, furniDefault);
 
     useEffect(() => {
         setAllowedInteractionTypes(CONDITION_EVALUATION_INTERACTION_TYPES);
@@ -58,11 +55,11 @@ export const WiredExtraOrEvalView: FC<{}> = () => {
         if (!trigger) return;
 
         setEvaluationMode(normalizeEvaluationMode(trigger.intData.length > 0 ? trigger.intData[0] : MODE_ALL));
-        setFurniSource(normalizeFurniSource(trigger.intData.length > 1 ? trigger.intData[1] : 0));
-        const nextCompareValue = normalizeCompareValue(trigger.intData.length > 2 ? trigger.intData[2] : DEFAULT_COMPARE_VALUE);
+        setFurniSource(normalizeFurniSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : furniDefault));
+        const nextCompareValue = normalizeCompareValue(trigger.intData.length > 1 ? trigger.intData[1] : DEFAULT_COMPARE_VALUE);
         setCompareValue(nextCompareValue);
         setCompareValueInput(nextCompareValue.toString());
-    }, [trigger]);
+    }, [trigger, furniAllowed, furniDefault]);
 
     const updateCompareValue = (value: number) => {
         const nextValue = normalizeCompareValue(value);
@@ -85,7 +82,8 @@ export const WiredExtraOrEvalView: FC<{}> = () => {
     };
 
     const save = () => {
-        setIntParams([normalizeEvaluationMode(evaluationMode), normalizeFurniSource(furniSource), normalizeCompareValue(compareValue)]);
+        setIntParams([normalizeEvaluationMode(evaluationMode), normalizeCompareValue(compareValue)]);
+        setFurniSources([normalizeFurniSource(furniSource)]);
         setStringParam('');
     };
 
@@ -99,7 +97,6 @@ export const WiredExtraOrEvalView: FC<{}> = () => {
                 <WiredSourcesSelector
                     showFurni={true}
                     furniSource={furniSource}
-                    furniSources={FURNI_SOURCES}
                     onChangeFurni={(value) => setFurniSource(normalizeFurniSource(value))}
                 />
             }

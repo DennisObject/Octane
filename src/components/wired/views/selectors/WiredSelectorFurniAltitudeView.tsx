@@ -25,32 +25,19 @@ const formatAltitude = (value: number) => {
     return text.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
 };
 
-const parseAltitude = (value: string) => {
-    if (!value || !value.trim().length) return 0;
-
-    const parsed = parseFloat(value);
-
-    if (isNaN(parsed)) return 0;
-
-    return clampAltitude(parsed);
-};
-
 export const WiredSelectorFurniAltitudeView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const { trigger = null, setIntParams = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
     const [comparison, setComparison] = useState(1);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
     const [altitude, setAltitude] = useState(0);
     const [altitudeInput, setAltitudeInput] = useState('0');
 
     useEffect(() => {
         if (!trigger) return;
 
-        const nextAltitude = parseAltitude(trigger.stringData);
+        // own: [hundredths of the altitude, comparison].
+        const nextAltitude = clampAltitude((trigger.intData.length > 0 ? trigger.intData[0] : 0) / 100);
 
-        setComparison(trigger.intData.length > 0 ? trigger.intData[0] : 1);
-        setFilterExisting(trigger.intData.length > 1 ? trigger.intData[1] === 1 : false);
-        setInvert(trigger.intData.length > 2 ? trigger.intData[2] === 1 : false);
+        setComparison(trigger.intData.length > 1 ? trigger.intData[1] : 1);
         setAltitude(nextAltitude);
         setAltitudeInput(formatAltitude(nextAltitude));
     }, [trigger]);
@@ -84,10 +71,10 @@ export const WiredSelectorFurniAltitudeView: FC<{}> = () => {
         setAltitude(clampAltitude(parsedValue));
     };
 
+    // Filter and inverse are category fields of the selector save, not owned ints.
     const save = useCallback(() => {
-        setIntParams([comparison, filterExisting ? 1 : 0, invert ? 1 : 0]);
-        setStringParam(formatAltitude(altitude));
-    }, [altitude, comparison, filterExisting, invert, setIntParams, setStringParam]);
+        setIntParams([Math.round(altitude * 100), comparison]);
+    }, [altitude, comparison, setIntParams]);
 
     return (
         <WiredSelectorBaseView
@@ -140,14 +127,14 @@ export const WiredSelectorFurniAltitudeView: FC<{}> = () => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>

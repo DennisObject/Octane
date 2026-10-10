@@ -4,7 +4,12 @@ import { Text } from '../../../../common';
 import { useWired, useWiredTools } from '../../../../hooks';
 import { normalizeWiredComparison, WIRED_CMP_DEFAULT, WiredComparisonOperator } from '../WiredComparisonOperator';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries, normalizeVariableTokenFromWire } from '../WiredVariablePickerData';
+import {
+    buildWiredVariablePickerEntries,
+    createFallbackVariableEntry,
+    flattenWiredVariablePickerEntries,
+    normalizeVariableTokenFromWire
+} from '../WiredVariablePickerData';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 // Server contract (WiredConditionChestHasItems):
@@ -62,23 +67,47 @@ export const WiredConditionChestHasItemsView: FC<{}> = () => {
         <WiredConditionBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID} save={save}>
             <div className="flex flex-col gap-3">
                 <Text small className="text-black/60">
-                    {localizeWithFallback('wiredfurni.params.sources.furni.title.chests', 'Pick the chest above. Passes when its total contents compare to the amount below.')}
+                    {localizeWithFallback(
+                        'wiredfurni.params.sources.furni.title.chests',
+                        'Pick the chest above. Passes when its total contents compare to the amount below.'
+                    )}
                 </Text>
                 <WiredComparisonOperator name="chestHasItemsComparison" value={comparison} onChange={setComparison} />
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1">
-                        <input checked={amountMode === AMOUNT_CONSTANT} className="form-check-input" id="chestAmountConstant" name="chestAmountMode" type="radio" onChange={() => setAmountMode(AMOUNT_CONSTANT)} />
+                        <input
+                            checked={amountMode === AMOUNT_CONSTANT}
+                            className="form-check-input"
+                            id="chestAmountConstant"
+                            name="chestAmountMode"
+                            type="radio"
+                            onChange={() => setAmountMode(AMOUNT_CONSTANT)}
+                        />
                         <Text>{localizeWithFallback('wiredfurni.params.amount.from_value', 'A number')}</Text>
                     </div>
                     <div className="flex items-center gap-1">
-                        <input checked={amountMode === AMOUNT_VARIABLE} className="form-check-input" id="chestAmountVariable" name="chestAmountMode" type="radio" onChange={() => setAmountMode(AMOUNT_VARIABLE)} />
+                        <input
+                            checked={amountMode === AMOUNT_VARIABLE}
+                            className="form-check-input"
+                            id="chestAmountVariable"
+                            name="chestAmountMode"
+                            type="radio"
+                            onChange={() => setAmountMode(AMOUNT_VARIABLE)}
+                        />
                         <Text>{localizeWithFallback('wiredfurni.params.amount.from_variable', 'The value of a variable')}</Text>
                     </div>
                 </div>
                 {amountMode === AMOUNT_CONSTANT ? (
                     <div className="flex flex-col gap-1">
                         <Text bold>{localizeWithFallback('wiredfurni.params.count', 'Amount')}</Text>
-                        <input className="form-control form-control-sm" min={0} style={{ maxWidth: 140 }} type="number" value={amount} onChange={(event) => setAmount(Math.max(0, parseInt(event.target.value, 10) || 0))} />
+                        <input
+                            className="form-control form-control-sm"
+                            min={0}
+                            style={{ maxWidth: 140 }}
+                            type="number"
+                            value={amount}
+                            onChange={(event) => setAmount(Math.max(0, parseInt(event.target.value, 10) || 0))}
+                        />
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
@@ -89,12 +118,24 @@ export const WiredConditionChestHasItemsView: FC<{}> = () => {
                                 { target: TARGET_USER, key: 'wiredfurni.params.variables.target.user', fallback: 'The user who triggered' }
                             ].map((option) => (
                                 <div key={option.target} className="flex items-center gap-1">
-                                    <input checked={amountTarget === option.target} className="form-check-input" id={`chestAmountTarget${option.target}`} name="chestAmountTarget" type="radio" onChange={() => setAmountTarget(option.target)} />
+                                    <input
+                                        checked={amountTarget === option.target}
+                                        className="form-check-input"
+                                        id={`chestAmountTarget${option.target}`}
+                                        name="chestAmountTarget"
+                                        type="radio"
+                                        onChange={() => setAmountTarget(option.target)}
+                                    />
                                     <Text>{localizeWithFallback(option.key, option.fallback)}</Text>
                                 </div>
                             ))}
                         </div>
-                        <WiredVariablePicker entries={resolvedEntries} recentScope={`chest-amount-${pickerTarget}`} selectedToken={variableToken} onSelect={(entry) => setVariableToken(entry.token)} />
+                        <WiredVariablePicker
+                            entries={resolvedEntries}
+                            recentScope={`chest-amount-${pickerTarget}`}
+                            selectedToken={variableToken}
+                            onSelect={(entry) => setVariableToken(entry.token)}
+                        />
                     </div>
                 )}
             </div>

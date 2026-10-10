@@ -4,35 +4,36 @@ import { LocalizeText, WIRED_STRING_DELIMETER, WiredFurniType } from '../../../.
 import { Button, LayoutAvatarImageView, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
-import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { normalizeBotSource, WIRED_BOT_NAMED_SOURCE } from '../../../../api';
 
 const DEFAULT_FIGURE: string = 'hd-180-1.ch-210-66.lg-270-82.sh-290-81';
-const normalizeBotSource = (value: number, hasBotName = false) => (BOT_SOURCES.some((option) => option.value === value) ? value : hasBotName ? 100 : 0);
 
 export const WiredActionBotChangeFigureView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
     const [figure, setFigure] = useState('');
-    const [botSource, setBotSource] = useState<number>(100);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
+    const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
+    const botAllowed = trigger?.inputSources?.usersAllowed[0];
+    const botDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
 
     const save = () => {
-        setStringParam((botSource === 100 ? botName : '') + WIRED_STRING_DELIMETER + figure);
-        setIntParams([botSource]);
+        setStringParam((botSource === WIRED_BOT_NAMED_SOURCE ? botName : '') + WIRED_STRING_DELIMETER + figure);
+        setIntParams([]);
+        setUserSources([botSource]);
     };
 
     useEffect(() => {
+        if (!trigger) return;
+
         const data = trigger.stringData.split(WIRED_STRING_DELIMETER);
         const nextBotName = data.length > 0 ? data[0] : '';
 
-        if (data.length > 0) setBotName(nextBotName);
-        if (data.length > 1) setFigure(data[1].length > 0 ? data[1] : DEFAULT_FIGURE);
-        else setFigure(DEFAULT_FIGURE);
-
-        setBotSource(
-            trigger.intData.length > 0 ? normalizeBotSource(trigger.intData[0], nextBotName.length > 0) : normalizeBotSource(-1, nextBotName.length > 0)
-        );
-    }, [trigger]);
+        setBotName(nextBotName);
+        setFigure(data.length > 1 && data[1].length > 0 ? data[1] : DEFAULT_FIGURE);
+        setBotSource(normalizeBotSource(trigger.userSources[0] ?? botDefault, botAllowed, botDefault, nextBotName.length > 0));
+    }, [botAllowed, botDefault, trigger]);
 
     return (
         <WiredActionBaseView
@@ -43,13 +44,12 @@ export const WiredActionBotChangeFigureView: FC<{}> = (props) => {
                 <WiredSourcesSelector
                     showUsers={true}
                     userSource={botSource}
-                    userSources={BOT_SOURCES}
                     usersTitle="wiredfurni.params.sources.users.title.bots"
-                    onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
+                    onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botAllowed, botDefault, botName.length > 0))}
                 />
             }
         >
-            {botSource === 100 && (
+            {botSource === WIRED_BOT_NAMED_SOURCE && (
                 <div className="flex flex-col gap-1">
                     <Text bold>{LocalizeText('wiredfurni.params.bot.name')}</Text>
                     <OctaneInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />
@@ -57,7 +57,7 @@ export const WiredActionBotChangeFigureView: FC<{}> = (props) => {
             )}
             <div className="flex items-center justify-center">
                 <LayoutAvatarImageView direction={4} figure={figure} />
-                <Button onClick={(event) => setFigure(GetSessionDataManager().figure)}>{LocalizeText('wiredfurni.params.capture.figure')}</Button>
+                <Button onClick={() => setFigure(GetSessionDataManager().figure)}>{LocalizeText('wiredfurni.params.capture.figure')}</Button>
             </div>
         </WiredActionBaseView>
     );

@@ -8,6 +8,8 @@ import { WiredExtraBaseView } from './WiredExtraBaseView';
 const MODE_LINEAR = 1;
 const MODE_EXPONENTIAL = 2;
 const MODE_MANUAL = 3;
+/** The native mode index in the owned ints: 0 manual, 1 linear, 2 exponential. */
+const NATIVE_MODE_MANUAL = 0;
 
 const SUB_CURRENT_LEVEL = 0;
 const SUB_CURRENT_XP = 1;
@@ -19,22 +21,12 @@ const SUB_IS_AT_MAX = 6;
 const SUB_MAX_LEVEL = 7;
 
 const DEFAULT_STEP_SIZE = 100;
-const DEFAULT_MAX_LEVEL = 10;
+const DEFAULT_MAX_LEVEL = 50;
 const DEFAULT_FIRST_LEVEL_XP = 100;
 const DEFAULT_INCREASE_FACTOR = 100;
 const DEFAULT_INTERPOLATION_TEXT = '';
 const DEFAULT_SUBVARIABLES = [SUB_CURRENT_LEVEL, SUB_CURRENT_XP];
 const DEFAULT_PLACEHOLDER = '5=100            (Level 5 = 100 XP)\n10=500\n20=4000\n...';
-
-interface IVariableLevelUpEditorData {
-    mode?: number;
-    stepSize?: number;
-    maxLevel?: number;
-    firstLevelXp?: number;
-    increaseFactor?: number;
-    interpolationText?: string;
-    subvariables?: number[] | null;
-}
 
 interface ILevelEntry {
     level: number;
@@ -71,29 +63,10 @@ const normalizePositiveInt = (value: number, fallback: number) => {
 
 const normalizeInterpolationText = (value: string) => (value ?? '').replace(/\r/g, '');
 
-const normalizeSubvariables = (value?: number[] | null) => {
-    if (value === null) return [...DEFAULT_SUBVARIABLES];
-    if (!Array.isArray(value)) return [...DEFAULT_SUBVARIABLES];
+/** The subvariable mask: bit i selects subvariable i. */
+const subvariablesOfMask = (mask: number) => Array.from({ length: SUB_MAX_LEVEL + 1 }, (_, bit) => bit).filter((bit) => (mask & (1 << bit)) !== 0);
 
-    return [...new Set(value.filter((subvariable) => Number.isInteger(subvariable) && subvariable >= SUB_CURRENT_LEVEL && subvariable <= SUB_MAX_LEVEL))];
-};
-
-const parseEditorData = (value: string): IVariableLevelUpEditorData => {
-    if (!value?.trim()) return {};
-
-    if (!value.trim().startsWith('{')) {
-        return {
-            mode: MODE_MANUAL,
-            interpolationText: normalizeInterpolationText(value)
-        };
-    }
-
-    try {
-        return (JSON.parse(value) as IVariableLevelUpEditorData) || {};
-    } catch {
-        return {};
-    }
-};
+const maskOfSubvariables = (subvariables: number[]) => subvariables.reduce((mask, bit) => mask | (1 << bit), 0);
 
 const parseIntInput = (value: string, fallback: number) => {
     const parsedValue = parseInt((value ?? '').trim(), 10);
@@ -226,15 +199,23 @@ export const WiredExtraVariableLevelUpSystemView: FC<{}> = () => {
             return;
         }
 
-        const editorData = parseEditorData(trigger.stringData);
+        // owned: [subvariable mask, mode, fields]: manual [mask, 0] with the raw text; linear [mask, 1, step, max];
+        // exponential [mask, 2, first level xp, increase factor, max].
+        const ints = trigger.intData;
+        const nativeMode = ints.length > 1 ? ints[1] : 1;
+        const nextMode = nativeMode === NATIVE_MODE_MANUAL ? MODE_MANUAL : nativeMode === 2 ? MODE_EXPONENTIAL : MODE_LINEAR;
 
-        setMode(normalizeMode(editorData.mode ?? MODE_LINEAR));
-        setStepSizeInput(normalizeNonNegativeInt(editorData.stepSize ?? DEFAULT_STEP_SIZE, DEFAULT_STEP_SIZE).toString());
-        setMaxLevelInput(normalizePositiveInt(editorData.maxLevel ?? DEFAULT_MAX_LEVEL, DEFAULT_MAX_LEVEL).toString());
-        setFirstLevelXpInput(normalizeNonNegativeInt(editorData.firstLevelXp ?? DEFAULT_FIRST_LEVEL_XP, DEFAULT_FIRST_LEVEL_XP).toString());
-        setIncreaseFactorInput(normalizeNonNegativeInt(editorData.increaseFactor ?? DEFAULT_INCREASE_FACTOR, DEFAULT_INCREASE_FACTOR).toString());
-        setInterpolationText(normalizeInterpolationText(editorData.interpolationText ?? DEFAULT_INTERPOLATION_TEXT));
-        setSelectedSubvariables(normalizeSubvariables(editorData.subvariables));
+        setMode(nextMode);
+        setSelectedSubvariables(subvariablesOfMask(ints.length > 0 ? ints[0] : 3));
+        setInterpolationText(nextMode === MODE_MANUAL ? normalizeInterpolationText(trigger.stringData) : DEFAULT_INTERPOLATION_TEXT);
+        if (nextMode === MODE_EXPONENTIAL) {
+            setFirstLevelXpInput(normalizeNonNegativeInt(ints[2] ?? DEFAULT_FIRST_LEVEL_XP, DEFAULT_FIRST_LEVEL_XP).toString());
+            setIncreaseFactorInput(normalizeNonNegativeInt(ints[3] ?? DEFAULT_INCREASE_FACTOR, DEFAULT_INCREASE_FACTOR).toString());
+            setMaxLevelInput(normalizePositiveInt(ints[4] ?? DEFAULT_MAX_LEVEL, DEFAULT_MAX_LEVEL).toString());
+        } else {
+            setStepSizeInput(normalizeNonNegativeInt(ints[2] ?? DEFAULT_STEP_SIZE, DEFAULT_STEP_SIZE).toString());
+            setMaxLevelInput(normalizePositiveInt(ints[3] ?? DEFAULT_MAX_LEVEL, DEFAULT_MAX_LEVEL).toString());
+        }
     }, [trigger]);
 
     const normalizedStepSize = useMemo(() => normalizeNonNegativeInt(parseIntInput(stepSizeInput, DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE), [stepSizeInput]);
@@ -263,18 +244,23 @@ export const WiredExtraVariableLevelUpSystemView: FC<{}> = () => {
     }, []);
 
     const save = () => {
-        setIntParams([]);
-        setStringParam(
-            JSON.stringify({
-                mode,
-                stepSize: normalizedStepSize,
-                maxLevel: normalizedMaxLevel,
-                firstLevelXp: normalizedFirstLevelXp,
-                increaseFactor: normalizedIncreaseFactor,
-                interpolationText: normalizedInterpolation,
-                subvariables: [...selectedSubvariables].sort((left, right) => left - right)
-            })
-        );
+        const mask = maskOfSubvariables([...selectedSubvariables].sort((left, right) => left - right));
+        // The server takes a maximum level of 2 to 10000 for the levelled modes.
+        const maxLevel = Math.min(10000, Math.max(2, normalizedMaxLevel));
+
+        if (mode === MODE_MANUAL) {
+            setIntParams([mask, NATIVE_MODE_MANUAL]);
+            setStringParam(normalizedInterpolation);
+            return;
+        }
+
+        if (mode === MODE_EXPONENTIAL) {
+            setIntParams([mask, 2, normalizedFirstLevelXp, normalizedIncreaseFactor, maxLevel]);
+        } else {
+            setIntParams([mask, 1, normalizedStepSize, maxLevel]);
+        }
+
+        setStringParam('');
     };
 
     const toggleSubvariable = (subvariable: number) => {

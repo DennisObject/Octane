@@ -12,18 +12,17 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
     const [rootY, setRootY] = useState(0);
     const [areaWidth, setAreaWidth] = useState(0);
     const [areaHeight, setAreaHeight] = useState(0);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
     // InArea.as: both buttons need an activated area selection manager; Select Area stays disabled from the click until the drag (or Clear) reports an area.
     const [isAreaActive, setIsAreaActive] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
     // True only while this window's own activate() succeeded: another selector's activation is never touched, cleared or deactivated from here.
     const ownsAreaSelection = useRef(false);
-    const { trigger = null, setIntParams } = useWired();
+    const { trigger = null, setIntParams, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
 
+    // Filter and inverse are category fields of the selector save, not owned ints.
     const save = useCallback(() => {
-        setIntParams([rootX, rootY, areaWidth, areaHeight, filterExisting ? 1 : 0, invert ? 1 : 0]);
-    }, [rootX, rootY, areaWidth, areaHeight, filterExisting, invert, setIntParams]);
+        setIntParams([rootX, rootY, areaWidth, areaHeight]);
+    }, [rootX, rootY, areaWidth, areaHeight, setIntParams]);
 
     // Activate the area selection manager when dialog opens, deactivate on close
     useEffect(() => {
@@ -70,8 +69,6 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
             setAreaHeight(0);
         }
 
-        setFilterExisting(trigger.intData.length >= 5 && trigger.intData[4] === 1);
-        setInvert(trigger.intData.length >= 6 && trigger.intData[5] === 1);
         // The first effect has just tried to activate the manager: both buttons work only when that call succeeded (InArea.onEditStart).
         setIsAreaActive(ownsAreaSelection.current);
         setIsSelecting(false);
@@ -80,8 +77,8 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
     useEffect(() => {
         if (!trigger || !ownsAreaSelection.current) return;
 
-        GetRoomEngine().areaSelectionManager.setHighlightType(invert ? RoomAreaSelectionManager.HIGHLIGHT_GREEN : RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
-    }, [invert, trigger]);
+        GetRoomEngine().areaSelectionManager.setHighlightType(inverse ? RoomAreaSelectionManager.HIGHLIGHT_GREEN : RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN);
+    }, [inverse, trigger]);
 
     const selectArea = () =>
     {
@@ -117,8 +114,8 @@ export const WiredActionFurniAreaView: FC<{}> = (props) => {
             </WiredSection>
             <WiredSection title={LocalizeText('wiredfurni.params.selector_options_selector')}>
                 <WiredCheckboxGroup>
-                    <WiredCheckboxOption checked={filterExisting} label={LocalizeText('wiredfurni.params.selector_option.0')} onChange={setFilterExisting} />
-                    <WiredCheckboxOption checked={invert} label={LocalizeText('wiredfurni.params.selector_option.1')} last={true} onChange={setInvert} />
+                    <WiredCheckboxOption checked={filter} label={LocalizeText('wiredfurni.params.selector_option.0')} onChange={setFilter} />
+                    <WiredCheckboxOption checked={inverse} label={LocalizeText('wiredfurni.params.selector_option.1')} last={true} onChange={setInverse} />
                 </WiredCheckboxGroup>
             </WiredSection>
         </WiredSelectorBaseView>

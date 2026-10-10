@@ -2,62 +2,35 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { DANCE_OPTIONS, parseUserActionText, SIGN_OPTIONS, USER_ACTION, USER_ACTION_OPTIONS, userActionText } from '../../../../api';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
-const ACTION_WAVE = 1;
-const ACTION_BLOW_KISS = 2;
-const ACTION_LAUGH = 3;
-const ACTION_AWAKE = 4;
-const ACTION_RELAX = 5;
-const ACTION_SIT = 6;
-const ACTION_STAND = 7;
-const ACTION_LAY = 8;
-const ACTION_SIGN = 9;
-const ACTION_DANCE = 10;
-const ACTION_THUMB_UP = 11;
-
-const ACTION_OPTIONS = [
-    { value: ACTION_WAVE, label: 'widget.memenu.wave' },
-    { value: ACTION_BLOW_KISS, label: 'widget.memenu.blow' },
-    { value: ACTION_LAUGH, label: 'widget.memenu.laugh' },
-    { value: ACTION_THUMB_UP, label: 'widget.memenu.thumb' },
-    { value: ACTION_AWAKE, label: 'wiredfurni.params.action.4' },
-    { value: ACTION_RELAX, label: 'avatar.widget.random_walk' },
-    { value: ACTION_SIT, label: 'widget.memenu.sit' },
-    { value: ACTION_STAND, label: 'widget.memenu.stand' },
-    { value: ACTION_LAY, label: 'wiredfurni.params.action.8' },
-    { value: ACTION_SIGN, label: 'widget.memenu.sign' },
-    { value: ACTION_DANCE, label: 'widget.memenu.dance' }
-];
-
-const SIGN_OPTIONS = Array.from({ length: 18 }, (_, value) => ({
-    value,
-    label: `wiredfurni.params.action.sign.${value}`
-}));
-
-const DANCE_OPTIONS = [
-    { value: 1, label: 'widget.memenu.dance1' },
-    { value: 2, label: 'widget.memenu.dance2' },
-    { value: 3, label: 'widget.memenu.dance3' },
-    { value: 4, label: 'widget.memenu.dance4' }
-];
-
 export const WiredTriggerUserPerformsActionView: FC<{}> = () => {
-    const [selectedAction, setSelectedAction] = useState(ACTION_WAVE);
+    const [selectedAction, setSelectedAction] = useState<number>(USER_ACTION.WAVE);
     const [signFilterEnabled, setSignFilterEnabled] = useState(false);
     const [signId, setSignId] = useState(0);
     const [danceFilterEnabled, setDanceFilterEnabled] = useState(false);
     const [danceId, setDanceId] = useState(1);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
 
-    const save = () => setIntParams([selectedAction, signFilterEnabled ? 1 : 0, signId, danceFilterEnabled ? 1 : 0, danceId]);
+    const save = () => {
+        const filtered = selectedAction === USER_ACTION.SIGN ? signFilterEnabled : selectedAction === USER_ACTION.DANCE && danceFilterEnabled;
+
+        setIntParams([selectedAction]);
+        setStringParam(userActionText(selectedAction, filtered, selectedAction === USER_ACTION.SIGN ? signId : danceId));
+    };
 
     useEffect(() => {
-        setSelectedAction(trigger?.intData?.length > 0 ? trigger.intData[0] : ACTION_WAVE);
-        setSignFilterEnabled(trigger?.intData?.length > 1 ? trigger.intData[1] === 1 : false);
-        setSignId(trigger?.intData?.length > 2 ? trigger.intData[2] : 0);
-        setDanceFilterEnabled(trigger?.intData?.length > 3 ? trigger.intData[3] === 1 : false);
-        setDanceId(trigger?.intData?.length > 4 ? trigger.intData[4] : 1);
+        if (!trigger) return;
+
+        const action = trigger.intData.length > 0 ? trigger.intData[0] : USER_ACTION.WAVE;
+        const parsed = parseUserActionText(trigger.stringData, action);
+
+        setSelectedAction(action);
+        setSignFilterEnabled(action === USER_ACTION.SIGN && parsed.filtered);
+        setSignId(action === USER_ACTION.SIGN ? parsed.id : 0);
+        setDanceFilterEnabled(action === USER_ACTION.DANCE && parsed.filtered);
+        setDanceId(action === USER_ACTION.DANCE ? parsed.id : 1);
     }, [trigger]);
 
     return (
@@ -65,14 +38,14 @@ export const WiredTriggerUserPerformsActionView: FC<{}> = () => {
             <div className="flex flex-col gap-1">
                 <Text bold>{localizeWithFallback('wiredfurni.params.action_selection', 'Action')}</Text>
                 <select className="form-select form-select-sm" value={selectedAction} onChange={(event) => setSelectedAction(parseInt(event.target.value))}>
-                    {ACTION_OPTIONS.map((option) => (
+                    {USER_ACTION_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
-                            {LocalizeText(option.label)}
+                            {localizeWithFallback(option.label, option.fallback)}
                         </option>
                     ))}
                 </select>
             </div>
-            {selectedAction === ACTION_SIGN && (
+            {selectedAction === USER_ACTION.SIGN && (
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1">
                         <input
@@ -95,7 +68,7 @@ export const WiredTriggerUserPerformsActionView: FC<{}> = () => {
                     )}
                 </div>
             )}
-            {selectedAction === ACTION_DANCE && (
+            {selectedAction === USER_ACTION.DANCE && (
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1">
                         <input

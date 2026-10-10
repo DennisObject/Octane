@@ -5,27 +5,29 @@ import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredTextCounter, WiredTextFormattingHelp } from '../common/WiredTextFormattingHelp';
 import { WiredBubbleWidthSelect } from '../WiredBubbleWidthSelect';
-import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
-
-const normalizeBotSource = (value: number, hasBotName = false) => (BOT_SOURCES.some((option) => option.value === value) ? value : hasBotName ? 100 : 0);
+import { normalizeBotSource, WIRED_BOT_NAMED_SOURCE } from '../../../../api';
 
 export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
     const [message, setMessage] = useState('');
     const [talkMode, setTalkMode] = useState(-1);
-    const [botSource, setBotSource] = useState<number>(100);
+    const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
     const [bubbleWidth, setBubbleWidth] = useState<number>(-1);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
+    const botAllowed = trigger?.inputSources?.usersAllowed[1];
+    const botDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
+    const userAllowed = trigger?.inputSources?.usersAllowed[0];
+    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
     const maxMessageLength = 200;
-    const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return 0;
-    });
+    const [userSource, setUserSource] = useState<number>(() => trigger?.userSources?.[0] ?? userDefault);
 
     const save = () => {
-        setStringParam((botSource === 100 ? botName : '') + WIRED_STRING_DELIMETER + message);
-        setIntParams([talkMode, userSource, botSource, bubbleWidth]);
+        setStringParam((botSource === WIRED_BOT_NAMED_SOURCE ? botName : '') + WIRED_STRING_DELIMETER + message);
+        // owned: [talk mode, bubble width]; users: [talked-to user, bot].
+        setIntParams([talkMode, bubbleWidth]);
+        setUserSources([userSource, botSource]);
     };
 
     useEffect(() => {
@@ -36,11 +38,9 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
         if (data.length > 1) setMessage(data[1].length > 0 ? data[1] : '');
 
         setTalkMode(trigger.intData.length > 0 ? trigger.intData[0] : 0);
-        setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
-        setBotSource(
-            trigger.intData.length > 2 ? normalizeBotSource(trigger.intData[2], nextBotName.length > 0) : normalizeBotSource(-1, nextBotName.length > 0)
-        );
-        setBubbleWidth(trigger.intData.length > 3 ? trigger.intData[3] : -1);
+        setUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : userDefault);
+        setBotSource(normalizeBotSource(trigger.userSources.length > 1 ? trigger.userSources[1] : botDefault, botAllowed, botDefault, nextBotName.length > 0));
+        setBubbleWidth(trigger.intData.length > 1 ? trigger.intData[1] : -1);
     }, [trigger]);
 
     return (
@@ -54,15 +54,15 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
                     <hr className="m-0 bg-dark" />
                     <WiredSourcesSelector
                         showUsers={true}
+                        userSlot={1}
                         userSource={botSource}
-                        userSources={BOT_SOURCES}
                         usersTitle="wiredfurni.params.sources.users.title.bots"
-                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
+                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botAllowed, botDefault, botName.length > 0))}
                     />
                 </div>
             }
         >
-            {botSource === 100 && (
+            {botSource === WIRED_BOT_NAMED_SOURCE && (
                 <div className="flex flex-col gap-1">
                     <Text bold>{LocalizeText('wiredfurni.params.bot.name')}</Text>
                     <OctaneInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />

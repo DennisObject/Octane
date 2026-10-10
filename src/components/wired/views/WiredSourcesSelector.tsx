@@ -47,6 +47,10 @@ export interface WiredSourceOption {
     label: string;
 }
 
+/** The card's own allowed group as options, labelled from the source keys; every value the server allows is listed. */
+export const nativeSourceOptions = (values: number[] | undefined, kind: 'furni' | 'users'): WiredSourceOption[] =>
+    sortWiredSourceOptions((values ?? []).map((value) => ({ value, label: `wiredfurni.params.sources.${kind}.${value}` })), kind);
+
 const FURNI_SOURCE_LABEL_ORDER = [
     'wiredfurni.params.sources.furni.100',
     'wiredfurni.params.sources.furni.101',
@@ -85,6 +89,8 @@ export const sortWiredSourceOptions = (options: WiredSourceOption[], category: '
 
 interface WiredSourcesSelectorProps {
     furniSlot?: number;
+    /** The furni choice is fixed by the card's mode; the picker shows the value without letting it change. */
+    furniDisabled?: boolean;
     userSlot?: number;
     showFurni?: boolean;
     showUsers?: boolean;
@@ -213,6 +219,7 @@ export const useAvailableUserSources = (
 export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     const {
         furniSlot = 0,
+        furniDisabled = false,
         userSlot = 0,
         showFurni = false,
         showUsers = false,
@@ -232,8 +239,11 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     const native = useWiredNative();
     const nativeFurniSources = trigger?.inputSources?.furniAllowed[furniSlot]?.map(value => ({ value, label: `wiredfurni.params.sources.furni.${value}` }));
     const nativeUserSources = trigger?.inputSources?.usersAllowed[userSlot]?.map(value => ({ value, label: `wiredfurni.params.sources.users.${value}` }));
-    const availableUserSources = useAvailableUserSources(trigger, userSources ?? nativeUserSources ?? USER_SOURCES, usersTitle, !nativeUserSources && allowClickedUserSource);
-    const orderedFurniSources = useMemo(() => sortWiredSourceOptions(furniSources ?? nativeFurniSources ?? FURNI_SOURCES, 'furni'), [furniSources, trigger, furniSlot]);
+    // The card's own allowed groups are the list whenever it sends one; explicit lists are only the fallback.
+    const hasNativeFurni = !!nativeFurniSources?.length;
+    const hasNativeUsers = !!nativeUserSources?.length;
+    const availableUserSources = useAvailableUserSources(trigger, hasNativeUsers ? nativeUserSources : (userSources ?? USER_SOURCES), usersTitle, !hasNativeUsers && allowClickedUserSource);
+    const orderedFurniSources = useMemo(() => sortWiredSourceOptions(hasNativeFurni ? nativeFurniSources : (furniSources ?? FURNI_SOURCES), 'furni'), [furniSources, hasNativeFurni, nativeFurniSources]);
     const orderedUserSources = useMemo(() => {
         if (usersTitle === BOT_SOURCE_TITLE) return [...availableUserSources];
 
@@ -306,7 +316,7 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
                 <>
                     <Text bold>{LocalizeText(furniTitle)}</Text>
                     <div className="flex items-center gap-1">
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={prevFurni}>
+                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" disabled={furniDisabled} onClick={prevFurni}>
                             <FaChevronLeft />
                         </Button>
                         <div className="flex min-w-0 flex-1 items-center justify-center octane-wired__picker-label">
@@ -314,7 +324,7 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
                                 {LocalizeText(orderedFurniSources[furniIndex].label)}
                             </Text>
                         </div>
-                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" onClick={nextFurni}>
+                        <Button variant="primary" classNames={['octane-wired__picker-button']} className="px-2 py-1" disabled={furniDisabled} onClick={nextFurni}>
                             <FaChevronRight />
                         </Button>
                     </div>

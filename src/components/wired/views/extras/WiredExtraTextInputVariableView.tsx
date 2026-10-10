@@ -1,17 +1,13 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    getCustomVariableItemId,
-    isCustomVariableToken,
-    normalizeVariableTokenFromWire
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
+import { WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 import { WiredPlaceholderPreview } from './WiredPlaceholderPreview';
 
@@ -28,16 +24,6 @@ const DEFAULT_CAPTURER_NAME = '';
 const MAX_CAPTURER_NAME_LENGTH = 32;
 const PLACEHOLDER_WRAPPER_PATTERN = /^#(.*)#$/;
 
-const splitStringData = (value: string) => {
-    if (!value?.length) return ['', DEFAULT_CAPTURER_NAME];
-
-    const parts = value.split('\t');
-
-    if (parts.length === 1) return [parts[0], DEFAULT_CAPTURER_NAME];
-
-    return [parts[0], parts[1]];
-};
-
 const normalizeDisplayType = (value: number) => (value === DISPLAY_TEXTUAL ? DISPLAY_TEXTUAL : DISPLAY_NUMERIC);
 const normalizeCapturerName = (value: string) => {
     let normalizedValue = (value ?? '').trim().replace(/[\t\r\n]/g, '');
@@ -52,8 +38,8 @@ const normalizeCapturerName = (value: string) => {
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export const WiredExtraTextInputVariableView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
-    const { contextVariableDefinitions = [] } = useWiredTools();
+    const { trigger = null, setIntParams = null, setStringParam = null, setVariableIds = null } = useWired();
+    const { contextVariableDefinitions = [] } = useWiredNativeVariables();
     const [variableToken, setVariableToken] = useState('');
     const [capturerName, setCapturerName] = useState(DEFAULT_CAPTURER_NAME);
     const [displayType, setDisplayType] = useState(DISPLAY_NUMERIC);
@@ -64,7 +50,7 @@ export const WiredExtraTextInputVariableView: FC<{}> = () => {
         [targetDefinitions]
     );
     const resolvedVariableEntries = useMemo(() => {
-        if (!variableToken || !isCustomVariableToken(variableToken)) return variableEntries;
+        if (!variableToken || !getNativeVariableId(variableToken)) return variableEntries;
         if (flattenWiredVariablePickerEntries(variableEntries).some((entry) => entry.token === variableToken)) return variableEntries;
 
         const fallbackEntry = createFallbackVariableEntry('context', variableToken);
@@ -73,11 +59,11 @@ export const WiredExtraTextInputVariableView: FC<{}> = () => {
     }, [variableEntries, variableToken]);
 
     const selectedVariableDefinition = useMemo(() => {
-        if (!isCustomVariableToken(variableToken)) return null;
+        const variableId = getNativeVariableId(variableToken);
 
-        const itemId = getCustomVariableItemId(variableToken);
+        if (!variableId) return null;
 
-        return targetDefinitions.find((definition) => definition.itemId === itemId) ?? null;
+        return targetDefinitions.find((definition) => definition.variableId === variableId) ?? null;
     }, [targetDefinitions, variableToken]);
 
     const canUseTextDisplay = !!selectedVariableDefinition?.isTextConnected;
@@ -85,10 +71,8 @@ export const WiredExtraTextInputVariableView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const [nextVariableToken, nextCapturerName] = splitStringData(trigger.stringData);
-
-        setVariableToken(normalizeVariableTokenFromWire(nextVariableToken));
-        setCapturerName(normalizeCapturerName(nextCapturerName));
+        setVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
+        setCapturerName(normalizeCapturerName(trigger.stringData));
         setDisplayType(normalizeDisplayType(trigger.intData.length > 0 ? trigger.intData[0] : DISPLAY_NUMERIC));
     }, [trigger]);
 
@@ -107,13 +91,12 @@ export const WiredExtraTextInputVariableView: FC<{}> = () => {
     const previewHtml = useMemo(() => LocalizeText('wiredfurni.params.texts.placeholder_preview', ['placeholder'], [escapeHtml(previewToken)]), [previewToken]);
 
     const save = () => {
-        const variableItemId = getCustomVariableItemId(variableToken);
-
         setIntParams([canUseTextDisplay ? normalizeDisplayType(displayType) : DISPLAY_NUMERIC]);
-        setStringParam(`${variableItemId ? String(variableItemId) : ''}\t${normalizeCapturerName(capturerName)}`);
+        setStringParam(normalizeCapturerName(capturerName));
+        setVariableIds([variableSlotOf(variableToken)]);
     };
 
-    const validate = () => !!normalizeCapturerName(capturerName).length && getCustomVariableItemId(variableToken) > 0;
+    const validate = () => !!normalizeCapturerName(capturerName).length && !!getNativeVariableId(variableToken);
 
     return (
         <WiredExtraBaseView

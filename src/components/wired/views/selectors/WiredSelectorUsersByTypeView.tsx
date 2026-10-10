@@ -8,23 +8,18 @@ const USER_TYPES = [1, 2, 4];
 
 export const WiredSelectorUsersByTypeView: FC<{}> = () => {
     const [userType, setUserType] = useState(1);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
 
     useEffect(() => {
         if (!trigger) return;
 
-        const params = trigger.intData;
-
-        setUserType(params.length > 0 ? params[0] : 1);
-        setFilterExisting(params.length > 1 ? params[1] === 1 : false);
-        setInvert(params.length > 2 ? params[2] === 1 : false);
+        setUserType(trigger.intData.length > 0 ? trigger.intData[0] : 1);
     }, [trigger]);
 
+    // Filter and inverse are category fields of the selector save, not owned ints.
     const save = useCallback(() => {
-        setIntParams([userType, filterExisting ? 1 : 0, invert ? 1 : 0]);
-    }, [userType, filterExisting, invert, setIntParams]);
+        setIntParams([userType]);
+    }, [userType, setIntParams]);
 
     return (
         <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: 400 }}>
@@ -53,14 +48,14 @@ export const WiredSelectorUsersByTypeView: FC<{}> = () => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>

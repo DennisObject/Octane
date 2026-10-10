@@ -8,33 +8,8 @@ import sourceUserIcon from '../../../../assets/images/wired/source_user.png';
 import { Button, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
-import { sortWiredSourceOptions, useAvailableUserSources } from '../WiredSourcesSelector';
+import { CLICKED_USER_SOURCE_VALUE, nativeSourceOptions, useAvailableUserSources } from '../WiredSourcesSelector';
 import { WiredSelectorBaseView } from './WiredSelectorBaseView';
-
-const SOURCE_USER_TRIGGER = 0;
-const SOURCE_USER_SIGNAL = 1;
-const SOURCE_USER_CLICKED = 2;
-const SOURCE_FURNI_TRIGGER = 3;
-const SOURCE_FURNI_PICKED = 4;
-const SOURCE_FURNI_SIGNAL = 5;
-
-const USER_SOURCES = sortWiredSourceOptions(
-    [
-        { value: SOURCE_USER_TRIGGER, label: 'wiredfurni.params.sources.users.0' },
-        { value: SOURCE_USER_SIGNAL, label: 'wiredfurni.params.sources.users.201' },
-        { value: SOURCE_USER_CLICKED, label: 'wiredfurni.params.sources.users.11' }
-    ],
-    'users'
-);
-
-const FURNI_SOURCES = sortWiredSourceOptions(
-    [
-        { value: SOURCE_FURNI_TRIGGER, label: 'wiredfurni.params.sources.furni.0' },
-        { value: SOURCE_FURNI_PICKED, label: 'wiredfurni.params.sources.furni.100' },
-        { value: SOURCE_FURNI_SIGNAL, label: 'wiredfurni.params.sources.furni.201' }
-    ],
-    'furni'
-);
 
 const SOURCE_GROUP_BUTTONS = [
     { key: 'user', icon: sourceUserIcon, isUserGroup: true },
@@ -43,13 +18,72 @@ const SOURCE_GROUP_BUTTONS = [
 
 const TILE_W = 22;
 const TILE_H = 11;
-const GRID_RANGE = 4;
+const GRID_RANGE = 10;
 const CX = GRID_RANGE * TILE_W + TILE_W / 2;
 const CY = GRID_RANGE * TILE_H + TILE_H / 2;
 const GRID_PX_W = (GRID_RANGE * 2 + 1) * TILE_W;
 const GRID_PX_H = (GRID_RANGE * 2 + 1) * TILE_H;
 
 type Tile = { x: number; y: number };
+
+/** The native neighbourhood is 441 tiles: a square spiral from the anchor, east, north, west, south, with steps 1,1,2,2,3,3,... */
+const NEIGHBORHOOD_TILE_COUNT = 441;
+const NEIGHBORHOOD_WORDS = 14;
+/** The last word carries only the final 25 tiles; its top seven bits are unused. */
+const NEIGHBORHOOD_LAST_WORD_MASK = 0x01ffffff;
+
+const buildNeighborhoodSpiral = (): Tile[] => {
+    const tiles: Tile[] = [{ x: 0, y: 0 }];
+    const directions = [
+        { x: 1, y: 0 },
+        { x: 0, y: -1 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 }
+    ];
+    let x = 0;
+    let y = 0;
+    let direction = 0;
+
+    for (let step = 1; tiles.length < NEIGHBORHOOD_TILE_COUNT; step++) {
+        for (let leg = 0; leg < 2 && tiles.length < NEIGHBORHOOD_TILE_COUNT; leg++) {
+            for (let move = 0; move < step && tiles.length < NEIGHBORHOOD_TILE_COUNT; move++) {
+                x += directions[direction].x;
+                y += directions[direction].y;
+                tiles.push({ x, y });
+            }
+
+            direction = (direction + 1) % directions.length;
+        }
+    }
+
+    return tiles;
+};
+
+const NEIGHBORHOOD_SPIRAL = buildNeighborhoodSpiral();
+const NEIGHBORHOOD_INDEX = new Map(NEIGHBORHOOD_SPIRAL.map((tile, index) => [`${tile.x},${tile.y}`, index]));
+
+/** Packs picked tiles into the 14 signed words, bit i of the spiral in word i>>5 at bit i&31. */
+const tilesToNeighborhoodWords = (tiles: Tile[]): number[] => {
+    const words = Array.from({ length: NEIGHBORHOOD_WORDS }, () => 0);
+
+    for (const tile of tiles) {
+        const index = NEIGHBORHOOD_INDEX.get(`${tile.x},${tile.y}`);
+
+        if (index === undefined) continue;
+
+        words[index >>> 5] |= 1 << (index & 31);
+    }
+
+    return words;
+};
+
+const neighborhoodWordsToTiles = (words: number[]): Tile[] =>
+    NEIGHBORHOOD_SPIRAL.filter((_, index) => {
+        const wordIndex = index >>> 5;
+        const word = (words[wordIndex] ?? 0) & (wordIndex === NEIGHBORHOOD_WORDS - 1 ? NEIGHBORHOOD_LAST_WORD_MASK : -1);
+
+        return ((word >>> (index & 31)) & 1) === 1;
+    });
 
 const tileIncluded = (tiles: Tile[], x: number, y: number) => tiles.some((tile) => tile.x === x && tile.y === y);
 const tileLeft = (rx: number, ry: number) => CX + (rx - ry) * (TILE_W / 2) - TILE_W / 2;
@@ -184,16 +218,18 @@ const NeighborhoodGrid: FC<NeighborhoodGridProps> = (props) => {
 
 export const WiredNeighborhoodSelectorView: FC<{}> = () => {
     const [selectedTiles, setSelectedTiles] = useState<Tile[]>([]);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
-    const [sourceType, setSourceType] = useState(SOURCE_USER_TRIGGER);
+    // The anchor's domain and its native source value (users or furni), straight from the card's metadata.
+    const [usersAnchor, setUsersAnchor] = useState(true);
+    const [sourceValue, setSourceValue] = useState(0);
     const [targetTile, setTargetTile] = useState<Tile>({ x: 0, y: 0 });
     const [targetPlacementMode, setTargetPlacementMode] = useState(false);
     const [curX, setCurX] = useState(0);
     const [curY, setCurY] = useState(0);
 
-    const { trigger = null, furniIds = [], setIntParams } = useWired();
-    const availableUserSources = useAvailableUserSources(trigger, USER_SOURCES);
+    const { trigger = null, furniIds = [], setIntParams, setUserSources = null, setFurniSources = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
+    const userOptions = useMemo(() => nativeSourceOptions(trigger?.inputSources?.usersAllowed[0], 'users'), [trigger]);
+    const furniOptions = useMemo(() => nativeSourceOptions(trigger?.inputSources?.furniAllowed[0], 'furni'), [trigger]);
+    const availableUserSources = useAvailableUserSources(trigger, userOptions);
 
     useEffect(() => {
         GetRoomEngine().areaSelectionManager.clearHighlight();
@@ -203,51 +239,31 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
+        // own: [usersAnchorBit, rootX, rootY, 14 words]; the anchor's own source is the U or F tail.
         const params = trigger.intData;
+        const usersAnchor = params[0] === 1;
 
-        if (params.length >= 1) setSourceType(params[0]);
-        if (params.length >= 2) setFilterExisting(params[1] === 1);
-        if (params.length >= 3) setInvert(params[2] === 1);
-        if (params.length >= 5) setTargetTile({ x: params[3], y: params[4] });
-        else setTargetTile({ x: 0, y: 0 });
+        const anchorsUsers = params[0] === 1;
 
-        if (params.length < 6) {
-            setSelectedTiles([]);
-            return;
-        }
-
-        const tileCount = params[5];
-        const nextTiles: Tile[] = [];
-
-        for (let index = 0; index < tileCount; index++) {
-            const tileIndex = 6 + index * 2;
-
-            if (tileIndex + 1 >= params.length) break;
-
-            nextTiles.push({ x: params[tileIndex], y: params[tileIndex + 1] });
-        }
-
-        setSelectedTiles(nextTiles);
+        setUsersAnchor(anchorsUsers);
+        setSourceValue(anchorsUsers ? (trigger.userSources[0] ?? 0) : (trigger.furniSources[0] ?? 100));
+        setTargetTile({ x: params[1] ?? 0, y: params[2] ?? 0 });
+        setSelectedTiles(neighborhoodWordsToTiles(params.slice(3, 3 + NEIGHBORHOOD_WORDS)));
     }, [trigger]);
 
     useEffect(() => {
-        if (sourceType !== SOURCE_USER_CLICKED) return;
-        if (availableUserSources.some((option) => option.value === SOURCE_USER_CLICKED)) return;
+        if (!usersAnchor || sourceValue !== CLICKED_USER_SOURCE_VALUE) return;
+        if (availableUserSources.some((option) => option.value === CLICKED_USER_SOURCE_VALUE)) return;
 
-        setSourceType(SOURCE_USER_TRIGGER);
-    }, [availableUserSources, sourceType]);
+        setSourceValue(0);
+    }, [availableUserSources, sourceValue, usersAnchor]);
 
+    // Filter and inverse are category fields; the anchor's source goes to its U or F tail, the other tail keeps its default.
     const save = useCallback(() => {
-        setIntParams([
-            sourceType,
-            filterExisting ? 1 : 0,
-            invert ? 1 : 0,
-            targetTile.x,
-            targetTile.y,
-            selectedTiles.length,
-            ...selectedTiles.flatMap((tile) => [tile.x, tile.y])
-        ]);
-    }, [filterExisting, invert, selectedTiles, setIntParams, sourceType, targetTile.x, targetTile.y]);
+        setIntParams([usersAnchor ? 1 : 0, targetTile.x, targetTile.y, ...tilesToNeighborhoodWords(selectedTiles)]);
+        setUserSources([usersAnchor ? sourceValue : 0]);
+        setFurniSources([usersAnchor ? 100 : sourceValue]);
+    }, [selectedTiles, setFurniSources, setIntParams, setUserSources, sourceValue, usersAnchor, targetTile.x, targetTile.y]);
 
     const setTileSelection = useCallback((x: number, y: number, selected: boolean) => {
         setSelectedTiles((previous) => {
@@ -265,31 +281,18 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
         });
     }, []);
 
-    const activeSources = useMemo(() => (sourceType <= SOURCE_USER_CLICKED ? availableUserSources : FURNI_SOURCES), [availableUserSources, sourceType]);
-    const isUserGroup = sourceType <= SOURCE_USER_CLICKED;
-    const currentIndex = Math.max(
-        0,
-        activeSources.findIndex((option) => option.value === sourceType)
-    );
-    const currentSourceType = activeSources[currentIndex]?.value ?? sourceType;
-
-    useEffect(() => {
-        if (currentSourceType === sourceType) return;
-
-        setSourceType(currentSourceType);
-    }, [currentSourceType, sourceType]);
+    const activeSources = usersAnchor ? availableUserSources : furniOptions;
 
     const changeGroup = useCallback(
         (nextIsUserGroup: boolean) => {
-            if (nextIsUserGroup === isUserGroup) return;
+            if (nextIsUserGroup === usersAnchor) return;
 
-            const nextOptions = nextIsUserGroup ? availableUserSources : FURNI_SOURCES;
-            const nextIndex = Math.min(currentIndex, Math.max(0, nextOptions.length - 1));
-            const nextOption = nextOptions[nextIndex] ?? nextOptions[0];
+            const nextOption = (nextIsUserGroup ? availableUserSources : furniOptions)[0];
 
-            if (nextOption) setSourceType(nextOption.value);
+            setUsersAnchor(nextIsUserGroup);
+            if (nextOption) setSourceValue(nextOption.value);
         },
-        [availableUserSources, currentIndex, isUserGroup]
+        [availableUserSources, furniOptions, usersAnchor]
     );
 
     const addTile = useCallback(() => {
@@ -318,7 +321,7 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
         setSelectedTiles(nextTiles);
     }, []);
 
-    const requiresFurni = sourceType === SOURCE_FURNI_PICKED ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
+    const requiresFurni = !usersAnchor && sourceValue === 100 ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
 
     return (
         <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={requiresFurni} save={save} hideDelay={true} cardStyle={{ width: '400px' }}>
@@ -361,7 +364,7 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
                     <NeighborhoodGrid
                         selectedTiles={selectedTiles}
                         targetTile={targetTile}
-                        invert={invert}
+                        invert={inverse}
                         onSetTile={setTileSelection}
                         onMoveTarget={(x, y) => setTargetTile({ x, y })}
                         targetPlacementMode={targetPlacementMode}
@@ -399,14 +402,14 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-1">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
 
@@ -415,12 +418,12 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
                 <WiredFurniSelectionSourceRow
                     title="wiredfurni.params.sources.merged.title.neighborhood"
                     options={activeSources}
-                    value={sourceType}
-                    selectionKind={isUserGroup ? 'primary' : 'secondary'}
-                    selectionActive={sourceType === SOURCE_FURNI_PICKED}
+                    value={sourceValue}
+                    selectionKind={usersAnchor ? 'primary' : 'secondary'}
+                    selectionActive={!usersAnchor && sourceValue === 100}
                     selectionCount={furniIds.length}
                     selectionLimit={trigger?.maximumItemSelectionCount ?? 20}
-                    selectionEnabledValues={[SOURCE_FURNI_PICKED]}
+                    selectionEnabledValues={[100]}
                     showSelectionToggle={false}
                     headerContent={
                         <div className="octane-wired__give-var-targets">
@@ -428,7 +431,7 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
                                 <button
                                     key={button.key}
                                     type="button"
-                                    className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${isUserGroup === button.isUserGroup ? 'is-active' : ''}`}
+                                    className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${usersAnchor === button.isUserGroup ? 'is-active' : ''}`}
                                     onClick={() => changeGroup(button.isUserGroup)}
                                 >
                                     <img src={button.icon} alt={button.key} />
@@ -436,10 +439,10 @@ export const WiredNeighborhoodSelectorView: FC<{}> = () => {
                             ))}
                         </div>
                     }
-                    onChange={(value) => setSourceType(value)}
+                    onChange={(value) => setSourceValue(value)}
                 />
 
-                {sourceType === SOURCE_FURNI_PICKED && (
+                {!usersAnchor && sourceValue === 100 && (
                     <Text small className="text-center">
                         {LocalizeText(
                             'wiredfurni.pickfurnis.caption',

@@ -1,25 +1,16 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback } from 'react';
 import { LocalizeText } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredSelectorBaseView } from './WiredSelectorBaseView';
 
 export const WiredSelectorUsersSignalView: FC<{}> = () => {
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { setIntParams = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
 
-    useEffect(() => {
-        if (!trigger) return;
-
-        const params = trigger.intData;
-        setFilterExisting(params.length > 0 ? params[0] === 1 : false);
-        setInvert(params.length > 1 ? params[1] === 1 : false);
-    }, [trigger]);
-
+    // Filter and inverse are category fields of the selector save; the owned ints stay empty.
     const save = useCallback(() => {
-        setIntParams([filterExisting ? 1 : 0, invert ? 1 : 0]);
-    }, [filterExisting, invert, setIntParams]);
+        setIntParams([]);
+    }, [setIntParams]);
 
     return (
         <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: 400 }}>
@@ -27,17 +18,12 @@ export const WiredSelectorUsersSignalView: FC<{}> = () => {
                 <Text bold>{LocalizeText('wiredfurni.params.selector_options_selector')}</Text>
 
                 <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
-                    />
+                    <input type="checkbox" className="form-check-input" checked={filter} onChange={(event) => setFilter(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>

@@ -1,17 +1,15 @@
-import { WiredActionLayoutCode, WIRED_FX_CATEGORY } from '../../../../api';
-import { WiredExtraAchievementEnablerView } from '../extras/WiredExtraAchievementEnablerView';
-import { WiredExtraArrayCaptureView } from '../extras/WiredExtraArrayCaptureView';
-import { WiredExtraDailyTaskView } from '../extras/WiredExtraDailyTaskView';
-import { WiredExtraGlobalPlaceholderView } from '../extras/WiredExtraGlobalPlaceholderView';
-import { WiredExtraProjectileView } from '../extras/WiredExtraProjectileView';
+import { WIRED_FX_CATEGORY, WiredActionLayoutCode } from '../../../../api';
 import { WiredChestCurrencyView } from '../extras/WiredChestCurrencyView';
 import { WiredChestFurniView } from '../extras/WiredChestFurniView';
 import { WiredContractPaymentView } from '../extras/WiredContractPaymentView';
 import { WiredContractRewardView } from '../extras/WiredContractRewardView';
 import { WiredContractTradeView } from '../extras/WiredContractTradeView';
 import { WiredCustomContractView } from '../extras/WiredCustomContractView';
+import { WiredExtraAchievementEnablerView } from '../extras/WiredExtraAchievementEnablerView';
 import { WiredExtraAnimationTimeView } from '../extras/WiredExtraAnimationTimeView';
+import { WiredExtraArrayCaptureView } from '../extras/WiredExtraArrayCaptureView';
 import { WiredExtraContextVariableView } from '../extras/WiredExtraContextVariableView';
+import { WiredExtraDailyTaskView } from '../extras/WiredExtraDailyTaskView';
 import { WiredExtraExecuteInOrderView } from '../extras/WiredExtraExecuteInOrderView';
 import { WiredExtraExecutionLimitView } from '../extras/WiredExtraExecutionLimitView';
 import { WiredExtraFilterFurniByVariableView } from '../extras/WiredExtraFilterFurniByVariableView';
@@ -19,11 +17,13 @@ import { WiredExtraFilterFurniView } from '../extras/WiredExtraFilterFurniView';
 import { WiredExtraFilterUsersByVariableView } from '../extras/WiredExtraFilterUsersByVariableView';
 import { WiredExtraFilterUserView } from '../extras/WiredExtraFilterUserView';
 import { WiredExtraFurniVariableView } from '../extras/WiredExtraFurniVariableView';
+import { WiredExtraGlobalPlaceholderView } from '../extras/WiredExtraGlobalPlaceholderView';
 import { WiredExtraMoveCarryUsersView } from '../extras/WiredExtraMoveCarryUsersView';
 import { WiredExtraMovementCurveView } from '../extras/WiredExtraMovementCurveView';
 import { WiredExtraMoveNoAnimationView } from '../extras/WiredExtraMoveNoAnimationView';
 import { WiredExtraMovePhysicsView } from '../extras/WiredExtraMovePhysicsView';
 import { WiredExtraOrEvalView } from '../extras/WiredExtraOrEvalView';
+import { WiredExtraProjectileView } from '../extras/WiredExtraProjectileView';
 import { WiredExtraQuestChainView } from '../extras/WiredExtraQuestChainView';
 import { WiredExtraQuestView } from '../extras/WiredExtraQuestView';
 import { WiredExtraRandomView } from '../extras/WiredExtraRandomView';
@@ -32,15 +32,15 @@ import { WiredExtraTextInputVariableView } from '../extras/WiredExtraTextInputVa
 import { WiredExtraTextOutputFurniNameView } from '../extras/WiredExtraTextOutputFurniNameView';
 import { WiredExtraTextOutputUsernameView } from '../extras/WiredExtraTextOutputUsernameView';
 import { WiredExtraTextOutputVariableView } from '../extras/WiredExtraTextOutputVariableView';
-import { WiredExtraVariableWebApiView } from '../extras/WiredExtraVariableWebApiView';
-import { WiredExtraVariableFxView } from '../extras/WiredExtraVariableFxView';
 import { WiredExtraTimeUtilitiesView } from '../extras/WiredExtraTimeUtilitiesView';
 import { WiredExtraUnseenView } from '../extras/WiredExtraUnseenView';
 import { WiredExtraUserVariableView } from '../extras/WiredExtraUserVariableView';
 import { WiredExtraVariableEchoView } from '../extras/WiredExtraVariableEchoView';
+import { WiredExtraVariableFxView } from '../extras/WiredExtraVariableFxView';
 import { WiredExtraVariableLevelUpSystemView } from '../extras/WiredExtraVariableLevelUpSystemView';
 import { WiredExtraVariableReferenceView } from '../extras/WiredExtraVariableReferenceView';
 import { WiredExtraVariableTextConnectorView } from '../extras/WiredExtraVariableTextConnectorView';
+import { WiredExtraVariableWebApiView } from '../extras/WiredExtraVariableWebApiView';
 import { WiredActionFurniAreaView } from '../selectors/WiredActionFurniAreaView';
 import { WiredSelectorFurniAltitudeView } from '../selectors/WiredSelectorFurniAltitudeView';
 import { WiredSelectorFurniByTypeView } from '../selectors/WiredSelectorFurniByTypeView';
@@ -77,6 +77,7 @@ import { WiredActionChangeOpacityView } from './WiredActionChangeOpacityView';
 import { WiredActionChangeVariableValueView } from './WiredActionChangeVariableValueView';
 import { WiredActionChaseView } from './WiredActionChaseView';
 import { WiredActionChatView } from './WiredActionChatView';
+import { WiredActionClickSettingsView } from './WiredActionClickSettingsView';
 import { WiredActionControlClockView } from './WiredActionControlClockView';
 import { WiredActionFleeView } from './WiredActionFleeView';
 import { WiredActionFreezeView } from './WiredActionFreezeView';
@@ -93,15 +94,15 @@ import { WiredActionInitTransactionView } from './WiredActionInitTransactionView
 import { WiredActionJoinTeamView } from './WiredActionJoinTeamView';
 import { WiredActionKickFromRoomView } from './WiredActionKickFromRoomView';
 import { WiredActionLeaveTeamView } from './WiredActionLeaveTeamView';
+import { WiredActionModifyArrayView } from './WiredActionModifyArrayView';
 import { WiredActionMoveAndRotateFurniView } from './WiredActionMoveAndRotateFurniView';
 import { WiredActionMoveFurniAsGroupView } from './WiredActionMoveFurniAsGroupView';
 import { WiredActionMoveFurniToView } from './WiredActionMoveFurniToView';
 import { WiredActionMoveFurniView } from './WiredActionMoveFurniView';
 import { WiredActionMoveRotateUserView } from './WiredActionMoveRotateUserView';
-import { WiredActionClickSettingsView } from './WiredActionClickSettingsView';
-import { WiredActionModifyArrayView } from './WiredActionModifyArrayView';
 import { WiredActionMuteUserView } from './WiredActionMuteUserView';
 import { WiredActionNegativeCallAnotherStackView } from './WiredActionNegativeCallAnotherStackView';
+import { WiredActionOverrideHeightView } from './WiredActionOverrideHeightView';
 import { WiredActionPlaceFurniView } from './WiredActionPlaceFurniView';
 import { WiredActionPlayYoutubeView } from './WiredActionPlayYoutubeView';
 import { WiredActionProgressAchievementView } from './WiredActionProgressAchievementView';
@@ -115,7 +116,6 @@ import { WiredActionResetView } from './WiredActionResetView';
 import { WiredActionSendSignalView } from './WiredActionSendSignalView';
 import { WiredActionSetAltitudeView } from './WiredActionSetAltitudeView';
 import { WiredActionSetFurniStateToView } from './WiredActionSetFurniStateToView';
-import { WiredActionOverrideHeightView } from './WiredActionOverrideHeightView';
 import { WiredActionSetRollerSpeedView } from './WiredActionSetRollerSpeedView';
 import { WiredActionSetRoomAdView } from './WiredActionSetRoomAdView';
 import { WiredActionTeleportToRoomView } from './WiredActionTeleportToRoomView';
@@ -410,19 +410,4 @@ export const WiredActionLayoutView = (code: number) => {
     }
 
     return null;
-};
-
-/** Native action codes are distinct from the old combined action/selector/addon layout band. */
-export const NativeWiredActionLayoutView = (code: number) => {
-    switch (code) {
-        case 28: return <WiredActionControlClockView />;
-        case 7: return <WiredActionChatView />;
-        case 8: return <WiredActionTeleportView />;
-        case 9: return <WiredActionJoinTeamView />;
-        case 6: return <WiredActionGiveScoreView />;
-        case 29: return <WiredActionSetAltitudeView />;
-        case 30: return <WiredActionSendSignalView />;
-        case 57: return <WiredActionMoveFurniAsGroupView />;
-        default: return null;
-    }
 };

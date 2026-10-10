@@ -5,38 +5,30 @@ import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_f
 import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_global.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Text } from '../../../../common';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
+import { IWiredNativeVariableDefinition, joinWiredLiteral, parseWiredLiteral, splitWiredLiteral, WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    normalizeVariableTokenFromWire,
-    WiredVariablePickerTarget
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries, WiredVariablePickerTarget } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
 import { WiredSelectorBaseView } from './WiredSelectorBaseView';
 
 type VariableTargetType = 'user' | 'furni' | 'global' | 'context';
 type ReferenceMode = 'constant' | 'variable';
 
-interface IVariableDefinition {
-    availability: number;
-    hasValue: boolean;
-    itemId: number;
-    name: string;
-}
+type IVariableDefinition = IWiredNativeVariableDefinition;
 
 interface WiredSelectorWithVariableViewProps {
     selectorTarget: 'user' | 'furni';
 }
 
-const TARGET_USER = 0;
-const TARGET_FURNI = 1;
-const TARGET_CONTEXT = 2;
-const TARGET_GLOBAL = 3;
+const TARGET_USER = 1;
+const TARGET_FURNI = 0;
+const TARGET_CONTEXT = -20;
+const TARGET_GLOBAL = -10;
 const REFERENCE_CONSTANT = 0;
 const REFERENCE_VARIABLE = 1;
 const SOURCE_TRIGGER = 0;
@@ -49,14 +41,22 @@ const TARGET_BUTTONS: Array<{ key: VariableTargetType; icon: string; disabled?: 
     { key: 'context', icon: contextVariableIcon }
 ];
 
+// The native radio values, which the server maps to its own comparators: 0 <, 1 =, 2 >, 3 ≤, 4 ≠, 5 ≥.
 const COMPARISON_OPTIONS = [
-    { value: 0, label: '>' },
-    { value: 1, label: '≥' },
-    { value: 2, label: '=' },
+    { value: 0, label: '<' },
+    { value: 1, label: '=' },
+    { value: 2, label: '>' },
     { value: 3, label: '≤' },
-    { value: 4, label: '<' },
-    { value: 5, label: '≠' }
+    { value: 4, label: '≠' },
+    { value: 5, label: '≥' }
 ];
+
+/** The with-variable selector stores its constant as one signed 32-bit word, so a wider literal is refused. */
+const isSigned32Literal = (value: string) => {
+    const literal = parseWiredLiteral(value.trim());
+
+    return literal !== null && literal >= -(1n << 31n) && literal < 1n << 31n;
+};
 
 const SECONDARY_FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
     [
@@ -71,7 +71,6 @@ const SECONDARY_FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
 const GLOBAL_SOURCE_OPTIONS: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: 'wiredfurni.params.sources.global' }];
 const CONTEXT_SOURCE_OPTIONS: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: localizeWithFallback('wiredfurni.params.sources.context', 'Current execution') }];
 
-const parseStringData = (value: string) => (value?.length ? value.split('\t', -1) : []);
 
 const getTargetValue = (value: VariableTargetType) => {
     switch (value) {
@@ -128,8 +127,8 @@ const resolveSourceOptions = (baseOptions: WiredSourceOption[], selectedValue: n
 };
 
 export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProps> = ({ selectorTarget }) => {
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null } = useWired();
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
+    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null, setVariableIds = null, setUserSources = null, setFurniSources = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
+    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     const [variableToken, setVariableToken] = useState('');
     const [selectByValue, setSelectByValue] = useState(false);
     const [comparison, setComparison] = useState(2);
@@ -140,8 +139,6 @@ export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProp
     const [referenceUserSource, setReferenceUserSource] = useState(SOURCE_TRIGGER);
     const [referenceFurniSource, setReferenceFurniSource] = useState(SOURCE_TRIGGER);
     const [referenceFurniIds, setReferenceFurniIds] = useState<number[]>([]);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
 
     const availableUserSources = useAvailableUserSources(trigger, USER_SOURCES);
     const orderedUserSources = useMemo(() => sortWiredSourceOptions(availableUserSources, 'users'), [availableUserSources]);
@@ -210,20 +207,23 @@ export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProp
     useEffect(() => {
         if (!trigger) return;
 
-        const stringParts = parseStringData(trigger.stringData);
         const nextReferenceFurniIds = [...(trigger.selectedItems ?? [])];
 
-        setVariableToken(normalizeVariableTokenFromWire(stringParts.length > 0 ? stringParts[0] : ''));
-        setReferenceVariableToken(normalizeVariableTokenFromWire(stringParts.length > 1 ? stringParts[1] : ''));
-        setSelectByValue(trigger.intData.length > 0 ? trigger.intData[0] === 1 : false);
-        setComparison(trigger.intData.length > 1 ? trigger.intData[1] : 2);
-        setReferenceMode((trigger.intData.length > 2 ? trigger.intData[2] : REFERENCE_CONSTANT) === REFERENCE_VARIABLE ? 'variable' : 'constant');
-        setReferenceConstantValueInput((trigger.intData.length > 3 ? trigger.intData[3] : 0).toString());
-        setReferenceTargetType(normalizeTargetType(trigger.intData.length > 4 ? trigger.intData[4] : TARGET_USER));
-        setReferenceUserSource(trigger.intData.length > 5 ? trigger.intData[5] : SOURCE_TRIGGER);
-        setReferenceFurniSource(trigger.intData.length > 6 ? trigger.intData[6] : nextReferenceFurniIds.length ? SOURCE_SECONDARY_SELECTED : SOURCE_TRIGGER);
-        setFilterExisting(trigger.intData.length > 7 ? trigger.intData[7] === 1 : false);
-        setInvert(trigger.intData.length > 8 ? trigger.intData[8] === 1 : false);
+        // variableIds: [0] is the tested variable, [1] the reference variable when the card compares by variable.
+        setVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
+        setReferenceVariableToken(tokenOfVariableSlot(trigger.variableIds[1]));
+        // owned: [comparison, value mode (0 none, 1 literal, 2 variable), value high, value low, value target].
+        const ints = trigger.intData;
+        const valueMode = ints.length > 1 ? ints[1] : 0;
+
+        setComparison(ints.length > 0 ? ints[0] : 2);
+        setSelectByValue(valueMode !== 0);
+        setReferenceMode(valueMode === 2 ? 'variable' : 'constant');
+        setReferenceConstantValueInput(ints.length > 3 ? joinWiredLiteral(ints[2], ints[3]).toString() : '0');
+        setReferenceTargetType(normalizeTargetType(ints.length > 4 ? ints[4] : TARGET_USER));
+        // The reference's user and furni sources are the U and F tails, not owned ints.
+        setReferenceUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : SOURCE_TRIGGER);
+        setReferenceFurniSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : nextReferenceFurniIds.length ? SOURCE_SECONDARY_SELECTED : SOURCE_TRIGGER);
         setReferenceFurniIds(nextReferenceFurniIds);
         setFurniIds(nextReferenceFurniIds);
     }, [setFurniIds, trigger]);
@@ -245,21 +245,17 @@ export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProp
 
     const save = () => {
         const nextReferenceFurniIds = referenceSelectionEnabled ? [...furniIds] : [...referenceFurniIds];
-        const parsedReferenceConstantValue = parseInt(referenceConstantValueInput.trim(), 10);
+        const constantValue = parseWiredLiteral(referenceConstantValueInput.trim());
 
         setReferenceFurniIds(nextReferenceFurniIds);
-        setStringParam(`${variableToken || ''}\t${selectByValue && referenceMode === 'variable' ? referenceVariableToken : ''}`);
-        setIntParams([
-            selectByValue ? 1 : 0,
-            comparison,
-            referenceMode === 'variable' ? REFERENCE_VARIABLE : REFERENCE_CONSTANT,
-            Number.isFinite(parsedReferenceConstantValue) ? parsedReferenceConstantValue : 0,
-            getTargetValue(referenceTargetType),
-            referenceUserSource,
-            referenceFurniSource,
-            filterExisting ? 1 : 0,
-            invert ? 1 : 0
-        ]);
+        setStringParam('');
+        setVariableIds([variableSlotOf(variableToken), selectByValue && referenceMode === 'variable' ? variableSlotOf(referenceVariableToken) : WIRED_VARIABLE_ABSENT]);
+        const [high, low] = splitWiredLiteral(constantValue ?? 0n);
+        const valueMode = !selectByValue ? 0 : referenceMode === 'variable' ? 2 : 1;
+
+        setIntParams([comparison, valueMode, high, low, getTargetValue(referenceTargetType)]);
+        setUserSources([referenceUserSource]);
+        setFurniSources([referenceFurniSource]);
         setFurniIds(referenceSelectionEnabled ? nextReferenceFurniIds : []);
     };
 
@@ -267,6 +263,7 @@ export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProp
         if (!variableToken) return false;
         if (selectByValue && !canSelectByValue) return false;
         if (selectByValue && referenceMode === 'variable' && !referenceVariableToken) return false;
+        if (selectByValue && referenceMode === 'constant' && !isSigned32Literal(referenceConstantValueInput)) return false;
 
         return true;
     };
@@ -419,14 +416,14 @@ export const WiredSelectorWithVariableView: FC<WiredSelectorWithVariableViewProp
                     <input
                         className="form-check-input"
                         type="checkbox"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input className="form-check-input" type="checkbox" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input className="form-check-input" type="checkbox" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>

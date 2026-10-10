@@ -5,37 +5,27 @@ import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_f
 import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_global.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Text } from '../../../../common';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
-import { CLICKED_USER_SOURCE_VALUE, WiredSourcesSelector } from '../WiredSourcesSelector';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
+import { normalizeNativeSource } from '../../../../api';
+import { IWiredNativeVariableDefinition, WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    getCustomVariableItemId,
-    isCustomVariableToken,
-    normalizeVariableTokenFromWire
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 import { WiredPlaceholderPreview } from './WiredPlaceholderPreview';
 
 type VariableTargetType = 'user' | 'furni' | 'global' | 'context';
 
-interface IVariableDefinition {
-    availability: number;
-    hasValue: boolean;
-    isTextConnected: boolean;
-    itemId: number;
-    isReadOnly?: boolean;
-    name: string;
-}
+type IVariableDefinition = IWiredNativeVariableDefinition;
 
-const TARGET_USER = 0;
-const TARGET_FURNI = 1;
-const TARGET_CONTEXT = 2;
-const TARGET_GLOBAL = 3;
+const TARGET_USER = 1;
+const TARGET_FURNI = 0;
+const TARGET_CONTEXT = -20;
+const TARGET_GLOBAL = -10;
 const DISPLAY_NUMERIC = 1;
 const DISPLAY_TEXTUAL = 2;
 const TYPE_SINGLE = 1;
@@ -81,8 +71,6 @@ const getTargetValue = (value: VariableTargetType) => {
 
 const normalizeDisplayType = (value: number) => (value === DISPLAY_TEXTUAL ? DISPLAY_TEXTUAL : DISPLAY_NUMERIC);
 const normalizePlaceholderType = (value: number) => (value === TYPE_MULTIPLE ? TYPE_MULTIPLE : TYPE_SINGLE);
-const normalizeUserSource = (value: number) => (value === 0 || value === 200 || value === 201 || value === CLICKED_USER_SOURCE_VALUE ? value : 0);
-const normalizeFurniSource = (value: number) => (value === 0 || value === 100 || value === 200 || value === 201 ? value : 0);
 const normalizePlaceholderName = (value: string) => {
     let normalizedValue = (value ?? '').trim().replace(/[\t\r\n]/g, '');
 
@@ -99,15 +87,13 @@ const normalizeDelimiter = (value: string) => {
     return value.replace(/[\t\r\n]/g, '').slice(0, MAX_DELIMITER_LENGTH);
 };
 
+/** The text is "placeholder name TAB delimiter"; the variable itself travels in variableIds. */
 const splitStringData = (value: string) => {
-    if (!value?.length) return ['', DEFAULT_PLACEHOLDER_NAME, DEFAULT_DELIMITER];
+    if (!value?.length) return [DEFAULT_PLACEHOLDER_NAME, DEFAULT_DELIMITER];
 
     const parts = value.split('\t');
 
-    if (parts.length === 1) return [parts[0], DEFAULT_PLACEHOLDER_NAME, DEFAULT_DELIMITER];
-    if (parts.length === 2) return [parts[0], parts[1], DEFAULT_DELIMITER];
-
-    return [parts[0], parts[1], parts[2]];
+    return [parts[0], parts.length > 1 ? parts[1] : DEFAULT_DELIMITER];
 };
 
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -131,12 +117,18 @@ const getTargetDefinitions = (
     }
 };
 
-const serializeStringData = (variableToken: string, placeholderName: string, delimiter: string) =>
-    `${variableToken || ''}\t${normalizePlaceholderName(placeholderName)}\t${normalizeDelimiter(delimiter)}`;
+const serializeStringData = (placeholderName: string, delimiter: string) => `${normalizePlaceholderName(placeholderName)}\t${normalizeDelimiter(delimiter)}`;
 
 export const WiredExtraTextOutputVariableView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null } = useWired();
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
+    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null, setVariableIds = null, setUserSources = null, setFurniSources = null } = useWired();
+    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
+    // The card's own groups and defaults decide which sources are valid.
+    const userAllowed = trigger?.inputSources?.usersAllowed[0];
+    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const furniAllowed = trigger?.inputSources?.furniAllowed[0];
+    const furniDefault = trigger?.inputSources?.furniDefaults[0] ?? 0;
+    const normalizeUserSource = (value: number) => normalizeNativeSource(value, userAllowed, userDefault);
+    const normalizeFurniSource = (value: number) => normalizeNativeSource(value, furniAllowed, furniDefault);
     const [targetType, setTargetType] = useState<VariableTargetType>('user');
     const [variableToken, setVariableToken] = useState('');
     const [displayType, setDisplayType] = useState(DISPLAY_NUMERIC);
@@ -161,11 +153,11 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
     }, [targetType, variableEntries, variableToken]);
 
     const selectedCustomDefinition = useMemo(() => {
-        if (!isCustomVariableToken(variableToken)) return null;
+        const variableId = getNativeVariableId(variableToken);
 
-        const itemId = getCustomVariableItemId(variableToken);
+        if (!variableId) return null;
 
-        return targetDefinitions.find((definition) => definition.itemId === itemId) ?? null;
+        return targetDefinitions.find((definition) => definition.variableId === variableId) ?? null;
     }, [targetDefinitions, variableToken]);
 
     const canUseTextDisplay = !!selectedCustomDefinition?.isTextConnected;
@@ -173,18 +165,19 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const [nextVariableToken, nextPlaceholderName, nextDelimiter] = splitStringData(trigger.stringData);
+        const [nextPlaceholderName, nextDelimiter] = splitStringData(trigger.stringData);
 
-        setTargetType(normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER));
-        setVariableToken(normalizeVariableTokenFromWire(nextVariableToken));
-        setDisplayType(normalizeDisplayType(trigger.intData.length > 1 ? trigger.intData[1] : DISPLAY_NUMERIC));
-        setPlaceholderType(normalizePlaceholderType(trigger.intData.length > 2 ? trigger.intData[2] : TYPE_SINGLE));
-        setUserSource(normalizeUserSource(trigger.intData.length > 3 ? trigger.intData[3] : 0));
-        setFurniSource(normalizeFurniSource(trigger.intData.length > 4 ? trigger.intData[4] : 0));
+        // owned: [placeholder (1 multiple), target, display (1 textual)].
+        setPlaceholderType(trigger.intData.length > 0 && trigger.intData[0] === 1 ? TYPE_MULTIPLE : TYPE_SINGLE);
+        setTargetType(normalizeTargetType(trigger.intData.length > 1 ? trigger.intData[1] : TARGET_USER));
+        setVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
+        setDisplayType(trigger.intData.length > 2 && trigger.intData[2] === 1 ? DISPLAY_TEXTUAL : DISPLAY_NUMERIC);
+        setUserSource(normalizeNativeSource(trigger.userSources.length > 0 ? trigger.userSources[0] : userDefault, userAllowed, userDefault));
+        setFurniSource(normalizeNativeSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : furniDefault, furniAllowed, furniDefault));
         setPlaceholderName(normalizePlaceholderName(nextPlaceholderName));
         setDelimiter(normalizeDelimiter(nextDelimiter));
         setFurniIds([...(trigger.selectedItems ?? [])]);
-    }, [setFurniIds, trigger]);
+    }, [furniAllowed, furniDefault, setFurniIds, trigger, userAllowed, userDefault]);
 
     useEffect(() => {
         if (canUseTextDisplay || displayType !== DISPLAY_TEXTUAL) return;
@@ -202,13 +195,14 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
 
     const save = () => {
         setIntParams([
+            normalizePlaceholderType(placeholderType) === TYPE_MULTIPLE ? 1 : 0,
             getTargetValue(targetType),
-            canUseTextDisplay ? normalizeDisplayType(displayType) : DISPLAY_NUMERIC,
-            normalizePlaceholderType(placeholderType),
-            normalizeUserSource(userSource),
-            normalizeFurniSource(furniSource)
+            canUseTextDisplay && displayType === DISPLAY_TEXTUAL ? 1 : 0
         ]);
-        setStringParam(serializeStringData(variableToken, placeholderName, delimiter));
+        setStringParam(serializeStringData(placeholderName, delimiter));
+        setVariableIds([variableSlotOf(variableToken)]);
+        setUserSources([normalizeUserSource(userSource)]);
+        setFurniSources([normalizeFurniSource(furniSource)]);
         setFurniIds(targetType === 'furni' && furniSource === 100 ? [...furniIds] : []);
     };
 

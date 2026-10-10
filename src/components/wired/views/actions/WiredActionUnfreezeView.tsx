@@ -6,12 +6,15 @@ import { WiredActionBaseView } from './WiredActionBaseView';
 
 export const WiredActionUnfreezeView: FC<{}> = () => {
     const [userSource, setUserSource] = useState(0);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setUserSources = null } = useWired();
 
-    const save = () => setIntParams([userSource]);
+    const save = () => {
+        setIntParams([]);
+        setUserSources([userSource]);
+    };
 
     useEffect(() => {
-        setUserSource(trigger?.intData?.length > 0 ? trigger.intData[0] : 0);
+        setUserSource(trigger?.userSources?.[0] ?? 0);
     }, [trigger]);
 
     return (

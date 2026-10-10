@@ -3,8 +3,8 @@ import { localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
-import { normalizeRewardTrackId, REWARD_TRACK_ID_MAX_LENGTH } from './WiredActionProgressRewardTrackView';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { normalizeRewardTrackId, REWARD_TRACK_ID_MAX_LENGTH } from './WiredActionProgressRewardTrackView';
 
 /**
  * Habbo's reset-reward-track action (`wf_act_reset_reward_track`): puts the chosen users' tasks of a
@@ -12,7 +12,7 @@ import { WiredActionBaseView } from './WiredActionBaseView';
  * param the track id, int params `[user source]`.
  */
 export const WiredActionResetRewardTrackView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, setUserSources = null } = useWired();
     const [trackId, setTrackId] = useState('');
     const [userSource, setUserSource] = useState(0);
 
@@ -20,12 +20,13 @@ export const WiredActionResetRewardTrackView: FC<{}> = () => {
         if (!trigger) return;
 
         setTrackId(normalizeRewardTrackId(trigger.stringData ?? ''));
-        setUserSource(trigger.intData?.[0] ?? 0);
+        setUserSource(trigger.userSources?.[0] ?? 0);
     }, [trigger]);
 
     const save = () => {
         setStringParam(trackId);
-        setIntParams([userSource]);
+        setIntParams([]);
+        setUserSources([userSource]);
     };
 
     return (

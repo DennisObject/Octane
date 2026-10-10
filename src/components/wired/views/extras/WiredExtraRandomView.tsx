@@ -7,7 +7,7 @@ import { WiredExtraBaseView } from './WiredExtraBaseView';
 
 const MIN_PICK_AMOUNT = 1;
 const MIN_SKIP_EXECUTIONS = 0;
-const MAX_RANDOM_VALUE = 1000;
+const MAX_RANDOM_VALUE = 100;
 
 const normalizePickAmount = (value: number) => {
     if (isNaN(value)) return MIN_PICK_AMOUNT;
@@ -29,12 +29,13 @@ export const WiredExtraRandomView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        setPickAmount(normalizePickAmount(trigger.intData.length > 0 ? trigger.intData[0] : MIN_PICK_AMOUNT));
-        setSkipExecutions(normalizeSkipExecutions(trigger.intData.length > 1 ? trigger.intData[1] : MIN_SKIP_EXECUTIONS));
+        // owned: [skipped executions, pick amount].
+        setSkipExecutions(normalizeSkipExecutions(trigger.intData.length > 0 ? trigger.intData[0] : MIN_SKIP_EXECUTIONS));
+        setPickAmount(normalizePickAmount(trigger.intData.length > 1 ? trigger.intData[1] : MIN_PICK_AMOUNT));
     }, [trigger]);
 
     const save = () => {
-        setIntParams([normalizePickAmount(pickAmount), normalizeSkipExecutions(skipExecutions)]);
+        setIntParams([normalizeSkipExecutions(skipExecutions), normalizePickAmount(pickAmount)]);
         setStringParam('');
     };
 

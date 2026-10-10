@@ -1,39 +1,54 @@
 import { FC, useEffect, useState } from 'react';
-import { WiredFurniType } from '../../../../api';
+import { localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { OctaneInput } from '../../../../layout';
+import { normalizeWiredVariableName, handleWiredVariableNameKeyDown, WIRED_VARIABLE_NAME_MAX } from '../../../../api';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 
-// Quest Chain box: place it on the SAME stack as a "current step" counter variable. Config = total steps.
-// Designers bump the step counter as each sub-quest completes. Exposes derived read-only vars:
-// <counter>.current_step / .total_steps / .is_complete / .percent.
+/**
+ * The quest chain box is itself a read-only user variable: owned [], text "variableName TAB chainName", no variable ids.
+ * Progress, target and completion are read through the variable it creates, not from the editor.
+ */
 export const WiredExtraQuestChainView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
-    const [totalSteps, setTotalSteps] = useState(0);
+    const { trigger = null, setIntParams = null, setStringParam = null, setVariableIds = null } = useWired();
+    const [variableName, setVariableName] = useState('');
+    const [chainName, setChainName] = useState('');
 
     useEffect(() => {
         if (!trigger) return;
-        setTotalSteps(trigger.intData.length > 0 ? Math.max(0, trigger.intData[0]) : 0);
+
+        const [nextVariableName = '', nextChainName = ''] = (trigger.stringData ?? '').split('\t');
+
+        setVariableName(normalizeWiredVariableName(nextVariableName));
+        setChainName(nextChainName);
     }, [trigger]);
 
     const save = () => {
-        setIntParams([Math.max(0, totalSteps)]);
-        setStringParam('');
+        setIntParams([]);
+        setVariableIds([]);
+        setStringParam(`${normalizeWiredVariableName(variableName)}\t${chainName.replace(/[\t\r\n]/g, '')}`);
     };
 
+    const validate = () => !!normalizeWiredVariableName(variableName).length && !!chainName.trim().length;
+
     return (
-        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} cardStyle={{ width: 380 }}>
+        <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} validate={validate} cardStyle={{ width: 380 }}>
             <div className="flex flex-col gap-2">
-                <Text bold>Place this on the same tile as a "current step" counter variable.</Text>
-                <Text bold>Total steps</Text>
-                <input
-                    type="number"
-                    min={0}
-                    className="form-control form-control-sm"
-                    value={totalSteps}
-                    onChange={(event) => setTotalSteps(Math.max(0, parseInt(event.target.value, 10) || 0))}
-                />
-                <Text small>Exposes: current_step, total_steps, is_complete, percent. Bump the step counter when each sub-quest completes.</Text>
+                <div className="flex flex-col gap-1">
+                    <Text>{localizeWithFallback('wiredfurni.params.variables.quest_chain_variable_name', 'Variable name')}</Text>
+                    <OctaneInput
+                        maxLength={WIRED_VARIABLE_NAME_MAX}
+                        type="text"
+                        value={variableName}
+                        onChange={(event) => setVariableName(normalizeWiredVariableName(event.target.value))}
+                        onKeyDown={(event) => handleWiredVariableNameKeyDown(event, setVariableName)}
+                    />
+                </div>
+                <div className="flex flex-col gap-1">
+                    <Text>{localizeWithFallback('wiredfurni.params.variables.quest_chain_name', 'Chain name')}</Text>
+                    <OctaneInput type="text" value={chainName} onChange={(event) => setChainName(event.target.value.replace(/[\t\r\n]/g, ''))} />
+                </div>
             </div>
         </WiredExtraBaseView>
     );

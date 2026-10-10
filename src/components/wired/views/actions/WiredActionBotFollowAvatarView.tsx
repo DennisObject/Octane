@@ -3,60 +3,60 @@ import { LocalizeText, WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';
 import { WiredRadioGroup } from '../WiredOptions';
 import { WiredSection } from '../WiredSection';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredTextInput } from '../WiredTextInput';
-import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
-
-const normalizeBotSource = (value: number, hasBotName = false) => (BOT_SOURCES.some((option) => option.value === value) ? value : hasBotName ? 100 : 0);
+import { normalizeBotSource, WIRED_BOT_NAMED_SOURCE } from '../../../../api';
 
 export const WiredActionBotFollowAvatarView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
-    const [followMode, setFollowMode] = useState(-1);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
-    const [botSource, setBotSource] = useState<number>(100);
-    const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return 0;
-    });
+    const [followMode, setFollowMode] = useState(1);
+    const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
+    const [userSource, setUserSource] = useState<number>(0);
+    const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
+    const userAllowed = trigger?.inputSources?.usersAllowed[0];
+    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const botAllowed = trigger?.inputSources?.usersAllowed[1];
+    const botDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
 
     const save = () => {
-        setStringParam(botSource === 100 ? botName : '');
-        setIntParams([followMode, userSource, botSource]);
+        setStringParam(botSource === WIRED_BOT_NAMED_SOURCE ? botName : '');
+        // owned: [follow mode]; users: [followed user, bot].
+        setIntParams([followMode]);
+        setUserSources([userSource, botSource]);
     };
 
     useEffect(() => {
+        if (!trigger) return;
+
         const nextBotName = trigger.stringData || '';
         setBotName(nextBotName);
-        setFollowMode(trigger.intData.length > 0 ? trigger.intData[0] : 0);
-        setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
-        setBotSource(
-            trigger.intData.length > 2 ? normalizeBotSource(trigger.intData[2], nextBotName.length > 0) : normalizeBotSource(-1, nextBotName.length > 0)
-        );
-    }, [trigger]);
+        setFollowMode(trigger.intData.length > 0 ? trigger.intData[0] : 1);
+        setUserSource(userAllowed?.includes(trigger.userSources[0]) ? trigger.userSources[0] : userDefault);
+        setBotSource(normalizeBotSource(trigger.userSources[1] ?? botDefault, botAllowed, botDefault, nextBotName.length > 0));
+    }, [botAllowed, botDefault, trigger, userAllowed, userDefault]);
 
-    // class_4276: one "Bot Name" section holding the name field and the start/stop radios.
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
             nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
-            // class_3976: user selection 0 is the bot, 1 the user.
             footer={
                 <>
+                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
                     <WiredSourcesSelector
                         showUsers={true}
+                        userSlot={1}
                         userSource={botSource}
-                        userSources={BOT_SOURCES}
                         usersTitle="wiredfurni.params.sources.users.title.bots"
-                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
+                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botAllowed, botDefault, botName.length > 0))}
                     />
-                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
                 </>
             }
         >
             <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
-                {botSource === 100 && <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />}
+                {botSource === WIRED_BOT_NAMED_SOURCE && <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />}
                 <WiredRadioGroup
                     name="followMode"
                     options={[

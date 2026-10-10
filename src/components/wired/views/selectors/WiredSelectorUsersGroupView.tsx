@@ -11,19 +11,16 @@ export const WiredSelectorUsersGroupView: FC<{}> = () => {
     const { data: groups = [] } = useUserGroups();
     const [groupType, setGroupType] = useState(GROUP_CURRENT_ROOM);
     const [selectedGroupId, setSelectedGroupId] = useState(0);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
 
     useEffect(() => {
         if (!trigger) return;
 
-        const params = trigger.intData;
+        // The text is the group id; empty is the room's own group.
+        const groupText = (trigger.stringData ?? '').trim();
 
-        setGroupType(params.length > 0 ? params[0] : GROUP_CURRENT_ROOM);
-        setSelectedGroupId(params.length > 1 ? params[1] : 0);
-        setFilterExisting(params.length > 2 ? params[2] === 1 : false);
-        setInvert(params.length > 3 ? params[3] === 1 : false);
+        setGroupType(groupText.length ? GROUP_SELECTED : GROUP_CURRENT_ROOM);
+        setSelectedGroupId(groupText.length ? Number(groupText) : 0);
     }, [trigger]);
 
     useEffect(() => {
@@ -34,7 +31,11 @@ export const WiredSelectorUsersGroupView: FC<{}> = () => {
 
     const selectedGroupOptions = useMemo(() => groups.map((group) => ({ value: group.groupId, label: group.groupName })), [groups]);
 
-    const save = () => setIntParams([groupType, selectedGroupId, filterExisting ? 1 : 0, invert ? 1 : 0]);
+    // Filter and inverse are category fields of the selector save; there are no owned ints.
+    const save = () => {
+        setIntParams([]);
+        setStringParam(groupType === GROUP_SELECTED ? String(selectedGroupId) : '');
+    };
 
     return (
         <WiredSelectorBaseView hasSpecialInput={true} requiresFurni={0} save={save} hideDelay={true} cardStyle={{ width: 400 }}>
@@ -78,14 +79,14 @@ export const WiredSelectorUsersGroupView: FC<{}> = () => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>

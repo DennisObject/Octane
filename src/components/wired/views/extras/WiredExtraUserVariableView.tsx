@@ -49,6 +49,8 @@ interface WiredExtraVariableViewProps
     availabilityRoomText: string;
     availabilityRadioName: string;
     showSharedAvailability?: boolean;
+    /** The native owned order: user cards carry [availability, has value], furni cards [has value, availability]. */
+    availabilityFirst?: boolean;
 }
 
 export const WiredExtraVariableView: FC<WiredExtraVariableViewProps> = props =>
@@ -78,14 +80,20 @@ export const WiredExtraVariableView: FC<WiredExtraVariableViewProps> = props =>
         if(!trigger) return;
 
         setVariableName(normalizeVariableName(trigger.stringData));
-        setHasValue((trigger.intData.length > 0) ? (trigger.intData[0] === 1) : false);
-        setAvailability(normalizeAvailability((trigger.intData.length > 1) ? trigger.intData[1] : props.availabilityRoomValue));
-    }, [ normalizeAvailability, props.availabilityRoomValue, trigger ]);
+        const availabilityIndex = props.availabilityFirst ? 0 : 1;
+        const hasValueIndex = props.availabilityFirst ? 1 : 0;
+
+        setHasValue((trigger.intData.length > hasValueIndex) ? (trigger.intData[hasValueIndex] === 1) : false);
+        setAvailability(normalizeAvailability((trigger.intData.length > availabilityIndex) ? trigger.intData[availabilityIndex] : props.availabilityRoomValue));
+    }, [ normalizeAvailability, props.availabilityFirst, props.availabilityRoomValue, trigger ]);
 
     const save = () =>
     {
         setStringParam(normalizeVariableName(variableName));
-        setIntParams([ hasValue ? 1 : 0, normalizeAvailability(availability) ]);
+        const ownedHasValue = hasValue ? 1 : 0;
+        const ownedAvailability = normalizeAvailability(availability);
+
+        setIntParams(props.availabilityFirst ? [ ownedAvailability, ownedHasValue ] : [ ownedHasValue, ownedAvailability ]);
     };
 
     return (
@@ -127,7 +135,7 @@ export const WiredExtraVariableView: FC<WiredExtraVariableViewProps> = props =>
 
 export const WiredExtraUserVariableView: FC<{}> = () =>
 {
-    return <WiredExtraVariableView availabilityRadioName="wiredUserVariableAvailability" availabilityRoomText={ LocalizeText('wiredfurni.params.variables.availability.0') } availabilityRoomValue={ AVAILABILITY_ROOM } showSharedAvailability={ true } />;
+    return <WiredExtraVariableView availabilityRadioName="wiredUserVariableAvailability" availabilityRoomText={ LocalizeText('wiredfurni.params.variables.availability.0') } availabilityRoomValue={ AVAILABILITY_ROOM } showSharedAvailability={ true } availabilityFirst={ true } />;
 };
 
 

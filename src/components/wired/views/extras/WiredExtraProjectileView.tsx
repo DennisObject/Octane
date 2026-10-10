@@ -2,9 +2,7 @@ import { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import {
     clampProjectileParam,
-    decodeProjectileTokens,
     defaultProjectileParams,
-    encodeProjectileTokens,
     isProjectileVariableEnabled,
     LocalizeText,
     localizeWithFallback,
@@ -36,23 +34,21 @@ import {
     PROJECTILE_PARAM_TIME_IS_VARIABLE,
     PROJECTILE_PARAM_TIME_PER_TILE,
     PROJECTILE_PARAM_TIME_TARGET,
+    PROJECTILE_PARAM_COUNT,
     PROJECTILE_PARAM_TIME_USER_SOURCE,
     toggleProjectileVariable,
     WiredFurniType
 } from '../../../../api';
 import { Text } from '../../../../common';
 import { WiredLegacySlider as Slider } from '../WiredSlider';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
 import { WiredFurniSelectorView } from '../WiredFurniSelectorView';
 import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    normalizeVariableTokenFromWire,
-    WiredVariablePickerTarget
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries, WiredVariablePickerTarget } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
+import { WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 import { WiredProjectileDirectionGrid } from './WiredProjectileDirectionGrid';
 
@@ -187,7 +183,7 @@ interface ValueOrVariableProps {
 /** Habbo's "set value / from variable" pair, as the time per tile and the distance use it. */
 const ValueOrVariable: FC<ValueOrVariableProps> = (props) => {
     const { name, label, value, fromVariable, target, token, userSource, furniSource, userSources } = props;
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
+    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     const targetKey = targetKeyOf(target);
 
     const entries = useMemo(() => {
@@ -257,7 +253,7 @@ const ValueOrVariable: FC<ValueOrVariableProps> = (props) => {
 };
 
 export const WiredExtraProjectileView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, setVariableIds = null, setUserSources = null, setFurniSources = null } = useWired();
     const [params, setParams] = useState<number[]>(defaultProjectileParams);
     const [timeToken, setTimeToken] = useState('');
     const [distanceToken, setDistanceToken] = useState('');
@@ -267,11 +263,19 @@ export const WiredExtraProjectileView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const [time, distance] = decodeProjectileTokens(trigger.stringData);
+        // variableIds: [0] the time variable, [1] the distance variable; an empty entry is "not from a variable".
+        // The first 19 ints are the card's params; the five sources are the U and F tails (time user U0, shooter U1,
+        // distance user U2; time furni F1, distance furni F2), read back into the same slots the form edits.
+        const nextParams = normalizeProjectileParams(trigger.intData);
 
-        setParams(normalizeProjectileParams(trigger.intData));
-        setTimeToken(normalizeVariableTokenFromWire(time));
-        setDistanceToken(normalizeVariableTokenFromWire(distance));
+        nextParams[PROJECTILE_PARAM_TIME_USER_SOURCE] = trigger.userSources[0] ?? 0;
+        nextParams[PROJECTILE_PARAM_SHOOTER_SOURCE] = trigger.userSources[1] ?? 0;
+        nextParams[PROJECTILE_PARAM_DISTANCE_USER_SOURCE] = trigger.userSources[2] ?? 0;
+        nextParams[PROJECTILE_PARAM_TIME_FURNI_SOURCE] = trigger.furniSources[1] ?? 100;
+        nextParams[PROJECTILE_PARAM_DISTANCE_FURNI_SOURCE] = trigger.furniSources[2] ?? 0;
+        setParams(nextParams);
+        setTimeToken(tokenOfVariableSlot(trigger.variableIds[0]));
+        setDistanceToken(tokenOfVariableSlot(trigger.variableIds[1]));
     }, [trigger]);
 
     const setParam = (index: number, value: number) =>
@@ -289,8 +293,11 @@ export const WiredExtraProjectileView: FC<{}> = () => {
     const distanceFromVariable = params[PROJECTILE_PARAM_DISTANCE_IS_VARIABLE] === 1;
 
     const save = () => {
-        setIntParams(normalizeProjectileParams(params));
-        setStringParam(encodeProjectileTokens(timeFromVariable ? timeToken : '', distanceFromVariable ? distanceToken : ''));
+        setIntParams(normalizeProjectileParams(params).slice(0, PROJECTILE_PARAM_COUNT));
+        setUserSources([params[PROJECTILE_PARAM_TIME_USER_SOURCE], params[PROJECTILE_PARAM_SHOOTER_SOURCE], params[PROJECTILE_PARAM_DISTANCE_USER_SOURCE]]);
+        setFurniSources([100, params[PROJECTILE_PARAM_TIME_FURNI_SOURCE], params[PROJECTILE_PARAM_DISTANCE_FURNI_SOURCE]]);
+        setStringParam('');
+        setVariableIds([timeFromVariable ? variableSlotOf(timeToken) : WIRED_VARIABLE_ABSENT, distanceFromVariable ? variableSlotOf(distanceToken) : WIRED_VARIABLE_ABSENT]);
     };
 
     return (

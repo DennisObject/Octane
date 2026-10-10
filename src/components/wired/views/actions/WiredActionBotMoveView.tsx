@@ -2,25 +2,24 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';
 import { WiredSection } from '../WiredSection';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredTextInput } from '../WiredTextInput';
-import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
-
-const normalizeBotSource = (value: number, hasBotName = false) => (BOT_SOURCES.some((option) => option.value === value) ? value : hasBotName ? 100 : 0);
+import { normalizeBotSource, WIRED_BOT_NAMED_SOURCE } from '../../../../api';
 
 export const WiredActionBotMoveView: FC<{}> = (props) => {
     const [botName, setBotName] = useState('');
-    const [botSource, setBotSource] = useState<number>(100);
-    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
-
-    const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length >= 1) return trigger.intData[0];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
-    });
+    const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
+    const [furniSource, setFurniSource] = useState<number>(100);
+    const { trigger = null, setStringParam = null, setIntParams = null, setFurniSources = null, setUserSources = null } = useWired();
+    const botAllowed = trigger?.inputSources?.usersAllowed[0];
+    const botDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
 
     const save = () => {
-        setStringParam(botSource === 100 ? botName : '');
-        setIntParams([furniSource, botSource]);
+        setStringParam(botSource === WIRED_BOT_NAMED_SOURCE ? botName : '');
+        setIntParams([]);
+        setFurniSources([furniSource]);
+        setUserSources([botSource]);
     };
 
     useEffect(() => {
@@ -28,39 +27,29 @@ export const WiredActionBotMoveView: FC<{}> = (props) => {
 
         const nextBotName = trigger.stringData || '';
         setBotName(nextBotName);
-
-        if (trigger.intData.length >= 1) setFurniSource(trigger.intData[0]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-
-        setBotSource(
-            trigger.intData.length >= 2 ? normalizeBotSource(trigger.intData[1], nextBotName.length > 0) : normalizeBotSource(-1, nextBotName.length > 0)
-        );
-    }, [trigger]);
-
-    const onChangeFurniSource = (next: number) => setFurniSource(next);
-
-    const requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_BY_ID;
+        setFurniSource(trigger.furniSources[0] ?? 100);
+        setBotSource(normalizeBotSource(trigger.userSources[0] ?? botDefault, botAllowed, botDefault, nextBotName.length > 0));
+    }, [botAllowed, botDefault, trigger]);
 
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
             nativeLayout={true}
-            requiresFurni={requiresFurni}
+            requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID}
             save={save}
             footer={
                 <>
-                    <WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />
+                    <WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={setFurniSource} />
                     <WiredSourcesSelector
                         showUsers={true}
                         userSource={botSource}
-                        userSources={BOT_SOURCES}
                         usersTitle="wiredfurni.params.sources.users.title.bots"
-                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
+                        onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botAllowed, botDefault, botName.length > 0))}
                     />
                 </>
             }
         >
-            {botSource === 100 && (
+            {botSource === WIRED_BOT_NAMED_SOURCE && (
                 <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
                     <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />
                 </WiredSection>

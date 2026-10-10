@@ -5,44 +5,27 @@ import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_f
 import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_global.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
+import { WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
 import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    normalizeVariableTokenFromWire,
-    WiredVariablePickerTarget
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries, WiredVariablePickerTarget } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 
 /**
  * Habbo's "movement curve" (wf_xtra_mov_curve): how high the furni the stack moves jump, typed or
  * read from a variable. Our easing curves sit under the advanced options.
- * Int params: [curve, intensity, strength, from variable, variable target, user source, furni source];
+ * Owned ints: [from variable, strength, variable target]; the user and furni sources are the U and F tails; the native
+ * curve is always the jump.
  * string param: the variable token.
  */
 
 type VariableTarget = 'user' | 'furni' | 'global' | 'context';
 
-const CURVE_OPTIONS: { value: number; label: string }[] = [
-    { value: 7, label: 'Jump' },
-    { value: 0, label: 'Linear' },
-    { value: 1, label: 'Ease in' },
-    { value: 2, label: 'Ease out' },
-    { value: 3, label: 'Ease in / out' },
-    { value: 4, label: 'Bounce' },
-    { value: 5, label: 'Elastic' },
-    { value: 6, label: 'Drop' }
-];
-
-const CURVE_JUMP = 7;
-const CURVE_MAX = 7;
-const INTENSITY_DEFAULT = 100;
 const STRENGTH_MIN = -1000;
 const STRENGTH_MAX = 1000;
 const STRENGTH_DEFAULT = 80;
@@ -50,10 +33,10 @@ const SOURCE_TRIGGER = 0;
 const SOURCE_SECONDARY_SELECTED = 101;
 
 const TARGETS: Array<{ key: VariableTarget; value: number; icon: string }> = [
-    { key: 'furni', value: 1, icon: furniVariableIcon },
-    { key: 'user', value: 0, icon: userVariableIcon },
-    { key: 'global', value: 3, icon: globalVariableIcon },
-    { key: 'context', value: 2, icon: contextVariableIcon }
+    { key: 'furni', value: 0, icon: furniVariableIcon },
+    { key: 'user', value: 1, icon: userVariableIcon },
+    { key: 'global', value: -10, icon: globalVariableIcon },
+    { key: 'context', value: -20, icon: contextVariableIcon }
 ];
 
 const FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
@@ -73,10 +56,8 @@ const targetOf = (value: number): VariableTarget => TARGETS.find((target) => tar
 const targetValue = (key: VariableTarget) => TARGETS.find((target) => target.key === key)?.value ?? 0;
 
 export const WiredExtraMovementCurveView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null } = useWired();
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
-    const [curveType, setCurveType] = useState(CURVE_JUMP);
-    const [intensity, setIntensity] = useState(INTENSITY_DEFAULT);
+    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null, setUserSources = null, setFurniSources = null, setVariableIds = null } = useWired();
+    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     const [strengthInput, setStrengthInput] = useState(String(STRENGTH_DEFAULT));
     const [fromVariable, setFromVariable] = useState(false);
     const [target, setTarget] = useState<VariableTarget>('user');
@@ -111,14 +92,13 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
 
         const ints = trigger.intData ?? [];
 
-        setCurveType(ints.length > 0 ? clamp(ints[0], 0, CURVE_MAX, CURVE_JUMP) : CURVE_JUMP);
-        setIntensity(ints.length > 1 ? clamp(ints[1], 0, 100, INTENSITY_DEFAULT) : INTENSITY_DEFAULT);
-        setStrengthInput(String(ints.length > 2 ? clamp(ints[2], STRENGTH_MIN, STRENGTH_MAX, STRENGTH_DEFAULT) : STRENGTH_DEFAULT));
-        setFromVariable(ints.length > 3 && ints[3] === 1);
-        setTarget(targetOf(ints.length > 4 ? ints[4] : 0));
-        setUserSource(ints.length > 5 ? ints[5] : SOURCE_TRIGGER);
-        setFurniSource(ints.length > 6 ? ints[6] : SOURCE_TRIGGER);
-        setVariableToken(normalizeVariableTokenFromWire(trigger.stringData ?? ''));
+        // owned: [from variable, strength, target].
+        setFromVariable(ints.length > 0 && ints[0] === 1);
+        setStrengthInput(String(ints.length > 1 ? clamp(ints[1], STRENGTH_MIN, STRENGTH_MAX, STRENGTH_DEFAULT) : STRENGTH_DEFAULT));
+        setTarget(targetOf(ints.length > 2 ? ints[2] : 1));
+        setUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : SOURCE_TRIGGER);
+        setFurniSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : SOURCE_TRIGGER);
+        setVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
     }, [trigger]);
 
     const chooseTarget = (next: VariableTarget) => {
@@ -130,54 +110,23 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
     };
 
     const save = () => {
-        setIntParams([
-            curveType,
-            intensity,
-            clamp(parseInt(strengthInput, 10), STRENGTH_MIN, STRENGTH_MAX, STRENGTH_DEFAULT),
-            fromVariable ? 1 : 0,
-            targetValue(target),
-            userSource,
-            furniSource
-        ]);
-        setStringParam(fromVariable ? variableToken : '');
+        setIntParams([fromVariable ? 1 : 0, clamp(parseInt(strengthInput, 10), STRENGTH_MIN, STRENGTH_MAX, STRENGTH_DEFAULT), targetValue(target)]);
+        setStringParam('');
+        setVariableIds([fromVariable ? variableSlotOf(variableToken) : WIRED_VARIABLE_ABSENT]);
+        setUserSources([userSource]);
+        setFurniSources([furniSource]);
         if (!picksFurni) setFurniIds([]);
     };
 
-    const isJump = curveType === CURVE_JUMP;
-
-    const footer = (
-        <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.movement_curve.style', 'Curve style')}</Text>
-                <select className="form-select form-select-sm" value={curveType} onChange={(event) => setCurveType(clamp(parseInt(event.target.value, 10), 0, CURVE_MAX, CURVE_JUMP))}>
-                    {CURVE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {localizeWithFallback(`wiredfurni.params.movement_curve.style.${option.value}`, option.label)}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            {!isJump && curveType > 0 && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>
-                        {localizeWithFallback('wiredfurni.params.movement_curve.intensity', 'Intensity')} ({intensity}%)
-                    </Text>
-                    <Slider max={100} min={0} step={1} value={intensity} onChange={(value) => setIntensity(clamp(value as number, 0, 100, INTENSITY_DEFAULT))} />
-                </div>
-            )}
-        </div>
-    );
-
     return (
         <WiredExtraBaseView
-            footer={footer}
             hasSpecialInput={true}
             requiresFurni={picksFurni ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
-            validate={() => !(isJump && fromVariable && !variableToken)}
+            validate={() => !(fromVariable && !variableToken)}
         >
             <div className="octane-wired__give-var">
-                <div className={`octane-wired__give-var-section ${isJump ? '' : 'opacity-50 pointer-events-none'}`}>
+                <div className="octane-wired__give-var-section">
                     <div className="octane-wired__give-var-section-title">{localizeWithFallback('wiredfurni.params.movement_curve', 'Movement curve:')}</div>
                     <label className="octane-wired__change-var-radio">
                         <input checked={!fromVariable} type="radio" onChange={() => setFromVariable(false)} />
@@ -224,7 +173,7 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
 
                 <div className="octane-wired__divider" />
 
-                <div className={fromVariable && isJump ? '' : 'opacity-50 pointer-events-none'}>
+                <div className={fromVariable ? '' : 'opacity-50 pointer-events-none'}>
                     <WiredFurniSelectionSourceRow
                         options={sourceOptions}
                         selectionActive={true}

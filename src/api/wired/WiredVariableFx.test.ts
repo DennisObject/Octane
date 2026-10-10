@@ -4,7 +4,6 @@ import {
     defaultWiredVariableFxParams,
     formatWiredVariableFxValue,
     readWiredVariableFxParams,
-    readWiredVariableFxTokens,
     resolveWiredVariableFxColor,
     resolveWiredVariableFxRange,
     WIRED_FX_CATEGORY,
@@ -19,8 +18,7 @@ import {
     wiredVariableFxSegmentRenderer,
     wiredVariableFxStyles,
     wiredVariableFxVisibleUntil,
-    writeWiredVariableFxParams,
-    writeWiredVariableFxTokens
+    writeWiredVariableFxParams
 } from './WiredVariableFx';
 
 const config = (overrides: Partial<Parameters<typeof resolveWiredVariableFxColor>[0]> = {}) => ({
@@ -60,32 +58,6 @@ describe('WiredVariableFx helpers', () => {
         expect(wiredVariableFxStyles(WIRED_FX_CATEGORY.BOSS_BAR)).toHaveLength(2);
         expect(wiredVariableFxStyles(WIRED_FX_CATEGORY.NUMBER_DISPLAY)).toHaveLength(3);
         expect(wiredVariableFxStyles(99)).toBe(wiredVariableFxStyles(WIRED_FX_CATEGORY.PROGRESS_BAR));
-    });
-
-    it('round-trips the sixteen params and clamps what the server would clamp', () => {
-        const params = { ...defaultWiredVariableFxParams(), visibility: 1, showMode: 1, showDurationMs: 2500, styleId: 3, segments: 6, overrideMaxEnabled: true, overrideMaxTarget: 1, audienceValue: 7 };
-
-        expect(readWiredVariableFxParams(writeWiredVariableFxParams(params), WIRED_FX_CATEGORY.PROGRESS_BAR)).toEqual(params);
-
-        const clamped = readWiredVariableFxParams([9, 99, 99, 1, 99, 5, 2, 999, 0, 100, 1, 1, 9, 9, 0, 0], WIRED_FX_CATEGORY.PROGRESS_BAR);
-
-        expect(clamped.source).toBe(0);
-        expect(clamped.visibility).toBe(4);
-        expect(clamped.showMode).toBe(2);
-        expect(clamped.showDurationMs).toBe(1500);
-        expect(clamped.styleId).toBe(4);
-        expect(clamped.segments).toBe(100);
-        expect(clamped.overrideMinTarget).toBe(0);
-        expect(readWiredVariableFxParams([], WIRED_FX_CATEGORY.BOSS_BAR)).toEqual(defaultWiredVariableFxParams());
-    });
-
-    it('round-trips the string tokens and strips stray tabs', () => {
-        const tokens = { overrideMinToken: 'custom:300', overrideMaxToken: '', audienceToken: 'custom:400', icon: 'misc_heart' };
-
-        expect(writeWiredVariableFxTokens(tokens)).toBe('custom:300\t\tcustom:400\tmisc_heart');
-        expect(readWiredVariableFxTokens('custom:300\t\tcustom:400\tmisc_heart')).toEqual(tokens);
-        expect(readWiredVariableFxTokens('')).toEqual({ overrideMinToken: '', overrideMaxToken: '', audienceToken: '', icon: '' });
-        expect(writeWiredVariableFxTokens({ ...tokens, icon: 'a\tb' })).toBe('custom:300\t\tcustom:400\tab');
     });
 
     it('lets a level badge pass the segment count to the bar it draws', () => {

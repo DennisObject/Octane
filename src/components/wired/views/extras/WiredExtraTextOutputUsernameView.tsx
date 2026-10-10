@@ -46,7 +46,7 @@ const splitStringData = (value: string) => {
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export const WiredExtraTextOutputUsernameView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, setUserSources = null } = useWired();
     const [placeholderName, setPlaceholderName] = useState(DEFAULT_PLACEHOLDER_NAME);
     const [placeholderType, setPlaceholderType] = useState(TYPE_SINGLE);
     const [delimiter, setDelimiter] = useState(DEFAULT_DELIMITER);
@@ -60,7 +60,7 @@ export const WiredExtraTextOutputUsernameView: FC<{}> = () => {
         setPlaceholderName(normalizePlaceholderName(nextPlaceholderName));
         setDelimiter(normalizeDelimiter(nextDelimiter));
         setPlaceholderType(normalizePlaceholderType(trigger.intData.length > 0 ? trigger.intData[0] : TYPE_SINGLE));
-        setUserSource(normalizeUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0));
+        setUserSource(normalizeUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : 0));
     }, [trigger]);
 
     const previewToken = useMemo(() => {
@@ -72,7 +72,8 @@ export const WiredExtraTextOutputUsernameView: FC<{}> = () => {
     const previewHtml = useMemo(() => LocalizeText('wiredfurni.params.texts.placeholder_preview', ['placeholder'], [escapeHtml(previewToken)]), [previewToken]);
 
     const save = () => {
-        setIntParams([normalizePlaceholderType(placeholderType), normalizeUserSource(userSource)]);
+        setIntParams([normalizePlaceholderType(placeholderType)]);
+        setUserSources([normalizeUserSource(userSource)]);
         setStringParam(`${normalizePlaceholderName(placeholderName)}\t${normalizeDelimiter(delimiter)}`);
     };
 

@@ -5,18 +5,16 @@ import furniVariableIcon from '../../../../assets/images/wired/var/icon_source_f
 import globalVariableIcon from '../../../../assets/images/wired/var/icon_source_global.png';
 import userVariableIcon from '../../../../assets/images/wired/var/icon_source_user.png';
 import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
-import { useWired, useWiredTools } from '../../../../hooks';
+import { useWired } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
+import { IWiredNativeVariableDefinition, joinWiredLiteral, parseWiredLiteral, splitWiredLiteral, WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
+import { useWiredNativeVariables } from '../../../../hooks';
+import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { CLICKED_USER_SOURCE, FURNI_SOURCES, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
-import {
-    buildWiredVariablePickerEntries,
-    createFallbackVariableEntry,
-    flattenWiredVariablePickerEntries,
-    normalizeVariableTokenFromWire
-} from '../WiredVariablePickerData';
+import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
+import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
 import { WiredActionBaseView } from './WiredActionBaseView';
 import { localizeWiredVariableOperation, WIRED_VARIABLE_OPERATIONS, WIRED_VARIABLE_UNARY_OPERATIONS } from './WiredVariableOperations';
 
@@ -24,18 +22,13 @@ type VariableTargetType = 'user' | 'furni' | 'global' | 'context';
 type ReferenceMode = 'constant' | 'variable';
 type SelectionMode = 'destination' | 'reference';
 
-interface IVariableDefinition {
-    availability: number;
-    hasValue: boolean;
-    isReadOnly?: boolean;
-    itemId: number;
-    name: string;
-}
+type IVariableDefinition = IWiredNativeVariableDefinition;
 
-const TARGET_USER = 0;
-const TARGET_FURNI = 1;
-const TARGET_CONTEXT = 2;
-const TARGET_GLOBAL = 3;
+// Native variable target codes: furni 0, user 1, room -10, context -20.
+const TARGET_USER = 1;
+const TARGET_FURNI = 0;
+const TARGET_CONTEXT = -20;
+const TARGET_GLOBAL = -10;
 const REFERENCE_CONSTANT = 0;
 const REFERENCE_VARIABLE = 1;
 const SOURCE_TRIGGER = 0;
@@ -61,25 +54,6 @@ const SECONDARY_FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
 
 const GLOBAL_SOURCE_OPTIONS: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: 'wiredfurni.params.sources.global' }];
 const CONTEXT_SOURCE_OPTIONS: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: 'wiredfurni.params.sources.context.current' }];
-
-const parseIds = (value: string): number[] => {
-    if (!value?.length) return [];
-
-    const ids = new Set<number>();
-
-    for (const part of value.split(/[;,\t]/)) {
-        const parsedValue = parseInt(part.trim(), 10);
-
-        if (!Number.isNaN(parsedValue) && parsedValue > 0) ids.add(parsedValue);
-    }
-
-    return [...ids];
-};
-
-const serializeIds = (ids: number[]) => (ids?.length ? ids.filter((id) => id > 0).join(';') : '');
-const parseStringData = (value: string) => (value?.length ? value.split('\t', -1) : []);
-const serializeStringData = (destinationVariableToken: string, referenceVariableToken: string, referenceFurniIds: number[]) =>
-    `${destinationVariableToken || ''}\t${referenceVariableToken || ''}\t${serializeIds(referenceFurniIds)}`;
 
 const normalizeTargetType = (value: number): VariableTargetType => {
     switch (value) {
@@ -150,9 +124,18 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
         setAllowsFurni = null,
         setFurniIds = null,
         setIntParams = null,
-        setStringParam = null
+        setStringParam = null,
+        setVariableIds = null,
+        setUserSources = null,
+        setFurniSources = null,
+        setSecondaryFurniIds = null
     } = useWired();
-    const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredTools();
+    const {
+        userVariableDefinitions = [],
+        furniVariableDefinitions = [],
+        roomVariableDefinitions = [],
+        contextVariableDefinitions = []
+    } = useWiredNativeVariables();
     const [destinationTargetType, setDestinationTargetType] = useState<VariableTargetType>('user');
     const [destinationVariableToken, setDestinationVariableToken] = useState('');
     const [operation, setOperation] = useState(0);
@@ -274,23 +257,28 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        const stringParts = parseStringData(trigger.stringData);
+        // owned: [destination target, operation, reference mode, constant, reference target];
+        // variableIds: [destination, reference]; users and furni: [destination, reference] each; secondary picks: the reference's furni.
         const nextDestinationTargetType = normalizeTargetType(trigger.intData.length > 0 ? trigger.intData[0] : TARGET_USER);
-        const nextReferenceTargetType = normalizeTargetType(trigger.intData.length > 4 ? trigger.intData[4] : TARGET_USER);
+        const nextReferenceTargetType = normalizeTargetType(trigger.intData.length > 5 ? trigger.intData[5] : TARGET_USER);
         const nextDestinationFurniIds = [...(trigger.selectedItems ?? [])];
-        const nextReferenceFurniIds = parseIds(stringParts.length > 2 ? stringParts[2] : '');
+        const nextReferenceFurniIds = [...(trigger.secondarySelectedItems ?? [])];
 
         setDestinationTargetType(nextDestinationTargetType);
-        setDestinationVariableToken(normalizeVariableTokenFromWire(stringParts.length > 0 ? stringParts[0] : ''));
+        setDestinationVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
         setOperation(trigger.intData.length > 1 ? trigger.intData[1] : 0);
         setReferenceMode((trigger.intData.length > 2 ? trigger.intData[2] : REFERENCE_CONSTANT) === REFERENCE_VARIABLE ? 'variable' : 'constant');
-        setReferenceConstantValueInput((trigger.intData.length > 3 ? trigger.intData[3] : 0).toString());
+        setReferenceConstantValueInput(trigger.intData.length > 4 ? joinWiredLiteral(trigger.intData[3], trigger.intData[4]) : '0');
         setReferenceTargetType(nextReferenceTargetType);
-        setReferenceVariableToken(normalizeVariableTokenFromWire(stringParts.length > 1 ? stringParts[1] : ''));
-        setDestinationUserSource(trigger.intData.length > 5 ? trigger.intData[5] : SOURCE_TRIGGER);
-        setDestinationFurniSource(trigger.intData.length > 6 ? trigger.intData[6] : nextDestinationFurniIds.length ? SOURCE_SELECTED : SOURCE_TRIGGER);
-        setReferenceUserSource(trigger.intData.length > 7 ? trigger.intData[7] : SOURCE_TRIGGER);
-        setReferenceFurniSource(trigger.intData.length > 8 ? trigger.intData[8] : nextReferenceFurniIds.length ? SOURCE_SECONDARY_SELECTED : SOURCE_TRIGGER);
+        setReferenceVariableToken(tokenOfVariableSlot(trigger.variableIds[1]));
+        setDestinationUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : SOURCE_TRIGGER);
+        setReferenceUserSource(trigger.userSources.length > 1 ? trigger.userSources[1] : SOURCE_TRIGGER);
+        setDestinationFurniSource(
+            trigger.furniSources.length > 0 ? trigger.furniSources[0] : nextDestinationFurniIds.length ? SOURCE_SELECTED : SOURCE_TRIGGER
+        );
+        setReferenceFurniSource(
+            trigger.furniSources.length > 1 ? trigger.furniSources[1] : nextReferenceFurniIds.length ? SOURCE_SECONDARY_SELECTED : SOURCE_TRIGGER
+        );
         setDestinationFurniIds(nextDestinationFurniIds);
         setReferenceFurniIds(nextReferenceFurniIds);
         setSelectionMode('destination');
@@ -333,28 +321,27 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
     const save = () => {
         const nextDestinationFurniIds = selectionMode === 'destination' ? [...furniIds] : [...destinationFurniIds];
         const nextReferenceFurniIds = selectionMode === 'reference' ? [...furniIds] : [...referenceFurniIds];
-        const parsedReferenceConstantValue = parseInt(referenceConstantValueInput.trim(), 10);
+        const constantValue = parseWiredLiteral(referenceConstantValueInput.trim());
 
         setDestinationFurniIds(nextDestinationFurniIds);
         setReferenceFurniIds(nextReferenceFurniIds);
-        setStringParam(serializeStringData(destinationVariableToken, referenceMode === 'variable' ? referenceVariableToken : '', nextReferenceFurniIds));
-        setIntParams([
-            getTargetValue(destinationTargetType),
-            operation,
-            referenceMode === 'variable' ? REFERENCE_VARIABLE : REFERENCE_CONSTANT,
-            Number.isFinite(parsedReferenceConstantValue) ? parsedReferenceConstantValue : 0,
-            getTargetValue(referenceTargetType),
-            destinationUserSource,
-            destinationFurniSource,
-            referenceUserSource,
-            referenceFurniSource
-        ]);
+
+        setStringParam('');
+        // owned: [destination target, operation, reference option (1 variable), value high, value low, reference target].
+        const [high, low] = splitWiredLiteral(constantValue ?? 0n);
+
+        setIntParams([getTargetValue(destinationTargetType), operation, referenceMode === 'variable' ? REFERENCE_VARIABLE : REFERENCE_CONSTANT, high, low, getTargetValue(referenceTargetType)]);
+        setVariableIds([variableSlotOf(destinationVariableToken), referenceMode === 'variable' ? variableSlotOf(referenceVariableToken) : WIRED_VARIABLE_ABSENT]);
+        setUserSources([destinationUserSource, referenceUserSource]);
+        setFurniSources([destinationFurniSource, referenceFurniSource]);
+        setSecondaryFurniIds(referenceMode === 'variable' && referenceTargetType === 'furni' ? [...nextReferenceFurniIds] : []);
         setFurniIds(isFurniTarget(destinationTargetType) && destinationFurniSource === SOURCE_SELECTED ? [...nextDestinationFurniIds] : []);
     };
 
     const validate = () => {
         if (!destinationVariableToken) return false;
         if (referenceMode === 'variable' && !referenceVariableToken) return false;
+        if (referenceMode === 'constant' && parseWiredLiteral(referenceConstantValueInput.trim()) === null) return false;
 
         return true;
     };
@@ -436,7 +423,8 @@ export const WiredActionChangeVariableValueView: FC<{}> = () => {
                         <OctaneInput
                             className="octane-wired__give-var-number"
                             disabled={isUnaryOperation}
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             value={referenceConstantValueInput}
                             onChange={(event) => setReferenceConstantValueInput(event.target.value)}
                         />

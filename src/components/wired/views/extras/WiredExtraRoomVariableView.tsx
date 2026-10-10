@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
@@ -44,9 +44,6 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
     const [variableName, setVariableName] = useState('');
     const [availability, setAvailability] = useState(AVAILABILITY_ROOM_ACTIVE);
-    const [currentValue, setCurrentValue] = useState(0);
-
-    const normalizedCurrentValue = useMemo(() => (Number.isFinite(currentValue) ? currentValue : 0), [currentValue]);
 
     useEffect(() => {
         if (!trigger) return;
@@ -55,12 +52,12 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
         const nextAvailability = trigger.intData.length > 0 ? trigger.intData[0] : AVAILABILITY_ROOM_ACTIVE;
 
         setAvailability(nextAvailability === AVAILABILITY_PERMANENT || nextAvailability === AVAILABILITY_SHARED ? nextAvailability : AVAILABILITY_ROOM_ACTIVE);
-        setCurrentValue(trigger.intData.length > 1 ? trigger.intData[1] : 0);
     }, [trigger]);
 
     const save = () => {
         setStringParam(normalizeVariableName(variableName));
-        setIntParams([availability, normalizedCurrentValue]);
+        // owned: [availability]; the room value lives in the variable store, not in the definition.
+        setIntParams([availability]);
     };
 
     return (
@@ -111,10 +108,6 @@ export const WiredExtraRoomVariableView: FC<{}> = () => {
                     </label>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                    <Text>{LocalizeText('wiredfurni.params.variables.inspection')}</Text>
-                    <Text>{LocalizeText('wiredfurni.params.variables.inspection.current_value', ['value'], [normalizedCurrentValue.toString()])}</Text>
-                </div>
             </div>
         </WiredExtraBaseView>
     );

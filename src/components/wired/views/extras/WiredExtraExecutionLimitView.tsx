@@ -8,10 +8,11 @@ import { WiredExtraBaseView } from './WiredExtraBaseView';
 const MIN_EXECUTIONS = 1;
 const MAX_EXECUTIONS = 100;
 const DEFAULT_EXECUTIONS = 1;
-const MIN_TIME_WINDOW_MS = 1000;
-const MAX_TIME_WINDOW_MS = 10000;
-const DEFAULT_TIME_WINDOW_MS = 1000;
-const TIME_WINDOW_STEP_MS = 500;
+/** The window is counted in pulses; one pulse is half a second. */
+const MIN_PULSES = 1;
+const MAX_PULSES = 20;
+const DEFAULT_PULSES = 2;
+const MS_PER_PULSE = 500;
 
 const normalizeExecutions = (value: number) => {
     if (isNaN(value)) return DEFAULT_EXECUTIONS;
@@ -19,34 +20,29 @@ const normalizeExecutions = (value: number) => {
     return Math.max(MIN_EXECUTIONS, Math.min(MAX_EXECUTIONS, Math.round(value)));
 };
 
-const normalizeTimeWindow = (value: number) => {
-    if (isNaN(value)) return DEFAULT_TIME_WINDOW_MS;
+const normalizePulses = (value: number) => {
+    if (isNaN(value)) return DEFAULT_PULSES;
 
-    const clampedValue = Math.max(MIN_TIME_WINDOW_MS, Math.min(MAX_TIME_WINDOW_MS, value));
-
-    return Math.round(clampedValue / TIME_WINDOW_STEP_MS) * TIME_WINDOW_STEP_MS;
+    return Math.max(MIN_PULSES, Math.min(MAX_PULSES, Math.round(value)));
 };
 
-const formatTimeWindow = (value: number) => {
-    const seconds = value / 1000;
-
-    return Number.isInteger(seconds) ? seconds.toString() : seconds.toFixed(1);
-};
+const formatWindow = (pulses: number) => (pulses * MS_PER_PULSE / 1000).toFixed(1);
 
 export const WiredExtraExecutionLimitView: FC<{}> = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
     const [executions, setExecutions] = useState(DEFAULT_EXECUTIONS);
-    const [timeWindowMs, setTimeWindowMs] = useState(DEFAULT_TIME_WINDOW_MS);
+    const [pulses, setPulses] = useState(DEFAULT_PULSES);
 
     useEffect(() => {
         if (!trigger) return;
 
+        // owned: [executions per window, window in pulses].
         setExecutions(normalizeExecutions(trigger.intData.length > 0 ? trigger.intData[0] : DEFAULT_EXECUTIONS));
-        setTimeWindowMs(normalizeTimeWindow(trigger.intData.length > 1 ? trigger.intData[1] : DEFAULT_TIME_WINDOW_MS));
+        setPulses(normalizePulses(trigger.intData.length > 1 ? trigger.intData[1] : DEFAULT_PULSES));
     }, [trigger]);
 
     const save = () => {
-        setIntParams([normalizeExecutions(executions), normalizeTimeWindow(timeWindowMs)]);
+        setIntParams([normalizeExecutions(executions), normalizePulses(pulses)]);
         setStringParam('');
     };
 
@@ -65,15 +61,15 @@ export const WiredExtraExecutionLimitView: FC<{}> = () => {
                     <Text small>{executions}</Text>
                 </div>
                 <div className="flex flex-col gap-2">
-                    <Text>{LocalizeText('wiredfurni.params.settimewindow', ['timewindow'], [formatTimeWindow(timeWindowMs)])}</Text>
+                    <Text>{LocalizeText('wiredfurni.params.settimewindow', ['timewindow'], [formatWindow(pulses)])}</Text>
                     <Slider
-                        min={MIN_TIME_WINDOW_MS}
-                        max={MAX_TIME_WINDOW_MS}
-                        step={TIME_WINDOW_STEP_MS}
-                        value={timeWindowMs}
-                        onChange={(value) => setTimeWindowMs(normalizeTimeWindow(Array.isArray(value) ? value[0] : Number(value)))}
+                        min={MIN_PULSES}
+                        max={MAX_PULSES}
+                        step={1}
+                        value={pulses}
+                        onChange={(value) => setPulses(normalizePulses(Array.isArray(value) ? value[0] : Number(value)))}
                     />
-                    <Text small>{formatTimeWindow(timeWindowMs)}s</Text>
+                    <Text small>{formatWindow(pulses)}s</Text>
                 </div>
             </div>
         </WiredExtraBaseView>

@@ -6,25 +6,24 @@ import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredSelectorBaseView } from './WiredSelectorBaseView';
 
 export const WiredSelectorFurniOnFurniView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setFurniSources = null, filter = false, setFilter = null, inverse = false, setInverse = null } = useWired();
     const [selectionType, setSelectionType] = useState(0);
-    const [filterExisting, setFilterExisting] = useState(false);
-    const [invert, setInvert] = useState(false);
     const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+        return trigger?.furniSources?.[0] ?? 100;
     });
 
     useEffect(() => {
         if (!trigger) return;
 
         setSelectionType(trigger.intData.length > 0 ? trigger.intData[0] : 0);
-        setFurniSource(trigger.intData.length > 1 ? trigger.intData[1] : (trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
-        setFilterExisting(trigger.intData.length > 2 ? trigger.intData[2] === 1 : false);
-        setInvert(trigger.intData.length > 3 ? trigger.intData[3] === 1 : false);
+        setFurniSource(trigger.furniSources[0] ?? 100);
     }, [trigger]);
 
-    const save = () => setIntParams([selectionType, furniSource, filterExisting ? 1 : 0, invert ? 1 : 0]);
+    // Filter and inverse are category fields of the selector save, not owned ints.
+    const save = () => {
+        setIntParams([selectionType]);
+        setFurniSources([furniSource]);
+    };
 
     return (
         <WiredSelectorBaseView
@@ -61,14 +60,14 @@ export const WiredSelectorFurniOnFurniView: FC<{}> = () => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        checked={filterExisting}
-                        onChange={(event) => setFilterExisting(event.target.checked)}
+                        checked={filter}
+                        onChange={(event) => setFilter(event.target.checked)}
                     />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.0')}</Text>
                 </label>
 
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" className="form-check-input" checked={invert} onChange={(event) => setInvert(event.target.checked)} />
+                    <input type="checkbox" className="form-check-input" checked={inverse} onChange={(event) => setInverse(event.target.checked)} />
                     <Text small>{LocalizeText('wiredfurni.params.selector_option.1')}</Text>
                 </label>
             </div>
