@@ -7,7 +7,7 @@ import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 const MIN_ALTITUDE = 0;
-const MAX_ALTITUDE = 40;
+const MAX_ALTITUDE = 80;
 const ALTITUDE_STEP = 0.01;
 const ALTITUDE_PATTERN = /^\d*(\.\d{0,2})?$/;
 
@@ -49,11 +49,11 @@ const normalizeOperator = (value: number) => {
 };
 
 export const WiredActionSetAltitudeView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const { trigger = null, setIntParams = null, setFurniSources = null } = useWired();
 
     const [operator, setOperator] = useState(2);
     const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
+        if (trigger?.furniSources?.length) return trigger.furniSources[0];
         return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
     });
     const [altitude, setAltitude] = useState(0);
@@ -64,10 +64,10 @@ export const WiredActionSetAltitudeView: FC<{}> = () => {
     useEffect(() => {
         if (!trigger) return;
 
-        setOperator(trigger.intData.length > 0 ? normalizeOperator(trigger.intData[0]) : 2);
-        setFurniSource(trigger.intData.length > 1 ? trigger.intData[1] : (trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
+        setOperator(trigger.intData.length > 0 ? normalizeOperator(trigger.intData[1]) : 2);
+        setFurniSource(trigger.furniSources[0]);
 
-        const nextAltitude = parseAltitude(trigger.stringData);
+        const nextAltitude = clampAltitude(trigger.intData[0] / 100);
         setAltitude(nextAltitude);
         setAltitudeInput(formatAltitude(nextAltitude));
     }, [trigger]);
@@ -102,9 +102,10 @@ export const WiredActionSetAltitudeView: FC<{}> = () => {
     };
 
     const save = () => {
-        setIntParams([operator, furniSource]);
+        setIntParams([Math.round(altitude * 100), operator]);
+        setFurniSources([furniSource]);
 
-        setStringParam(normalizedAltitudeText);
+
     };
 
     return (

@@ -84,6 +84,8 @@ export const sortWiredSourceOptions = (options: WiredSourceOption[], category: '
 };
 
 interface WiredSourcesSelectorProps {
+    furniSlot?: number;
+    userSlot?: number;
     showFurni?: boolean;
     showUsers?: boolean;
     furniSource?: number;
@@ -210,14 +212,16 @@ export const useAvailableUserSources = (
 
 export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     const {
+        furniSlot = 0,
+        userSlot = 0,
         showFurni = false,
         showUsers = false,
         furniSource = 0,
         userSource = 0,
         furniTitle = 'wiredfurni.params.sources.furni.title',
         usersTitle = 'wiredfurni.params.sources.users.title',
-        furniSources = FURNI_SOURCES,
-        userSources = USER_SOURCES,
+        furniSources = null,
+        userSources = null,
         allowClickedUserSource = true,
         furniDetail = null,
         userDetail = null,
@@ -226,8 +230,10 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = (props) => {
     } = props;
     const { trigger = null } = useWired();
     const native = useWiredNative();
-    const availableUserSources = useAvailableUserSources(trigger, userSources, usersTitle, allowClickedUserSource);
-    const orderedFurniSources = useMemo(() => sortWiredSourceOptions(furniSources, 'furni'), [furniSources]);
+    const nativeFurniSources = trigger?.inputSources?.furniAllowed[furniSlot]?.map(value => ({ value, label: `wiredfurni.params.sources.furni.${value}` }));
+    const nativeUserSources = trigger?.inputSources?.usersAllowed[userSlot]?.map(value => ({ value, label: `wiredfurni.params.sources.users.${value}` }));
+    const availableUserSources = useAvailableUserSources(trigger, userSources ?? nativeUserSources ?? USER_SOURCES, usersTitle, !nativeUserSources && allowClickedUserSource);
+    const orderedFurniSources = useMemo(() => sortWiredSourceOptions(furniSources ?? nativeFurniSources ?? FURNI_SOURCES, 'furni'), [furniSources, trigger, furniSlot]);
     const orderedUserSources = useMemo(() => {
         if (usersTitle === BOT_SOURCE_TITLE) return [...availableUserSources];
 

@@ -182,7 +182,8 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         setFurniIds((prevValue) => {
             if (prevValue && prevValue.length) WiredSelectionVisualizer.clearSelectionShaderFromFurni(prevValue);
 
-            if (requiresFurni <= WiredFurniType.STUFF_SELECTION_OPTION_NONE) return [];
+            // A native inactive pick list is still saved editor data, even when this view cannot pick.
+            if (requiresFurni <= WiredFurniType.STUFF_SELECTION_OPTION_NONE && !trigger.inputSources) return [];
 
             if (trigger.selectedItems && trigger.selectedItems.length) {
                 WiredSelectionVisualizer.applySelectionShaderToFurni(trigger.selectedItems);

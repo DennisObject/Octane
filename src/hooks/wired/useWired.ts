@@ -1,5 +1,8 @@
 import {
     ConditionDefinition,
+    WiredSelectorDefinition, WiredAddonDefinition, WiredVariableDefinition,
+    WiredFurniSelectorEvent, WiredFurniAddonEvent, WiredFurniVariableEvent,
+    UpdateSelectorMessageComposer, UpdateAddonMessageComposer, UpdateVariableMessageComposer,
     GetRoomEngine,
     GetSessionDataManager,
     IFurnitureData,
@@ -53,6 +56,11 @@ const useWiredState = () => {
     const [intParams, setIntParams, intParamsRef] = useLiveState<number[]>([]);
     const [stringParam, setStringParam, stringParamRef] = useLiveState<string>('');
     const [furniIds, setFurniIds, furniIdsRef] = useLiveState<number[]>([]);
+    const [secondaryFurniIds, setSecondaryFurniIds, secondaryFurniIdsRef] = useLiveState<number[]>([]);
+    const [furniSources, setFurniSources, furniSourcesRef] = useLiveState<number[]>([]);
+    const [userSources, setUserSources, userSourcesRef] = useLiveState<number[]>([]);
+    const [variableIds, setVariableIds, variableIdsRef] = useLiveState<string[]>([]);
+    const [activePickSlot, setActivePickSlot] = useState<0 | 1>(0);
     const [actionDelay, setActionDelay, actionDelayRef] = useLiveState<number>(0);
     const [allowsFurni, setAllowsFurni] = useState<number>(WiredFurniType.STUFF_SELECTION_OPTION_NONE);
     const selectByType = false;
@@ -79,12 +87,20 @@ const useWiredState = () => {
             const furniIds = furniIdsRef.current;
             const actionDelay = actionDelayRef.current;
 
+            const tails = [furniSourcesRef.current, userSourcesRef.current, variableIdsRef.current, secondaryFurniIdsRef.current] as const;
+
             if (trigger instanceof WiredActionDefinition) {
-                SendMessageComposer(new UpdateActionMessageComposer(trigger.id, intParams, stringParam, furniIds, actionDelay, trigger.stuffTypeSelectionCode));
+                SendMessageComposer(new UpdateActionMessageComposer(trigger.id, intParams, stringParam, furniIds, actionDelay, ...tails));
             } else if (trigger instanceof TriggerDefinition) {
-                SendMessageComposer(new UpdateTriggerMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.stuffTypeSelectionCode));
+                SendMessageComposer(new UpdateTriggerMessageComposer(trigger.id, intParams, stringParam, furniIds, ...tails));
             } else if (trigger instanceof ConditionDefinition) {
-                SendMessageComposer(new UpdateConditionMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.stuffTypeSelectionCode));
+                SendMessageComposer(new UpdateConditionMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.quantifier, ...tails));
+            } else if (trigger instanceof WiredSelectorDefinition) {
+                SendMessageComposer(new UpdateSelectorMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.filter, trigger.inverse, ...tails));
+            } else if (trigger instanceof WiredAddonDefinition) {
+                SendMessageComposer(new UpdateAddonMessageComposer(trigger.id, intParams, stringParam, furniIds, ...tails));
+            } else if (trigger instanceof WiredVariableDefinition) {
+                SendMessageComposer(new UpdateVariableMessageComposer(trigger.id, intParams, stringParam, furniIds, ...tails));
             }
         };
 
@@ -109,7 +125,13 @@ const useWiredState = () => {
     const selectObjectForWired = (objectId: number, category: number) => {
         if (!trigger || !allowsFurni) return;
 
-        if (objectId <= 0) return;
+        if (objectId <= 0 || (category !== RoomObjectCategory.FLOOR && category !== RoomObjectCategory.WALL)) return;
+        if (category === RoomObjectCategory.WALL && !trigger.allowWall) return;
+
+        const session = GetRoomSession();
+        if (!session || !GetRoomEngine().getRoomObject(session.roomId, objectId, category)) return;
+
+        const pickedId = category === RoomObjectCategory.WALL ? -objectId : objectId;
 
         const getInteractionTypeName = (furniData: any): string => {
             if (!furniData) return null;
@@ -254,7 +276,7 @@ const useWiredState = () => {
             if (!sourceFurniData) return;
             if (!isAllowedInteraction(sourceFurniData) || (allowedFurniCheck && !allowedFurniCheck(clickedObject, sourceFurniData))) {
                 handleDisallowedInteraction();
-                setFurniIds((prevValue) => {
+                (activePickSlot === 1 ? setSecondaryFurniIds : setFurniIds)((prevValue) => {
                     if (!prevValue.includes(objectId)) return prevValue;
 
                     const remaining = prevValue.filter((id) => id !== objectId);
@@ -268,19 +290,19 @@ const useWiredState = () => {
             }
         }
 
-        setFurniIds((prevValue) => {
+        (activePickSlot === 1 ? setSecondaryFurniIds : setFurniIds)((prevValue) => {
             const newFurniIds = [...prevValue];
 
-            const index = prevValue.indexOf(objectId);
+            const index = prevValue.indexOf(pickedId);
 
             if (index >= 0) {
                 newFurniIds.splice(index, 1);
 
-                WiredSelectionVisualizer.hide(objectId);
+                WiredSelectionVisualizer.hide(pickedId);
             } else if (newFurniIds.length < trigger.maximumItemSelectionCount) {
-                newFurniIds.push(objectId);
+                newFurniIds.push(pickedId);
 
-                WiredSelectionVisualizer.show(objectId);
+                WiredSelectionVisualizer.show(pickedId);
             }
 
             return newFurniIds;
@@ -328,7 +350,13 @@ const useWiredState = () => {
             intParams: [...(intParamsRef.current ?? [])],
             stringParam: stringParamRef.current ?? '',
             furniIds: [...(furniIdsRef.current ?? [])],
-            delayInPulses: actionDelayRef.current ?? 0
+            delayInPulses: actionDelayRef.current ?? 0,
+            secondaryFurniIds: [...secondaryFurniIdsRef.current],
+            furniSources: [...furniSourcesRef.current], userSources: [...userSourcesRef.current],
+            variableIds: [...variableIdsRef.current],
+            quantifier: current instanceof ConditionDefinition ? current.quantifier : undefined,
+            filter: current instanceof WiredSelectorDefinition ? current.filter : undefined,
+            inverse: current instanceof WiredSelectorDefinition ? current.inverse : undefined
         };
 
         setClipboard((prevValue) => {
@@ -410,14 +438,28 @@ const useWiredState = () => {
         setTrigger(parser.definition);
     });
 
+    useMessageEvent<WiredFurniSelectorEvent>(WiredFurniSelectorEvent, event => setTrigger(event.getParser().definition));
+    useMessageEvent<WiredFurniAddonEvent>(WiredFurniAddonEvent, event => setTrigger(event.getParser().definition));
+    useMessageEvent<WiredFurniVariableEvent>(WiredFurniVariableEvent, event => setTrigger(event.getParser().definition));
+
     useEffect(() => {
         if (!trigger) return;
+        setSecondaryFurniIds([...trigger.secondarySelectedItems]);
+        setFurniSources([...trigger.furniSources]);
+        setUserSources([...trigger.userSources]);
+        setVariableIds([...trigger.variableIds]);
+        setActivePickSlot(0);
 
         return () => {
             WiredSelectionVisualizer.clearAllSelectionShaders();
             setIntParams([]);
             setStringParam('');
             setActionDelay(0);
+            setSecondaryFurniIds([]);
+            setFurniSources([]);
+            setUserSources([]);
+            setVariableIds([]);
+            setActivePickSlot(0);
             setFurniIds((prevValue) => {
                 if (prevValue && prevValue.length) WiredSelectionVisualizer.clearSelectionShaderFromFurni(prevValue);
 
@@ -441,6 +483,9 @@ const useWiredState = () => {
         setStringParam,
         furniIds,
         setFurniIds,
+        secondaryFurniIds, setSecondaryFurniIds,
+        furniSources, setFurniSources, userSources, setUserSources, variableIds, setVariableIds,
+        activePickSlot, setActivePickSlot,
         actionDelay,
         setActionDelay,
         setAllowsFurni,

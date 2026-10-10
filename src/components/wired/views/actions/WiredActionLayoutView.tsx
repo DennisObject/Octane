@@ -411,3 +411,16 @@ export const WiredActionLayoutView = (code: number) => {
 
     return null;
 };
+
+/** Native action codes are distinct from the old combined action/selector/addon layout band. */
+export const NativeWiredActionLayoutView = (code: number) => {
+    switch (code) {
+        case 28: return <WiredActionControlClockView />;
+        case 9: return <WiredActionJoinTeamView />;
+        case 6: return <WiredActionGiveScoreView />;
+        case 29: return <WiredActionSetAltitudeView />;
+        case 30: return <WiredActionSendSignalView />;
+        case 57: return <WiredActionMoveFurniAsGroupView />;
+        default: return null;
+    }
+};

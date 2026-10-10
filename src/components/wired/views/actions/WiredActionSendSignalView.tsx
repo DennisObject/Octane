@@ -1,254 +1,51 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType, WiredSelectionVisualizer  } from '../../../../api';
-import { Text } from '../../../../common';
+import { FC, useEffect, useState } from 'react';
+import { WiredFurniType } from '../../../../api';
+import { Button } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
-import { FURNI_SOURCES, USER_SOURCES } from '../WiredSourcesSelector';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-const SOURCE_TRIGGER = 0;
-const SOURCE_SELECTED = 100;
+export const WiredActionSendSignalView: FC<{}> = () => {
+    const { trigger, furniIds, secondaryFurniIds, activePickSlot, setActivePickSlot,
+        setIntParams, setFurniSources, setUserSources, setAllowedInteractionTypes, setAllowedInteractionErrorKey } = useWired();
+    const [antennaSource, setAntennaSource] = useState(100);
+    const [forwardedSource, setForwardedSource] = useState(200);
+    const [userSource, setUserSource] = useState(200);
+    const [splitFurni, setSplitFurni] = useState(false);
+    const [splitUsers, setSplitUsers] = useState(false);
 
-const FORWARD_ITEM_DELIMITER = ';';
+    useEffect(() => {
+        setAntennaSource(trigger.furniSources[0]);
+        setForwardedSource(trigger.furniSources[1]);
+        setUserSource(trigger.userSources[0]);
+        setSplitFurni(trigger.intData[0] === 1);
+        setSplitUsers(trigger.intData[1] === 1);
+    }, [trigger]);
 
-type SelectionMode = 'antenna' | 'furni';
+    useEffect(() => {
+        const pickingAntennas = antennaSource === (activePickSlot === 0 ? 100 : 101);
+        setAllowedInteractionTypes(pickingAntennas ? ['antenna'] : null);
+        setAllowedInteractionErrorKey(pickingAntennas ? 'wiredfurni.error.require_antenna_furni' : null);
+        return () => { setAllowedInteractionTypes(null); setAllowedInteractionErrorKey(null); };
+    }, [activePickSlot, antennaSource, setAllowedInteractionTypes, setAllowedInteractionErrorKey]);
 
-const parseForwardIds = (data: string): number[] =>
-{
-    if(!data || !data.length) return [];
-
-    const ids = new Set<number>();
-
-    for(const part of data.split(/[;,\t]/))
-    {
-        const trimmed = part.trim();
-        if(!trimmed.length) continue;
-
-        const value = parseInt(trimmed, 10);
-        if(!isNaN(value) && value > 0) ids.add(value);
-    }
-
-    return Array.from(ids);
-};
-
-const serializeForwardIds = (ids: number[]): string =>
-{
-    if(!ids || !ids.length) return '';
-
-    return ids.filter(id => (id > 0)).join(FORWARD_ITEM_DELIMITER);
-};
-
-export const WiredActionSendSignalView: FC<{}> = () =>
-{
-    const [ furniSource, setFurniSource ] = useState<number>(SOURCE_TRIGGER);
-    const [ userSource, setUserSource ] = useState<number>(SOURCE_TRIGGER);
-    const [ signalPerFurni, setSignalPerFurni ] = useState(false);
-    const [ signalPerUser, setSignalPerUser ] = useState(false);
-    const [ antennaIds, setAntennaIds ] = useState<number[]>([]);
-    const [ forwardFurniIds, setForwardFurniIds ] = useState<number[]>([]);
-    const [ selectionMode, setSelectionMode ] = useState<SelectionMode>('antenna');
-    const highlightedIds = useRef<number[]>([]);
-
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null } = useWired();
-
-    useEffect(() =>
-    {
-        if(!trigger) return;
-
-        const p = trigger.intData;
-        if(p.length > 1) setFurniSource(p[1]);
-        else setFurniSource(SOURCE_TRIGGER);
-
-        if(p.length > 2) setUserSource(p[2]);
-        else setUserSource(SOURCE_TRIGGER);
-
-        setSignalPerFurni(p.length > 3 && p[3] === 1);
-        setSignalPerUser(p.length > 4 && p[4] === 1);
-
-        setAntennaIds(trigger.selectedItems ?? []);
-        setForwardFurniIds(parseForwardIds(trigger.stringData));
-        setSelectionMode('antenna');
-    }, [ trigger ]);
-
-    useEffect(() =>
-    {
-        if(selectionMode === 'antenna') setAntennaIds(furniIds);
-        else setForwardFurniIds(furniIds);
-    }, [ furniIds, selectionMode ]);
-
-    const syncHighlights = useCallback((nextAntennaIds: number[], nextForwardFurniIds: number[], nextSelectionMode: SelectionMode, nextFurniSource: number) =>
-    {
-        if(highlightedIds.current.length)
-        {
-            WiredSelectionVisualizer.clearSelectionShaderFromFurni(highlightedIds.current);
-            WiredSelectionVisualizer.clearSecondarySelectionShaderFromFurni(highlightedIds.current);
-        }
-
-        const visibleForwardIds = (nextFurniSource === SOURCE_SELECTED) ? nextForwardFurniIds : [];
-        const activeIds = (nextSelectionMode === 'antenna') ? nextAntennaIds : visibleForwardIds;
-        const passiveIds = (nextSelectionMode === 'antenna') ? visibleForwardIds : nextAntennaIds;
-        const activeSet = new Set(activeIds);
-        const passiveOnlyIds = passiveIds.filter(id => !activeSet.has(id));
-
-        if(activeIds.length) WiredSelectionVisualizer.applySelectionShaderToFurni(activeIds);
-        if(passiveOnlyIds.length) WiredSelectionVisualizer.applySecondarySelectionShaderToFurni(passiveOnlyIds);
-
-        highlightedIds.current = Array.from(new Set([ ...activeIds, ...passiveOnlyIds ]));
-    }, []);
-
-    useEffect(() =>
-    {
-        syncHighlights(antennaIds, forwardFurniIds, selectionMode, furniSource);
-    }, [ antennaIds, forwardFurniIds, selectionMode, furniSource, syncHighlights ]);
-
-    const switchSelection = useCallback((mode: SelectionMode) =>
-    {
-        if(mode === selectionMode) return;
-        if(mode === 'furni' && furniSource !== SOURCE_SELECTED) return;
-
-        const nextAntennaIds = (selectionMode === 'antenna') ? [ ...furniIds ] : [ ...antennaIds ];
-        const nextForwardFurniIds = (selectionMode === 'furni') ? [ ...furniIds ] : [ ...forwardFurniIds ];
-
-        setAntennaIds(nextAntennaIds);
-        setForwardFurniIds(nextForwardFurniIds);
-        setSelectionMode(mode);
-        if(setFurniIds) setFurniIds([ ...((mode === 'antenna') ? nextAntennaIds : nextForwardFurniIds) ]);
-    }, [ selectionMode, furniSource, furniIds, antennaIds, forwardFurniIds, setFurniIds ]);
-
-    const onChangeFurniSource = (next: number) =>
-    {
-        const nextAntennaIds = (selectionMode === 'antenna') ? [ ...furniIds ] : [ ...antennaIds ];
-
-        setAntennaIds(nextAntennaIds);
-        if(forwardFurniIds.length || selectionMode === 'furni')
-        {
-            setForwardFurniIds([]);
-        }
-
-        if(selectionMode === 'furni')
-        {
-            if(setFurniIds) setFurniIds([ ...nextAntennaIds ]);
-            setSelectionMode('antenna');
-        }
-
-        setFurniSource(next);
+    const save = () => {
+        setIntParams([splitFurni ? 1 : 0, splitUsers ? 1 : 0]);
+        setFurniSources([antennaSource, forwardedSource]);
+        setUserSources([userSource]);
     };
 
-    const save = useCallback(() =>
-    {
-        const nextAntennaIds = (selectionMode === 'antenna') ? [ ...furniIds ] : [ ...antennaIds ];
-        const nextForwardFurniIds = (selectionMode === 'furni') ? [ ...furniIds ] : [ ...forwardFurniIds ];
-
-        setAntennaIds(nextAntennaIds);
-        setForwardFurniIds(nextForwardFurniIds);
-
-        if(selectionMode === 'furni')
-        {
-            setSelectionMode('antenna');
-            if(setFurniIds) setFurniIds([ ...nextAntennaIds ]);
-        }
-
-        const antennaSource = (nextAntennaIds && nextAntennaIds.length) ? nextAntennaIds[0] : 0;
-
-        setIntParams([
-            antennaSource,
-            furniSource,
-            userSource,
-            signalPerFurni ? 1 : 0,
-            signalPerUser ? 1 : 0,
-            0,
-        ]);
-
-        setStringParam(serializeForwardIds(nextForwardFurniIds));
-    }, [ selectionMode, furniIds, antennaIds, furniSource, userSource, signalPerFurni, signalPerUser, forwardFurniIds, setFurniIds, setIntParams, setStringParam ]);
-
-    useEffect(() =>
-    {
-        return () =>
-        {
-            if(!highlightedIds.current.length) return;
-
-            WiredSelectionVisualizer.clearSelectionShaderFromFurni(highlightedIds.current);
-            WiredSelectionVisualizer.clearSecondarySelectionShaderFromFurni(highlightedIds.current);
-            highlightedIds.current = [];
-        };
-    }, []);
-
-    const selectionLimit = trigger?.maximumItemSelectionCount ?? 0;
-
-    return (
-        <WiredActionBaseView
-            hasSpecialInput={ true }
-            requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_BY_ID }
-            cardStyle={ { width: '400px' } }
-            save={ save }
-            selectionPreview={
-                <div className="flex flex-col gap-2">
-                    <WiredFurniSelectionSourceRow
-                        title={ localizeWithFallback('wiredfurni.params.sources.furni.title.signal_antenna', 'Antenne:') }
-                        titleIsLiteral={ true }
-                        options={ [ { value: SOURCE_SELECTED, label: 'wiredfurni.params.sources.furni.100' } ] }
-                        value={ SOURCE_SELECTED }
-                        selectionKind="primary"
-                        selectionActive={ selectionMode === 'antenna' }
-                        selectionCount={ antennaIds.length }
-                        selectionLimit={ selectionLimit }
-                        selectionEnabledValues={ [ SOURCE_SELECTED ] }
-                        onChange={ () =>
-                        {} }
-                        onSelectionActivate={ () => switchSelection('antenna') } />
-                    <WiredFurniSelectionSourceRow
-                        title={ localizeWithFallback('wiredfurni.sendsignal.furni', 'Furniture to send forward:') }
-                        titleIsLiteral={ true }
-                        options={ FURNI_SOURCES }
-                        value={ furniSource }
-                        selectionKind="secondary"
-                        selectionActive={ selectionMode === 'furni' }
-                        selectionCount={ forwardFurniIds.length }
-                        selectionLimit={ selectionLimit }
-                        selectionEnabledValues={ [ SOURCE_SELECTED ] }
-                        onChange={ onChangeFurniSource }
-                        onSelectionActivate={ () => switchSelection('furni') } />
-                    <WiredFurniSelectionSourceRow
-                        title={ localizeWithFallback('wiredfurni.sendsignal.users', 'Users to send forward:') }
-                        titleIsLiteral={ true }
-                        options={ USER_SOURCES }
-                        value={ userSource }
-                        selectionKind="secondary"
-                        selectionActive={ false }
-                        selectionCount={ 0 }
-                        selectionLimit={ 0 }
-                        selectionEnabledValues={ [] }
-                        showSelectionToggle={ false }
-                        onChange={ setUserSource } />
-                </div>
-            }
-        >
-            <div className="flex flex-col gap-3">
-                <Text bold>{ localizeWithFallback('wiredfurni.params.signal.send_options', LocalizeText('wiredfurni.params.signal.options')) }</Text>
-                <div className="form-check">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id="signal-per-furni"
-                        checked={ signalPerFurni }
-                        onChange={ e => setSignalPerFurni(e.target.checked) } />
-                    <label className="form-check-label" htmlFor="signal-per-furni">
-                        <Text small>{ LocalizeText('wiredfurni.params.signal.split_furni') }</Text>
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id="signal-per-user"
-                        checked={ signalPerUser }
-                        onChange={ e => setSignalPerUser(e.target.checked) } />
-                    <label className="form-check-label" htmlFor="signal-per-user">
-                        <Text small>{ LocalizeText('wiredfurni.params.signal.split_users') }</Text>
-                    </label>
-                </div>
+    return <WiredActionBaseView hasSpecialInput nativeLayout requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_OR_BY_TYPE} save={save}
+        footer={<>
+            <WiredSourcesSelector showFurni furniSlot={0} furniTitle="Antenna furniture" furniSource={antennaSource} onChangeFurni={setAntennaSource} />
+            <WiredSourcesSelector showFurni showUsers furniSlot={1} furniTitle="Forwarded furniture" furniSource={forwardedSource}
+                userSource={userSource} onChangeFurni={setForwardedSource} onChangeUsers={setUserSource} />
+            <div className="flex gap-2">
+                <Button onClick={() => setActivePickSlot(0)} disabled={activePickSlot === 0}>Primary picks ({furniIds.length})</Button>
+                <Button onClick={() => setActivePickSlot(1)} disabled={activePickSlot === 1}>Secondary picks ({secondaryFurniIds.length})</Button>
             </div>
-        </WiredActionBaseView>
-    );
+        </>}>
+        <label><input type="checkbox" checked={splitFurni} onChange={event => setSplitFurni(event.target.checked)} /> One signal per furniture</label>
+        <label><input type="checkbox" checked={splitUsers} onChange={event => setSplitUsers(event.target.checked)} /> One signal per user</label>
+    </WiredActionBaseView>;
 };

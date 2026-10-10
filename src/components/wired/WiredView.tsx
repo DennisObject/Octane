@@ -1,7 +1,7 @@
 import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@octane/renderer';
 import { FC, Fragment } from 'react';
 import { useWired } from '../../hooks';
-import { WiredActionLayoutView } from './views/actions/WiredActionLayoutView';
+import { NativeWiredActionLayoutView } from './views/actions/WiredActionLayoutView';
 import { WiredConditionLayoutView } from './views/conditions/WiredConditionLayoutView';
 import { WiredTriggerLayoutView } from './views/triggers/WiredTriggerLayoutView';
 
@@ -11,7 +11,7 @@ export const WiredView: FC<{}> = (props) => {
     if (!trigger) return null;
 
     if (trigger instanceof WiredActionDefinition) {
-        return <Fragment key={`wired-action-${trigger.id}-${trigger.code}`}>{WiredActionLayoutView(trigger.code)}</Fragment>;
+        return <Fragment key={`wired-action-${trigger.id}-${trigger.code}`}>{NativeWiredActionLayoutView(trigger.code)}</Fragment>;
     }
 
     if (trigger instanceof TriggerDefinition) {

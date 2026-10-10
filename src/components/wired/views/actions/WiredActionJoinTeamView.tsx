@@ -18,32 +18,15 @@ const normalizeJoinMode = (value: number): number => (value === 1 || value === 2
 export const WiredActionJoinTeamView: FC<{}> = (props) => {
     const [selectedTeamType, setSelectedTeamType] = useState(0);
     const [selectedTeam, setSelectedTeam] = useState(1);
-    const [joinMode, setJoinMode] = useState(0);
-    const { trigger = null, setIntParams = null } = useWired();
-    const [userSource, setUserSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        if (trigger?.intData?.length > 1) return trigger.intData[1];
-        return 0;
-    });
-
-    const save = () => setIntParams([selectedTeamType, selectedTeam, userSource, joinMode]);
-
+    const { trigger = null, setIntParams = null, setUserSources = null } = useWired();
+    const [userSource, setUserSource] = useState(0);
+    const save = () => { setIntParams([selectedTeam, selectedTeamType]); setUserSources([userSource]); };
     useEffect(() => {
-        if (trigger.intData.length > 2) {
-            setSelectedTeamType(trigger.intData[0]);
-            setSelectedTeam(trigger.intData[1]);
-            setUserSource(trigger.intData[2]);
-            setJoinMode(normalizeJoinMode(trigger.intData[3]));
-        } else {
-            setJoinMode(0);
-            setSelectedTeamType(0);
-            setSelectedTeam(trigger.intData.length > 0 ? trigger.intData[0] : 1);
-            setUserSource(trigger.intData.length > 1 ? trigger.intData[1] : 0);
-        }
+        setSelectedTeam(trigger.intData[0]);
+        setSelectedTeamType(trigger.intData[1]);
+        setUserSource(trigger.userSources[0]);
     }, [trigger]);
 
-    // class_4212: "Pick team" in two columns, then "Choose type:". The join mode section is an Octane addition
-    // (smallest/random team) that the official dialog does not have; it stays last so the native part keeps its layout.
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
@@ -56,7 +39,7 @@ export const WiredActionJoinTeamView: FC<{}> = (props) => {
                 <WiredRadioGroup
                     columns={2}
                     name="selectedTeam"
-                    options={[1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.team.${id}`), disabled: joinMode !== 0 }))}
+                    options={[1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.team.${id}`) }))}
                     value={selectedTeam}
                     onChange={setSelectedTeam}
                 />
@@ -71,14 +54,6 @@ export const WiredActionJoinTeamView: FC<{}> = (props) => {
                     ]}
                     value={selectedTeamType}
                     onChange={setSelectedTeamType}
-                />
-            </WiredSection>
-            <WiredSection title={localizeWithFallback('wiredfurni.params.team.join_mode', 'Join')}>
-                <WiredRadioGroup
-                    name="joinMode"
-                    options={JOIN_TEAM_MODES.map((mode) => ({ id: mode.value, label: localizeWithFallback(`wiredfurni.params.team.join_mode.${mode.value}`, mode.fallback) }))}
-                    value={joinMode}
-                    onChange={setJoinMode}
                 />
             </WiredSection>
         </WiredActionBaseView>

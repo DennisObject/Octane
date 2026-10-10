@@ -97,7 +97,8 @@ export class WiredSelectionVisualizer {
     private static getRoomObject(objectId: number): IRoomObject {
         const roomEngine = GetRoomEngine();
 
-        return roomEngine.getRoomObject(roomEngine.activeRoomId, objectId, RoomObjectCategory.FLOOR);
+        return roomEngine.getRoomObject(roomEngine.activeRoomId, Math.abs(objectId),
+            objectId < 0 ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR);
     }
 
     private static getRoomObjectByCategory(objectId: number, category: number): IRoomObject {
