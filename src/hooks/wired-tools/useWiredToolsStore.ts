@@ -1,14 +1,15 @@
 import {
     CreateLinkEvent,
+    parseWiredInt64,
     GetSessionDataManager,
     WiredMenuPermissionsSaveComposer,
     WiredRoomSettingsDataEvent,
     WiredRoomSettingsRequestComposer,
     WiredRoomStateActionComposer,
-    WiredUserVariableManageComposer,
-    WiredUserVariablesDataEvent,
-    WiredUserVariablesRequestComposer,
-    WiredUserVariableUpdateComposer
+    WiredUserVariableManage64Composer,
+    WiredUserVariablesData64Event,
+    WiredUserVariablesRequest64Composer,
+    WiredUserVariableUpdate64Composer
 } from '@octane/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook } from '@/state/useSharedHook';
@@ -63,7 +64,7 @@ export interface IWiredUserVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | null;
     variableItemId: number;
 }
 
@@ -82,7 +83,7 @@ export interface IWiredFurniVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | null;
     variableItemId: number;
 }
 
@@ -101,7 +102,7 @@ export interface IWiredRoomVariableAssignment {
     createdAt: number;
     hasValue: boolean;
     updatedAt: number;
-    value: number | null;
+    value: bigint | null;
     variableItemId: number;
 }
 
@@ -181,7 +182,7 @@ export const useWiredToolsStore = () => {
         if (!roomSettings.canInspect) return;
 
         userVariablesRequestGateRef.current?.request(() => {
-            SendMessageComposer(new WiredUserVariablesRequestComposer());
+            SendMessageComposer(new WiredUserVariablesRequest64Composer());
         });
     }, [roomSettings.canInspect]);
 
@@ -277,7 +278,7 @@ export const useWiredToolsStore = () => {
     useMessageEvent<WiredRoomSettingsDataEvent>(WiredRoomSettingsDataEvent, (event) => {
         const parser = event.getParser();
 
-        if (roomSession?.roomId && parser.roomId && parser.roomId !== roomSession.roomId) return;
+        if (!roomSession || parser.roomId !== roomSession.roomId) return;
 
         setRoomSettings({
             roomId: parser.roomId,
@@ -291,10 +292,10 @@ export const useWiredToolsStore = () => {
         });
     });
 
-    useMessageEvent<WiredUserVariablesDataEvent>(WiredUserVariablesDataEvent, (event) => {
+    useMessageEvent<WiredUserVariablesData64Event>(WiredUserVariablesData64Event, (event) => {
         const parser = event.getParser();
 
-        if (roomSession?.roomId && parser.roomId && parser.roomId !== roomSession.roomId) return;
+        if (!roomSession || parser.roomId !== roomSession.roomId || parser.roomId !== roomSettings.roomId || !roomSettings.canInspect) return;
 
         const nextAssignments: Record<number, IWiredUserVariableAssignment[]> = {};
         const nextFurniAssignments: Record<number, IWiredFurniVariableAssignment[]> = {};
@@ -368,9 +369,19 @@ export const useWiredToolsStore = () => {
         SendMessageComposer(new WiredRoomStateActionComposer(true));
     }, [roomSettings.canModify]);
 
+    const exactInput = useCallback((input: bigint | string | number): bigint | null => {
+        try { return parseWiredInt64(input); }
+        catch (error) {
+            simpleAlert?.(String(error instanceof Error ? error.message : error), NotificationAlertType.ALERT);
+            return null;
+        }
+    }, [simpleAlert]);
+
     const updateUserVariableValue = useCallback(
-        (userId: number, variableItemId: number, value: number) => {
+        (userId: number, variableItemId: number, input: bigint | string | number) => {
             if (!roomSettings.canModify) return;
+            const value = exactInput(input);
+            if (value === null) return;
 
             setUserVariableAssignments((prevValue) => {
                 const existingAssignments = prevValue[userId];
@@ -399,14 +410,16 @@ export const useWiredToolsStore = () => {
                 };
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_USER, userId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_USER, userId, variableItemId, value));
         },
-        [roomSettings.canModify]
+        [roomSettings.canModify, exactInput]
     );
 
     const updateFurniVariableValue = useCallback(
-        (furniId: number, variableItemId: number, value: number) => {
+        (furniId: number, variableItemId: number, input: bigint | string | number) => {
             if (!roomSettings.canModify) return;
+            const value = exactInput(input);
+            if (value === null) return;
 
             setFurniVariableAssignments((prevValue) => {
                 const existingAssignments = prevValue[furniId];
@@ -435,14 +448,16 @@ export const useWiredToolsStore = () => {
                 };
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, value));
         },
-        [roomSettings.canModify]
+        [roomSettings.canModify, exactInput]
     );
 
     const updateRoomVariableValue = useCallback(
-        (variableItemId: number, value: number) => {
+        (variableItemId: number, input: bigint | string | number) => {
             if (!roomSettings.canModify) return;
+            const value = exactInput(input);
+            if (value === null) return;
 
             setRoomVariableAssignments((prevValue) => {
                 const now = getCurrentUnixTime();
@@ -474,14 +489,17 @@ export const useWiredToolsStore = () => {
                 ];
             });
 
-            SendMessageComposer(new WiredUserVariableUpdateComposer(WIRED_VARIABLE_TARGET_ROOM, roomSettings.roomId, variableItemId, value));
+            SendMessageComposer(new WiredUserVariableUpdate64Composer(WIRED_VARIABLE_TARGET_ROOM, roomSettings.roomId, variableItemId, value));
         },
-        [roomSettings.canModify, roomSettings.roomId]
+        [roomSettings.canModify, roomSettings.roomId, exactInput]
     );
 
     const assignUserVariable = useCallback(
-        (userId: number, variableItemId: number, value: number) => {
+        (userId: number, variableItemId: number, input: bigint | string | number) => {
             if (!roomSettings.canModify) return;
+
+            const value = exactInput(input);
+            if (value === null) return;
 
             const definition = userVariableDefinitions.find((entry) => entry.itemId === variableItemId);
 
@@ -520,16 +538,16 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_ASSIGN,
                     WIRED_VARIABLE_TARGET_USER,
                     userId,
                     variableItemId,
-                    Number(normalizedValue ?? 0)
+                    normalizedValue ?? 0n
                 )
             );
         },
-        [roomSettings.canModify, userVariableDefinitions]
+        [roomSettings.canModify, userVariableDefinitions, exactInput]
     );
 
     const removeUserVariable = useCallback(
@@ -554,15 +572,18 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_USER, userId, variableItemId, 0)
+                new WiredUserVariableManage64Composer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_USER, userId, variableItemId, 0)
             );
         },
         [roomSettings.canModify]
     );
 
     const assignFurniVariable = useCallback(
-        (furniId: number, variableItemId: number, value: number) => {
+        (furniId: number, variableItemId: number, input: bigint | string | number) => {
             if (!roomSettings.canModify) return;
+
+            const value = exactInput(input);
+            if (value === null) return;
 
             const definition = furniVariableDefinitions.find((entry) => entry.itemId === variableItemId);
 
@@ -601,16 +622,16 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_ASSIGN,
                     WIRED_VARIABLE_TARGET_FURNI,
                     furniId,
                     variableItemId,
-                    Number(normalizedValue ?? 0)
+                    normalizedValue ?? 0n
                 )
             );
         },
-        [furniVariableDefinitions, roomSettings.canModify]
+        [furniVariableDefinitions, roomSettings.canModify, exactInput]
     );
 
     const removeFurniVariable = useCallback(
@@ -635,7 +656,7 @@ export const useWiredToolsStore = () => {
             });
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, 0)
+                new WiredUserVariableManage64Composer(WIRED_VARIABLE_MANAGE_ACTION_REMOVE, WIRED_VARIABLE_TARGET_FURNI, furniId, variableItemId, 0)
             );
         },
         [roomSettings.canModify]
@@ -666,7 +687,7 @@ export const useWiredToolsStore = () => {
             else setUserVariableAssignments((prevValue) => strip(prevValue) as typeof prevValue);
 
             SendMessageComposer(
-                new WiredUserVariableManageComposer(
+                new WiredUserVariableManage64Composer(
                     WIRED_VARIABLE_MANAGE_ACTION_CLEAR_ALL,
                     scope === 'furni' ? WIRED_VARIABLE_TARGET_FURNI : WIRED_VARIABLE_TARGET_USER,
                     0,

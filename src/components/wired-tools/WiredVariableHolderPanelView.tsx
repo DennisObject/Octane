@@ -6,7 +6,7 @@ export interface WiredHolderPanelEntry {
     name: string;
     availability: string;
     hasValue: boolean;
-    value: number | null;
+    value: bigint | number | null;
     isReadOnly?: boolean;
 }
 

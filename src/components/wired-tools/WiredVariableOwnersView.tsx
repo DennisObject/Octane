@@ -1,8 +1,8 @@
-import { IWiredVariableHolder, WiredVariableHoldersPageComposer, WiredVariableHoldersPageEvent } from '@octane/renderer';
+import { GetCommunication, IWiredVariableHolder, WiredVariableHoldersPage64Composer, WiredVariableHoldersPage64Event } from '@octane/renderer';
 import { useEffect, useRef, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer } from '../../api';
 import { GetUserProfile } from '../../api/user/GetUserProfile';
-import { useMessageEvent } from '../../hooks';
+import { useMessageEvent, useRoom } from '../../hooks';
 import { useWiredPageRequests } from '../../hooks/wired-tools/useWiredPageRequests';
 import { VariableManageEntry, VariablesElementType } from './WiredCreatorTools.types';
 import { calculateLastPage, NO_PAGE } from './WiredPaging.helpers';
@@ -43,7 +43,7 @@ interface HoldersPage {
     variableId: string;
     totalEntries: number;
     currentPage: number;
-    elements: IWiredVariableHolder[];
+    elements: IWiredVariableHolder<bigint>[];
     userTypeFilter: number;
     sortTypeFilter: number;
 }
@@ -67,16 +67,21 @@ export interface WiredVariableOwnersViewProps {
  */
 export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => {
     const { variableId, variableName, variablesType, hasValue, describeHolder, onManage, onClose } = props;
+    const { roomSession } = useRoom();
+    const pending = useRef<{ room: typeof roomSession; variableId: string; page: number; users: number; sort: number; connection: ReturnType<typeof GetCommunication>['connection'] } | null>(null);
     const [page, setPage] = useState<HoldersPage | null>(null);
     const [userType, setUserType] = useState(USER_FILTER_ALL);
     const [sortType, setSortType] = useState(SORT_NONE);
     const [scrollKey, setScrollKey] = useState(0);
     const nextFilters = useRef<{ userTypeFilter: number; sortTypeFilter: number } | null>(null);
 
-    useMessageEvent<WiredVariableHoldersPageEvent>(WiredVariableHoldersPageEvent, (event) => {
+    useMessageEvent<WiredVariableHoldersPage64Event>(WiredVariableHoldersPage64Event, (event) => {
         const parser = event.getParser();
 
-        if (parser.variableId !== variableId) return;
+        const expected = pending.current;
+        if (!expected || !roomSession || expected.room !== roomSession || expected.connection !== GetCommunication().connection || parser.amount !== WIRED_VARIABLE_OWNERS_PAGE_SIZE || expected.variableId !== variableId || parser.variableId !== expected.variableId || parser.currentPage !== expected.page || parser.userTypeFilter !== expected.users || parser.sortTypeFilter !== expected.sort) return;
+        pending.current = null;
+        // 9482 has no room ID/nonce: an identical delayed request is indistinguishable on the wire.
 
         setPage({
             variableId: parser.variableId,
@@ -105,8 +110,10 @@ export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => 
                 sortTypeFilter: page?.sortTypeFilter ?? SORT_NONE
             };
 
+            if (!roomSession) return;
+            pending.current = { room: roomSession, connection: GetCommunication().connection, variableId, page: requested, users: filters.userTypeFilter, sort: filters.sortTypeFilter };
             SendMessageComposer(
-                new WiredVariableHoldersPageComposer(variableId, requested, WIRED_VARIABLE_OWNERS_PAGE_SIZE, filters.userTypeFilter, filters.sortTypeFilter)
+                new WiredVariableHoldersPage64Composer(variableId, requested, WIRED_VARIABLE_OWNERS_PAGE_SIZE, filters.userTypeFilter, filters.sortTypeFilter)
             );
         }
     });
@@ -114,8 +121,12 @@ export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => 
     // The first page of a new variable, unfiltered.
     useEffect(() => {
         setPage(null);
-        SendMessageComposer(new WiredVariableHoldersPageComposer(variableId, 1, WIRED_VARIABLE_OWNERS_PAGE_SIZE, USER_FILTER_ALL, SORT_NONE));
-    }, [variableId]);
+        pending.current = null;
+        if (!roomSession) return;
+        pending.current = { room: roomSession, connection: GetCommunication().connection, variableId, page: 1, users: USER_FILTER_ALL, sort: SORT_NONE };
+        SendMessageComposer(new WiredVariableHoldersPage64Composer(variableId, 1, WIRED_VARIABLE_OWNERS_PAGE_SIZE, USER_FILTER_ALL, SORT_NONE));
+        return () => { pending.current = null; };
+    }, [variableId, roomSession]);
 
     const changeFilters = (nextUserType: number, nextSortType: number) => {
         if (!requests.canRequestNewPage(false)) return;
@@ -125,7 +136,7 @@ export const WiredVariableOwnersView = (props: WiredVariableOwnersViewProps) => 
         nextFilters.current = null;
     };
 
-    const toManageEntry = (holder: IWiredVariableHolder): VariableManageEntry => {
+    const toManageEntry = (holder: IWiredVariableHolder<bigint>): VariableManageEntry => {
         const description = describeHolder(holder.entityType, holder.entityId, holder.entityName);
 
         return {

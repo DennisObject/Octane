@@ -24,11 +24,11 @@ export interface WiredOwnersFilter {
     onChange: (value: string) => void;
 }
 
-export interface WiredVariableOwnersPanelProps {
+export interface WiredVariableOwnersPanelProps<T extends number | bigint = number> {
     variableName: string;
     variablesType: VariablesElementType;
     hasValue: boolean;
-    holders: IWiredVariableHolder[];
+    holders: IWiredVariableHolder<T>[];
     describeHolder: (entityType: number, entityId: number, entityName: string) => WiredHolderDescription;
     currentPage: number;
     totalEntries: number;
@@ -36,9 +36,9 @@ export interface WiredVariableOwnersPanelProps {
     requests: WiredPageRequests;
     scrollResetKey: number;
     filters: WiredOwnersFilter[];
-    onManage: (holder: IWiredVariableHolder) => void;
+    onManage: (holder: IWiredVariableHolder<T>) => void;
     /** Adds a delete link next to "Manage". */
-    onDelete?: (holder: IWiredVariableHolder) => void;
+    onDelete?: (holder: IWiredVariableHolder<T>) => void;
     /** Turns user names into profile links. */
     onOpenUserProfile?: (entityId: number) => void;
     onClose: () => void;
@@ -55,7 +55,7 @@ const LINK_CLASS = 'text-[#1b57b2] underline underline-offset-2';
  * The "Variable Management" window: who holds a variable, a page at a time, with filter menus,
  * refresh and a "Manage" link per holder. It shows what it is handed; the caller fetches.
  */
-export const WiredVariableOwnersPanel = (props: WiredVariableOwnersPanelProps) => {
+export const WiredVariableOwnersPanel = <T extends number | bigint = number>(props: WiredVariableOwnersPanelProps<T>) => {
     const {
         variableName,
         variablesType,
@@ -105,7 +105,7 @@ export const WiredVariableOwnersPanel = (props: WiredVariableOwnersPanelProps) =
 
     const noValueLabel = hasValue ? '/' : localizeWithFallback('wiredmenu.variable_management.no_value', 'Not supported');
 
-    const getCell = (holder: IWiredVariableHolder, columnId: string): WiredTableCell => {
+    const getCell = (holder: IWiredVariableHolder<T>, columnId: string): WiredTableCell => {
         const description = describeHolder(holder.entityType, holder.entityId, holder.entityName);
 
         switch (columnId) {

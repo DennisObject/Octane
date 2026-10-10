@@ -1,3 +1,4 @@
+import { parseWiredInt64 } from '@octane/renderer';
 import {
     AddLinkEventTracker,
     AvatarExpressionEnum,
@@ -2135,7 +2136,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                             name: definition.name,
                             hasValue: definition.hasValue,
                             isReadOnly: !!definition.isReadOnly,
-                            value: assignment?.value ?? 0,
+                            value: assignment?.value ?? 0n,
                             availability: getVariableAvailabilityLabel(definition.availability, 'global'),
                             createdAt: 0,
                             updatedAt: Number(assignment?.updatedAt ?? 0)
@@ -2339,14 +2340,21 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             localizeWithFallback('wiredmenu.variable_overview.delete_all.title', 'Clear this variable')
         );
     };
+    const parseScalarInput = (input: string): bigint | null => {
+        try { return parseWiredInt64(input); }
+        catch (error) {
+            simpleAlert?.(String(error instanceof Error ? error.message : error));
+            return null;
+        }
+    };
     const commitManagedHolderValueEdit = useCallback(() => {
         if (!selectedManagedVariableEntry || !selectedManagedHolderVariableEntry || !roomSettings.canModify || selectedManagedHolderVariableEntry.isReadOnly)
             return;
         if (!selectedManagedHolderVariableEntry.hasValue) return;
         if (variablesType === 'context') return;
 
-        const parsedValue = Number(editingManagedHolderValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? Math.trunc(parsedValue) : 0;
+        const nextValue = parseScalarInput(editingManagedHolderValue);
+        if (nextValue === null) return;
 
         switch (variablesType) {
             case 'user':
@@ -2375,8 +2383,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         if (!selectedManagedVariableEntry || !selectedManagedGiveDefinition || !roomSettings.canModify) return;
         if (variablesType === 'global' || variablesType === 'context') return;
 
-        const parsedValue = Number(managedGiveValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? Math.trunc(parsedValue) : 0;
+        const nextValue = parseScalarInput(managedGiveValue);
+        if (nextValue === null) return;
 
         if (variablesType === 'user') assignUserVariable(selectedManagedVariableEntry.entityId, selectedManagedGiveDefinition.itemId, nextValue);
         else assignFurniVariable(selectedManagedVariableEntry.entityId, selectedManagedGiveDefinition.itemId, nextValue);
@@ -2454,14 +2462,10 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 return;
             }
 
-            const parsed = parseInt(editingValue.trim(), 10);
+            const parsed = parseScalarInput(editingValue);
+            if (parsed === null) return;
 
-            if (Number.isNaN(parsed)) {
-                cancelVariableEdit();
-                return;
-            }
-
-            const currentValue = roomVariableAssignmentMap.get(customDefinition.itemId)?.value ?? 0;
+            const currentValue = roomVariableAssignmentMap.get(customDefinition.itemId)?.value ?? 0n;
 
             if (currentValue === parsed) {
                 cancelVariableEdit();
@@ -2478,12 +2482,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             const customDefinition = selectedUserCustomVariableDefinitionMap.get(editingVariable);
 
             if (customDefinition?.hasValue && !customDefinition.isReadOnly) {
-                const parsed = parseInt(editingValue.trim(), 10);
-
-                if (Number.isNaN(parsed)) {
-                    cancelVariableEdit();
-                    return;
-                }
+                const parsed = parseScalarInput(editingValue);
+                if (parsed === null) return;
 
                 const assignment = selectedUserAssignmentMap.get(customDefinition.itemId);
 
@@ -2600,12 +2600,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         const customFurniDefinition = selectedFurniCustomVariableDefinitionMap.get(editingVariable);
 
         if (customFurniDefinition?.hasValue && !customFurniDefinition.isReadOnly) {
-            const parsed = parseInt(editingValue.trim(), 10);
-
-            if (Number.isNaN(parsed)) {
-                cancelVariableEdit();
-                return;
-            }
+            const parsed = parseScalarInput(editingValue);
+            if (parsed === null) return;
 
             const assignment = selectedFurniAssignmentMap.get(customFurniDefinition.itemId);
 
@@ -2956,8 +2952,8 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const giveInspectionVariable = useCallback(() => {
         if (!canManageInspectionVariableAssignments || !selectedInspectionGiveDefinition) return;
 
-        const parsedValue = Number(inspectionGiveValue.trim());
-        const nextValue = Number.isFinite(parsedValue) ? parsedValue : 0;
+        const nextValue = parseScalarInput(inspectionGiveValue);
+        if (nextValue === null) return;
 
         if (inspectionType === 'user' && selectedUser) {
             assignUserVariable(selectedUserHolderKey, selectedInspectionGiveDefinition.itemId, nextValue);
