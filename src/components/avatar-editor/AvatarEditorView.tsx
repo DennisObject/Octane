@@ -41,14 +41,15 @@ const MAIN_TAB_ICONS: Record<string, string> = {
 };
 
 // AIR removes unavailable tabs without reordering the survivors.
+// AvatarEditor layout mainTabs: generic, head, torso, legs, misc (only with clothing.misc.tab.enabled), hotlooks, effects, nfts.
 const MAIN_TAB_ORDER: string[] = [
     AvatarEditorFigureCategory.GENERIC,
     AvatarEditorFigureCategory.HEAD,
     AvatarEditorFigureCategory.TORSO,
     AvatarEditorFigureCategory.LEGS,
+    AvatarEditorFigureCategory.MISC,
     AvatarEditorFigureCategory.HOTLOOKS,
     AvatarEditorFigureCategory.EFFECTS,
-    AvatarEditorFigureCategory.MISC,
     AvatarEditorFigureCategory.NFT
 ];
 
