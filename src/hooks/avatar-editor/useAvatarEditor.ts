@@ -75,7 +75,7 @@ const useAvatarEditorState = () => {
     const [hotLooksState, setHotLooksState] = useState<{ userId: number; looks: IHotLookInfo[] }>({ userId: 0, looks: [] });
     const hotLooksUser = useRef(0);
     const userData = useUserDataSnapshot();
-    const { effects, wornEffect, setWornEffect } = useAvatarEditorEffects(userData.userId);
+    const { effects, wornEffect, setWornEffect } = useAvatarEditorEffects();
     const [genderEffectsState, setGenderEffectsState] = useState<{ userId: number; effects: Record<string, number> }>({ userId: 0, effects: {} });
     const [previewDirectionState, setPreviewDirectionState] = useState<{ userId: number; direction: number }>({ userId: 0, direction: 4 });
     const hotLooks = userData.userId && hotLooksState.userId === userData.userId ? hotLooksState.looks : NO_HOT_LOOKS;

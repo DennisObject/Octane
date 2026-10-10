@@ -1,8 +1,8 @@
 import {
-    AvatarEffectActivatedEvent, AvatarEffectAddedEvent, AvatarEffectExpiredEvent, AvatarEffectsEvent
+    AvatarEffectActivatedEvent, AvatarEffectAddedEvent, AvatarEffectExpiredEvent, AvatarEffectsEvent, GetCommunication, OctaneEventType
 } from '@octane/renderer';
-import { useEffect, useRef, useState } from 'react';
-import { useMessageEvent } from '../events';
+import { useState } from 'react';
+import { useMessageEvent, useOctaneEvent } from '../events';
 
 export interface AvatarEditorEffect {
     type: number;
@@ -18,11 +18,25 @@ export const getEditorEffectSeconds = (effect: AvatarEditorEffect) => effect.act
     ? Math.max(0, effect.secondsLeft - Math.floor((Date.now() - effect.updatedAt) / 1000))
     : effect.duration;
 
-export const useAvatarEditorEffects = (userId: number) =>
+const NO_EFFECTS: AvatarEditorEffect[] = [];
+
+/**
+ * The effects of the signed-in session. The server sends the list right after AuthenticationOK, before the user identity, so the list belongs to the
+ * authenticated connection: it is dropped when the connection stops being authenticated (logout, user change, reconnect) and the next login sends
+ * it again. Nothing received on the current connection is ever cleared by an identity change.
+ */
+export const useAvatarEditorEffects = () =>
 {
-    const [effects, setEffects] = useState<AvatarEditorEffect[]>([]);
+    const [effects, setEffects] = useState<AvatarEditorEffect[]>(NO_EFFECTS);
     const [wornEffect, setWornEffect] = useState(-1);
-    const previousUserId = useRef(userId);
+
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    {
+        if (GetCommunication().connection.connectionState.authenticated) return;
+
+        setEffects(NO_EFFECTS);
+        setWornEffect(-1);
+    });
 
     useMessageEvent<AvatarEffectsEvent>(AvatarEffectsEvent, (event) =>
     {
@@ -30,7 +44,8 @@ export const useAvatarEditorEffects = (userId: number) =>
         const incoming = event.getParser().effects.map(effect => ({
             type: effect.type, duration: effect.duration,
             amount: effect.inactiveEffectsInInventory + (effect.secondsLeftIfActive >= 0 ? 1 : 0),
-            secondsLeft: effect.secondsLeftIfActive >= 0 ? effect.secondsLeftIfActive : effect.duration,
+            // class_1951.onAvatarEffects: only the exact -1 sentinel means inactive with a full duration; any other negative keeps the zero default.
+            secondsLeft: effect.secondsLeftIfActive >= 0 ? effect.secondsLeftIfActive : effect.secondsLeftIfActive === -1 ? effect.duration : 0,
             active: effect.secondsLeftIfActive >= 0,
             permanent: effect.isPermanent, updatedAt
         }));
@@ -73,18 +88,6 @@ export const useAvatarEditorEffects = (userId: number) =>
             : effect.amount > 1 ? [{ ...effect, amount: effect.amount - 1, active: false, secondsLeft: effect.duration }] : []));
         setWornEffect(-1);
     });
-
-    useEffect(() =>
-    {
-        // The first authenticated identity can arrive in the same batch as the effects list.
-        if (!userId || (previousUserId.current && previousUserId.current !== userId))
-        {
-            setEffects([]);
-            setWornEffect(-1);
-        }
-
-        previousUserId.current = userId;
-    }, [userId]);
 
     return { effects, wornEffect, setWornEffect };
 };
