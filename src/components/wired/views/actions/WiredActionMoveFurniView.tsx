@@ -36,27 +36,28 @@ const extraDirectionOptions: { value: number; icon: WiredMoveIconName }[] = [
 const rotationOptions: number[] = [0, 1, 2, 3];
 
 export const WiredActionMoveFurniView: FC<{}> = (props) => {
-    const [movement, setMovement] = useState(-1);
-    const [rotation, setRotation] = useState(-1);
-    const { trigger = null, setIntParams = null } = useWired();
+    const [movement, setMovement] = useState(0);
+    const [rotation, setRotation] = useState(0);
+    const { trigger = null, setIntParams = null, setFurniSources = null } = useWired();
     const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+        return trigger?.furniSources?.[0] ?? 100;
     });
 
-    const save = () => setIntParams([movement, rotation, furniSource]);
+    const save = () => {
+        setIntParams([movement, rotation]);
+        setFurniSources([furniSource]);
+    };
 
     useEffect(() => {
         if (trigger.intData.length >= 2) {
             setMovement(trigger.intData[0]);
             setRotation(trigger.intData[1]);
         } else {
-            setMovement(-1);
-            setRotation(-1);
+            setMovement(0);
+            setRotation(0);
         }
 
-        if (trigger.intData.length > 2) setFurniSource(trigger.intData[2]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
+        setFurniSource(trigger.furniSources[0]);
     }, [trigger]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);

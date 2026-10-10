@@ -11,14 +11,16 @@ const rotationOptions: number[] = [0, 1, 2, 3, 4, 5, 6];
 export const WiredActionMoveAndRotateFurniView: FC<{}> = (props) => {
     const [movement, setMovement] = useState(0);
     const [rotation, setRotation] = useState(0);
-    const [blockOnUserCollision, setBlockOnUserCollision] = useState(false);
-    const { trigger = null, setIntParams = null } = useWired();
+    const [blockOnUserCollision, setBlockOnUserCollision] = useState(true);
+    const { trigger = null, setIntParams = null, setFurniSources = null } = useWired();
     const [furniSource, setFurniSource] = useState<number>(() => {
-        if (trigger?.intData?.length > 2) return trigger.intData[2];
-        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+        return trigger?.furniSources?.[0] ?? 100;
     });
 
-    const save = () => setIntParams([movement, rotation, furniSource, blockOnUserCollision ? 1 : 0]);
+    const save = () => {
+        setIntParams([movement, rotation, blockOnUserCollision ? 1 : 0]);
+        setFurniSources([furniSource]);
+    };
 
     useEffect(() => {
         if (trigger.intData.length >= 2) {
@@ -29,10 +31,9 @@ export const WiredActionMoveAndRotateFurniView: FC<{}> = (props) => {
             setRotation(0);
         }
 
-        if (trigger.intData.length > 2) setFurniSource(trigger.intData[2]);
-        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
+        setFurniSource(trigger.furniSources[0]);
 
-        setBlockOnUserCollision((trigger.intData?.length ?? 0) > 3 ? trigger.intData[3] === 1 : false);
+        setBlockOnUserCollision(trigger.intData[2] === 1);
     }, [trigger]);
 
     const onChangeFurniSource = (next: number) => setFurniSource(next);
