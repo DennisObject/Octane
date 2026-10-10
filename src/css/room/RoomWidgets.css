@@ -1464,6 +1464,51 @@
     left: 62px;
 }
 
+/* Rentable bot menu: RentableBotMenuView builds the avatar_menu_widget layout (151 wide, 4px margins, 143 wide header, separator and list at x=2 on 139,
+   items 137 on 143 wide buttons, minimize region at x=3 on 136 with its icon at x=62). Scoped to the bot menu; the other users' menu keeps its own sizes. */
+.octane-avatar-action-menu--rentable-bot {
+    width: 151px;
+    min-width: 151px;
+    max-width: 151px;
+}
+
+.octane-avatar-action-menu--rentable-bot .octane-context-menu-header {
+    width: 143px;
+    min-width: 143px;
+    padding: 0 32px 0 31px;
+}
+
+.octane-avatar-action-menu--rentable-bot .octane-context-menu-header::after {
+    width: 139px;
+}
+
+.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons {
+    width: 139px;
+    margin-left: 6px;
+}
+
+.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .octane-context-menu-item {
+    width: 137px;
+    min-width: 137px;
+    max-width: 137px;
+}
+
+.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .octane-context-menu-item::before {
+    width: 143px;
+}
+
+.octane-avatar-action-menu--rentable-bot .octane-context-menu-footer {
+    width: 136px;
+    min-width: 136px;
+    margin-left: 7px;
+}
+
+.octane-avatar-action-menu--rentable-bot .octane-context-menu-footer::before {
+    left: 62px;
+    width: 12px;
+    height: 11px;
+}
+
 .octane-context-menu.name-only {
     width: auto;
     min-width: 72px;

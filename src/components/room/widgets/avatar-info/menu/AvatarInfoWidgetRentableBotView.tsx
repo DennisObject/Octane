@@ -149,7 +149,7 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own']}
+            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--rentable-bot']}
             collapsable={true}
             freezePositionOnHover={true}
             objectId={avatarInfo.roomIndex}
@@ -186,14 +186,14 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
                                 {LocalizeText('avatar.widget.dress_up')}
                             </ContextMenuListItemView>
                         )}
-                        {avatarInfo.botSkills.indexOf(BotSkillsEnum.RANDOM_WALK) >= 0 && (
-                            <ContextMenuListItemView onClick={(event) => processAction('random_walk')}>
-                                {LocalizeText('avatar.widget.random_walk')}
-                            </ContextMenuListItemView>
-                        )}
                         {avatarInfo.botSkills.indexOf(BotSkillsEnum.SETUP_CHAT) >= 0 && (
                             <ContextMenuListItemView onClick={(event) => processAction('setup_chat')}>
                                 {LocalizeText('avatar.widget.setup_chat')}
+                            </ContextMenuListItemView>
+                        )}
+                        {avatarInfo.botSkills.indexOf(BotSkillsEnum.RANDOM_WALK) >= 0 && (
+                            <ContextMenuListItemView onClick={(event) => processAction('random_walk')}>
+                                {LocalizeText('avatar.widget.random_walk')}
                             </ContextMenuListItemView>
                         )}
                         {avatarInfo.botSkills.indexOf(BotSkillsEnum.DANCE) >= 0 && (
