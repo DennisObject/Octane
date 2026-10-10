@@ -31,7 +31,8 @@ const CLIENT_COMMANDS: { key: string; descriptionKey: string }[] = [
     { key: 'settings', descriptionKey: 'chatcmd.client.settings' },
     // Info
     { key: 'client', descriptionKey: 'chatcmd.client.info' },
-    { key: 'volt', descriptionKey: 'chatcmd.client.info' }
+    { key: 'volt', descriptionKey: 'chatcmd.client.info' },
+    { key: 'nitro', descriptionKey: 'chatcmd.client.info' }
 ];
 
 /**
