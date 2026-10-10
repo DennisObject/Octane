@@ -16,7 +16,8 @@ interface MarketplaceItemStats {
     suggestedPrice: number;
 }
 
-export const MarketplacePostOfferView: FC<{}> = () => {
+export const MarketplacePostOfferView: FC<{}> = () =>
+{
     const [item, setItem] = useState<FurnitureItem>(null);
     const [itemIds, setItemIds] = useState<number[]>([]);
     const [priceText, setPriceText] = useState('');
@@ -25,7 +26,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
     const { data: marketplaceConfiguration = null } = useMarketplaceConfiguration({ enabled: !!item });
     const { showConfirm = null } = useNotification();
 
-    useUiEvent<CatalogPostMarketplaceOfferEvent>(CatalogPostMarketplaceOfferEvent.POST_MARKETPLACE, (event) => {
+    useUiEvent<CatalogPostMarketplaceOfferEvent>(CatalogPostMarketplaceOfferEvent.POST_MARKETPLACE, (event) =>
+    {
         setItem(event.item);
         setItemIds(event.itemIds);
         setPriceText('');
@@ -33,7 +35,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
         setItemStats(null);
     });
 
-    useMessageEvent<MarketplaceItemStatsEvent>(MarketplaceItemStatsEvent, (event) => {
+    useMessageEvent<MarketplaceItemStatsEvent>(MarketplaceItemStatsEvent, (event) =>
+    {
         const parser = event.getParser();
 
         if (!item || parser.furniTypeId !== item.type || parser.furniCategoryId !== (item.isWallItem ? 2 : 1)) return;
@@ -51,7 +54,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
 
         SendMessageComposer(new GetMarketplaceItemStatsComposer(item.isWallItem ? 2 : 1, item.type));
 
-        return () => {
+        return () =>
+        {
             setPriceText('');
             setAmountText('1');
             setItemStats(null);
@@ -92,10 +96,10 @@ export const MarketplacePostOfferView: FC<{}> = () => {
         showConfirm(
             amount > 1
                 ? LocalizeText(
-                      'inventory.marketplace.confirm_offer.info.multiple',
-                      ['amount', 'furniname', 'price', 'total'],
-                      [amount.toString(), furniTitle, askingPrice.toString(), (revenue * amount).toString()]
-                  )
+                    'inventory.marketplace.confirm_offer.info.multiple',
+                    ['amount', 'furniname', 'price', 'total'],
+                    [amount.toString(), furniTitle, askingPrice.toString(), (revenue * amount).toString()]
+                )
                 : LocalizeText('inventory.marketplace.confirm_offer.info', ['furniname', 'price'], [furniTitle, revenue.toString()]),
             () => {
                 // A confirmation left open across a logout must not list the old session's items in another user's.
@@ -158,7 +162,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                     <input
                         inputMode="numeric"
                         value={priceText}
-                        onChange={(event) => {
+                        onChange={(event) =>
+                        {
                             const value = event.target.value.replace(/\D/g, '');
                             setPriceText(parseInt(value, 10) > maximumPrice ? String(maximumPrice) : value);
                         }}
@@ -216,7 +221,8 @@ export const MarketplacePostOfferView: FC<{}> = () => {
                             </div>
                             <OctaneButton
                                 className="octane-market-offer-copy"
-                                onClick={() => {
+                                onClick={() =>
+                                {
                                     setPriceText(String(Math.min(suggestedPrice, maximumPrice)));
                                     navigator.clipboard?.writeText(suggestedPrice.toString()).catch(() => undefined);
                                 }}

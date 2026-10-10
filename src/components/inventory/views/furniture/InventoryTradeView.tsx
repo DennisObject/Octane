@@ -22,7 +22,8 @@ const TradeOfferView: FC<{
     user: TradeUserData;
     disabledText?: string;
     onRemove?: (groupItem: GroupItem) => void;
-}> = (props) => {
+}> = (props) =>
+{
     const { side, user, disabledText = null, onRemove = null } = props;
     const isOwn = side === 'own';
     // v75 only fills content_text_*_a/b while trading.warning.enabled (on in the legacy variables).
@@ -36,7 +37,8 @@ const TradeOfferView: FC<{
             </div>
             {!!disabledText && <div className="octane-trade-offer-info">{disabledText}</div>}
             <div className="octane-trade-offer-grid" hidden={disabledText !== null}>
-                {Array.from(Array(MAX_ITEMS_TO_TRADE), (_, slotIndex) => {
+                {Array.from(Array(MAX_ITEMS_TO_TRADE), (_, slotIndex) =>
+                {
                     // v75 builds a CreditTradingItem out of the credit total and lists it before the furni.
                     const hasCredits = user.creditsCount > 0;
                     const isCreditSlot = hasCredits && slotIndex === 0;
@@ -114,7 +116,8 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
     if (tradeState === TradeState.TRADING_STATE_READY || !ownUser || !otherUser) return null;
 
     // inventory_trading_minimized_xml: shown while another inventory tab is open.
-    if (isMinimized) {
+    if (isMinimized)
+    {
         return (
             <div className="octane-trade is-minimized">
                 <div className="octane-trade-minimized-panel" />
@@ -136,7 +139,8 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
     let buttonCaption = LocalizeText('inventory.trading.accept');
     let buttonEnabled = false;
 
-    switch (tradeState) {
+    switch (tradeState)
+    {
         case TradeState.TRADING_STATE_RUNNING:
             buttonEnabled = hasOffers(ownUser) || hasOffers(otherUser);
             buttonCaption = LocalizeText(ownUser.accepts ? 'inventory.trading.modify' : 'inventory.trading.accept');

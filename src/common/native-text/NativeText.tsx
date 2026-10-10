@@ -87,7 +87,8 @@ export const NativeText: FC<NativeTextProps> = ({
     style,
     nativeResolution = false,
     onRaster
-}) => {
+}) =>
+{
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [size, setSize] = useState<{ width: number; height: number }>(null);
     const fontStyle = { ...nativeTextStyles[textStyle], ...overrides, background };
@@ -194,8 +195,8 @@ export const NativeText: FC<NativeTextProps> = ({
                             align === 'center'
                                 ? Math.round((pixelWidth - 4 * scale - measureNativeText(loaded.font, line, scaledStyle)) / 2)
                                 : align === 'right'
-                                  ? Math.round(pixelWidth - 4 * scale - measureNativeText(loaded.font, line, scaledStyle))
-                                  : 0
+                                    ? Math.round(pixelWidth - 4 * scale - measureNativeText(loaded.font, line, scaledStyle))
+                                    : 0
                     }
                 })
             );

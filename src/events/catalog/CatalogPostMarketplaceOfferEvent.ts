@@ -7,7 +7,8 @@ export class CatalogPostMarketplaceOfferEvent extends CatalogEvent {
     private _item: FurnitureItem;
     private _itemIds: number[];
 
-    constructor(item: FurnitureItem, itemIds: number[] = [item.id]) {
+    constructor(item: FurnitureItem, itemIds: number[] = [item.id])
+    {
         super(CatalogPostMarketplaceOfferEvent.POST_MARKETPLACE);
         this._item = item;
         this._itemIds = itemIds;
@@ -18,7 +19,8 @@ export class CatalogPostMarketplaceOfferEvent extends CatalogEvent {
     }
 
     /** Ids of the stacked items that can be put up for sale. */
-    public get itemIds(): number[] {
+    public get itemIds(): number[]
+    {
         return this._itemIds;
     }
 }

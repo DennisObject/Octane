@@ -36,7 +36,8 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     const { simpleAlert = null, showConfirm = null } = useNotification();
     const pendingOfferIdRef = useRef<number>(null);
 
-    const buyOffer = useCallback((offerId: number) => {
+    const buyOffer = useCallback((offerId: number) =>
+    {
         if (pendingOfferIdRef.current !== null) return;
 
         pendingOfferIdRef.current = offerId;
@@ -44,7 +45,8 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     }, []);
 
     // The server forgets a buy with its socket and answers nothing for it on the next connection.
-    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () => {
+    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    {
         if (GetCommunication().connection.connectionState.authenticated) return;
 
         pendingOfferIdRef.current = null;

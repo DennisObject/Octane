@@ -13,18 +13,24 @@ import {
 export const MAX_ITEMS_TO_TRADE: number = 9;
 const MAX_TRADE_ITEM_COUNT: number = 1500;
 
-const canTradeGroupedItem = (ownUser: TradeUserData, isWallItem: boolean, spriteId: number, category: number, stuffData: IObjectData) => {
+const canTradeGroupedItem = (ownUser: TradeUserData, isWallItem: boolean, spriteId: number, category: number, stuffData: IObjectData) =>
+{
     if (!ownUser || ownUser.accepts || !ownUser.userItems) return false;
 
     if (ownUser.userItems.length < MAX_ITEMS_TO_TRADE) return true;
 
     let type = spriteId.toString();
 
-    if (category === FurniCategory.POSTER) {
+    if (category === FurniCategory.POSTER)
+    {
         type = type + 'poster' + stuffData.getLegacyString();
-    } else if (category === FurniCategory.GUILD_FURNI) {
+    }
+    else if (category === FurniCategory.GUILD_FURNI)
+    {
         type = getGuildFurniType(spriteId, stuffData);
-    } else {
+    }
+    else
+    {
         type = (isWallItem ? 'I' : 'S') + type;
     }
 
@@ -37,7 +43,8 @@ export const offerGroupItemsToTrade = (
     groupItem: GroupItem,
     count: number,
     showAlert: (message: string, type: string, link: string, linkTitle: string, title: string) => void
-): number => {
+): number =>
+{
     if (!ownUser || !groupItem) return 0;
 
     const tradeItems = groupItem.getTradeItems(count);
@@ -47,13 +54,15 @@ export const offerGroupItemsToTrade = (
     let coreItem: IFurnitureItem = null;
     const itemIds: number[] = [];
 
-    for (const item of tradeItems) {
+    for (const item of tradeItems)
+    {
         itemIds.push(item.id);
 
         if (!coreItem) coreItem = item;
     }
 
-    if (ownUser.itemCount + itemIds.length > MAX_TRADE_ITEM_COUNT) {
+    if (ownUser.itemCount + itemIds.length > MAX_TRADE_ITEM_COUNT)
+    {
         showAlert(
             LocalizeText('trading.items.too_many_items.desc'),
             NotificationAlertType.DEFAULT,
@@ -65,7 +74,8 @@ export const offerGroupItemsToTrade = (
         return 0;
     }
 
-    if (!coreItem.isGroupable) {
+    if (!coreItem.isGroupable)
+    {
         SendMessageComposer(new TradingListAddItemComposer(itemIds[itemIds.length - 1]));
 
         return 1;

@@ -307,7 +307,8 @@ export class GroupItem {
     private setDescription(): void {
         const k = this.getLastItem();
 
-        if (!k || this._category === FurniCategory.TRAX_SONG) {
+        if (!k || this._category === FurniCategory.TRAX_SONG)
+        {
             this._description = '';
 
             return;

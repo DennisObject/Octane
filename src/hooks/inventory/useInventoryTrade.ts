@@ -66,8 +66,10 @@ const useInventoryTradeState = () => {
     };
 
     // Items offered in a trade are locked in the inventory list; a closed trade releases them again.
-    const unlockTradeItems = () => {
-        setGroupItems((prevValue) => {
+    const unlockTradeItems = () =>
+    {
+        setGroupItems((prevValue) =>
+        {
             const newValue = [...prevValue];
 
             for (const groupItem of newValue) groupItem.lockItemIds([]);
@@ -85,7 +87,8 @@ const useInventoryTradeState = () => {
     };
 
     // v75 minimized trade box: Cancel always sends the plain close message.
-    const closeTrade = () => {
+    const closeTrade = () =>
+    {
         if (!isTrading) return;
 
         SendMessageComposer(new TradingCloseComposer());

@@ -72,12 +72,14 @@ export const InventoryFurnitureView: FC<{
     // v75 offertotrade_cnt: the amount stays within 1..tradable count of the selection.
     const [clampedFor, setClampedFor] = useState(tradeableCount);
 
-    if (clampedFor !== tradeableCount) {
+    if (clampedFor !== tradeableCount)
+    {
         setClampedFor(tradeableCount);
         setOfferCount((prevValue) => String(Math.min(Math.max(1, Number.parseInt(prevValue, 10) || 1), Math.max(1, tradeableCount))));
     }
 
-    const attemptOffer = () => {
+    const attemptOffer = () =>
+    {
         if (!selectedItem) return;
 
         const count = Math.max(1, Number.parseInt(offerCount, 10) || 1);
