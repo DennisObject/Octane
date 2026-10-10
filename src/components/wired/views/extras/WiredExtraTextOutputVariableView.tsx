@@ -15,6 +15,7 @@ import { useWiredNativeVariables } from '../../../../hooks';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
 import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
+import { FurniPickSlotButtons } from '../conditions/WiredVariableConditionParts';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 import { WiredPlaceholderPreview } from './WiredPlaceholderPreview';
 
@@ -120,7 +121,7 @@ const getTargetDefinitions = (
 const serializeStringData = (placeholderName: string, delimiter: string) => `${normalizePlaceholderName(placeholderName)}\t${normalizeDelimiter(delimiter)}`;
 
 export const WiredExtraTextOutputVariableView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null, setVariableIds = null, setUserSources = null, setFurniSources = null } = useWired();
+    const { trigger = null, furniIds = [], secondaryFurniIds = [], setActivePickSlot = null, setIntParams = null, setStringParam = null, setVariableIds = null, setUserSources = null, setFurniSources = null } = useWired();
     const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     // The card's own groups and defaults decide which sources are valid.
     const userAllowed = trigger?.inputSources?.usersAllowed[0];
@@ -160,6 +161,12 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
         return targetDefinitions.find((definition) => definition.variableId === variableId) ?? null;
     }, [targetDefinitions, variableToken]);
 
+    const picksFurni = targetType === 'furni' && (furniSource === 100 || furniSource === 101);
+
+    useEffect(() => {
+        if (picksFurni) setActivePickSlot(furniSource === 101 ? 1 : 0);
+    }, [furniSource, picksFurni, setActivePickSlot]);
+
     const canUseTextDisplay = !!selectedCustomDefinition?.isTextConnected;
 
     useEffect(() => {
@@ -176,8 +183,7 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
         setFurniSource(normalizeNativeSource(trigger.furniSources.length > 0 ? trigger.furniSources[0] : furniDefault, furniAllowed, furniDefault));
         setPlaceholderName(normalizePlaceholderName(nextPlaceholderName));
         setDelimiter(normalizeDelimiter(nextDelimiter));
-        setFurniIds([...(trigger.selectedItems ?? [])]);
-    }, [furniAllowed, furniDefault, setFurniIds, trigger, userAllowed, userDefault]);
+    }, [furniAllowed, furniDefault, trigger, userAllowed, userDefault]);
 
     useEffect(() => {
         if (canUseTextDisplay || displayType !== DISPLAY_TEXTUAL) return;
@@ -203,7 +209,6 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
         setVariableIds([variableSlotOf(variableToken)]);
         setUserSources([normalizeUserSource(userSource)]);
         setFurniSources([normalizeFurniSource(furniSource)]);
-        setFurniIds(targetType === 'furni' && furniSource === 100 ? [...furniIds] : []);
     };
 
     const validate = () => {
@@ -278,6 +283,7 @@ export const WiredExtraTextOutputVariableView: FC<{}> = () => {
             footer={footer}
         >
             <div className="flex flex-col gap-2">
+                {picksFurni && <FurniPickSlotButtons slots={[furniSource === 101 ? { slot: 1, count: secondaryFurniIds.length } : { slot: 0, count: furniIds.length }]} />}
                 <div className="flex flex-col gap-1">
                     <Text>{LocalizeText('wiredfurni.params.texts.placeholder_name')}</Text>
                     <OctaneInput

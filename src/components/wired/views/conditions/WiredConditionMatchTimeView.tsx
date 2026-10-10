@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
+import { GetConfigurationValue, LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
@@ -93,7 +93,10 @@ const TimeFilterSection: FC<TimeFilterSectionProps> = (props) => {
 };
 
 export const WiredConditionMatchTimeView: FC<{}> = () => {
-    const { trigger = null, setIntParams = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
+    const [timezone, setTimezone] = useState('UTC');
+    const configuredZones = GetConfigurationValue<string>('wired.timezones', '').split(',').map(zone => zone.trim()).filter(Boolean);
+    const zones = [...new Set([...(configuredZones.length ? configuredZones : ['UTC']), timezone].filter(Boolean))];
     const [hourMode, setHourMode] = useState(MODE_SKIP);
     const [hourFrom, setHourFrom] = useState(0);
     const [hourTo, setHourTo] = useState(0);
@@ -106,6 +109,7 @@ export const WiredConditionMatchTimeView: FC<{}> = () => {
 
     useEffect(() => {
         if (!trigger) return;
+        setTimezone(trigger.stringData || configuredZones[0] || 'UTC');
 
         setHourMode(trigger.intData[2] === 1 ? MODE_RANGE : MODE_SKIP);
         setHourFrom(clampValue(trigger.intData[7] ?? 0, 0, 23));
@@ -119,6 +123,7 @@ export const WiredConditionMatchTimeView: FC<{}> = () => {
     }, [trigger]);
 
     const save = () => {
+        setStringParam(timezone);
         setIntParams([
             secondMode !== MODE_SKIP ? 1 : 0,
             minuteMode !== MODE_SKIP ? 1 : 0,
@@ -135,6 +140,12 @@ export const WiredConditionMatchTimeView: FC<{}> = () => {
     return (
         <WiredConditionBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
             <div className="flex flex-col gap-3">
+                <label hidden={zones.length <= 1}>
+                    {LocalizeText('wiredfurni.params.time.timezone_selection')}
+                    <select className="form-select form-select-sm" value={timezone} onChange={event => setTimezone(event.target.value)}>
+                        {zones.map(zone => <option key={zone} value={zone}>{zone}</option>)}
+                    </select>
+                </label>
                 <TimeFilterSection
                     fromValue={hourFrom}
                     max={23}

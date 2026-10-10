@@ -16,18 +16,18 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
     const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
     const [bubbleWidth, setBubbleWidth] = useState<number>(-1);
     const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
-    const botAllowed = trigger?.inputSources?.usersAllowed[1];
-    const botDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
-    const userAllowed = trigger?.inputSources?.usersAllowed[0];
-    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const botAllowed = trigger?.inputSources?.usersAllowed[0];
+    const botDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const userAllowed = trigger?.inputSources?.usersAllowed[1];
+    const userDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
     const maxMessageLength = 200;
-    const [userSource, setUserSource] = useState<number>(() => trigger?.userSources?.[0] ?? userDefault);
+    const [userSource, setUserSource] = useState<number>(() => trigger?.userSources?.[1] ?? userDefault);
 
     const save = () => {
         setStringParam((botSource === WIRED_BOT_NAMED_SOURCE ? botName : '') + WIRED_STRING_DELIMETER + message);
-        // owned: [talk mode, bubble width]; users: [talked-to user, bot].
+        // owned: [talk mode, bubble width]; users: [bot, talked-to user].
         setIntParams([talkMode, bubbleWidth]);
-        setUserSources([userSource, botSource]);
+        setUserSources([botSource, userSource]);
     };
 
     useEffect(() => {
@@ -38,8 +38,8 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
         if (data.length > 1) setMessage(data[1].length > 0 ? data[1] : '');
 
         setTalkMode(trigger.intData.length > 0 ? trigger.intData[0] : 0);
-        setUserSource(trigger.userSources.length > 0 ? trigger.userSources[0] : userDefault);
-        setBotSource(normalizeBotSource(trigger.userSources.length > 1 ? trigger.userSources[1] : botDefault, botAllowed, botDefault, nextBotName.length > 0));
+        setUserSource(trigger.userSources.length > 1 ? trigger.userSources[1] : userDefault);
+        setBotSource(normalizeBotSource(trigger.userSources.length > 0 ? trigger.userSources[0] : botDefault, botAllowed, botDefault, nextBotName.length > 0));
         setBubbleWidth(trigger.intData.length > 1 ? trigger.intData[1] : -1);
     }, [trigger]);
 
@@ -50,11 +50,11 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
             save={save}
             footer={
                 <div className="flex flex-col gap-2">
-                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
+                    <WiredSourcesSelector showUsers={true} userSlot={1} userSource={userSource} onChangeUsers={setUserSource} />
                     <hr className="m-0 bg-dark" />
                     <WiredSourcesSelector
                         showUsers={true}
-                        userSlot={1}
+                        userSlot={0}
                         userSource={botSource}
                         usersTitle="wiredfurni.params.sources.users.title.bots"
                         onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botAllowed, botDefault, botName.length > 0))}

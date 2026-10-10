@@ -9,6 +9,7 @@ import { WiredVariablePicker } from '../WiredVariablePicker';
 import { buildWiredVariablePickerEntries, WiredVariablePickerTarget } from '../WiredVariablePickerData';
 import { tokenOfVariableSlot, variableSlotOf, WIRED_VARIABLE_ABSENT } from '../../../../api';
 import { useWiredNativeVariables } from '../../../../hooks';
+import { FurniPickSlotButtons } from '../conditions/WiredVariableConditionParts';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 
 const MIN_FILTER = 1;
@@ -25,11 +26,10 @@ const COUNT_TARGETS: { target: WiredVariablePickerTarget; code: number; label: s
 const clampCount = (value: number) => (Number.isFinite(value) ? Math.min(MAX_FILTER, Math.max(MIN_FILTER, Math.trunc(value))) : MIN_FILTER);
 
 /**
- * The filter cards: owned [count, option (0 value, 1 variable), variable target]; the filtered side is the furni (F)
- * or the users (U) source; the count variable is the one variable slot.
+ * The filter cards: owned [count, option (0 value, 1 variable), variable target]; the source groups select the reference-variable holder; the count variable is the one variable slot.
  */
 export const WiredExtraFilterCountView: FC<{ furni: boolean }> = ({ furni }) => {
-    const { trigger = null, setIntParams = null, setStringParam = null, setVariableIds = null, setFurniSources = null, setUserSources = null } = useWired();
+    const { trigger = null, setIntParams = null, setStringParam = null, setVariableIds = null, setFurniSources = null, setUserSources = null, furniIds = [], secondaryFurniIds = [] } = useWired();
     const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     const [count, setCount] = useState(MIN_FILTER);
     const [useVariable, setUseVariable] = useState(false);
@@ -73,8 +73,8 @@ export const WiredExtraFilterCountView: FC<{ furni: boolean }> = ({ furni }) => 
         setIntParams([clampCount(count), useVariable ? 1 : 0, code]);
         setStringParam('');
         setVariableIds([useVariable ? variableSlotOf(variableToken) : WIRED_VARIABLE_ABSENT]);
-        setFurniSources([furni ? furniSource : 100]);
-        setUserSources([furni ? userDefault : userSource]);
+        setFurniSources([useVariable && target === 'furni' ? furniSource : 0]);
+        setUserSources([useVariable && target === 'user' ? userSource : 0]);
     };
 
     const validate = () => !useVariable || !!variableToken;
@@ -82,11 +82,15 @@ export const WiredExtraFilterCountView: FC<{ furni: boolean }> = ({ furni }) => 
     return (
         <WiredExtraBaseView
             hasSpecialInput={true}
-            requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
+            requiresFurni={useVariable && target === 'furni' && (furniSource === 100 || furniSource === 101) ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             validate={validate}
             cardStyle={{ width: 360 }}
-            footer={furni ? <WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={setFurniSource} /> : <WiredSourcesSelector showUsers={true} userSlot={0} userSource={userSource} onChangeUsers={setUserSource} />}
+            footer={useVariable ? <>
+                {target === 'furni' && <><WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={setFurniSource} />
+                    <FurniPickSlotButtons slots={furniSource === 100 ? [{ slot: 0, count: furniIds.length }] : furniSource === 101 ? [{ slot: 1, count: secondaryFurniIds.length }] : []} /></>}
+                {target === 'user' && <WiredSourcesSelector showUsers={true} userSlot={0} userSource={userSource} onChangeUsers={setUserSource} />}
+            </> : null}
         >
             <div className="flex flex-col gap-1">
                 <Text bold>{localizeWithFallback('wiredfurni.params.setfilter', 'Amount')}</Text>

@@ -475,9 +475,8 @@ export interface IWiredVariableFxParams {
     source: number;
     visibility: number;
     showMode: number;
-    /** The server validates these two ints but nothing reads them; they are kept as stored. */
-    reservedFlags: number;
-    reservedToggle: number;
+    updateMask: number;
+    showOnMouseHover: number;
     showDurationMs: number;
     styleId: number;
     colorId: number;
@@ -502,8 +501,8 @@ export const defaultWiredVariableFxParams = (category: number = WIRED_FX_CATEGOR
         source: WIRED_FX_SOURCE.USER,
         visibility: WIRED_FX_VISIBILITY.EVERYONE,
         showMode: WIRED_FX_SHOW_MODE.ALWAYS,
-        reservedFlags: 0,
-        reservedToggle: 0,
+        updateMask: 0,
+        showOnMouseHover: 0,
         showDurationMs: WIRED_FX_SHOW_DURATION_DEFAULT_MS,
         styleId: style.styleId,
         colorId: style.defaultColorId,
@@ -540,8 +539,8 @@ export const readWiredVariableFxParams = (intData: number[], category: number): 
         source,
         visibility: source === WIRED_FX_SOURCE.FURNI && visibility < WIRED_FX_VISIBILITY.EVERYONE ? WIRED_FX_VISIBILITY.EVERYONE : visibility,
         showMode: clamp(int(intData, 2, defaults.showMode), WIRED_FX_SHOW_MODE.ALWAYS, WIRED_FX_SHOW_MODE.NEVER),
-        reservedFlags: clamp(int(intData, 3, 0), 0, 15),
-        reservedToggle: int(intData, 4, 0) === 1 ? 1 : 0,
+        updateMask: clamp(int(intData, 3, 0), 0, 15),
+        showOnMouseHover: int(intData, 4, 0) === 1 ? 1 : 0,
         showDurationMs: clamp(int(intData, 5, defaults.showDurationMs), WIRED_FX_SHOW_DURATION_MIN_MS, WIRED_FX_SHOW_DURATION_MAX_MS),
         styleId,
         colorId: pick(int(intData, 7, defaults.colorId), style.colorIds, style.defaultColorId),
@@ -585,8 +584,8 @@ export const writeWiredVariableFxParams = (params: IWiredVariableFxParams, categ
         source,
         visibility,
         clamp(params.showMode, WIRED_FX_SHOW_MODE.ALWAYS, WIRED_FX_SHOW_MODE.NEVER),
-        clamp(params.reservedFlags, 0, 15),
-        params.reservedToggle === 1 ? 1 : 0,
+        clamp(params.updateMask, 0, 15),
+        params.showOnMouseHover === 1 ? 1 : 0,
         clamp(params.showDurationMs, WIRED_FX_SHOW_DURATION_MIN_MS, WIRED_FX_SHOW_DURATION_MAX_MS),
         style.styleId,
         pick(params.colorId, style.colorIds, style.defaultColorId),
@@ -616,6 +615,7 @@ export interface IWiredVariableFxConfigLike {
     widthId: number;
     rendererId: number;
     showMode: number;
+    showOnMouseHover?: number | boolean;
     showDurationMs: number;
     defaultMinValue: number;
     defaultMaxValue: number;
@@ -722,12 +722,13 @@ export const formatWiredVariableFxValue = (value: number): string => {
  * Whether a value is on screen right now: always, never, or only for the show duration after it
  * last changed. Returns the moment it hides, or null when that never happens on its own.
  */
-export const wiredVariableFxVisibleUntil = (config: IWiredVariableFxConfigLike, changedAt: number, now: number): { visible: boolean; until: number | null } => {
+export const wiredVariableFxVisibleUntil = (config: IWiredVariableFxConfigLike, visibleUntil: number, now: number, hovered = false): { visible: boolean; until: number | null } => {
+    if (config.showMode !== WIRED_FX_SHOW_MODE.ALWAYS && config.showOnMouseHover && hovered) return { visible: true, until: null };
     switch (config.showMode) {
         case WIRED_FX_SHOW_MODE.NEVER:
             return { visible: false, until: null };
         case WIRED_FX_SHOW_MODE.WHEN_CHANGES: {
-            const until = changedAt + Math.max(WIRED_FX_SHOW_DURATION_MIN_MS, config.showDurationMs || 0);
+            const until = visibleUntil;
 
             return { visible: now < until, until };
         }

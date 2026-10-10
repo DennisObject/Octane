@@ -9,8 +9,9 @@ import { useWired } from '../../../../hooks';
 import { WIRED_VARIABLE_ABSENT, tokenOfVariableSlot, variableSlotOf } from '../../../../api';
 import { useWiredNativeVariables } from '../../../../hooks';
 import { OctaneInput } from '../../../../layout';
+import { FurniPickSlotButtons } from '../conditions/WiredVariableConditionParts';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
-import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
+import { nativeSourceOptions, sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries, WiredVariablePickerTarget } from '../WiredVariablePickerData';
 import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
@@ -30,6 +31,7 @@ const STRENGTH_MIN = -1000;
 const STRENGTH_MAX = 1000;
 const STRENGTH_DEFAULT = 80;
 const SOURCE_TRIGGER = 0;
+const SOURCE_SELECTED = 100;
 const SOURCE_SECONDARY_SELECTED = 101;
 
 const TARGETS: Array<{ key: VariableTarget; value: number; icon: string }> = [
@@ -39,15 +41,6 @@ const TARGETS: Array<{ key: VariableTarget; value: number; icon: string }> = [
     { key: 'context', value: -20, icon: contextVariableIcon }
 ];
 
-const FURNI_SOURCES: WiredSourceOption[] = sortWiredSourceOptions(
-    [
-        { value: SOURCE_TRIGGER, label: 'wiredfurni.params.sources.furni.0' },
-        { value: SOURCE_SECONDARY_SELECTED, label: 'wiredfurni.params.sources.furni.101' },
-        { value: 200, label: 'wiredfurni.params.sources.furni.200' },
-        { value: 201, label: 'wiredfurni.params.sources.furni.201' }
-    ],
-    'furni'
-);
 const GLOBAL_SOURCES: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: 'wiredfurni.params.sources.global' }];
 const CONTEXT_SOURCES: WiredSourceOption[] = [{ value: SOURCE_TRIGGER, label: localizeWithFallback('wiredfurni.params.sources.context', 'Context variables') }];
 
@@ -56,7 +49,7 @@ const targetOf = (value: number): VariableTarget => TARGETS.find((target) => tar
 const targetValue = (key: VariableTarget) => TARGETS.find((target) => target.key === key)?.value ?? 0;
 
 export const WiredExtraMovementCurveView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setFurniIds = null, setIntParams = null, setStringParam = null, setUserSources = null, setFurniSources = null, setVariableIds = null } = useWired();
+    const { trigger = null, furniIds = [], secondaryFurniIds = [], activePickSlot = 0, setActivePickSlot = null, setIntParams = null, setStringParam = null, setUserSources = null, setFurniSources = null, setVariableIds = null } = useWired();
     const { userVariableDefinitions = [], furniVariableDefinitions = [], roomVariableDefinitions = [], contextVariableDefinitions = [] } = useWiredNativeVariables();
     const [strengthInput, setStrengthInput] = useState(String(STRENGTH_DEFAULT));
     const [fromVariable, setFromVariable] = useState(false);
@@ -83,8 +76,8 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
         return fallback ? [fallback, ...built] : built;
     }, [definitions, target, variableToken]);
 
-    const picksFurni = fromVariable && target === 'furni' && furniSource === SOURCE_SECONDARY_SELECTED;
-    const sourceOptions = target === 'furni' ? FURNI_SOURCES : target === 'global' ? GLOBAL_SOURCES : target === 'context' ? CONTEXT_SOURCES : userSources;
+    const picksFurni = fromVariable && target === 'furni' && (furniSource === SOURCE_SELECTED || furniSource === SOURCE_SECONDARY_SELECTED);
+    const sourceOptions = target === 'furni' ? nativeSourceOptions(trigger?.inputSources?.furniAllowed[0], 'furni') : target === 'global' ? GLOBAL_SOURCES : target === 'context' ? CONTEXT_SOURCES : userSources;
     const sourceValue = target === 'furni' ? furniSource : target === 'user' ? userSource : SOURCE_TRIGGER;
 
     useEffect(() => {
@@ -101,9 +94,12 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
         setVariableToken(tokenOfVariableSlot(trigger.variableIds[0]));
     }, [trigger]);
 
+    useEffect(() => {
+        if (picksFurni) setActivePickSlot(furniSource === SOURCE_SECONDARY_SELECTED ? 1 : 0);
+    }, [furniSource, picksFurni, setActivePickSlot]);
+
     const chooseTarget = (next: VariableTarget) => {
         if (next === target) return;
-        if (target === 'furni') setFurniIds([]);
 
         setTarget(next);
         setVariableToken('');
@@ -115,7 +111,6 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
         setVariableIds([fromVariable ? variableSlotOf(variableToken) : WIRED_VARIABLE_ABSENT]);
         setUserSources([userSource]);
         setFurniSources([furniSource]);
-        if (!picksFurni) setFurniIds([]);
     };
 
     return (
@@ -126,6 +121,7 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
             validate={() => !(fromVariable && !variableToken)}
         >
             <div className="octane-wired__give-var">
+                {picksFurni && <FurniPickSlotButtons slots={[furniSource === SOURCE_SECONDARY_SELECTED ? { slot: 1, count: secondaryFurniIds.length } : { slot: 0, count: furniIds.length }]} />}
                 <div className="octane-wired__give-var-section">
                     <div className="octane-wired__give-var-section-title">{localizeWithFallback('wiredfurni.params.movement_curve', 'Movement curve:')}</div>
                     <label className="octane-wired__change-var-radio">
@@ -176,10 +172,10 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
                 <div className={fromVariable ? '' : 'opacity-50 pointer-events-none'}>
                     <WiredFurniSelectionSourceRow
                         options={sourceOptions}
-                        selectionActive={true}
-                        selectionCount={furniIds.length}
-                        selectionEnabledValues={[SOURCE_SECONDARY_SELECTED]}
-                        selectionKind="primary"
+                        selectionActive={activePickSlot === (furniSource === SOURCE_SECONDARY_SELECTED ? 1 : 0)}
+                        selectionCount={furniSource === SOURCE_SECONDARY_SELECTED ? secondaryFurniIds.length : furniIds.length}
+                        selectionEnabledValues={[SOURCE_SELECTED, SOURCE_SECONDARY_SELECTED]}
+                        selectionKind={furniSource === SOURCE_SECONDARY_SELECTED ? "secondary" : "primary"}
                         selectionLimit={trigger?.maximumItemSelectionCount ?? 0}
                         showSelectionToggle={false}
                         title="wiredfurni.params.sources.merged.title.variables_reference"
@@ -187,7 +183,7 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
                         onChange={(value) => {
                             if (target === 'furni') {
                                 setFurniSource(value);
-                                if (value !== SOURCE_SECONDARY_SELECTED) setFurniIds([]);
+                                if (value === SOURCE_SELECTED || value === SOURCE_SECONDARY_SELECTED) setActivePickSlot(value === SOURCE_SECONDARY_SELECTED ? 1 : 0);
                                 return;
                             }
 

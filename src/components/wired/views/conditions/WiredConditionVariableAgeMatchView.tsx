@@ -16,17 +16,19 @@ const COMPARE_UPDATED = 1;
 /** Comparison as the native form sends it: 0 is "younger than" (<), 2 is "older than" (>). */
 const COMPARISON_LESS = 0;
 const COMPARISON_GREATER = 2;
-const DURATION_MAX = 1000000;
+const DURATION_MAX = 2147483647;
+const DURATION_MIN = -2147483648;
 const DURATION_UNITS = [0, 1, 2, 3, 4, 5, 6, 7];
 const SCOPES: WiredNativeVariableScope[] = ['furni', 'user', 'global', 'context'];
 const FURNI_SOURCE_SELECTED = 100;
+const FURNI_SOURCE_SECONDARY_SELECTED = 101;
 
 /**
  * Owned: [target, comparison (0 below, 2 above), clock (0 creation, 1 last update), 0, duration, time unit];
  * furni: [the holder's furni source]; users: [the holder's user source]; variables: [the variable]; the text is empty.
  */
 export const WiredConditionVariableAgeMatchView: FC<{}> = () => {
-    const { trigger = null, furniIds = [], setFurniIds = null, quantifier = 0, setQuantifier = null, setIntParams = null, setStringParam = null, setVariableIds = null, setFurniSources = null, setUserSources = null } =
+    const { trigger = null, furniIds = [], secondaryFurniIds = [], setActivePickSlot = null, quantifier = 0, setQuantifier = null, setIntParams = null, setStringParam = null, setVariableIds = null, setFurniSources = null, setUserSources = null } =
         useWired();
     const [scope, setScope] = useState<WiredNativeVariableScope>('user');
     const [variableToken, setVariableToken] = useState('');
@@ -38,7 +40,11 @@ export const WiredConditionVariableAgeMatchView: FC<{}> = () => {
     const [furniSource, setFurniSource] = useState(0);
     const entries = useVariableScopeEntries(scope, 'condition', variableToken);
 
-    const picksFurni = scope === 'furni' && furniSource === FURNI_SOURCE_SELECTED;
+    const picksFurni = scope === 'furni' && (furniSource === FURNI_SOURCE_SELECTED || furniSource === FURNI_SOURCE_SECONDARY_SELECTED);
+    useEffect(() => {
+        if (picksFurni) setActivePickSlot(furniSource === FURNI_SOURCE_SECONDARY_SELECTED ? 1 : 0);
+    }, [furniSource, picksFurni, setActivePickSlot]);
+
     const requiresFurni = picksFurni ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
 
     useEffect(() => {
@@ -62,15 +68,14 @@ export const WiredConditionVariableAgeMatchView: FC<{}> = () => {
     }, [compareValue, scope]);
 
     const parsedDuration = Number(durationInput.trim());
-    const durationValid = /^\d+$/.test(durationInput.trim()) && parsedDuration <= DURATION_MAX;
+    const durationValid = /^-?\d+$/.test(durationInput.trim()) && parsedDuration >= DURATION_MIN && parsedDuration <= DURATION_MAX;
 
     const save = () => {
-        setIntParams([targetCodeOfScope(scope), comparison, compareValue, 0, durationValid ? parsedDuration : 0, durationUnit]);
+        setIntParams([targetCodeOfScope(scope), comparison, compareValue, durationValid && parsedDuration < 0 ? -1 : 0, durationValid ? parsedDuration : 0, durationUnit]);
         setFurniSources([scope === 'furni' ? furniSource : 0]);
         setUserSources([scope === 'user' ? userSource : 0]);
         setVariableIds([variableSlotOf(variableToken)]);
         setStringParam('');
-        if (!picksFurni) setFurniIds([]);
     };
 
     const validate = () => {
@@ -101,7 +106,7 @@ export const WiredConditionVariableAgeMatchView: FC<{}> = () => {
                     <VariableQuantifierRadios name="wiredConditionVariableAgeQuantifier" value={quantifier} onChange={(value) => setQuantifier?.(value)} />
                     {scope === 'furni' && <WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={setFurniSource} />}
                     {scope === 'user' && <WiredSourcesSelector showUsers={true} userSlot={0} userSource={userSource} onChangeUsers={setUserSource} />}
-                    {picksFurni && <FurniPickSlotButtons slots={[{ slot: 0, count: furniIds.length }]} />}
+                    {picksFurni && <FurniPickSlotButtons slots={[furniSource === FURNI_SOURCE_SECONDARY_SELECTED ? { slot: 1, count: secondaryFurniIds.length } : { slot: 0, count: furniIds.length }]} />}
                 </div>
             }
         >
@@ -159,7 +164,7 @@ export const WiredConditionVariableAgeMatchView: FC<{}> = () => {
                         <OctaneInput
                             className="octane-wired__give-var-number"
                             type="number"
-                            min={0}
+                            min={DURATION_MIN}
                             max={DURATION_MAX}
                             value={durationInput}
                             onChange={(event) => setDurationInput(event.target.value)}

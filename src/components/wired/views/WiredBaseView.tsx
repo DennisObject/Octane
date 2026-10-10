@@ -72,6 +72,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         setStringParam = null,
         setFurniIds = null,
         furniIds = [],
+        secondaryFurniIds = [],
         setAllowsFurni = null,
         saveWired = null,
         saveWiredAndKeepOpen = null,
@@ -149,7 +150,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
         {
             id: 'clear-picks',
             label: localizeWithFallback('wiredfurni.params.menu.clear_picks', 'Clear furni picks'),
-            disabled: !canEdit || !furniIds?.length,
+            disabled: !canEdit || (!furniIds?.length && !secondaryFurniIds?.length),
             onClick: () => clearWiredPicks?.()
         },
         { id: 'reset', label: localizeWithFallback('wiredfurni.params.menu.reset', 'Reset to default'), disabled: !canEdit, onClick: () => resetWiredToDefault?.() },
@@ -183,7 +184,6 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
             if (prevValue && prevValue.length) WiredSelectionVisualizer.clearSelectionShaderFromFurni(prevValue);
 
             // A native inactive pick list is still saved editor data, even when this view cannot pick.
-            if (requiresFurni <= WiredFurniType.STUFF_SELECTION_OPTION_NONE && !trigger.inputSources) return [];
 
             if (trigger.selectedItems && trigger.selectedItems.length) {
                 WiredSelectionVisualizer.applySelectionShaderToFurni(trigger.selectedItems);
@@ -193,7 +193,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = (props) 
 
             return [];
         });
-    }, [trigger, requiresFurni, setFurniIds]);
+    }, [trigger, setFurniIds]);
 
     useEffect(() => {
         return () => clearRoomAreaSelection();

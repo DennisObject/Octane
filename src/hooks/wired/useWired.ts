@@ -325,7 +325,8 @@ const useWiredState = () => {
             } else if (newFurniIds.length < trigger.maximumItemSelectionCount) {
                 newFurniIds.push(pickedId);
 
-                WiredSelectionVisualizer.show(pickedId);
+                if (activePickSlot === 1) WiredSelectionVisualizer.applySecondarySelectionShaderToFurni([pickedId]);
+                else WiredSelectionVisualizer.show(pickedId);
             }
 
             return newFurniIds;
@@ -430,7 +431,11 @@ const useWiredState = () => {
 
             return [];
         });
-    }, [setFurniIds]);
+        setSecondaryFurniIds(previous => {
+            for (const id of previous) WiredSelectionVisualizer.hide(id);
+            return [];
+        });
+    }, [setFurniIds, setSecondaryFurniIds]);
 
     useMessageEvent<WiredValidationErrorEvent>(WiredValidationErrorEvent, (event) => {
         const parser = event.getParser();

@@ -322,6 +322,21 @@ export const WiredExtraVariableFxView: FC<WiredExtraVariableFxViewProps> = (prop
 
                 {select(localizeWithFallback('wiredfurni.params.variablefx.show', 'Show'), params.showMode, SHOW_MODE_OPTIONS, (showMode) => patch({ showMode }))}
 
+                <label className="flex items-center gap-1">
+                    <input type="checkbox" checked={params.showOnMouseHover === 1} onChange={event => patch({ showOnMouseHover: event.target.checked ? 1 : 0 })} />
+                    {localizeWithFallback('wiredfurni.params.variablefx.mouse_hover', 'Show on mouse hover')}
+                </label>
+                {params.showMode === WIRED_FX_SHOW_MODE.WHEN_CHANGES && (
+                    <div className="flex flex-wrap gap-2">
+                        {[[1, 'New value'], [2, 'Increase'], [4, 'Decrease'], [8, 'Unchanged']].map(([bit, label]) => (
+                            <label key={bit} className="flex items-center gap-1">
+                                <input type="checkbox" checked={(params.updateMask & Number(bit)) !== 0} onChange={event => patch({ updateMask: event.target.checked ? params.updateMask | Number(bit) : params.updateMask & ~Number(bit) })} />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+                )}
+
                 {params.showMode === WIRED_FX_SHOW_MODE.WHEN_CHANGES && (
                     <div className="flex items-center gap-1 pl-4">
                         <Text>{localizeWithFallback('wiredfurni.params.variablefx.show_duration', 'for (ms)')}</Text>

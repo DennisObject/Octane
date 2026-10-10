@@ -6,9 +6,9 @@ import { WiredSection } from './WiredSection';
 import { WiredText } from './WiredText';
 
 export const WiredFurniSelectorView: FC<{}> = () => {
-    const { trigger = null, furniIds = [] } = useWired();
+    const { trigger = null, furniIds = [], secondaryFurniIds = [], activePickSlot = 0 } = useWired();
 
-    const count = furniIds?.length ?? 0;
+    const count = (activePickSlot === 1 ? secondaryFurniIds : furniIds).length;
     const limit = trigger?.maximumItemSelectionCount ?? 0;
 
     // The shipped caption template historically omitted %count% ("Select Furni [/%limit%]"), so the
@@ -31,9 +31,9 @@ export const WiredFurniSelectorView: FC<{}> = () => {
 
 /** The native "pick furnis" section: the caption is the section title, the explanation the soft body text. */
 export const WiredFurniSelectorSection: FC<{}> = () => {
-    const { trigger = null, furniIds = [] } = useWired();
+    const { trigger = null, furniIds = [], secondaryFurniIds = [], activePickSlot = 0 } = useWired();
 
-    const count = furniIds?.length ?? 0;
+    const count = (activePickSlot === 1 ? secondaryFurniIds : furniIds).length;
     const limit = trigger?.maximumItemSelectionCount ?? 0;
     const rawCaption = LocalizeText('wiredfurni.pickfurnis.caption', ['count', 'limit'], [count.toString(), limit.toString()]);
     const caption = /\d+\s*\/\s*\d+/.test(rawCaption) ? rawCaption : rawCaption.replace(/\[\s*\//, `[${count}/`);

@@ -17,6 +17,7 @@ interface WiredConditionHasVariableViewProps {
 const SCOPES: WiredNativeVariableScope[] = ['furni', 'user', 'context'];
 /** The furni source that reads the selected furni, which the card needs picks for. */
 const FURNI_SOURCE_SELECTED = 100;
+const FURNI_SOURCE_SECONDARY_SELECTED = 101;
 
 /**
  * Owned: [target]; furni: [the holder's furni source]; users: [the holder's user source]; variables: [the variable];
@@ -26,7 +27,7 @@ export const WiredConditionHasVariableView: FC<WiredConditionHasVariableViewProp
     const {
         trigger = null,
         furniIds = [],
-        setFurniIds = null,
+        secondaryFurniIds = [], setActivePickSlot = null,
         quantifier = 0,
         setQuantifier = null,
         setIntParams = null,
@@ -41,7 +42,11 @@ export const WiredConditionHasVariableView: FC<WiredConditionHasVariableViewProp
     const [userSource, setUserSource] = useState(0);
     const entries = useVariableScopeEntries(scope, 'condition', variableToken);
 
-    const picksFurni = scope === 'furni' && furniSource === FURNI_SOURCE_SELECTED;
+    const picksFurni = scope === 'furni' && (furniSource === FURNI_SOURCE_SELECTED || furniSource === FURNI_SOURCE_SECONDARY_SELECTED);
+    useEffect(() => {
+        if (picksFurni) setActivePickSlot(furniSource === FURNI_SOURCE_SECONDARY_SELECTED ? 1 : 0);
+    }, [furniSource, picksFurni, setActivePickSlot]);
+
     const requiresFurni = picksFurni ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
 
     useEffect(() => {
@@ -59,7 +64,6 @@ export const WiredConditionHasVariableView: FC<WiredConditionHasVariableViewProp
         setUserSources([scope === 'user' ? userSource : 0]);
         setVariableIds([variableSlotOf(variableToken)]);
         setStringParam('');
-        if (!picksFurni) setFurniIds([]);
     };
 
     const validate = () => !!variableToken;
@@ -87,7 +91,7 @@ export const WiredConditionHasVariableView: FC<WiredConditionHasVariableViewProp
                     />
                     {scope === 'furni' && <WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={setFurniSource} />}
                     {scope === 'user' && <WiredSourcesSelector showUsers={true} userSlot={0} userSource={userSource} onChangeUsers={setUserSource} />}
-                    {picksFurni && <FurniPickSlotButtons slots={[{ slot: 0, count: furniIds.length }]} />}
+                    {picksFurni && <FurniPickSlotButtons slots={[furniSource === FURNI_SOURCE_SECONDARY_SELECTED ? { slot: 1, count: secondaryFurniIds.length } : { slot: 0, count: furniIds.length }]} />}
                 </div>
             }
         >

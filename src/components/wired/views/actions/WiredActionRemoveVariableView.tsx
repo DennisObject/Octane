@@ -14,6 +14,7 @@ import { normalizeNativeSource } from '../../../../api';
 import { WiredVariablePicker } from '../WiredVariablePicker';
 import { buildWiredVariablePickerEntries, createFallbackVariableEntry, flattenWiredVariablePickerEntries } from '../WiredVariablePickerData';
 import { createNativeVariableToken, getNativeVariableId } from '../../../../api';
+import { FurniPickSlotButtons } from '../conditions/WiredVariableConditionParts';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 type VariableTargetType = 'user' | 'furni' | 'context';
@@ -59,7 +60,8 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
         actionDelay = 0,
         setActionDelay = null,
         setIntParams = null,
-        setFurniIds = null,
+        secondaryFurniIds = [],
+        setActivePickSlot = null,
         setStringParam = null,
         setVariableIds = null,
         setUserSources = null,
@@ -151,10 +153,15 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
         setVariableIds([variableSlotOf(selectedVariableToken)]);
         setUserSources([userSource]);
         setFurniSources([furniSource]);
-        setFurniIds(selectedTargetType === 'furni' && furniSource === SOURCE_SELECTED ? [...furniIds] : []);
     };
 
     const validate = () => !!getNativeVariableId(selectedVariableToken);
+
+    const picksFurni = selectedTargetType === 'furni' && (furniSource === 100 || furniSource === 101);
+
+    useEffect(() => {
+        if (picksFurni) setActivePickSlot(furniSource === 101 ? 1 : 0);
+    }, [furniSource, picksFurni, setActivePickSlot]);
 
     const requiresFurni =
         selectedTargetType === 'furni' ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
@@ -190,6 +197,7 @@ export const WiredActionRemoveVariableView: FC<{}> = () => {
     return (
         <WiredActionBaseView hasSpecialInput={true} requiresFurni={requiresFurni} save={save} validate={validate} cardStyle={{ width: 244 }} hideDelay={true}>
             <div className="octane-wired__give-var">
+                {picksFurni && <FurniPickSlotButtons slots={[furniSource === 101 ? { slot: 1, count: secondaryFurniIds.length } : { slot: 0, count: furniIds.length }]} />}
                 <div className="octane-wired__give-var-heading">
                     <Text>{LocalizeText('wiredfurni.params.variables.variable_selection')}</Text>
                     <div className="octane-wired__give-var-targets">

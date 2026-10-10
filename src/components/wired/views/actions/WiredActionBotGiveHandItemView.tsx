@@ -15,16 +15,16 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
     const [userSource, setUserSource] = useState<number>(0);
     const [botSource, setBotSource] = useState<number>(WIRED_BOT_NAMED_SOURCE);
     const { trigger = null, setStringParam = null, setIntParams = null, setUserSources = null } = useWired();
-    const botAllowed = trigger?.inputSources?.usersAllowed[1];
-    const botDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
-    const userAllowed = trigger?.inputSources?.usersAllowed[0];
-    const userDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const botAllowed = trigger?.inputSources?.usersAllowed[0];
+    const botDefault = trigger?.inputSources?.userDefaults[0] ?? 0;
+    const userAllowed = trigger?.inputSources?.usersAllowed[1];
+    const userDefault = trigger?.inputSources?.userDefaults[1] ?? 0;
 
     const save = () => {
         setStringParam(botSource === WIRED_BOT_NAMED_SOURCE ? botName : '');
-        // owned: [hand item]; users: [receiving user, bot].
+        // owned: [hand item]; users: [bot, receiving user].
         setIntParams([handItemId]);
-        setUserSources([userSource, botSource]);
+        setUserSources([botSource, userSource]);
     };
 
     useEffect(() => {
@@ -33,8 +33,8 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
         const nextBotName = trigger.stringData || '';
         setBotName(nextBotName);
         setHandItemId(trigger.intData.length > 0 ? trigger.intData[0] : -1);
-        setUserSource(normalizeBotSource(trigger.userSources[0] ?? userDefault, userAllowed, userDefault, false));
-        setBotSource(normalizeBotSource(trigger.userSources[1] ?? botDefault, botAllowed, botDefault, nextBotName.length > 0));
+        setUserSource(normalizeBotSource(trigger.userSources[1] ?? userDefault, userAllowed, userDefault, false));
+        setBotSource(normalizeBotSource(trigger.userSources[0] ?? botDefault, botAllowed, botDefault, nextBotName.length > 0));
     }, [botAllowed, botDefault, trigger, userAllowed, userDefault]);
 
     return (
@@ -47,7 +47,7 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
                 <>
                     <WiredSourcesSelector
                         showUsers={true}
-                        userSlot={1}
+                        userSlot={0}
                         userSource={botSource}
                         usersTitle="wiredfurni.params.sources.users.title.bots"
                         allowClickedUserSource={false}
@@ -55,6 +55,7 @@ export const WiredActionBotGiveHandItemView: FC<{}> = (props) => {
                     />
                     <WiredSourcesSelector
                         showUsers={true}
+                        userSlot={1}
                         userSource={userSource}
                         onChangeUsers={(value) => setUserSource(normalizeBotSource(value, userAllowed, userDefault, false))}
                     />

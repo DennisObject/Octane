@@ -25,7 +25,7 @@ const SCOPES: WiredNativeVariableScope[] = ['furni', 'user', 'global', 'context'
 /** The reference option: a typed constant, or the value of another variable. */
 const REFERENCE_CONSTANT = 0;
 const REFERENCE_VARIABLE = 1;
-/** The furni sources that take picks: the selected furni of the destination, and the secondary picks of the reference. */
+/** Native furni sources 100 and 101 read the primary and secondary pick lists, regardless of variable role. */
 const FURNI_SOURCE_SELECTED = 100;
 const FURNI_SOURCE_SECONDARY_SELECTED = 101;
 
@@ -39,9 +39,8 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
     const {
         trigger = null,
         furniIds = [],
-        setFurniIds = null,
+        setActivePickSlot = null,
         secondaryFurniIds = [],
-        setSecondaryFurniIds = null,
         quantifier = 0,
         setQuantifier = null,
         setIntParams = null,
@@ -65,8 +64,8 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
     const referenceEntries = useVariableScopeEntries(referenceScope, 'change-reference', referenceToken);
 
     const usesReference = option === REFERENCE_VARIABLE;
-    const picksFurni = scope === 'furni' && furniSource === FURNI_SOURCE_SELECTED;
-    const picksReference = usesReference && referenceScope === 'furni' && referenceFurniSource === FURNI_SOURCE_SECONDARY_SELECTED;
+    const picksFurni = scope === 'furni' && (furniSource === FURNI_SOURCE_SELECTED || furniSource === FURNI_SOURCE_SECONDARY_SELECTED);
+    const picksReference = usesReference && referenceScope === 'furni' && (referenceFurniSource === FURNI_SOURCE_SELECTED || referenceFurniSource === FURNI_SOURCE_SECONDARY_SELECTED);
     const requiresFurni = picksFurni || picksReference ? WiredFurniType.STUFF_SELECTION_OPTION_BY_ID : WiredFurniType.STUFF_SELECTION_OPTION_NONE;
 
     useEffect(() => {
@@ -85,7 +84,9 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
         setReferenceFurniSource(trigger.furniSources?.[1] ?? 0);
         setUserSource(trigger.userSources?.[0] ?? 0);
         setReferenceUserSource(trigger.userSources?.[1] ?? 0);
-    }, [trigger]);
+        if (scopeOfTargetCode(ints[0]) === 'furni' && [100, 101].includes(trigger.furniSources?.[0])) setActivePickSlot(trigger.furniSources[0] === 101 ? 1 : 0);
+        else if (ints[2] === REFERENCE_VARIABLE && scopeOfTargetCode(ints[5]) === 'furni' && [100, 101].includes(trigger.furniSources?.[1])) setActivePickSlot(trigger.furniSources[1] === 101 ? 1 : 0);
+    }, [setActivePickSlot, trigger]);
 
     const constantValid = parseWiredLiteral(constantInput.trim()) !== null;
 
@@ -97,8 +98,6 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
         setFurniSources([scope === 'furni' ? furniSource : 0, usesReference && referenceScope === 'furni' ? referenceFurniSource : 0]);
         setUserSources([scope === 'user' ? userSource : 0, usesReference && referenceScope === 'user' ? referenceUserSource : 0]);
         setStringParam('');
-        setFurniIds(picksFurni ? furniIds : []);
-        setSecondaryFurniIds?.(picksReference ? secondaryFurniIds : []);
     };
 
     const validate = () => {
@@ -133,7 +132,7 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
             footer={
                 <div className="flex flex-col gap-2">
                     <VariableQuantifierRadios name="wiredConditionVariableValueQuantifier" value={quantifier} onChange={(value) => setQuantifier?.(value)} />
-                    {scope === 'furni' && <WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={setFurniSource} />}
+                    {scope === 'furni' && <WiredSourcesSelector showFurni={true} furniSlot={0} furniSource={furniSource} onChangeFurni={(value) => { setFurniSource(value); if (value === 100 || value === 101) setActivePickSlot(value === 101 ? 1 : 0); }} />}
                     {scope === 'user' && <WiredSourcesSelector showUsers={true} userSlot={0} userSource={userSource} onChangeUsers={setUserSource} />}
                     {usesReference && referenceScope === 'furni' && (
                         <WiredSourcesSelector
@@ -141,7 +140,7 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
                             furniSlot={1}
                             furniSource={referenceFurniSource}
                             furniTitle="wiredfurni.params.sources.merged.title.variables_reference"
-                            onChangeFurni={setReferenceFurniSource}
+                            onChangeFurni={(value) => { setReferenceFurniSource(value); if (value === 100 || value === 101) setActivePickSlot(value === 101 ? 1 : 0); }}
                         />
                     )}
                     {usesReference && referenceScope === 'user' && (
@@ -155,8 +154,8 @@ export const WiredConditionVariableValueMatchView: FC<{}> = () => {
                     )}
                     <FurniPickSlotButtons
                         slots={[
-                            ...(picksFurni ? [{ slot: 0 as const, count: furniIds.length }] : []),
-                            ...(picksReference ? [{ slot: 1 as const, count: secondaryFurniIds.length }] : [])
+                            ...((picksFurni && furniSource === 100 || picksReference && referenceFurniSource === 100) ? [{ slot: 0 as const, count: furniIds.length }] : []),
+                            ...((picksFurni && furniSource === 101 || picksReference && referenceFurniSource === 101) ? [{ slot: 1 as const, count: secondaryFurniIds.length }] : [])
                         ]}
                     />
                 </div>
