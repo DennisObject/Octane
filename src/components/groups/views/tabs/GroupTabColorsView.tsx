@@ -1,4 +1,4 @@
-import { GroupSaveColorsComposer } from '@octane/renderer';
+import { GroupSaveColorsComposer } from '@volt/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { IGroupData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { useGroup } from '../../../../hooks';
@@ -98,7 +98,7 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
     if (!colors) return null;
 
     return (
-        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+        <div className="volt-group-native__step-body" style={{ top: STEP_Y }}>
             <GroupText align="center" text={LocalizeText('group.edit.color.guild.color')} textStyle="u_bold" width={92} x={13} y={8} />
             <GroupBox height={46} kind="outline" width={92} x={13} y={29}>
                 <GroupBox height={38} kind="tan" width={84} x={4} y={4}>
@@ -110,14 +110,14 @@ export const GroupTabColorsView: FC<GroupTabColorsViewProps> = (props) => {
             <GroupText align="center" text={LocalizeText('group.edit.color.primary.color')} textStyle="u_bold" width={142} x={128} y={8} />
             <GroupText align="center" text={LocalizeText('group.edit.color.secondary.color')} textStyle="u_bold" width={100} x={280} y={8} />
             <GroupBox height={277} kind="dark" width={142} x={128} y={29}>
-                <div className="octane-group-native__color-grid" style={{ left: 3, top: 3, width: 138, gridTemplateColumns: 'repeat(9, 15px)' }}>
+                <div className="volt-group-native__color-grid" style={{ left: 3, top: 3, width: 138, gridTemplateColumns: 'repeat(9, 15px)' }}>
                     {groupCustomize?.groupColorsA.map((item) => (
                         <GroupColorChip key={item.id} color={item.color} selected={colors[0] === item.id} onSelect={() => selectColor(0, item.id)} />
                     ))}
                 </div>
             </GroupBox>
             <GroupBox height={277} kind="dark" width={96} x={280} y={29}>
-                <div className="octane-group-native__color-grid" style={{ left: 3, top: 3, width: 94, gridTemplateColumns: 'repeat(6, 15px)' }}>
+                <div className="volt-group-native__color-grid" style={{ left: 3, top: 3, width: 94, gridTemplateColumns: 'repeat(6, 15px)' }}>
                     {groupCustomize?.groupColorsB.map((item) => (
                         <GroupColorChip key={item.id} color={item.color} selected={colors[1] === item.id} onSelect={() => selectColor(1, item.id)} />
                     ))}

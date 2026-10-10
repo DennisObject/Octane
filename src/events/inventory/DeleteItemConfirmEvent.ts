@@ -1,7 +1,7 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 import { FurnitureItem } from '../../api';
 
-export class DeleteItemConfirmEvent extends OctaneEvent {
+export class DeleteItemConfirmEvent extends VoltEvent {
     public static DELETE_ITEM_CONFIRM: string = 'DICE_DELETE_ITEM_CONFIRM';
 
     constructor(

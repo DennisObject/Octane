@@ -1,4 +1,4 @@
-import { ExtendedForumData, GuildForumThread, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent } from '@octane/renderer';
+import { ExtendedForumData, GuildForumThread, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, FriendlyTime, LocalizeText, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
@@ -126,7 +126,7 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
 
     return (
         <ForumFrame
-            className="octane-group-forum-compose"
+            className="volt-group-forum-compose"
             height={470}
             initialPosition={initialPosition}
             title={LocalizeText('groupforum.compose.window_title')}
@@ -135,19 +135,19 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
             onClose={onClose}
             onHelp={() => CreateLinkEvent('habbopages/forums')}
         >
-            <div className="octane-forum__header" style={{ width: 453 }}>
-                <div className="octane-forum__header-icon">
-                    <div className="octane-forum__header-badge">
+            <div className="volt-forum__header" style={{ width: 453 }}>
+                <div className="volt-forum__header-icon">
+                    <div className="volt-forum__header-badge">
                         <LayoutBadgeImageView badgeCode={forumData.icon} isGroup={true} />
                     </div>
                 </div>
                 <GroupText background={FORUM_HEADER} height={30} overrides={{ size: 24, color: 0xffffff }} text={forumData.name} textStyle="u_headline_big" width={360} x={90} y={10} />
                 <GroupText background={FORUM_HEADER} height={40} overrides={flatText(12, { color: 0xffffff })} text={forumData.description} width={359} wrap x={90} y={40} />
             </div>
-            <div className="octane-forum__compose-bar" style={{ top: 96 }}>
+            <div className="volt-forum__compose-bar" style={{ top: 96 }}>
                 <GroupText background={0x227aad} overrides={flatText(12, { color: 0xeeeeee })} text={LocalizeText(isReply ? 'groupforum.compose.subject_replying_to' : 'groupforum.compose.subject')} x={1} y={1} />
             </div>
-            {(isReply || subject.length > 0) && <div className="octane-forum__compose-field" style={{ left: 0, top: 117, width: 444, height: 22 }} />}
+            {(isReply || subject.length > 0) && <div className="volt-forum__compose-field" style={{ left: 0, top: 117, width: 444, height: 22 }} />}
             {isReply ? (
                 <GroupText background={0xffffff} overrides={flatText(16)} text={compose.subject} x={0} y={117} />
             ) : (
@@ -156,9 +156,9 @@ export const GroupForumComposeView: FC<GroupForumComposeViewProps> = ({ compose,
                     setSubject(value); setIsHintShown(false);
                 }} />
             )}
-            <div className="octane-forum__compose-bar" style={{ top: 145 }}>
+            <div className="volt-forum__compose-bar" style={{ top: 145 }}>
                 <GroupText background={0x227aad} overrides={flatText(12, { color: 0xeeeeee })} text={LocalizeText('groupforum.compose.message')} x={1} y={1} />
-                <button className="octane-forum__help-link" type="button" onClick={() => CreateLinkEvent('habbopages/forums/formatting')}>
+                <button className="volt-forum__help-link" type="button" onClick={() => CreateLinkEvent('habbopages/forums/formatting')}>
                     <GroupText background={0x227aad} className="is-static" overrides={flatText(12, { color: 0xffffff, underline: true })} text={stripTags(LocalizeText('groupforum.compose.formatting_help'))} x={0} y={0} />
                 </button>
             </div>

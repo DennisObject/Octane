@@ -1,4 +1,4 @@
-import { GetRoomEngine, GetSessionDataManager } from '@octane/renderer';
+import { GetRoomEngine, GetSessionDataManager } from '@volt/renderer';
 import { FC } from 'react';
 import { CalendarItemState, GetConfigurationValue, ICalendarItem } from '../../api';
 import { Column, Flex, LayoutImage } from '../../common';

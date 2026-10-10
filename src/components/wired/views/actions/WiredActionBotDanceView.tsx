@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { localizeWithFallback, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 const DANCE_TYPES = [
@@ -40,7 +40,7 @@ export const WiredActionBotDanceView: FC<{}> = props =>
             save={ save }>
             <div className="flex flex-col gap-1">
                 <Text bold>{ localizeWithFallback('wiredfurni.params.bot.name', 'Bot name') }</Text>
-                <OctaneInput maxLength={ 32 } type="text" value={ botName } onChange={ event => setBotName(event.target.value) } />
+                <VoltInput maxLength={ 32 } type="text" value={ botName } onChange={ event => setBotName(event.target.value) } />
             </div>
             <div className="flex flex-col gap-1">
                 <Text bold>Dance</Text>

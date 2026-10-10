@@ -19,13 +19,13 @@ export const FurniEditorCopyValueView: FC<{ value: string | number; label?: stri
     return (
         <button
             aria-label={label || undefined}
-            className={`octane-furni-editor-copy ${copied ? 'is-copied' : ''}`}
+            className={`volt-furni-editor-copy ${copied ? 'is-copied' : ''}`}
             title={LocalizeText('furni.editor.copy.tip')}
             type="button"
             onClick={() => void CopyToClipboard(text).then((ok) => setCopied(ok))}
         >
-            <span className="octane-furni-editor-copy-value">{text}</span>
-            <span className="octane-furni-editor-copy-hint">{LocalizeText(copied ? 'furni.editor.copy.done' : 'furni.editor.copy')}</span>
+            <span className="volt-furni-editor-copy-value">{text}</span>
+            <span className="volt-furni-editor-copy-hint">{LocalizeText(copied ? 'furni.editor.copy.done' : 'furni.editor.copy')}</span>
         </button>
     );
 };

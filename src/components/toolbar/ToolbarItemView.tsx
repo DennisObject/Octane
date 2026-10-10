@@ -39,7 +39,7 @@ export const ToolbarItemView = ({ ref, icon = null, className = null, title, 'ar
             ref={ref}
             data-toolbar-tooltip={label}
             aria-label={ariaLabel ?? label}
-            className={classNames('cursor-pointer relative', `octane-icon icon-${icon}`, className)}
+            className={classNames('cursor-pointer relative', `volt-icon icon-${icon}`, className)}
             {...rest}
         />
     );

@@ -57,7 +57,7 @@ export const HousekeepingDashboardTab: FC = () => {
         <>
             <StaffSection title={LocalizeText('housekeeping.dashboard.title')}>
                 {dashboard ? (
-                    <table className="octane-staff-table">
+                    <table className="volt-staff-table">
                         <tbody>
                             {stats.map(([key, value]) => (
                                 <tr key={key}>
@@ -70,8 +70,8 @@ export const HousekeepingDashboardTab: FC = () => {
                 ) : (
                     <StaffEmpty>{LocalizeText(isDashboardLoading ? 'housekeeping.dashboard.loading' : 'housekeeping.dashboard.unavailable')}</StaffEmpty>
                 )}
-                <div className="octane-staff-row">
-                    <span className="grow octane-staff-muted">
+                <div className="volt-staff-row">
+                    <span className="grow volt-staff-muted">
                         {dashboardUpdatedAt ? LocalizeText('housekeeping.dashboard.updated', ['time'], [formatLogTime(dashboardUpdatedAt)]) : ''}
                     </span>
                     <Button disabled={isDashboardLoading} variant="secondary" onClick={() => refreshDashboard()}>
@@ -87,8 +87,8 @@ export const HousekeepingDashboardTab: FC = () => {
                     value={alertText}
                     onChange={(event) => setAlertText(event.target.value)}
                 />
-                <div className="octane-staff-row">
-                    <span className="grow octane-staff-muted">
+                <div className="volt-staff-row">
+                    <span className="grow volt-staff-muted">
                         {trimmedAlert.length} / {HK_MAX_ALERT_LENGTH}
                     </span>
                     <Button disabled={!trimmedAlert.length || isActionPending} variant="danger" onClick={submitAlert}>
@@ -98,7 +98,7 @@ export const HousekeepingDashboardTab: FC = () => {
             </StaffSection>
             {recentSanctions.length > 0 && (
                 <StaffSection title={LocalizeText('housekeeping.dashboard.recent_sanctions')}>
-                    <div className="octane-staff-list">
+                    <div className="volt-staff-list">
                         {recentSanctions.map((entry) => (
                             <HousekeepingLogRow key={entry.id} entry={entry} />
                         ))}
@@ -107,12 +107,12 @@ export const HousekeepingDashboardTab: FC = () => {
             )}
             {recentLookups.length > 0 && (
                 <StaffSection title={LocalizeText('housekeeping.dashboard.recent_lookups')}>
-                    <div className="octane-staff-list">
+                    <div className="volt-staff-list">
                         {recentLookups.map((entry) => (
-                            <button key={`${entry.kind}-${entry.id}`} className="octane-staff-list-row" type="button" onClick={() => openRecent(entry.kind, entry.id)}>
-                                <span className="octane-staff-muted">{LocalizeText(`housekeeping.audit.target.${entry.kind}`)}</span>
+                            <button key={`${entry.kind}-${entry.id}`} className="volt-staff-list-row" type="button" onClick={() => openRecent(entry.kind, entry.id)}>
+                                <span className="volt-staff-muted">{LocalizeText(`housekeeping.audit.target.${entry.kind}`)}</span>
                                 <span className="grow truncate">{entry.label}</span>
-                                <span className="octane-staff-muted">#{entry.id}</span>
+                                <span className="volt-staff-muted">#{entry.id}</span>
                             </button>
                         ))}
                     </div>

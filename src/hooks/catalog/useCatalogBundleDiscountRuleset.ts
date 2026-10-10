@@ -1,10 +1,10 @@
-import { BundleDiscountRuleset, BundleDiscountRulesetMessageEvent, GetBundleDiscountRulesetComposer } from '@octane/renderer';
+import { BundleDiscountRuleset, BundleDiscountRulesetMessageEvent, GetBundleDiscountRulesetComposer } from '@volt/renderer';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useOctaneQuery } from '../../api/octane-query';
+import { useVoltQuery } from '../../api/volt-query';
 
 export const useCatalogBundleDiscountRuleset = (options: { enabled?: boolean } = {}): UseQueryResult<BundleDiscountRuleset> =>
-    useOctaneQuery<BundleDiscountRulesetMessageEvent, BundleDiscountRuleset>({
-        key: ['octane', 'catalog', 'bundleDiscountRuleset'],
+    useVoltQuery<BundleDiscountRulesetMessageEvent, BundleDiscountRuleset>({
+        key: ['volt', 'catalog', 'bundleDiscountRuleset'],
         request: () => new GetBundleDiscountRulesetComposer(),
         parser: BundleDiscountRulesetMessageEvent,
         select: (event) => event.getParser().bundleDiscountRuleset,

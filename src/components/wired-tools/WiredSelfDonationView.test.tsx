@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
     furniture: [] as any[]
 }));
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     FurnitureType: { FLOOR: 'floor', WALL: 'wall' },
     GetSessionDataManager: () => ({ getAllFurnitureData: () => mocks.furniture }),
     SelfDonationMessageComposer: class {
@@ -41,9 +41,9 @@ vi.mock('../../common', () => ({
         </button>
     ),
     DraggableWindowPosition: { TOP_LEFT: 'top-left' },
-    OctaneCardView: ({ children }: PropsWithChildren) => <div>{children}</div>,
-    OctaneCardHeaderView: ({ headerText }: { headerText: string }) => <div>{headerText}</div>,
-    OctaneCardContentView: ({ children }: PropsWithChildren) => <div>{children}</div>,
+    VoltCardView: ({ children }: PropsWithChildren) => <div>{children}</div>,
+    VoltCardHeaderView: ({ headerText }: { headerText: string }) => <div>{headerText}</div>,
+    VoltCardContentView: ({ children }: PropsWithChildren) => <div>{children}</div>,
     Text: ({ children }: PropsWithChildren) => <span>{children}</span>
 }));
 

@@ -1,8 +1,8 @@
 /* Quests list (512x448) and QuestDetails (493x253) of the quest engine: frame style 3 windows whose entries are flat
    colour surfaces and questing bitmaps at the layout XML rects (HabboQuestEngineCom Quests, Campaign, Quest). */
 
-.octane-card-shell.octane-quests-air,
-.octane-card-shell.octane-quest-details-air {
+.volt-card-shell.volt-quests-air,
+.volt-card-shell.volt-quest-details-air {
     position: relative;
     box-sizing: border-box;
     min-width: 0 !important;
@@ -12,51 +12,51 @@
     resize: none !important;
     padding: 0 !important;
     border: 0 !important;
-    --octane-card-surface: #e9e9e1;
+    --volt-card-surface: #e9e9e1;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-card-shell.octane-quests-air {
+.volt-card-shell.volt-quests-air {
     width: 512px !important;
     height: 448px !important;
 }
 
-.octane-card-shell.octane-quest-details-air {
+.volt-card-shell.volt-quest-details-air {
     width: 493px !important;
 }
 
-.draggable-window:has(> .octane-quests-air) {
+.draggable-window:has(> .volt-quests-air) {
     width: 512px;
     height: 448px;
 }
 
-.draggable-window:has(> .octane-quest-details-air) {
+.draggable-window:has(> .volt-quest-details-air) {
     width: 493px;
 }
 
-.octane-quests-air *,
-.octane-quest-details-air * {
+.volt-quests-air *,
+.volt-quest-details-air * {
     box-sizing: border-box;
     font-family: HabboAirUbuntu, Ubuntu, sans-serif;
 }
 
-.octane-quests-air .air-quests-native-title,
-.octane-quest-details-air .air-quests-native-title {
+.volt-quests-air .air-quests-native-title,
+.volt-quest-details-air .air-quests-native-title {
     position: absolute !important;
     top: 3px;
     left: 50%;
     transform: translateX(-50%);
 }
 
-.octane-card-shell.octane-quests-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button,
-.octane-card-shell.octane-quest-details-air.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-card-shell.volt-quests-air.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button,
+.volt-card-shell.volt-quest-details-air.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     top: 2px !important;
     right: 3px !important;
 }
 
-.octane-quests-air .air-quests-content.octane-card-content-shell,
-.octane-quest-details-air .air-quest-details-content.octane-card-content-shell {
+.volt-quests-air .air-quests-content.volt-card-content-shell,
+.volt-quest-details-air .air-quest-details-content.volt-card-content-shell {
     position: relative;
     display: block;
     margin: 33px 0 0;
@@ -65,18 +65,18 @@
     overflow: visible;
 }
 
-.octane-quests-air .air-quests-content.octane-card-content-shell {
+.volt-quests-air .air-quests-content.volt-card-content-shell {
     width: 512px;
     height: 415px;
 }
 
-.octane-quest-details-air .air-quest-details-content.octane-card-content-shell {
+.volt-quest-details-air .air-quest-details-content.volt-card-content-shell {
     width: 493px;
 }
 
 /* ---- list ---- */
 
-.octane-quests-air .air-quests-list {
+.volt-quests-air .air-quests-list {
     position: absolute;
     top: 10px;
     left: 13px;
@@ -84,22 +84,22 @@
     height: 362px;
 }
 
-.octane-quests-air .air-quests-list > .octane-classic-scroll-area-viewport {
+.volt-quests-air .air-quests-list > .volt-classic-scroll-area-viewport {
     width: 473px;
     height: 362px;
 }
 
-.octane-quests-air .air-quests-entries {
+.volt-quests-air .air-quests-entries {
     width: 473px;
 }
 
-.octane-quests-air .air-quests-hc-info {
+.volt-quests-air .air-quests-hc-info {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
 
-.octane-quests-air .air-quest-get-hc {
+.volt-quests-air .air-quest-get-hc {
     position: absolute;
     top: 378px;
     left: 378px;
@@ -120,11 +120,11 @@
     margin-top: var(--air-quest-extra, 0px);
 }
 
-.octane-quests-air .air-quest-entry:last-child {
+.volt-quests-air .air-quest-entry:last-child {
     height: 114px;
 }
 
-.octane-quest-details-air .air-quest-entry {
+.volt-quest-details-air .air-quest-entry {
     margin: 11px 0 0 11px;
 }
 
@@ -178,7 +178,7 @@
     object-fit: none;
     /* pivot_point center places the bitmap at floor((field - bitmap) / 2); CSS rounds half a pixel up */
     object-position: calc(50% - 0.01px) calc(50% - 0.01px);
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-quest-counter {
@@ -314,7 +314,7 @@
     height: 72px;
     object-fit: none;
     object-position: calc(50% - 0.01px) calc(50% - 0.01px);
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-quest-completed-image {
@@ -360,7 +360,7 @@
     border-image-repeat: stretch;
     background: transparent;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-quest-accept:hover,
@@ -442,53 +442,53 @@
 
 /* ---- style 0 scrollbar (habbo_skin_scrollbar): 17x16 buttons, 1px track, lift = 2 row cap + stretched row + 2 row foot + a 7px grip ---- */
 
-.air-style0-scroll-area > .octane-classic-scroll-area-viewport {
+.air-style0-scroll-area > .volt-classic-scroll-area-viewport {
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: scroll;
     scrollbar-width: none !important;
 }
 
-.air-style0-scroll-area > .octane-classic-scroll-area-viewport::-webkit-scrollbar {
+.air-style0-scroll-area > .volt-classic-scroll-area-viewport::-webkit-scrollbar {
     display: none !important;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar {
+.air-style0-scroll-area > .volt-classic-scrollbar {
     top: 0;
     right: 0;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:hover {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up:hover {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-up:active {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-up:active {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-up-pressed.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:hover {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down:hover {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-button.is-down:active {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-button.is-down:active {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-down-pressed.png');
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-track {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-track {
     background-image: url('../../assets/images/habbo-skin/slices/scroll-track-v.png');
     background-repeat: repeat-y;
     background-size: 17px 1px;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-thumb {
     position: relative;
     min-height: 0;
     box-sizing: border-box;
@@ -501,8 +501,8 @@
     background-position: 5px 7px, 0 0;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before,
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-thumb::before,
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-thumb::after {
     position: absolute;
     left: 0;
     width: 17px;
@@ -512,17 +512,17 @@
     background-repeat: no-repeat;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::before {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-thumb::before {
     top: 0;
     background-position: 0 0;
 }
 
-.air-style0-scroll-area > .octane-classic-scrollbar .octane-classic-scrollbar-thumb::after {
+.air-style0-scroll-area > .volt-classic-scrollbar .volt-classic-scrollbar-thumb::after {
     bottom: 0;
     background-position: 0 -22px;
 }
 
-.octane-quest-details-air .air-quests-native-title {
+.volt-quest-details-air .air-quests-native-title {
     margin-left: -2px;
 }
 

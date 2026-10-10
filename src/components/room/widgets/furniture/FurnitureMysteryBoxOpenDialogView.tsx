@@ -4,10 +4,10 @@ import {
     GotMysteryBoxPrizeMessageEvent,
     MysteryBoxWaitingCanceledMessageComposer,
     ShowMysteryBoxWaitMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Flex, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { Button, Flex, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../../common';
 import { LayoutPrizeProductImageView } from '../../../../common/layout/LayoutPrizeProductImageView';
 import { useMessageEvent } from '../../../../hooks';
 
@@ -57,14 +57,14 @@ export const FurnitureMysteryBoxOpenDialogView: FC<FurnitureMysteryBoxOpenDialog
     if (mode === ViewMode.HIDDEN) return null;
 
     return (
-        <OctaneCardView className="octane-mysterybox-dialog" theme="primary-slim">
-            <OctaneCardHeaderView
+        <VoltCardView className="volt-mysterybox-dialog" theme="primary-slim">
+            <VoltCardHeaderView
                 headerText={
                     mode === ViewMode.WAITING ? LocalizeText(`mysterybox.dialog.${isOwner ? 'owner' : 'other'}.title`) : LocalizeText('mysterybox.reward.title')
                 }
                 onCloseClick={close}
             />
-            <OctaneCardContentView>
+            <VoltCardContentView>
                 {mode === ViewMode.WAITING && (
                     <>
                         <Text variant="primary"> {LocalizeText(`mysterybox.dialog.${isOwner ? 'owner' : 'other'}.subtitle`)} </Text>
@@ -88,7 +88,7 @@ export const FurnitureMysteryBoxOpenDialogView: FC<FurnitureMysteryBoxOpenDialog
                         </Button>
                     </>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredActionLayoutCode, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredTextCounter, WiredTextFormattingHelp } from '../common/WiredTextFormattingHelp';
 import { WiredBubbleWidthSelect } from '../WiredBubbleWidthSelect';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
@@ -85,7 +85,7 @@ export const WiredActionChatView: FC<{}> = (props) => {
                 {!field || field.multiline ? (
                     <>
                         <textarea
-                            className="form-control form-control-sm octane-wired__resizable-textarea"
+                            className="form-control form-control-sm volt-wired__resizable-textarea"
                             maxLength={maxMessageLength}
                             rows={4}
                             value={message}
@@ -95,7 +95,7 @@ export const WiredActionChatView: FC<{}> = (props) => {
                         {isChat && <WiredTextFormattingHelp />}
                     </>
                 ) : (
-                    <OctaneInput
+                    <VoltInput
                         maxLength={field.maxLength}
                         type={field.numeric ? 'number' : 'text'}
                         value={message}

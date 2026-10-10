@@ -22,7 +22,7 @@ const sound = vi.hoisted(() => {
     return { currentOffer, musicController };
 });
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     GetOfficialSongIdMessageComposer: class {},
     GetSoundManager: () => ({ musicController: sound.musicController }),
     MusicPriorities: { PRIORITY_PURCHASE_PREVIEW: 3 },
@@ -42,10 +42,10 @@ vi.mock('../../../../../hooks', () => ({
     useCatalogData: () => ({ currentOffer: sound.currentOffer }),
     useCatalogDisplayPreferences: () => ({ density: 'standard', showTilePrices: true }),
     useMessageEvent: vi.fn(),
-    useOctaneEvent: vi.fn()
+    useVoltEvent: vi.fn()
 }));
 
-vi.mock('../../../../../layout', () => ({ OctaneButton: ({ children, ...props }: any) => <button {...props}>{children}</button> }));
+vi.mock('../../../../../layout', () => ({ VoltButton: ({ children, ...props }: any) => <button {...props}>{children}</button> }));
 vi.mock('../widgets/CatalogItemGridWidgetView', () => ({ CatalogItemGridWidgetView: () => <div /> }));
 vi.mock('../widgets/CatalogPriceDisplayWidgetView', () => ({ CatalogPriceDisplayWidgetView: () => <div /> }));
 vi.mock('../widgets/CatalogPurchaseSelectionPrompt', () => ({ CatalogPurchaseSelectionPrompt: () => <div /> }));

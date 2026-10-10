@@ -7,7 +7,7 @@ const cssPath = join(process.cwd(), 'src/css/purse/PurseView.css');
 describe('PurseView.css', () => {
     it('lets shortened currency tooltips escape the compact purse frame', () => {
         const css = readFileSync(cssPath, 'utf8');
-        const purseBlock = css.match(/\.octane-purse\s*\{[^}]*\}/)?.[0] ?? '';
+        const purseBlock = css.match(/\.volt-purse\s*\{[^}]*\}/)?.[0] ?? '';
 
         expect(purseBlock).toContain('overflow: visible;');
     });
@@ -24,9 +24,9 @@ describe('PurseView.css', () => {
         expect(css).toContain('left: 174px');
         expect(css).toContain('#00c1c4');
         expect(css).not.toContain('--habbo-skin-shiny');
-        expect(css).not.toContain('.octane-purse::before');
-        expect(css).toMatch(/\.octane-purse__col--actions\s*\{[^}]*gap:\s*2px;/s);
-        expect(css).toMatch(/\.octane-purse__btn--join,\s*\n\.octane-purse__btn--earnings\s*\{[^}]*height:\s*28px;/s);
+        expect(css).not.toContain('.volt-purse::before');
+        expect(css).toMatch(/\.volt-purse__col--actions\s*\{[^}]*gap:\s*2px;/s);
+        expect(css).toMatch(/\.volt-purse__btn--join,\s*\n\.volt-purse__btn--earnings\s*\{[^}]*height:\s*28px;/s);
     });
 
 });

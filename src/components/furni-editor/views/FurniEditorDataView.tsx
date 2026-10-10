@@ -40,52 +40,52 @@ export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insi
             {entry && (
                 <StaffSection title={LocalizeText('furni.editor.data.structure')}>
                     {structureDiff.length === 0 ? (
-                        <p className="octane-staff-muted">
+                        <p className="volt-staff-muted">
                             {LocalizeText(furnidataState === 'editable' ? 'furni.editor.data.structure.in_sync' : 'furni.editor.data.structure.no_match')}
                         </p>
                     ) : (
                         <>
-                            <p className="octane-staff-muted">{LocalizeText('furni.editor.data.structure.hint')}</p>
-                            <table className="octane-staff-table">
+                            <p className="volt-staff-muted">{LocalizeText('furni.editor.data.structure.hint')}</p>
+                            <table className="volt-staff-table">
                                 <tbody>
                                     {structureDiff.map((row) => (
                                         <tr key={row.key}>
                                             <td>{row.key}</td>
-                                            <td className="octane-staff-muted">{formatFurniEditorValue(row.from)}</td>
+                                            <td className="volt-staff-muted">{formatFurniEditorValue(row.from)}</td>
                                             <td>{formatFurniEditorValue(row.to)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                             {rights.canEditFurnidata ? (
-                                <div className="octane-staff-row">
+                                <div className="volt-staff-row">
                                     <Button disabled={isBusy} variant="secondary" onClick={actions.writeStructure}>
                                         {LocalizeText('furni.editor.data.structure.write')}
                                     </Button>
                                 </div>
                             ) : (
-                                <p className="octane-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
+                                <p className="volt-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
                             )}
                         </>
                     )}
                 </StaffSection>
             )}
             {furnidataIdMismatch !== null && (
-                <p className="octane-furni-editor-warning" role="note">
+                <p className="volt-furni-editor-warning" role="note">
                     {furniEditorText('furni.editor.data.id_mismatch', { entryId: furnidataIdMismatch, spriteId: item.spriteId })}
                 </p>
             )}
             <FurniEditorRelatedView duplicates={insights.duplicates} siblings={insights.related.siblings} onOpen={onOpen} />
             {entry && (
-                <details className="octane-furni-editor-details">
+                <details className="volt-furni-editor-details">
                     <summary>{LocalizeText('furni.editor.data.entry')}</summary>
-                    <p className="octane-staff-muted">{LocalizeText('furni.editor.data.entry.hint')}</p>
-                    <pre className="octane-furni-editor-code">{JSON.stringify(entry, null, 2)}</pre>
+                    <p className="volt-staff-muted">{LocalizeText('furni.editor.data.entry.hint')}</p>
+                    <pre className="volt-furni-editor-code">{JSON.stringify(entry, null, 2)}</pre>
                 </details>
             )}
-            <details className="octane-furni-editor-details">
+            <details className="volt-furni-editor-details">
                 <summary>{LocalizeText('furni.editor.data.resolution')}</summary>
-                <table className="octane-staff-table">
+                <table className="volt-staff-table">
                     <tbody>
                         <tr>
                             <th>{LocalizeText('furni.editor.data.resolution.reason')}</th>
@@ -93,7 +93,7 @@ export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insi
                         </tr>
                         <tr>
                             <th>{LocalizeText('furni.editor.data.resolution.source')}</th>
-                            <td className="octane-furni-editor-break">{diagnostic?.sourcePath || LocalizeText('furni.editor.data.resolution.unresolved')}</td>
+                            <td className="volt-furni-editor-break">{diagnostic?.sourcePath || LocalizeText('furni.editor.data.resolution.unresolved')}</td>
                         </tr>
                         {diagnostic?.sourceStatus && (
                             <tr>
@@ -104,7 +104,7 @@ export const FurniEditorDataView: FC<FurniEditorDataViewProps> = ({ detail, insi
                         {diagnostic?.message && (
                             <tr>
                                 <th>{LocalizeText('furni.editor.data.resolution.message')}</th>
-                                <td className="octane-furni-editor-break">{diagnosticMessage(diagnostic.message)}</td>
+                                <td className="volt-furni-editor-break">{diagnosticMessage(diagnostic.message)}</td>
                             </tr>
                         )}
                     </tbody>

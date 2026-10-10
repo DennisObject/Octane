@@ -9,24 +9,24 @@ export const FurniEditorCatalogueView: FC<{ catalogItems: CatalogRef[] }> = ({ c
         {catalogItems.length === 0 ? (
             <StaffEmpty>{LocalizeText('furni.editor.catalogue.empty')}</StaffEmpty>
         ) : (
-            <table className="octane-staff-table">
+            <table className="volt-staff-table">
                 <thead>
                     <tr>
                         <th>{LocalizeText('furni.editor.catalogue.page')}</th>
                         <th>{LocalizeText('furni.editor.catalogue.offer')}</th>
-                        <th className="octane-furni-editor-end">{LocalizeText('furni.editor.catalogue.price')}</th>
+                        <th className="volt-furni-editor-end">{LocalizeText('furni.editor.catalogue.price')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {catalogItems.map((ref) => (
                         <tr key={ref.id}>
                             <td>
-                                {ref.pageName} <span className="octane-staff-muted">#{ref.pageId}</span>
+                                {ref.pageName} <span className="volt-staff-muted">#{ref.pageId}</span>
                             </td>
-                            <td className="octane-furni-editor-ellipsis">
-                                {ref.catalogName} <span className="octane-staff-muted">#{ref.id}</span>
+                            <td className="volt-furni-editor-ellipsis">
+                                {ref.catalogName} <span className="volt-staff-muted">#{ref.id}</span>
                             </td>
-                            <td className="octane-furni-editor-end">{formatCatalogPrice(ref)}</td>
+                            <td className="volt-furni-editor-end">{formatCatalogPrice(ref)}</td>
                         </tr>
                     ))}
                 </tbody>

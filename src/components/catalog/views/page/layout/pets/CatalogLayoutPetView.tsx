@@ -7,13 +7,13 @@ import {
     PurchaseFromCatalogComposer,
     RoomContentLoadedEvent,
     SellablePetPaletteData
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaCheck, FaLock, FaTimes } from 'react-icons/fa';
 import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../../../api';
 import { LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchasedEvent, CatalogPurchaseFailureEvent } from '../../../../../../events';
-import { useCatalogData, useCatalogUiState, useMessageEvent, useOctaneEvent, useSellablePetPalette, useUiEvent, useUserDataSnapshot } from '../../../../../../hooks';
+import { useCatalogData, useCatalogUiState, useMessageEvent, useVoltEvent, useSellablePetPalette, useUiEvent, useUserDataSnapshot } from '../../../../../../hooks';
 import { CatalogScrollAreaView } from '../../common/CatalogScrollAreaView';
 import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogTotalPriceWidget } from '../../widgets/CatalogTotalPriceWidget';
@@ -82,7 +82,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
         GetRoomContentLoader().downloadAsset(petTypeName);
     }, [petTypeName]);
 
-    useOctaneEvent<RoomContentLoadedEvent>(
+    useVoltEvent<RoomContentLoadedEvent>(
         RoomContentLoadedEvent.RCLE_SUCCESS,
         (event) => {
             if (event.contentType !== petTypeName) return;
@@ -247,11 +247,11 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
 
     return (
         <div
-            className={`octane-catalog-pet-layout ${legacyPet ? 'octane-catalog-pet-layout--legacy' : 'octane-catalog-pet-layout--new'}`}
+            className={`volt-catalog-pet-layout ${legacyPet ? 'volt-catalog-pet-layout--legacy' : 'volt-catalog-pet-layout--new'}`}
         >
-            <div className="octane-catalog-pet-preview relative h-[240px] min-h-[240px] overflow-hidden">
+            <div className="volt-catalog-pet-preview relative h-[240px] min-h-[240px] overflow-hidden">
                 {selectedPalette && (
-                    <div className="octane-catalog-pet-preview-image">
+                    <div className="volt-catalog-pet-preview-image">
                         <LayoutPetImageView
                             direction={legacyPet || petIndex === 15 ? 2 : 3}
                             paletteId={selectedPalette.paletteId}
@@ -262,26 +262,26 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                     </div>
                 )}
                 {!legacyPet && (
-                    <div className="octane-catalog-pet-breed-title">
+                    <div className="volt-catalog-pet-breed-title">
                         {selectedPalette
                             ? localizeWithFallback(`pet.breed.${petIndex}.${selectedPalette.breedId}`, currentOffer.localizationName || '')
                             : currentOffer.localizationName || ''}
                     </div>
                 )}
-                <CatalogAddOnBadgeWidgetView className="octane-catalog-pet-preview-badge" />
-                <div className="octane-catalog-pet-preview-price">
+                <CatalogAddOnBadgeWidgetView className="volt-catalog-pet-preview-badge" />
+                <div className="volt-catalog-pet-preview-price">
                     <CatalogTotalPriceWidget />
                 </div>
             </div>
 
-            <div className="octane-catalog-pet-editor">
+            <div className="volt-catalog-pet-editor">
                 {legacyPet ? (
                     <>
-                        <div className="octane-catalog-pet-field">
+                        <div className="volt-catalog-pet-field">
                             <span>{colorLabel}</span>
                             <CatalogScrollAreaView
-                                className="octane-catalog-pet-color-grid"
-                                contentClassName="octane-catalog-pet-color-grid-content"
+                                className="volt-catalog-pet-color-grid"
+                                contentClassName="volt-catalog-pet-color-grid-content"
                                 aria-label={colorLabel}
                                 role="group"
                             >
@@ -290,19 +290,19 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                                         key={`${colors[0]}-${index}`}
                                         aria-label={`${colorLabel} ${index + 1}`}
                                         aria-pressed={selectedColorIndex === index}
-                                        className="octane-catalog-pet-color-swatch"
+                                        className="volt-catalog-pet-color-swatch"
                                         disabled={controlsDisabled}
                                         style={swatchFill([ColorConverter.int2rgb(colors[0])])}
                                         type="button"
                                         onClick={() => setSelectedColorIndex(index)}
                                     >
-                                        {selectedColorIndex === index && <span className="octane-catalog-pet-swatch-chosen" />}
+                                        {selectedColorIndex === index && <span className="volt-catalog-pet-swatch-chosen" />}
                                     </button>
                                 ))}
                             </CatalogScrollAreaView>
                         </div>
                         {selectablePalettes.length > 1 && (
-                            <label className="octane-catalog-pet-breed-selector">
+                            <label className="volt-catalog-pet-breed-selector">
                                 <span>{breedLabel}</span>
                                 <select
                                     value={selectedPaletteIndex}
@@ -324,11 +324,11 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                         )}
                     </>
                 ) : (
-                    <div className="octane-catalog-pet-field">
+                    <div className="volt-catalog-pet-field">
                         <span>{colorLabel}</span>
                         <CatalogScrollAreaView
-                            className="octane-catalog-pet-color-grid"
-                            contentClassName="octane-catalog-pet-color-grid-content"
+                            className="volt-catalog-pet-color-grid"
+                            contentClassName="volt-catalog-pet-color-grid-content"
                             aria-label={colorLabel}
                             role="group"
                         >
@@ -342,15 +342,15 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                                         key={choice.palette.paletteId}
                                         aria-label={locked ? `${colorLabel} ${index + 1} — ${hcOnlyLabel}` : `${colorLabel} ${index + 1}`}
                                         aria-pressed={selectedPaletteIndex === index}
-                                        className={`octane-catalog-pet-color-swatch${locked ? ' octane-catalog-pet-color-swatch--locked' : ''}`}
+                                        className={`volt-catalog-pet-color-swatch${locked ? ' volt-catalog-pet-color-swatch--locked' : ''}`}
                                         disabled={controlsDisabled || locked}
                                         style={style}
                                         title={locked ? hcOnlyLabel : undefined}
                                         type="button"
                                         onClick={() => setSelectedPaletteIndex(index)}
                                     >
-                                        {selectedPaletteIndex === index && <span className="octane-catalog-pet-swatch-chosen" />}
-                                        {locked && <FaLock className="octane-catalog-pet-swatch-lock" />}
+                                        {selectedPaletteIndex === index && <span className="volt-catalog-pet-swatch-chosen" />}
+                                        {locked && <FaLock className="volt-catalog-pet-swatch-lock" />}
                                     </button>
                                 );
                             })}
@@ -358,8 +358,8 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                     </div>
                 )}
 
-                <div className="octane-catalog-pet-purchase mt-auto">
-                    <label className="octane-catalog-pet-name-field">
+                <div className="volt-catalog-pet-purchase mt-auto">
+                    <label className="volt-catalog-pet-name-field">
                         <span>{nameLabel}</span>
                         <span className="relative flex-1">
                             <input
@@ -369,19 +369,19 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = ({ page = null }) =>
                                 value={petName}
                                 onChange={(event) => setPetName(event.target.value)}
                             />
-                            {approvalResult === 0 && <FaCheck className="octane-catalog-pet-name-status text-success" />}
-                            {approvalResult > 0 && <FaTimes className="octane-catalog-pet-name-status text-danger" />}
+                            {approvalResult === 0 && <FaCheck className="volt-catalog-pet-name-status text-success" />}
+                            {approvalResult > 0 && <FaTimes className="volt-catalog-pet-name-status text-danger" />}
                         </span>
                     </label>
-                    {approvalResult > 0 && <span className="octane-catalog-pet-name-error">{validationErrorMessage}</span>}
+                    {approvalResult > 0 && <span className="volt-catalog-pet-name-error">{validationErrorMessage}</span>}
                     {isBreedLocked(selectedPalette) && (
-                        <span className="octane-catalog-pet-hc-note">
+                        <span className="volt-catalog-pet-hc-note">
                             <FaLock /> {hcOnlyLabel}
                         </span>
                     )}
-                    <div className="octane-catalog-pet-purchase-row">
+                    <div className="volt-catalog-pet-purchase-row">
                         <button
-                            className="octane-catalog-standard-button octane-catalog-standard-buy-button"
+                            className="volt-catalog-standard-button volt-catalog-standard-buy-button"
                             disabled={controlsDisabled || !purchaseExtraData}
                             onClick={requestPurchase}
                         >

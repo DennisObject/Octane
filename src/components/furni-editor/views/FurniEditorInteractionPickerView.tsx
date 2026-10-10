@@ -29,7 +29,7 @@ export const FurniEditorInteractionPickerView: FC<FurniEditorInteractionPickerVi
     };
 
     return (
-        <div className="octane-furni-editor-picker">
+        <div className="volt-furni-editor-picker">
             <input
                 aria-autocomplete="list"
                 aria-controls={`${id}-list`}
@@ -65,11 +65,11 @@ export const FurniEditorInteractionPickerView: FC<FurniEditorInteractionPickerVi
                 }}
             />
             {isOpen && (
-                <ul className="octane-staff-list octane-furni-editor-picker-list" id={`${id}-list`} role="listbox">
+                <ul className="volt-staff-list volt-furni-editor-picker-list" id={`${id}-list`} role="listbox">
                     {!needle && (
                         <li
                             aria-selected={value === ''}
-                            className={`octane-staff-list-row is-interactive octane-staff-muted ${value === '' ? 'is-selected' : ''}`}
+                            className={`volt-staff-list-row is-interactive volt-staff-muted ${value === '' ? 'is-selected' : ''}`}
                             role="option"
                             onClick={() => pick('')}
                             onMouseDown={(event) => event.preventDefault()}
@@ -81,7 +81,7 @@ export const FurniEditorInteractionPickerView: FC<FurniEditorInteractionPickerVi
                         <li
                             key={type}
                             aria-selected={type === value}
-                            className={`octane-staff-list-row is-interactive ${type === value ? 'is-selected' : ''}`}
+                            className={`volt-staff-list-row is-interactive ${type === value ? 'is-selected' : ''}`}
                             role="option"
                             onClick={() => pick(type)}
                             onMouseDown={(event) => event.preventDefault()}
@@ -90,7 +90,7 @@ export const FurniEditorInteractionPickerView: FC<FurniEditorInteractionPickerVi
                         </li>
                     ))}
                     {needle && matches.length === 0 && (
-                        <li className="octane-staff-list-row octane-furni-editor-warning">{LocalizeText('furni.editor.interaction.no_match')}</li>
+                        <li className="volt-staff-list-row volt-furni-editor-warning">{LocalizeText('furni.editor.interaction.no_match')}</li>
                     )}
                 </ul>
             )}

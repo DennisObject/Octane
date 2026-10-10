@@ -30,7 +30,7 @@ import {
     UserBannedMessageEvent,
     Vector3d,
     WiredRewardResultMessageEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {
@@ -162,7 +162,7 @@ const useNotificationStore = () => {
         []
     );
 
-    const showOctaneAlert = useCallback(() => simpleAlert(null, NotificationAlertType.OCTANE), [simpleAlert]);
+    const showVoltAlert = useCallback(() => simpleAlert(null, NotificationAlertType.VOLT), [simpleAlert]);
 
     const showSingleBubble = useCallback(
         (message: string, type: string, imageUrl: string = null, internalLink: string = null, senderName: string = '') => {
@@ -323,7 +323,7 @@ const useNotificationStore = () => {
 
         if (raw.startsWith(sentinel)) {
             const body = raw.substring(sentinel.length).replace(/^[\r\n]+/, '');
-            simpleAlert(body, NotificationAlertType.OCTANE_INFO, null, null, LocalizeText('nitro.info.title'));
+            simpleAlert(body, NotificationAlertType.VOLT_INFO, null, null, LocalizeText('nitro.info.title'));
             return;
         }
 
@@ -715,7 +715,7 @@ const useNotificationStore = () => {
         bubbleAlerts,
         confirms,
         simpleAlert,
-        showOctaneAlert,
+        showVoltAlert,
         showTradeAlert,
         showConfirm,
         showSingleBubble,
@@ -741,12 +741,12 @@ export const useNotificationState = () => {
 };
 
 export const useNotificationActions = () => {
-    const { simpleAlert, showOctaneAlert, showTradeAlert, showConfirm, showSingleBubble, closeAlert, closeBubbleAlert, closeConfirm } =
+    const { simpleAlert, showVoltAlert, showTradeAlert, showConfirm, showSingleBubble, closeAlert, closeBubbleAlert, closeConfirm } =
         useSharedHook(useNotificationStore);
 
     return {
         simpleAlert,
-        showOctaneAlert,
+        showVoltAlert,
         showTradeAlert,
         showConfirm,
         showSingleBubble,

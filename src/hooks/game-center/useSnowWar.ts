@@ -51,11 +51,11 @@ import {
     GetCommunication,
     GetSnowWarGameTokensOfferComposer,
     LeaderboardEntry,
-    OctaneEventType,
+    VoltEventType,
     PurchaseSnowWarGameTokensOfferComposer,
     SnowWarGameTokensMessageEvent
-} from '@octane/renderer';
-import type { ConnectionStatePhase } from '@octane/renderer';
+} from '@volt/renderer';
+import type { ConnectionStatePhase } from '@volt/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { CreateRoomSession, GetConfigurationValue, GetRoomSession, GetSessionDataManager, PlaySound, SendMessageComposer, TryVisitRoom, VisitDesktop } from '../../api';
@@ -81,7 +81,7 @@ import {
     SnowWarResults,
     SnowWarTokenOffer
 } from '../../api/snowwar';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 
 const SNOWSTORM_GAME_TYPE = 0;
 const CONNECTION_LOST_PHASES: readonly ConnectionStatePhase[] = [ 'disconnected', 'reconnecting', 'reauthenticating', 'failed' ];
@@ -256,7 +256,7 @@ const useSnowWarState = (): SnowWarHookState =>
     // The server drops the player from lobby and game when the socket goes, so no message ends this session:
     // clear it as soon as the connection is lost (the state ReconnectView shows), and once the session is
     // authenticated again go back to the room the arena replaced.
-    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, useCallback(() =>
+    useVoltEvent(VoltEventType.CONNECTION_STATE_CHANGED, useCallback(() =>
     {
         if(!CONNECTION_LOST_PHASES.includes(GetCommunication().connection.connectionState.phase)) return;
 
@@ -264,7 +264,7 @@ const useSnowWarState = (): SnowWarHookState =>
         clearSession();
     }, [ clearSession ]));
 
-    useOctaneEvent(OctaneEventType.SOCKET_REAUTHENTICATED, useCallback(() =>
+    useVoltEvent(VoltEventType.SOCKET_REAUTHENTICATED, useCallback(() =>
     {
         if(!connectionLostRef.current) return;
 

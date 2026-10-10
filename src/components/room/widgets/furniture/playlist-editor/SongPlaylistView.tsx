@@ -1,4 +1,4 @@
-import { ISongInfo } from '@octane/renderer';
+import { ISongInfo } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { GetConfigurationValue, GetDiskColor, LocalizeText } from '../../../../../api';
 import { Button, Text } from '../../../../../common';

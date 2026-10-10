@@ -4,7 +4,7 @@ import {
     CallForHelpFromIMMessageComposer,
     CallForHelpFromPhotoMessageComposer,
     CallForHelpMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText, ReportState, ReportType, SendMessageComposer } from '../../../api';
 import { useHelp } from '../../../hooks';

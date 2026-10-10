@@ -48,7 +48,7 @@ describe('InventoryCategoryFilterView AIR filters', () => {
             />
         );
 
-        expect(container.querySelector('.octane-inventory-filter-bar')).toBeTruthy();
-        expect(container.querySelector('.octane-inventory-filter-search')).toBeTruthy();
+        expect(container.querySelector('.volt-inventory-filter-bar')).toBeTruthy();
+        expect(container.querySelector('.volt-inventory-filter-search')).toBeTruthy();
     });
 });

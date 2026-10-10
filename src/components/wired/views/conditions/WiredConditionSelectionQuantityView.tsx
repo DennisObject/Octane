@@ -197,12 +197,12 @@ export const WiredConditionSelectionQuantityView: FC<{}> = () => {
                 selectionEnabledValues={[SOURCE_SELECTED]}
                 showSelectionToggle={false}
                 headerContent={
-                    <div className="octane-wired__give-var-targets">
+                    <div className="volt-wired__give-var-targets">
                         {SOURCE_GROUP_BUTTONS.map((button) => (
                             <button
                                 key={button.key}
                                 type="button"
-                                className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${isUserGroup === button.isUserGroup ? 'is-active' : ''}`}
+                                className={`volt-wired__give-var-target volt-wired__give-var-target--${button.key} ${isUserGroup === button.isUserGroup ? 'is-active' : ''}`}
                                 onClick={() => changeGroup(button.isUserGroup)}
                             >
                                 <img src={button.icon} alt={button.key} />

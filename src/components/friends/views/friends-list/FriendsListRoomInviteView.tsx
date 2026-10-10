@@ -85,7 +85,7 @@ export const FriendsDialogFrameView: FC<PropsWithChildren<{
     ];
     const style: CSSProperties = { width, height };
     return <DraggableWindow windowPosition={DraggableWindowPosition.NOTHING} initialPosition={initialPosition} unconstrainedPosition>
-        <div className={'friends-native-dialog ' + (className ?? 'octane-friends-' + (kind === 'invite' ? 'room-invite' : 'remove-confirmation'))}
+        <div className={'friends-native-dialog ' + (className ?? 'volt-friends-' + (kind === 'invite' ? 'room-invite' : 'remove-confirmation'))}
             style={style} role="dialog" aria-labelledby={titleId}>
             <svg className="friends-dialog-frame" width={width} height={height} aria-hidden="true">
                 {nineSlice(width, height, 13, 0, 0, 14, 14, 0, tint?.frame ?? blueFrame, 27, 27)}
@@ -125,8 +125,8 @@ export const FriendsRoomInviteView: FC<FriendsRoomInviteViewProps> = ({ snapshot
     return <FriendsDialogFrameView kind="invite" title={LocalizeText('friendlist.invite.title')}
         initialPosition={snapshot.initialPosition} onCloseClick={onCloseClick}>
         <FriendsDialogBorderView width={199} height={118} />
-        <div className="octane-friends-room-invite-summary">{snapshot.caption}</div>
-        <textarea className="octane-friends-room-invite-textarea" aria-label={LocalizeText('friendlist.invite.title')}
+        <div className="volt-friends-room-invite-summary">{snapshot.caption}</div>
+        <textarea className="volt-friends-room-invite-textarea" aria-label={LocalizeText('friendlist.invite.title')}
             value={roomInviteMessage} onChange={(event) => setRoomInviteMessage(event.target.value)}
             onKeyDown={(event) => {
                 if (event.nativeEvent.isComposing) return;
@@ -144,7 +144,7 @@ export const FriendsRoomInviteView: FC<FriendsRoomInviteViewProps> = ({ snapshot
                     setRoomInviteMessage(input.value);
                 }
             }} />
-        <div className="octane-friends-room-invite-note">{LocalizeText('friendlist.invite.note')}</div>
+        <div className="volt-friends-room-invite-note">{LocalizeText('friendlist.invite.note')}</div>
         <div className="friends-dialog-actions">
             <FriendsDialogButtonView thick caption={LocalizeText('friendlist.invite.send')} onClick={() => submit(true)} />
             <FriendsDialogButtonView caption={LocalizeText('generic.cancel')} onClick={onCloseClick} />

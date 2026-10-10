@@ -1,4 +1,4 @@
-import { GetRoomVisitsMessageComposer, RoomVisitsEvent, RoomVisitsData } from '@octane/renderer';
+import { GetRoomVisitsMessageComposer, RoomVisitsEvent, RoomVisitsData } from '@volt/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import { useMessageEvent } from '../../../hooks';

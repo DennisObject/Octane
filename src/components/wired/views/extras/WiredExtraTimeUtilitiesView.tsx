@@ -38,10 +38,10 @@ export const WiredExtraTimeUtilitiesView: FC<{}> = () => {
     };
 
     const renderSubVariables = (subVariables: ITimeUtilSubVariable[]) => (
-        <div className="octane-wired__levelup-subvariables">
+        <div className="volt-wired__levelup-subvariables">
             {subVariables.map((subVariable) => (
-                <div key={subVariable.id} className="octane-wired__levelup-subvariable-row">
-                    <label className="octane-wired__levelup-subvariable-label">
+                <div key={subVariable.id} className="volt-wired__levelup-subvariable-row">
+                    <label className="volt-wired__levelup-subvariable-label">
                         <input
                             checked={isTimeUtilSubVariableSelected(mask, subVariable.id)}
                             className="form-check-input"
@@ -50,7 +50,7 @@ export const WiredExtraTimeUtilitiesView: FC<{}> = () => {
                         />
                         <Text>{localizeWithFallback(`${SUB_VARIABLE_KEY}${subVariable.id}`, subVariable.label)}</Text>
                     </label>
-                    <input className="octane-wired__levelup-subvariable-token" readOnly tabIndex={-1} type="text" value={subVariable.name} />
+                    <input className="volt-wired__levelup-subvariable-token" readOnly tabIndex={-1} type="text" value={subVariable.name} />
                 </div>
             ))}
         </div>
@@ -58,8 +58,8 @@ export const WiredExtraTimeUtilitiesView: FC<{}> = () => {
 
     return (
         <WiredExtraBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save} cardStyle={{ width: 300 }}>
-            <div className="octane-wired__levelup">
-                <div className="octane-wired__levelup-section">
+            <div className="volt-wired__levelup">
+                <div className="volt-wired__levelup-section">
                     <Text bold>{localizeWithFallback('wiredfurni.params.choose_type', 'Read the variable as:')}</Text>
                     <div className="flex flex-col gap-1">
                         {TIME_UTIL_MODES.map((option) => (
@@ -77,22 +77,22 @@ export const WiredExtraTimeUtilitiesView: FC<{}> = () => {
                     </div>
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__levelup-section">
-                    <button type="button" className="octane-wired__levelup-section-header" onClick={() => setIsCalendarOpen((value) => !value)}>
+                <div className="volt-wired__levelup-section">
+                    <button type="button" className="volt-wired__levelup-section-header" onClick={() => setIsCalendarOpen((value) => !value)}>
                         <Text bold>{localizeWithFallback('wiredfurni.params.create_subvariables', 'Create sub-variables:')}</Text>
-                        <span className={`octane-wired__levelup-chevron ${isCalendarOpen ? 'is-open' : ''}`}>^</span>
+                        <span className={`volt-wired__levelup-chevron ${isCalendarOpen ? 'is-open' : ''}`}>^</span>
                     </button>
                     {isCalendarOpen && renderSubVariables(TIME_UTIL_SUB_VARIABLES)}
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
-                <div className="octane-wired__levelup-section">
-                    <button type="button" className="octane-wired__levelup-section-header" onClick={() => setIsAdvancedOpen((value) => !value)}>
+                <div className="volt-wired__levelup-section">
+                    <button type="button" className="volt-wired__levelup-section-header" onClick={() => setIsAdvancedOpen((value) => !value)}>
                         <Text bold>{localizeWithFallback('wiredfurni.params.create_subvariables.advanced', 'Advanced sub-variables:')}</Text>
-                        <span className={`octane-wired__levelup-chevron ${isAdvancedOpen ? 'is-open' : ''}`}>^</span>
+                        <span className={`volt-wired__levelup-chevron ${isAdvancedOpen ? 'is-open' : ''}`}>^</span>
                     </button>
                     {isAdvancedOpen && (
                         <>

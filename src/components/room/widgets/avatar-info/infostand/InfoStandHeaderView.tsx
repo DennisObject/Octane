@@ -15,13 +15,13 @@ export const InfoStandHeaderView: FC<InfoStandHeaderViewProps> = ({ name, onClos
     <>
         <button
             type="button"
-            className="octane-infostand__close"
+            className="volt-infostand__close"
             aria-label={LocalizeText('generic.close')}
             title={LocalizeText('generic.close')}
             onClick={onClose}
         />
-        <div className="octane-infostand__header">
-            <span className="octane-infostand__identity octane-infostand__identity--plain">{name}</span>
+        <div className="volt-infostand__header">
+            <span className="volt-infostand__identity volt-infostand__identity--plain">{name}</span>
         </div>
     </>
 );

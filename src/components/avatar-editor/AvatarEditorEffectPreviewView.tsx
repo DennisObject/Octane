@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomPreviewer } from '@octane/renderer';
+import { GetRoomEngine, RoomPreviewer } from '@volt/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { Point } from 'pixi.js';
 import { LayoutRoomPreviewerView } from '../../common/layout/LayoutRoomPreviewerView';
@@ -36,6 +36,6 @@ export const AvatarEditorEffectPreviewView: FC<{ figure: string; effect: number;
         previewer.updatePreviewRoomView(true);
     }, [previewer, figure, effect, direction]);
 
-    return <div ref={attach} className="octane-avatar-editor-effect-preview">{previewer && <LayoutRoomPreviewerView roomPreviewer={previewer} height={210} onPreviewClick={() =>
+    return <div ref={attach} className="volt-avatar-editor-effect-preview">{previewer && <LayoutRoomPreviewerView roomPreviewer={previewer} height={210} onPreviewClick={() =>
     {}} />}</div>;
 };

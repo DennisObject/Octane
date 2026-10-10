@@ -1,7 +1,7 @@
-import { IEventDispatcher, OctaneEvent } from '@octane/renderer';
+import { IEventDispatcher, VoltEvent } from '@volt/renderer';
 import { useEffect } from 'react';
 
-export const useEventDispatcher = <T extends OctaneEvent>(
+export const useEventDispatcher = <T extends VoltEvent>(
     type: string | string[],
     eventDispatcher: IEventDispatcher,
     handler: (event: T) => void,

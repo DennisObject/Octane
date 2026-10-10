@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@octane/renderer';
+import { RoomObjectCategory } from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText } from '../../../../api';
 import { Column, DraggableWindow, Text } from '../../../../common';
@@ -19,7 +19,7 @@ export const FurnitureHighScoreView: FC<{}> = (props) => {
 
                 return (
                     <DraggableWindow key={index} uniqueKey={`high-score-${objectId}`}>
-                        <Column className="octane-widget-high-score octane-context-menu bg-[#1e1f23] p-2 w-[280px] max-w-[280px] h-[320px]" gap={0}>
+                        <Column className="volt-widget-high-score volt-context-menu bg-[#1e1f23] p-2 w-[280px] max-w-[280px] h-[320px]" gap={0}>
                             <ContextMenuHeaderView classNames={['drag-handler cursor-move']}>
                                 {configured
                                     ? LocalizeText(

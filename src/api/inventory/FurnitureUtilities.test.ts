@@ -1,4 +1,4 @@
-import { StringDataType } from '@octane/renderer';
+import { StringDataType } from '@volt/renderer';
 import { describe, expect, it } from 'vitest';
 import { FurniCategory } from './FurniCategory';
 import { getGroupItemKey } from './FurnitureUtilities';

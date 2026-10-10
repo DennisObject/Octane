@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useNavigatorRoomInfoPopupStore } from '../../../../hooks';
 import { NavigatorRoomInfoPopupView } from './NavigatorRoomInfoPopupView';
 
-vi.mock('@octane/renderer', async () => {
-    const actual = await vi.importActual<typeof import('@octane/renderer')>('@octane/renderer');
+vi.mock('@volt/renderer', async () => {
+    const actual = await vi.importActual<typeof import('@volt/renderer')>('@volt/renderer');
 
     return {
         ...actual,
@@ -74,7 +74,7 @@ describe('AIR navigator room popover', () => {
     it('keeps the official 374px bubble width so metadata and actions do not collapse', () => {
         renderPopup();
 
-        expect(screen.getByRole('dialog')).toHaveClass('octane-navigator-air__room-bubble');
+        expect(screen.getByRole('dialog')).toHaveClass('volt-navigator-air__room-bubble');
         expect(screen.getByRole('dialog')).toHaveStyle({ width: '374px' });
     });
 

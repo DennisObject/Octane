@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import creditsIcon from '@/assets/images/inventory/trading/credits-icon.png';
 import { GetConfigurationValue, GroupItem, LocalizeText, TradeState, TradeUserData } from '../../../../api';
 import { useInventoryTrade } from '../../../../hooks';
-import { OctaneButton, OctaneItemCountBadge } from '../../../../layout';
+import { VoltButton, VoltItemCountBadge } from '../../../../layout';
 import { InventoryThumbIconView } from '../InventoryThumbIconView';
 import { MAX_ITEMS_TO_TRADE } from './inventoryTradeOffer';
 
@@ -30,13 +30,13 @@ const TradeOfferView: FC<{
     const showTotals = GetConfigurationValue<boolean>('trading.warning.enabled', true);
 
     return (
-        <div className={`octane-trade-offer is-${side}`}>
-            <div className="octane-trade-offer-title">
-                <span className="octane-trade-offer-name">{isOwn ? LocalizeText('inventory.trading.you') : user.userName}</span>
+        <div className={`volt-trade-offer is-${side}`}>
+            <div className="volt-trade-offer-title">
+                <span className="volt-trade-offer-name">{isOwn ? LocalizeText('inventory.trading.you') : user.userName}</span>
                 <span>{LocalizeText(isOwn ? 'inventory.trading.areoffering' : 'inventory.trading.isoffering')}</span>
             </div>
-            {!!disabledText && <div className="octane-trade-offer-info">{disabledText}</div>}
-            <div className="octane-trade-offer-grid" hidden={disabledText !== null}>
+            {!!disabledText && <div className="volt-trade-offer-info">{disabledText}</div>}
+            <div className="volt-trade-offer-grid" hidden={disabledText !== null}>
                 {Array.from(Array(MAX_ITEMS_TO_TRADE), (_, slotIndex) =>
                 {
                     // v75 builds a CreditTradingItem out of the credit total and lists it before the furni.
@@ -46,32 +46,32 @@ const TradeOfferView: FC<{
                     const index = slotIndex;
 
                     return (
-                        <div key={index} className="octane-trade-slot">
+                        <div key={index} className="volt-trade-slot">
                             {isCreditSlot && (
-                                <div className="octane-inventory-thumb octane-trade-item is-credit" title={LocalizeText('purse.coins')}>
-                                    <img className="octane-trade-credit-icon" src={creditsIcon} alt="" draggable={false} />
-                                    <span className="octane-trade-credit-count">{user.creditsCount}</span>
+                                <div className="volt-inventory-thumb volt-trade-item is-credit" title={LocalizeText('purse.coins')}>
+                                    <img className="volt-trade-credit-icon" src={creditsIcon} alt="" draggable={false} />
+                                    <span className="volt-trade-credit-count">{user.creditsCount}</span>
                                 </div>
                             )}
                             {groupItem && (
                                 <div
-                                    className={`octane-inventory-thumb octane-trade-item ${isOwn && !user.accepts ? 'is-removable' : ''}`}
+                                    className={`volt-inventory-thumb volt-trade-item ${isOwn && !user.accepts ? 'is-removable' : ''}`}
                                     title={groupItem.name}
                                     onClick={isOwn ? () => onRemove?.(groupItem) : undefined}
                                 >
                                     <InventoryThumbIconView iconUrl={groupItem.iconUrl} />
-                                    {groupItem.getTotalCount() > 1 && <OctaneItemCountBadge count={groupItem.getTotalCount()} />}
+                                    {groupItem.getTotalCount() > 1 && <VoltItemCountBadge count={groupItem.getTotalCount()} />}
                                 </div>
                             )}
                         </div>
                     );
                 })}
             </div>
-            <div className={`octane-trade-lock ${user.accepts ? 'is-locked' : ''}`} />
+            <div className={`volt-trade-lock ${user.accepts ? 'is-locked' : ''}`} />
             {showTotals && (
                 <>
-                    <div className="octane-trade-total is-items">{LocalizeText('inventory.trading.info.itemcount', ['value'], [String(user.itemCount)])}</div>
-                    <div className="octane-trade-total is-credits">
+                    <div className="volt-trade-total is-items">{LocalizeText('inventory.trading.info.itemcount', ['value'], [String(user.itemCount)])}</div>
+                    <div className="volt-trade-total is-credits">
                         {LocalizeText('inventory.trading.info.creditvalue', ['value'], [String(user.creditsCount)])}
                     </div>
                 </>
@@ -119,17 +119,17 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
     if (isMinimized)
     {
         return (
-            <div className="octane-trade is-minimized">
-                <div className="octane-trade-minimized-panel" />
-                <div className="octane-trade-minimized-icon" />
-                <div className="octane-trade-minimized-help">{LocalizeText('inventory.trading.minimized.trade_in_progress')}</div>
-                <div className="octane-trade-buttons">
-                    <OctaneButton className="octane-trade-continue" onClick={continueTrade}>
+            <div className="volt-trade is-minimized">
+                <div className="volt-trade-minimized-panel" />
+                <div className="volt-trade-minimized-icon" />
+                <div className="volt-trade-minimized-help">{LocalizeText('inventory.trading.minimized.trade_in_progress')}</div>
+                <div className="volt-trade-buttons">
+                    <VoltButton className="volt-trade-continue" onClick={continueTrade}>
                         {LocalizeText('inventory.trading.minimized.continue_trade')}
-                    </OctaneButton>
-                    <OctaneButton className="octane-trade-cancel" onClick={closeTrade}>
+                    </VoltButton>
+                    <VoltButton className="volt-trade-cancel" onClick={closeTrade}>
                         {LocalizeText('generic.cancel')}
-                    </OctaneButton>
+                    </VoltButton>
                 </div>
             </div>
         );
@@ -165,16 +165,16 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
     const helpText = !ownUser.canTrade && !otherUser.canTrade ? 'inventory.trading.warning.both_accounts_disabled' : helpKey;
 
     return (
-        <div className="octane-trade">
-            <div className="octane-trade-panel">
-                <div className="octane-trade-help">{LocalizeText(helpText)}</div>
+        <div className="volt-trade">
+            <div className="volt-trade-panel">
+                <div className="volt-trade-help">{LocalizeText(helpText)}</div>
                 <TradeOfferView
                     side="own"
                     user={ownUser}
                     disabledText={ownUser.canTrade ? null : otherUser.canTrade ? LocalizeText('inventory.trading.warning.own_account_disabled') : ''}
                     onRemove={ownUser.accepts ? null : removeItem}
                 />
-                <div className="octane-trade-separator" />
+                <div className="volt-trade-separator" />
                 <TradeOfferView
                     side="other"
                     user={otherUser}
@@ -182,18 +182,18 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = (props) => {
                 />
             </div>
             {(ownUser.creditsCount > 0 || otherUser.creditsCount > 0) && (
-                <div className="octane-trade-note">{LocalizeText('inventory.trading.warning.credits')}</div>
+                <div className="volt-trade-note">{LocalizeText('inventory.trading.warning.credits')}</div>
             )}
-            <div className="octane-trade-buttons">
-                <OctaneButton className="octane-trade-accept" disabled={!buttonEnabled} onClick={progressTrade}>
+            <div className="volt-trade-buttons">
+                <VoltButton className="volt-trade-accept" disabled={!buttonEnabled} onClick={progressTrade}>
                     {buttonCaption}
-                </OctaneButton>
-                <OctaneButton
-                    className="octane-trade-cancel"
+                </VoltButton>
+                <VoltButton
+                    className="volt-trade-cancel"
                     onClick={tradeState === TradeState.TRADING_STATE_RUNNING || tradeState === TradeState.TRADING_STATE_CONFIRMING ? cancelTrade : undefined}
                 >
                     {LocalizeText('generic.cancel')}
-                </OctaneButton>
+                </VoltButton>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { AchievementData } from '@octane/renderer';
+import { AchievementData } from '@volt/renderer';
 import { AchievementUtilities } from './AchievementUtilities';
 import { IAchievementCategory } from './IAchievementCategory';
 

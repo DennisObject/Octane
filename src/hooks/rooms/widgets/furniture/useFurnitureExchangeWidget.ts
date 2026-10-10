@@ -1,7 +1,7 @@
-import { FurnitureExchangeComposer, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { FurnitureExchangeComposer, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@volt/renderer';
 import { useState } from 'react';
 import { IsOwnerOfFurniture, SendMessageComposer } from '../../../../api';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 
 const useFurnitureExchangeWidgetState = () => {
@@ -21,7 +21,7 @@ const useFurnitureExchangeWidgetState = () => {
         onClose();
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_CREDITFURNI, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_CREDITFURNI, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject || !IsOwnerOfFurniture(roomObject)) return;

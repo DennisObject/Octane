@@ -1,4 +1,4 @@
-import { FurnitureType, GetRoomEngine } from '@octane/renderer';
+import { FurnitureType, GetRoomEngine } from '@volt/renderer';
 import { FurniCategory } from '../inventory';
 
 export class ProductImageUtility {

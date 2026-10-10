@@ -1,4 +1,4 @@
-.octane-room-widgets {
+.volt-room-widgets {
     pointer-events: none;
 }
 
@@ -10,20 +10,20 @@
     max-height: 430px !important;
 }
 
-.octane-room-widget-toner {
+.volt-room-widget-toner {
     width: 190px;
 }
 
 /* background_color_ui: 292x255 style 3 frame, positions from the layout with its (6,25) content origin. */
-.octane-toner.octane-card-shell.octane-card-frame-3 {
-    --octane-card-frame-3: url('@/assets/images/room-widgets/dimmer-widget/frame-toner.png');
+.volt-toner.volt-card-shell.volt-card-frame-3 {
+    --volt-card-frame-3: url('@/assets/images/room-widgets/dimmer-widget/frame-toner.png');
 }
 
-.octane-toner.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-toner.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-toner {
+.volt-toner {
     width: 292px;
     height: 255px;
     font-family: Ubuntu, sans-serif;
@@ -35,11 +35,11 @@
         position: absolute;
     }
 
-    > .octane-card-header-shell {
+    > .volt-card-header-shell {
         position: absolute !important;
     }
 
-    .octane-toner__panel {
+    .volt-toner__panel {
         top: 41px;
         left: 9px;
         box-sizing: border-box;
@@ -51,13 +51,13 @@
         image-rendering: pixelated;
     }
 
-    .octane-toner__info {
+    .volt-toner__info {
         top: 44px;
         left: 17px;
         width: 218px;
     }
 
-    .octane-toner__preview {
+    .volt-toner__preview {
         top: 45px;
         left: 250px;
         box-sizing: border-box;
@@ -67,12 +67,12 @@
         border-left: 1px solid #999;
     }
 
-    .octane-toner__label {
+    .volt-toner__label {
         left: 17px;
         font-weight: bold;
     }
 
-    .octane-toner__slider {
+    .volt-toner__slider {
         left: 15px;
         width: 206px;
         height: 18px;
@@ -90,7 +90,7 @@
         }
     }
 
-    .octane-toner__thumb {
+    .volt-toner__thumb {
         position: absolute;
         top: 1px;
         width: 12px;
@@ -98,7 +98,7 @@
         background: url('@/assets/images/room-widgets/dimmer-widget/slider-button.png') 0 0 no-repeat;
     }
 
-    .octane-toner__button {
+    .volt-toner__button {
         padding: 2px 0 0 2px !important;
         background: none;
         font: 9px/10px Volter, monospace;
@@ -106,17 +106,17 @@
         -webkit-font-smoothing: none;
     }
 
-    .octane-card-title {
+    .volt-card-title {
         transform: translateY(2px);
     }
 
-    .octane-toner__apply {
+    .volt-toner__apply {
         top: 218px;
         left: 10px;
         width: 46px;
     }
 
-    .octane-toner__toggle {
+    .volt-toner__toggle {
         top: 218px;
         left: 225px;
         width: 60px;
@@ -124,7 +124,7 @@
 }
 
 /* dimmer_ui: fixed 274x222 frame, every element placed from measurements of the v75 window (origin = frame top-left). */
-.octane-dimmer {
+.volt-dimmer {
     position: relative;
     box-sizing: border-box;
     width: 274px;
@@ -134,7 +134,7 @@
     font-size: 9px;
     line-height: 10px;
     filter: drop-shadow(2.828px 2.828px 4px rgba(0, 0, 0, 0.349));
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     -webkit-font-smoothing: none;
 
     &::before {
@@ -161,7 +161,7 @@
     }
 }
 
-.octane-dimmer__header {
+.volt-dimmer__header {
     top: 5px;
     left: 5px;
     width: 265px;
@@ -170,7 +170,7 @@
     cursor: move;
 }
 
-.octane-dimmer__title {
+.volt-dimmer__title {
     position: absolute;
     top: 0;
     left: 1px;
@@ -189,12 +189,12 @@
     }
 }
 
-.octane-dimmer__title-text {
+.volt-dimmer__title-text {
     color: #fff;
-    filter: var(--octane-native-text-halo);
+    filter: var(--volt-native-text-halo);
 }
 
-.octane-dimmer__close {
+.volt-dimmer__close {
     position: absolute;
     top: 0;
     left: 250px;
@@ -203,15 +203,15 @@
     background: #418db0 url('@/assets/images/room-widgets/dimmer-widget/close.png') 1px 0 no-repeat !important;
 }
 
-.octane-dimmer__panel,
-.octane-dimmer__box {
+.volt-dimmer__panel,
+.volt-dimmer__box {
     box-sizing: border-box;
     border: solid transparent;
     border-width: 8px;
     image-rendering: pixelated;
 }
 
-.octane-dimmer__panel {
+.volt-dimmer__panel {
     top: 44px;
     left: 9px;
     width: 258px;
@@ -219,7 +219,7 @@
     border-image: url('@/assets/images/room-widgets/dimmer-widget/panel.png') 8 fill / 8px stretch;
 }
 
-.octane-dimmer__box {
+.volt-dimmer__box {
     top: 51px;
     left: 11px;
     width: 254px;
@@ -227,32 +227,32 @@
     border-image: url('@/assets/images/room-widgets/dimmer-widget/box.png') 8 fill / 8px stretch;
 }
 
-.octane-dimmer__info-image {
+.volt-dimmer__info-image {
     top: 62px;
     left: 107px;
     width: 56px;
     height: 79px;
 }
 
-.octane-dimmer__off-text,
-.octane-dimmer__info {
+.volt-dimmer__off-text,
+.volt-dimmer__info {
     left: 32px;
     width: 208px;
     text-indent: 1px;
 }
 
-.octane-dimmer__off-text {
+.volt-dimmer__off-text {
     top: 146px;
 }
 
-.octane-dimmer__info {
+.volt-dimmer__info {
     left: 30px;
     width: 212px;
     top: 139px;
     color: #999;
 }
 
-.octane-dimmer__tabs {
+.volt-dimmer__tabs {
     top: 22px;
     left: 9px;
     width: 258px;
@@ -273,7 +273,7 @@
     }
 }
 
-.octane-dimmer__tab {
+.volt-dimmer__tab {
     top: 24px;
     height: 21px;
     width: 60px;
@@ -288,38 +288,38 @@
     }
 }
 
-.octane-dimmer__cell {
+.volt-dimmer__cell {
     top: 58px;
     width: 27px;
     height: 22px;
     background: url('@/assets/images/room-widgets/dimmer-widget/color-frame.png') 0 0 no-repeat !important;
 }
 
-.octane-dimmer__cell-color,
-.octane-dimmer__cell-selected {
+.volt-dimmer__cell-color,
+.volt-dimmer__cell-selected {
     position: absolute;
     inset: 0;
 }
 
-.octane-dimmer__cell-color {
+.volt-dimmer__cell-color {
     background-image: url('@/assets/images/room-widgets/dimmer-widget/color-button.png');
     background-blend-mode: multiply;
     -webkit-mask: url('@/assets/images/room-widgets/dimmer-widget/color-button.png') 0 0 no-repeat;
     mask: url('@/assets/images/room-widgets/dimmer-widget/color-button.png') 0 0 no-repeat;
 }
 
-.octane-dimmer__cell-selected {
+.volt-dimmer__cell-selected {
     background: url('@/assets/images/room-widgets/dimmer-widget/color-selected.png') 0 0 no-repeat;
 }
 
-.octane-dimmer__color-input {
+.volt-dimmer__color-input {
     top: 58px;
     left: 26px;
     width: 203px;
     height: 22px;
 }
 
-.octane-dimmer__slider {
+.volt-dimmer__slider {
     top: 92px;
     left: 28px;
     width: 206px;
@@ -338,7 +338,7 @@
     }
 }
 
-.octane-dimmer__thumb {
+.volt-dimmer__thumb {
     position: absolute;
     top: 1px;
     width: 12px;
@@ -346,7 +346,7 @@
     background: url('@/assets/images/room-widgets/dimmer-widget/slider-button.png') 0 0 no-repeat;
 }
 
-.octane-dimmer__checkbox {
+.volt-dimmer__checkbox {
     top: 117px;
     left: 27px;
     width: 15px;
@@ -358,14 +358,14 @@
     }
 }
 
-.octane-dimmer__checkbox-text {
+.volt-dimmer__checkbox-text {
     top: 120px;
     left: 49px;
     white-space: nowrap;
 }
 
-.octane-dimmer__button,
-.octane-toner__button {
+.volt-dimmer__button,
+.volt-toner__button {
     box-sizing: border-box;
     height: 24px;
     padding: 2px 8px 0 !important;
@@ -390,13 +390,13 @@
     }
 }
 
-.octane-dimmer__apply {
+.volt-dimmer__apply {
     top: 190px;
     left: 9px;
     width: 90px;
 }
 
-.octane-dimmer__toggle {
+.volt-dimmer__toggle {
     top: 191px;
     right: 8px;
     height: 22px;
@@ -404,7 +404,7 @@
     padding-left: 8px !important;
 }
 
-.octane-widget-crafting {
+.volt-widget-crafting {
     width: min(500px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -421,7 +421,7 @@
     }
 }
 
-.octane-widget-exchange-credit {
+.volt-widget-exchange-credit {
     width: min(375px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -437,7 +437,7 @@
 }
 
 /* AIR stories_image_widget at a 320px photo: ExternalImageWidget.drawImage geometry. */
-.octane-photo-viewer {
+.volt-photo-viewer {
     position: relative;
     width: 490px;
     height: 464px;
@@ -449,7 +449,7 @@
     line-height: 16px;
     text-shadow: none;
     user-select: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 
     button {
         padding: 0;
@@ -459,7 +459,7 @@
     }
 }
 
-.octane-photo-viewer__panel {
+.volt-photo-viewer__panel {
     position: absolute;
     inset: 0;
     border: 6px solid transparent;
@@ -468,7 +468,7 @@
 }
 
 /* drawImage paints the photo black at four 1px offsets, leaving the corner pixels clear. */
-.octane-photo-viewer__photo {
+.volt-photo-viewer__photo {
     position: absolute;
     top: 71px;
     left: 84px;
@@ -488,7 +488,7 @@
 }
 
 /* updateWindowPosition centres the arrows on the panel, or on the stage when the panel is taller. */
-.octane-photo-viewer__browse {
+.volt-photo-viewer__browse {
     position: absolute;
     top: min(200px, calc(50vh - 32px));
     width: 64px;
@@ -496,17 +496,17 @@
     background: url('@/assets/images/camera/photo-viewer/browse-ffwd.png') 0 0 / 64px 64px no-repeat !important;
 }
 
-.octane-photo-viewer__browse--previous {
+.volt-photo-viewer__browse--previous {
     left: 10px;
     transform: scaleX(-1);
 }
 
-.octane-photo-viewer__browse--next {
+.volt-photo-viewer__browse--next {
     left: 416px;
 }
 
-.octane-photo-viewer__date,
-.octane-photo-viewer__creator {
+.volt-photo-viewer__date,
+.volt-photo-viewer__creator {
     position: absolute;
     padding: 4px;
     color: #ffffff;
@@ -515,20 +515,20 @@
     white-space: nowrap;
 }
 
-.octane-photo-viewer__date {
+.volt-photo-viewer__date {
     top: 393px;
     left: 87px;
 }
 
 /* senderName is right-aligned in a 129px region ending 3px inside the photo. */
-.octane-photo-viewer__creator {
+.volt-photo-viewer__creator {
     top: 395px;
     right: 87px;
     text-decoration: underline;
 }
 
 /* buttonContainer boxsizer: padding 8/5, spacing 5, pinned to the panel's top right. */
-.octane-photo-viewer__buttons {
+.volt-photo-viewer__buttons {
     position: absolute;
     top: 0;
     right: 0;
@@ -538,7 +538,7 @@
     padding: 5px 8px 0;
 }
 
-.octane-photo-viewer__button {
+.volt-photo-viewer__button {
     position: relative;
     width: 19px;
     height: 20px;
@@ -560,7 +560,7 @@
 }
 
 /* reportButtonContainer is 20px wide around the 19px button. */
-.octane-photo-viewer__button--report {
+.volt-photo-viewer__button--report {
     margin-right: 1px;
 
     &::after {
@@ -573,7 +573,7 @@
 }
 
 /* common_trashcan_small with the #icon etching: 0x48000000 one pixel above. */
-.octane-photo-viewer__button--remove::after {
+.volt-photo-viewer__button--remove::after {
     top: -1px;
     left: 0;
     width: 9px;
@@ -582,7 +582,7 @@
     filter: drop-shadow(0 -1px 0 rgb(0 0 0 / 0.282));
 }
 
-.octane-photo-viewer__close {
+.volt-photo-viewer__close {
     width: 19px;
     height: 20px;
     background: url('@/assets/images/habbo-skin/slices/close-3-default.png') 0 0 / 19px 20px no-repeat !important;
@@ -596,7 +596,7 @@
     }
 }
 
-.octane-gift-opening {
+.volt-gift-opening {
     width: min(340px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -604,7 +604,7 @@
     resize: none;
 }
 
-.octane-mannequin {
+.volt-mannequin {
     width: 300px;
 
     .mannequin-preview {
@@ -625,13 +625,13 @@
 
 /* v75 stickie: a 185x178 window. The grey stickie_blanco bitmap is multiplied by the note colour; themed notes use their
    own bitmap. Delete (9,4), colours (26 + 12n, 5) 9x9, close (168,5) and the 175x135 text input at (5,24) are absolute. */
-.octane-stickie {
+.volt-stickie {
     position: relative;
     box-sizing: border-box;
     width: 185px;
     height: 178px;
     pointer-events: all;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 
     &::before {
         content: '';
@@ -644,7 +644,7 @@
         mask: url('@/assets/images/room-widgets/stickie-widget/stickie-blanco.png') 0 0 / 185px 178px no-repeat;
     }
 
-    &.octane-stickie-image::before {
+    &.volt-stickie-image::before {
         content: none;
     }
 
@@ -710,12 +710,12 @@
     }
 }
 
-.octane-stickie.octane-stickie-image {
+.volt-stickie.volt-stickie-image {
     background-repeat: no-repeat;
     background-position: 0 0;
 }
 
-.octane-stickie-image {
+.volt-stickie-image {
     &.stickie-christmas {
         background-image: url('@/assets/images/room-widgets/stickie-widget/stickie-christmas.png');
     }
@@ -749,7 +749,7 @@
     }
 }
 
-.octane-engraving-lock {
+.volt-engraving-lock {
     width: 300px;
 
     .engraving-lock-stage-1 {
@@ -768,7 +768,7 @@
 }
 
 /* lovelock_engraving_xml.xml — 375×210, absolute layout */
-.octane-engraving-lock-view {
+.volt-engraving-lock-view {
     position: relative;
     width: 375px;
     height: 210px;
@@ -776,7 +776,7 @@
     background-position: 0 0;
     background-repeat: no-repeat;
     background-size: 411px 630px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     color: #59224a;
     font-family: UbuntuCondensed, Ubuntu, sans-serif;
     font-weight: 700;
@@ -786,18 +786,18 @@
     user-select: none;
 }
 
-.octane-engraving-lock-view.engraving-lock-3 {
+.volt-engraving-lock-view.engraving-lock-3 {
     background-position: 0 -210px;
     color: #614110;
 }
 
-.octane-engraving-lock-view.engraving-lock-4 {
+.volt-engraving-lock-view.engraving-lock-4 {
     background-position: 0 -420px;
     color: #f1dcc8;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
 }
 
-.octane-engraving-lock-view .engraving-lock-close {
+.volt-engraving-lock-view .engraving-lock-close {
     position: absolute;
     top: 33px;
     right: 24px;
@@ -809,7 +809,7 @@
     cursor: pointer;
 }
 
-.octane-engraving-lock-view .engraving-lock-avatar {
+.volt-engraving-lock-view .engraving-lock-avatar {
     position: absolute;
     top: 7px;
     width: 70px;
@@ -818,7 +818,7 @@
     pointer-events: none;
 }
 
-.octane-engraving-lock-view .engraving-lock-avatar .avatar-image {
+.volt-engraving-lock-view .engraving-lock-avatar .avatar-image {
     position: absolute !important;
     top: auto !important;
     bottom: 0 !important;
@@ -827,20 +827,20 @@
     height: 130px !important;
     margin: 0 !important;
     transform: translateX(-50%) !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-engraving-lock-view .engraving-lock-avatar--left {
+.volt-engraving-lock-view .engraving-lock-avatar--left {
     left: 115px;
 }
 
-.octane-engraving-lock-view .engraving-lock-avatar--right {
+.volt-engraving-lock-view .engraving-lock-avatar--right {
     left: 186px;
 }
 
-.octane-engraving-lock-view .engraving-lock-header,
-.octane-engraving-lock-view .engraving-lock-date,
-.octane-engraving-lock-view .engraving-lock-name {
+.volt-engraving-lock-view .engraving-lock-header,
+.volt-engraving-lock-view .engraving-lock-date,
+.volt-engraving-lock-view .engraving-lock-name {
     position: absolute;
     display: block;
     height: 17px;
@@ -852,37 +852,37 @@
     box-sizing: border-box;
 }
 
-.octane-engraving-lock-view .engraving-lock-header {
+.volt-engraving-lock-view .engraving-lock-header {
     top: 126px;
     left: 82px;
     width: 217px;
     text-align: center;
 }
 
-.octane-engraving-lock-view .engraving-lock-date {
+.volt-engraving-lock-view .engraving-lock-date {
     top: 151px;
     left: 143px;
     width: 97px;
     text-align: center;
 }
 
-.octane-engraving-lock-view .engraving-lock-name {
+.volt-engraving-lock-view .engraving-lock-name {
     top: 175px;
 }
 
-.octane-engraving-lock-view .engraving-lock-name--left {
+.volt-engraving-lock-view .engraving-lock-name--left {
     left: 19px;
     width: 150px;
     text-align: right;
 }
 
-.octane-engraving-lock-view .engraving-lock-name--right {
+.volt-engraving-lock-view .engraving-lock-name--right {
     left: 199px;
     width: 87px;
     text-align: left;
 }
 
-.octane-widget-high-score {
+.volt-widget-high-score {
     border-radius: 0.3rem;
     border: solid 1px #000;
 
@@ -963,7 +963,7 @@
     }
 }
 
-.octane-playlist-editor-widget {
+.volt-playlist-editor-widget {
     width: min(625px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -1079,7 +1079,7 @@
 }
 
 @media (max-width: 640px), (max-height: 520px) {
-    .octane-playlist-editor-widget {
+    .volt-playlist-editor-widget {
         .playlist-editor-layout {
             flex-direction: column;
         }
@@ -1091,7 +1091,7 @@
     }
 }
 
-.octane-mysterybox-dialog {
+.volt-mysterybox-dialog {
     width: min(375px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -1108,7 +1108,7 @@
     }
 }
 
-.octane-mysterytrophy-dialog {
+.volt-mysterytrophy-dialog {
     .mysterytrophy-dialog-top {
         width: 100%;
         min-height: 120px;
@@ -1164,7 +1164,7 @@
 }
 
 @media (max-width: 560px), (max-height: 460px) {
-    .octane-widget-crafting {
+    .volt-widget-crafting {
         .crafting-widget-layout {
             flex-direction: column;
             overflow: auto;
@@ -1176,7 +1176,7 @@
         }
     }
 
-    .octane-widget-exchange-credit {
+    .volt-widget-exchange-credit {
         height: auto;
     }
 }

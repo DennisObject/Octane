@@ -1,7 +1,7 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { AchievementUtilities, LocalizeText } from '../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useAchievements } from '../../hooks';
 import { AchievementCategoryView } from './AchievementCategoryView';
@@ -75,8 +75,8 @@ export const AchievementsView: FC = () => {
     if (!isVisible || !isLoaded || !windowPosition) return null;
 
     return (
-        <OctaneCardView
-            className="octane-achievements-air"
+        <VoltCardView
+            className="volt-achievements-air"
             uniqueKey="achievements"
             frameStyle={3}
             isResizable={false}
@@ -86,7 +86,7 @@ export const AchievementsView: FC = () => {
             dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
             data-view={selectedCategory ? 'category' : 'categories'}
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={close}>
+            <VoltCardHeaderView headerText="" onCloseClick={close}>
                 <NativeText
                     background={0x377998}
                     className="air-achievements-native-title"
@@ -94,8 +94,8 @@ export const AchievementsView: FC = () => {
                     text={LocalizeText('inventory.achievements')}
                     textStyle="u_frame_title"
                 />
-            </OctaneCardHeaderView>
-            <div className="air-achievements-content octane-card-content-shell">
+            </VoltCardHeaderView>
+            <div className="air-achievements-content volt-card-content-shell">
                 {!selectedCategory && (
                     <>
                         <AchievementsCategoryListView
@@ -169,6 +169,6 @@ export const AchievementsView: FC = () => {
                     </>
                 )}
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

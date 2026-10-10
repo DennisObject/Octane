@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, GetSessionDataManager, MessengerMessageType } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, GetSessionDataManager, MessengerMessageType } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useId, useMemo, useState } from 'react';
 import { FriendlyTime, GetGroupChatData, LocalizeText, MessengerGroupType, MessengerThread, MessengerThreadChat, MessengerThreadChatGroup, useHabbiconCatalog } from '../../../../../api';
 import MessengerCaution from '../../../../../assets/images/friends/messenger_caution.png';

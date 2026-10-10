@@ -1,5 +1,5 @@
-import type { DailyTaskData, QuestMessageData, RewardTrackData, RewardTrackPrizeData } from '@octane/renderer';
-import { GetConfigurationValue } from '../octane';
+import type { DailyTaskData, QuestMessageData, RewardTrackData, RewardTrackPrizeData } from '@volt/renderer';
+import { GetConfigurationValue } from '../volt';
 import { FriendlyTime, LocalizeText, localizeWithFallback } from '../utils';
 
 /** The official quest engine texts and image rules (HabboQuestEngine / QuestsList / QuestCompleted). */

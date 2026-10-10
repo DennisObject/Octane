@@ -1,5 +1,5 @@
 /* v75 make_marketplace_offer: 300px frame, controls at their XML rect inside the client area that starts at (6,30). */
-.octane-market-offer {
+.volt-market-offer {
     box-sizing: border-box !important;
     width: 300px !important;
     min-width: 300px !important;
@@ -13,13 +13,13 @@
     will-change: transform;
 }
 
-.octane-market-offer-body {
+.volt-market-offer-body {
     position: relative;
     width: 288px;
     padding-top: 190px;
 }
 
-.octane-market-offer-image {
+.volt-market-offer-image {
     position: absolute;
     left: 10px;
     top: 12px;
@@ -31,11 +31,11 @@
     justify-content: center;
 }
 
-.octane-market-offer-image > .furni-image {
+.volt-market-offer-image > .furni-image {
     flex: none;
 }
 
-.octane-market-offer-name {
+.volt-market-offer-name {
     position: absolute;
     left: 88px;
     top: 13px;
@@ -47,14 +47,14 @@
     line-height: 20px;
 }
 
-.octane-market-offer-expiration {
+.volt-market-offer-expiration {
     position: absolute;
     left: 10px;
     top: 87px;
     width: 268px;
 }
 
-.octane-market-offer-label {
+.volt-market-offer-label {
     position: absolute;
     left: -86px;
     width: 295px;
@@ -64,16 +64,16 @@
     text-align: right;
 }
 
-.octane-market-offer-label.is-price {
+.volt-market-offer-label.is-price {
     top: 131px;
 }
 
-.octane-market-offer-label.is-amount {
+.volt-market-offer-label.is-amount {
     top: 160px;
 }
 
 /* input_border / amount_input_border: 66x26 white box around a 50x19 input at (8,3). */
-.octane-market-offer-field {
+.volt-market-offer-field {
     position: absolute;
     left: 212px;
     width: 66px;
@@ -83,15 +83,15 @@
     border-image: var(--habbo-skin-border-white) 6 fill / 6px stretch;
 }
 
-.octane-market-offer-field.is-price {
+.volt-market-offer-field.is-price {
     top: 129px;
 }
 
-.octane-market-offer-field.is-amount {
+.volt-market-offer-field.is-amount {
     top: 158px;
 }
 
-.octane-market-offer-field input {
+.volt-market-offer-field input {
     position: absolute;
     left: 2px;
     top: -3px;
@@ -105,7 +105,7 @@
 }
 
 /* itemlist (10,190) 268 wide, spacing 7. */
-.octane-market-offer-list {
+.volt-market-offer-list {
     position: relative;
     left: 10px;
     display: flex;
@@ -114,7 +114,7 @@
     width: 268px;
 }
 
-.octane-market-offer-list button {
+.volt-market-offer-list button {
     box-sizing: border-box;
     padding: 0;
     border: 5px solid transparent !important;
@@ -128,17 +128,17 @@
     image-rendering: pixelated;
 }
 
-.octane-market-offer-list button:hover:not(:disabled) { border-image-source: var(--habbo-skin-shiny-hover) !important; }
-.octane-market-offer-list button:active:not(:disabled) { border-image-source: var(--habbo-skin-shiny-pressed) !important; }
-.octane-market-offer-list button:disabled { border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important; opacity: 1; }
+.volt-market-offer-list button:hover:not(:disabled) { border-image-source: var(--habbo-skin-shiny-hover) !important; }
+.volt-market-offer-list button:active:not(:disabled) { border-image-source: var(--habbo-skin-shiny-pressed) !important; }
+.volt-market-offer-list button:disabled { border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important; opacity: 1; }
 
-.octane-market-offer-copy {
+.volt-market-offer-copy {
     align-self: flex-end;
     width: 138px;
     height: 24px;
 }
 
-.octane-market-offer-final {
+.volt-market-offer-final {
     position: relative;
     box-sizing: border-box;
     width: 268px;
@@ -149,12 +149,12 @@
     text-align: center;
 }
 
-.octane-market-offer-buttons {
+.volt-market-offer-buttons {
     position: relative;
     height: 30px;
 }
 
-.octane-market-offer-buttons button {
+.volt-market-offer-buttons button {
     position: absolute;
     top: 0;
     width: max-content;
@@ -163,15 +163,15 @@
     height: 28px;
 }
 
-.octane-market-offer-post { left: 0; }
-.octane-market-offer-cancel { right: 0; }
+.volt-market-offer-post { left: 0; }
+.volt-market-offer-cancel { right: 0; }
 
-.octane-market-offer-list button > [data-native-text] {
+.volt-market-offer-list button > [data-native-text] {
     mix-blend-mode: multiply;
 }
 
 /* final_price: center autosize around the native (6,11) 257x30 text field. */
-.octane-market-offer-final-text {
+.volt-market-offer-final-text {
     position: absolute;
     left: 0;
     top: 5px;
@@ -182,16 +182,16 @@
     justify-content: center;
 }
 
-.octane-market-offer-final-text > [data-native-text] {
+.volt-market-offer-final-text > [data-native-text] {
     flex: none;
 }
 
-.octane-market-offer-list button:disabled > [data-native-text] {
+.volt-market-offer-list button:disabled > [data-native-text] {
     mix-blend-mode: normal;
     opacity: 0.5;
 }
 
-.octane-market-offer-stat {
+.volt-market-offer-stat {
     height: 18px;
     flex: none;
     overflow: hidden;

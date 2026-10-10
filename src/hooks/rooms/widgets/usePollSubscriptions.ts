@@ -1,6 +1,6 @@
-import { RoomSessionPollEvent } from '@octane/renderer';
+import { RoomSessionPollEvent } from '@volt/renderer';
 import { DispatchUiEvent, RoomWidgetPollUpdateEvent } from '../../../api';
-import { useOctaneEvent } from '../../events';
+import { useVoltEvent } from '../../events';
 
 /**
  * Bridges the three poll-related renderer events (OFFER / ERROR / CONTENT)
@@ -11,7 +11,7 @@ import { useOctaneEvent } from '../../events';
  * usePollWidget. The "actions" half is in usePollActions.
  */
 export const usePollSubscriptions = (): void => {
-    useOctaneEvent<RoomSessionPollEvent>(RoomSessionPollEvent.OFFER, (event) => {
+    useVoltEvent<RoomSessionPollEvent>(RoomSessionPollEvent.OFFER, (event) => {
         const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.OFFER, event.id);
 
         pollEvent.summary = event.summary;
@@ -20,7 +20,7 @@ export const usePollSubscriptions = (): void => {
         DispatchUiEvent(pollEvent);
     });
 
-    useOctaneEvent<RoomSessionPollEvent>(RoomSessionPollEvent.ERROR, (event) => {
+    useVoltEvent<RoomSessionPollEvent>(RoomSessionPollEvent.ERROR, (event) => {
         const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.ERROR, event.id);
 
         pollEvent.summary = event.summary;
@@ -29,7 +29,7 @@ export const usePollSubscriptions = (): void => {
         DispatchUiEvent(pollEvent);
     });
 
-    useOctaneEvent<RoomSessionPollEvent>(RoomSessionPollEvent.CONTENT, (event) => {
+    useVoltEvent<RoomSessionPollEvent>(RoomSessionPollEvent.CONTENT, (event) => {
         const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.CONTENT, event.id);
 
         pollEvent.startMessage = event.startMessage;

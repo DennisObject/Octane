@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { CreateRoomSession, DoorStateType, GoToDesktop, LocalizeText } from '../../../api';
-import { Button, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../common';
+import { Button, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../common';
 import { useDoorState } from '../../../hooks';
-import { OctaneInput } from '../../../layout';
+import { VoltInput } from '../../../layout';
 
 const VISIBLE_STATES = [
     DoorStateType.START_DOORBELL,
@@ -45,12 +45,12 @@ export const NavigatorDoorStateView: FC<{}> = (props) => {
     const isDoorbell = DOORBELL_STATES.indexOf(snapshot.state) >= 0;
 
     return (
-        <OctaneCardView
-            className="octane-navigator-doorbell min-w-0 w-[min(320px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
+        <VoltCardView
+            className="volt-navigator-doorbell min-w-0 w-[min(320px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
             theme="primary-slim"
         >
-            <OctaneCardHeaderView headerText={LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title')} onCloseClick={onClose} />
-            <OctaneCardContentView className="octane-navigator-air__door-state">
+            <VoltCardHeaderView headerText={LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title')} onCloseClick={onClose} />
+            <VoltCardContentView className="volt-navigator-air__door-state">
                 <div className="flex flex-col gap-1">
                     <Text bold>{snapshot.roomInfo && snapshot.roomInfo.roomName}</Text>
                     {snapshot.state === DoorStateType.START_DOORBELL && <Text>{LocalizeText('navigator.doorbell.info')}</Text>}
@@ -75,7 +75,7 @@ export const NavigatorDoorStateView: FC<{}> = (props) => {
                     <>
                         <div className="flex flex-col gap-1">
                             <Text>{LocalizeText('navigator.password.enter')}</Text>
-                            <OctaneInput
+                            <VoltInput
                                 autoFocus
                                 type="password"
                                 value={password}
@@ -95,7 +95,7 @@ export const NavigatorDoorStateView: FC<{}> = (props) => {
                         </div>
                     </>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

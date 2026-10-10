@@ -22,8 +22,8 @@ vi.mock('../../common', () => ({
         </button>
     ),
     DraggableWindowPosition: { TOP_LEFT: 'top-left' },
-    OctaneCardView: ({ children }: PropsWithChildren) => <div>{children}</div>,
-    OctaneCardHeaderView: ({ headerText, onCloseClick }: { headerText: string; onCloseClick: () => void }) => (
+    VoltCardView: ({ children }: PropsWithChildren) => <div>{children}</div>,
+    VoltCardHeaderView: ({ headerText, onCloseClick }: { headerText: string; onCloseClick: () => void }) => (
         <div>
             <span>{headerText}</span>
             <button type="button" onClick={onCloseClick}>
@@ -31,7 +31,7 @@ vi.mock('../../common', () => ({
             </button>
         </div>
     ),
-    OctaneCardContentView: ({ children }: PropsWithChildren) => <div>{children}</div>,
+    VoltCardContentView: ({ children }: PropsWithChildren) => <div>{children}</div>,
     Text: ({ children }: PropsWithChildren) => <span>{children}</span>
 }));
 

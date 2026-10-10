@@ -7,7 +7,7 @@ import {
     GetUserChatlogMessageComposer,
     RoomChatlogEvent,
     UserChatlogEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import { NativeText } from '../../../common/native-text/NativeText';

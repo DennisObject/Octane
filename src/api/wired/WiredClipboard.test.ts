@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@octane/renderer', () => {
+vi.mock('@volt/renderer', () => {
     class Triggerable {
         _intParams: number[] = [];
         _stringParam = '';
@@ -48,7 +48,7 @@ vi.mock('@octane/renderer', () => {
     return { Triggerable, WiredActionDefinition, TriggerDefinition, ConditionDefinition };
 });
 
-import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@octane/renderer';
+import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@volt/renderer';
 import { pasteTriggerableData, resetTriggerableData, wiredClipboardKeyOf, withTriggerableData } from './WiredClipboard';
 
 const action = (code: number) => {

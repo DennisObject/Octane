@@ -1,4 +1,4 @@
-import { StringDataType } from '@octane/renderer';
+import { StringDataType } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, LocalizeText, localizeWithFallback } from '../../../../../api';
 import { AutoGrid, AutoGridProps, ClassicScrollAreaView, LayoutBadgeImageView, LayoutGridItem } from '../../../../../common';
@@ -83,8 +83,8 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
     }, [currentBadgeCode, filteredBadgeCodes]);
 
     return (
-        <div className={`octane-catalog-badge-selector ${className}`.trim()}>
-            <div className="octane-catalog-badge-search">
+        <div className={`volt-catalog-badge-selector ${className}`.trim()}>
+            <div className="volt-catalog-badge-search">
                 <input
                     aria-label={LocalizeText('generic.search')}
                     maxLength={MAX_SEARCH_LENGTH}
@@ -103,7 +103,7 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
                 {!!searchText.length && (
                     <button
                         aria-label={localizeWithFallback('generic.clear', 'Clear')}
-                        className="octane-catalog-badge-search-clear"
+                        className="volt-catalog-badge-search-clear"
                         type="button"
                         onClick={() => setSearchText('')}
                     >
@@ -111,10 +111,10 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
                     </button>
                 )}
             </div>
-            <ClassicScrollAreaView className="octane-catalog-badge-scroll-area" scrollStep={45}>
+            <ClassicScrollAreaView className="volt-catalog-badge-scroll-area" scrollStep={45}>
                 <AutoGrid
                     aria-label={LocalizeText('catalog_selectbadge')}
-                    className="octane-catalog-badge-grid"
+                    className="volt-catalog-badge-grid"
                     columnCount={columnCount}
                     columnMinHeight={44}
                     columnMinWidth={44}
@@ -127,7 +127,7 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
                             key={badgeCode}
                             aria-label={badgeCode}
                             aria-selected={currentBadgeCode === badgeCode}
-                            className="octane-catalog-badge-tile"
+                            className="volt-catalog-badge-tile"
                             itemActive={currentBadgeCode === badgeCode}
                             role="option"
                             title={LocalizeBadgeName(badgeCode)}
@@ -137,7 +137,7 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
                         </LayoutGridItem>
                     ))}
                 </AutoGrid>
-                {!filteredBadgeCodes.length && <div className="octane-catalog-badge-empty">{LocalizeText('inventory.empty.title')}</div>}
+                {!filteredBadgeCodes.length && <div className="volt-catalog-badge-empty">{LocalizeText('inventory.empty.title')}</div>}
             </ClassicScrollAreaView>
         </div>
     );

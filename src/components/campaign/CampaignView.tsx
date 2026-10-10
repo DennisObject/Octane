@@ -7,7 +7,7 @@ import {
     OpenCampaignCalendarDoorAsStaffComposer,
     OpenCampaignCalendarDoorComposer,
     RemoveLinkEventTracker
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { CalendarItem, SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../../hooks';

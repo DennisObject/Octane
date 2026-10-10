@@ -13,7 +13,7 @@ import {
     SaveRewardTrackTaskMessageComposer,
     SaveRewardTrackTextsMessageComposer,
     SearchRewardTrackFurniMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../events';

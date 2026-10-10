@@ -1,4 +1,4 @@
-import { IObjectData } from '@octane/renderer';
+import { IObjectData } from '@volt/renderer';
 
 export class MarketplaceOfferData {
     public static readonly TYPE_FLOOR: number = 1;

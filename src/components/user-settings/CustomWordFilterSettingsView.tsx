@@ -4,7 +4,7 @@ import {
     GetCustomFilterMessageComposer,
     ModifyCustomFilterResultEvent,
     RemoveCustomFilterWordMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../../hooks';

@@ -1,2 +1,2 @@
-export * from './OctaneCardTabsItemView';
-export * from './OctaneCardTabsView';
+export * from './VoltCardTabsItemView';
+export * from './VoltCardTabsView';

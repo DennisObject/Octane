@@ -37,41 +37,41 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
     return (
         <>
             <StaffSection title={LocalizeText('furni.editor.names.title')}>
-                <div className="octane-staff-row">
+                <div className="volt-staff-row">
                     <FurniEditorFurnidataFlagView state={furnidataState} />
-                    {isEditable && draft.isDirty && <span className="octane-furni-editor-warning">{LocalizeText('furni.editor.names.unsaved')}</span>}
+                    {isEditable && draft.isDirty && <span className="volt-furni-editor-warning">{LocalizeText('furni.editor.names.unsaved')}</span>}
                 </div>
-                {furnidataState === 'unconfigured' && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.unconfigured')}</p>}
+                {furnidataState === 'unconfigured' && <p className="volt-staff-muted">{LocalizeText('furni.editor.names.unconfigured')}</p>}
                 {furnidataState === 'locked' && (
-                    <p className="octane-staff-muted">
+                    <p className="volt-staff-muted">
                         {furniEditorText('furni.editor.names.locked', { reason: furnidataReasonText(insights.furnidataReason) })}
                     </p>
                 )}
                 {isEditable && !rights.canEditFurnidata && (
                     <>
-                        <div className="octane-staff-grid">
-                            <div className="octane-staff-field">
-                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
+                        <div className="volt-staff-grid">
+                            <div className="volt-staff-field">
+                                <span className="volt-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
                                 <FurniEditorCopyValueView value={draft.storedName} />
                             </div>
-                            <div className="octane-staff-field">
-                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
+                            <div className="volt-staff-field">
+                                <span className="volt-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
                                 <FurniEditorCopyValueView value={draft.storedDescription} />
                             </div>
                         </div>
-                        <p className="octane-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
+                        <p className="volt-staff-muted">{LocalizeText('furni.editor.names.no_right')}</p>
                     </>
                 )}
-                {furnidataState === 'missing' && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.missing')}</p>}
+                {furnidataState === 'missing' && <p className="volt-staff-muted">{LocalizeText('furni.editor.names.missing')}</p>}
                 {canWrite && (
                     <>
-                        <div className="octane-staff-grid">
-                            <label className="octane-staff-field">
-                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
+                        <div className="volt-staff-grid">
+                            <label className="volt-staff-field">
+                                <span className="volt-staff-field-label">{LocalizeText('furni.editor.names.display_name')}</span>
                                 <input maxLength={FURNIDATA_NAME_MAX} type="text" value={draft.name} onChange={(event) => draft.setName(event.target.value)} />
                             </label>
-                            <label className="octane-staff-field">
-                                <span className="octane-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
+                            <label className="volt-staff-field">
+                                <span className="volt-staff-field-label">{LocalizeText('furni.editor.names.description')}</span>
                                 <input
                                     maxLength={FURNIDATA_DESCRIPTION_MAX}
                                     type="text"
@@ -80,7 +80,7 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                                 />
                             </label>
                         </div>
-                        <div className="octane-staff-row">
+                        <div className="volt-staff-row">
                             <Button disabled={isBusy || !draft.isDirty} variant="primary" onClick={actions.saveFurnidata}>
                                 {LocalizeText('furni.editor.names.save')}
                             </Button>
@@ -89,7 +89,7 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                             </Button>
                             {!importUnavailable && (
                                 <Button
-                                    className="octane-furni-editor-push"
+                                    className="volt-furni-editor-push"
                                     disabled={isBusy || isImporting}
                                     title={LocalizeText('furni.editor.names.import.tip')}
                                     variant="secondary"
@@ -99,19 +99,19 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                                 </Button>
                             )}
                         </div>
-                        {importUnavailable && <p className="octane-staff-muted">{LocalizeText('furni.editor.names.import.unconfigured')}</p>}
-                        {draft.importNote && <p className="octane-staff-muted">{localizeFurniEditorText(draft.importNote)}</p>}
+                        {importUnavailable && <p className="volt-staff-muted">{LocalizeText('furni.editor.names.import.unconfigured')}</p>}
+                        {draft.importNote && <p className="volt-staff-muted">{localizeFurniEditorText(draft.importNote)}</p>}
                     </>
                 )}
             </StaffSection>
             <StaffSection title={LocalizeText('furni.editor.basic.title')}>
-                <div className="octane-staff-grid">
-                    <div className="octane-staff-field">
-                        <span className="octane-staff-field-label">{LocalizeText('furni.editor.basic.classname')}</span>
+                <div className="volt-staff-grid">
+                    <div className="volt-staff-field">
+                        <span className="volt-staff-field-label">{LocalizeText('furni.editor.basic.classname')}</span>
                         <FurniEditorCopyValueView value={item.itemName} />
                     </div>
-                    <div className="octane-staff-field">
-                        <span className="octane-staff-field-label">{LocalizeText('furni.editor.basic.public_name')}</span>
+                    <div className="volt-staff-field">
+                        <span className="volt-staff-field-label">{LocalizeText('furni.editor.basic.public_name')}</span>
                         <FurniEditorCopyValueView value={item.publicName} />
                         {insights.canSyncPublicName && rights.canEditFurnidata && (
                             <Button disabled={isBusy} variant="secondary" onClick={actions.syncName}>
@@ -119,12 +119,12 @@ export const FurniEditorNamesView: FC<FurniEditorNamesViewProps> = ({ item, draf
                             </Button>
                         )}
                     </div>
-                    <div className="octane-staff-field">
-                        <span className="octane-staff-field-label">{LocalizeText('furni.editor.basic.sprite_id')}</span>
+                    <div className="volt-staff-field">
+                        <span className="volt-staff-field-label">{LocalizeText('furni.editor.basic.sprite_id')}</span>
                         <FurniEditorCopyValueView value={item.spriteId} />
                     </div>
-                    <div className="octane-staff-field">
-                        <span className="octane-staff-field-label">{LocalizeText('furni.editor.basic.type')}</span>
+                    <div className="volt-staff-field">
+                        <span className="volt-staff-field-label">{LocalizeText('furni.editor.basic.type')}</span>
                         <FurniEditorCopyValueView value={LocalizeText(item.type === 's' ? 'furni.editor.type.floor_code' : 'furni.editor.type.wall_code')} />
                     </div>
                 </div>

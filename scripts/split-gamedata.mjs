@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import stripJsonComments from 'strip-json-comments';
 
 const HELP = `
-Octane V3 — gamedata splitter
+Volt V3 — gamedata splitter
 
 Takes a legacy single-file gamedata JSON (EffectMap, FigureData, FigureMap,
 FurnitureData, HabboAvatarActions, ProductData, ExternalTexts, UITexts) and

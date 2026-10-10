@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { expandLocalizedText, localizeWithFallback } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 
 export interface VariablesExplorerBulkDeleteViewProps {
     variableName: string;
@@ -22,18 +22,18 @@ export const VariablesExplorerBulkDeleteView: FC<VariablesExplorerBulkDeleteView
     );
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[360px] max-w-[360px]"
             theme="primary-slim"
             uniqueKey="variables-explorer-bulk-delete"
             windowPosition={DraggableWindowPosition.CENTER}
             isResizable={false}
         >
-            <OctaneCardHeaderView
+            <VoltCardHeaderView
                 headerText={localizeWithFallback('wiredmenu.variable_overview.delete_all.title', 'Clear this variable')}
                 onCloseClick={onCancel}
             />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3">
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3">
                 <div className="rounded border border-[#d9a3a3] bg-[#fbeaea] p-3 flex flex-col gap-2">
                     <Text bold>Delete {variableName} from every holder in this room?</Text>
                     <Text className="whitespace-pre-line">{warning}</Text>
@@ -60,7 +60,7 @@ export const VariablesExplorerBulkDeleteView: FC<VariablesExplorerBulkDeleteView
                         {localizeWithFallback('wiredmenu.variable_management.delete', 'Delete')}
                     </Button>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

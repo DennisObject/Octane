@@ -1,6 +1,6 @@
-import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@octane/renderer';
+import { CreateLinkEvent, DisconnectMessageComposer, GetCommunication } from '@volt/renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { endAuthSession, FriendlyTime, forgetAccessToken, isOctaneAuthEnabled, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
+import { endAuthSession, FriendlyTime, forgetAccessToken, isVoltAuthEnabled, forgetRememberGrant, GetConfigurationValue, getAccessToken, localizeWithFallback, logoutSession, SendMessageComposer } from '../../api';
 import earningsIcon from '../../assets/images/purse-swf/icons/1747_icon_earnings_png$5e39e03f65fbbb9a85bedd0d577dc12d307477063.png';
 import hcIcon from '../../assets/images/purse-swf/icons/1801_hc_icon_png$2f8b554609e9c5cbbdc46bcbe5764be5-210881771.png';
 import logoutIcon from '../../assets/images/purse-swf/icons/1936_logout_icon_png$6a29fdff1e5e3cdd3c6290cec5c962b4-234470554.png';
@@ -13,7 +13,7 @@ import { SeasonalView } from './views/SeasonalView';
 export const PurseView: FC<{}> = (props) => {
     const { purse = null, hcDisabled = false } = usePurse();
     const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
-    const authEnabled = isOctaneAuthEnabled();
+    const authEnabled = isVoltAuthEnabled();
 
     const openSettingsSection = useCallback((section: string) => {
         CreateLinkEvent('user-settings/show/' + section);
@@ -91,7 +91,7 @@ export const PurseView: FC<{}> = (props) => {
     const handleLogout = useCallback(async (event: React.MouseEvent) => {
         event.stopPropagation();
 
-        const ssoTicket = (window.OctaneConfig?.['sso.ticket'] as string) ?? '';
+        const ssoTicket = (window.VoltConfig?.['sso.ticket'] as string) ?? '';
         const accessToken = getAccessToken();
         // Taken under the remember lock, so a rotation in flight finishes first.
         const rememberToken = (await forgetRememberGrant())[0] ?? '';
@@ -115,7 +115,7 @@ export const PurseView: FC<{}> = (props) => {
         endAuthSession();
         forgetAccessToken();
         ClearStoredChatHistory();
-        if (window.OctaneConfig) window.OctaneConfig['sso.ticket'] = '';
+        if (window.VoltConfig) window.VoltConfig['sso.ticket'] = '';
 
         // When the client runs inside a CMS page, reloading the iframe alone
         // leaves the user logged in on the site with a dead client. Send the
@@ -137,42 +137,42 @@ export const PurseView: FC<{}> = (props) => {
     if (!purse) return null;
 
     return (
-        <Column alignItems="end" className="octane-purse-container" gap={0}>
-            <div className="octane-purse">
-                <div className="octane-purse__chrome" aria-hidden="true" />
-                <div className="octane-purse__body">
-                    <div className="octane-purse__currencies">
+        <Column alignItems="end" className="volt-purse-container" gap={0}>
+            <div className="volt-purse">
+                <div className="volt-purse__chrome" aria-hidden="true" />
+                <div className="volt-purse__body">
+                    <div className="volt-purse__currencies">
                         {hasDiamonds && <CurrencyView type={5} amount={purse.activityPoints.get(5) || 0} short={currencyDisplayNumberShort} />}
                         <CurrencyView type={-1} amount={purse.credits} short={currencyDisplayNumberShort} />
                         {hasDuckets && <CurrencyView type={0} amount={purse.activityPoints.get(0) || 0} short={currencyDisplayNumberShort} />}
                     </div>
-                    <div className="octane-purse__col octane-purse__col--primary subscription-container">
+                    <div className="volt-purse__col volt-purse__col--primary subscription-container">
                         {!hcDisabled && (
                             <button
                                 type="button"
-                                className="octane-purse__btn octane-purse__btn--join octane-purse-subscription club-text"
+                                className="volt-purse__btn volt-purse__btn--join volt-purse-subscription club-text"
                                 onClick={openClub}
                                 aria-label={clubTitle}
                             >
-                                <img src={hcIcon} alt="" className="octane-purse__btn-img" />
-                                <span className={hasClubTime ? 'octane-purse__btn-days' : 'octane-purse__btn-join'}>{clubLabel}</span>
+                                <img src={hcIcon} alt="" className="volt-purse__btn-img" />
+                                <span className={hasClubTime ? 'volt-purse__btn-days' : 'volt-purse__btn-join'}>{clubLabel}</span>
                             </button>
                         )}
                         <button
                             type="button"
-                            className="octane-purse__btn octane-purse__btn--earnings octane-purse-subscription club-text"
+                            className="volt-purse__btn volt-purse__btn--earnings volt-purse-subscription club-text"
                             onClick={openEarnings}
                             aria-label={earningsLabel}
                         >
-                            <img src={earningsIcon} alt="" className="octane-purse__btn-img" />
-                            <span className="octane-purse__btn-earnings">{earningsLabel}</span>
+                            <img src={earningsIcon} alt="" className="volt-purse__btn-img" />
+                            <span className="volt-purse__btn-earnings">{earningsLabel}</span>
                         </button>
                     </div>
-                    <div className="octane-purse__divider" aria-hidden="true" />
-                    <div className="octane-purse__col octane-purse__col--actions">
+                    <div className="volt-purse__divider" aria-hidden="true" />
+                    <div className="volt-purse__col volt-purse__col--actions">
                         <button
                             type="button"
-                            className="octane-purse__btn octane-purse__btn--help octane-purse-right-button help"
+                            className="volt-purse__btn volt-purse__btn--help volt-purse-right-button help"
                             onClick={(event) => {
                                 event.stopPropagation();
                                 CreateLinkEvent('help/show');
@@ -183,46 +183,46 @@ export const PurseView: FC<{}> = (props) => {
                         </button>
                         {authEnabled && <button
                             type="button"
-                            className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--logout octane-purse-right-button disconnect"
+                            className="volt-purse__btn volt-purse__btn--icon volt-purse__btn--logout volt-purse-right-button disconnect"
                             onClick={handleLogout}
                             aria-label={logoutLabel}
                         >
-                            <img src={logoutIcon} alt="" className="octane-purse__btn-img" />
+                            <img src={logoutIcon} alt="" className="volt-purse__btn-img" />
                         </button>}
                         <button
                             type="button"
-                            className="octane-purse__btn octane-purse__btn--icon octane-purse__btn--settings octane-purse-right-button settings"
+                            className="volt-purse__btn volt-purse__btn--icon volt-purse__btn--settings volt-purse-right-button settings"
                             onClick={(event) => {
                                 event.stopPropagation();
                                 setSettingsMenuOpen((value) => !value);
                             }}
                             aria-label={settingsLabel}
                         >
-                            <img src={settingsIcon} alt="" className="octane-purse__btn-img" />
+                            <img src={settingsIcon} alt="" className="volt-purse__btn-img" />
                         </button>
                     </div>
                 </div>
             </div>
             {settingsMenuOpen && (
-                <div className="octane-purse-menu">
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('audio')}>
+                <div className="volt-purse-menu">
+                    <button type="button" className="volt-purse-menu__item" onClick={() => openSettingsSection('audio')}>
                         {localizeWithFallback('widget.memenu.settings.audio', 'Sound settings')}
                     </button>
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('chat')}>
+                    <button type="button" className="volt-purse-menu__item" onClick={() => openSettingsSection('chat')}>
                         {localizeWithFallback('widget.memenu.settings.chat', 'Chat settings')}
                     </button>
-                    <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('other')}>
+                    <button type="button" className="volt-purse-menu__item" onClick={() => openSettingsSection('other')}>
                         {localizeWithFallback('widget.memenu.settings.other', 'Other settings')}
                     </button>
                     {GetConfigurationValue<boolean>('user.custom.filter.enabled', false) && (
-                        <button type="button" className="octane-purse-menu__item" onClick={() => openSettingsSection('wordfilter')}>
+                        <button type="button" className="volt-purse-menu__item" onClick={() => openSettingsSection('wordfilter')}>
                             {localizeWithFallback('word_filter.settings.title', 'Word filter')}
                         </button>
                     )}
                 </div>
             )}
             {seasonalCurrencies.length > 0 && (
-                <div className="octane-purse__other">
+                <div className="volt-purse__other">
                     {seasonalCurrencies.map((type) => (
                         <SeasonalView key={type} type={type} amount={purse.activityPoints.get(type) || 0} />
                     ))}

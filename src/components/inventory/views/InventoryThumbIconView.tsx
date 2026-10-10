@@ -10,7 +10,7 @@ const centerIcon = (event: SyntheticEvent<HTMLImageElement>) =>
 };
 
 export const InventoryThumbIconView: FC<{ iconUrl: string }> = ({ iconUrl }) => (
-    <div className="octane-inventory-thumb-image">
+    <div className="volt-inventory-thumb-image">
         <img src={iconUrl} alt="" draggable={false} onLoad={centerIcon} />
     </div>
 );

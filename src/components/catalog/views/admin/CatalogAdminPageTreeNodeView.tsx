@@ -31,9 +31,9 @@ export const CatalogAdminPageTreeNodeView: FC<CatalogAdminPageTreeNodeViewProps>
     const isSelected = node.pageId === tree.selectedPageId;
     const dropPosition = tree.dropTarget?.pageId === node.pageId ? tree.dropTarget.position : null;
     const classNames = [
-        'octane-staff-list-row',
+        'volt-staff-list-row',
         'is-interactive',
-        'octane-catalog-admin-tree-row',
+        'volt-catalog-admin-tree-row',
         isSelected ? 'is-selected' : '',
         node.isVisible ? '' : 'is-hidden',
         dropPosition ? `is-drop-${dropPosition}` : ''
@@ -66,7 +66,7 @@ export const CatalogAdminPageTreeNodeView: FC<CatalogAdminPageTreeNodeViewProps>
                 {hasChildren ? (
                     <button
                         aria-label={LocalizeText(isOpen ? 'catalog.admin.tree.collapse' : 'catalog.admin.tree.expand', ['name'], [name])}
-                        className={`octane-catalog-admin-tree-caret ${isOpen ? 'is-open' : ''}`}
+                        className={`volt-catalog-admin-tree-caret ${isOpen ? 'is-open' : ''}`}
                         type="button"
                         onClick={(event) => {
                             event.stopPropagation();
@@ -74,14 +74,14 @@ export const CatalogAdminPageTreeNodeView: FC<CatalogAdminPageTreeNodeViewProps>
                         }}
                     />
                 ) : (
-                    <span className="octane-catalog-admin-tree-caret is-empty" />
+                    <span className="volt-catalog-admin-tree-caret is-empty" />
                 )}
-                <span className="octane-catalog-admin-tree-icon">{node.iconId > 0 && <CatalogIconView icon={node.iconId} />}</span>
-                <span className="octane-catalog-admin-tree-label" title={name}>
+                <span className="volt-catalog-admin-tree-icon">{node.iconId > 0 && <CatalogIconView icon={node.iconId} />}</span>
+                <span className="volt-catalog-admin-tree-label" title={name}>
                     {name}
                 </span>
-                {!node.isVisible && <span className="octane-staff-flag is-muted">{LocalizeText('catalog.admin.hidden')}</span>}
-                <span className="octane-staff-muted">{node.pageId}</span>
+                {!node.isVisible && <span className="volt-staff-flag is-muted">{LocalizeText('catalog.admin.hidden')}</span>}
+                <span className="volt-staff-muted">{node.pageId}</span>
             </div>
             {isOpen && node.children.map((child) => <CatalogAdminPageTreeNodeView key={child.pageId} depth={depth + 1} node={child} tree={tree} />)}
         </>

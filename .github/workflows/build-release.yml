@@ -1,7 +1,7 @@
 name: Build & Publish Client Release
 
 # Every push to main publishes the built client. The hotel installers download
-# octane-client.zip from the latest release, so servers never build it.
+# volt-client.zip from the latest release, so servers never build it.
 on:
   push:
     branches: [main]
@@ -22,44 +22,44 @@ jobs:
   build-release:
     runs-on: ubuntu-latest
     steps:
-      # vite.config.mjs reads the renderer source from ../Octane-Renderer.
+      # vite.config.mjs reads the renderer source from ../Volt-Renderer.
       - name: Checkout client
         uses: actions/checkout@v7
         with:
-          path: Octane
+          path: Volt
 
       - name: Checkout renderer
         uses: actions/checkout@v7
         with:
-          repository: ${{ github.repository_owner }}/Octane-Renderer
+          repository: ${{ github.repository_owner }}/Volt-Renderer
           ref: main
-          path: Octane-Renderer
+          path: Volt-Renderer
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: Octane/.nvmrc
+          node-version-file: Volt/.nvmrc
 
       - name: Install dependencies
         run: |
           corepack enable
-          (cd Octane-Renderer && corepack yarn install --immutable)
-          (cd Octane && corepack yarn install --immutable)
+          (cd Volt-Renderer && corepack yarn install --immutable)
+          (cd Volt && corepack yarn install --immutable)
 
       # A plain Vite build, the same output the live hotel serves.
       - name: Build client
-        working-directory: Octane
+        working-directory: Volt
         run: corepack yarn vite build
 
       - name: Package dist
-        run: (cd Octane/dist && zip -qr ../../octane-client.zip .)
+        run: (cd Volt/dist && zip -qr ../../volt-client.zip .)
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        working-directory: Octane
+        working-directory: Volt
         run: |
           version=$(node -p "require('./package.json').version")
           tag="client-v$version-${GITHUB_SHA::7}"
           if gh release view "$tag" > /dev/null 2>&1; then echo "$tag is already released"; exit 0; fi
-          gh release create "$tag" ../octane-client.zip --target "$GITHUB_SHA" --title "Octane client $version (${GITHUB_SHA::7})" --generate-notes --latest
+          gh release create "$tag" ../volt-client.zip --target "$GITHUB_SHA" --title "Volt client $version (${GITHUB_SHA::7})" --generate-notes --latest

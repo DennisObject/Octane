@@ -2,7 +2,7 @@
     transition: bottom 140ms ease-out, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, border-radius 220ms ease;
 }
 
-.octane-toolbar-hobba {
+.volt-toolbar-hobba {
     position: absolute;
     bottom: -3px;
     left: -10px;
@@ -18,10 +18,10 @@
     border-image-width: 7px 7px 8px;
     border-image-repeat: stretch;
     background: transparent;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-toolbar-mobile-hobba {
+.volt-toolbar-mobile-hobba {
     min-height: 44px;
     border: 1px solid rgba(0, 0, 0, 0.50);
     border-radius: 7px;
@@ -39,7 +39,7 @@
 .tb-icon {
     opacity: 1;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.28));
 }
 
@@ -67,15 +67,15 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0s linear 500ms;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 [data-toolbar-tooltip]:hover::after {
     opacity: 1;
 }
 
-.tb-nav-clip .octane-icon:hover,
-.tb-nav-clip .octane-icon:active {
+.tb-nav-clip .volt-icon:hover,
+.tb-nav-clip .volt-icon:active {
     transform: none;
 }
 
@@ -100,7 +100,7 @@
 .tb-memenu-face-img {
     width: 50px !important;
     height: 50px !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .tb-memenu-face {
@@ -161,7 +161,7 @@
     width: 45px;
     height: 45px;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-memenu-bg {
@@ -200,7 +200,7 @@
     height: 40px;
     flex-shrink: 0;
     align-self: flex-start;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-collapse {
@@ -224,7 +224,7 @@
     height: 8px;
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAIBAMAAAAo6JMLAAAAElBMVEWcl5H///8AAAC8trAAAACcl5Eob2b7AAAABHRSTlMAAAAAs5NmmgAAACxJREFUeF4NibENACAQhCgc4GMcwQ1+Bnst2H8VryCEQA2pI9tLFJrlYybyPk/8BRNoV5ftAAAAAElFTkSuQmCC") center / 6px 8px no-repeat;
     content: "";
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-collapse--right::before {
@@ -239,7 +239,7 @@
     background-image: url("../../assets/images/toolbar/air/collapse-border-3b3933.png");
     background-repeat: no-repeat;
     background-position: -6px 0;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-toggle {
@@ -314,7 +314,7 @@
     display: block;
     width: 1px;
     height: 40px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-friendtools .tb-slot {
@@ -326,7 +326,7 @@
 .tb-friendtools .tb-right-search { left: 64px; }
 .tb-friendtools .tb-right-messenger { left: 103px; margin: 0; }
 
-.tb-nav-clip .tb-friendtools .tb-slot .octane-icon { top: 0; left: 0; }
+.tb-nav-clip .tb-friendtools .tb-slot .volt-icon { top: 0; left: 0; }
 
 .tb-right-friend-bar {
     flex: 0 0 auto;
@@ -340,7 +340,7 @@
     background-image: url("../../assets/images/toolbar/air/collapse-border-3b3933.png");
     background-repeat: no-repeat;
     background-position: 0 1px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-collapse--friendbar-left {
@@ -368,7 +368,7 @@
 }
 
 /* me_menu_new_view.xml border style 6: habbo_skin_border_6, ubuntu atlas 8/4/8, window color #3b3933. */
-.octane-toolbar-me-popup {
+.volt-toolbar-me-popup {
     box-sizing: border-box;
     min-width: max-content;
     height: 53px;
@@ -383,10 +383,10 @@
     padding: 5px 0 0 15px;
     gap: 8px;
     align-items: flex-start;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-toolbar-me-popup .tbme-item {
+.volt-toolbar-me-popup .tbme-item {
     position: relative;
     display: flex;
     width: 60px;
@@ -405,19 +405,19 @@
     cursor: pointer;
 }
 
-.octane-toolbar-me-popup::after {
+.volt-toolbar-me-popup::after {
     width: 7px;
     height: 30px;
     flex: 0 0 7px;
     content: "";
 }
 
-.octane-toolbar-me-popup .tbme-item:has(.icon-me-helper-tool) {
+.volt-toolbar-me-popup .tbme-item:has(.icon-me-helper-tool) {
     width: 50px;
     flex-basis: 50px;
 }
 
-.octane-toolbar-me-popup .tbme-item > span:last-of-type {
+.volt-toolbar-me-popup .tbme-item > span:last-of-type {
     position: absolute;
     top: 32px;
     left: 0;
@@ -426,8 +426,8 @@
     text-align: center;
 }
 
-.octane-toolbar-me-popup .tbme-item > .octane-icon,
-.octane-toolbar-me-popup .tbme-item > [class^="icon-me-"] {
+.volt-toolbar-me-popup .tbme-item > .volt-icon,
+.volt-toolbar-me-popup .tbme-item > [class^="icon-me-"] {
     position: absolute;
     top: 0;
     left: 14px;
@@ -439,43 +439,43 @@
     filter: grayscale(1);
 }
 
-.octane-toolbar-me-popup .tbme-item > .icon-me-rooms {
+.volt-toolbar-me-popup .tbme-item > .icon-me-rooms {
     background-position: left top;
 }
 
-.octane-toolbar-me-popup .tbme-item > .icon-me-helper-tool,
-.octane-toolbar-me-popup .tbme-item > .icon-me-clothing {
+.volt-toolbar-me-popup .tbme-item > .icon-me-helper-tool,
+.volt-toolbar-me-popup .tbme-item > .icon-me-clothing {
     background-position: center top;
 }
 
-.octane-toolbar-me-popup .tbme-item:hover > [class^="icon-me-"] {
+.volt-toolbar-me-popup .tbme-item:hover > [class^="icon-me-"] {
     filter: none;
 }
 
-.octane-toolbar-me-popup .tbme-item > .icon-progression-leaderboards {
+.volt-toolbar-me-popup .tbme-item > .icon-progression-leaderboards {
     top: 4px;
     left: 17px;
     width: 25px;
     height: 25px;
 }
 
-.octane-toolbar-me-popup .tbme-item > .icon-me-rewardtrack {
+.volt-toolbar-me-popup .tbme-item > .icon-me-rewardtrack {
     width: 33px;
     height: 32px;
 }
 
-.octane-icon.icon-progression-leaderboards {
+.volt-icon.icon-progression-leaderboards {
     width: 32px;
     height: 30px;
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABdUExURQAAAPfERf77a//1Kf/mGf/SCv2yAfKPAf////u/B/X3+PaoBO7x8tne4uHm6dri5cfR1c7X29bd4eWEAaGutvm1BbfGzmZucu+0Q6VGAMpkANp3AYEvANNzAAAAACfs3O0AAAAfdFJOU////////////////////////////////////////wDNGXYQAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNS4xLjExiggWzgAAALhlWElmSUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAAAgAAADEBAgARAAAAWgAAAGmHBAABAAAAbAAAAAAAAABgAAAAAQAAAGAAAAABAAAAUGFpbnQuTkVUIDUuMS4xMQAAAwAAkAcABAAAADAyMzABoAMAAQAAAAEAAAAFoAQAAQAAAJYAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAABjXUc7KPcjsAAAErSURBVChTdZLZcsMgDEVvtAAqCcFBZG36/5/ZgWx+aDVjI3RspCuBn48BWO9W7mazWW9XLhH9R/hvAmJeo7cHIQ1K8gm8VqIQEcMn1WMFVENEQgyqz9oxVMBERJG+ElREbIR+gJzNWDTYJBZU2CxnAJmIdHyWttttGgcoEU2iYoaU0q6UskspwUw0j/OyqmFf63I4HJZa9zDVjFEbMlmD17osS62OZpRH+KGlT1Qn6A9N84nUO46THNE7xQcBHMwBXv3k1RGY4VOPe8GZGvZ7YLwanVHcAXgq6EQNuFwvQCPqKGn+5QVdiFqLIbZGJB3FR9XwE7oEYRrGEqTjNMloaWdllmHMyn1eldnxkUdv18v35XrTkec9H8QY76P1AO4xTjlPMgfyHOXL/wUUkiPOLuaTjQAAAABJRU5ErkJggg==");
 }
 
 
-.octane-toolbar-me-popup .tbme-item:hover {
+.volt-toolbar-me-popup .tbme-item:hover {
     color: #21cff4;
 }
 
-.octane-toolbar-me-popup .tbme-item:hover .octane-icon {
+.volt-toolbar-me-popup .tbme-item:hover .volt-icon {
     transform: none;
     filter: none;
 }
@@ -528,7 +528,7 @@
     border-image-width: 6px 6px 7px;
     border-image-repeat: stretch;
     content: "";
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-unseen-count::after {
@@ -544,7 +544,7 @@
     border-image-repeat: stretch;
     clip-path: polygon(0 0, 100% 0, 100% 3px, 0 3px, 0 0, 0 14px, 100% 14px, 100% 100%, 0 100%, 0 14px);
     content: "";
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .tb-unseen-count.tb-unseen-count--friends {

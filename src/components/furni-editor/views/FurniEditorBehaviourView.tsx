@@ -17,8 +17,8 @@ export const FurniEditorBehaviourView: FC<FurniEditorBehaviourViewProps> = ({ fi
     return (
         <>
             <StaffSection title={LocalizeText('furni.editor.behaviour.interaction')}>
-                <div className="octane-furni-editor-grid-3">
-                    <FurniEditorFieldView className="octane-furni-editor-span-2" field="interactionType" fields={fields}>
+                <div className="volt-furni-editor-grid-3">
+                    <FurniEditorFieldView className="volt-furni-editor-span-2" field="interactionType" fields={fields}>
                         <FurniEditorInteractionPickerView
                             id={fieldInputId('interactionType')}
                             options={interactions}
@@ -27,7 +27,7 @@ export const FurniEditorBehaviourView: FC<FurniEditorBehaviourViewProps> = ({ fi
                         />
                         {suggestedType && (
                             <button
-                                className="octane-furni-editor-link"
+                                className="volt-furni-editor-link"
                                 title={localizeFurniEditorText(suggestedType.reason)}
                                 type="button"
                                 onClick={() => fields.setField('interactionType', suggestedType.type)}
@@ -39,14 +39,14 @@ export const FurniEditorBehaviourView: FC<FurniEditorBehaviourViewProps> = ({ fi
                             </button>
                         )}
                         {interactionUnregistered && (
-                            <span className="octane-furni-editor-warning" role="note">
+                            <span className="volt-furni-editor-warning" role="note">
                                 {LocalizeText('furni.editor.behaviour.unregistered')}
                             </span>
                         )}
                     </FurniEditorFieldView>
                     <FurniEditorNumberFieldView field="interactionModesCount" fields={fields} max={100} min={0} />
                 </div>
-                <div className="octane-furni-editor-grid-3">
+                <div className="volt-furni-editor-grid-3">
                     <FurniEditorTextFieldView field="vendingIds" fields={fields} maxLength={255} />
                     <FurniEditorTextFieldView field="multiheight" fields={fields} maxLength={50} />
                     {/* One effect id for both genders on this hotel; the female id follows it. */}

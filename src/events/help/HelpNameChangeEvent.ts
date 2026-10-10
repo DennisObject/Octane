@@ -1,5 +1,5 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class HelpNameChangeEvent extends OctaneEvent {
+export class HelpNameChangeEvent extends VoltEvent {
     public static INIT: string = 'HC_NAME_CHANGE_INIT';
 }

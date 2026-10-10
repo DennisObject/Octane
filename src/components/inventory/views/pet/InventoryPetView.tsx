@@ -1,10 +1,10 @@
 import { InventoryFilterSelect } from '../InventoryFilterSelect';
-import { IRoomSession, RoomPreviewer } from '@octane/renderer';
+import { IRoomSession, RoomPreviewer } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { attemptPetPlacement, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { ClassicScrollAreaView } from '../../../../common/scroll-area/ClassicScrollAreaView';
 import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
-import { OctaneButton } from '../../../../layout';
+import { VoltButton } from '../../../../layout';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryPetImageView } from './InventoryPetImageView';
 import { InventoryPetItemView } from './InventoryPetItemView';
@@ -58,11 +58,11 @@ export const InventoryPetView: FC<{
     }
 
     return (
-        <div className="octane-inventory-animals is-pets">
-            <div className="octane-inventory-filter-bar">
-                <div className="octane-inventory-filter-search">
+        <div className="volt-inventory-animals is-pets">
+            <div className="volt-inventory-filter-bar">
+                <div className="volt-inventory-filter-search">
                     <input
-                        className="octane-inventory-filter-input"
+                        className="volt-inventory-filter-input"
                         aria-label={LocalizeText('generic.search')}
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
@@ -77,7 +77,7 @@ export const InventoryPetView: FC<{
                     {searchInput && (
                         <button
                             type="button"
-                            className="octane-inventory-filter-clear"
+                            className="volt-inventory-filter-clear"
                             aria-label={LocalizeText('generic.clear')}
                             onClick={() => {
                                 setSearchInput('');
@@ -113,27 +113,27 @@ export const InventoryPetView: FC<{
                     </option>
                 </InventoryFilterSelect>
             </div>
-            <div className="octane-inventory-animal-grid">
+            <div className="volt-inventory-animal-grid">
                 <ClassicScrollAreaView className="size-full">
-                    <div className="octane-inventory-animal-cells">
+                    <div className="volt-inventory-animal-cells">
                         {visiblePets.map((item) => (
                             <InventoryPetItemView key={item.petData.id} petItem={item} />
                         ))}
                     </div>
                 </ClassicScrollAreaView>
             </div>
-            <div className="octane-inventory-animal-preview">
-                <div className="octane-inventory-animal-name">{selectedPet?.petData.name}</div>
-                <div className="octane-inventory-animal-image">{selectedPet && <InventoryPetImageView pet={selectedPet.petData} preview />}</div>
-                <div className="octane-inventory-animal-description">{selectedPet && LocalizeText(`pet.type.${selectedPet.petData.typeId}`)}</div>
-                <div className="octane-inventory-animal-actions">
-                    <OctaneButton
-                        className="octane-inventory-animal-place"
+            <div className="volt-inventory-animal-preview">
+                <div className="volt-inventory-animal-name">{selectedPet?.petData.name}</div>
+                <div className="volt-inventory-animal-image">{selectedPet && <InventoryPetImageView pet={selectedPet.petData} preview />}</div>
+                <div className="volt-inventory-animal-description">{selectedPet && LocalizeText(`pet.type.${selectedPet.petData.typeId}`)}</div>
+                <div className="volt-inventory-animal-actions">
+                    <VoltButton
+                        className="volt-inventory-animal-place"
                         disabled={!selectedPet || !(roomSession?.isRoomOwner || roomSession?.allowPets)}
                         onClick={() => attemptPetPlacement(selectedPet)}
                     >
                         {LocalizeText('inventory.pets.placetoroom')}
-                    </OctaneButton>
+                    </VoltButton>
                 </div>
             </div>
         </div>

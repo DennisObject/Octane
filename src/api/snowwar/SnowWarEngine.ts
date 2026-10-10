@@ -1,5 +1,5 @@
-import { Game2GetAccountGameStatusMessageComposer, Game2LoadStageReadyMessageComposer, Game2MakeSnowballMessageComposer, Game2RequestFullStatusUpdateMessageComposer, Game2SetUserMoveTargetMessageComposer, Game2ThrowSnowballAtHumanMessageComposer, Game2ThrowSnowballAtPositionMessageComposer } from '@octane/renderer';
-import type { IMessageComposer } from '@octane/renderer';
+import { Game2GetAccountGameStatusMessageComposer, Game2LoadStageReadyMessageComposer, Game2MakeSnowballMessageComposer, Game2RequestFullStatusUpdateMessageComposer, Game2SetUserMoveTargetMessageComposer, Game2ThrowSnowballAtHumanMessageComposer, Game2ThrowSnowballAtPositionMessageComposer } from '@volt/renderer';
+import type { IMessageComposer } from '@volt/renderer';
 import { SUBTURN_MS, SUBTURNS_PER_TURN, TILE_WIDTH } from './SnowWarMath';
 import { getRayGunUseTile, isRayGun, SnowWarHumanObject, SnowWarStage } from './SnowWarSimulation';
 import type { SnowWarSimEventData, SnowWarSimNotification, SnowWarSimObjectData } from './SnowWarSimulation';

@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 
 export const Permission = {
     ModerationTool: 'moderation.tool',

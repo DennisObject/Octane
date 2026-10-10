@@ -1,4 +1,4 @@
-import { IObjectData, IRoomEngine } from '@octane/renderer';
+import { IObjectData, IRoomEngine } from '@volt/renderer';
 import { LocalizeText } from '../utils';
 import { FurniCategory } from './FurniCategory';
 import { FurnitureItem } from './FurnitureItem';

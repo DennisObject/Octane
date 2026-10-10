@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { getQuestDescription, getQuestImageUrl, getQuestingImageUrl, getQuestName, getQuestProgressPercent, localizeWithFallback } from '../../api';
 import { useQuests } from '../../hooks';

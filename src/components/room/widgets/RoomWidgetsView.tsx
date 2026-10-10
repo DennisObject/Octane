@@ -6,11 +6,11 @@ import {
     RoomId,
     RoomSessionErrorMessageEvent,
     RoomZoomEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC } from 'react';
 import { DispatchUiEvent, LocalizeText, NotificationAlertType, RoomWidgetUpdateRoomObjectEvent } from '../../../api';
 import { WidgetErrorBoundary } from '../../../common';
-import { useOctaneEvent, useNotification, usePollSubscriptions, useRoom } from '../../../hooks';
+import { useVoltEvent, useNotification, usePollSubscriptions, useRoom } from '../../../hooks';
 import { AvatarInfoWidgetView } from './avatar-info/AvatarInfoWidgetView';
 import { BuildHeightWidgetView } from './BuildHeightWidgetView';
 import { ChatWidgetView } from './chat/ChatWidgetView';
@@ -36,13 +36,13 @@ export const RoomWidgetsView: FC<{}> = (props) => {
 
     usePollSubscriptions();
 
-    useOctaneEvent<RoomZoomEvent>(RoomZoomEvent.ROOM_ZOOM, (event) => {
+    useVoltEvent<RoomZoomEvent>(RoomZoomEvent.ROOM_ZOOM, (event) => {
         const level = Number.isFinite(event.level) ? Math.floor(event.level) : 1;
         const logicalScale = level < 1 ? 0.5 : (1 << Math.min(level - 1, MAX_ZOOM_SHIFT));
         applyRoomZoom(event.roomId, logicalScale, event.isFlipForced);
     });
 
-    useOctaneEvent<RoomEngineObjectEvent>(
+    useVoltEvent<RoomEngineObjectEvent>(
         [
             RoomEngineTriggerWidgetEvent.REQUEST_TEASER,
             RoomEngineTriggerWidgetEvent.REQUEST_ECOTRONBOX,
@@ -106,7 +106,7 @@ export const RoomWidgetsView: FC<{}> = (props) => {
         }
     );
 
-    useOctaneEvent<RoomSessionErrorMessageEvent>(
+    useVoltEvent<RoomSessionErrorMessageEvent>(
         [
             RoomSessionErrorMessageEvent.RSEME_KICKED,
             RoomSessionErrorMessageEvent.RSEME_PETS_FORBIDDEN_IN_HOTEL,

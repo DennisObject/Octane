@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 import { getAccessToken } from '../auth';
 
 // WIN63 badge rarity ids 0..6 in order; uncommon only appears when the hotel enables it.
@@ -55,7 +55,7 @@ const getUrl = (): string => {
 const authHeaders = (): Record<string, string> => {
     const headers: Record<string, string> = {
         Accept: 'application/json',
-        'X-Requested-With': 'OctaneBadgeLeaderboard'
+        'X-Requested-With': 'VoltBadgeLeaderboard'
     };
 
     const token = getAccessToken();

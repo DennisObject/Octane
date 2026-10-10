@@ -1,6 +1,6 @@
-import { GetRoomEngine, HighScoreDataType, ObjectDataFactory, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { GetRoomEngine, HighScoreDataType, ObjectDataFactory, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@volt/renderer';
 import { useState } from 'react';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useRoom } from '../../useRoom';
 
 // The order is the client contract, not ours: the server sends an index into this list.
@@ -56,7 +56,7 @@ const useFurnitureHighScoreWidgetState = () => {
     const [stuffDatas, setStuffDatas] = useState<Map<number, HighScoreDataType>>(new Map());
     const { roomSession = null } = useRoom();
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_HIGH_SCORE_DISPLAY, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_HIGH_SCORE_DISPLAY, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;
@@ -75,7 +75,7 @@ const useFurnitureHighScoreWidgetState = () => {
         });
     });
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_HIDE_HIGH_SCORE_DISPLAY, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_HIDE_HIGH_SCORE_DISPLAY, (event) => {
         if (event.roomId !== roomSession.roomId) return;
 
         setStuffDatas((prevValue) => {

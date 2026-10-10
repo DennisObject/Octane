@@ -19,7 +19,7 @@ import {
     HabboGroupDeactivatedMessageEvent,
     ILinkEventTracker,
     RemoveLinkEventTracker
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetUserProfile, LocalizeText, SendMessageComposer } from '../../../api';
@@ -30,9 +30,9 @@ import {
     Grid,
     LayoutAvatarImageView,
     LayoutBadgeImageView,
-    OctaneCardContentView,
-    OctaneCardHeaderView,
-    OctaneCardView,
+    VoltCardContentView,
+    VoltCardHeaderView,
+    VoltCardView,
     Text
 } from '../../../common';
 import { useGroupMemberRemoval, useMessageEvent, useNotification } from '../../../hooks';
@@ -231,38 +231,38 @@ export const GroupMembersView: FC<{}> = (props) => {
     if (groupId === -1 || !membersData) return null;
 
     return (
-        <OctaneCardView className="octane-groups-window octane-group-members" theme="primary-slim" isResizable={false}>
-            <OctaneCardHeaderView
+        <VoltCardView className="volt-groups-window volt-group-members" theme="primary-slim" isResizable={false}>
+            <VoltCardHeaderView
                 headerText={LocalizeText('group.members.title', ['groupName'], [membersData ? membersData.groupTitle : ''])}
                 onCloseClick={(event) => setGroupId(-1)}
             />
-            <OctaneCardContentView className="octane-groups-content" overflow="hidden">
-                <div className="octane-group-members-search flex gap-2">
-                    <Flex center className="group-badge octane-group-members-search__badge">
+            <VoltCardContentView className="volt-groups-content" overflow="hidden">
+                <div className="volt-group-members-search flex gap-2">
+                    <Flex center className="group-badge volt-group-members-search__badge">
                         <LayoutBadgeImageView badgeCode={membersData.badge} className="mx-auto block" isGroup={true} />
                     </Flex>
-                    <Column fullWidth gap={1} className="octane-group-members-search__controls">
+                    <Column fullWidth gap={1} className="volt-group-members-search__controls">
                         <input
-                            className="octane-groups-input min-h-[calc(1.5em+.5rem+2px)] px-[.5rem] py-[.25rem] text-[.7875rem] rounded-[.2rem] w-full"
+                            className="volt-groups-input min-h-[calc(1.5em+.5rem+2px)] px-[.5rem] py-[.25rem] text-[.7875rem] rounded-[.2rem] w-full"
                             placeholder={LocalizeText('group.members.searchinfo')}
                             type="text"
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                         />
-                        <select className="octane-groups-select form-select form-select-sm w-full" value={levelId} onChange={(event) => setLevelId(parseInt(event.target.value))}>
+                        <select className="volt-groups-select form-select form-select-sm w-full" value={levelId} onChange={(event) => setLevelId(parseInt(event.target.value))}>
                             <option value="0">{LocalizeText('group.members.search.all')}</option>
                             <option value="1">{LocalizeText('group.members.search.admins')}</option>
                             {membersData.admin && <option value="2">{LocalizeText('group.members.search.pending')}</option>}
                         </select>
                     </Column>
                 </div>
-                <Grid className="octane-group-members-list-grid" columnCount={2} overflow="auto">
+                <Grid className="volt-group-members-list-grid" columnCount={2} overflow="auto">
                     {membersData.result.map((member, index) => {
                         return (
-                            <Flex key={index} alignItems="center" className="octane-group-member-row" gap={0} overflow="hidden">
-                                <div className="octane-group-member-row__avatar cursor-pointer" onClick={() => GetUserProfile(member.id)}>
+                            <Flex key={index} alignItems="center" className="volt-group-member-row" gap={0} overflow="hidden">
+                                <div className="volt-group-member-row__avatar cursor-pointer" onClick={() => GetUserProfile(member.id)}>
                                     <LayoutAvatarImageView
-                                        className="octane-group-member-row__head"
+                                        className="volt-group-member-row__head"
                                         direction={2}
                                         figure={member.figure}
                                         headOnly={true}
@@ -271,22 +271,22 @@ export const GroupMembersView: FC<{}> = (props) => {
                                         compactHeadPadding={0}
                                     />
                                 </div>
-                                <Column className="octane-group-member-row__copy" grow gap={0}>
-                                    <Text bold pointer small className="octane-group-member-row__name" onClick={(event) => GetUserProfile(member.id)}>
+                                <Column className="volt-group-member-row__copy" grow gap={0}>
+                                    <Text bold pointer small className="volt-group-member-row__name" onClick={(event) => GetUserProfile(member.id)}>
                                         {member.name}
                                     </Text>
                                     {member.rank !== GroupRank.REQUESTED && (
-                                        <Text italics small variant="muted" className="octane-group-member-row__since">
+                                        <Text italics small variant="muted" className="volt-group-member-row__since">
                                             {LocalizeText('group.members.since', ['date'], [member.joinedAt])}
                                         </Text>
                                     )}
                                 </Column>
-                                <div className="octane-group-member-row__actions">
+                                <div className="volt-group-member-row__actions">
                                     {member.rank !== GroupRank.REQUESTED && (
                                         <div className="flex items-center justify-center">
                                             <div
                                                 className={classNames(
-                                                    `octane-icon icon-group-small-${member.rank === GroupRank.OWNER ? 'owner' : member.rank === GroupRank.ADMIN ? 'admin' : isOwner && member.rank === GroupRank.MEMBER ? 'not-admin' : ''}`,
+                                                    `volt-icon icon-group-small-${member.rank === GroupRank.OWNER ? 'owner' : member.rank === GroupRank.ADMIN ? 'admin' : isOwner && member.rank === GroupRank.MEMBER ? 'not-admin' : ''}`,
                                                     isOwner && 'cursor-pointer'
                                                 )}
                                                 title={LocalizeText(getRankDescription(member))}
@@ -297,7 +297,7 @@ export const GroupMembersView: FC<{}> = (props) => {
                                     {membersData.admin && member.rank === GroupRank.REQUESTED && (
                                         <Flex alignItems="center">
                                             <div
-                                                className="cursor-pointer octane-friends-spritesheet icon-accept"
+                                                className="cursor-pointer volt-friends-spritesheet icon-accept"
                                                 title={LocalizeText('group.members.accept')}
                                                 onClick={(event) => acceptMembership(member)}
                                             />
@@ -306,7 +306,7 @@ export const GroupMembersView: FC<{}> = (props) => {
                                     {canRemoveMember(member) && (
                                         <Flex alignItems="center">
                                             <div
-                                                className="cursor-pointer octane-friends-spritesheet icon-deny"
+                                                className="cursor-pointer volt-friends-spritesheet icon-deny"
                                                 title={LocalizeText(member.rank === GroupRank.REQUESTED ? 'group.members.reject' : 'group.members.kick')}
                                                 onClick={(event) => removeMemberOrDeclineMembership(member)}
                                             />
@@ -317,16 +317,16 @@ export const GroupMembersView: FC<{}> = (props) => {
                         );
                     })}
                 </Grid>
-                <Flex alignItems="center" gap={1} justifyContent="between" className="octane-groups-footer octane-group-members-footer">
-                    <Button className="octane-groups-button octane-groups-button--pager" disabled={pageId <= 0} onClick={(event) => setPageId((prevValue) => Math.max(0, prevValue - 1))}>
+                <Flex alignItems="center" gap={1} justifyContent="between" className="volt-groups-footer volt-group-members-footer">
+                    <Button className="volt-groups-button volt-groups-button--pager" disabled={pageId <= 0} onClick={(event) => setPageId((prevValue) => Math.max(0, prevValue - 1))}>
                         <FaChevronLeft className="fa-icon" />
                     </Button>
-                    <div className="octane-group-members-footer__page">
-                        <Text small className="octane-group-members-footer__label">
+                    <div className="volt-group-members-footer__page">
+                        <Text small className="volt-group-members-footer__label">
                             {membersData.totalMembersCount} Habbo Membri. Pagina
                         </Text>
                         <input
-                            className="octane-group-members-footer__input"
+                            className="volt-group-members-footer__input"
                             type="number"
                             min={1}
                             max={Math.max(1, totalPages)}
@@ -336,19 +336,19 @@ export const GroupMembersView: FC<{}> = (props) => {
                                 setPageId(value - 1);
                             }}
                         />
-                        <Text small className="octane-group-members-footer__total">
+                        <Text small className="volt-group-members-footer__total">
                             / {Math.max(1, totalPages)}
                         </Text>
                     </div>
                     <Button
-                        className="octane-groups-button octane-groups-button--pager"
+                        className="volt-groups-button volt-groups-button--pager"
                         disabled={totalPages === 0 || pageId >= totalPages - 1}
                         onClick={(event) => setPageId((prevValue) => Math.min(totalPages - 1, prevValue + 1))}
                     >
                         <FaChevronRight className="fa-icon" />
                     </Button>
                 </Flex>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

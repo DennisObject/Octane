@@ -24,7 +24,7 @@ import {
     NavigatorSavedSearch,
     NavigatorSearchesEvent,
     NavigatorTopLevelContext,
-    OctaneEventType,
+    VoltEventType,
     RoomDataParser,
     RoomEnterErrorEvent,
     RoomEntryInfoMessageEvent,
@@ -34,7 +34,7 @@ import {
     UserFlatCatsEvent,
     UserInfoEvent,
     UserPermissionsEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useState } from 'react';
 import {
     CreateRoomSession,
@@ -48,7 +48,7 @@ import {
     VisitDesktop
 } from '../../api';
 import { HasPermission, Permission } from '../../api/permissions';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 import { useNotification } from '../notification';
 import { useNavigatorFavouritesStore } from './navigatorFavouritesStore';
 import { useNavigatorUiStore } from './navigatorUiStore';
@@ -294,8 +294,8 @@ export const useNavigatorStore = () => {
         }, [])
     );
 
-    useOctaneEvent(
-        OctaneEventType.SOCKET_RECONNECTING,
+    useVoltEvent(
+        VoltEventType.SOCKET_RECONNECTING,
         useCallback(() => {
             setNavigatorData((prev) => ({ ...prev, settingsReceived: false }));
         }, [])

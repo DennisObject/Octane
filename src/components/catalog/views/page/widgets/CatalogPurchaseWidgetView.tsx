@@ -1,4 +1,4 @@
-import { CreateLinkEvent, PurchaseFromCatalogComposer } from '@octane/renderer';
+import { CreateLinkEvent, PurchaseFromCatalogComposer } from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     CatalogPurchaseState,
@@ -299,8 +299,8 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
     const isClubLocked = !isOfferUnavailable && !habbiconOwned && GetClubMemberLevel() < currentOffer.clubLevel;
 
     const PurchaseButton = () => {
-        const standardButtonClassNames = ['octane-catalog-standard-button'];
-        const purchaseButtonClassNames = [...standardButtonClassNames, 'octane-catalog-standard-buy-button'];
+        const standardButtonClassNames = ['volt-catalog-standard-button'];
+        const purchaseButtonClassNames = [...standardButtonClassNames, 'volt-catalog-standard-buy-button'];
 
         if (habbiconOwned)
             return (
@@ -383,7 +383,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = (pr
             {!isClubLocked && !noGiftOption && !currentOffer.isRentOffer && (
                 <button
                     type="button"
-                    className="octane-catalog-standard-button octane-catalog-standard-gift-button"
+                    className="volt-catalog-standard-button volt-catalog-standard-gift-button"
                     disabled={
                         disabled ||
                         purchaseOptions.quantity > 1 ||

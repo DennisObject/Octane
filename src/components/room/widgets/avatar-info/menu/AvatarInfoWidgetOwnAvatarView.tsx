@@ -6,7 +6,7 @@ import {
     RoomObjectCategory,
     RoomObjectVariable,
     RoomUnitDropHandItemComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { Dispatch, FC, SetStateAction, useState } from 'react';
 import {
     AvatarInfoUser,
@@ -196,7 +196,7 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--classic']}
+            classNames={['volt-avatar-action-menu', 'volt-avatar-action-menu--own', 'volt-avatar-action-menu--classic']}
             collapsable={true}
             freezePositionOnHover={true}
             maximumVerticalLeadRatio={0.05}

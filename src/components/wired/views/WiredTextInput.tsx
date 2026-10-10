@@ -38,9 +38,9 @@ export const WiredTextInput: FC<WiredTextInputProps> = ({ value, onChange, maxLe
     }
 
     return (
-        <div className={`octane-wired__input-box ${className}`} style={width >= 0 ? { width: width + 8 } : { width: '100%' }}>
+        <div className={`volt-wired__input-box ${className}`} style={width >= 0 ? { width: width + 8 } : { width: '100%' }}>
             <input
-                className="octane-wired__input-field octane-wired__input-field--stretch"
+                className="volt-wired__input-field volt-wired__input-field--stretch"
                 disabled={disabled}
                 maxLength={maxLength > 0 ? maxLength : undefined}
                 placeholder={placeholder}
@@ -49,7 +49,7 @@ export const WiredTextInput: FC<WiredTextInputProps> = ({ value, onChange, maxLe
                 value={value}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
             />
-            {warn && <span className="octane-wired__input-limit">{`${value.length}/${maxLength}`}</span>}
+            {warn && <span className="volt-wired__input-limit">{`${value.length}/${maxLength}`}</span>}
         </div>
     );
 };

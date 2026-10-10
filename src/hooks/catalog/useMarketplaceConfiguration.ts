@@ -1,6 +1,6 @@
-import { GetMarketplaceConfigurationMessageComposer, MarketplaceConfigurationEvent, MarketplaceConfigurationMessageParser } from '@octane/renderer';
+import { GetMarketplaceConfigurationMessageComposer, MarketplaceConfigurationEvent, MarketplaceConfigurationMessageParser } from '@volt/renderer';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useOctaneQuery } from '../../api/octane-query';
+import { useVoltQuery } from '../../api/volt-query';
 
 /**
  * Marketplace configuration (commission rates, min/max ask, etc.) as
@@ -12,12 +12,12 @@ import { useOctaneQuery } from '../../api/octane-query';
  * stuffed the parser into catalogOptions.marketplaceConfiguration
  * via setCatalogOptions inside its own listener, and dispatched
  * GetMarketplaceConfigurationMessageComposer from an effect that
- * checked the same field as the cache. With useOctaneQuery, the cache
+ * checked the same field as the cache. With useVoltQuery, the cache
  * is React Query's; the component just reads `data`.
  */
 export const useMarketplaceConfiguration = (options: { enabled?: boolean } = {}): UseQueryResult<MarketplaceConfigurationMessageParser> =>
-    useOctaneQuery<MarketplaceConfigurationEvent, MarketplaceConfigurationMessageParser>({
-        key: ['octane', 'catalog', 'marketplaceConfiguration'],
+    useVoltQuery<MarketplaceConfigurationEvent, MarketplaceConfigurationMessageParser>({
+        key: ['volt', 'catalog', 'marketplaceConfiguration'],
         request: () => new GetMarketplaceConfigurationMessageComposer(),
         parser: MarketplaceConfigurationEvent,
         select: (event) => event.getParser(),

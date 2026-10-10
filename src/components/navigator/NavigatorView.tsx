@@ -10,7 +10,7 @@ import {
     NavigatorSettingsEvent,
     RemoveLinkEventTracker,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { CSSProperties, FC, PointerEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, localizeWithFallback, SendMessageComposer, TryVisitRoom } from '../../api';
 import createRoomImg from '../../assets/images/navigator/air/create-room.png';
@@ -25,7 +25,7 @@ import {
     useNavigatorSearch,
     useNavigatorUiState,
     useNavigatorUiStore,
-    useOctaneEvent
+    useVoltEvent
 } from '../../hooks';
 import { NavigatorDoorStateView } from './views/NavigatorDoorStateView';
 import { NavigatorRoomCreatorView } from './views/NavigatorRoomCreatorView';
@@ -66,7 +66,7 @@ export const NavigatorView: FC<{}> = () => {
         requestAnimationFrame(() => persistNavigatorBounds(frameRef.current));
     }, []);
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, () => {
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, () => {
         useNavigatorUiStore.getState().hide();
         useNavigatorUiStore.getState().closeCreator();
         useNavigatorRoomInfoPopupStore.getState().hide();
@@ -185,7 +185,7 @@ export const NavigatorView: FC<{}> = () => {
         const tabs = tabsRef.current;
         if (!tabs) return;
 
-        const labels = tabs.querySelectorAll<HTMLElement>('.octane-navigator-air__tab-label');
+        const labels = tabs.querySelectorAll<HTMLElement>('.volt-navigator-air__tab-label');
 
         const sizeTabs = () => {
             for (const label of labels) {
@@ -274,44 +274,44 @@ export const NavigatorView: FC<{}> = () => {
             {isVisible && topLevelContexts?.length > 0 && (
                 <DraggableWindow
                     uniqueKey="navigator"
-                    handleSelector=".octane-navigator-air__caption"
+                    handleSelector=".volt-navigator-air__caption"
                     initialPosition={{ x: windowX, y: windowY }}
                     constrainToViewport={true}
                     onPositionChange={onPositionChange}
                 >
                     <div
                         ref={frameRef}
-                        className={`octane-navigator-air${isOpenSavesSearches ? ' is-quick-links' : ''}`}
+                        className={`volt-navigator-air${isOpenSavesSearches ? ' is-quick-links' : ''}`}
                         data-air-frame="ubuntu-3"
                         style={{ '--navigator-height': `${windowHeight || 628}px` } as CSSProperties}
                     >
-                        <div className="octane-navigator-air__skin" aria-hidden="true" />
-                        <div className="octane-navigator-air__tab-shelf" aria-hidden="true" />
-                        <div className="octane-navigator-air__caption">
-                            <span className="octane-navigator-air__title">{headerText}</span>
+                        <div className="volt-navigator-air__skin" aria-hidden="true" />
+                        <div className="volt-navigator-air__tab-shelf" aria-hidden="true" />
+                        <div className="volt-navigator-air__caption">
+                            <span className="volt-navigator-air__title">{headerText}</span>
                             <button
                                 type="button"
-                                className="octane-navigator-air__close octane-navigator-air__help"
+                                className="volt-navigator-air__close volt-navigator-air__help"
                                 aria-label={LocalizeText('generic.help')}
                                 onClick={() => CreateLinkEvent('habbopages/navigator')}
                             />
                             <button
                                 type="button"
-                                className="octane-navigator-air__close"
+                                className="volt-navigator-air__close"
                                 aria-label={LocalizeText('generic.close')}
                                 onClick={() => useNavigatorUiStore.getState().hide()}
                             />
                         </div>
                         <button
                             type="button"
-                            className="octane-navigator-air__quick-toggle"
+                            className="volt-navigator-air__quick-toggle"
                             aria-label={quickLinksToggleLabel}
                             aria-expanded={isOpenSavesSearches}
                             onClick={onToggleQuickLinks}
                         >
                             <img src={quicklinkAdd} alt="" width={18} height={18} />
                         </button>
-                        <div ref={tabsRef} className="octane-navigator-air__tabs" role="tablist">
+                        <div ref={tabsRef} className="volt-navigator-air__tabs" role="tablist">
                             {topLevelContexts &&
                                 topLevelContexts.length > 0 &&
                                 topLevelContexts.map((context) => {
@@ -323,27 +323,27 @@ export const NavigatorView: FC<{}> = () => {
                                             type="button"
                                             role="tab"
                                             aria-selected={active}
-                                            className={`octane-navigator-air__tab${active ? ' is-active' : ''}`}
+                                            className={`volt-navigator-air__tab${active ? ' is-active' : ''}`}
                                             onClick={() => {
                                                 useNavigatorRoomInfoPopupStore.getState().hide();
                                                 useNavigatorUiStore.getState().setTab(context.code);
                                             }}
                                         >
-                                            <span className="octane-navigator-air__tab-label">{LocalizeText('navigator.toplevelview.' + context.code)}</span>
+                                            <span className="volt-navigator-air__tab-label">{LocalizeText('navigator.toplevelview.' + context.code)}</span>
                                         </button>
                                     );
                                 })}
                         </div>
-                        <div className="octane-navigator-air__body">
-                            <div className="octane-navigator-air__workspace">
+                        <div className="volt-navigator-air__body">
+                            <div className="volt-navigator-air__workspace">
                                 {isOpenSavesSearches && (
-                                    <nav className="octane-navigator-air__quick-links" aria-label={quickLinksLabel}>
+                                    <nav className="volt-navigator-air__quick-links" aria-label={quickLinksLabel}>
                                         <NavigatorSearchSavesResultView searches={navigatorSearches || []} />
                                     </nav>
                                 )}
-                                <main className="octane-navigator-air__main" aria-label={navigatorLabel}>
+                                <main className="volt-navigator-air__main" aria-label={navigatorLabel}>
                                     <NavigatorSearchView searchResult={searchResult} />
-                                    <div ref={elementRef} className="octane-navigator-air__results has-air-scrollbar" data-scrollable={resultsScrollable}>
+                                    <div ref={elementRef} className="volt-navigator-air__results has-air-scrollbar" data-scrollable={resultsScrollable}>
                                         {searchResult &&
                                             searchResult.results.map((result, index) => (
                                                 <NavigatorSearchResultView
@@ -358,43 +358,43 @@ export const NavigatorView: FC<{}> = () => {
                                             <NavigatorEmptyStateView code={searchResult.code} />
                                         )}
                                     </div>
-                                    {isFetching && <div className="octane-navigator-air__busy-mask" aria-hidden="true" />}
-                                    <div className="octane-navigator-air__actions">
+                                    {isFetching && <div className="volt-navigator-air__busy-mask" aria-hidden="true" />}
+                                    <div className="volt-navigator-air__actions">
                                         <button
                                             type="button"
-                                            className="octane-navigator-air__action octane-navigator-air__action--create"
+                                            className="volt-navigator-air__action volt-navigator-air__action--create"
                                             onClick={onCreateRoom}
                                         >
-                                            <div className="octane-navigator-air__action-content">
+                                            <div className="volt-navigator-air__action-content">
                                                 <img src={createRoomImg} alt="" />
                                                 <span>{localizeWithFallback('navigator.create.room', LocalizeText('navigator.createroom.create'))}</span>
                                             </div>
-                                            <i className="octane-navigator-air__action-border" aria-hidden="true" />
+                                            <i className="volt-navigator-air__action-border" aria-hidden="true" />
                                         </button>
                                         {!showPromote && (
                                             <button
                                                 type="button"
-                                                className="octane-navigator-air__action octane-navigator-air__action--random"
+                                                className="volt-navigator-air__action volt-navigator-air__action--random"
                                                 onClick={onRandomRoom}
                                             >
-                                                <div className="octane-navigator-air__action-content">
+                                                <div className="volt-navigator-air__action-content">
                                                     <img src={randomRoomImg} alt="" />
                                                     <span>{LocalizeText('navigator.random.room')}</span>
                                                 </div>
-                                                <i className="octane-navigator-air__action-border" aria-hidden="true" />
+                                                <i className="volt-navigator-air__action-border" aria-hidden="true" />
                                             </button>
                                         )}
                                         {showPromote && (
                                             <button
                                                 type="button"
-                                                className="octane-navigator-air__action octane-navigator-air__action--promote"
+                                                className="volt-navigator-air__action volt-navigator-air__action--promote"
                                                 onClick={onPromoteRoom}
                                             >
-                                                <div className="octane-navigator-air__action-content">
+                                                <div className="volt-navigator-air__action-content">
                                                     <img src={promoteRoomImg} alt="" />
                                                     <span>{LocalizeText('navigator.promote.room')}</span>
                                                 </div>
-                                                <i className="octane-navigator-air__action-border" aria-hidden="true" />
+                                                <i className="volt-navigator-air__action-border" aria-hidden="true" />
                                             </button>
                                         )}
                                     </div>
@@ -403,7 +403,7 @@ export const NavigatorView: FC<{}> = () => {
                         </div>
                         <button
                             type="button"
-                            className="octane-navigator-air__resize"
+                            className="volt-navigator-air__resize"
                             aria-label={localizeWithFallback('navigator.resize', 'Resize Navigator')}
                             onPointerDown={onResizeStart}
                             onPointerMove={onResizeMove}

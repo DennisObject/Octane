@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { DAILY_TASK_NAME_MAX_LENGTH, localizeWithFallback, normalizeDailyTaskName, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredExtraBaseView } from './WiredExtraBaseView';
 
 const MAX_TARGET = 2147483647;
@@ -30,7 +30,7 @@ export const WiredExtraDailyTaskView: FC<{}> = () => {
                 <Text bold>{localizeWithFallback('wiredfurni.params.variables.daily_task.usage', 'Place this on the same tile as a user counter variable.')}</Text>
                 <div className="flex flex-col gap-1">
                     <Text>{localizeWithFallback('wiredfurni.params.variables.daily_task_name', 'Daily task name')}</Text>
-                    <OctaneInput
+                    <VoltInput
                         maxLength={DAILY_TASK_NAME_MAX_LENGTH}
                         placeholder="1234.."
                         type="text"

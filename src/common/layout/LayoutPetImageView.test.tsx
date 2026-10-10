@@ -8,7 +8,7 @@ interface PendingImage {
 
 const pendingImages: PendingImage[] = [];
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     GetRoomEngine: () => ({
         getRoomObjectPetImage: () => {
             let resolve: PendingImage['resolve'];

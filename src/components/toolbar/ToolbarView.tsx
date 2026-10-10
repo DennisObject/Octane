@@ -1,4 +1,4 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, OctaneToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@octane/renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, GetSessionDataManager, JumpBy, Motions, VoltToolbarAnimateIconEvent, PerkEnum, Queue, SessionDataPreferencesEvent, Wait, YouTubeRoomSettingsEvent } from '@volt/renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { CSSProperties, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '../../api/permissions';
@@ -7,7 +7,7 @@ import dividerImg from '../../assets/images/toolbar/air/divider.png';
 import memenuBgImg from '../../assets/images/toolbar/air/memenu-bg.png';
 import memenuCircleImg from '../../assets/images/toolbar/air/memenu-circle.png';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
-import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useOctaneEvent, useOpenIssueCount, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
+import { useAchievements, useBuildHeight, useDailyTasks, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useVoltEvent, useOpenIssueCount, useRewardTracks, useSessionInfo, useWiredTools } from '../../hooks';
 import { usePerkAllowed } from '../../state/perkAllowancesStore';
 import { AIR_RAISED_CHAT_BOTTOM } from './bottomDockLayout';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -173,7 +173,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         }
     }, [ leftCollapsed ]);
 
-    useOctaneEvent<SessionDataPreferencesEvent>(SessionDataPreferencesEvent.UPDATED, event => setRightCollapsed(!(event.uiFlags & FRIEND_BAR_UI_FLAG)));
+    useVoltEvent<SessionDataPreferencesEvent>(SessionDataPreferencesEvent.UPDATED, event => setRightCollapsed(!(event.uiFlags & FRIEND_BAR_UI_FLAG)));
 
     const toggleFriendBar = (collapsed: boolean) =>
     {
@@ -185,7 +185,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     {
         const measure = () =>
         {
-            const roomTools = document.querySelector('.octane-room-tools-container') as HTMLElement | null;
+            const roomTools = document.querySelector('.volt-room-tools-container') as HTMLElement | null;
             const next = roomTools
                 ? Math.max(8, Math.round(window.innerHeight - roomTools.getBoundingClientRect().top + 15))
                 : null;
@@ -245,7 +245,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
     const openYouTubePlayer = () => window.dispatchEvent(new CustomEvent('youtube:toggle'));
 
-    useOctaneEvent<OctaneToolbarAnimateIconEvent>(OctaneToolbarAnimateIconEvent.ANIMATE_ICON, event =>
+    useVoltEvent<VoltToolbarAnimateIconEvent>(VoltToolbarAnimateIconEvent.ANIMATE_ICON, event =>
     {
         const animationIconToToolbar = (iconName: string, image: HTMLImageElement, x: number, y: number) =>
         {
@@ -339,7 +339,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 animate={visibilityVariant}
                 variants={shellVariants}
                 transition={SHELL_TRANSITION}
-                className={`octane-toolbar octane-toolbar-hobba absolute z-[70] ${desktopBlockClasses}`}
+                className={`volt-toolbar volt-toolbar-hobba absolute z-[70] ${desktopBlockClasses}`}
             />
 
             <motion.div
@@ -526,7 +526,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 animate={visibilityVariant}
                 variants={mobileNavVariants}
                 transition={NAV_TRANSITION}
-                className={`absolute left-1/2 bottom-0 z-[71] flex w-[95vw] -translate-x-1/2 items-center overflow-visible ${mobileOnlyClasses} ${isInRoom ? 'octane-toolbar-mobile-hobba px-[6px] py-[4px] mb-[3px]' : ''}`}
+                className={`absolute left-1/2 bottom-0 z-[71] flex w-[95vw] -translate-x-1/2 items-center overflow-visible ${mobileOnlyClasses} ${isInRoom ? 'volt-toolbar-mobile-hobba px-[6px] py-[4px] mb-[3px]' : ''}`}
             >
                 <motion.div
                     variants={containerVariants}

@@ -9,10 +9,10 @@ import {
     IEarningsEntry,
     IEarningsReward,
     ILinkEventTracker,
-    OctaneEventType,
+    VoltEventType,
     RemoveLinkEventTracker,
     RequestEarningsCenterComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { CSSProperties, FC, ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../api';
 import imgAchievements from '../../assets/images/vault/achievements.png';
@@ -28,9 +28,9 @@ import imgHcpayday from '../../assets/images/vault/hcpayday.png';
 import imgLevel from '../../assets/images/vault/levelprogression.png';
 import imgMarketplace from '../../assets/images/vault/marketplace.png';
 import imgSurprise from '../../assets/images/vault/surprise.png';
-import { LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { LayoutCurrencyIcon, VoltCardHeaderView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
-import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../hooks';
+import { useMessageEvent, useNotification, useVoltEvent, usePurse } from '../../hooks';
 
 const localizeWithFallback = (key: string, fallback: string) =>
 {
@@ -80,7 +80,7 @@ interface Slot {
 }
 
 const nativeIcon = (src: string, size: number, className = '') => (
-    <img alt="" className={`octane-vault__icon ${className}`} draggable={false} height={size} src={src} width={size} />
+    <img alt="" className={`volt-vault__icon ${className}`} draggable={false} height={size} src={src} width={size} />
 );
 
 // A reward that a native slot does not cover (diamonds, HC days, a currency the v75 row has no slot for) keeps its own slot, so nothing earned is hidden.
@@ -167,7 +167,7 @@ const CategoryIcon: FC<{ src: string }> = ({ src }) =>
     return (
         <img
             alt=""
-            className="octane-vault__category-icon"
+            className="volt-vault__category-icon"
             draggable={false}
             src={src}
             style={{ left: -4 + Math.floor((32 - size[0]) / 2), top: -4 + Math.floor((32 - size[1]) / 2) }}
@@ -186,10 +186,10 @@ interface VaultButtonProps {
 
 /** button (shiny, 60x28) and button_thick (shiny thick, 73x30): the label is a v75 raster over the skin. */
 const VaultButton: FC<VaultButtonProps> = ({ label, disabled, kind, style, onClick }) => (
-    <button className={`octane-vault__button is-${kind}`} disabled={disabled} style={style} type="button" onClick={onClick}>
+    <button className={`volt-vault__button is-${kind}`} disabled={disabled} style={style} type="button" onClick={onClick}>
         <NativeText
             background={0xffffff}
-            className="octane-vault__button-label"
+            className="volt-vault__button-label"
             overrides={disabled ? { color: 0x777777 } : undefined}
             text={label}
             textStyle={kind === 'claim' ? 'u_regular' : 'u_bold'}
@@ -282,8 +282,8 @@ export const VaultView: FC<{}> = () =>
     }, [commitPending]);
 
     // A dropped connection ends every dialog that was asked before it, even when the same user comes back.
-    useOctaneEvent(
-        OctaneEventType.CONNECTION_STATE_CHANGED,
+    useVoltEvent(
+        VoltEventType.CONNECTION_STATE_CHANGED,
         useCallback(() =>
         {
             if (GetCommunication().connection.connectionState.phase === 'connected') return;
@@ -506,25 +506,25 @@ export const VaultView: FC<{}> = () =>
     const height = windowHeight(rowCount);
 
     return (
-        <OctaneCardView
+        <VoltCardView
             aria-label={localizeWithFallback('earnings.title', 'Earnings')}
-            className="octane-vault"
+            className="volt-vault"
             frameStyle={3}
             isResizable={false}
             role="dialog"
             style={{ '--vault-width': WINDOW_WIDTH + 'px', '--vault-height': height + 'px' } as CSSProperties}
             uniqueKey="vault"
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={() => changeVisibility(false)}>
+            <VoltCardHeaderView headerText="" onCloseClick={() => changeVisibility(false)}>
                 <NativeText
                     background={0x377998}
-                    className="octane-vault__title"
+                    className="volt-vault__title"
                     overrides={{ color: 0xffffff }}
                     text={localizeWithFallback('earnings.title', 'Earnings')}
                     textStyle="u_frame_title"
                 />
-            </OctaneCardHeaderView>
-            <div className="octane-vault-content">
+            </VoltCardHeaderView>
+            <div className="volt-vault-content">
                 {visibleCategories.map((category, index) =>
                 {
                     const entry = entriesByKey.get(category.key) ?? null;
@@ -535,11 +535,11 @@ export const VaultView: FC<{}> = () =>
                     const label = localizeWithFallback(category.textKey, category.label);
 
                     return (
-                        <div key={category.key} className="octane-vault__row" data-category={category.key} style={{ top }}>
-                            <div className="octane-vault__extended" />
-                            <div className="octane-vault__label">
+                        <div key={category.key} className="volt-vault__row" data-category={category.key} style={{ top }}>
+                            <div className="volt-vault__extended" />
+                            <div className="volt-vault__label">
                                 <CategoryIcon src={category.img} />
-                                <div className="octane-vault__label-text">
+                                <div className="volt-vault__label-text">
                                     <NativeText background={0xffffff} text={category.isBackendOnly ? `${label}` : label} textStyle="u_bold" />
                                 </div>
                             </div>
@@ -548,9 +548,9 @@ export const VaultView: FC<{}> = () =>
                                 const x = slots.length > 2 ? 8 + slotIndex * 48 : 15 + slotIndex * 70;
 
                                 return (
-                                    <div key={slot.id} className="octane-vault__slot" style={{ left: 179 + x }}>
-                                        <span className="octane-vault__slot-icon">{slot.icon}</span>
-                                        <div className="octane-vault__value" style={{ left: 25 }}>
+                                    <div key={slot.id} className="volt-vault__slot" style={{ left: 179 + x }}>
+                                        <span className="volt-vault__slot-icon">{slot.icon}</span>
+                                        <div className="volt-vault__value" style={{ left: 25 }}>
                                             <NativeText
                                                 background={0xbec3c1}
                                                 overrides={{ size: 14, sharpness: 0, thickness: 0 }}
@@ -579,6 +579,6 @@ export const VaultView: FC<{}> = () =>
                     onClick={claimAll}
                 />
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

@@ -1,4 +1,4 @@
-import { GetConfigurationValue } from '../octane';
+import { GetConfigurationValue } from '../volt';
 import { localizeWithFallback } from '../utils';
 
 // Port of the AIR currency type table (com.sulake.habbo.catalog.purse, WIN63-202609091217).

@@ -1,4 +1,4 @@
-import { GetRoomEngine, GetSessionDataManager, RoomControllerLevel, RoomObjectCategory } from '@octane/renderer';
+import { GetRoomEngine, GetSessionDataManager, RoomControllerLevel, RoomObjectCategory } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetUserProfile, getCameraMediaUrl, LocalizeText, ReportType } from '../../../../api';
 import { DraggableWindow } from '../../../../common';
@@ -53,28 +53,28 @@ export const FurnitureExternalImageView: FC<{}> = (props) => {
         );
 
     return (
-        <DraggableWindow uniqueKey="photo-viewer" handleSelector=".octane-photo-viewer__panel">
-            <div className="octane-photo-viewer">
-                <div className="octane-photo-viewer__panel" />
-                <div className="octane-photo-viewer__photo">{photoUrl && <img alt="" src={photoUrl} draggable={false} />}</div>
+        <DraggableWindow uniqueKey="photo-viewer" handleSelector=".volt-photo-viewer__panel">
+            <div className="volt-photo-viewer">
+                <div className="volt-photo-viewer__panel" />
+                <div className="volt-photo-viewer__photo">{photoUrl && <img alt="" src={photoUrl} draggable={false} />}</div>
                 {canBrowse && (
                     <>
-                        <button type="button" className="octane-photo-viewer__browse octane-photo-viewer__browse--previous" onClick={() => browse(-1)} />
-                        <button type="button" className="octane-photo-viewer__browse octane-photo-viewer__browse--next" onClick={() => browse(1)} />
+                        <button type="button" className="volt-photo-viewer__browse volt-photo-viewer__browse--previous" onClick={() => browse(-1)} />
+                        <button type="button" className="volt-photo-viewer__browse volt-photo-viewer__browse--next" onClick={() => browse(1)} />
                     </>
                 )}
                 {creator && (
                     <>
-                        <span className="octane-photo-viewer__date">{formatCreationDate(photo.t)}</span>
-                        <button type="button" className="octane-photo-viewer__creator" onClick={() => photo.oi && GetUserProfile(photo.oi)}>
+                        <span className="volt-photo-viewer__date">{formatCreationDate(photo.t)}</span>
+                        <button type="button" className="volt-photo-viewer__creator" onClick={() => photo.oi && GetUserProfile(photo.oi)}>
                             {creator}
                         </button>
                     </>
                 )}
-                <div className="octane-photo-viewer__buttons">
-                    <button type="button" className="octane-photo-viewer__button octane-photo-viewer__button--report" onClick={reportPhoto} />
-                    {canRemove && <button type="button" className="octane-photo-viewer__button octane-photo-viewer__button--remove" onClick={removePhoto} />}
-                    <button type="button" className="octane-photo-viewer__close" onClick={onClose} />
+                <div className="volt-photo-viewer__buttons">
+                    <button type="button" className="volt-photo-viewer__button volt-photo-viewer__button--report" onClick={reportPhoto} />
+                    {canRemove && <button type="button" className="volt-photo-viewer__button volt-photo-viewer__button--remove" onClick={removePhoto} />}
+                    <button type="button" className="volt-photo-viewer__close" onClick={onClose} />
                 </div>
             </div>
         </DraggableWindow>

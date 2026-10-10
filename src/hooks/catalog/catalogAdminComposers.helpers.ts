@@ -1,4 +1,4 @@
-import { CatalogAdminCreateOfferComposer, CatalogAdminCreatePageComposer, CatalogAdminSaveOfferComposer, CatalogAdminSavePageComposer } from '@octane/renderer';
+import { CatalogAdminCreateOfferComposer, CatalogAdminCreatePageComposer, CatalogAdminSaveOfferComposer, CatalogAdminSavePageComposer } from '@volt/renderer';
 import type { CatalogAdminOfferForm, CatalogAdminPageForm } from './catalogAdmin.types';
 
 /** Draft version, expected revision and history line every catalog admin write carries. */

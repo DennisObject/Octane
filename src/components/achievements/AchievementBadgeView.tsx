@@ -1,4 +1,4 @@
-import { AchievementData } from '@octane/renderer';
+import { AchievementData } from '@volt/renderer';
 import { FC } from 'react';
 import { AchievementUtilities } from '../../api';
 import { BaseProps, LayoutBadgeImageView } from '../../common';

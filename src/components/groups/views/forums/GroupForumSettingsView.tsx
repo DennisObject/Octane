@@ -1,4 +1,4 @@
-import { ExtendedForumData, UpdateForumSettingsMessageComposer } from '@octane/renderer';
+import { ExtendedForumData, UpdateForumSettingsMessageComposer } from '@volt/renderer';
 import { FC, useRef, useState } from 'react';
 import { CreateLinkEvent, LocalizeText, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
@@ -59,7 +59,7 @@ export const GroupForumSettingsView: FC<GroupForumSettingsViewProps> = ({ forumD
 
     return (
         <ForumFrame
-            className="octane-group-forum-settings"
+            className="volt-group-forum-settings"
             height={545}
             initialPosition={initialPosition}
             title={LocalizeText('groupforum.settings.window_title')}
@@ -68,9 +68,9 @@ export const GroupForumSettingsView: FC<GroupForumSettingsViewProps> = ({ forumD
             onClose={onClose}
             onHelp={() => CreateLinkEvent('habbopages/forums')}
         >
-            <div className="octane-forum__header" style={{ width: 348 }}>
-                <div className="octane-forum__header-icon">
-                    <div className="octane-forum__header-badge">
+            <div className="volt-forum__header" style={{ width: 348 }}>
+                <div className="volt-forum__header-icon">
+                    <div className="volt-forum__header-badge">
                         <LayoutBadgeImageView badgeCode={forumData.icon} isGroup={true} />
                     </div>
                 </div>
@@ -78,13 +78,13 @@ export const GroupForumSettingsView: FC<GroupForumSettingsViewProps> = ({ forumD
                 <GroupText background={FORUM_HEADER} height={40} overrides={flatText(12, { color: 0xffffff })} text={forumData.description} width={254} wrap x={90} y={40} />
             </div>
             {SECTIONS.map((section, sectionIndex) => (
-                <div key={section.labelKey} className="octane-forum__section" style={{ top: section.y }}>
+                <div key={section.labelKey} className="volt-forum__section" style={{ top: section.y }}>
                     <GroupText text={LocalizeText(section.labelKey)} x={0} y={0} />
                     {section.levels.map((level, row) => (
                         <div key={level}>
                             <button
                                 aria-checked={levels[sectionIndex] === level}
-                                className={`octane-group-native__check is-radio${levels[sectionIndex] === level ? ' is-checked' : ''}`}
+                                className={`volt-group-native__check is-radio${levels[sectionIndex] === level ? ' is-checked' : ''}`}
                                 role="radio"
                                 style={{ left: 20, top: 23 + row * 20 }}
                                 type="button"

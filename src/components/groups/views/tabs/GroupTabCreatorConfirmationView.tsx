@@ -36,13 +36,13 @@ export const GroupTabCreatorConfirmationView: FC<GroupTabCreatorConfirmationView
     if (!groupData) return null;
 
     return (
-        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+        <div className="volt-group-native__step-body" style={{ top: STEP_Y }}>
             <GroupText height={45} overrides={flatText(18, { bold: true })} wrap text={groupData.groupName} width={256} x={126} y={8} />
             <GroupText height={215} overrides={flatText(13)} wrap text={LocalizeText('group.create.confirm.info')} width={260} x={126} y={46} />
             <GroupText align="center" text={LocalizeText('group.create.confirm.guildbadge')} textStyle="u_bold" width={92} x={15} y={33} />
             <GroupBox height={92} kind="white" width={92} x={15} y={50}>
                 <GroupBox height={84} kind="tan" width={84} x={4} y={4} />
-                <div className="octane-group-native__badge" style={{ left: 26, top: 26 }}>
+                <div className="volt-group-native__badge" style={{ left: 26, top: 26 }}>
                     <LayoutBadgeImageView badgeCode={getCompleteBadgeCode()} isGroup={true} />
                 </div>
             </GroupBox>

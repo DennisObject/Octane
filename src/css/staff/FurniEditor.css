@@ -1,5 +1,5 @@
 /* Furni editor window on the staff frame (see StaffWindow.css). */
-.octane-staff-window.octane-furni-editor {
+.volt-staff-window.volt-furni-editor {
     --furni-editor-link: var(--habbo-blue, #418db0);
     --furni-editor-warning: #b35c00;
     --furni-editor-changed: #c98a00;
@@ -8,60 +8,60 @@
     height: 600px;
 }
 
-.octane-furni-editor .octane-staff-body {
+.volt-furni-editor .volt-staff-body {
     overflow: hidden;
 }
 
-.octane-furni-editor .is-hidden {
+.volt-furni-editor .is-hidden {
     display: none !important;
 }
 
-.octane-furni-editor p {
+.volt-furni-editor p {
     margin: 0;
 }
 
 /* Small layout helpers */
-.octane-furni-editor .octane-furni-editor-grow {
+.volt-furni-editor .volt-furni-editor-grow {
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.octane-furni-editor .octane-furni-editor-push {
+.volt-furni-editor .volt-furni-editor-push {
     margin-left: auto;
 }
 
-.octane-furni-editor .octane-furni-editor-ellipsis {
+.volt-furni-editor .volt-furni-editor-ellipsis {
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.octane-furni-editor .octane-furni-editor-end {
+.volt-furni-editor .volt-furni-editor-end {
     text-align: right;
     white-space: nowrap;
 }
 
-.octane-furni-editor .octane-furni-editor-center {
+.volt-furni-editor .volt-furni-editor-center {
     text-align: center;
 }
 
-.octane-furni-editor .octane-furni-editor-break {
+.volt-furni-editor .volt-furni-editor-break {
     word-break: break-all;
 }
 
-.octane-furni-editor .octane-furni-editor-grid-3 {
+.volt-furni-editor .volt-furni-editor-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
 }
 
-.octane-furni-editor .octane-furni-editor-span-2 {
+.volt-furni-editor .volt-furni-editor-span-2 {
     grid-column: span 2;
 }
 
 /* Text links (AIR blue, underlined on hover) */
-.octane-furni-editor .octane-furni-editor-link {
+.volt-furni-editor .volt-furni-editor-link {
     padding: 0;
     border: 0;
     background: transparent;
@@ -71,23 +71,23 @@
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-furni-editor-link:hover {
+.volt-furni-editor .volt-furni-editor-link:hover {
     text-decoration: underline;
 }
 
-.octane-furni-editor .octane-furni-editor-warning {
+.volt-furni-editor .volt-furni-editor-warning {
     color: var(--furni-editor-warning);
 }
 
 /* Pages (Search, edit sheet) fill the body; their lists scroll inside */
-.octane-furni-editor .octane-furni-editor-page {
+.volt-furni-editor .volt-furni-editor-page {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 0;
 }
 
-.octane-furni-editor .octane-furni-editor-search {
+.volt-furni-editor .volt-furni-editor-search {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -95,7 +95,7 @@
     min-height: 0;
 }
 
-.octane-furni-editor .octane-furni-editor-results {
+.volt-furni-editor .volt-furni-editor-results {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
@@ -104,14 +104,14 @@
     background: var(--staff-panel);
 }
 
-.octane-furni-editor .octane-furni-editor-results thead th {
+.volt-furni-editor .volt-furni-editor-results thead th {
     position: sticky;
     top: 0;
     z-index: 1;
     background: var(--staff-surface);
 }
 
-.octane-furni-editor .octane-furni-editor-sort {
+.volt-furni-editor .volt-furni-editor-sort {
     padding: 0;
     border: 0;
     background: transparent;
@@ -122,36 +122,36 @@
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-furni-editor-result {
+.volt-furni-editor .volt-furni-editor-result {
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-staff-table tbody tr.octane-furni-editor-result:hover td,
-.octane-furni-editor .octane-staff-table tbody tr.octane-furni-editor-result:focus-visible td {
+.volt-furni-editor .volt-staff-table tbody tr.volt-furni-editor-result:hover td,
+.volt-furni-editor .volt-staff-table tbody tr.volt-furni-editor-result:focus-visible td {
     background: var(--staff-row-hover);
 }
 
-.octane-furni-editor .octane-furni-editor-result:focus-visible {
+.volt-furni-editor .volt-furni-editor-result:focus-visible {
     outline: 1px dotted var(--staff-text);
 }
 
-.octane-furni-editor .octane-furni-editor-result-icon {
+.volt-furni-editor .volt-furni-editor-result-icon {
     width: 40px;
     height: 36px;
     text-align: center;
 }
 
-.octane-furni-editor .octane-furni-editor-row-flag {
+.volt-furni-editor .volt-furni-editor-row-flag {
     margin-right: 4px;
 }
 
-.octane-furni-editor .octane-furni-editor-page-input {
+.volt-furni-editor .volt-furni-editor-page-input {
     width: 48px;
     text-align: center;
 }
 
 /* Edit sheet: fixed sidebar, scrolling field groups */
-.octane-furni-editor .octane-furni-editor-sheet {
+.volt-furni-editor .volt-furni-editor-sheet {
     display: grid;
     flex: 1 1 auto;
     grid-template-columns: 184px minmax(0, 1fr);
@@ -159,7 +159,7 @@
     min-height: 0;
 }
 
-.octane-furni-editor .octane-furni-editor-side {
+.volt-furni-editor .volt-furni-editor-side {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -171,51 +171,51 @@
     background: var(--staff-panel);
 }
 
-.octane-furni-editor .octane-furni-editor-pane {
+.volt-furni-editor .volt-furni-editor-pane {
     min-height: 0;
     overflow-y: auto;
 }
 
-.octane-furni-editor .octane-furni-editor-group {
+.volt-furni-editor .volt-furni-editor-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.octane-furni-editor .octane-furni-editor-facts th {
+.volt-furni-editor .volt-furni-editor-facts th {
     padding-left: 0;
     color: var(--staff-muted);
     font-weight: 400;
 }
 
-.octane-furni-editor .octane-furni-editor-facts td {
+.volt-furni-editor .volt-furni-editor-facts td {
     padding-right: 0;
     text-align: right;
 }
 
-.octane-furni-editor .octane-furni-editor-asset + .octane-furni-editor-asset {
+.volt-furni-editor .volt-furni-editor-asset + .volt-furni-editor-asset {
     margin-left: 3px;
 }
 
-.octane-furni-editor .octane-furni-editor-unsaved {
+.volt-furni-editor .volt-furni-editor-unsaved {
     padding: 4px 6px;
     border: 1px solid var(--furni-editor-changed);
     border-radius: 3px;
 }
 
-.octane-furni-editor .octane-furni-editor-unsaved ul {
+.volt-furni-editor .volt-furni-editor-unsaved ul {
     margin: 2px 0 0;
     padding: 0;
     list-style: none;
 }
 
-.octane-furni-editor .octane-furni-editor-unsaved li {
+.volt-furni-editor .volt-furni-editor-unsaved li {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.octane-furni-editor .octane-furni-editor-actions {
+.volt-furni-editor .volt-furni-editor-actions {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -223,7 +223,7 @@
 }
 
 /* Room-engine preview with the footprint grid */
-.octane-furni-editor .octane-furni-editor-preview {
+.volt-furni-editor .volt-furni-editor-preview {
     position: relative;
     display: flex;
     align-items: center;
@@ -235,7 +235,7 @@
     background: var(--staff-row-alt);
 }
 
-.octane-furni-editor .octane-furni-editor-footprint {
+.volt-furni-editor .volt-furni-editor-footprint {
     position: absolute;
     top: 4px;
     right: 4px;
@@ -243,14 +243,14 @@
     gap: 1px;
 }
 
-.octane-furni-editor .octane-furni-editor-footprint span {
+.volt-furni-editor .volt-furni-editor-footprint span {
     width: 6px;
     height: 6px;
     background: var(--furni-editor-link);
     opacity: 0.6;
 }
 
-.octane-furni-editor .octane-furni-editor-preview-size {
+.volt-furni-editor .volt-furni-editor-preview-size {
     position: absolute;
     right: 4px;
     bottom: 4px;
@@ -258,7 +258,7 @@
     font-size: 10px;
 }
 
-.octane-furni-editor .octane-furni-editor-preview-controls {
+.volt-furni-editor .volt-furni-editor-preview-controls {
     position: absolute;
     bottom: 3px;
     left: 3px;
@@ -267,7 +267,7 @@
 }
 
 /* Read-only values that copy on click */
-.octane-furni-editor .octane-furni-editor-copy {
+.volt-furni-editor .volt-furni-editor-copy {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -283,11 +283,11 @@
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-furni-editor-copy:hover {
+.volt-furni-editor .volt-furni-editor-copy:hover {
     background: var(--staff-row-hover);
 }
 
-.octane-furni-editor .octane-furni-editor-copy-value {
+.volt-furni-editor .volt-furni-editor-copy-value {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -295,37 +295,37 @@
     white-space: nowrap;
 }
 
-.octane-furni-editor .octane-furni-editor-copy-hint {
+.volt-furni-editor .volt-furni-editor-copy-hint {
     flex: 0 0 auto;
     color: var(--staff-muted);
     font-size: 10px;
 }
 
-.octane-furni-editor .octane-furni-editor-copy.is-copied .octane-furni-editor-copy-hint {
+.volt-furni-editor .volt-furni-editor-copy.is-copied .volt-furni-editor-copy-hint {
     color: var(--staff-success);
 }
 
 /* Fields: changed inputs carry an amber edge, invalid ones a red one */
-.octane-furni-editor .octane-furni-editor-tip {
+.volt-furni-editor .volt-furni-editor-tip {
     color: var(--staff-muted);
     font-weight: 400;
     cursor: help;
 }
 
-.octane-furni-editor .octane-furni-editor-revert {
+.volt-furni-editor .volt-furni-editor-revert {
     margin-left: auto;
     font-size: 10px;
 }
 
-.octane-furni-editor .octane-furni-editor-field.is-changed :where(input:not([type='checkbox']), select, textarea) {
+.volt-furni-editor .volt-furni-editor-field.is-changed :where(input:not([type='checkbox']), select, textarea) {
     border-color: var(--furni-editor-changed);
 }
 
-.octane-furni-editor .octane-furni-editor-field.is-invalid :where(input:not([type='checkbox']), select, textarea) {
+.volt-furni-editor .volt-furni-editor-field.is-invalid :where(input:not([type='checkbox']), select, textarea) {
     border-color: var(--staff-error);
 }
 
-.octane-furni-editor .octane-furni-editor-hints {
+.volt-furni-editor .volt-furni-editor-hints {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -333,31 +333,31 @@
     font-size: 10px;
 }
 
-.octane-furni-editor .octane-furni-editor-flags {
+.volt-furni-editor .volt-furni-editor-flags {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 12px;
 }
 
-.octane-furni-editor .octane-furni-editor-flag {
+.volt-furni-editor .volt-furni-editor-flag {
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-furni-editor-flag.is-changed {
+.volt-furni-editor .volt-furni-editor-flag.is-changed {
     color: var(--furni-editor-changed);
     font-weight: 700;
 }
 
 /* Interaction type combobox */
-.octane-furni-editor .octane-furni-editor-picker {
+.volt-furni-editor .volt-furni-editor-picker {
     position: relative;
 }
 
-.octane-furni-editor .octane-furni-editor-picker input {
+.volt-furni-editor .volt-furni-editor-picker input {
     width: 100%;
 }
 
-.octane-furni-editor .octane-furni-editor-picker-list {
+.volt-furni-editor .volt-furni-editor-picker-list {
     position: absolute;
     top: calc(100% + 2px);
     right: 0;
@@ -371,23 +371,23 @@
 }
 
 /* Collapsible read-only blocks (furnidata entry, resolution) */
-.octane-furni-editor .octane-furni-editor-details {
+.volt-furni-editor .volt-furni-editor-details {
     padding: 4px 6px;
     border: 1px solid var(--staff-line);
     border-radius: 3px;
     background: var(--staff-panel);
 }
 
-.octane-furni-editor .octane-furni-editor-details summary {
+.volt-furni-editor .volt-furni-editor-details summary {
     font-weight: 700;
     cursor: pointer;
 }
 
-.octane-furni-editor .octane-furni-editor-details[open] summary {
+.volt-furni-editor .volt-furni-editor-details[open] summary {
     margin-bottom: 4px;
 }
 
-.octane-furni-editor .octane-furni-editor-code {
+.volt-furni-editor .volt-furni-editor-code {
     max-height: 200px;
     margin: 4px 0 0;
     padding: 4px;
@@ -401,13 +401,13 @@
 }
 
 /* The sheet is a fieldset so it can be locked while a furni loads */
-.octane-furni-editor fieldset.octane-furni-editor-sheet {
+.volt-furni-editor fieldset.volt-furni-editor-sheet {
     min-width: 0;
     margin: 0;
     padding: 0;
     border: 0;
 }
 
-.octane-furni-editor fieldset.octane-furni-editor-sheet:disabled {
+.volt-furni-editor fieldset.volt-furni-editor-sheet:disabled {
     opacity: 0.7;
 }

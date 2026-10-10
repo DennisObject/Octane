@@ -6,7 +6,7 @@ import {
     RoomObjectType,
     RoomObjectVariable,
     RoomUnitGiveHandItemPetComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { AvatarInfoPet, GetConfigurationValue, GetOwnRoomObject, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { useRoom, useSessionInfo } from '../../../../../hooks';
@@ -124,7 +124,7 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = (
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--pet']}
+            classNames={['volt-avatar-action-menu', 'volt-avatar-action-menu--own', 'volt-avatar-action-menu--pet']}
             collapsable={true}
             freezePositionOnHover={true}
             objectId={avatarInfo.roomIndex}

@@ -1,7 +1,7 @@
-import { ClubOfferData } from '@octane/renderer';
+import { ClubOfferData } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, LocalizeText } from '../../../../../api';
-import { LayoutCurrencyIcon, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
+import { LayoutCurrencyIcon, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../../common';
 import { useMeasuredFloorHeight } from '../../../../../hooks/catalog/useMeasuredFloorHeight';
 import { CatalogClubPriceFieldView } from './CatalogClubPriceFieldView';
 
@@ -40,13 +40,13 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
     // AIR centres the initial dialog once, then retains its origin when text resizes it.
     const [initialOffsetTop] = useState(() => (frameHeight - REFERENCE_FRAME_HEIGHT) / 2);
     const layoutVars = {
-        '--octane-club-confirm-title-height': `${titleHeight}px`,
-        '--octane-club-confirm-product-height': `${productHeight}px`,
-        '--octane-club-confirm-disclaimer-y': `${disclaimerY}px`,
-        '--octane-club-confirm-disclaimer-height': `${disclaimerHeight}px`,
-        '--octane-club-confirm-actions-y': `${actionsY}px`,
-        '--octane-club-confirm-content-height': `${contentHeight}px`,
-        '--octane-club-confirm-frame-height': `${frameHeight}px`
+        '--volt-club-confirm-title-height': `${titleHeight}px`,
+        '--volt-club-confirm-product-height': `${productHeight}px`,
+        '--volt-club-confirm-disclaimer-y': `${disclaimerY}px`,
+        '--volt-club-confirm-disclaimer-height': `${disclaimerHeight}px`,
+        '--volt-club-confirm-actions-y': `${actionsY}px`,
+        '--volt-club-confirm-content-height': `${contentHeight}px`,
+        '--volt-club-confirm-frame-height': `${frameHeight}px`
     } as CSSProperties;
 
     useEffect(() => setDisclaimerAccepted(!disclaimerEnabled), [disclaimerEnabled, offer.offerId]);
@@ -54,10 +54,10 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
     const title = LocalizeText('catalog.club.buy.confirm');
 
     return (
-        <OctaneCardView
+        <VoltCardView
             aria-label={title}
             aria-modal="true"
-            classNames={['octane-club-purchase-confirm']}
+            classNames={['volt-club-purchase-confirm']}
             dragStyle={{ height: frameHeight }}
             frameStyle={3}
             isResizable={false}
@@ -66,28 +66,28 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
             style={layoutVars}
             theme="primary-slim"
         >
-            <OctaneCardHeaderView headerText={title} onCloseClick={onCancel} />
-            <OctaneCardContentView classNames={['octane-club-purchase-confirm-content']} overflow="hidden">
-                <div className="octane-club-purchase-confirm-product">
-                    <span aria-hidden="true" className="octane-club-purchase-confirm-icon" />
-                    <div className="octane-club-purchase-confirm-copy">
-                        <strong className="octane-club-purchase-confirm-title">
-                            <span ref={titleTextRef} className="octane-club-purchase-confirm-title-text">
+            <VoltCardHeaderView headerText={title} onCloseClick={onCancel} />
+            <VoltCardContentView classNames={['volt-club-purchase-confirm-content']} overflow="hidden">
+                <div className="volt-club-purchase-confirm-product">
+                    <span aria-hidden="true" className="volt-club-purchase-confirm-icon" />
+                    <div className="volt-club-purchase-confirm-copy">
+                        <strong className="volt-club-purchase-confirm-title">
+                            <span ref={titleTextRef} className="volt-club-purchase-confirm-title-text">
                                 {productText}
                             </span>
                         </strong>
                         <span>{validUntilText}</span>
-                        <div className="octane-club-purchase-confirm-cost-row">
+                        <div className="volt-club-purchase-confirm-cost-row">
                             <CatalogClubPriceFieldView value={LocalizeText('catalog.purchase.confirmation.dialog.cost')} />
-                            <span className="octane-club-purchase-confirm-price">
+                            <span className="volt-club-purchase-confirm-price">
                                 {showCredits && (
-                                    <span className="octane-club-purchase-confirm-price-part" data-currency-type="-1">
+                                    <span className="volt-club-purchase-confirm-price-part" data-currency-type="-1">
                                         <CatalogClubPriceFieldView value={offer.priceCredits} />
                                         <LayoutCurrencyIcon type={-1} />
                                     </span>
                                 )}
                                 {offer.priceActivityPoints > 0 && (
-                                    <span className="octane-club-purchase-confirm-price-part" data-currency-type={offer.priceActivityPointsType}>
+                                    <span className="volt-club-purchase-confirm-price-part" data-currency-type={offer.priceActivityPointsType}>
                                         <CatalogClubPriceFieldView value={`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`} />
                                         <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
                                     </span>
@@ -98,21 +98,21 @@ export const CatalogClubPurchaseConfirmView: FC<CatalogClubPurchaseConfirmViewPr
                 </div>
 
                 {disclaimerEnabled && (
-                    <label className="octane-club-purchase-confirm-disclaimer">
+                    <label className="volt-club-purchase-confirm-disclaimer">
                         <input checked={disclaimerAccepted} type="checkbox" onChange={(event) => setDisclaimerAccepted(event.target.checked)} />
                         <span ref={disclaimerTextRef}>{LocalizeText('disclaimer.credit_spending')}</span>
                     </label>
                 )}
 
-                <div className="octane-club-purchase-confirm-actions">
-                    <button className="octane-club-purchase-confirm-cancel" type="button" onClick={onCancel}>
+                <div className="volt-club-purchase-confirm-actions">
+                    <button className="volt-club-purchase-confirm-cancel" type="button" onClick={onCancel}>
                         {LocalizeText('cancel')}
                     </button>
-                    <button className="octane-club-purchase-confirm-submit" disabled={!disclaimerAccepted} type="button" onClick={onConfirm}>
+                    <button className="volt-club-purchase-confirm-submit" disabled={!disclaimerAccepted} type="button" onClick={onConfirm}>
                         {LocalizeText('catalog.club.buy.subscribe')}
                     </button>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

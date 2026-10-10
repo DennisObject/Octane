@@ -1,7 +1,7 @@
-import { CreateLinkEvent, GetLocalizationManager } from '@octane/renderer';
+import { CreateLinkEvent, GetLocalizationManager } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useState } from 'react';
 import { getCampaignImageUrl, getCampaignName, getQuestCompletedText, getQuestingImageUrl, isQuestRewardVisible, localizeWithFallback } from '../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useQuests } from '../../hooks';
 import { AchievementText, useAirFieldWidth } from '../achievements/AchievementText';
@@ -104,8 +104,8 @@ export const QuestCompletedView: FC<{}> = () => {
         .split('%amount%');
 
     return (
-        <OctaneCardView
-            className="octane-quest-completed-air"
+        <VoltCardView
+            className="volt-quest-completed-air"
             uniqueKey="quest-completed"
             frameStyle={3}
             isResizable={false}
@@ -114,7 +114,7 @@ export const QuestCompletedView: FC<{}> = () => {
             unconstrainedPosition
             dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={onNextQuest}>
+            <VoltCardHeaderView headerText="" onCloseClick={onNextQuest}>
                 <NativeText
                     background={0x377998}
                     className={`air-quests-native-title${lastQuestInCampaign ? ' air-quests-native-title-campaign' : ''}`}
@@ -126,8 +126,8 @@ export const QuestCompletedView: FC<{}> = () => {
                     }
                     textStyle="u_frame_title"
                 />
-            </OctaneCardHeaderView>
-            <div className="air-quest-completed-content octane-card-content-shell">
+            </VoltCardHeaderView>
+            <div className="air-quest-completed-content volt-card-content-shell">
                 <div className="air-quest-completed-banner" />
                 {lastQuestInCampaign ? (
                     <>
@@ -172,6 +172,6 @@ export const QuestCompletedView: FC<{}> = () => {
                     <QuestButton className="air-quest-completed-next" label={localizeWithFallback('quests.completed.next', 'Activate Next Quest')} width={141} onClick={onNextQuest} />
                 )}
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

@@ -7,7 +7,7 @@ import userVariableIcon from '../../../../assets/images/wired/var/icon_source_us
 import { Text } from '../../../../common';
 import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired, useWiredTools } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
 import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources, WiredSourceOption } from '../WiredSourcesSelector';
 import { WiredVariablePicker } from '../WiredVariablePicker';
@@ -176,14 +176,14 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
             save={save}
             validate={() => !(isJump && fromVariable && !variableToken)}
         >
-            <div className="octane-wired__give-var">
-                <div className={`octane-wired__give-var-section ${isJump ? '' : 'opacity-50 pointer-events-none'}`}>
-                    <div className="octane-wired__give-var-section-title">{localizeWithFallback('wiredfurni.params.movement_curve', 'Movement curve:')}</div>
-                    <label className="octane-wired__change-var-radio">
+            <div className="volt-wired__give-var">
+                <div className={`volt-wired__give-var-section ${isJump ? '' : 'opacity-50 pointer-events-none'}`}>
+                    <div className="volt-wired__give-var-section-title">{localizeWithFallback('wiredfurni.params.movement_curve', 'Movement curve:')}</div>
+                    <label className="volt-wired__change-var-radio">
                         <input checked={!fromVariable} type="radio" onChange={() => setFromVariable(false)} />
                         <Text>{LocalizeText('wiredfurni.params.variables.reference_value.set_value')}</Text>
-                        <OctaneInput
-                            className="octane-wired__give-var-number"
+                        <VoltInput
+                            className="volt-wired__give-var-number"
                             max={STRENGTH_MAX}
                             min={STRENGTH_MIN}
                             type="number"
@@ -192,15 +192,15 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
                         />
                     </label>
 
-                    <div className="octane-wired__change-var-reference-block">
-                        <label className="octane-wired__change-var-radio">
+                    <div className="volt-wired__change-var-reference-block">
+                        <label className="volt-wired__change-var-radio">
                             <input checked={fromVariable} type="radio" onChange={() => setFromVariable(true)} />
                             <Text>{LocalizeText('wiredfurni.params.variables.reference_value.from_variable')}</Text>
-                            <div className="octane-wired__give-var-targets">
+                            <div className="volt-wired__give-var-targets">
                                 {TARGETS.map((button) => (
                                     <button
                                         key={button.key}
-                                        className={`octane-wired__give-var-target octane-wired__give-var-target--${button.key} ${target === button.key ? 'is-active' : ''}`}
+                                        className={`volt-wired__give-var-target volt-wired__give-var-target--${button.key} ${target === button.key ? 'is-active' : ''}`}
                                         disabled={!fromVariable}
                                         type="button"
                                         onClick={() => chooseTarget(button.key)}
@@ -222,7 +222,7 @@ export const WiredExtraMovementCurveView: FC<{}> = () => {
                     </div>
                 </div>
 
-                <div className="octane-wired__divider" />
+                <div className="volt-wired__divider" />
 
                 <div className={fromVariable && isJump ? '' : 'opacity-50 pointer-events-none'}>
                     <WiredFurniSelectionSourceRow

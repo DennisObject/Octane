@@ -1,4 +1,4 @@
-import { BadgeImageReadyEvent, GetEventDispatcher, GetSessionDataManager, OctaneSprite, TextureUtils } from '@octane/renderer';
+import { BadgeImageReadyEvent, GetEventDispatcher, GetSessionDataManager, VoltSprite, TextureUtils } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -125,7 +125,7 @@ export const LayoutBadgeImageView: FC<LayoutBadgeImageViewProps> = (props) => {
             if (event.badgeId !== badgeCode) return;
 
             if (isGroup) {
-                const sprite = new OctaneSprite(event.image);
+                const sprite = new VoltSprite(event.image);
                 const element = await TextureUtils.generateImage({ target: sprite, resolution: 1 });
 
                 // Drop the wrapper only; the badge texture stays with the session data manager.
@@ -153,7 +153,7 @@ export const LayoutBadgeImageView: FC<LayoutBadgeImageViewProps> = (props) => {
         if (texture && !didSetBadge) {
             if (isGroup) {
                 (async () => {
-                    const sprite = new OctaneSprite(texture);
+                    const sprite = new VoltSprite(texture);
                     const element = await TextureUtils.generateImage({ target: sprite, resolution: 1 });
 
                     sprite.destroy();

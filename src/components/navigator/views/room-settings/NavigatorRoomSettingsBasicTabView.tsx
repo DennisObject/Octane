@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     GetClubMemberLevel,

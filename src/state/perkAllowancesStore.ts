@@ -1,12 +1,12 @@
-import { GetCommunication, PerkAllowancesMessageEvent } from '@octane/renderer';
-import { createOctaneStore } from './createOctaneStore';
+import { GetCommunication, PerkAllowancesMessageEvent } from '@volt/renderer';
+import { createVoltStore } from './createVoltStore';
 
 interface PerkAllowancesState
 {
     allowed: ReadonlySet<string>;
 }
 
-export const usePerkAllowancesStore = createOctaneStore<PerkAllowancesState>()(() => ({ allowed: new Set<string>() }));
+export const usePerkAllowancesStore = createVoltStore<PerkAllowancesState>()(() => ({ allowed: new Set<string>() }));
 
 export const usePerkAllowed = (code: string) => usePerkAllowancesStore(state => state.allowed.has(code));
 

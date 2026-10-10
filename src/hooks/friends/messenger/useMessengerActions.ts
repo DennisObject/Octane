@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { SendMessageComposer as SendPacket } from '../../../api';
 import { createMessengerActionsController } from './messengerControllers';
 import { useMessengerStore } from './useMessengerStore';

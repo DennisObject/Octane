@@ -1,4 +1,4 @@
-.octane-floorplan-window {
+.volt-floorplan-window {
     --fp-text: #2b2b2b;
     /* two pixel then one pixel step on every corner, the cut of the running client's bordered boxes */
     --fp-stair-corners: polygon(2px 0, calc(100% - 2px) 0, calc(100% - 2px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 1px) calc(100% - 2px), calc(100% - 1px) calc(100% - 1px), calc(100% - 2px) calc(100% - 1px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 2px), 0 calc(100% - 2px), 0 2px, 1px 2px, 1px 1px, 2px 1px);
@@ -10,10 +10,10 @@
     background: transparent !important;
 }
 
-.octane-floorplan-window.octane-card-shell.octane-card-frame-3 {
-    --octane-card-frame-3: url("../../assets/images/habbo-skin/slices/frame-ubuntu-3-bc.png");
-    --octane-card-frame-3-title: #ff8d00;
-    --octane-card-frame-3-line: #6a3a00;
+.volt-floorplan-window.volt-card-shell.volt-card-frame-3 {
+    --volt-card-frame-3: url("../../assets/images/habbo-skin/slices/frame-ubuntu-3-bc.png");
+    --volt-card-frame-3-title: #ff8d00;
+    --volt-card-frame-3-line: #6a3a00;
     width: 662px;
     height: 600px;
     min-width: 662px !important;
@@ -23,11 +23,11 @@
     padding: 33px 0 0 !important;
 }
 
-.octane-floorplan-window.octane-card-shell.octane-card-frame-3::after {
+.volt-floorplan-window.volt-card-shell.volt-card-frame-3::after {
     display: none;
 }
 
-.octane-floorplan-window .octane-card-content-shell {
+.volt-floorplan-window .volt-card-content-shell {
     position: relative;
     height: 567px;
     padding: 0 !important;
@@ -36,7 +36,7 @@
     background: transparent !important;
 }
 
-.octane-floorplan-window.octane-card-shell.octane-card-frame-3 .octane-card-content-shell {
+.volt-floorplan-window.volt-card-shell.volt-card-frame-3 .volt-card-content-shell {
     position: absolute;
     top: 33px;
     right: 0;
@@ -130,7 +130,7 @@
     background: #e3e3e3;
 }
 
-.fp-tool .octane-icon {
+.fp-tool .volt-icon {
     display: block;
     flex: 0 0 auto;
 }
@@ -156,7 +156,7 @@
     color: var(--fp-text);
 }
 
-.fp-orientation .octane-icon {
+.fp-orientation .volt-icon {
     cursor: pointer;
 }
 
@@ -1351,20 +1351,20 @@
 }
 
 /* style 5 thick button with colour 0x0bb3e3: the thick skin multiplied by the window colour */
-.octane-floorplan-window .fp-bc-btn.is-save {
+.volt-floorplan-window .fp-bc-btn.is-save {
     border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-default-0bb3e3-h35.png");
 }
 
-.octane-floorplan-window .fp-bc-btn.is-save:hover {
+.volt-floorplan-window .fp-bc-btn.is-save:hover {
     border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-hover-0bb3e3-h35.png");
 }
 
-.octane-floorplan-window .fp-bc-btn.is-save:active {
+.volt-floorplan-window .fp-bc-btn.is-save:active {
     border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-pressed-0bb3e3-h35.png");
 }
 
-.octane-floorplan-window .fp-bc-btn.is-save:disabled,
-.octane-floorplan-window .fp-bc-btn.is-save:disabled:hover {
+.volt-floorplan-window .fp-bc-btn.is-save:disabled,
+.volt-floorplan-window .fp-bc-btn.is-save:disabled:hover {
     border-image-source: url("../../assets/images/habbo-skin/slices/button-shiny-thick-disabled-0bb3e3-h35.png");
     cursor: default;
 }
@@ -1413,28 +1413,28 @@
     width: 73px;
 }
 
-.octane-floorplan-import.octane-card-frame-3 {
+.volt-floorplan-import.volt-card-frame-3 {
     width: 379px;
     height: 374px;
 }
 
 /* The shared card's descendant typography must yield to the AIR text styles. */
-.octane-floorplan-window.octane-card-frame-3 .fp-bc,
-.octane-floorplan-window.octane-card-frame-3 .fp-bc :is(span, button, select),
-.octane-floorplan-import.octane-card-frame-3 .fp-bc-import button {
+.volt-floorplan-window.volt-card-frame-3 .fp-bc,
+.volt-floorplan-window.volt-card-frame-3 .fp-bc :is(span, button, select),
+.volt-floorplan-import.volt-card-frame-3 .fp-bc-import button {
     font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
 }
 
-.octane-floorplan-window.octane-card-frame-3 .fp-bc-subtitle {
+.volt-floorplan-window.volt-card-frame-3 .fp-bc-subtitle {
     color: #ffffff;
 }
 
-.octane-floorplan-window.octane-card-frame-3 .fp-bc-footer .fp-bc-btn,
-.octane-floorplan-import.octane-card-frame-3 .fp-bc-import .fp-bc-btn {
+.volt-floorplan-window.volt-card-frame-3 .fp-bc-footer .fp-bc-btn,
+.volt-floorplan-import.volt-card-frame-3 .fp-bc-import .fp-bc-btn {
     color: #111111;
 }
 
-.octane-floorplan-import.octane-card-frame-3 .fp-bc-import-data {
+.volt-floorplan-import.volt-card-frame-3 .fp-bc-import-data {
     font-family: Courier, monospace;
     color: #111111;
 }
@@ -1700,17 +1700,17 @@
 .fp-bc-drop-item[aria-selected="true"].is-highlighted { background: #dddddd; }
 
 /* v75 floor_plan_export_import_xml (379x374, colour 0x418db0): everything is placed in dialog coordinates measured on the running client. */
-.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 {
+.volt-floorplan-import.is-official.volt-card-shell.volt-card-frame-3 {
     padding: 0 !important;
 }
 
 /* The editor and its dialog share one drop shadow, fitted to the pixels around the running client's windows (offset 3.5px, blur 2.5px, 35%); the shared card default is 4px. */
-.draggable-window:has(.octane-floorplan-window),
-.draggable-window:has(.octane-floorplan-import) {
+.draggable-window:has(.volt-floorplan-window),
+.draggable-window:has(.volt-floorplan-import) {
     filter: drop-shadow(3.5px 3.5px 2.5px rgba(0, 0, 0, 0.35)) !important;
 }
 
-.octane-floorplan-import.is-official .octane-card-content-shell {
+.volt-floorplan-import.is-official .volt-card-content-shell {
     position: absolute;
     inset: 0;
     height: auto;
@@ -1719,13 +1719,13 @@
     background: transparent !important;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import {
+.volt-floorplan-import.is-official .fp-bc-import {
     position: absolute;
     inset: 0;
     height: auto;
 }
 
-.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+.volt-floorplan-import.is-official.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-title {
     top: 3px !important;
     right: auto !important;
     left: -6px !important;
@@ -1735,11 +1735,11 @@
     text-align: left;
 }
 
-.octane-floorplan-import.is-official.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-floorplan-import.is-official.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-data {
+.volt-floorplan-import.is-official .fp-bc-import-data {
     left: 9px;
     top: 42px;
     width: 348px;
@@ -1755,11 +1755,11 @@
     scrollbar-width: none;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-data::-webkit-scrollbar {
+.volt-floorplan-import.is-official .fp-bc-import-data::-webkit-scrollbar {
     display: none;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-vbar {
+.volt-floorplan-import.is-official .fp-bc-import-vbar {
     position: absolute;
     left: 357px;
     top: 42px;
@@ -1767,7 +1767,7 @@
     width: 18px;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-hbar {
+.volt-floorplan-import.is-official .fp-bc-import-hbar {
     position: absolute;
     left: 9px;
     top: 310px;
@@ -1775,7 +1775,7 @@
     height: 18px;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import .fp-bc-btn {
+.volt-floorplan-import.is-official .fp-bc-import .fp-bc-btn {
     position: absolute;
     top: 335px;
     box-sizing: border-box;
@@ -1793,32 +1793,32 @@
     image-rendering: pixelated;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-revert {
+.volt-floorplan-import.is-official .fp-bc-import-revert {
     left: 9px;
     width: 158px;
     /* button style 101 scale9: 4 rows above and 5 below the stretched centre, sampled by flooring, so the skin is stretched to the exact size */
     background-image: url("../../assets/images/habbo-skin/slices/button-small-101-158x27.png");
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-save {
+.volt-floorplan-import.is-official .fp-bc-import-save {
     left: 313px;
     width: 51px;
     background-image: url("../../assets/images/habbo-skin/slices/button-small-101-51x27.png");
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-label {
+.volt-floorplan-import.is-official .fp-bc-import-label {
     position: absolute;
     left: 0;
     top: 0;
     display: block;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-revert .fp-bc-import-label {
+.volt-floorplan-import.is-official .fp-bc-import-revert .fp-bc-import-label {
     left: 13px;
     top: 6px;
 }
 
-.octane-floorplan-import.is-official .fp-bc-import-save .fp-bc-import-label {
+.volt-floorplan-import.is-official .fp-bc-import-save .fp-bc-import-label {
     left: 13px;
     top: 6px;
 }
@@ -1834,19 +1834,19 @@
     text-align: left;
 }
 
-.octane-floorplan-window .fp-bc-subtitle {
+.volt-floorplan-window .fp-bc-subtitle {
     left: 77px;
     top: 11px;
     line-height: 0;
 }
 
-.octane-floorplan-window .fp-bc-zoom {
+.volt-floorplan-window .fp-bc-zoom {
     left: 16px;
     bottom: 11px;
 }
 
 /* frame 3 header: native title text centred on the whole window, help button 27px and close button 3px from the right edge */
-.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-title {
+.volt-floorplan-window.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-title {
     top: 3px !important;
     right: auto !important;
     left: -6px !important;
@@ -1857,11 +1857,11 @@
     text-align: left;
 }
 
-.octane-floorplan-window.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-floorplan-window.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-floorplan-window .fp-bc-logo {
+.volt-floorplan-window .fp-bc-logo {
     left: 12px;
     top: 7px;
 }

@@ -28,24 +28,24 @@ const CatalogAdminOfferEditorWindow: FC<{ target: CatalogAdminOfferEditorTarget 
 
     return (
         <StaffWindow
-            className="octane-catalog-admin-editor"
+            className="volt-catalog-admin-editor"
             title={form.isNew ? LocalizeText('catalog.admin.offer.new') : LocalizeText('catalog.admin.offer.edit')}
             uniqueKey="catalog-admin-offer-editor"
             onClose={form.requestClose}
         >
-            <div className="octane-catalog-admin-editor-layout" onKeyDown={form.onKeyDown}>
-                <div className="octane-catalog-admin-editor-scroll">
-                    <div className="octane-staff-row octane-catalog-admin-editor-head">
-                        <span className="octane-catalog-admin-editor-icon">
+            <div className="volt-catalog-admin-editor-layout" onKeyDown={form.onKeyDown}>
+                <div className="volt-catalog-admin-editor-scroll">
+                    <div className="volt-staff-row volt-catalog-admin-editor-head">
+                        <span className="volt-catalog-admin-editor-icon">
                             {!form.isNew && target.offer && <CatalogAdminOfferIconView offer={target.offer} url={getCatalogAdminOfferIconUrl(target.offer)} />}
                         </span>
-                        <div className="octane-catalog-admin-editor-titles">
+                        <div className="volt-catalog-admin-editor-titles">
                             <strong title={form.displayName}>{form.displayName}</strong>
-                            <span className="octane-staff-muted">{offerMeta}</span>
+                            <span className="volt-staff-muted">{offerMeta}</span>
                         </div>
                         <CatalogAdminOfferPriceView credits={draft.costCredits} points={draft.costPoints} pointsType={draft.pointsType} />
                     </div>
-                    <fieldset className="octane-catalog-admin-fieldset" disabled={!form.detailsReady}>
+                    <fieldset className="volt-catalog-admin-fieldset" disabled={!form.detailsReady}>
                         <CatalogAdminOfferFieldsView
                             draft={draft}
                             fieldErrors={fieldErrors}

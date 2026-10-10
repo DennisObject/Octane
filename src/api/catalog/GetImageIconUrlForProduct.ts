@@ -1,4 +1,4 @@
-import { GetRoomEngine } from '@octane/renderer';
+import { GetRoomEngine } from '@volt/renderer';
 import { ProductTypeEnum } from './ProductTypeEnum';
 
 export const GetImageIconUrlForProduct = (productType: string, productClassId: number, extraData: string = null) => {

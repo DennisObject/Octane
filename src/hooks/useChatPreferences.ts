@@ -1,4 +1,4 @@
-import { UserSettingsChatPreferencesComposer, UserSettingsEvent } from '@octane/renderer';
+import { UserSettingsChatPreferencesComposer, UserSettingsEvent } from '@volt/renderer';
 import { useCallback, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { SendMessageComposer } from '../api';

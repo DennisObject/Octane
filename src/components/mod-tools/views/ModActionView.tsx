@@ -9,7 +9,7 @@ import {
     ModMuteMessageComposer,
     ModTradingLockMessageComposer,
     ModeratorInitData
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useMemo, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../api';
 import { NativeText } from '../../../common/native-text/NativeText';

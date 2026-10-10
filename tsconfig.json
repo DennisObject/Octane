@@ -31,16 +31,22 @@
                 "./src/*"
             ],
             "pixi.js": [
+                "../Volt-Renderer/node_modules/pixi.js",
+                "../volt-renderer/node_modules/pixi.js",
                 "../Octane-Renderer/node_modules/pixi.js",
                 "../octane-renderer/node_modules/pixi.js",
                 "../renderer/node_modules/pixi.js"
             ],
-            "@octane/renderer": [
+            "@volt/renderer": [
+                "../Volt-Renderer/index.ts",
+                "../volt-renderer/index.ts",
                 "../Octane-Renderer/index.ts",
                 "../octane-renderer/index.ts",
                 "../renderer/index.ts"
             ],
-            "@octane/*": [
+            "@volt/*": [
+                "../Volt-Renderer/packages/*/src/index.ts",
+                "../volt-renderer/packages/*/src/index.ts",
                 "../Octane-Renderer/packages/*/src/index.ts",
                 "../octane-renderer/packages/*/src/index.ts",
                 "../renderer/packages/*/src/index.ts"
@@ -49,6 +55,6 @@
     },
     "include": [
         "src",
-        "node_modules/@octane/renderer/src/**/*.ts"
+        "node_modules/@volt/renderer/src/**/*.ts"
     ]
 }

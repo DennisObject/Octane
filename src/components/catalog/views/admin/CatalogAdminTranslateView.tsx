@@ -54,12 +54,12 @@ export const CatalogAdminTranslateView: FC<CatalogAdminTranslateViewProps> = ({ 
     };
 
     return (
-        <div className="octane-catalog-admin-translate">
+        <div className="volt-catalog-admin-translate">
             <Button disabled={!hasText || isTranslating} variant="secondary" onClick={() => hasText && toggle()}>
                 {LocalizeText('catalog.admin.translate.action')}
             </Button>
             {isOpen && (
-                <div className="octane-staff-row">
+                <div className="volt-staff-row">
                     <select disabled={isTranslating || languagesLoading} value={language} onChange={(event) => setLanguage(event.target.value)}>
                         {languagesLoading && !supportedLanguages.length && (
                             <option value="">{LocalizeText('catalog.admin.translate.loading.languages')}</option>
@@ -78,7 +78,7 @@ export const CatalogAdminTranslateView: FC<CatalogAdminTranslateViewProps> = ({ 
                     </Button>
                 </div>
             )}
-            {error && <span className="octane-staff-error-text">{error}</span>}
+            {error && <span className="volt-staff-error-text">{error}</span>}
         </div>
     );
 };

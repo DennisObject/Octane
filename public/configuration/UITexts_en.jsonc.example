@@ -1537,7 +1537,7 @@
     "housekeeping.tab.roles": "Roles",
     "housekeeping.error.stale_revision": "Permissions changed. The view has been refreshed; review your edit and try again.",
     // ------------------------------------------------------------------------
-    // Octane keys the client references without a hotel text: the English the
+    // Volt keys the client references without a hotel text: the English the
     // client already showed as its fallback, plus keys that rendered raw.
     // ------------------------------------------------------------------------
     "avatar.widget.donate_to_all": "Serve everyone",

@@ -1,4 +1,4 @@
-import { CreateLinkEvent, FrontPageItem, GetRoomEngine, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@octane/renderer';
+import { CreateLinkEvent, FrontPageItem, GetRoomEngine, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer } from '@volt/renderer';
 import {
     CatalogType,
     GetRoomSession,
@@ -11,7 +11,7 @@ import {
     ProductTypeEnum,
     SearchResult
 } from '../../api';
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 import {
     findNodeById,
     findNodeByName,
@@ -155,7 +155,7 @@ const getPathToNodeWithLayout = (node: ICatalogNode): ICatalogNode[] => {
     return [];
 };
 
-export const useCatalogStore = createOctaneStore<CatalogStoreState>((set, get) => ({
+export const useCatalogStore = createVoltStore<CatalogStoreState>((set, get) => ({
     ...INITIAL_CATALOG_UI_STATE,
 
     setIsVisible: (visible) => set((state) => ({ isVisible: typeof visible === 'function' ? visible(state.isVisible) : visible })),

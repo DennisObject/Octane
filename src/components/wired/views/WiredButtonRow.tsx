@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { FC, ReactNode } from 'react';
 import { resolveWiredStyle } from '../../../api';
 import { useWired, useWiredTools } from '../../../hooks';
@@ -23,7 +23,7 @@ export const WiredButtonRow: FC<{ buttons: WiredRowButton[] }> = ({ buttons }) =
     const shellStyle = resolveWiredStyle(activeWiredStyle, GetSessionDataManager().getFloorItemData(trigger?.spriteId)?.className);
 
     return (
-        <div className="octane-wired__button-row" style={{ gridTemplateColumns: `repeat(${buttons.length}, round(down, calc((100% - ${(buttons.length - 1) * 12}px) / ${buttons.length}), 1px))` }}>
+        <div className="volt-wired__button-row" style={{ gridTemplateColumns: `repeat(${buttons.length}, round(down, calc((100% - ${(buttons.length - 1) * 12}px) / ${buttons.length}), 1px))` }}>
             {buttons.map((button) => (
                 <WiredShellButton key={button.id} disabled={button.disabled} shellStyle={shellStyle} onClick={button.onClick}>
                     {button.label}

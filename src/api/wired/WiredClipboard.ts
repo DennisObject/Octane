@@ -1,4 +1,4 @@
-import { ConditionDefinition, Triggerable, TriggerDefinition, WiredActionDefinition } from '@octane/renderer';
+import { ConditionDefinition, Triggerable, TriggerDefinition, WiredActionDefinition } from '@volt/renderer';
 
 /** Which of the three holders a box belongs to; a clipboard entry only pastes into the same holder and code. */
 export type WiredHolder = 'action' | 'condition' | 'trigger' | 'unknown';

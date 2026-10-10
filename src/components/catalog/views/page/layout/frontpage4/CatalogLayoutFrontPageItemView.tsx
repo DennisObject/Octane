@@ -1,4 +1,4 @@
-import { FrontPageItem } from '@octane/renderer';
+import { FrontPageItem } from '@volt/renderer';
 import { FC } from 'react';
 import { GetConfigurationValue } from '../../../../../../api';
 
@@ -18,12 +18,12 @@ export const CatalogLayoutFrontPageItemView: FC<CatalogLayoutFrontPageItemViewPr
     const imageUrl = item.itemPromoImage ? GetConfigurationValue<string>('image.library.url', '') + item.itemPromoImage : null;
 
     return (
-        <div className={`octane-cfp-item ${first ? 'is-first' : ''}`}>
-            <div className="octane-cfp-item-image" style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined} />
-            <div className="octane-cfp-item-title">
+        <div className={`volt-cfp-item ${first ? 'is-first' : ''}`}>
+            <div className="volt-cfp-item-image" style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined} />
+            <div className="volt-cfp-item-title">
                 <span>{item.itemName}</span>
             </div>
-            <button className="octane-cfp-item-region" type="button" onClick={() => onSelect(item)} />
+            <button className="volt-cfp-item-region" type="button" onClick={() => onSelect(item)} />
         </div>
     );
 };

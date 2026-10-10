@@ -1,4 +1,4 @@
-import { NodeData, RoomControllerLevel, RoomObjectCategory } from '@octane/renderer';
+import { NodeData, RoomControllerLevel, RoomObjectCategory } from '@volt/renderer';
 import { CatalogNode, CatalogPage, CatalogType, ICatalogNode, ICatalogPage, IPurchasableOffer } from '../../api';
 
 export const normalizeCatalogType = (_type?: string): string => CatalogType.NORMAL;

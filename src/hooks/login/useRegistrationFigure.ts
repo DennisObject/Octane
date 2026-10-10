@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AVATAR_SET_TYPES, buildFigureString, DEFAULT_LOOKS, FigureSelection, Gender, parseFigureString, REQUIRED_SET_TYPES } from '../../api';
 import { configFileUrl } from '../../secure-assets';

@@ -1,7 +1,7 @@
-import { GetRoomEngine, OpenPetPackageMessageComposer, RoomObjectCategory, RoomSessionPetPackageEvent } from '@octane/renderer';
+import { GetRoomEngine, OpenPetPackageMessageComposer, RoomObjectCategory, RoomSessionPetPackageEvent } from '@volt/renderer';
 import { useReducer } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../api';
-import { useOctaneEvent } from '../../events';
+import { useVoltEvent } from '../../events';
 
 interface PetPackageState {
     isVisible: boolean;
@@ -67,7 +67,7 @@ const usePetPackageWidgetState = () => {
     const onConfirm = () => SendMessageComposer(new OpenPetPackageMessageComposer(state.objectId, state.petName));
     const onChangePetName = (petName: string) => dispatch({ type: 'set-name', petName });
 
-    useOctaneEvent<RoomSessionPetPackageEvent>(RoomSessionPetPackageEvent.RSOPPE_OPEN_PET_PACKAGE_REQUESTED, (event) => {
+    useVoltEvent<RoomSessionPetPackageEvent>(RoomSessionPetPackageEvent.RSOPPE_OPEN_PET_PACKAGE_REQUESTED, (event) => {
         if (!event) return;
 
         const roomObject = GetRoomEngine().getRoomObject(event.session.roomId, event.objectId, RoomObjectCategory.FLOOR);
@@ -75,7 +75,7 @@ const usePetPackageWidgetState = () => {
         dispatch({ type: 'open', objectId: event.objectId, objectType: roomObject.type });
     });
 
-    useOctaneEvent<RoomSessionPetPackageEvent>(RoomSessionPetPackageEvent.RSOPPE_OPEN_PET_PACKAGE_RESULT, (event) => {
+    useVoltEvent<RoomSessionPetPackageEvent>(RoomSessionPetPackageEvent.RSOPPE_OPEN_PET_PACKAGE_RESULT, (event) => {
         if (!event) return;
 
         if (event.nameValidationStatus === 0) {

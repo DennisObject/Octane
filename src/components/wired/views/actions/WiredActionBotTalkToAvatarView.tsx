@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WIRED_STRING_DELIMETER, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredTextCounter, WiredTextFormattingHelp } from '../common/WiredTextFormattingHelp';
 import { WiredBubbleWidthSelect } from '../WiredBubbleWidthSelect';
 import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
@@ -65,13 +65,13 @@ export const WiredActionBotTalkToAvatarView: FC<{}> = (props) => {
             {botSource === 100 && (
                 <div className="flex flex-col gap-1">
                     <Text bold>{LocalizeText('wiredfurni.params.bot.name')}</Text>
-                    <OctaneInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />
+                    <VoltInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />
                 </div>
             )}
             <div className="flex flex-col gap-1">
                 <Text bold>{LocalizeText('wiredfurni.params.message')}</Text>
                 <textarea
-                    className="form-control form-control-sm octane-wired__resizable-textarea"
+                    className="form-control form-control-sm volt-wired__resizable-textarea"
                     maxLength={maxMessageLength}
                     rows={4}
                     value={message}

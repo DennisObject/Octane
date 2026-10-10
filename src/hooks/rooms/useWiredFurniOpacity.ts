@@ -1,7 +1,7 @@
-import { GetRoomEngine, RoomEngineObjectEvent, RoomObjectCategory, WiredFeatureCapabilitiesComposer, WiredFurniOpacityEvent } from '@octane/renderer';
+import { GetRoomEngine, RoomEngineObjectEvent, RoomObjectCategory, WiredFeatureCapabilitiesComposer, WiredFurniOpacityEvent } from '@volt/renderer';
 import { useEffect, useRef } from 'react';
 import { SendMessageComposer } from '../../api';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 import { WiredFurniOpacityController } from './WiredFurniOpacityController';
 
 const WIRED_FEATURE_PROTOCOL_VERSION = 1;
@@ -33,7 +33,7 @@ export const useWiredFurniOpacity = (roomId: number): void => {
         controllerRef.current.apply(parser.roomId, parser.updates);
     });
 
-    useOctaneEvent<RoomEngineObjectEvent>([RoomEngineObjectEvent.ADDED, RoomEngineObjectEvent.REMOVED], (event) => {
+    useVoltEvent<RoomEngineObjectEvent>([RoomEngineObjectEvent.ADDED, RoomEngineObjectEvent.REMOVED], (event) => {
         if (event.category !== RoomObjectCategory.FLOOR && event.category !== RoomObjectCategory.WALL) return;
 
         if (event.type === RoomEngineObjectEvent.ADDED) {

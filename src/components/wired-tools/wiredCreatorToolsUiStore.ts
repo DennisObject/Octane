@@ -1,4 +1,4 @@
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 import { createEmptyMonitorSnapshot } from './WiredCreatorTools.helpers';
 import {
     InspectionElementType,
@@ -182,7 +182,7 @@ interface WiredCreatorToolsUiState {
     setManagedGiveValue: (next: string) => void;
 }
 
-export const useWiredCreatorToolsUiStore = createOctaneStore<WiredCreatorToolsUiState>()((set) => ({
+export const useWiredCreatorToolsUiStore = createVoltStore<WiredCreatorToolsUiState>()((set) => ({
     isVisible: false,
     activeTab: 'monitor',
     inspectionType: 'furni',

@@ -1,5 +1,5 @@
 import { FC, KeyboardEvent, ReactNode } from 'react';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../card';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../card';
 import { DraggableWindowPosition } from '../draggable-window';
 
 export interface StaffWindowTab<T extends string | number> {
@@ -36,31 +36,31 @@ export const StaffWindow = <T extends string | number>(props: StaffWindowProps<T
     };
 
     return (
-        <OctaneCardView
-            className={`octane-staff-window ${className}`}
+        <VoltCardView
+            className={`volt-staff-window ${className}`}
             frameStyle={3}
             isResizable={false}
             uniqueKey={uniqueKey}
             windowPosition={windowPosition}
             onKeyDown={onKeyDown}
         >
-            <OctaneCardHeaderView headerText={title} onCloseClick={() => onClose()} />
+            <VoltCardHeaderView headerText={title} onCloseClick={() => onClose()} />
             {tabs.length > 0 && (
-                <OctaneCardTabsView classNames={['octane-staff-tabs']}>
+                <VoltCardTabsView classNames={['volt-staff-tabs']}>
                     {tabs.map((tab) => (
-                        <OctaneCardTabsItemView
+                        <VoltCardTabsItemView
                             key={tab.id}
                             classNames={tab.disabled ? ['is-disabled'] : []}
                             isActive={tab.id === activeTab}
                             onClick={() => !tab.disabled && onTabChange?.(tab.id)}
                         >
                             {tab.label}
-                        </OctaneCardTabsItemView>
+                        </VoltCardTabsItemView>
                     ))}
-                </OctaneCardTabsView>
+                </VoltCardTabsView>
             )}
-            <OctaneCardContentView classNames={['octane-staff-body']}>{children}</OctaneCardContentView>
-        </OctaneCardView>
+            <VoltCardContentView classNames={['volt-staff-body']}>{children}</VoltCardContentView>
+        </VoltCardView>
     );
 };
 
@@ -72,9 +72,9 @@ interface StaffSectionProps {
 
 /** A captioned, sunk panel - the grouping box the AIR staff windows use. */
 export const StaffSection: FC<StaffSectionProps> = ({ title = '', className = '', children = null }) => (
-    <section className={`octane-staff-section ${className}`}>
-        {title && <h3 className="octane-staff-section-title">{title}</h3>}
-        <div className="octane-staff-section-body">{children}</div>
+    <section className={`volt-staff-section ${className}`}>
+        {title && <h3 className="volt-staff-section-title">{title}</h3>}
+        <div className="volt-staff-section-body">{children}</div>
     </section>
 );
 
@@ -85,8 +85,8 @@ interface StaffFieldProps {
 }
 
 export const StaffField: FC<StaffFieldProps> = ({ label, className = '', children = null }) => (
-    <label className={`octane-staff-field ${className}`}>
-        <span className="octane-staff-field-label">{label}</span>
+    <label className={`volt-staff-field ${className}`}>
+        <span className="volt-staff-field-label">{label}</span>
         {children}
     </label>
 );
@@ -99,10 +99,10 @@ interface StaffStatusProps {
 }
 
 export const StaffStatus: FC<StaffStatusProps> = ({ tone, message, onDismiss = null, dismissLabel = '' }) => (
-    <div className={`octane-staff-status is-${tone}`} role={tone === 'error' ? 'alert' : 'status'}>
-        <span className="octane-staff-status-text">{message}</span>
-        {onDismiss && <button aria-label={dismissLabel} className="octane-staff-status-dismiss" title={dismissLabel} type="button" onClick={onDismiss} />}
+    <div className={`volt-staff-status is-${tone}`} role={tone === 'error' ? 'alert' : 'status'}>
+        <span className="volt-staff-status-text">{message}</span>
+        {onDismiss && <button aria-label={dismissLabel} className="volt-staff-status-dismiss" title={dismissLabel} type="button" onClick={onDismiss} />}
     </div>
 );
 
-export const StaffEmpty: FC<{ children?: ReactNode }> = ({ children = null }) => <div className="octane-staff-empty">{children}</div>;
+export const StaffEmpty: FC<{ children?: ReactNode }> = ({ children = null }) => <div className="volt-staff-empty">{children}</div>;

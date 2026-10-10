@@ -90,10 +90,10 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
     );
 
     return (
-        <div className={`octane-catalog-navigation-node ${child ? 'is-child' : ''}`}>
+        <div className={`volt-catalog-navigation-node ${child ? 'is-child' : ''}`}>
             <div
                 ref={dragRef}
-                className={`octane-catalog-navigation-item ${adminMode ? 'is-admin' : ''} ${isActive ? 'is-active' : ''} ${node.isBranch ? 'is-branch' : 'is-leaf'} ${isOpen ? 'is-open' : ''} ${isDragOver ? 'is-drag-over' : ''}`}
+                className={`volt-catalog-navigation-item ${adminMode ? 'is-admin' : ''} ${isActive ? 'is-active' : ''} ${node.isBranch ? 'is-branch' : 'is-leaf'} ${isOpen ? 'is-open' : ''} ${isDragOver ? 'is-drag-over' : ''}`}
                 draggable={adminMode}
                 role="treeitem"
                 tabIndex={0}
@@ -107,19 +107,19 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
                 onDragStart={adminMode ? handleDragStart : undefined}
                 onDrop={adminMode ? handleDrop : undefined}
             >
-                <div className="octane-catalog-navigation-icon">
+                <div className="volt-catalog-navigation-icon">
                     <CatalogIconView icon={node.iconId} />
                 </div>
                 <span
-                    className="octane-catalog-navigation-label"
+                    className="volt-catalog-navigation-label"
                     title={adminMode ? LocalizeText('catalog.admin.page.id.title', ['id'], [String(node.pageId)]) : undefined}
                 >
                     {swfLabel}
                 </span>
                 {adminMode && (
-                    <span className="octane-catalog-navigation-admin">
+                    <span className="volt-catalog-navigation-admin">
                         <button
-                            className="octane-catalog-navigation-admin-action"
+                            className="volt-catalog-navigation-admin-action"
                             title={LocalizeText('catalog.admin.create.subpage')}
                             type="button"
                             onClick={(e) => {
@@ -131,7 +131,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
                             {LocalizeText('catalog.admin.new')}
                         </button>
                         <button
-                            className="octane-catalog-navigation-admin-action"
+                            className="volt-catalog-navigation-admin-action"
                             title={LocalizeText('catalog.admin.delete.page')}
                             type="button"
                             onClick={(e) => {
@@ -145,7 +145,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = (pr
                     </span>
                 )}
                 {node.isBranch && (
-                    <span className="octane-catalog-navigation-caret text-[9px] text-muted shrink-0">{isOpen ? <FaCaretUp /> : <FaCaretDown />}</span>
+                    <span className="volt-catalog-navigation-caret text-[9px] text-muted shrink-0">{isOpen ? <FaCaretUp /> : <FaCaretDown />}</span>
                 )}
             </div>
             {isOpen && node.isBranch && <CatalogNavigationSetView child={true} node={node} runtime={runtime} />}

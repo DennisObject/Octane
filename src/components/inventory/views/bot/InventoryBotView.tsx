@@ -1,9 +1,9 @@
-import { IRoomSession, RoomPreviewer } from '@octane/renderer';
+import { IRoomSession, RoomPreviewer } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { attemptBotPlacement, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { ClassicScrollAreaView } from '../../../../common/scroll-area/ClassicScrollAreaView';
 import { useInventoryBots, useInventoryUnseenTracker } from '../../../../hooks';
-import { OctaneButton } from '../../../../layout';
+import { VoltButton } from '../../../../layout';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryBotImageView } from './InventoryBotImageView';
 import { InventoryBotItemView } from './InventoryBotItemView';
@@ -38,30 +38,30 @@ export const InventoryBotView: FC<{
     }
 
     return (
-        <div className="octane-inventory-animals is-bots">
-            <div className="octane-inventory-animal-grid">
+        <div className="volt-inventory-animals is-bots">
+            <div className="volt-inventory-animal-grid">
                 <ClassicScrollAreaView className="size-full">
-                    <div className="octane-inventory-animal-cells">
+                    <div className="volt-inventory-animal-cells">
                         {botItems.map((item) => (
                             <InventoryBotItemView key={item.botData.id} botItem={item} />
                         ))}
                     </div>
                 </ClassicScrollAreaView>
             </div>
-            <div className="octane-inventory-animal-preview">
-                <div className="octane-inventory-animal-name">{selectedBot?.botData.name}</div>
-                <div className="octane-inventory-animal-image">
+            <div className="volt-inventory-animal-preview">
+                <div className="volt-inventory-animal-name">{selectedBot?.botData.name}</div>
+                <div className="volt-inventory-animal-image">
                     {selectedBot && <InventoryBotImageView figure={selectedBot.botData.figure} gender={selectedBot.botData.gender} preview />}
                 </div>
-                <div className="octane-inventory-animal-description">{selectedBot?.botData.motto}</div>
-                <div className="octane-inventory-animal-actions">
-                    <OctaneButton
-                        className="octane-inventory-animal-place"
+                <div className="volt-inventory-animal-description">{selectedBot?.botData.motto}</div>
+                <div className="volt-inventory-animal-actions">
+                    <VoltButton
+                        className="volt-inventory-animal-place"
                         disabled={!selectedBot || !roomSession?.isRoomOwner}
                         onClick={() => attemptBotPlacement(selectedBot)}
                     >
                         {LocalizeText('inventory.bot.placetoroom')}
-                    </OctaneButton>
+                    </VoltButton>
                 </div>
             </div>
         </div>

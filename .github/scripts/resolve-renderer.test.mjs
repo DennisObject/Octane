@@ -34,14 +34,14 @@ describe('renderer resolution', () => {
     it('uses the fork when it provides the exact companion branch', async () => {
         const hasRef = refLookup(
             new Set([
-                'simoleo89/Octane-Renderer@codex/global-classic-scrollbars',
-                'simoleo89/Octane-Renderer@Dev',
+                'simoleo89/Volt-Renderer@codex/global-classic-scrollbars',
+                'simoleo89/Volt-Renderer@Dev',
                 'duckietm/Octane-Renderer@Dev',
             ])
         );
 
         assert.deepEqual(await resolveRenderer(baseInput, hasRef), {
-            repository: 'simoleo89/Octane-Renderer',
+            repository: 'simoleo89/Volt-Renderer',
             ref: 'codex/global-classic-scrollbars',
         });
     });

@@ -6,11 +6,11 @@ import {
     RequestCameraConfigurationComposer,
     RoomCameraWidgetManagerEvent,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { CameraPicture, cancelTrustedCameraRequests, completeTrustedCameraRequest, SendMessageComposer } from '../../api';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 
 const CAMERA_EFFECTS_LOAD_DELAY_MS = 10000;
 
@@ -26,7 +26,7 @@ const useCameraState = () => {
     const [activePictureSlotIndex, setActivePictureSlotIndex] = useState(0);
     const [price, setPrice] = useState<{ credits: number; duckets: number; publishDucketPrice: number }>(null);
 
-    useOctaneEvent<RoomCameraWidgetManagerEvent>(RoomCameraWidgetManagerEvent.INITIALIZED, (event) => {
+    useVoltEvent<RoomCameraWidgetManagerEvent>(RoomCameraWidgetManagerEvent.INITIALIZED, (event) => {
         setAvailableEffects(Array.from(GetRoomCameraWidgetManager().effects.values()));
     });
 
@@ -36,7 +36,7 @@ const useCameraState = () => {
         completeTrustedCameraRequest(parser.url, parser.png);
     });
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, () => {
         cancelTrustedCameraRequests();
         setCameraRoll((previous) => {
             previous.forEach((picture) => picture?.texture?.destroy?.(true));

@@ -42,8 +42,8 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = (props) => 
     return (
         <ClassicScrollAreaView
             aria-label="Catalog categories"
-            className="octane-catalog-navigation-scroll-area"
-            contentClassName="octane-catalog-navigation-list is-normal"
+            className="volt-catalog-navigation-scroll-area"
+            contentClassName="volt-catalog-navigation-list is-normal"
             role="tree"
         >
             {searchResult &&

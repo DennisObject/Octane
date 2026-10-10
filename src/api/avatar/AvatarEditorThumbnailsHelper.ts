@@ -7,11 +7,11 @@ import {
     IFigurePart,
     IGraphicAsset,
     IPartColor,
-    OctaneAlphaFilter,
-    OctaneContainer,
-    OctaneSprite,
+    VoltAlphaFilter,
+    VoltContainer,
+    VoltSprite,
     TextureUtils
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { canvasToThumbnailUrl, centerCanvasIntoBox, imageUrlToCanvas, ThumbnailUrlCache, trimCanvasToOpaqueBounds } from './avatarThumbnailUrls';
 import { IAvatarEditorCategoryPartItem } from './IAvatarEditorCategoryPartItem';
 
@@ -41,7 +41,7 @@ export class AvatarEditorThumbnailsHelper {
     private static PENDING_THUMBNAILS: Map<string, Promise<string>> = new Map();
     private static THUMB_DIRECTIONS: number[] = [2, 6, 0, 4, 3, 1];
     private static THUMB_BOX: number = 50;
-    private static ALPHA_FILTER: OctaneAlphaFilter = new OctaneAlphaFilter({ alpha: 0.2 });
+    private static ALPHA_FILTER: VoltAlphaFilter = new VoltAlphaFilter({ alpha: 0.2 });
     private static DRAW_ORDER: string[] = [
         AvatarFigurePartType.LEFT_HAND_ITEM,
         AvatarFigurePartType.LEFT_HAND,
@@ -121,7 +121,7 @@ export class AvatarEditorThumbnailsHelper {
         if (pending) return pending;
 
         const buildContainer = (part: IAvatarEditorCategoryPartItem, useColors: boolean, partColors: IPartColor[], isDisabled: boolean = false) => {
-            const container = new OctaneContainer();
+            const container = new VoltContainer();
             const sourceParts = part.partSet.parts;
             const parts = sourceParts.concat().sort(this.sortByDrawOrder);
             let renderedCount = 0;
@@ -166,7 +166,7 @@ export class AvatarEditorThumbnailsHelper {
             if (!union || union.width <= 0 || union.height <= 0) return { container, renderedCount };
 
             for (const { figurePart, asset } of drawn) {
-                const sprite = new OctaneSprite(asset.texture);
+                const sprite = new VoltSprite(asset.texture);
                 const dest = avatarEditorThumbDest(asset.x, asset.y, union);
 
                 sprite.position.set(dest.x, dest.y);

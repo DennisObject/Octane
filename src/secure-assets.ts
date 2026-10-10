@@ -4,7 +4,7 @@ type SecureSession = {
     fingerprint: string;
 };
 
-export type OctaneClientMode = {
+export type VoltClientMode = {
     distObfuscationEnabled: boolean;
     secureAssetsEnabled: boolean;
     secureApiEnabled: boolean;
@@ -13,7 +13,7 @@ export type OctaneClientMode = {
     plainGamedataBaseUrl?: string;
 };
 
-const CLIENT_MODE_DEFAULTS: OctaneClientMode = {
+const CLIENT_MODE_DEFAULTS: VoltClientMode = {
     distObfuscationEnabled: true,
     secureAssetsEnabled: true,
     secureApiEnabled: true
@@ -21,7 +21,7 @@ const CLIENT_MODE_DEFAULTS: OctaneClientMode = {
 
 const getDeployBaseUrl = (): string => {
     try {
-        const loaderBase = (window as any).__octaneLoaderBase;
+        const loaderBase = (window as any).__voltLoaderBase;
         if (typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
     } catch {}
 
@@ -53,23 +53,23 @@ const isDebugEnabled = (): boolean => {
 
 const setDebugState = (message: string): void => {
     try {
-        (window as any).__octaneSecureDebug = message;
-        const log = Array.isArray((window as any).__octaneSecureDebugLog) ? (window as any).__octaneSecureDebugLog : [];
+        (window as any).__voltSecureDebug = message;
+        const log = Array.isArray((window as any).__voltSecureDebugLog) ? (window as any).__voltSecureDebugLog : [];
 
         log.push(message);
-        (window as any).__octaneSecureDebugLog = log.slice(-50);
+        (window as any).__voltSecureDebugLog = log.slice(-50);
 
         if (!isDebugEnabled()) return;
 
-        const existing = document.getElementById('octane-secure-debug');
+        const existing = document.getElementById('volt-secure-debug');
 
         if (existing) {
-            existing.textContent = (window as any).__octaneSecureDebugLog.slice(-8).join('\n');
+            existing.textContent = (window as any).__voltSecureDebugLog.slice(-8).join('\n');
             return;
         }
 
         const node = document.createElement('div');
-        node.id = 'octane-secure-debug';
+        node.id = 'volt-secure-debug';
         node.style.position = 'fixed';
         node.style.left = '8px';
         node.style.bottom = '8px';
@@ -81,7 +81,7 @@ const setDebugState = (message: string): void => {
         node.style.font = '12px monospace';
         node.style.whiteSpace = 'pre-wrap';
         node.style.pointerEvents = 'none';
-        node.textContent = (window as any).__octaneSecureDebugLog.slice(-8).join('\n');
+        node.textContent = (window as any).__voltSecureDebugLog.slice(-8).join('\n');
         document.body.appendChild(node);
     } catch {}
 };
@@ -97,13 +97,13 @@ let secureSessionCreatedAt = 0;
 const SECURE_SESSION_TTL_MS = 5 * 60 * 1000;
 const REKEY_ENDPOINTS = new Set(['/api/auth/login', '/api/auth/remember', '/api/auth/logout']);
 
-let clientModeCache: OctaneClientMode | null = null;
+let clientModeCache: VoltClientMode | null = null;
 
-export const getClientMode = (): OctaneClientMode => {
+export const getClientMode = (): VoltClientMode => {
     if (clientModeCache) return clientModeCache;
 
     try {
-        const configured = (window as any).__octaneClientMode;
+        const configured = (window as any).__voltClientMode;
 
         if (configured && typeof configured === 'object') {
             clientModeCache = {
@@ -192,7 +192,7 @@ const getApiBase = (): string => {
     const mode = getClientMode();
     if (typeof mode.apiBaseUrl === 'string' && mode.apiBaseUrl.length) return mode.apiBaseUrl.replace(/\/$/, '');
 
-    const configured = (window as any).OctaneSecureApiUrl;
+    const configured = (window as any).VoltSecureApiUrl;
 
     if (typeof configured === 'string' && configured.length) return configured.replace(/\/$/, '');
 
@@ -207,7 +207,7 @@ const getPlainAssetBase = (kind: 'config' | 'gamedata'): string => {
 
     if (kind === 'config') return new URL('configuration/', getDeployBaseUrl()).toString();
 
-    return `${window.location.origin}/octane/gamedata/`;
+    return `${window.location.origin}/volt/gamedata/`;
 };
 
 const mapSecureAssetRequestToPlainUrl = (requestUrl: string): string => {

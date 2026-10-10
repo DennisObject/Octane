@@ -35,7 +35,7 @@ export const WiredArrayCriteriaEditor: FC<WiredArrayCriteriaEditorProps> = (prop
             )}
 
             {criteria.map((criterion, index) => (
-                <div key={index} className="flex flex-col gap-1 octane-wired__divider-top">
+                <div key={index} className="flex flex-col gap-1 volt-wired__divider-top">
                     <div className="flex gap-2 items-end">
                         <div className="flex flex-col gap-1">
                             <Text small>{localizeWithFallback('wiredfurni.params.arrays.criteria.field', 'Field')}</Text>

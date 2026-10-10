@@ -1,8 +1,8 @@
 import { CSSProperties, FC, ReactNode } from 'react';
 import { FriendlyTime, LocalizeText } from '../../../../api';
 import settingsIcon from '../../../../assets/images/groups/native/pursearea_settings_icon.png';
-import { MessageData } from '@octane/renderer';
-import { LayoutBadgeImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { MessageData } from '@volt/renderer';
+import { LayoutBadgeImageView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { flatText, GroupText, GroupWindowTitle } from '../GroupNativeLayout';
 
 export const FORUM_PAGE_SIZE = 20;
@@ -66,9 +66,9 @@ interface ForumFrameProps {
 
 /** A group forum window: frame 3 with the help and close buttons, its client origin 6px right of and 25px below the frame corner. */
 export const ForumFrame: FC<ForumFrameProps> = ({ uniqueKey, className, title, width, height, minWidth = width, minHeight = height, isResizable = false, initialPosition, onClose, onHelp, children }) => (
-    <OctaneCardView
+    <VoltCardView
         aria-label={title}
-        className={`octane-forum ${className}`}
+        className={`volt-forum ${className}`}
         frameStyle={3}
         initialPosition={initialPosition}
         isResizable={isResizable}
@@ -76,12 +76,12 @@ export const ForumFrame: FC<ForumFrameProps> = ({ uniqueKey, className, title, w
         style={{ '--forum-width': width + 'px', '--forum-height': height + 'px', '--forum-min-width': minWidth + 'px', '--forum-min-height': minHeight + 'px' } as CSSProperties}
         uniqueKey={uniqueKey}
     >
-        <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
-            {onHelp && <button aria-label={LocalizeText('help.button.tooltip')} className="octane-forum__help" type="button" onClick={onHelp} onMouseDown={(event) => event.stopPropagation()} />}
-        </OctaneCardHeaderView>
+        <VoltCardHeaderView headerText="" onCloseClick={onClose}>
+            {onHelp && <button aria-label={LocalizeText('help.button.tooltip')} className="volt-forum__help" type="button" onClick={onHelp} onMouseDown={(event) => event.stopPropagation()} />}
+        </VoltCardHeaderView>
         <GroupWindowTitle title={title} width={width} />
-        <div className="octane-forum__client">{children}</div>
-    </OctaneCardView>
+        <div className="volt-forum__client">{children}</div>
+    </VoltCardView>
 );
 
 interface ForumHeaderProps {
@@ -98,11 +98,11 @@ interface ForumHeaderProps {
 
 /** top_part: 550x80 band, a 80x80 black icon cell, the headline, the description and the optional Settings pill. */
 export const ForumHeader: FC<ForumHeaderProps> = ({ title, description, badge, icon, descriptionWidth = 456, canChangeSettings = false, onSettings, onClick }) => (
-    <div className="octane-forum__header">
-        <div className="octane-forum__header-click" onClick={onClick} />
-        <div className="octane-forum__header-icon">
+    <div className="volt-forum__header">
+        <div className="volt-forum__header-click" onClick={onClick} />
+        <div className="volt-forum__header-icon">
             {badge !== undefined && (
-                <div className="octane-forum__header-badge">
+                <div className="volt-forum__header-badge">
                     <LayoutBadgeImageView badgeCode={badge} isGroup={true} />
                 </div>
             )}
@@ -111,7 +111,7 @@ export const ForumHeader: FC<ForumHeaderProps> = ({ title, description, badge, i
         <GroupText background={FORUM_HEADER} height={30} overrides={{ size: 24, color: 0xffffff }} text={title} textStyle="u_headline_big" width={460} x={90} y={10} />
         <GroupText background={FORUM_HEADER} height={40} overrides={flatText(12, { color: 0xffffff })} text={description} width={descriptionWidth} wrap x={90} y={40} />
         {canChangeSettings && (
-            <button className="octane-forum__settings" type="button" onClick={onSettings}>
+            <button className="volt-forum__settings" type="button" onClick={onSettings}>
                 <img alt="" draggable={false} src={settingsIcon} />
                 <GroupText background={0x000000} overrides={flatText(11, { bold: true, color: 0xffffff, thickness: 15 })} text={LocalizeText('groupforum.view.settings.header')} x={17} y={1} />
             </button>
@@ -131,7 +131,7 @@ export const ForumShortcuts: FC<ForumShortcutsProps> = ({ unreadCount = 0, onOpe
     const mine = unreadCount > 0 ? stripTags(LocalizeText('groupforum.view.shortcuts.my.unread', ['UNREAD_COUNT'], [String(unreadCount)])) : strip('groupforum.view.shortcuts.my');
 
     return (
-        <div className="octane-forum__shortcuts">
+        <div className="volt-forum__shortcuts">
             <GroupText background={0xffffff} className="is-static" overrides={flatText(11, { bold: true })} text={LocalizeText('groupforum.view.shortcuts.header')} x={0} y={0} />
             <ForumShortcutLink text={mine} onClick={() => onOpenList('my')} />
             <ForumShortcutLink text={strip('groupforum.view.shortcuts.active')} onClick={() => onOpenList('active')} />
@@ -141,7 +141,7 @@ export const ForumShortcuts: FC<ForumShortcutsProps> = ({ unreadCount = 0, onOpe
 };
 
 const ForumShortcutLink: FC<{ text: string; onClick: () => void }> = ({ text, onClick }) => (
-    <button className="octane-forum__shortcut" type="button" onClick={onClick}>
+    <button className="volt-forum__shortcut" type="button" onClick={onClick}>
         <GroupText background={0xffffff} className="is-static" overrides={flatText(11, { color: 0x1b79ab, underline: true })} text={text} x={0} y={0} />
     </button>
 );
@@ -161,7 +161,7 @@ interface ForumButtonProps {
 
 /** container_button: shiny thick skin tinted 0xdddddd (grey) or 0x0a9bc5 (blue). */
 export const ForumButton: FC<ForumButtonProps> = ({ label, x, right, y = 0, width, height = 30, tint = 'grey', disabled = false, onClick }) => (
-    <button className={`octane-forum__button is-${tint}`} disabled={disabled} style={{ left: right === undefined ? x : undefined, right, top: y, width, height }} type="button" onClick={onClick}>
+    <button className={`volt-forum__button is-${tint}`} disabled={disabled} style={{ left: right === undefined ? x : undefined, right, top: y, width, height }} type="button" onClick={onClick}>
         <GroupText
             blend={tint === 'blue' ? 'screen' : 'multiply'}
             className="is-static"
@@ -192,9 +192,9 @@ export const ForumPager: FC<ForumPagerProps> = ({ pageIndex, pageCount, onPage }
     ];
 
     return (
-        <div className="octane-forum__pager">
+        <div className="volt-forum__pager">
             {buttons.map(([label, x, target, isDisabled]) => (
-                <button key={label} className="octane-forum__button is-plain" disabled={isDisabled} style={{ left: x, top: 0, width: 25, height: 30 }} type="button" onClick={() => onPage(target)}>
+                <button key={label} className="volt-forum__button is-plain" disabled={isDisabled} style={{ left: x, top: 0, width: 25, height: 30 }} type="button" onClick={() => onPage(target)}>
                     <GroupText blend="multiply" className="is-static" text={label} textStyle="u_bold" x={0} y={0} />
                 </button>
             ))}

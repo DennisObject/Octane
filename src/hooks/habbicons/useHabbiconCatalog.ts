@@ -21,7 +21,7 @@ import {
     UnfavoriteHabbiconComposer,
     UserHabbiconStatusChangedEvent,
     UserHabbiconsEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {

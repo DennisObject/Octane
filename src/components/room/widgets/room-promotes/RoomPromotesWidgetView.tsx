@@ -1,4 +1,4 @@
-import { CreateLinkEvent, DesktopViewEvent } from '@octane/renderer';
+import { CreateLinkEvent, DesktopViewEvent } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { GetConfigurationValue, LocalizeText } from '../../../../api';
 import contractedBackground from '../../../../assets/images/room/promotes/event_bg_contracted.png';
@@ -72,16 +72,16 @@ export const RoomPromotesWidgetView: FC<{}> = () => {
 
     return (
         <>
-            <div className={`octane-event-info${isExpanded ? ' is-expanded' : ''}`}>
-                <img alt="" className="octane-event-info__bg" draggable={false} src={isExpanded ? (isOwner ? ownerBackground : visitorBackground) : contractedBackground} />
-                <div className="octane-event-info__region" onClick={onBackgroundClick} />
+            <div className={`volt-event-info${isExpanded ? ' is-expanded' : ''}`}>
+                <img alt="" className="volt-event-info__bg" draggable={false} src={isExpanded ? (isOwner ? ownerBackground : visitorBackground) : contractedBackground} />
+                <div className="volt-event-info__region" onClick={onBackgroundClick} />
                 {hasEvent && <RoomPromoteText alignCenter bold size={13} spacing={-0.4} text={eventData.eventName} width={67} x={61} y={2} />}
                 {!hasEvent && canManage && <RoomPromoteText className="is-link" height={17} text={LocalizeText('roomad.get.event')} underline width={126} x={31} y={3} onClick={onBackgroundClick} />}
                 {isExpanded && <RoomPromoteText height={90} text={eventData.eventDescription} width={175} wrap x={10} y={27} />}
                 {showInProgress && <RoomPromoteText alignCenter bold text={LocalizeText('navigator.eventinprogress')} width={156} x={18} y={107} />}
                 {showModify && <RoomPromoteText className="is-link" height={17} text={LocalizeText('navigator.roominfo.editevent')} underline x={16} y={110} onClick={() => setIsEditingPromote(true)} />}
                 {showModify && canExtend && <RoomPromoteText alignRight className="is-link" height={17} text={LocalizeText('roomad.extend.event')} underline width={88} x={88} y={110} onClick={extend} />}
-                <img alt="" className="octane-event-info__icon" draggable={false} src={eventIcon} />
+                <img alt="" className="volt-event-info__icon" draggable={false} src={eventIcon} />
             </div>
             {/* Keyed by the event: when another event replaces this one the window starts over from the new event instead of saving the old draft into it. */}
             {isEditingPromote && hasEvent && (

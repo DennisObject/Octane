@@ -30,7 +30,7 @@
     top: 40px;
     left: 40px;
     z-index: 5;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     user-select: none;
 }
 
@@ -53,7 +53,7 @@
     background:
         url("@/assets/images/login/background_tiles.png") repeat,
         linear-gradient(180deg, #0c5a7f 24.902%, #0c3a65 50%);
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .login-flow-landing-left,
@@ -63,7 +63,7 @@
     max-width: none;
     opacity: 0;
     user-select: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .login-flow-landing-left {
@@ -272,7 +272,7 @@
     line-height: 20px;
     white-space: nowrap;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .login-flow-button:hover:not(:disabled),
@@ -585,7 +585,7 @@
 .registration-room-thumbnail img {
     max-width: 100%;
     max-height: 100%;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .registration-room-copy {
@@ -725,7 +725,7 @@
 .login-flow .avatar-preview img {
     max-width: 100%;
     max-height: 190px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     image-rendering: -moz-crisp-edges;
 }
 
@@ -774,7 +774,7 @@
 .login-flow .registration-wardrobe-tabs img {
     max-width: 40px;
     max-height: 27px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
@@ -952,11 +952,11 @@
 }
 
 .login-flow .registration-wardrobe-part:focus-visible {
-    outline: 2px solid var(--octane-card-header, #418db0);
+    outline: 2px solid var(--volt-card-header, #418db0);
     outline-offset: -2px;
 }
 
-.login-flow .registration-wardrobe-part.wardrobe-part-loading:not(:has(.octane-icon)) {
+.login-flow .registration-wardrobe-part.wardrobe-part-loading:not(:has(.volt-icon)) {
     background-image: linear-gradient(110deg, #e9e8e4 30%, #f8f8f6 45%, #e9e8e4 60%);
     background-size: 200% 100% !important;
     animation: wardrobe-loading 1.1s linear infinite;
@@ -1003,7 +1003,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: var(--octane-card-muted, #666666);
+    color: var(--volt-card-muted, #666666);
     font-size: 13px;
 }
 

@@ -10,7 +10,7 @@ import {
     RoomSettingsComposer,
     ToggleStaffPickMessageComposer,
     UpdateHomeRoomMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     DispatchUiEvent,
@@ -26,7 +26,7 @@ import { Permission } from '../../../api/permissions';
 import weblinkIcon from '../../../assets/images/navigator/air/icon-weblink.png';
 import removeRightsIcon from '../../../assets/images/navigator/air/remove-rights.png';
 import nativeAtlas from '../../../assets/images/navigator/air/room-info-native-atlas.png';
-import { LayoutBadgeImageView, LayoutRoomThumbnailView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../common';
+import { LayoutBadgeImageView, LayoutRoomThumbnailView, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../common';
 import { RoomWidgetThumbnailEvent } from '../../../events';
 import { useHasPermission, useHelp, useNavigatorData, useNavigatorFavourite, useNavigatorUiStore, useRoom } from '../../../hooks';
 import { usePerkAllowed } from '../../../state/perkAllowancesStore';
@@ -77,7 +77,7 @@ const REPORT_SKIN = {
 const ReportSkin = () => (
     <>
         {Object.entries(REPORT_SKIN).map(([state, pieces]) => (
-            <svg key={state} aria-hidden="true" className={'octane-room-info__report-skin is-' + state} width={218} height={55}>
+            <svg key={state} aria-hidden="true" className={'volt-room-info__report-skin is-' + state} width={218} height={55}>
                 {pieces.map(({ name, source, bounds }) => (
                     <svg key={name} x={bounds[0]} y={bounds[1]} width={bounds[2]} height={bounds[3]} viewBox={source.join(' ')} preserveAspectRatio="none">
                         <image href={nativeAtlas} width={256} height={256} />
@@ -91,7 +91,7 @@ const ReportSkin = () => (
 const TagSkin = () => (
     <>
         {[0, 32].map((offset) => (
-            <span key={offset} className={'octane-room-info__tag-skin ' + (offset ? 'is-hovering' : 'is-default')} aria-hidden="true">
+            <span key={offset} className={'volt-room-info__tag-skin ' + (offset ? 'is-hovering' : 'is-default')} aria-hidden="true">
                 {[
                     { x: 0, width: 4, name: 'left' },
                     { x: 8, width: 1, name: 'middle' },
@@ -205,18 +205,18 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
     };
 
     return (
-        <OctaneCardView
-            className="octane-room-info"
+        <VoltCardView
+            className="volt-room-info"
             frameStyle={3}
             isResizable={false}
             offsetLeft={-0.5}
             offsetTop={-0.5}
             dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
         >
-            <OctaneCardHeaderView headerText={LocalizeText('navigator.roomsettings.roominfo')} onCloseClick={onCloseClick} />
-            <OctaneCardContentView className="octane-room-info__content" overflow="visible">
-                <div className="octane-room-info__details">
-                    <div className="octane-room-info__quick-actions">
+            <VoltCardHeaderView headerText={LocalizeText('navigator.roomsettings.roominfo')} onCloseClick={onCloseClick} />
+            <VoltCardContentView className="volt-room-info__content" overflow="visible">
+                <div className="volt-room-info__details">
+                    <div className="volt-room-info__quick-actions">
                         {hasRights && (
                             <button
                                 type="button"
@@ -255,56 +255,56 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                             </button>
                         )}
                     </div>
-                    <div className="octane-room-info__name is-bold">{room.roomName}</div>
+                    <div className="volt-room-info__name is-bold">{room.roomName}</div>
                     {room.showOwner && room.ownerId > 0 && (
                         <button
                             type="button"
-                            className="octane-room-info__owner"
+                            className="volt-room-info__owner"
                             title={LocalizeText('infostand.profile.link.tooltip')}
                             onClick={() => GetUserProfile(room.ownerId)}
                         >
                             <span className="is-caption is-bold">{LocalizeText('navigator.roomownercaption')}</span>
-                            <span className="octane-room-info__eye">
+                            <span className="volt-room-info__eye">
                                 <AtlasSprite x={0} y={40} width={13} height={11} className="is-default" />
                                 <AtlasSprite x={24} y={40} width={13} height={11} className="is-hovering" />
                             </span>
                             <span>{room.ownerName}</span>
                         </button>
                     )}
-                    <div className="octane-room-info__rating">
+                    <div className="volt-room-info__rating">
                         <span className="is-caption is-bold">{LocalizeText('navigator.roomrating')}</span>
                         <span>{navigatorData.currentRoomRating}</span>
                         {canRate && (
-                            <span className="octane-room-info__rating-icon" title={LocalizeText('navigator.rateroom')}>
+                            <span className="volt-room-info__rating-icon" title={LocalizeText('navigator.rateroom')}>
                                 <AtlasSprite x={96} y={0} width={12} height={15} />
                             </span>
                         )}
                     </div>
                     {room.ranking > 0 && (
-                        <div className="octane-room-info__rating">
+                        <div className="volt-room-info__rating">
                             <span className="is-caption is-bold">{LocalizeText('navigator.roomranking')}</span>
                             <span>{room.ranking}</span>
                         </div>
                     )}
-                    <div className="octane-room-info__padding" />
+                    <div className="volt-room-info__padding" />
                     {room.tags?.length > 0 && (
-                        <div className="octane-room-info__tags">
+                        <div className="volt-room-info__tags">
                             {room.tags.slice(0, 4).map((tag, index) => (
-                                <button key={index} type="button" className="octane-room-info__tag" onClick={() => processAction('navigator_search_tag', tag)}>
+                                <button key={index} type="button" className="volt-room-info__tag" onClick={() => processAction('navigator_search_tag', tag)}>
                                     <TagSkin />
                                     <span>#{tag}</span>
                                 </button>
                             ))}
                         </div>
                     )}
-                    {room.description && <div className="octane-room-info__description">{room.description}</div>}
+                    {room.description && <div className="volt-room-info__description">{room.description}</div>}
                     {canUseRoomThumbnailCamera && (
-                        <div className="octane-room-info__thumbnail-container">
-                            <LayoutRoomThumbnailView className="octane-room-info__thumbnail" customUrl={room.officialRoomPicRef} roomId={roomId} />
+                        <div className="volt-room-info__thumbnail-container">
+                            <LayoutRoomThumbnailView className="volt-room-info__thumbnail" customUrl={room.officialRoomPicRef} roomId={roomId} />
                             {canEdit && (
                                 <button
                                     type="button"
-                                    className="octane-room-info__camera"
+                                    className="volt-room-info__camera"
                                     aria-label={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
                                     title={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
                                     onClick={() => processAction('open_room_thumbnail_camera')}
@@ -316,16 +316,16 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                     )}
                 </div>
                 {room.habboGroupId > 0 && (
-                    <button type="button" className="octane-room-info__group" onClick={() => GetGroupInformation(room.habboGroupId)}>
-                        <LayoutBadgeImageView badgeCode={room.groupBadgeCode} className="octane-room-info__group-badge" isGroup />
+                    <button type="button" className="volt-room-info__group" onClick={() => GetGroupInformation(room.habboGroupId)}>
+                        <LayoutBadgeImageView badgeCode={room.groupBadgeCode} className="volt-room-info__group-badge" isGroup />
                         <span>{LocalizeText('navigator.guildbase', ['groupName'], [room.groupName])}</span>
                     </button>
                 )}
                 {showEmbed && (
-                    <div className="octane-room-info__embed">
+                    <div className="volt-room-info__embed">
                         <button
                             type="button"
-                            className="octane-room-info__embed-toggle"
+                            className="volt-room-info__embed-toggle"
                             aria-expanded={embedExpanded}
                             onClick={() => setEmbedExpanded(!embedExpanded)}
                         >
@@ -334,10 +334,10 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                         </button>
                         {embedExpanded && (
                             <>
-                                <div className="octane-room-info__embed-info">{LocalizeText('navigator.embed.info')}</div>
+                                <div className="volt-room-info__embed-info">{LocalizeText('navigator.embed.info')}</div>
                                 <input
                                     aria-label={LocalizeText('navigator.embed.caption')}
-                                    className="octane-room-info__embed-source"
+                                    className="volt-room-info__embed-source"
                                     value={embedSource}
                                     readOnly
                                     onClick={(event) => event.currentTarget.select()}
@@ -347,36 +347,36 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                     </div>
                 )}
                 {showActions && (
-                    <div className="octane-room-info__actions">
+                    <div className="volt-room-info__actions">
                         {canEdit && (
-                            <button type="button" className="octane-room-info__action" onClick={() => processAction('open_room_settings')}>
+                            <button type="button" className="volt-room-info__action" onClick={() => processAction('open_room_settings')}>
                                 {LocalizeText('navigator.roomsettings')}
                             </button>
                         )}
                         {showRoomFilter && (
-                            <button type="button" className="octane-room-info__action" onClick={() => processAction('room_filter')}>
+                            <button type="button" className="volt-room-info__action" onClick={() => processAction('room_filter')}>
                                 {LocalizeText('navigator.roomsettings.roomfilter')}
                             </button>
                         )}
                         {showFloorEditor && (
-                            <button type="button" className="octane-room-info__action" onClick={() => processAction('open_floorplan_editor')}>
+                            <button type="button" className="volt-room-info__action" onClick={() => processAction('open_floorplan_editor')}>
                                 {LocalizeText('open.floor.plan.editor')}
                             </button>
                         )}
                         {canStaffPick && (
-                            <button type="button" className="octane-room-info__action" onClick={() => processAction('toggle_pick')}>
+                            <button type="button" className="volt-room-info__action" onClick={() => processAction('toggle_pick')}>
                                 {LocalizeText(isRoomPicked ? 'navigator.staffpicks.unpick' : 'navigator.staffpicks.pick')}
                             </button>
                         )}
                         {showReport && (
-                            <button type="button" className="octane-room-info__report" onClick={() => processAction('report_room')}>
+                            <button type="button" className="volt-room-info__report" onClick={() => processAction('report_room')}>
                                 <ReportSkin />
-                                <span className="octane-room-info__panic">
+                                <span className="volt-room-info__panic">
                                     <AtlasSprite x={32} y={56} width={23} height={22} />
                                 </span>
                                 <svg
                                     aria-hidden="true"
-                                    className="octane-room-info__report-divider"
+                                    className="volt-room-info__report-divider"
                                     width={3}
                                     height={20}
                                     viewBox="64 56 3 3"
@@ -384,17 +384,17 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                                 >
                                     <image href={nativeAtlas} width={256} height={256} />
                                 </svg>
-                                <span className="octane-room-info__report-caption">{localizeWithFallback('create.room.report', 'Report room')}</span>
+                                <span className="volt-room-info__report-caption">{localizeWithFallback('create.room.report', 'Report room')}</span>
                             </button>
                         )}
                         {showMute && (
-                            <button type="button" className="octane-room-info__action" onClick={() => processAction('toggle_mute')}>
+                            <button type="button" className="volt-room-info__action" onClick={() => processAction('toggle_mute')}>
                                 {LocalizeText(isRoomMuted ? 'navigator.muteall_on' : 'navigator.muteall_off')}
                             </button>
                         )}
                     </div>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

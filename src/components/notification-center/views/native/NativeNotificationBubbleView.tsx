@@ -18,9 +18,9 @@ export const NativeNotificationBubbleView: FC<NativeNotificationBubbleViewProps>
     const { markup: messageMarkup, text: plainMessage } = useMemo(() => getPlainNotificationText(message), [message]);
 
     return (
-        <div className="octane-native-bubble-slot">
+        <div className="volt-native-bubble-slot">
             <div
-                className="octane-native-bubble"
+                className="volt-native-bubble"
                 style={{ opacity: shown ? 1 : 0, transition: `opacity ${BUBBLE_FADE_IN_MS}ms linear` }}
                 onClick={() => {
                     onActivate?.();
@@ -28,10 +28,10 @@ export const NativeNotificationBubbleView: FC<NativeNotificationBubbleViewProps>
                 }}
                 {...hoverProps}
             >
-                <div aria-hidden="true" className="octane-native-bubble-chrome" />
-                <div className="octane-native-bubble-icon">{!!iconUrl && <img alt="" draggable={false} src={iconUrl} />}</div>
+                <div aria-hidden="true" className="volt-native-bubble-chrome" />
+                <div className="volt-native-bubble-icon">{!!iconUrl && <img alt="" draggable={false} src={iconUrl} />}</div>
                 {plainMessage !== null ? (
-                    <div className="octane-native-bubble-text uses-native-text">
+                    <div className="volt-native-bubble-text uses-native-text">
                         <NativeText
                             text={plainMessage}
                             textStyle="bold"
@@ -41,7 +41,7 @@ export const NativeNotificationBubbleView: FC<NativeNotificationBubbleViewProps>
                         />
                     </div>
                 ) : (
-                    <div className="octane-native-bubble-text" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
+                    <div className="volt-native-bubble-text" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
                 )}
             </div>
         </div>

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LayoutBadgeImageView } from './LayoutBadgeImageView';
 
 const rendererMocks = vi.hoisted(() => {
-    class OctaneSprite {
+    class VoltSprite {
         public destroyed = false;
 
         public constructor(public readonly texture: unknown) {}
@@ -14,12 +14,12 @@ const rendererMocks = vi.hoisted(() => {
     }
 
     return {
-        OctaneSprite,
+        VoltSprite,
         generateImage: vi.fn()
     };
 });
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     BadgeImageReadyEvent: class {
         public static IMAGE_READY = 'badge_image_ready';
     },
@@ -28,7 +28,7 @@ vi.mock('@octane/renderer', () => ({
         getBadgeImage: () => null,
         getGroupBadgeImage: () => ({ id: 'group-texture' })
     }),
-    OctaneSprite: rendererMocks.OctaneSprite,
+    VoltSprite: rendererMocks.VoltSprite,
     TextureUtils: { generateImage: rendererMocks.generateImage }
 }));
 
@@ -67,8 +67,8 @@ describe('group badge image', () => {
         const [options] = rendererMocks.generateImage.mock.calls[0];
 
         expect(options).toMatchObject({ resolution: 1 });
-        expect(options.target).toBeInstanceOf(rendererMocks.OctaneSprite);
-        const target = options.target as InstanceType<typeof rendererMocks.OctaneSprite>;
+        expect(options.target).toBeInstanceOf(rendererMocks.VoltSprite);
+        const target = options.target as InstanceType<typeof rendererMocks.VoltSprite>;
 
         expect(target.texture).toEqual({ id: 'group-texture' });
 

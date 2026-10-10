@@ -62,7 +62,7 @@ export const CardResizeHandle = ({
     return (
         <div
             aria-hidden="true"
-            className={`octane-card-resize-handle is-${resizeAxis}`}
+            className={`volt-card-resize-handle is-${resizeAxis}`}
             onLostPointerCapture={onResizeEnd}
             onPointerCancel={onResizeEnd}
             onPointerDown={onResizeStart}

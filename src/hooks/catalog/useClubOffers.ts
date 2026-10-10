@@ -1,4 +1,4 @@
-import { ClubOfferData, GetClubOffersMessageComposer, HabboClubOffersMessageEvent } from '@octane/renderer';
+import { ClubOfferData, GetClubOffersMessageComposer, HabboClubOffersMessageEvent } from '@volt/renderer';
 import { useEffect } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEventState } from '../events';

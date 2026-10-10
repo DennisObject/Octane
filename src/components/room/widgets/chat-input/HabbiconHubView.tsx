@@ -1,7 +1,7 @@
 import { FC, MouseEvent, useEffect, useRef, useState } from 'react';
 import { HabbiconEntry, localizeHabbiconName, localizeWithFallback, useHabbiconCatalog } from '../../../../api';
 import { HabbiconFavorite, HabbiconHeaderPattern, HabbiconsLogo } from '../../../../assets/images/habbicons';
-import { DraggableWindowPosition, LayoutCurrencyIcon, LayoutHabbiconImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { DraggableWindowPosition, LayoutCurrencyIcon, LayoutHabbiconImageView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { HabbiconProgressBarView } from './HabbiconProgressBarView';
 import { HabbiconPurchaseView } from './HabbiconPurchaseView';
 
@@ -92,14 +92,14 @@ export const HabbiconHubView: FC = () => {
                     <feColorMatrix type="matrix" values=".35 0 0 0 .35294 0 .35 0 0 .33333 0 0 .35 0 .31373 0 0 0 .65 0" />
                 </filter>
             </svg>
-            <OctaneCardView
+            <VoltCardView
                 classNames={['habbicon-hub-window']}
                 frameStyle={3}
                 isResizable={false}
                 uniqueKey="habbicon-hub"
                 windowPosition={DraggableWindowPosition.CENTER}
             >
-                <OctaneCardHeaderView
+                <VoltCardHeaderView
                     headerText={localizeWithFallback('habbicon_book.title', 'Habbicons Collection')}
                     onCloseClick={() => {
                         catalog.setBookVisible(false);
@@ -337,7 +337,7 @@ export const HabbiconHubView: FC = () => {
                         </div>
                     )}
                 </div>
-            </OctaneCardView>
+            </VoltCardView>
             {catalog.purchase && <HabbiconPurchaseView />}
         </>
     );

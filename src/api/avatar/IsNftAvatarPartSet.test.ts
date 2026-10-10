@@ -1,4 +1,4 @@
-import { IFigurePartSet } from '@octane/renderer';
+import { IFigurePartSet } from '@volt/renderer';
 import { describe, expect, it } from 'vitest';
 import { IsNftAvatarPartSet } from './IsNftAvatarPartSet';
 

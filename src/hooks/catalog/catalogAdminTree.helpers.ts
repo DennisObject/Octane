@@ -1,4 +1,4 @@
-import type { NodeData } from '@octane/renderer';
+import type { NodeData } from '@volt/renderer';
 import { CatalogNode } from '../../api/catalog/CatalogNode';
 import type { ICatalogNode } from '../../api/catalog/ICatalogNode';
 import { parseCatalogTabLabel } from '../../components/catalog/catalogTabLabel';

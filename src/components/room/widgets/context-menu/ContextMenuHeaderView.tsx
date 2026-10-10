@@ -6,7 +6,7 @@ export const ContextMenuHeaderView: FC<FlexProps> = (props) => {
 
     const getClassNames = useMemo(() => {
         const newClassNames: string[] = [
-            'octane-context-menu-header'
+            'volt-context-menu-header'
         ];
 
         if (classNames.length) newClassNames.push(...classNames);

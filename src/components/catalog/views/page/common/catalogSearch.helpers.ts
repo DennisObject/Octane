@@ -1,4 +1,4 @@
-import { IFurnitureData } from '@octane/renderer';
+import { IFurnitureData } from '@volt/renderer';
 import { CatalogType } from '../../../../../api';
 
 export const CATALOG_SEARCH_MIN_LENGTH = 3;

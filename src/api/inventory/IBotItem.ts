@@ -1,4 +1,4 @@
-import { BotData } from '@octane/renderer';
+import { BotData } from '@volt/renderer';
 
 export interface IBotItem {
     botData: BotData;

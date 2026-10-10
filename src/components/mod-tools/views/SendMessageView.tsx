@@ -1,4 +1,4 @@
-import { ModeratorInitData, ModMessageMessageComposer } from '@octane/renderer';
+import { ModeratorInitData, ModMessageMessageComposer } from '@volt/renderer';
 import { FC, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import { showModAlert } from '../../../hooks';

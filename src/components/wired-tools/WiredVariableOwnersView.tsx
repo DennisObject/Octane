@@ -1,4 +1,4 @@
-import { IWiredVariableHolder, WiredVariableHoldersPageComposer, WiredVariableHoldersPageEvent } from '@octane/renderer';
+import { IWiredVariableHolder, WiredVariableHoldersPageComposer, WiredVariableHoldersPageEvent } from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer } from '../../api';
 import { GetUserProfile } from '../../api/user/GetUserProfile';

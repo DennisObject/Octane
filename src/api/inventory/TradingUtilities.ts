@@ -1,4 +1,4 @@
-import { AdvancedMap, GetSessionDataManager, ItemDataStructure } from '@octane/renderer';
+import { AdvancedMap, GetSessionDataManager, ItemDataStructure } from '@volt/renderer';
 import { FurniCategory } from './FurniCategory';
 import { FurnitureItem } from './FurnitureItem';
 import { createGroupItem } from './FurnitureUtilities';

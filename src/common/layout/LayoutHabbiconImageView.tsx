@@ -1,4 +1,4 @@
-import { HabbiconAssetManager } from '@octane/renderer';
+import { HabbiconAssetManager } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { PIXEL_ART_RENDERING } from './PixelArtRendering';
 

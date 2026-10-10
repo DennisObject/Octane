@@ -1,7 +1,7 @@
-import { RemoveAllRightsMessageComposer, RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser, SaveRoomSettingsComposer } from '@octane/renderer';
+import { RemoveAllRightsMessageComposer, RoomBannedUsersComposer, RoomDataParser, RoomDeleteComposer, RoomSettingsDataEvent, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorParser, SaveRoomSettingsComposer } from '@volt/renderer';
 import { FC, useRef, useState } from 'react';
 import { CreateLinkEvent, GetClubMemberLevel, GetMaxVisitorsList, GetSelectedMaxVisitors, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardTabsItemView, OctaneCardTabsView, OctaneCardView } from '../../../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardTabsItemView, VoltCardTabsView, VoltCardView } from '../../../../common';
 import { useMessageEvent, useNavigatorData, useNotificationActions } from '../../../../hooks';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
@@ -360,8 +360,8 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
 
     return (
         <>
-            <OctaneCardView className="octane-room-settings" frameStyle={3} isResizable={false} uniqueKey="octane-room-settings">
-                <OctaneCardHeaderView
+            <VoltCardView className="volt-room-settings" frameStyle={3} isResizable={false} uniqueKey="volt-room-settings">
+                <VoltCardHeaderView
                     headerText={LocalizeText('navigator.roomsettings')}
                     isInfoToHabboPages={currentTab === TABS[3]}
                     onClickInfoHabboPages={() => {
@@ -369,21 +369,21 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                     }}
                     onCloseClick={onClose}
                 />
-                <OctaneCardTabsView classNames={['octane-room-settings-tabs']}>
+                <VoltCardTabsView classNames={['volt-room-settings-tabs']}>
                     {visibleTabs.map((tab) => {
                         return (
-                            <OctaneCardTabsItemView
+                            <VoltCardTabsItemView
                                 key={tab}
                                 isActive={currentTab === tab}
                                 style={{ width: tabWidth, minWidth: tabWidth, maxWidth: tabWidth }}
                                 onClick={(event) => setSelectedTab(tab)}
                             >
                                 {LocalizeText(tab)}
-                            </OctaneCardTabsItemView>
+                            </VoltCardTabsItemView>
                         );
                     })}
-                </OctaneCardTabsView>
-                <OctaneCardContentView className="octane-room-settings-content" gap={0}>
+                </VoltCardTabsView>
+                <VoltCardContentView className="volt-room-settings-content" gap={0}>
                     <div className="ros-viewport">
                         {currentTab === TABS[0] && (
                             <NavigatorRoomSettingsBasicTabView
@@ -418,8 +418,8 @@ export const NavigatorRoomSettingsView: FC<{}> = (props) => {
                         {currentTab === TABS[4] && <NavigatorRoomSettingsModTabView handleChange={handleChange} roomData={roomData} />}
                     </div>
                     <div ref={setOverlayNode} className="ros-overlay" />
-                </OctaneCardContentView>
-            </OctaneCardView>
+                </VoltCardContentView>
+            </VoltCardView>
             {confirmKind && (
                 <NavigatorRoomSettingsConfirmView
                     title={LocalizeText(confirmKind === 'delete' ? 'navigator.roomsettings' : 'navigator.flatctrls.removeconfirm.title')}

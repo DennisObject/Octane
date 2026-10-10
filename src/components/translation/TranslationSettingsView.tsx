@@ -1,6 +1,6 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useTranslation } from '../../hooks';
 
 export const TranslationSettingsView: FC<{}> = () => {
@@ -55,13 +55,13 @@ export const TranslationSettingsView: FC<{}> = () => {
     if (!isVisible) return null;
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="translation-settings-window min-w-0 w-[min(360px,calc(100vw-16px))] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)]"
             theme="primary-slim"
             uniqueKey="translation-settings"
         >
-            <OctaneCardHeaderView headerText="Google Translate" onCloseClick={() => setIsVisible(false)} />
-            <OctaneCardContentView className="flex flex-col gap-3 text-black">
+            <VoltCardHeaderView headerText="Google Translate" onCloseClick={() => setIsVisible(false)} />
+            <VoltCardContentView className="flex flex-col gap-3 text-black">
                 <div className="flex items-center gap-2">
                     <input
                         checked={settings.enabled}
@@ -155,7 +155,7 @@ export const TranslationSettingsView: FC<{}> = () => {
                 {lastError.length > 0 && (
                     <div className="rounded border border-red-300 bg-red-50 px-2 py-1 text-[11px] leading-4 text-red-700">{lastError}</div>
                 )}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

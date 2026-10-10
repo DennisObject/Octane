@@ -21,15 +21,15 @@ export const CatalogAdminEditorFooterView: FC<CatalogAdminEditorFooterViewProps>
     const canReset = isDirty && !isSaving;
 
     return (
-        <div className="octane-catalog-admin-editor-footer">
+        <div className="volt-catalog-admin-editor-footer">
             {status && <StaffStatus message={status.message} tone={status.tone} />}
-            <div className="octane-staff-row">
+            <div className="volt-staff-row">
                 {!isNew && (
                     <Button disabled={!canDelete} variant="danger" onClick={() => canDelete && onDelete()}>
                         {LocalizeText('catalog.admin.delete')}
                     </Button>
                 )}
-                <span className="octane-catalog-admin-spacer" />
+                <span className="volt-catalog-admin-spacer" />
                 <Button disabled={!canReset} variant="secondary" onClick={() => canReset && onReset()}>
                     {LocalizeText('catalog.admin.reset')}
                 </Button>

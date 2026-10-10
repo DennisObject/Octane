@@ -1,7 +1,7 @@
-import { FurnitureType, GetSessionDataManager, IFurnitureData, SelfDonationMessageComposer, SelfDonationResultMessageEvent } from '@octane/renderer';
+import { FurnitureType, GetSessionDataManager, IFurnitureData, SelfDonationMessageComposer, SelfDonationResultMessageEvent } from '@volt/renderer';
 import { useMemo, useState } from 'react';
 import { GetConfigurationValue, localizeWithFallback, NotificationAlertType, SendMessageComposer } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useMessageEvent, useNotification } from '../../hooks';
 
 /** The official tool's range; the server clamps to its own `hotel.selfdonation.max.amount`. */
@@ -81,7 +81,7 @@ export const WiredSelfDonationView = ({ onClose }: WiredSelfDonationViewProps) =
     };
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[420px] max-w-[420px] max-h-[560px]"
             theme="primary-slim"
             uniqueKey="wired-self-donation"
@@ -89,8 +89,8 @@ export const WiredSelfDonationView = ({ onClose }: WiredSelfDonationViewProps) =
             offsetLeft={560}
             offsetTop={80}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('selfdonation.title', 'Sandbox donation tool')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
+            <VoltCardHeaderView headerText={localizeWithFallback('selfdonation.title', 'Sandbox donation tool')} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
                 <label className="flex items-center gap-2 text-[12px]">
                     <Text bold>{localizeWithFallback('selfdonation.amount', 'Amount')}:</Text>
                     <input
@@ -171,7 +171,7 @@ export const WiredSelfDonationView = ({ onClose }: WiredSelfDonationViewProps) =
                         </Button>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

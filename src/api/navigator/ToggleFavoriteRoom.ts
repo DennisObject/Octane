@@ -1,4 +1,4 @@
-import { AddFavouriteRoomMessageComposer, DeleteFavouriteRoomMessageComposer } from '@octane/renderer';
+import { AddFavouriteRoomMessageComposer, DeleteFavouriteRoomMessageComposer } from '@volt/renderer';
 import { SendMessageComposer } from '..';
 
 export const ToggleFavoriteRoom = (roomId: number, isFavorite: boolean): void => {

@@ -1,4 +1,4 @@
-import { GroupInformationEvent, GroupSettingsEvent, HabboGroupDeactivatedMessageEvent } from '@octane/renderer';
+import { GroupInformationEvent, GroupSettingsEvent, HabboGroupDeactivatedMessageEvent } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { GroupBadgePart, IGroupData, LocalizeText } from '../../../api';
 import { useMessageEvent } from '../../../hooks';
@@ -98,11 +98,11 @@ export const GroupManagerView: FC<{}> = (props) => {
             description={LocalizeText(`group.edit.tabdesc.${currentTab}`)}
             headerImageStep={currentTab}
             tabs={
-                <div className="octane-group-native__tabs">
+                <div className="volt-group-native__tabs">
                     {TABS.map((tab, index) => (
                         <button
                             key={tab}
-                            className={`octane-group-native__tab${currentTab === tab ? ' is-selected' : ''}`}
+                            className={`volt-group-native__tab${currentTab === tab ? ' is-selected' : ''}`}
                             style={{ left: TAB_RECTS[index][0], width: TAB_RECTS[index][1], paddingLeft: TAB_RECTS[index][2] * 2 }}
                             type="button"
                             onClick={() => changeTab(tab)}

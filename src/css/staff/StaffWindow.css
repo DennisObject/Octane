@@ -1,6 +1,6 @@
 /* Staff tools (housekeeping, catalog admin, furni editor) on the frame-3 window,
    with AIR body text (Ubuntu 11px #333), sunk white panels and the Habbo skins. */
-.octane-staff-window {
+.volt-staff-window {
     --staff-text: #333333;
     --staff-muted: #7a7a7a;
     --staff-line: #9b9b9b;
@@ -23,23 +23,23 @@
     line-height: 14px;
 }
 
-.octane-staff-window .octane-staff-tabs {
+.volt-staff-window .volt-staff-tabs {
     flex: 0 0 35px;
     justify-content: flex-start !important;
     background: var(--staff-surface) !important;
 }
 
-.octane-staff-window .octane-staff-tabs .octane-card-tab-item {
+.volt-staff-window .volt-staff-tabs .volt-card-tab-item {
     flex: 0 0 auto;
     min-width: 0;
 }
 
-.octane-staff-window .octane-staff-tabs .octane-card-tab-item.is-disabled {
+.volt-staff-window .volt-staff-tabs .volt-card-tab-item.is-disabled {
     color: var(--staff-muted);
     cursor: default;
 }
 
-.octane-staff-window .octane-staff-body {
+.volt-staff-window .volt-staff-body {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -53,7 +53,7 @@
     font-size: 11px;
 }
 
-.octane-staff-window :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+.volt-staff-window :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
     box-sizing: border-box;
     min-height: 22px;
     padding: 2px 5px;
@@ -68,25 +68,25 @@
     outline: none;
 }
 
-.octane-staff-window :where(input:not([type='checkbox']):not([type='radio']), select, textarea):focus {
+.volt-staff-window :where(input:not([type='checkbox']):not([type='radio']), select, textarea):focus {
     border-color: var(--habbo-blue, #418db0);
 }
 
-.octane-staff-window :where(input, select, textarea):disabled {
+.volt-staff-window :where(input, select, textarea):disabled {
     background: #f4f4f4;
     color: var(--staff-muted);
 }
 
-.octane-staff-window :where(input::placeholder, textarea::placeholder) {
+.volt-staff-window :where(input::placeholder, textarea::placeholder) {
     color: var(--staff-muted);
     font-style: normal;
 }
 
-.octane-staff-window textarea {
+.volt-staff-window textarea {
     resize: vertical;
 }
 
-.octane-staff-window input[type='checkbox'] {
+.volt-staff-window input[type='checkbox'] {
     appearance: none;
     flex: 0 0 auto;
     width: 17px;
@@ -98,11 +98,11 @@
     cursor: pointer;
 }
 
-.octane-staff-window input[type='checkbox']:checked {
+.volt-staff-window input[type='checkbox']:checked {
     background-image: url('../../assets/images/habbo-skin/slices/checkbox-checked.png');
 }
 
-.octane-staff-window input[type='radio'] {
+.volt-staff-window input[type='radio'] {
     appearance: none;
     flex: 0 0 auto;
     width: 16px;
@@ -114,18 +114,18 @@
     cursor: pointer;
 }
 
-.octane-staff-window input[type='radio']:checked {
+.volt-staff-window input[type='radio']:checked {
     background-image: url('../../assets/images/habbo-skin/slices/radio-checked.png');
 }
 
-.octane-staff-section {
+.volt-staff-section {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
 }
 
-.octane-staff-section-title {
+.volt-staff-section-title {
     margin: 0;
     color: var(--staff-text);
     font-size: 11px;
@@ -133,7 +133,7 @@
     line-height: 14px;
 }
 
-.octane-staff-section-body {
+.volt-staff-section-body {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -144,41 +144,41 @@
     background: var(--staff-panel);
 }
 
-.octane-staff-field {
+.volt-staff-field {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
 }
 
-.octane-staff-field-label {
+.volt-staff-field-label {
     color: var(--staff-text);
     font-size: 11px;
     font-weight: 700;
 }
 
-.octane-staff-row {
+.volt-staff-row {
     display: flex;
     align-items: center;
     gap: 5px;
     min-width: 0;
 }
 
-.octane-staff-grid {
+.volt-staff-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 5px;
 }
 
-.octane-staff-muted {
+.volt-staff-muted {
     color: var(--staff-muted);
 }
 
-.octane-staff-error-text {
+.volt-staff-error-text {
     color: var(--staff-error);
 }
 
-.octane-staff-status {
+.volt-staff-status {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -191,19 +191,19 @@
     font-weight: 700;
 }
 
-.octane-staff-status.is-error {
+.volt-staff-status.is-error {
     color: var(--staff-error);
 }
 
-.octane-staff-status.is-success {
+.volt-staff-status.is-success {
     color: var(--staff-success);
 }
 
-.octane-staff-status.is-pending {
+.volt-staff-status.is-pending {
     color: var(--staff-muted);
 }
 
-.octane-staff-status-text {
+.volt-staff-status-text {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -211,7 +211,7 @@
     white-space: nowrap;
 }
 
-.octane-staff-status-dismiss {
+.volt-staff-status-dismiss {
     flex: 0 0 auto;
     width: 13px;
     height: 13px;
@@ -222,18 +222,18 @@
     opacity: 0.7;
 }
 
-.octane-staff-status-dismiss:hover {
+.volt-staff-status-dismiss:hover {
     opacity: 1;
 }
 
-.octane-staff-empty {
+.volt-staff-empty {
     padding: 12px 6px;
     color: var(--staff-muted);
     text-align: center;
 }
 
 /* AIR item lists: plain rows on white, alternating tint, blue selection. */
-.octane-staff-list {
+.volt-staff-list {
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -243,7 +243,7 @@
     background: var(--staff-panel);
 }
 
-.octane-staff-list-row {
+.volt-staff-list-row {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -256,50 +256,50 @@
     text-align: left;
 }
 
-.octane-staff-list-row:nth-child(even) {
+.volt-staff-list-row:nth-child(even) {
     background: var(--staff-row-alt);
 }
 
-button.octane-staff-list-row,
-.octane-staff-list-row.is-interactive {
+button.volt-staff-list-row,
+.volt-staff-list-row.is-interactive {
     cursor: pointer;
 }
 
-button.octane-staff-list-row:hover,
-.octane-staff-list-row.is-interactive:hover {
+button.volt-staff-list-row:hover,
+.volt-staff-list-row.is-interactive:hover {
     background: var(--staff-row-hover);
 }
 
-.octane-staff-list-row.is-selected {
+.volt-staff-list-row.is-selected {
     background: var(--staff-row-selected);
 }
 
-.octane-staff-list-row.is-failed {
+.volt-staff-list-row.is-failed {
     color: var(--staff-error);
 }
 
-.octane-staff-table {
+.volt-staff-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.octane-staff-table th {
+.volt-staff-table th {
     padding: 2px 6px;
     color: var(--staff-text);
     font-weight: 700;
     text-align: left;
 }
 
-.octane-staff-table td {
+.volt-staff-table td {
     padding: 2px 6px;
 }
 
-.octane-staff-table tbody tr:nth-child(odd) > * {
+.volt-staff-table tbody tr:nth-child(odd) > * {
     background: var(--staff-row-alt);
 }
 
 /* Small status flag (banned, muted, hidden...), text only like the AIR infostand. */
-.octane-staff-flag {
+.volt-staff-flag {
     display: inline-block;
     padding: 0 4px;
     border: 1px solid currentColor;
@@ -309,14 +309,14 @@ button.octane-staff-list-row:hover,
     line-height: 13px;
 }
 
-.octane-staff-flag.is-danger {
+.volt-staff-flag.is-danger {
     color: var(--staff-error);
 }
 
-.octane-staff-flag.is-ok {
+.volt-staff-flag.is-ok {
     color: var(--staff-success);
 }
 
-.octane-staff-flag.is-muted {
+.volt-staff-flag.is-muted {
     color: var(--staff-muted);
 }

@@ -114,9 +114,9 @@ export const WiredNumberInput: FC<WiredNumberInputProps> = ({ value, min, max, p
     };
 
     return (
-        <div className={`octane-wired__input-box ${error ? 'is-invalid' : ''}`} style={{ width: width + 8 }} title={error ?? undefined}>
+        <div className={`volt-wired__input-box ${error ? 'is-invalid' : ''}`} style={{ width: width + 8 }} title={error ?? undefined}>
             <input
-                className="octane-wired__input-field"
+                className="volt-wired__input-field"
                 disabled={disabled}
                 spellCheck={false}
                 style={{ width }}

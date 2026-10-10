@@ -1,4 +1,4 @@
-import { ClubOfferData, CreateLinkEvent, PurchaseFromCatalogComposer } from '@octane/renderer';
+import { ClubOfferData, CreateLinkEvent, PurchaseFromCatalogComposer } from '@volt/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { CatalogPurchaseState, DispatchUiEvent, GetConfigurationValue, LocalizeText, OpenUrl, SanitizeHtml, SendMessageComposer } from '../../../../../api';
 import hcCatalogTeaser from '../../../../../assets/images/catalog/air/hc/hc-catalog-teaser.gif';
@@ -254,7 +254,7 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
     const renderPrice = (offer: ClubOfferData) => {
         if (!isVipPage) {
             return (
-                <span className="octane-club-offer-prices is-compact-text">
+                <span className="volt-club-offer-prices is-compact-text">
                     {offer.priceCredits > 0 && LocalizeText('catalog.club.price', ['price'], [offer.priceCredits.toString()])}
                     {offer.priceCredits > 0 && offer.priceActivityPoints > 0 && ' + '}
                     {offer.priceActivityPoints > 0 && `${offer.priceActivityPoints} ${getActivityPointName(offer.priceActivityPointsType)}`}
@@ -263,15 +263,15 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
         }
 
         return (
-            <span className="octane-club-offer-prices">
+            <span className="volt-club-offer-prices">
                 {(offer.priceCredits > 0 || offer.priceActivityPoints <= 0) && (
-                    <span className="octane-club-offer-price" data-currency-type="-1">
+                    <span className="volt-club-offer-price" data-currency-type="-1">
                         <CatalogClubPriceFieldView value={offer.priceCredits} />
                         <LayoutCurrencyIcon type={-1} />
                     </span>
                 )}
                 {offer.priceActivityPoints > 0 && (
-                    <span className="octane-club-offer-price" data-currency-type={offer.priceActivityPointsType}>
+                    <span className="volt-club-offer-price" data-currency-type={offer.priceActivityPointsType}>
                         <CatalogClubPriceFieldView value={`${offer.priceCredits > 0 ? '+ ' : ''}${offer.priceActivityPoints}`} />
                         <LayoutCurrencyIcon type={offer.priceActivityPointsType} />
                     </span>
@@ -286,27 +286,27 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
         return (
             <article
                 key={offer.offerId}
-                className={`octane-club-offer ${isVipPage ? 'is-wide' : 'is-compact'} ${offer.vip ? 'is-vip' : 'is-hc'}`}
+                className={`volt-club-offer ${isVipPage ? 'is-wide' : 'is-compact'} ${offer.vip ? 'is-vip' : 'is-hc'}`}
                 data-offer-id={offer.offerId}
             >
-                <header className="octane-club-offer-header">
+                <header className="volt-club-offer-header">
                     {isVipPage ? (
-                        <img alt="" aria-hidden="true" className="octane-club-vip-medium-mark" draggable={false} src={vipIconMedium} />
+                        <img alt="" aria-hidden="true" className="volt-club-vip-medium-mark" draggable={false} src={vipIconMedium} />
                     ) : (
-                        <span aria-hidden="true" className={`octane-club-compact-mark ${offer.vip ? 'is-vip' : 'is-hc'}`} />
+                        <span aria-hidden="true" className={`volt-club-compact-mark ${offer.vip ? 'is-vip' : 'is-hc'}`} />
                     )}
                     <strong>{getOfferText(offer)}</strong>
                 </header>
-                <div className="octane-club-offer-footer">
+                <div className="volt-club-offer-footer">
                     {renderPrice(offer)}
-                    <div className="octane-club-offer-actions">
+                    <div className="volt-club-offer-actions">
                         {isVipPage && offer.giftable && (
-                            <button className="octane-club-offer-action" disabled={isPurchasingRef.current} type="button" onClick={() => startGift(offer)}>
+                            <button className="volt-club-offer-action" disabled={isPurchasingRef.current} type="button" onClick={() => startGift(offer)}>
                                 {LocalizeText('catalog.purchase_confirmation.gift')}
                             </button>
                         )}
                         <button
-                            className="octane-club-offer-action is-buy"
+                            className="volt-club-offer-action is-buy"
                             disabled={isPurchasingRef.current}
                             type="button"
                             onClick={() => startPurchase(offer)}
@@ -339,13 +339,13 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
         membership.tier === 'vip' ? LocalizeText('catalog.vip.extend.info', ['days'], [membership.totalDays.toString()]) : LocalizeText('catalog.vip.buy.info');
 
     return (
-        <div className={`octane-club-purchase-layout ${isVipPage ? 'is-vip-page' : 'is-club-page'}`}>
+        <div className={`volt-club-purchase-layout ${isVipPage ? 'is-vip-page' : 'is-club-page'}`}>
             {isVipPage ? (
                 <>
-                    <div className="octane-club-vip-intro">
+                    <div className="volt-club-vip-intro">
                         <img
                             alt=""
-                            className="octane-club-teaser"
+                            className="volt-club-teaser"
                             draggable={false}
                             src={hcCatalogTeaser}
                             onError={(event) =>
@@ -359,14 +359,14 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
                                 image.src = `${GetConfigurationValue<string>('image.library.url', '')}catalogue/hc_catalog_teaser.gif`;
                             }}
                         />
-                        <div className="octane-club-vip-copy">
+                        <div className="volt-club-vip-copy">
                             <strong>{LocalizeText(vipTitleKey)}</strong>
                             <span dangerouslySetInnerHTML={{ __html: SanitizeHtml(vipInfo) }} />
                         </div>
                     </div>
-                    <div className="octane-club-vip-offers">{offerGroups.vip.map(renderOffer)}</div>
+                    <div className="volt-club-vip-offers">{offerGroups.vip.map(renderOffer)}</div>
                     <div
-                        className="octane-club-center-link"
+                        className="volt-club-center-link"
                         dangerouslySetInnerHTML={{ __html: SanitizeHtml(getHcCenterLinkHtml(LocalizeText('catalog.vip.buy.hccenter'))) }}
                         role="link"
                         tabIndex={0}
@@ -384,29 +384,29 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = ({ page = null })
                 </>
             ) : (
                 <>
-                    <header className="octane-club-membership-header">
+                    <header className="volt-club-membership-header">
                         <strong>{LocalizeText(membershipHeaderKey)}</strong>
                     </header>
-                    <p className="octane-club-membership-info">{LocalizeText(membershipInfoKey)}</p>
-                    <div className="octane-club-emblem" aria-hidden="true">
-                        <span className="octane-club-vip-emblem" />
+                    <p className="volt-club-membership-info">{LocalizeText(membershipInfoKey)}</p>
+                    <div className="volt-club-emblem" aria-hidden="true">
+                        <span className="volt-club-vip-emblem" />
                     </div>
-                    <div className="octane-club-columns">
-                        <section className="octane-club-hc-column">
+                    <div className="volt-club-columns">
+                        <section className="volt-club-hc-column">
                             {offerGroups.hc.map(renderOffer)}
                             {membership.tier === 'vip' && (
-                                <div className="octane-club-info-card">
+                                <div className="volt-club-info-card">
                                     <strong>{LocalizeText('catalog.club.info.header')}</strong>
                                     <span>{LocalizeText('catalog.club.info.content')}</span>
                                 </div>
                             )}
                         </section>
-                        <section className="octane-club-vip-column">{offerGroups.vip.map(renderOffer)}</section>
+                        <section className="volt-club-vip-column">{offerGroups.vip.map(renderOffer)}</section>
                     </div>
                     {membership.active && (
-                        <div className="octane-club-remaining">{LocalizeText(remainingKey, ['days'], [membership.totalDays.toString()])}</div>
+                        <div className="volt-club-remaining">{LocalizeText(remainingKey, ['days'], [membership.totalDays.toString()])}</div>
                     )}
-                    <button className="octane-club-center-link" type="button" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
+                    <button className="volt-club-center-link" type="button" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
                         {LocalizeText('catalog.club.buy.link')}
                     </button>
                 </>

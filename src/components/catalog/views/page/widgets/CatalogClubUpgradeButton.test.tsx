@@ -1,4 +1,4 @@
-import { CreateLinkEvent } from '@octane/renderer';
+import { CreateLinkEvent } from '@volt/renderer';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CatalogClubUpgradeButton } from './CatalogClubUpgradeButton';

@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GroupSaveInformationComposer } from '@octane/renderer';
+import { CreateLinkEvent, GroupSaveInformationComposer } from '@volt/renderer';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { GetGroupMembers, IGroupData, LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
@@ -82,12 +82,12 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
     if (!groupData) return null;
 
     return (
-        <div className="octane-group-native__step-body" style={{ top: STEP_Y }}>
+        <div className="volt-group-native__step-body" style={{ top: STEP_Y }}>
             {!isCreator && (
                 <>
                     <GroupBox height={94} kind="white" width={94} x={17} y={11}>
                         <GroupBox height={86} kind="tan" width={86} x={4} y={4} />
-                        <div className="octane-group-native__badge" style={{ left: 27, top: 27 }}>
+                        <div className="volt-group-native__badge" style={{ left: 27, top: 27 }}>
                             <LayoutBadgeImageView badgeCode={groupData.groupBadgeParts.map((part) => part.previewCode || '').join('')} isGroup={true} />
                         </div>
                     </GroupBox>
@@ -114,8 +114,8 @@ export const GroupTabIdentityView: FC<GroupTabIdentityViewProps> = (props) => {
                 <>
                     <GroupText overrides={flatText(13, { bold: true })} text={LocalizeText('group.edit.base')} width={101} x={126} y={166} />
                     <HabboDropMenuView
-                        className="octane-group-native__dropmenu"
-                        popupClassName="octane-group-native__dropmenu-popup"
+                        className="volt-group-native__dropmenu"
+                        popupClassName="volt-group-native__dropmenu-popup"
                         label={LocalizeText('group.edit.base')}
                         options={[{ value: -1, label: LocalizeText('group.edit.base.select.room') }, ...(availableRooms ?? []).map((room) => ({ value: room.id, label: room.name }))]}
                         style={{ left: 126, top: 188, width: 247, height: 26 }}

@@ -17,9 +17,14 @@ export const captureLaunchCredentials = (): LaunchCredentials =>
     if (captured) return captured;
 
     // The production loader (configuration/bootstrap.js) has already taken them out of the URL.
-    if (window.__octaneLaunchCredentials)
+    // Hotels keep their configuration folder across client updates, so a loader from before the
+    // Volt rename still hands them over under its Octane name.
+    const handedOver = window.__voltLaunchCredentials ?? window.__octaneLaunchCredentials;
+
+    if (handedOver)
     {
-        captured = { ...window.__octaneLaunchCredentials };
+        captured = { ...handedOver };
+        delete window.__voltLaunchCredentials;
         delete window.__octaneLaunchCredentials;
 
         return captured;

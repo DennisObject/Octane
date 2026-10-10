@@ -11,7 +11,7 @@ import {
     RoomSessionChatEvent,
     RoomUserData,
     SystemChatStyleEnum
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ChatBubbleMessage,
@@ -28,7 +28,7 @@ import {
 } from '../../../api';
 import { captureNativeChatCreation } from '../../../components/room/widgets/chat/nativeChatScroller';
 import { useChatHistory } from './../../chat-history';
-import { useMessageEvent, useOctaneEvent } from '../../events';
+import { useMessageEvent, useVoltEvent } from '../../events';
 import { useUserDataSnapshot } from '../../session/useSessionSnapshots';
 import { useTranslation } from '../../translation';
 import { useChatPreferences } from '../../useChatPreferences';
@@ -286,7 +286,7 @@ const useChatWidgetState = () => {
         );
         if (userType === RoomObjectType.USER) chatMessage.imageScale = 2;
         captureNativeChatCreation(chatMessage, chatSettings.mode);
-        // The renderer adds bubbleWidthOverride to the chat event in Octane-Renderer#212; until that
+        // The renderer adds bubbleWidthOverride to the chat event in Volt-Renderer#212; until that
         // lands the published event has no such field, so it is read as optional.
         // Native bubbles resolve their width at creation; later preference changes affect new bubbles only.
         chatMessage.bubbleWidthOverride = resolveChatBubbleWidth(
@@ -393,7 +393,7 @@ const useChatWidgetState = () => {
         });
     };
 
-    useOctaneEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, (event) => {
+    useVoltEvent<RoomSessionChatEvent>(RoomSessionChatEvent.CHAT_EVENT, (event) => {
         const roomToken = roomTokenRef.current;
         const seq = reserveChatLine(lineQueueRef.current);
 
@@ -407,7 +407,7 @@ const useChatWidgetState = () => {
         }
     });
 
-    useOctaneEvent<RoomDragEvent>(RoomDragEvent.ROOM_DRAG, (event) => {
+    useVoltEvent<RoomDragEvent>(RoomDragEvent.ROOM_DRAG, (event) => {
         if (!chatMessages.length || event.roomId !== roomSession.roomId) return;
 
         const offsetX = event.offsetX;

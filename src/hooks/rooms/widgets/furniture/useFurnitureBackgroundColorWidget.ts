@@ -1,7 +1,7 @@
-import { ApplyTonerComposer, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { ApplyTonerComposer, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@volt/renderer';
 import { useEffect, useState } from 'react';
 import { CanManipulateFurniture, DispatchUiEvent, RoomWidgetUpdateBackgroundColorPreviewEvent, SendMessageComposer } from '../../../../api';
-import { useOctaneEvent } from '../../../events';
+import { useVoltEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 import { useRoom } from '../../useRoom';
 
@@ -27,7 +27,7 @@ const useFurnitureBackgroundColorWidgetState = () => {
         setLightness(0);
     };
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_BACKGROUND_COLOR, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_BACKGROUND_COLOR, (event) => {
         if (!CanManipulateFurniture(roomSession, event.objectId, event.category)) return;
 
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);

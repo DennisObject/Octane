@@ -107,5 +107,5 @@ export const WiredBannerCanvas: FC = () => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} className="octane-wired__banner-canvas" aria-hidden="true" />;
+    return <canvas ref={canvasRef} className="volt-wired__banner-canvas" aria-hidden="true" />;
 };

@@ -42,7 +42,7 @@ export const WiredActionJoinTeamView: FC<{}> = (props) => {
         }
     }, [trigger]);
 
-    // class_4212: "Pick team" in two columns, then "Choose type:". The join mode section is an Octane addition
+    // class_4212: "Pick team" in two columns, then "Choose type:". The join mode section is an Volt addition
     // (smallest/random team) that the official dialog does not have; it stays last so the native part keeps its layout.
     return (
         <WiredActionBaseView

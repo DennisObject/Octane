@@ -53,42 +53,42 @@ export const NativeSimpleAlertView: FC<NativeSimpleAlertViewProps> = (props) => 
             <section
                 aria-label={caption}
                 aria-modal="true"
-                className={`octane-alert octane-card-shell octane-card-frame-3 octane-native-alert is-simple${hasImage ? ' has-image' : ''}`}
+                className={`volt-alert volt-card-shell volt-card-frame-3 volt-native-alert is-simple${hasImage ? ' has-image' : ''}`}
                 role="alertdialog"
                 style={{ width: hasImage ? imageWidth + 320 : 310 }}
             >
-                <div className="octane-card-header-shell">
-                    <span className="octane-card-title">{caption}</span>
+                <div className="volt-card-header-shell">
+                    <span className="volt-card-title">{caption}</span>
                 </div>
-                <div className="octane-native-alert-list">
-                    <div className="octane-native-alert-row">
+                <div className="volt-native-alert-list">
+                    <div className="volt-native-alert-row">
                         {hasImage && (
                             <img
                                 alt=""
-                                className="octane-native-alert-illustration"
+                                className="volt-native-alert-illustration"
                                 src={imageUrl}
                                 onError={() => setImageFailed(true)}
                                 onLoad={(event) => setImageWidth(event.currentTarget.naturalWidth)}
                             />
                         )}
-                        <div className="octane-native-alert-top">
-                            {!!subtitle && <div className="octane-native-alert-subtitle">{subtitle}</div>}
+                        <div className="volt-native-alert-top">
+                            {!!subtitle && <div className="volt-native-alert-subtitle">{subtitle}</div>}
                             {plainMessage !== null ? (
-                                <div className="octane-native-alert-message uses-native-text">
+                                <div className="volt-native-alert-message uses-native-text">
                                     <NativeText text={plainMessage} textStyle="il_regular" background={0xe9e9e1} maxWidth={291} />
                                 </div>
                             ) : (
-                                <div className="octane-native-alert-message" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
+                                <div className="volt-native-alert-message" dangerouslySetInnerHTML={{ __html: messageMarkup }} />
                             )}
                         </div>
                     </div>
-                    <div className="octane-native-alert-bottom">
-                        <div aria-hidden="true" className="octane-native-alert-separator" />
-                        <button ref={closeRef} className="octane-native-button is-thick" type="button" onClick={onClose}>
+                    <div className="volt-native-alert-bottom">
+                        <div aria-hidden="true" className="volt-native-alert-separator" />
+                        <button ref={closeRef} className="volt-native-button is-thick" type="button" onClick={onClose}>
                             {localizeWithFallback('alert.close.button', 'Close')}
                         </button>
                         {hasLink && (
-                            <button className="octane-native-link" type="button" onClick={openLink}>
+                            <button className="volt-native-link" type="button" onClick={openLink}>
                                 {linkTitle}
                             </button>
                         )}

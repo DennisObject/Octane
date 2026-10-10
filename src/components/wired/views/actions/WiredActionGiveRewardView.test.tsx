@@ -22,7 +22,7 @@ vi.mock('../../../../common', () => ({
 }));
 
 vi.mock('../../../../layout', () => ({
-    OctaneInput: (props: InputHTMLAttributes<HTMLInputElement>) => <input {...props} />
+    VoltInput: (props: InputHTMLAttributes<HTMLInputElement>) => <input {...props} />
 }));
 
 vi.mock('../WiredSourcesSelector', () => ({

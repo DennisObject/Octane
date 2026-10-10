@@ -14,7 +14,7 @@
     font-size: 12px;
     font-weight: 400;
     line-height: 17px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .us-window--audio {
@@ -48,7 +48,7 @@
     border-image-width: 8px;
     border-image-repeat: stretch;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .us-window > :not(.us-chrome) {
@@ -113,7 +113,7 @@
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .us-button:hover {
@@ -158,7 +158,7 @@
     background: url('../../assets/images/user-settings/native/checkbox-default.png') 0 0 no-repeat;
     box-shadow: none;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .us-window input.us-check:checked {
@@ -253,7 +253,7 @@
     background-repeat: no-repeat;
     box-shadow: none;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-settings-volume-row__speaker--off {
@@ -292,7 +292,7 @@
     height: 20px;
     background: url('../../assets/images/user-settings/air/slider-base.png') no-repeat 0 0;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-settings-volume-row input[type='range'] {
@@ -337,7 +337,7 @@
     border-radius: 0;
     background: url('../../assets/images/user-settings/air/slider-button.png') no-repeat 0 0;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-settings-volume-row input[type='range']::-moz-range-track {
@@ -354,7 +354,7 @@
     border-radius: 0;
     background: url('../../assets/images/user-settings/air/slider-button.png') no-repeat 0 0;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* word filter: both boxes are `border` style 3 (border_slot, white). Input (3,4) 146x17 in a 152x24 box, add button 66x24, 222x100 list of 18px rows, remove 210x30 */
@@ -366,7 +366,7 @@
     border-image-slice: 3 fill;
     border-image-width: 3px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .us-filter-input {

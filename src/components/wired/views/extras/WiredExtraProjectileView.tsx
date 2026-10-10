@@ -117,13 +117,13 @@ const ProjectileSection: FC<PropsWithChildren<{ title: string; open: boolean; fi
 
     return (
         <>
-            {!first && <div className="octane-wired__divider" />}
-            <div className="octane-wired__projectile-section">
-                <button aria-expanded={open} className="octane-wired__projectile-section-header" type="button" onClick={onToggle}>
+            {!first && <div className="volt-wired__divider" />}
+            <div className="volt-wired__projectile-section">
+                <button aria-expanded={open} className="volt-wired__projectile-section-header" type="button" onClick={onToggle}>
                     <Text bold>{title}</Text>
-                    {open ? <FaChevronUp className="octane-wired__projectile-chevron" /> : <FaChevronDown className="octane-wired__projectile-chevron" />}
+                    {open ? <FaChevronUp className="volt-wired__projectile-chevron" /> : <FaChevronDown className="volt-wired__projectile-chevron" />}
                 </button>
-                {open && <div className="octane-wired__projectile-section-body">{children}</div>}
+                {open && <div className="volt-wired__projectile-section-body">{children}</div>}
             </div>
         </>
     );
@@ -144,7 +144,7 @@ const NumberField: FC<{ disabled?: boolean; label: string; value: number; onChan
     <label className={`flex items-center justify-between gap-2 ${disabled ? 'opacity-50' : ''}`}>
         <Text small>{label}</Text>
         <input
-            className="form-control form-control-sm octane-wired__projectile-number"
+            className="form-control form-control-sm volt-wired__projectile-number"
             disabled={disabled}
             type="number"
             value={value}
@@ -215,7 +215,7 @@ const ValueOrVariable: FC<ValueOrVariableProps> = (props) => {
                 <Text small>{label}</Text>
                 <input
                     aria-label={label}
-                    className="form-control form-control-sm octane-wired__projectile-number ms-auto"
+                    className="form-control form-control-sm volt-wired__projectile-number ms-auto"
                     disabled={fromVariable}
                     type="number"
                     value={value}
@@ -227,7 +227,7 @@ const ValueOrVariable: FC<ValueOrVariableProps> = (props) => {
                 <Text small>{LocalizeText('wiredfurni.params.variables.reference_value.from_variable')}</Text>
             </label>
             {fromVariable && (
-                <div className="flex flex-col gap-1 octane-wired__projectile-indent">
+                <div className="flex flex-col gap-1 volt-wired__projectile-indent">
                     <select
                         aria-label={`${label} variable type`}
                         className="form-select form-select-sm"
@@ -302,7 +302,7 @@ export const WiredExtraProjectileView: FC<{}> = () => {
             showSelection={false}
             validate={() => !(scalesTime && timeFromVariable && !timeToken) && !(distanceMode !== PROJECTILE_DISTANCE_NORMAL && distanceFromVariable && !distanceToken)}
         >
-            <div className="octane-wired__projectile">
+            <div className="volt-wired__projectile">
                 <ProjectileSection first open={openSections.info} title={text('info', 'Usage info:')} onToggle={() => toggleSection('info')}>
                     <Text small>
                         {text(
@@ -340,7 +340,7 @@ export const WiredExtraProjectileView: FC<{}> = () => {
                         label={text('shooter', "Visually change the shooter's direction")}
                         onChange={(checked) => setFlag(PROJECTILE_PARAM_CHANGE_SHOOTER_DIRECTION, checked)}
                     />
-                    <div className="flex flex-col gap-1 octane-wired__projectile-indent">
+                    <div className="flex flex-col gap-1 volt-wired__projectile-indent">
                         <Checkbox
                             checked={params[PROJECTILE_PARAM_BUNNY_HOP] === 1}
                             disabled={!changesShooter}
@@ -374,7 +374,7 @@ export const WiredExtraProjectileView: FC<{}> = () => {
                         ))}
                     </div>
                     {distanceMode !== PROJECTILE_DISTANCE_NORMAL && (
-                        <div className="octane-wired__projectile-indent">
+                        <div className="volt-wired__projectile-indent">
                             <ValueOrVariable
                                 fromVariable={distanceFromVariable}
                                 furniSource={params[PROJECTILE_PARAM_DISTANCE_FURNI_SOURCE]}
@@ -437,7 +437,7 @@ export const WiredExtraProjectileView: FC<{}> = () => {
                                 onValue={(value) => setParam(PROJECTILE_PARAM_TIME_PER_TILE, value)}
                             />
                             <Text small>{text('time.distance_by', 'Measure the distance by:')}</Text>
-                            <div className="flex items-center gap-3 octane-wired__projectile-indent">
+                            <div className="flex items-center gap-3 volt-wired__projectile-indent">
                                 {DISTANCE_AXES.map((axis) => (
                                     <Checkbox
                                         key={axis.key}

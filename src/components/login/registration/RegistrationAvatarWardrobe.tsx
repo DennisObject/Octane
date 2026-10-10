@@ -1,4 +1,4 @@
-import { AvatarDirectionAngle, GetAvatarRenderManager, IPartColor } from '@octane/renderer';
+import { AvatarDirectionAngle, GetAvatarRenderManager, IPartColor } from '@volt/renderer';
 import { FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import { AvatarEditorThumbnailsHelper, FigureSelection, Gender, loginText } from '../../../api';
 import faceTabIcon from '../../../assets/images/wardrobe/hd.png';

@@ -41,7 +41,7 @@ export const WiredTriggerAvatarSaysSomethingView: FC<WiredTriggerAvatarSaysSomet
         <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
             {usernameOnly && (
                 <WiredSection>
-                    <span className="octane-wired__text octane-wired__text--soft octane-wired__text--wrap">
+                    <span className="volt-wired__text volt-wired__text--soft volt-wired__text--wrap">
                         {localizeWithFallback('wiredfurni.params.username_as_trigger.info', 'Fires when a user says their own username.')}
                     </span>
                 </WiredSection>

@@ -1,4 +1,4 @@
-import { ModeratorInitData } from '@octane/renderer';
+import { ModeratorInitData } from '@volt/renderer';
 import { FC, useMemo } from 'react';
 import userInfoFrameXml from '../../../assets/mod-tools/xml/user_info_frame.xml?raw';
 import { nativeNumber, parseNativeLayout } from '../native/NativeLayout';

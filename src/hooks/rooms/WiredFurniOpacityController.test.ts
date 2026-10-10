@@ -1,4 +1,4 @@
-import { RoomObjectCategory, RoomObjectVariable } from '@octane/renderer';
+import { RoomObjectCategory, RoomObjectVariable } from '@volt/renderer';
 import { describe, expect, it } from 'vitest';
 import {
     clampWiredOpacity,

@@ -23,11 +23,11 @@ export const ChestButton: FC<ChestButtonProps> = ({
     ...rest
 }) => {
     const classes = [
-        'octane-chest__btn',
-        wide ? 'octane-chest__btn--wide' : '',
-        icon ? 'octane-chest__btn--icon' : '',
-        fixed ? 'octane-chest__btn--fixed' : '',
-        footer ? 'octane-chest__btn--footer' : '',
+        'volt-chest__btn',
+        wide ? 'volt-chest__btn--wide' : '',
+        icon ? 'volt-chest__btn--icon' : '',
+        fixed ? 'volt-chest__btn--fixed' : '',
+        footer ? 'volt-chest__btn--footer' : '',
         className,
     ]
         .filter(Boolean)

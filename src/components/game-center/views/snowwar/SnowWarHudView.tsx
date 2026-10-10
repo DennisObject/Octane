@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { LocalizeText, PlaySound, SoundNames } from '../../../../api';
 import { ISnowWarEngine, SnowWarEngineState } from '../../../../api/snowwar';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useUserDataSnapshot } from '../../../../hooks';
 import { SnowWarAvatarImage } from './SnowWarAvatarImage';
 import { SNOWWAR_EXPLOSION_OFFSETS, SnowWarAnimation, SnowWarBitmap, SnowWarBox, snowWarBitmapSize, snowWarBitmapUrl } from './SnowWarBitmap';
@@ -117,14 +117,14 @@ const SnowWarCountdownView: FC<{ startedAt: number; desktop: { width: number; he
 
 /** `snowwar_exit_confirmation` frame (270x163) at the layout's own (0, 0). */
 const SnowWarExitConfirmationView: FC<{ onYes: () => void; onNo: () => void }> = ({ onYes, onNo }) => (
-    <OctaneCardView className="snowwar-window snowwar-game-window snowwar-exit-confirmation" frameStyle={3} initialPosition={{ x: 0, y: 0 }} isResizable={false} uniqueKey="snowwar-exit-confirmation" style={{ width: 270, height: 163 }}>
-        <OctaneCardHeaderView headerText={LocalizeText('snowwar.exit.title')} onCloseClick={onNo} />
+    <VoltCardView className="snowwar-window snowwar-game-window snowwar-exit-confirmation" frameStyle={3} initialPosition={{ x: 0, y: 0 }} isResizable={false} uniqueKey="snowwar-exit-confirmation" style={{ width: 270, height: 163 }}>
+        <VoltCardHeaderView headerText={LocalizeText('snowwar.exit.title')} onCloseClick={onNo} />
         <div className="snowwar-frame-content" style={{ width: 264, height: 124 }}>
             <SnowWarText align="center" bold size={13} text={LocalizeText('snowwar.exit.confirmation')} wrap x={12} y={12} width={238} height={18} />
             <button className="snowwar-shiny-button" data-air-name="no" style={{ left: 8, top: 80, width: 110, height: 35 }} type="button" onClick={onNo}>{LocalizeText('snowwar.exit.no')}</button>
             <button className="snowwar-shiny-button" data-air-name="yes" style={{ left: 144, top: 80, width: 110, height: 35 }} type="button" onClick={onYes}>{LocalizeText('snowwar.exit.yes')}</button>
         </div>
-    </OctaneCardView>
+    </VoltCardView>
 );
 
 interface SnowWarHudViewProps

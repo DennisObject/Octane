@@ -7,8 +7,8 @@ const { generateImage, getImage } = vi.hoisted(() => ({
     getImage: vi.fn().mockResolvedValue({ height: 10, src: 'data:x', width: 10 } as HTMLImageElement)
 }));
 
-vi.mock('@octane/renderer', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@octane/renderer')>();
+vi.mock('@volt/renderer', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@volt/renderer')>();
 
     return {
         ...actual,

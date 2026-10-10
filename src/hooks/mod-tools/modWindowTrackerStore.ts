@@ -1,4 +1,4 @@
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 
 export type ModWindowType = 'issueHandler' | 'issueBrowser' | 'roomTool' | 'userInfo' | 'sendMessage' | 'modAction' | 'roomVisits' | 'userChatlog' | 'roomChatlog' | 'cfhChatlog' | 'userClassification';
 
@@ -73,7 +73,7 @@ const clampToDesktop = (rect: ModWindowRect): ModWindowRect => ({
 
 // Classic v75 WindowTracker (qn): one window per type and key. Showing an open window again closes it when `toggle` is set and otherwise replaces it in place;
 // a new window goes right of (or below) its parent frame, centred on the desktop without a parent, and is kept inside the desktop.
-export const useModWindowTrackerStore = createOctaneStore<ModWindowTrackerState>()((set, get) => ({
+export const useModWindowTrackerStore = createVoltStore<ModWindowTrackerState>()((set, get) => ({
     startPanel: { x: 120, y: 64, width: 170, height: 170 },
     setStartPanel: (rect) => set({ startPanel: rect }),
     windows: [],

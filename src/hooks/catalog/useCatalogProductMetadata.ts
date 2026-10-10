@@ -2,7 +2,7 @@ import {
     CatalogProductMetadataComposer,
     CatalogProductMetadataEntry,
     CatalogProductMetadataEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../events';

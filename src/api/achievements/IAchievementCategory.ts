@@ -1,4 +1,4 @@
-import { AchievementData } from '@octane/renderer';
+import { AchievementData } from '@volt/renderer';
 
 export interface IAchievementCategory {
     code: string;

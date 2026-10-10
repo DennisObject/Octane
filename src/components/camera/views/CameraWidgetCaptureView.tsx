@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, OctaneLogger, OctaneTexture, RequestCameraConfigurationComposer } from '@octane/renderer';
+import { CreateLinkEvent, GetRenderer, GetRoomSessionManager, VoltLogger, VoltTexture, RequestCameraConfigurationComposer } from '@volt/renderer';
 import { FC, useEffect, useRef } from 'react';
 import {
     blitRoomCanvasToViewfinder,
@@ -77,12 +77,12 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         const markStreamReady = () => {
             streamIsReady = true;
-            video.classList.add('octane-camera-viewfinder__stream--ready');
+            video.classList.add('volt-camera-viewfinder__stream--ready');
         };
 
         const markStreamUnavailable = () => {
             streamIsReady = false;
-            video.classList.remove('octane-camera-viewfinder__stream--ready');
+            video.classList.remove('volt-camera-viewfinder__stream--ready');
         };
 
         try {
@@ -146,7 +146,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
             video.removeEventListener('error', markStreamUnavailable);
             video.pause();
             video.srcObject = null;
-            video.classList.remove('octane-camera-viewfinder__stream--ready');
+            video.classList.remove('volt-camera-viewfinder__stream--ready');
             stream?.getTracks().forEach((track) => track.stop());
         };
     }, [selectedPicture]);
@@ -195,7 +195,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         const targetSlot = activePictureSlotIndex >= 0 && activePictureSlotIndex < CAMERA_ROLL_LIMIT ? activePictureSlotIndex : 0;
         const captureSession = GetRoomSessionManager().getSession(-1);
-        let texture: OctaneTexture = null;
+        let texture: VoltTexture = null;
         let capturedDraftId: string = null;
 
         const setSlot = (picture: CameraPicture | null) => {
@@ -214,10 +214,10 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
         try {
             PlaySound(SoundNames.CAMERA_SHUTTER);
-            flashRef.current?.classList.remove('octane-camera-capture__flash--active');
+            flashRef.current?.classList.remove('volt-camera-capture__flash--active');
             // Restart the CSS flash even when two photographs are taken quickly.
             void flashRef.current?.offsetWidth;
-            flashRef.current?.classList.add('octane-camera-capture__flash--active');
+            flashRef.current?.classList.add('volt-camera-capture__flash--active');
 
             const viewport = getTrustedCameraViewport(frame);
             const previousPicture = cameraRollRef.current[targetSlot];
@@ -241,7 +241,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                 return;
             }
 
-            texture = OctaneTexture.from(image);
+            texture = VoltTexture.from(image);
 
             const picture = new CameraPicture(texture, capture.url, capture.draftId, image.src);
 
@@ -250,7 +250,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
             fillSlot(picture);
         } catch (error) {
-            OctaneLogger.error('Failed to capture camera photo', error);
+            VoltLogger.error('Failed to capture camera photo', error);
             if (capturedDraftId) deleteTrustedCamera(capturedDraftId);
             texture?.destroy?.(true);
 
@@ -267,9 +267,9 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
 
     return (
         <DraggableWindow>
-            <Column center className="octane-camera-capture" gap={0}>
-                <div className="octane-camera-capture__body drag-handler">
-                    <div className="octane-camera-capture__title">
+            <Column center className="volt-camera-capture" gap={0}>
+                <div className="volt-camera-capture__body drag-handler">
+                    <div className="volt-camera-capture__title">
                         <CameraCenteredText
                             background={0x000000}
                             color={0xffffff}
@@ -278,24 +278,24 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                             width={340}
                         />
                     </div>
-                    <button type="button" className="octane-camera-capture__help" aria-label={LocalizeText('generic.help')} onClick={() => CreateLinkEvent('habbopages/camera')} />
-                    <button type="button" className="octane-camera-capture__close" aria-label={LocalizeText('generic.close')} onClick={onClose} />
-                    <div className="octane-camera-viewfinder">
+                    <button type="button" className="volt-camera-capture__help" aria-label={LocalizeText('generic.help')} onClick={() => CreateLinkEvent('habbopages/camera')} />
+                    <button type="button" className="volt-camera-capture__close" aria-label={LocalizeText('generic.close')} onClick={onClose} />
+                    <div className="volt-camera-viewfinder">
                         {!selectedPicture && (
                             <>
-                                <canvas ref={elementRef} className="octane-camera-viewfinder__fallback" width={320} height={320} />
-                                <video ref={videoRef} className="octane-camera-viewfinder__stream" aria-hidden="true" muted playsInline />
+                                <canvas ref={elementRef} className="volt-camera-viewfinder__fallback" width={320} height={320} />
+                                <video ref={videoRef} className="volt-camera-viewfinder__stream" aria-hidden="true" muted playsInline />
                             </>
                         )}
-                        {selectedPicture && <img alt="" className="octane-camera-viewfinder__photo" src={selectedPicture.displayUrl} />}
+                        {selectedPicture && <img alt="" className="volt-camera-viewfinder__photo" src={selectedPicture.displayUrl} />}
                     </div>
-                    {!selectedPicture && <div className="octane-camera-capture__crosshair" aria-hidden="true" />}
-                    <div ref={flashRef} className="octane-camera-capture__flash" aria-hidden="true" />
+                    {!selectedPicture && <div className="volt-camera-capture__crosshair" aria-hidden="true" />}
+                    <div ref={flashRef} className="volt-camera-capture__flash" aria-hidden="true" />
                     {selectedPicture && (
-                        <div className="octane-camera-capture__preview-actions">
+                        <div className="volt-camera-capture__preview-actions">
                             {/* A photo opened before the server's capture arrives can't be edited or bought yet. */}
                             <button
-                                className="habbo-btn-primary octane-camera-capture__editor-button"
+                                className="habbo-btn-primary volt-camera-capture__editor-button"
                                 disabled={!selectedPicture.draftId}
                                 title={LocalizeText('camera.editor.button.tooltip')}
                                 type="button"
@@ -314,22 +314,22 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                     )}
                     <button
                         type="button"
-                        className="octane-camera-capture__shutter"
+                        className="volt-camera-capture__shutter"
                         aria-label={LocalizeText('camera.take.photo.button.tooltip')}
                         title={LocalizeText('camera.take.photo.button.tooltip')}
                         onClick={takePicture}
                     />
                 </div>
-                <div className={`octane-camera-roll${hasPictures ? '' : ' octane-camera-roll--hidden'}`} aria-hidden={!hasPictures}>
+                <div className={`volt-camera-roll${hasPictures ? '' : ' volt-camera-roll--hidden'}`} aria-hidden={!hasPictures}>
                     {Array.from({ length: CAMERA_ROLL_LIMIT }, (_, index) => {
                         const picture = cameraRoll[index];
                         const isActive = index === activeSlotIndex;
 
                         return (
-                            <div key={index} className={`octane-camera-roll__slot${isActive ? ' octane-camera-roll__slot--active' : ''}`}>
+                            <div key={index} className={`volt-camera-roll__slot${isActive ? ' volt-camera-roll__slot--active' : ''}`}>
                                 <button
                                     type="button"
-                                    className="octane-camera-roll__slot-button"
+                                    className="volt-camera-roll__slot-button"
                                     aria-label={picture ? LocalizeText('camera.editor.button.tooltip') : LocalizeText('camera.take.photo.button.tooltip')}
                                     onClick={() => {
                                         setActivePictureSlotIndex(index);
@@ -341,7 +341,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (props)
                                 {picture && selectedPictureIndex === index && (
                                     <button
                                         type="button"
-                                        className="octane-camera-roll__delete"
+                                        className="volt-camera-roll__delete"
                                         aria-label={LocalizeText('camera.delete.button.text')}
                                         title={LocalizeText('camera.delete.button.text')}
                                         onClick={onDelete}

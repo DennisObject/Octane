@@ -1,4 +1,4 @@
-import type { CatalogRefData, FurniDetailData, FurniItemData } from '@octane/renderer';
+import type { CatalogRefData, FurniDetailData, FurniItemData } from '@volt/renderer';
 import type { FurniEditorMutationKind } from './furniEditorTraffic';
 
 // Client-side shapes of the furni editor packets (10040-10049). The parser

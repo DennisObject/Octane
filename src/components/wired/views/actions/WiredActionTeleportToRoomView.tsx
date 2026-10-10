@@ -1,4 +1,4 @@
-import { RoomObjectVariable } from '@octane/renderer';
+import { RoomObjectVariable } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     isTeleportToRoomPickable,

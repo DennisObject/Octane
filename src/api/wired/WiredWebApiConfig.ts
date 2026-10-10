@@ -1,4 +1,4 @@
-import { GetConfigurationValue } from '../octane';
+import { GetConfigurationValue } from '../volt';
 import { normalizeWebApiBaseUrl, resolveWebApiDocsUrl, resolveWebApiHotels, WebApiHotel, webApiBaseFromSocketUrl } from './WiredWebApi';
 
 /** `wired.webapi.url`, else the websocket's host and port. */

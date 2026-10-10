@@ -1,7 +1,7 @@
 import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { GroupItem, LocalizeText } from '../../../../api';
-import { OctaneButton, OctaneInput } from '../../../../layout';
+import { VoltButton, VoltInput } from '../../../../layout';
 
 export const InventoryFurnitureSearchView: FC<{
     groupItems: GroupItem[];
@@ -30,10 +30,10 @@ export const InventoryFurnitureSearchView: FC<{
 
     return (
         <div className="flex gap-1">
-            <OctaneInput placeholder={LocalizeText('generic.search')} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} />
-            <OctaneButton>
+            <VoltInput placeholder={LocalizeText('generic.search')} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} />
+            <VoltButton>
                 <FaSearch className="fa-icon" />
-            </OctaneButton>
+            </VoltButton>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { AvatarFigureContainer, GetAvatarRenderManager, IFigurePartSet } from '@octane/renderer';
+import { AvatarFigureContainer, GetAvatarRenderManager, IFigurePartSet } from '@volt/renderer';
 
 const getFirstSelectableColorForSetType = (setType: string): number => {
     const structure = GetAvatarRenderManager()?.structureData;

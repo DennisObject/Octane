@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 
 /**
  * Accepts a URL (http/https, protocol-relative, or site-relative),

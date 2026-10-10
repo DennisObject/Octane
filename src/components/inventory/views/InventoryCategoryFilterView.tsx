@@ -82,10 +82,10 @@ export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> =
     const typeOptions = isFurniture ? FURNI_TYPE_OPTIONS[(mainFilter as FurniMainFilter) || FURNI_MAIN_FILTER.ALL] || FURNI_TYPE_OPTIONS.all : [];
 
     return (
-        <div className={`octane-inventory-filter-bar ${isBadges ? 'is-badges' : ''}`}>
-            <div className="octane-inventory-filter-search">
+        <div className={`volt-inventory-filter-bar ${isBadges ? 'is-badges' : ''}`}>
+            <div className="volt-inventory-filter-search">
                 <input
-                    className="octane-inventory-filter-input"
+                    className="volt-inventory-filter-input"
                     aria-label={localizeOr('catalog.search', 'Search inventory')}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter') onSearchApply?.(searchValue);
@@ -100,7 +100,7 @@ export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> =
                 {searchValue.length > 0 && (
                     <button
                         type="button"
-                        className="octane-inventory-filter-clear"
+                        className="volt-inventory-filter-clear"
                         aria-label={localizeOr('generic.clear', 'Clear search')}
                         onClick={() => {
                             onSearchChange?.('');

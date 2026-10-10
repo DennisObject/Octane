@@ -1,11 +1,11 @@
-import { GetMarketplaceItemStatsComposer, GetSessionDataManager, MakeOfferMessageComposer, MarketplaceItemStatsEvent } from '@octane/renderer';
+import { GetMarketplaceItemStatsComposer, GetSessionDataManager, MakeOfferMessageComposer, MarketplaceItemStatsEvent } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } from '../../../../../../api';
-import { LayoutFurniImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../../../common';
+import { LayoutFurniImageView, VoltCardHeaderView, VoltCardView } from '../../../../../../common';
 import { NativeText } from '../../../../../../common/native-text/NativeText';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../../../events';
 import { useMarketplaceConfiguration, useMessageEvent, useNotification, useUiEvent } from '../../../../../../hooks';
-import { OctaneButton } from '../../../../../../layout';
+import { VoltButton } from '../../../../../../layout';
 
 const DEFAULT_BULK_OFFER_LIMIT = 500;
 
@@ -122,16 +122,16 @@ export const MarketplacePostOfferView: FC<{}> = () =>
         : `${LocalizeText('sell.in.marketplace.revenue.label')}: ${revenue}`;
 
     return (
-        <OctaneCardView
-            className="octane-market-offer"
+        <VoltCardView
+            className="volt-market-offer"
             frameStyle={3}
             isResizable={false}
             initialPosition={{ x: Math.round((window.innerWidth - 300) / 2), y: Math.round((window.innerHeight - 429) / 2) }}
             uniqueKey="marketplace-offer"
         >
-            <OctaneCardHeaderView headerText={LocalizeText('inventory.marketplace.make_offer.title')} onCloseClick={close} />
-            <div className="octane-market-offer-body">
-                <div className="octane-market-offer-image">
+            <VoltCardHeaderView headerText={LocalizeText('inventory.marketplace.make_offer.title')} onCloseClick={close} />
+            <div className="volt-market-offer-body">
+                <div className="volt-market-offer-image">
                     <LayoutFurniImageView
                         direction={90}
                         style={{ backgroundColor: '#eeeeee' }}
@@ -140,10 +140,10 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                         productType={item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR}
                     />
                 </div>
-                <div className="octane-market-offer-name">
+                <div className="volt-market-offer-name">
                     <NativeText text={furniTitle} textStyle="u_headline_medium" background={0xe9e9e1} maxWidth={190} />
                 </div>
-                <div className="octane-market-offer-expiration">
+                <div className="volt-market-offer-expiration">
                     <NativeText
                         text={LocalizeText(
                             'inventory.marketplace.make_offer.expiration_info_days',
@@ -155,10 +155,10 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                         maxWidth={268}
                     />
                 </div>
-                <div className="octane-market-offer-label is-price">
+                <div className="volt-market-offer-label is-price">
                     <NativeText text={LocalizeText('inventory.marketplace.make_offer.price_request')} textStyle="u_headline_small" background={0xe9e9e1} />
                 </div>
-                <div className="octane-market-offer-field is-price">
+                <div className="volt-market-offer-field is-price">
                     <input
                         inputMode="numeric"
                         value={priceText}
@@ -169,23 +169,23 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                         }}
                     />
                 </div>
-                <div className="octane-market-offer-label is-amount">
+                <div className="volt-market-offer-label is-amount">
                     <NativeText
                         text={LocalizeText('sellinmarketplace.amount', ['max_amount'], [maxAmount.toString()])}
                         textStyle="u_headline_small"
                         background={0xe9e9e1}
                     />
                 </div>
-                <div className="octane-market-offer-field is-amount">
+                <div className="volt-market-offer-field is-amount">
                     <input
                         inputMode="numeric"
                         value={amountText}
                         onChange={(event) => setAmountText(String(Math.max(1, Math.min(parseInt(event.target.value.replace(/\D/g, ''), 10) || 1, maxAmount))))}
                     />
                 </div>
-                <div className="octane-market-offer-list">
+                <div className="volt-market-offer-list">
                     {itemStats?.averagePrice > 0 && (
-                        <div className="octane-market-offer-stat">
+                        <div className="volt-market-offer-stat">
                             <NativeText
                                 text={LocalizeText(
                                     'inventory.marketplace.make_offer.average_price',
@@ -202,7 +202,7 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                         </div>
                     )}
                     {itemStats?.lowestCurrentPrice > 0 && (
-                        <div className="octane-market-offer-stat">
+                        <div className="volt-market-offer-stat">
                             <NativeText
                                 text={LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestCurrentPrice.toString()])}
                                 textStyle="u_regular"
@@ -212,15 +212,15 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                     )}
                     {suggestedPrice > 0 && (
                         <>
-                            <div className="octane-market-offer-stat">
+                            <div className="volt-market-offer-stat">
                                 <NativeText
                                     text={LocalizeText('inventory.marketplace.make_offer.suggested_price', ['price'], [suggestedPrice.toString()])}
                                     textStyle="u_regular"
                                     background={0xe9e9e1}
                                 />
                             </div>
-                            <OctaneButton
-                                className="octane-market-offer-copy"
+                            <VoltButton
+                                className="volt-market-offer-copy"
                                 onClick={() =>
                                 {
                                     setPriceText(String(Math.min(suggestedPrice, maximumPrice)));
@@ -232,28 +232,28 @@ export const MarketplacePostOfferView: FC<{}> = () =>
                                     textStyle="button_shiny_regular"
                                     background={0xffffff}
                                 />
-                            </OctaneButton>
+                            </VoltButton>
                         </>
                     )}
-                    <div className="octane-market-offer-final">
-                        <div className="octane-market-offer-final-text">
+                    <div className="volt-market-offer-final">
+                        <div className="volt-market-offer-final-text">
                             <NativeText text={infoText} textStyle="u_regular" background={0xffffff} maxWidth={257} align="center" />
                         </div>
                     </div>
-                    <div className="octane-market-offer-buttons">
-                        <OctaneButton className="octane-market-offer-post" disabled={!isPriceValid || !isAmountValid} onClick={postItem}>
+                    <div className="volt-market-offer-buttons">
+                        <VoltButton className="volt-market-offer-post" disabled={!isPriceValid || !isAmountValid} onClick={postItem}>
                             <NativeText
                                 text={LocalizeText('inventory.marketplace.make_offer.post')}
                                 textStyle="button_shiny_regular"
                                 background={isPriceValid && isAmountValid ? 0xffffff : 0xc3c3c1}
                             />
-                        </OctaneButton>
-                        <OctaneButton className="octane-market-offer-cancel" onClick={close}>
+                        </VoltButton>
+                        <VoltButton className="volt-market-offer-cancel" onClick={close}>
                             <NativeText text={LocalizeText('inventory.marketplace.make_offer.cancel')} textStyle="button_shiny_regular" background={0xffffff} />
-                        </OctaneButton>
+                        </VoltButton>
                     </div>
                 </div>
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

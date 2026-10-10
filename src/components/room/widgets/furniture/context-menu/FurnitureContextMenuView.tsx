@@ -1,4 +1,4 @@
-import { ContextMenuEnum, CustomUserNotificationMessageEvent, GetSessionDataManager, RoomObjectCategory } from '@octane/renderer';
+import { ContextMenuEnum, CustomUserNotificationMessageEvent, GetSessionDataManager, RoomObjectCategory } from '@volt/renderer';
 import { CSSProperties, FC } from 'react';
 import { GetGroupInformation, LocalizeText } from '../../../../../api';
 import {
@@ -126,7 +126,7 @@ export const FurnitureContextMenuView: FC<{}> = (props) => {
                 <ContextMenuView
                     category={RoomObjectCategory.FLOOR}
                     anchorOffsets={{ user: -4, other: -4 }}
-                    classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--own', 'octane-avatar-action-menu--furni', ...(isGuildMenu ? ['octane-avatar-action-menu--furni-guild'] : [])]}
+                    classNames={['volt-avatar-action-menu', 'volt-avatar-action-menu--own', 'volt-avatar-action-menu--furni', ...(isGuildMenu ? ['volt-avatar-action-menu--furni-guild'] : [])]}
                     collapsable={true}
                     fadeDelay={3000}
                     fadeLength={500}

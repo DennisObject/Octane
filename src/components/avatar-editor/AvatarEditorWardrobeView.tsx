@@ -1,4 +1,4 @@
-import { GetAvatarRenderManager, HabboClubLevelEnum, IAvatarFigureContainer, SaveWardrobeOutfitMessageComposer } from '@octane/renderer';
+import { GetAvatarRenderManager, HabboClubLevelEnum, IAvatarFigureContainer, SaveWardrobeOutfitMessageComposer } from '@volt/renderer';
 import { FC, useCallback, useMemo } from 'react';
 import { GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../api';
 import hcIconSrc from '../../assets/images/avatareditor/air/wardrobe-hc.png';
@@ -72,14 +72,14 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
     );
 
     return (
-        <aside className="octane-avatar-editor-wardrobe" aria-label={LocalizeText('avatareditor.wardrobe.title')}>
-            <div className="octane-avatar-editor-wardrobe-header">
-                <NativeText className="octane-avatar-editor-wardrobe-title" text={LocalizeText('avatareditor.wardrobe.title')} textStyle="u_bold" background={0xe9e9e1} overrides={{ color: 0x83827e }} />
-                <img src={hcIconSrc} alt="" draggable={false} className="octane-avatar-editor-wardrobe-hc" />
+        <aside className="volt-avatar-editor-wardrobe" aria-label={LocalizeText('avatareditor.wardrobe.title')}>
+            <div className="volt-avatar-editor-wardrobe-header">
+                <NativeText className="volt-avatar-editor-wardrobe-title" text={LocalizeText('avatareditor.wardrobe.title')} textStyle="u_bold" background={0xe9e9e1} overrides={{ color: 0x83827e }} />
+                <img src={hcIconSrc} alt="" draggable={false} className="volt-avatar-editor-wardrobe-hc" />
             </div>
-            <div className="octane-avatar-editor-wardrobe-slots">
+            <div className="volt-avatar-editor-wardrobe-slots">
                 {columns.map((column, columnIndex) => (
-                    <div className="octane-avatar-editor-wardrobe-column" key={`wardrobe-col-${columnIndex}`}>
+                    <div className="volt-avatar-editor-wardrobe-column" key={`wardrobe-col-${columnIndex}`}>
                         {column.map((item, rowIndex) => {
                             const index = columnIndex * SLOTS_PER_COL + rowIndex;
                             const [figureContainer, slotGender] = item;
@@ -87,12 +87,12 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                             const figureString = figureContainer?.getFigureString() ?? '';
 
                             return (
-                                <div className="octane-avatar-editor-wardrobe-slot" key={`wardrobe-slot-${index}`}>
-                                    <div className="octane-avatar-editor-wardrobe-slot-shade" />
+                                <div className="volt-avatar-editor-wardrobe-slot" key={`wardrobe-slot-${index}`}>
+                                    <div className="volt-avatar-editor-wardrobe-slot-shade" />
                                     {enabled && (
                                         <button
                                             type="button"
-                                            className="octane-avatar-editor-wardrobe-slot-set"
+                                            className="volt-avatar-editor-wardrobe-slot-set"
                                             aria-label={LocalizeText('avatareditor.wardrobe.save')}
                                             onClick={() => saveFigureAtWardrobeIndex(index)}
                                         />
@@ -100,14 +100,14 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                                     {enabled && (
                                         <button
                                             type="button"
-                                            className="octane-avatar-editor-wardrobe-slot-get"
+                                            className="volt-avatar-editor-wardrobe-slot-get"
                                             aria-label={LocalizeText('widget.generic_usable.button.use')}
                                             onClick={() => wearFigureAtIndex(index)}
                                         />
                                     )}
                                     <button
                                         type="button"
-                                        className="octane-avatar-editor-wardrobe-slot-figure"
+                                        className="volt-avatar-editor-wardrobe-slot-figure"
                                         disabled={!enabled || !figureContainer}
                                         aria-label={LocalizeText('widget.generic_usable.button.use')}
                                         onClick={() => wearFigureAtIndex(index)}
@@ -115,7 +115,7 @@ export const AvatarEditorWardrobeView: FC<{}> = () => {
                                         {enabled && figureContainer ? (
                                             <LayoutAvatarImageView direction={4} figure={figureString} gender={slotGender} fit />
                                         ) : !enabled ? (
-                                            <img src={emptySlotSrc} alt="" draggable={false} className="octane-avatar-editor-wardrobe-empty" />
+                                            <img src={emptySlotSrc} alt="" draggable={false} className="volt-avatar-editor-wardrobe-empty" />
                                         ) : null}
                                     </button>
                                 </div>

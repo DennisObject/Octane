@@ -1,4 +1,4 @@
-import { GetRoomEngine, IGetImageListener, IImageResult, ImageResult, Vector3d } from '@octane/renderer';
+import { GetRoomEngine, IGetImageListener, IImageResult, ImageResult, Vector3d } from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProductTypeEnum } from '../../api';
 import { Base, BaseProps } from '../Base';

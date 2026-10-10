@@ -7,10 +7,10 @@ import {
     PetFigureData,
     RoomObjectCategory,
     RoomObjectVariable
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FurniCategory, GetFurnitureDataForRoomObject, LocalizeText, UseProductItem } from '../../../../api';
-import { Button, Column, Flex, LayoutPetImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../common';
+import { Button, Column, Flex, LayoutPetImageView, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../../../common';
 import { useRoom } from '../../../../hooks';
 
 interface AvatarInfoUseProductConfirmViewProps {
@@ -255,9 +255,9 @@ export const AvatarInfoUseProductConfirmView: FC<AvatarInfoUseProductConfirmView
     if (!petData) return null;
 
     return (
-        <OctaneCardView className="octane-use-product-confirmation">
-            <OctaneCardHeaderView headerText={LocalizeText('useproduct.widget.title', ['name'], [petData.name])} onCloseClick={onClose} />
-            <OctaneCardContentView center>
+        <VoltCardView className="volt-use-product-confirmation">
+            <VoltCardHeaderView headerText={LocalizeText('useproduct.widget.title', ['name'], [petData.name])} onCloseClick={onClose} />
+            <VoltCardContentView center>
                 <Flex gap={2} overflow="hidden">
                     <div className="flex flex-col">
                         <div className="product-preview cursor-pointer" onClick={selectRoomObject}>
@@ -319,7 +319,7 @@ export const AvatarInfoUseProductConfirmView: FC<AvatarInfoUseProductConfirmView
                         </div>
                     </Column>
                 </Flex>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

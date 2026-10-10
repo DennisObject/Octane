@@ -1,7 +1,7 @@
-import { IWiredArrayInspectionData, WiredArrayInspectionDataEvent, WiredArrayInspectionRequestComposer, WiredArrayInspectionUpdateComposer } from '@octane/renderer';
+import { IWiredArrayInspectionData, WiredArrayInspectionDataEvent, WiredArrayInspectionRequestComposer, WiredArrayInspectionUpdateComposer } from '@volt/renderer';
 import { useEffect, useMemo, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer, wiredArrayFieldsOf } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useMessageEvent } from '../../hooks';
 import { useWiredPageRequests } from '../../hooks/wired-tools/useWiredPageRequests';
 import { WiredPagedTable, WiredTableCell, WiredTableColumn } from './WiredPagedTable';
@@ -151,7 +151,7 @@ export const WiredArrayInspectorView = (props: WiredArrayInspectorViewProps) => 
         : '';
 
     return (
-        <OctaneCardView
+        <VoltCardView
             className="min-w-[620px] max-w-[620px] max-h-[620px]"
             theme="primary-slim"
             uniqueKey="wired-array-inspector"
@@ -159,8 +159,8 @@ export const WiredArrayInspectorView = (props: WiredArrayInspectorViewProps) => 
             offsetLeft={540}
             offsetTop={60}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.arrays.title', 'Array contents')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
+            <VoltCardHeaderView headerText={localizeWithFallback('wiredmenu.arrays.title', 'Array contents')} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
                 <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
                     <div className="grow flex flex-col">
                         <Text>
@@ -210,8 +210,8 @@ export const WiredArrayInspectorView = (props: WiredArrayInspectorViewProps) => 
                     scrollResetKey={scrollKey}
                     bodyClassName="h-[320px]"
                 />
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };
 

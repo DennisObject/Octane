@@ -1,7 +1,7 @@
-import { NavigatorSearchEvent, NavigatorSearchResultSet } from '@octane/renderer';
+import { NavigatorSearchEvent, NavigatorSearchResultSet } from '@volt/renderer';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockEventDispatcher } from '../../octane-renderer.mock';
+import { mockEventDispatcher } from '../../volt-renderer.mock';
 import { useNavigatorUiStore } from './navigatorUiStore';
 import { useNavigatorSearch } from './useNavigatorSearch';
 

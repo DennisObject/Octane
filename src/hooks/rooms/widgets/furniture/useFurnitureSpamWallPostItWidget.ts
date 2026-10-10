@@ -1,4 +1,4 @@
-import { AddSpamWallPostItMessageComposer, GetRoomEngine, RequestSpamWallPostItMessageEvent, RoomObjectCategory } from '@octane/renderer';
+import { AddSpamWallPostItMessageComposer, GetRoomEngine, RequestSpamWallPostItMessageEvent, RoomObjectCategory } from '@volt/renderer';
 import { useState } from 'react';
 import { SendMessageComposer } from '../../../../api';
 import { useMessageEvent } from '../../../events';

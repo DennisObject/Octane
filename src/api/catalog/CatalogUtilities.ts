@@ -1,5 +1,5 @@
-import { GetRoomEngine, SellablePetPaletteData } from '@octane/renderer';
-import { GetConfigurationValue } from '../octane';
+import { GetRoomEngine, SellablePetPaletteData } from '@volt/renderer';
+import { GetConfigurationValue } from '../volt';
 import { ICatalogNode } from './ICatalogNode';
 import { IProduct } from './IProduct';
 import { IPurchasableOffer } from './IPurchasableOffer';

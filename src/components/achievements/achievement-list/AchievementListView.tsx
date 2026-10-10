@@ -1,4 +1,4 @@
-import { AchievementData } from '@octane/renderer';
+import { AchievementData } from '@volt/renderer';
 import { CSSProperties, FC, useState } from 'react';
 import { ClassicScrollAreaView } from '../../../common';
 import { useAchievementListScrollStore } from '../achievementListScrollStore';

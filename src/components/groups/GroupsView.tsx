@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, HabboGroupJoinFailedMessageEvent, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, GroupPurchasedEvent, GroupSettingsComposer, HabboGroupJoinFailedMessageEvent, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetGroupInformation, LocalizeText, SendMessageComposer, TryVisitRoom } from '../../api';
 import { useGroup, useGroupMemberRemovalSink, useMessageEvent } from '../../hooks';

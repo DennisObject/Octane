@@ -4,7 +4,7 @@ import {
     MarketplaceCancelOfferResultEvent,
     MarketplaceOwnOffersEvent,
     RedeemMarketplaceOfferCreditsMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocalizeText, MarketPlaceOfferState, MarketplaceOfferData, NotificationAlertType, SendMessageComposer } from '../../../../../../api';
 import { Button, Column, Text } from '../../../../../../common';
@@ -129,7 +129,7 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = (pro
                 <Text shrink truncate fontWeight="bold">
                     {LocalizeText('catalog.marketplace.items_found', ['count'], [offers.length.toString()])}
                 </Text>
-                <Column className="octane-catalog-layout-marketplace-grid" overflow="auto">
+                <Column className="volt-catalog-layout-marketplace-grid" overflow="auto">
                     {offers.length > 0 &&
                         offers.map((offer) => (
                             <CatalogLayoutMarketplaceItemView key={offer.offerId} offerData={offer} type={OWN_OFFER} onClick={takeItemBack} />

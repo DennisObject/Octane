@@ -286,7 +286,7 @@ export const WiredVariablePicker: FC<WiredVariablePickerProps> = (props) => {
             <button
                 key={entry.id}
                 type="button"
-                className={`octane-wired__variable-picker-row ${entry.selectable ? '' : 'is-disabled'} ${selectedToken === entry.token ? 'is-selected' : ''}`}
+                className={`volt-wired__variable-picker-row ${entry.selectable ? '' : 'is-disabled'} ${selectedToken === entry.token ? 'is-selected' : ''}`}
                 onMouseEnter={(event) => activateParent(entry, event.currentTarget)}
                 onClick={(event) => {
                     if (hasChildren) {
@@ -297,8 +297,8 @@ export const WiredVariablePicker: FC<WiredVariablePickerProps> = (props) => {
                     if (entry.selectable) handleSelect(entry);
                 }}
             >
-                <span className="octane-wired__variable-picker-row-label">{entry.label}</span>
-                {hasChildren && <FaChevronRight className="octane-wired__variable-picker-row-arrow" />}
+                <span className="volt-wired__variable-picker-row-label">{entry.label}</span>
+                {hasChildren && <FaChevronRight className="volt-wired__variable-picker-row-arrow" />}
             </button>
         );
     };
@@ -309,15 +309,15 @@ export const WiredVariablePicker: FC<WiredVariablePickerProps> = (props) => {
         return (
             <div
                 ref={panelRef}
-                className="octane-wired__variable-picker-panel is-portal"
+                className="volt-wired__variable-picker-panel is-portal"
                 style={{ left: panelPosition.left, top: panelPosition.top, width: panelPosition.width }}
             >
-                <div className="octane-wired__variable-picker-toolbar">
+                <div className="volt-wired__variable-picker-toolbar">
                     {PICKER_MODES.map((button) => (
                         <button
                             key={button.key}
                             type="button"
-                            className={`octane-wired__variable-picker-mode ${mode === button.key ? 'is-active' : ''}`}
+                            className={`volt-wired__variable-picker-mode ${mode === button.key ? 'is-active' : ''}`}
                             onClick={() => {
                                 setMode(button.key);
                                 if (button.key === 'search') setTimeout(() => searchInputRef.current?.focus(), 0);
@@ -328,28 +328,28 @@ export const WiredVariablePicker: FC<WiredVariablePickerProps> = (props) => {
                     ))}
                 </div>
 
-                <div className="octane-wired__variable-picker-search">
-                    <img className="octane-wired__variable-picker-search-icon" src={searchIcon} alt="search" />
+                <div className="volt-wired__variable-picker-search">
+                    <img className="volt-wired__variable-picker-search-icon" src={searchIcon} alt="search" />
                     <input
                         ref={searchInputRef}
-                        className="octane-wired__variable-picker-search-input"
+                        className="volt-wired__variable-picker-search-input"
                         placeholder={placeholder}
                         type="text"
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
                     />
                     {!!query.length && (
-                        <button type="button" className="octane-wired__variable-picker-clear" onClick={() => setQuery('')}>
+                        <button type="button" className="volt-wired__variable-picker-clear" onClick={() => setQuery('')}>
                             <img src={searchClearIcon} alt="clear" />
                         </button>
                     )}
                 </div>
 
-                <div className="octane-wired__variable-picker-list">
+                <div className="volt-wired__variable-picker-list">
                     {filteredEntries.length ? (
                         filteredEntries.map(renderEntry)
                     ) : (
-                        <Text small className="octane-wired__variable-picker-empty">
+                        <Text small className="volt-wired__variable-picker-empty">
                             {emptyText}
                         </Text>
                     )}
@@ -359,32 +359,32 @@ export const WiredVariablePicker: FC<WiredVariablePickerProps> = (props) => {
     };
 
     return (
-        <div className="octane-wired__variable-picker" ref={containerRef}>
-            <button type="button" className="form-select form-select-sm octane-wired__variable-picker-trigger" onClick={() => setIsOpen((value) => !value)}>
-                <span className={selectedEntry ? '' : 'octane-wired__variable-picker-placeholder'}>{selectedEntry?.displayLabel || placeholder}</span>
+        <div className="volt-wired__variable-picker" ref={containerRef}>
+            <button type="button" className="form-select form-select-sm volt-wired__variable-picker-trigger" onClick={() => setIsOpen((value) => !value)}>
+                <span className={selectedEntry ? '' : 'volt-wired__variable-picker-placeholder'}>{selectedEntry?.displayLabel || placeholder}</span>
             </button>
 
             {isOpen &&
                 panelPosition &&
                 portalTarget &&
                 createPortal(
-                    <div className="octane-wired octane-wired__variable-picker-portal">
+                    <div className="volt-wired volt-wired__variable-picker-portal">
                         {renderPanel()}
 
                         {activeParent?.children?.length && submenuPosition && (
                             <div
                                 ref={submenuRef}
-                                className="octane-wired__variable-picker-submenu"
+                                className="volt-wired__variable-picker-submenu"
                                 style={{ left: submenuPosition.left, top: submenuPosition.top }}
                             >
                                 {activeParent.children.map((child) => (
                                     <button
                                         key={child.id}
                                         type="button"
-                                        className={`octane-wired__variable-picker-row octane-wired__variable-picker-subrow ${child.selectable ? '' : 'is-disabled'} ${selectedToken === child.token ? 'is-selected' : ''}`}
+                                        className={`volt-wired__variable-picker-row volt-wired__variable-picker-subrow ${child.selectable ? '' : 'is-disabled'} ${selectedToken === child.token ? 'is-selected' : ''}`}
                                         onClick={() => handleSelect(child)}
                                     >
-                                        <span className="octane-wired__variable-picker-row-label">{child.label}</span>
+                                        <span className="volt-wired__variable-picker-row-label">{child.label}</span>
                                     </button>
                                 ))}
                             </div>

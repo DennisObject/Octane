@@ -1,5 +1,5 @@
-import { GetProductOfferComposer, IFurnitureData } from '@octane/renderer';
-import { GetProductDataForLocalization, SendMessageComposer } from '../octane';
+import { GetProductOfferComposer, IFurnitureData } from '@volt/renderer';
+import { GetProductDataForLocalization, SendMessageComposer } from '../volt';
 import { ICatalogPage } from './ICatalogPage';
 import { IProduct } from './IProduct';
 import { IPurchasableOffer } from './IPurchasableOffer';

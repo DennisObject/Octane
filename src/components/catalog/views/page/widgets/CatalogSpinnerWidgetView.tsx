@@ -107,22 +107,22 @@ export const CatalogSpinnerWidgetView: FC<{}> = () => {
         return null;
 
     return (
-        <div className="octane-catalog-standard-spinner">
-            <label className="octane-catalog-standard-spinner-label" htmlFor={quantityInputId}>
+        <div className="volt-catalog-standard-spinner">
+            <label className="volt-catalog-standard-spinner-label" htmlFor={quantityInputId}>
                 {LocalizeText('catalog.bundlewidget.quantity')}
             </label>
             {freeItemCount > 0 && (
-                <div className="octane-catalog-standard-spinner-discount">
-                    <span className="octane-catalog-standard-spinner-discount-copy">
+                <div className="volt-catalog-standard-spinner-discount">
+                    <span className="volt-catalog-standard-spinner-discount-copy">
                         {LocalizeText('shop.bonus.items.count', ['amount'], [freeItemCount.toString()])}
                     </span>
-                    <span aria-hidden="true" className="octane-catalog-standard-spinner-discount-star" />
+                    <span aria-hidden="true" className="volt-catalog-standard-spinner-discount-star" />
                 </div>
             )}
-            <div className="octane-catalog-standard-spinner-input-frame">
+            <div className="volt-catalog-standard-spinner-input-frame">
                 <input
                     id={quantityInputId}
-                    className="octane-catalog-standard-spinner-value"
+                    className="volt-catalog-standard-spinner-value"
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"

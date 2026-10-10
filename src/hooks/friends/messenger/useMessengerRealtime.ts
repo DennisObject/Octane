@@ -7,7 +7,7 @@ import {
     MessengerMessageFailedEvent,
     MessengerReadCursorEvent,
     RequestMessengerConversationsComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useEffect } from 'react';
 import { MessengerMessage, SendMessageComposer as SendPacket } from '../../../api';
 import { useMessageEvent } from '../../events';

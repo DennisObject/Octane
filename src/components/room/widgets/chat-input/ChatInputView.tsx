@@ -272,7 +272,7 @@ export const ChatInputView: FC<{}> = (props) => {
         // left cap via a negative margin. With justify-between, hiding an optional
         // trailing button (habbicons disabled) redistributes the slack between the
         // trigger and the bubble, exposing the cap and opening a gap.
-        <div className="octane-chat-input-container swf-chat-input relative flex w-full items-center justify-start overflow-visible">
+        <div className="volt-chat-input-container swf-chat-input relative flex w-full items-center justify-start overflow-visible">
             {commandSelectorVisible && (
                 <ChatInputCommandSelectorView
                     commands={filteredCommands}

@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { blitRoomCanvasToViewfinder, CameraViewport, getTrustedCameraViewport, getViewfinderRoomFrame, LocalizeText, PlaySound, SoundNames } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../card';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../card';
 
 interface LayoutMiniCameraViewProps {
     roomId: number;
@@ -52,19 +52,19 @@ export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
     const isBusy = isCapturing || isSaving;
 
     return (
-        <OctaneCardView
-            className="octane-room-thumbnail-camera"
+        <VoltCardView
+            className="volt-room-thumbnail-camera"
             role="dialog"
             aria-label={LocalizeText('navigator.thumbnail.camera.title')}
             frameStyle={3}
             isResizable={false}
         >
-            <OctaneCardHeaderView headerText={LocalizeText('navigator.thumbnail.camera.title')} onCloseClick={() => !isBusy && onClose()} />
-            <OctaneCardContentView className="octane-room-thumbnail-camera__content" aria-busy={isBusy}>
-                <div className="octane-room-thumbnail-camera__viewfinder">
-                    <canvas ref={elementRef} className="octane-camera-viewfinder" width={110} height={110} />
+            <VoltCardHeaderView headerText={LocalizeText('navigator.thumbnail.camera.title')} onCloseClick={() => !isBusy && onClose()} />
+            <VoltCardContentView className="volt-room-thumbnail-camera__content" aria-busy={isBusy}>
+                <div className="volt-room-thumbnail-camera__viewfinder">
+                    <canvas ref={elementRef} className="volt-camera-viewfinder" width={110} height={110} />
                 </div>
-                <div className="octane-room-thumbnail-camera__buttons">
+                <div className="volt-room-thumbnail-camera__buttons">
                     <button type="button" disabled={isBusy} onClick={onClose}>
                         {LocalizeText('navigator.thumbnail.camera.title.cancel')}
                     </button>
@@ -72,7 +72,7 @@ export const LayoutMiniCameraView: FC<LayoutMiniCameraViewProps> = (props) => {
                         {LocalizeText('navigator.thumbnail.camera.title.capture')}
                     </button>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

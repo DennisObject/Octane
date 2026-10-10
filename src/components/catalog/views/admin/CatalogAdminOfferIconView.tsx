@@ -13,7 +13,7 @@ export const CatalogAdminOfferIconView: FC<CatalogAdminOfferIconViewProps> = ({ 
     return (
         <img
             alt=""
-            className="octane-catalog-admin-offer-icon"
+            className="volt-catalog-admin-offer-icon"
             draggable={false}
             src={url}
             onError={(event) => {

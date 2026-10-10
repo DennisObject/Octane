@@ -1,4 +1,4 @@
-import { RoomEventEvent, RoomEventMessageParser } from '@octane/renderer';
+import { RoomEventEvent, RoomEventMessageParser } from '@volt/renderer';
 import { useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { useMessageEvent } from '../../events';

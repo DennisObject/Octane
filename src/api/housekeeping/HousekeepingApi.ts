@@ -33,9 +33,9 @@ import {
     HousekeepingUserDetailData,
     HousekeepingUserDetailEvent,
     IMessageComposer
-} from '@octane/renderer';
-import { awaitMessageEvent } from '../octane/awaitMessageEvent';
-import { SendMessageComposer } from '../octane/SendMessageComposer';
+} from '@volt/renderer';
+import { awaitMessageEvent } from '../volt/awaitMessageEvent';
+import { SendMessageComposer } from '../volt/SendMessageComposer';
 import {
     IHousekeepingActionLogEntry,
     IHousekeepingActionResult,

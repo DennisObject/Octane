@@ -1,11 +1,11 @@
-import { GetRenderer, GetRoomEngine, GetRoomSessionManager } from '@octane/renderer';
+import { GetRenderer, GetRoomEngine, GetRoomSessionManager } from '@volt/renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cancelTrustedCameraRequests, captureTrustedCamera, completeTrustedCameraRequest, getTrustedCameraViewport, renderTrustedCamera } from './TrustedCamera';
 
 const mocks = vi.hoisted(() => ({ send: vi.fn() }));
 
-vi.mock('../octane/SendMessageComposer', () => ({ SendMessageComposer: mocks.send }));
-vi.mock('@octane/renderer', () => {
+vi.mock('../volt/SendMessageComposer', () => ({ SendMessageComposer: mocks.send }));
+vi.mock('@volt/renderer', () => {
     class Composer {
         private data: unknown[] = [];
         getMessageArray() {
@@ -16,7 +16,7 @@ vi.mock('@octane/renderer', () => {
         GetRenderer: vi.fn(),
         GetRoomEngine: vi.fn(),
         GetRoomSessionManager: vi.fn(),
-        OctaneRectangle: class {},
+        VoltRectangle: class {},
         RenderRoomMessageComposer: Composer,
         RenderRoomThumbnailMessageComposer: Composer,
         RoomGeometry: { SCALE_ZOOMED_IN: 64 }

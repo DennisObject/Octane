@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 
 export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: string }> = ({ figure, gender }) =>
@@ -79,5 +79,5 @@ export const AvatarEditorHotLookThumbnailView: FC<{ figure: string; gender: stri
         };
     }, [figure, gender]);
 
-    return url && <img className="octane-avatar-editor-hotlook-bitmap" src={url} alt="" draggable={false} />;
+    return url && <img className="volt-avatar-editor-hotlook-bitmap" src={url} alt="" draggable={false} />;
 };

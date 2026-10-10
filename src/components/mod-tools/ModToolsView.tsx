@@ -1,8 +1,8 @@
-import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType, UserClassificationMessageEvent } from '@octane/renderer';
+import { AddLinkEventTracker, CreateLinkEvent, ILinkEventTracker, RemoveLinkEventTracker, RoomEngineEvent, RoomId, RoomObjectCategory, RoomObjectType, UserClassificationMessageEvent } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomSession, ISelectedUser, LocalizeText } from '../../api';
 import { Permission } from '../../api/permissions';
-import { MOD_WINDOW_SIZE, useHasPermission, useIssueManager, useModTools, useMessageEvent, useModWindowTrackerStore, useObjectSelectedEvent, useOctaneEvent } from '../../hooks';
+import { MOD_WINDOW_SIZE, useHasPermission, useIssueManager, useModTools, useMessageEvent, useModWindowTrackerStore, useObjectSelectedEvent, useVoltEvent } from '../../hooks';
 import { EvidenceChatlogView } from './views/EvidenceChatlogView';
 import { IssueBrowserView } from './views/IssueBrowserView';
 import { IssueHandlerView } from './views/IssueHandlerView';
@@ -65,7 +65,7 @@ export const ModToolsView: FC<{}> = () => {
         setIsVisible(true);
     }, [settings]);
 
-    useOctaneEvent<RoomEngineEvent>([RoomEngineEvent.INITIALIZED, RoomEngineEvent.DISPOSED], (event) => {
+    useVoltEvent<RoomEngineEvent>([RoomEngineEvent.INITIALIZED, RoomEngineEvent.DISPOSED], (event) => {
         if (RoomId.isRoomPreviewerId(event.roomId)) return;
 
         const entered = event.type === RoomEngineEvent.INITIALIZED;

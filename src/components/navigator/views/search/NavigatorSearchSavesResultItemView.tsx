@@ -1,4 +1,4 @@
-import { NavigatorDeleteSavedSearchComposer, NavigatorSavedSearch } from '@octane/renderer';
+import { NavigatorDeleteSavedSearchComposer, NavigatorSavedSearch } from '@volt/renderer';
 import { FC, MouseEvent } from 'react';
 import { LocalizeText, localizeWithFallback, SendMessageComposer } from '../../../../api';
 import { useNavigatorUiStore } from '../../../../hooks';

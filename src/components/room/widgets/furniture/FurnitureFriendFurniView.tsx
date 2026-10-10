@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { LocalizeText } from '../../../../api';
-import { Button, DraggableWindow, LayoutAvatarImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { Button, DraggableWindow, LayoutAvatarImageView, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useFurnitureFriendFurniWidget } from '../../../../hooks';
 
 const formatEngravingDate = (value: string) => {
@@ -35,9 +35,9 @@ export const FurnitureFriendFurniView: FC<{}> = (props) => {
         const lockStage = partnerConfirmed ? 2 : stage;
 
         return (
-            <OctaneCardView className="octane-engraving-lock" theme="primary-slim">
-                <OctaneCardHeaderView headerText={LocalizeText('friend.furniture.confirm.lock.caption')} onCloseClick={cancelLock ?? onClose} />
-                <OctaneCardContentView>
+            <VoltCardView className="volt-engraving-lock" theme="primary-slim">
+                <VoltCardHeaderView headerText={LocalizeText('friend.furniture.confirm.lock.caption')} onCloseClick={cancelLock ?? onClose} />
+                <VoltCardContentView>
                     <h5 className="text-black text-center font-bold mt-2 mb-2">{LocalizeText('friend.furniture.confirm.lock.subtitle')}</h5>
                     <div className="flex justify-center mb-2">
                         <div className={`engraving-lock-stage-${lockStage}`} />
@@ -53,8 +53,8 @@ export const FurnitureFriendFurniView: FC<{}> = (props) => {
                             {LocalizeText('friend.furniture.confirm.lock.button.confirm')}
                         </Button>
                     </div>
-                </OctaneCardContentView>
-            </OctaneCardView>
+                </VoltCardContentView>
+            </VoltCardView>
         );
     }
 
@@ -62,8 +62,8 @@ export const FurnitureFriendFurniView: FC<{}> = (props) => {
         const engravingTypeClass = type === 3 || type === 4 ? `engraving-lock-${type}` : '';
 
         return (
-            <DraggableWindow handleSelector=".octane-engraving-lock-view">
-                <div className={`octane-engraving-lock-view ${engravingTypeClass}`.trim()}>
+            <DraggableWindow handleSelector=".volt-engraving-lock-view">
+                <div className={`volt-engraving-lock-view ${engravingTypeClass}`.trim()}>
                     <button type="button" className="engraving-lock-close" onClick={onClose} aria-label="Close" />
                     <div className="engraving-lock-avatar engraving-lock-avatar--left">
                         <LayoutAvatarImageView direction={2} figure={figures[0]} />

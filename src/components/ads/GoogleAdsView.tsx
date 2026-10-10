@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetConfigurationValue } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../common';
 import { configFileUrl } from '../../secure-assets';
 
 interface AdsenseConfig {
@@ -41,7 +41,7 @@ export const GoogleAdsView: FC<{}> = () => {
 
     // Auto-open once on initial mount (the login / landing stage).
     // Subsequent toggles are driven by the "ads:toggle" window event
-    // (e.g. the Show Ad button in OctaneSystemAlertView).
+    // (e.g. the Show Ad button in VoltSystemAlertView).
     useEffect(() => {
         if (!adsEnabled) return;
         if (autoOpenedRef.current) return;
@@ -120,12 +120,12 @@ export const GoogleAdsView: FC<{}> = () => {
     if (!isOpen) return null;
 
     return (
-        <OctaneCardView className="octane-google-ads" uniqueKey="google-ads" theme="primary">
+        <VoltCardView className="volt-google-ads" uniqueKey="google-ads" theme="primary">
             {publisherId && (
                 <script async crossOrigin="anonymous" src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${publisherId}`} />
             )}
-            <OctaneCardHeaderView headerText="Sponsored" onCloseClick={() => setIsOpen(false)} />
-            <OctaneCardContentView>
+            <VoltCardHeaderView headerText="Sponsored" onCloseClick={() => setIsOpen(false)} />
+            <VoltCardContentView>
                 <div className="flex items-center justify-center w-[300px] h-[250px] bg-white">
                     {loadError && <div className="text-xs text-red-600 text-center px-2">Ads unavailable: {loadError}</div>}
                     {!loadError && (!publisherId || !config) && <div className="text-xs text-gray-500">Loading…</div>}
@@ -145,7 +145,7 @@ export const GoogleAdsView: FC<{}> = () => {
                         <div className="text-xs text-gray-500 text-center px-2">Ad slot not configured in configuration/adsense.json</div>
                     )}
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

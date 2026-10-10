@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@octane/renderer';
+import { GetConfiguration } from '@volt/renderer';
 import { useEffect, useState } from 'react';
 import { fetchNewsArticles, NewsArticle } from '../../api';
 

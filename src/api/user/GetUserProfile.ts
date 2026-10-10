@@ -1,5 +1,5 @@
-import { UserProfileComposer } from '@octane/renderer';
-import { SendMessageComposer } from '../octane';
+import { UserProfileComposer } from '@volt/renderer';
+import { SendMessageComposer } from '../volt';
 
 export function GetUserProfile(userId: number): void {
     SendMessageComposer(new UserProfileComposer(userId));

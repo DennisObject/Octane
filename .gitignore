@@ -29,14 +29,14 @@
 .DS_Store
 Thumbs.db
 
-# Octane
+# Volt
 /build
 *.zip
 .env
 .claude/
 
 # Per-deploy build configuration (yarn configure)
-/.octane-build.json
+/.volt-build.json
 # Legacy name, still read as a fallback
 /.nitro-build.json
 

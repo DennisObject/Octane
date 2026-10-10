@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@volt/renderer';
 import { Dispatch, FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../api';
 import { AIR_FLOOR_ASSETS } from '../air/airAssets';

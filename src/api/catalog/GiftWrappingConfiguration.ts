@@ -1,4 +1,4 @@
-import { GiftWrappingConfigurationParser } from '@octane/renderer';
+import { GiftWrappingConfigurationParser } from '@volt/renderer';
 
 export class GiftWrappingConfiguration {
     private _isEnabled: boolean = false;

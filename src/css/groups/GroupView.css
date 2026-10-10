@@ -1,18 +1,18 @@
-.octane-groups-window {
+.volt-groups-window {
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
     color: #111111;
 }
-.octane-groups-window .octane-card-content,
-.octane-groups-window .octane-card-content-shell,
-.octane-groups-content {
+.volt-groups-window .volt-card-content,
+.volt-groups-window .volt-card-content-shell,
+.volt-groups-content {
     background: #eeeee7 !important;
     color: #111111;
 }
-.octane-groups-window .octane-card-tabs {
+.volt-groups-window .volt-card-tabs {
     background: #d6d5cc;
     border-bottom: 1px solid #77776f;
 }
-.octane-groups-window .octane-card-tabs-item {
+.volt-groups-window .volt-card-tabs-item {
     min-height: 25px;
     border: 1px solid #111111;
     border-bottom: 0;
@@ -21,15 +21,15 @@
     color: #111111;
     text-shadow: none;
 }
-.octane-groups-window .octane-card-tabs-item.active,
-.octane-groups-window .octane-card-tabs-item:hover {
+.volt-groups-window .volt-card-tabs-item.active,
+.volt-groups-window .volt-card-tabs-item:hover {
     background: #eeeee7;
 }
-.octane-groups-window input,
-.octane-groups-window textarea,
-.octane-groups-window select,
-.octane-groups-input,
-.octane-groups-select {
+.volt-groups-window input,
+.volt-groups-window textarea,
+.volt-groups-window select,
+.volt-groups-input,
+.volt-groups-select {
     border: 1px solid #9c9c94 !important;
     border-radius: 3px !important;
     background: #ffffff !important;
@@ -37,14 +37,14 @@
     box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.08);
     font-size: 12px;
 }
-.octane-groups-footer {
+.volt-groups-footer {
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px solid #c7c7bf;
 }
-.octane-groups-button,
-.octane-groups-window button:not(.octane-card-header-close),
-.octane-group-room-info .octane-groups-button {
+.volt-groups-button,
+.volt-groups-window button:not(.volt-card-header-close),
+.volt-group-room-info .volt-groups-button {
     min-height: 24px;
     border: 3px solid transparent !important;
     border-image-source: var(--habbo-skin-button) !important;
@@ -59,32 +59,32 @@
     font-size: 12px;
     font-weight: 700;
 }
-.octane-groups-button:hover,
-.octane-groups-window button:not(.octane-card-header-close):hover,
-.octane-group-room-info .octane-groups-button:hover {
+.volt-groups-button:hover,
+.volt-groups-window button:not(.volt-card-header-close):hover,
+.volt-group-room-info .volt-groups-button:hover {
     border-image-source: var(--habbo-skin-button-hover) !important;
     filter: none !important;
 }
-.octane-groups-button:active,
-.octane-groups-window button:not(.octane-card-header-close):active,
-.octane-group-room-info .octane-groups-button:active {
+.volt-groups-button:active,
+.volt-groups-window button:not(.volt-card-header-close):active,
+.volt-group-room-info .volt-groups-button:active {
     border-image-source: var(--habbo-skin-button-pressed) !important;
 }
-.octane-groups-button:disabled,
-.octane-groups-window button:disabled,
-.octane-group-room-info .octane-groups-button:disabled {
+.volt-groups-button:disabled,
+.volt-groups-window button:disabled,
+.volt-group-room-info .volt-groups-button:disabled {
     border-image-source: var(--habbo-skin-button-disabled) !important;
     color: #777777 !important;
     opacity: 1 !important;
 }
 /* AIR 1192/1197: group_cont at (10,43), border style 0, 343 x 214. */
-.octane-group-members {
+.volt-group-members {
     width: 332px;
     height: 431px;
     resize: none !important;
 }
-.octane-group-members .octane-card-content-shell,
-.octane-group-members .octane-groups-content {
+.volt-group-members .volt-card-content-shell,
+.volt-group-members .volt-groups-content {
     position: relative;
     width: 332px;
     height: 398px;
@@ -92,7 +92,7 @@
     overflow: hidden !important;
     background: #eeeee7 !important;
 }
-.octane-group-members-search {
+.volt-group-members-search {
     position: absolute;
     left: 6px;
     top: 0;
@@ -103,7 +103,7 @@
     border-radius: 0;
     background: transparent;
 }
-.octane-group-members-search__badge {
+.volt-group-members-search__badge {
     position: absolute;
     left: 17px;
     top: 22px;
@@ -114,11 +114,11 @@
     background-size: auto !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
-.octane-group-members-search .flex-column,
-.octane-group-members-search .d-flex.flex-column,
-.octane-group-members-search > .column {
+.volt-group-members-search .flex-column,
+.volt-group-members-search .d-flex.flex-column,
+.volt-group-members-search > .column {
     position: absolute;
     left: 78px;
     top: 14px;
@@ -126,21 +126,21 @@
     height: 59px;
     gap: 9px !important;
 }
-.octane-group-members-search input {
+.volt-group-members-search input {
     width: 214px !important;
     height: 25px !important;
     min-height: 25px !important;
     padding: 2px 6px !important;
     font-size: 13px !important;
 }
-.octane-group-members-search select {
+.volt-group-members-search select {
     width: 230px !important;
     height: 25px !important;
     min-height: 25px !important;
     padding: 2px 6px !important;
     font-size: 13px !important;
 }
-.octane-group-members-list-grid {
+.volt-group-members-list-grid {
     position: absolute;
     left: 4px;
     top: 82px;
@@ -157,7 +157,7 @@
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-.octane-group-member-row {
+.volt-group-member-row {
     position: relative;
     width: 164px !important;
     height: 35px !important;
@@ -170,10 +170,10 @@
     box-shadow: none !important;
     color: #000000;
 }
-.octane-group-member-row:hover {
+.volt-group-member-row:hover {
     background: rgba(255, 255, 255, .35) !important;
 }
-.octane-group-member-row__avatar {
+.volt-group-member-row__avatar {
     position: absolute;
     left: -3px;
     top: 0;
@@ -181,16 +181,16 @@
     height: 34px;
     overflow: hidden;
 }
-.octane-group-member-row__head {
+.volt-group-member-row__head {
     position: absolute;
     left: 50%;
     top: -12px;
     width: auto !important;
     height: auto !important;
     transform: translateX(-50%);
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
-.octane-group-member-row__copy {
+.volt-group-member-row__copy {
     position: absolute;
     left: 33px;
     top: 1px;
@@ -198,7 +198,7 @@
     height: 31px;
     overflow: hidden;
 }
-.octane-group-member-row__name {
+.volt-group-member-row__name {
     display: block;
     width: 77px;
     height: 16px;
@@ -210,7 +210,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.octane-group-member-row__since {
+.volt-group-member-row__since {
     display: block;
     position: absolute;
     left: 17px;
@@ -225,7 +225,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.octane-group-member-row__actions {
+.volt-group-member-row__actions {
     position: absolute;
     right: 1px;
     top: 1px;
@@ -236,12 +236,12 @@
     gap: 0;
     align-items: center;
 }
-.octane-group-member-row__actions .octane-icon,
-.octane-group-member-row__actions .octane-friends-spritesheet {
+.volt-group-member-row__actions .volt-icon,
+.volt-group-member-row__actions .volt-friends-spritesheet {
     margin: 0 !important;
     flex: 0 0 auto;
 }
-.octane-group-members .octane-groups-footer {
+.volt-group-members .volt-groups-footer {
     position: absolute;
     left: 4px;
     top: 363px;
@@ -251,19 +251,19 @@
     padding: 0;
     border: 0;
 }
-.octane-group-members .octane-groups-button--pager {
+.volt-group-members .volt-groups-button--pager {
     width: 50px !important;
     height: 25px !important;
     min-height: 25px !important;
     padding: 0 !important;
 }
-.octane-group-members .octane-groups-footer .text {
+.volt-group-members .volt-groups-footer .text {
     width: 178px;
     text-align: center;
     color: rgba(0, 0, 0, .7) !important;
     font-size: 12px;
 }
-.octane-group-room-info {
+.volt-group-room-info {
     margin-left: auto;
     margin-right: 0;
     width: 188px;
@@ -278,13 +278,13 @@
         inset 0 -1px 0 rgba(0, 0, 0, 0.55),
         0 2px 0 rgba(0, 0, 0, 0.35);
     font-family: HabboAirUbuntu, UbuntuRegular, Ubuntu, sans-serif;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     transition: height 0.18s ease;
 }
-.octane-group-room-info.is-closed {
+.volt-group-room-info.is-closed {
     height: 22px;
 }
-.octane-group-room-info__contracted {
+.volt-group-room-info__contracted {
     position: relative;
     display: flex;
     align-items: center;
@@ -296,13 +296,13 @@
     border-bottom: 1px solid #000000;
     border-radius: 3px 3px 0 0;
 }
-.octane-group-room-info__base-icon {
+.volt-group-room-info__base-icon {
     width: auto;
     height: auto;
     flex: 0 0 auto;
     margin-right: 3px;
 }
-.octane-group-room-info__toggle {
+.volt-group-room-info__toggle {
     position: absolute;
     top: 2px;
     right: 2px;
@@ -314,7 +314,7 @@
     box-shadow: none;
     transform: none;
 }
-.octane-group-room-info__toggle::after {
+.volt-group-room-info__toggle::after {
     content: "";
     position: absolute;
     left: 4px;
@@ -326,14 +326,14 @@
     border-top: 5px solid #d7d7d7;
     filter: drop-shadow(1px 1px 0 #000000);
 }
-.octane-group-room-info.is-closed .octane-group-room-info__toggle {
+.volt-group-room-info.is-closed .volt-group-room-info__toggle {
     transform: none;
 }
-.octane-group-room-info.is-closed .octane-group-room-info__toggle::after {
+.volt-group-room-info.is-closed .volt-group-room-info__toggle::after {
     transform: rotate(180deg);
 }
-.octane-group-room-info__title,
-.octane-group-room-info .text-white {
+.volt-group-room-info__title,
+.volt-group-room-info .text-white {
     color: #ffffff !important;
     font-size: 12px;
     font-weight: 700;
@@ -341,22 +341,22 @@
     letter-spacing: -0.2px;
     text-shadow: 1px 1px 0 #000000;
 }
-.octane-group-room-info__content {
+.volt-group-room-info__content {
     height: 90px;
     overflow: hidden;
     transition: opacity 0.14s ease;
     background: rgba(27, 27, 27, 0.94);
 }
-.octane-group-room-info.is-closed .octane-group-room-info__content {
+.volt-group-room-info.is-closed .volt-group-room-info__content {
     opacity: 0;
     pointer-events: none;
 }
-.octane-group-room-info__main {
+.volt-group-room-info__main {
     height: 57px;
     padding: 7px 8px 0 10px;
     gap: 7px;
 }
-.octane-group-room-info__badge {
+.volt-group-room-info__badge {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -365,14 +365,14 @@
     flex: 0 0 39px;
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.75));
 }
-.octane-group-room-info__badge .layout-badge-image,
-.octane-group-room-info__badge .badge-image {
+.volt-group-room-info__badge .layout-badge-image,
+.volt-group-room-info__badge .badge-image {
     width: 39px !important;
     height: 39px !important;
     background-size: contain !important;
     background-position: center !important;
 }
-.octane-group-room-info__group-name {
+.volt-group-room-info__group-name {
     display: -webkit-box;
     width: 124px;
     height: 42px;
@@ -386,72 +386,72 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
-.octane-group-room-info__button-wrap {
+.volt-group-room-info__button-wrap {
     padding: 3px 8px 0;
 }
-.octane-group-room-info__button {
+.volt-group-room-info__button {
     width: 170px;
     height: 27px;
     min-height: 27px;
 }
 /* SWF group_room_info.xml coordinates. */
-.octane-group-room-info {
+.volt-group-room-info {
     width: 195px !important;
     max-width: 195px !important;
     height: 119px !important;
     margin-left: auto !important;
     border-radius: 4px !important;
 }
-.octane-group-room-info.is-closed {
+.volt-group-room-info.is-closed {
     height: 25px !important;
 }
-.octane-group-room-info__contracted {
+.volt-group-room-info__contracted {
     width: 195px !important;
     height: 25px !important;
     padding: 0 24px 0 5px !important;
 }
-.octane-group-room-info__base-icon {
+.volt-group-room-info__base-icon {
     width: 21px !important;
     max-width: 21px !important;
     height: 16px !important;
     max-height: 16px !important;
     margin: 0 -11px 0 0 !important;
 }
-.octane-group-room-info__title,
-.octane-group-room-info .text-white {
+.volt-group-room-info__title,
+.volt-group-room-info .text-white {
     font-size: 13px !important;
     line-height: 18px !important;
     letter-spacing: -0.4px !important;
 }
-.octane-group-room-info__content {
+.volt-group-room-info__content {
     height: 94px !important;
 }
-.octane-group-room-info__main {
+.volt-group-room-info__main {
     height: 51px !important;
     padding: 7px 11px 0 12px !important;
     gap: 8px !important;
 }
-.octane-group-room-info__badge {
+.volt-group-room-info__badge {
     width: 39px !important;
     height: 39px !important;
     flex: 0 0 39px !important;
 }
-.octane-group-room-info__group-name {
+.volt-group-room-info__group-name {
     width: 125px !important;
     height: 50px !important;
     font-size: 13px !important;
     line-height: 14px !important;
 }
-.octane-group-room-info__button-wrap {
+.volt-group-room-info__button-wrap {
     padding: 1px 10px 0 !important;
 }
-.octane-group-room-info__button {
+.volt-group-room-info__button {
     width: 175px !important;
     height: 29px !important;
     min-height: 29px !important;
 }
 /* group_room_info.xml: guilds/group_bg.png 195x119, contracted Events/event_bg_contracted.png 195x25. */
-.octane-group-room-info {
+.volt-group-room-info {
     position: relative !important;
     overflow: hidden !important;
     border: 0 !important;
@@ -459,11 +459,11 @@
     background: url("../../assets/images/groups/swf/group_bg.png") 0 0 / 195px 119px no-repeat !important;
     box-shadow: none !important;
 }
-.octane-group-room-info.is-closed {
+.volt-group-room-info.is-closed {
     background-image: url("../../assets/images/groups/swf/event_bg_contracted.png") !important;
     background-size: 195px 25px !important;
 }
-.octane-group-room-info__contracted {
+.volt-group-room-info__contracted {
     position: relative !important;
     width: 195px !important;
     height: 25px !important;
@@ -472,12 +472,12 @@
     border-radius: 0 !important;
     background: transparent !important;
 }
-.octane-group-room-info__toggle::after,
-.octane-group-room-info.is-closed .octane-group-room-info__toggle::after {
+.volt-group-room-info__toggle::after,
+.volt-group-room-info.is-closed .volt-group-room-info__toggle::after {
     content: none !important;
     border: 0 !important;
 }
-.octane-group-room-info__base-icon {
+.volt-group-room-info__base-icon {
     position: absolute !important;
     top: 3px !important;
     left: 5px !important;
@@ -485,7 +485,7 @@
     height: 16px !important;
     margin: 0 !important;
 }
-.octane-group-room-info__title {
+.volt-group-room-info__title {
     position: absolute !important;
     top: 2px !important;
     left: 27px !important;
@@ -495,18 +495,18 @@
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
 }
-.octane-group-room-info__toggle {
+.volt-group-room-info__toggle {
     top: 4px !important;
     right: 5px !important;
 }
-.octane-group-room-info__content {
+.volt-group-room-info__content {
     position: relative !important;
     width: 195px !important;
     height: 94px !important;
     overflow: hidden !important;
     background: transparent !important;
 }
-.octane-group-room-info__main {
+.volt-group-room-info__main {
     position: absolute !important;
     inset: 0 !important;
     display: block !important;
@@ -514,12 +514,12 @@
     height: 54px !important;
     padding: 0 !important;
 }
-.octane-group-room-info__badge {
+.volt-group-room-info__badge {
     position: absolute !important;
     top: 7px !important;
     left: 12px !important;
 }
-.octane-group-room-info__group-name {
+.volt-group-room-info__group-name {
     position: absolute !important;
     top: 7px !important;
     left: 59px !important;
@@ -528,7 +528,7 @@
     margin: 0 !important;
     color: #ffffff !important;
 }
-.octane-group-room-info__button-wrap {
+.volt-group-room-info__button-wrap {
     position: absolute !important;
     top: 54px !important;
     left: 10px !important;
@@ -536,7 +536,7 @@
     height: 29px !important;
     padding: 0 !important;
 }
-.octane-group-room-info .octane-group-room-info__button {
+.volt-group-room-info .volt-group-room-info__button {
     width: 175px !important;
     height: 29px !important;
     min-height: 29px !important;
@@ -546,27 +546,27 @@
     justify-content: center !important;
     text-align: center !important;
 }
-.octane-group-room-info__button .text-white {
+.volt-group-room-info__button .text-white {
     color: #111111 !important;
 }
 /* SWF guild_members_window/member_entry layout */
-.octane-group-members {
+.volt-group-members {
     width: 351px !important;
     height: 431px !important;
     resize: none !important;
 }
-.octane-group-members .octane-card-header,
-.octane-group-members .octane-card-header-shell {
+.volt-group-members .volt-card-header,
+.volt-group-members .volt-card-header-shell {
     height: 32px !important;
 }
-.octane-group-members .octane-card-header-text {
+.volt-group-members .volt-card-header-text {
     font-size: 13px !important;
     font-weight: 700 !important;
     line-height: 30px !important;
     text-align: center !important;
 }
-.octane-group-members .octane-card-content-shell,
-.octane-group-members .octane-groups-content {
+.volt-group-members .volt-card-content-shell,
+.volt-group-members .volt-groups-content {
     position: relative !important;
     width: 351px !important;
     height: 398px !important;
@@ -574,7 +574,7 @@
     overflow: hidden !important;
     background: #eeeee7 !important;
 }
-.octane-group-members-search {
+.volt-group-members-search {
     position: absolute !important;
     left: 7px !important;
     top: 9px !important;
@@ -584,7 +584,7 @@
     border: 0 !important;
     background: transparent !important;
 }
-.octane-group-members-search__badge {
+.volt-group-members-search__badge {
     position: absolute !important;
     left: 19px !important;
     top: 8px !important;
@@ -593,10 +593,10 @@
     min-width: 39px !important;
     min-height: 39px !important;
 }
-.octane-group-members-search__controls,
-.octane-group-members-search .flex-column,
-.octane-group-members-search .d-flex.flex-column,
-.octane-group-members-search > .column {
+.volt-group-members-search__controls,
+.volt-group-members-search .flex-column,
+.volt-group-members-search .d-flex.flex-column,
+.volt-group-members-search > .column {
     position: absolute !important;
     left: 80px !important;
     top: 5px !important;
@@ -606,7 +606,7 @@
     display: flex !important;
     flex-direction: column !important;
 }
-.octane-group-members-search input {
+.volt-group-members-search input {
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
@@ -621,7 +621,7 @@
     color: #222222 !important;
     font-size: 13px !important;
 }
-.octane-group-members-search select {
+.volt-group-members-search select {
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
@@ -636,7 +636,7 @@
     color: #222222 !important;
     font-size: 13px !important;
 }
-.octane-group-members-list-grid {
+.volt-group-members-list-grid {
     position: absolute !important;
     left: 6px !important;
     top: 82px !important;
@@ -652,7 +652,7 @@
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-.octane-group-member-row {
+.volt-group-member-row {
     position: relative !important;
     width: 168px !important;
     height: 36px !important;
@@ -666,10 +666,10 @@
     box-shadow: inset 0 1px 0 #ffffff !important;
     overflow: hidden !important;
 }
-.octane-group-member-row:hover {
+.volt-group-member-row:hover {
     background: #ffffff !important;
 }
-.octane-group-member-row__avatar {
+.volt-group-member-row__avatar {
     position: absolute !important;
     left: -5px !important;
     top: -5px !important;
@@ -677,16 +677,16 @@
     height: 45px !important;
     overflow: hidden !important;
 }
-.octane-group-member-row__head {
+.volt-group-member-row__head {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
     width: 40px !important;
     height: 40px !important;
     transform: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
-.octane-group-member-row__copy {
+.volt-group-member-row__copy {
     position: absolute !important;
     left: 38px !important;
     top: 1px !important;
@@ -694,7 +694,7 @@
     height: 32px !important;
     overflow: hidden !important;
 }
-.octane-group-member-row__name {
+.volt-group-member-row__name {
     display: block !important;
     width: 93px !important;
     height: 16px !important;
@@ -706,7 +706,7 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
-.octane-group-member-row__since {
+.volt-group-member-row__since {
     display: block !important;
     position: absolute !important;
     left: 11px !important;
@@ -721,7 +721,7 @@
     overflow: hidden !important;
     text-overflow: clip !important;
 }
-.octane-group-member-row__actions {
+.volt-group-member-row__actions {
     position: absolute !important;
     right: 3px !important;
     top: 17px !important;
@@ -732,12 +732,12 @@
     align-items: center !important;
     gap: 1px !important;
 }
-.octane-group-member-row__actions .octane-icon,
-.octane-group-member-row__actions .octane-friends-spritesheet {
+.volt-group-member-row__actions .volt-icon,
+.volt-group-member-row__actions .volt-friends-spritesheet {
     margin: 0 !important;
     flex: 0 0 auto !important;
 }
-.octane-group-members-footer {
+.volt-group-members-footer {
     position: absolute !important;
     left: 8px !important;
     top: 360px !important;
@@ -747,16 +747,16 @@
     padding: 0 !important;
     border: 0 !important;
 }
-.octane-group-members-footer .octane-groups-button--pager {
+.volt-group-members-footer .volt-groups-button--pager {
     width: 51px !important;
     height: 29px !important;
     min-height: 29px !important;
     padding: 0 !important;
 }
-.octane-group-members-footer .octane-groups-button--pager:first-child {
+.volt-group-members-footer .volt-groups-button--pager:first-child {
     visibility: hidden;
 }
-.octane-group-members-footer__page {
+.volt-group-members-footer__page {
     position: absolute;
     left: 73px;
     top: 4px;
@@ -768,14 +768,14 @@
     gap: 5px;
     color: #5d5d58;
 }
-.octane-group-members-footer__label,
-.octane-group-members-footer__total {
+.volt-group-members-footer__label,
+.volt-group-members-footer__total {
     color: #5d5d58 !important;
     font-size: 12px !important;
     line-height: 20px !important;
     white-space: nowrap !important;
 }
-.octane-group-members-footer__input {
+.volt-group-members-footer__input {
     width: 22px !important;
     height: 22px !important;
     min-height: 22px !important;
@@ -789,14 +789,14 @@
     box-shadow: none !important;
     appearance: textfield !important;
 }
-.octane-group-members-footer__input::-webkit-outer-spin-button,
-.octane-group-members-footer__input::-webkit-inner-spin-button {
+.volt-group-members-footer__input::-webkit-outer-spin-button,
+.volt-group-members-footer__input::-webkit-inner-spin-button {
     appearance: none;
     margin: 0;
 }
 /* button_thick style 3: neutral shiny skin shared by group controls. */
-.octane-groups-window .octane-groups-button--primary,
-.octane-group-room-info .octane-group-room-info__button {
+.volt-groups-window .volt-groups-button--primary,
+.volt-group-room-info .volt-group-room-info__button {
     border: 5px solid transparent !important;
     border-image-source: var(--habbo-skin-shiny-thick) !important;
     border-image-slice: 5 fill !important;
@@ -813,25 +813,25 @@
     min-height: 29px !important;
     text-shadow: none !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
-.octane-groups-window .octane-groups-button--primary:hover,
-.octane-group-room-info .octane-group-room-info__button:hover {
+.volt-groups-window .volt-groups-button--primary:hover,
+.volt-group-room-info .volt-group-room-info__button:hover {
     border-image-source: var(--habbo-skin-shiny-thick-hover) !important;
     opacity: 1 !important;
 }
-.octane-groups-window .octane-groups-button--primary:active,
-.octane-group-room-info .octane-group-room-info__button:active {
+.volt-groups-window .volt-groups-button--primary:active,
+.volt-group-room-info .volt-group-room-info__button:active {
     border-image-source: var(--habbo-skin-shiny-thick-pressed) !important;
     opacity: 1 !important;
 }
-.octane-groups-window .octane-groups-button--primary.pointer-events-none,
-.octane-group-room-info .octane-group-room-info__button.pointer-events-none {
+.volt-groups-window .volt-groups-button--primary.pointer-events-none,
+.volt-group-room-info .volt-group-room-info__button.pointer-events-none {
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;
 }
-.octane-groups-window .octane-groups-button--primary:disabled,
-.octane-group-room-info .octane-group-room-info__button:disabled {
+.volt-groups-window .volt-groups-button--primary:disabled,
+.volt-group-room-info .volt-group-room-info__button:disabled {
     border-image-source: var(--habbo-skin-shiny-thick-disabled) !important;
     opacity: 1 !important;
 }

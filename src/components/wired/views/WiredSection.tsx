@@ -16,7 +16,7 @@ export interface WiredSectionProps {
     className?: string;
 }
 
-export const WiredSplitter: FC<{ className?: string }> = ({ className = '' }) => <div className={`octane-wired__splitter ${className}`} aria-hidden="true" />;
+export const WiredSplitter: FC<{ className?: string }> = ({ className = '' }) => <div className={`volt-wired__splitter ${className}`} aria-hidden="true" />;
 
 export const WiredSection: FC<PropsWithChildren<WiredSectionProps>> = ({ title = null, headerOption = null, headerOptionsRight = null, titleOffset = 0, splitter = true, className = '', children = null }) =>
 {
@@ -27,8 +27,8 @@ export const WiredSection: FC<PropsWithChildren<WiredSectionProps>> = ({ title =
     {
         return (
             <>
-                {splitter && <div className="octane-wired__divider" />}
-                <div className="octane-wired__section">
+                {splitter && <div className="volt-wired__divider" />}
+                <div className="volt-wired__section">
                     <div className="flex flex-col gap-1">
                         {title !== null && (typeof title === 'string' ? <Text bold>{title}</Text> : title)}
                         {headerOption}
@@ -41,21 +41,21 @@ export const WiredSection: FC<PropsWithChildren<WiredSectionProps>> = ({ title =
     }
 
     return (
-        <div className={`octane-wired__native-section ${className}`}>
+        <div className={`volt-wired__native-section ${className}`}>
             {splitter && <WiredSplitter />}
-            <div className="octane-wired__native-section-inner">
+            <div className="volt-wired__native-section-inner">
                 {(title !== null || headerOption !== null || headerOptionsRight !== null) && (
-                    <div className="octane-wired__native-section-header">
+                    <div className="volt-wired__native-section-header">
                         {title !== null &&
                             (typeof title === 'string' ? (
-                                <WiredText bold className={titleOffset ? 'octane-wired__native-text--offset' : ''} text={title} />
+                                <WiredText bold className={titleOffset ? 'volt-wired__native-text--offset' : ''} text={title} />
                             ) : (
-                                <span className="octane-wired__text octane-wired__text--bold" style={titleOffset ? { marginTop: titleOffset } : undefined}>
+                                <span className="volt-wired__text volt-wired__text--bold" style={titleOffset ? { marginTop: titleOffset } : undefined}>
                                     {title}
                                 </span>
                             ))}
                         {headerOption}
-                        {headerOptionsRight !== null && <div className="octane-wired__native-section-header-right">{headerOptionsRight}</div>}
+                        {headerOptionsRight !== null && <div className="volt-wired__native-section-header-right">{headerOptionsRight}</div>}
                     </div>
                 )}
                 {children}

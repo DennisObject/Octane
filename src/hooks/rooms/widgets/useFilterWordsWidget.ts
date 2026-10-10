@@ -1,4 +1,4 @@
-import { RoomFilterSettingsMessageEvent } from '@octane/renderer';
+import { RoomFilterSettingsMessageEvent } from '@volt/renderer';
 import { useState } from 'react';
 import { useMessageEvent } from '../../events';
 

@@ -13,7 +13,7 @@ import {
     RoomZoomEvent,
     TextureUtils,
     TriggerHabbiconComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback } from 'react';
 import { HasPermission, Permission } from '../../../api/permissions';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
@@ -38,7 +38,7 @@ import { useRoom } from '../useRoom';
  * to useChatInputState.
  */
 export const useChatInputActions = () => {
-    const { showOctaneAlert = null, showConfirm = null } = useNotification();
+    const { showVoltAlert = null, showConfirm = null } = useNotification();
     const { settings, translateOutgoing, enqueueOutgoingTranslation } = useTranslation();
     const { roomSession = null } = useRoom();
     const { openMonitor } = useWiredToolsActions();
@@ -216,10 +216,10 @@ export const useChatInputActions = () => {
                         return null;
                     }
                     case ':client':
-                    case ':octane':
+                    case ':volt':
                     case ':nitro':
                     case ':billsonnn':
-                        showOctaneAlert();
+                        showVoltAlert();
                         return null;
                     case ':settings':
                         if (roomSession && (roomSession.isRoomOwner || HasPermission(Permission.RoomOwnerAny))) {
@@ -276,7 +276,7 @@ export const useChatInputActions = () => {
 
             return null;
         },
-        [roomSession, settings, translateOutgoing, enqueueOutgoingTranslation, showConfirm, showOctaneAlert, openMonitor]
+        [roomSession, settings, translateOutgoing, enqueueOutgoingTranslation, showConfirm, showVoltAlert, openMonitor]
     );
 
     return { sendChat };

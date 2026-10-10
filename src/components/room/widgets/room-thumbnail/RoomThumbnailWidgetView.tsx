@@ -1,4 +1,4 @@
-import { GetGuestRoomMessageComposer, ThumbnailStatusMessageEvent } from '@octane/renderer';
+import { GetGuestRoomMessageComposer, ThumbnailStatusMessageEvent } from '@volt/renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { CameraViewport, LocalizeText, RefreshRoomThumbnail, SendMessageComposer, sendTrustedCameraRequest } from '../../../../api';
 import { LayoutMiniCameraView } from '../../../../common';

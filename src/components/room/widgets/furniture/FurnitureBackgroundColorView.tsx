@@ -1,7 +1,7 @@
-import { ColorConverter } from '@octane/renderer';
+import { ColorConverter } from '@volt/renderer';
 import { FC, PointerEvent as ReactPointerEvent, useMemo } from 'react';
 import { ColorUtils, LocalizeText } from '../../../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useFurnitureBackgroundColorWidget } from '../../../../hooks';
 
 // background_color_ui (HabboRoomUICom): a 292x255 style 3 frame; the white panel, three dimmer-style sliders and two buttons are placed
@@ -17,11 +17,11 @@ const ToneSlider: FC<{ top: number; label: string; value: number; onChange: (val
 
     return (
         <>
-            <span className="octane-toner__label" style={{ top: top + 2 }}>
+            <span className="volt-toner__label" style={{ top: top + 2 }}>
                 {label}
             </span>
             <div
-                className="octane-toner__slider"
+                className="volt-toner__slider"
                 style={{ top: top + 12 }}
                 onPointerDown={(event) => {
                     event.currentTarget.setPointerCapture(event.pointerId);
@@ -29,7 +29,7 @@ const ToneSlider: FC<{ top: number; label: string; value: number; onChange: (val
                 }}
                 onPointerMove={(event) => event.currentTarget.hasPointerCapture(event.pointerId) && move(event)}
             >
-                <span className="octane-toner__thumb" style={{ left: Math.round((value / 255) * SLIDER_TRAVEL) - 15 }} />
+                <span className="volt-toner__thumb" style={{ left: Math.round((value / 255) * SLIDER_TRAVEL) - 15 }} />
             </div>
         </>
     );
@@ -54,20 +54,20 @@ export const FurnitureBackgroundColorView: FC<{}> = () => {
     if (objectId === -1) return null;
 
     return (
-        <OctaneCardView className="octane-toner" frameStyle={3} isResizable={false} uniqueKey="octane-room-toner">
-            <OctaneCardHeaderView headerText={LocalizeText('widget.backgroundcolour.title')} onCloseClick={onClose} />
-            <div className="octane-toner__panel" />
-            <span className="octane-toner__info">{LocalizeText('widget.backgroundcolor.info')}</span>
-            <div className="octane-toner__preview" style={{ backgroundColor: ColorUtils.makeColorNumberHex(previewColor) }} />
+        <VoltCardView className="volt-toner" frameStyle={3} isResizable={false} uniqueKey="volt-room-toner">
+            <VoltCardHeaderView headerText={LocalizeText('widget.backgroundcolour.title')} onCloseClick={onClose} />
+            <div className="volt-toner__panel" />
+            <span className="volt-toner__info">{LocalizeText('widget.backgroundcolor.info')}</span>
+            <div className="volt-toner__preview" style={{ backgroundColor: ColorUtils.makeColorNumberHex(previewColor) }} />
             <ToneSlider label={LocalizeText('widget.backgroundcolor.hue')} top={77} value={hue} onChange={setHue} />
             <ToneSlider label={LocalizeText('widget.backgroundcolor.saturation')} top={119} value={saturation} onChange={setSaturation} />
             <ToneSlider label={LocalizeText('widget.backgroundcolor.lightness')} top={161} value={lightness} onChange={setLightness} />
-            <button className="octane-toner__button octane-toner__apply" type="button" onClick={applyToner}>
+            <button className="volt-toner__button volt-toner__apply" type="button" onClick={applyToner}>
                 {LocalizeText('widget.backgroundcolor.button.apply')}
             </button>
-            <button className="octane-toner__button octane-toner__toggle" type="button" onClick={toggleToner}>
+            <button className="volt-toner__button volt-toner__toggle" type="button" onClick={toggleToner}>
                 {LocalizeText('widget.backgroundcolor.button.on')}
             </button>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

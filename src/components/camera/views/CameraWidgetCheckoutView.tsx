@@ -5,17 +5,17 @@ import {
     CreateLinkEvent,
     GetEventDispatcher,
     GetSessionDataManager,
-    OctaneToolbarAnimateIconEvent,
+    VoltToolbarAnimateIconEvent,
     PhotoCompetitionMessageComposer,
     PublishPhotoMessageComposer,
     PurchasePhotoMessageComposer,
     ToolbarIconEnum
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CameraEffectSelection, CameraPicture, GetConfigurationValue, loadTrustedCameraImage, LocalizeText, NotificationAlertType, OpenUrl, renderTrustedCamera, SendMessageComposer } from '../../../api';
 import creditIcon from '../../../assets/images/camera/checkout/credit.png';
 import ducketIcon from '../../../assets/images/camera/checkout/ducket.png';
-import { OctaneCardView } from '../../../common';
+import { VoltCardView } from '../../../common';
 import { useMessageEvent, useNotification, usePurse } from '../../../hooks';
 import { CAMERA_BOX_COLOR, CAMERA_COMPETITION_COLOR, CameraCenteredText, CameraNativeText } from './CameraNativeText';
 import { CameraSkinButton } from './CameraSkinButton';
@@ -133,7 +133,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
 
         const transitionImage = sourceImage.cloneNode(true) as HTMLImageElement;
         const sourceBounds = sourceContainer.getBoundingClientRect();
-        const transitionEvent = new OctaneToolbarAnimateIconEvent(transitionImage, sourceBounds.x, sourceBounds.y);
+        const transitionEvent = new VoltToolbarAnimateIconEvent(transitionImage, sourceBounds.x, sourceBounds.y);
 
         transitionImage.width = 120;
         transitionImage.height = 120;
@@ -320,17 +320,17 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
     );
 
     return (
-        <OctaneCardView className="octane-camera-checkout" frameStyle={3} isResizable={false} theme="primary-slim">
-            <div className="octane-card-header-shell">
-                <span className="octane-card-title">
+        <VoltCardView className="volt-camera-checkout" frameStyle={3} isResizable={false} theme="primary-slim">
+            <div className="volt-card-header-shell">
+                <span className="volt-card-title">
                     <CameraCenteredText background={0x484949} color={0xffffff} text={LocalizeText('camera.confirm_phase.title')} textStyle="u_frame_title" width={340} />
                 </span>
-                <button aria-label={LocalizeText('generic.close')} className="octane-card-close-button" type="button" onClick={() => processAction('close')} />
+                <button aria-label={LocalizeText('generic.close')} className="volt-card-close-button" type="button" onClick={() => processAction('close')} />
             </div>
-            <div className="octane-camera-checkout__list">
-                <div ref={productImageContainerRef} className={`octane-camera-checkout__image${hasRenderingFailed ? ' is-failed' : ''}`}>
+            <div className="volt-camera-checkout__list">
+                <div ref={productImageContainerRef} className={`volt-camera-checkout__image${hasRenderingFailed ? ' is-failed' : ''}`}>
                     {!isImageLoaded && !hasRenderingFailed && (
-                        <div className="octane-camera-checkout__loading">
+                        <div className="volt-camera-checkout__loading">
                             <CameraNativeText background={0xcccccc} color={0xffffff} size={36} text={LocalizeText('camera.loading')} />
                         </div>
                     )}
@@ -350,13 +350,13 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                     )}
                 </div>
 
-                <div className={`octane-camera-checkout__status${statusLocalization ? '' : ' is-empty'}`}>
+                <div className={`volt-camera-checkout__status${statusLocalization ? '' : ' is-empty'}`}>
                     {!!statusLocalization && <CameraNativeText maxWidth={320} text={LocalizeText(statusLocalization)} />}
                 </div>
 
                 {competitionEnabled && (
-                    <section className="octane-camera-checkout__box is-competition">
-                        <div className="octane-camera-checkout__box-name">
+                    <section className="volt-camera-checkout__box is-competition">
+                        <div className="volt-camera-checkout__box-name">
                             <CameraNativeText
                                 background={CAMERA_COMPETITION_COLOR}
                                 color={0xffffff}
@@ -371,33 +371,33 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                                 textStyle="u_bold"
                             />
                         </div>
-                        <div className="octane-camera-checkout__competition-info">
+                        <div className="volt-camera-checkout__competition-info">
                             <CameraNativeText background={CAMERA_COMPETITION_COLOR} color={0xffffff} maxWidth={190} text={LocalizeText('camera.competition.info')} />
                         </div>
                         {renderButton('competition', 'is-competition-button', LocalizeText('generic.submit'), competitionDisabled, 'green', () => processAction('competition'))}
                     </section>
                 )}
 
-                <section className={`octane-camera-checkout__box is-purchase${picturesBought > 0 ? ' has-inventory-link' : ''}`}>
-                    <div className="octane-camera-checkout__box-name">
+                <section className={`volt-camera-checkout__box is-purchase${picturesBought > 0 ? ' has-inventory-link' : ''}`}>
+                    <div className="volt-camera-checkout__box-name">
                         <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={LocalizeText('camera.purchase.header')} textStyle="u_bold" />
                     </div>
-                    <div className="octane-camera-checkout__price-row">
+                    <div className="volt-camera-checkout__price-row">
                         <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={costLabel} />
                         <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={String(shownPrice.credits)} textStyle="u_bold" />
-                        <img alt="" className="octane-camera-checkout__icon" src={creditIcon} />
+                        <img alt="" className="volt-camera-checkout__icon" src={creditIcon} />
                         {shownPrice.duckets > 0 && (
                             <>
                                 <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={String(shownPrice.duckets)} textStyle="u_bold" />
-                                <img alt="" className="octane-camera-checkout__icon" src={ducketIcon} />
+                                <img alt="" className="volt-camera-checkout__icon" src={ducketIcon} />
                             </>
                         )}
                     </div>
                     {picturesBought > 0 && (
-                        <div className="octane-camera-checkout__inventory-row">
+                        <div className="volt-camera-checkout__inventory-row">
                             <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={LocalizeText('camera.purchase.count.info')} textStyle="u_bold" />
                             <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={String(picturesBought)} />
-                            <button className="octane-camera-checkout__link" type="button" onClick={() => CreateLinkEvent('inventory/open/furni')}>
+                            <button className="volt-camera-checkout__link" type="button" onClick={() => CreateLinkEvent('inventory/open/furni')}>
                                 <CameraNativeText background={CAMERA_BOX_COLOR} text={LocalizeText('camera.open.inventory')} underline />
                             </button>
                         </div>
@@ -413,8 +413,8 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                 </section>
 
                 {!publishDisabled && (
-                    <section className={`octane-camera-checkout__box is-publish${wasPicturePublished ? ' is-published' : ''}`}>
-                        <div className="octane-camera-checkout__box-name">
+                    <section className={`volt-camera-checkout__box is-publish${wasPicturePublished ? ' is-published' : ''}`}>
+                        <div className="volt-camera-checkout__box-name">
                             <CameraNativeText
                                 background={CAMERA_BOX_COLOR}
                                 maxWidth={300}
@@ -423,7 +423,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                                 textStyle="u_bold"
                             />
                         </div>
-                        <div className="octane-camera-checkout__publish-info">
+                        <div className="volt-camera-checkout__publish-info">
                             <CameraNativeText
                                 background={CAMERA_BOX_COLOR}
                                 maxWidth={191}
@@ -431,14 +431,14 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                             />
                         </div>
                         {!wasPicturePublished && (
-                            <div className="octane-camera-checkout__price-row is-publish-price">
+                            <div className="volt-camera-checkout__price-row is-publish-price">
                                 <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={costLabel} />
                                 <CameraNativeText background={CAMERA_BOX_COLOR} size={14} text={String(shownPrice.publishDucketPrice)} textStyle="u_bold" />
-                                <img alt="" className="octane-camera-checkout__icon" src={ducketIcon} />
+                                <img alt="" className="volt-camera-checkout__icon" src={ducketIcon} />
                             </div>
                         )}
                         {wasPicturePublished && !!publishedPhotoUrl && (
-                            <a className="octane-camera-checkout__link is-publish-link" href={publishedPhotoUrl} rel="noreferrer" target="_blank">
+                            <a className="volt-camera-checkout__link is-publish-link" href={publishedPhotoUrl} rel="noreferrer" target="_blank">
                                 <CameraNativeText background={CAMERA_BOX_COLOR} text={LocalizeText('camera.link.to.published')} underline />
                             </a>
                         )}
@@ -447,20 +447,20 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                     </section>
                 )}
 
-                <div className="octane-camera-checkout__removal">
+                <div className="volt-camera-checkout__removal">
                     <CameraNativeText maxWidth={320} text={LocalizeText('camera.warning.disclaimer')} />
                 </div>
 
                 {spendingDisclaimerEnabled && (
-                    <label className="octane-camera-checkout__spending">
+                    <label className="volt-camera-checkout__spending">
                         <input checked={disclaimerAccepted} type="checkbox" onChange={(event) => setDisclaimerAccepted(event.target.checked)} />
-                        <span className="octane-camera-checkout__spending-text">
+                        <span className="volt-camera-checkout__spending-text">
                             <CameraNativeText maxWidth={278} text={LocalizeText('disclaimer.credit_spending')} />
                         </span>
                     </label>
                 )}
 
-                <div className="octane-camera-checkout__buttons">
+                <div className="volt-camera-checkout__buttons">
                     {renderButton(
                         'cancel',
                         'is-cancel-button',
@@ -471,6 +471,6 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (prop
                     )}
                 </div>
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

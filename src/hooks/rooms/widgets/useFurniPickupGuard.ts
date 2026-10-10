@@ -1,4 +1,4 @@
-import { RoomObjectCategory, RoomObjectOperationType } from '@octane/renderer';
+import { RoomObjectCategory, RoomObjectOperationType } from '@volt/renderer';
 import { useCallback } from 'react';
 import {
     expandLocalizedText,

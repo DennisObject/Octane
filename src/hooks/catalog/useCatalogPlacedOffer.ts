@@ -1,4 +1,4 @@
-import { FurnitureListComposer, FurnitureListItemParser, FurniturePlaceComposer, FurniturePlacePaintComposer, GetRoomEngine, RoomObjectVariable } from '@octane/renderer';
+import { FurnitureListComposer, FurnitureListItemParser, FurniturePlaceComposer, FurniturePlacePaintComposer, GetRoomEngine, RoomObjectVariable } from '@volt/renderer';
 import { useShallow } from 'zustand/react/shallow';
 import { GetRoomSession, PlacedObjectPurchaseData, SendMessageComposer } from '../../api';
 import { useCatalogStore } from './catalogStore';

@@ -1,9 +1,9 @@
 /* @vitest-environment jsdom */
 
-import { RoomSessionDoorbellEvent } from '@octane/renderer';
+import { RoomSessionDoorbellEvent } from '@volt/renderer';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { clearMockEventDispatcher, mockEventDispatcher } from '../../../octane-renderer.mock';
+import { clearMockEventDispatcher, mockEventDispatcher } from '../../../volt-renderer.mock';
 import { useDoorbellState } from './useDoorbellState';
 
 // Server push helper — mirrors the renderer wire by emitting the same

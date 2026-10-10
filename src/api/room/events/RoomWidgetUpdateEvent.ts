@@ -1,3 +1,3 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 
-export class RoomWidgetUpdateEvent extends OctaneEvent {}
+export class RoomWidgetUpdateEvent extends VoltEvent {}

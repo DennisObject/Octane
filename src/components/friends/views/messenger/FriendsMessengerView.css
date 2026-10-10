@@ -626,7 +626,7 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .messenger-picker-host .messenger-habbicon-controls {
@@ -690,7 +690,7 @@
     border-radius: 0;
     background: transparent url("@/assets/images/habbicons/slices/promo-arrow-close.png") center no-repeat;
     opacity: .7;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .messenger-picker-host .messenger-btn.messenger-habbicon-get-more {
@@ -750,7 +750,7 @@
     border-radius: 0;
     background: rgba(255, 255, 255, .85);
     box-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .messenger-picker-host .messenger-habbicon-grid .empty {
@@ -770,7 +770,7 @@
     height: 40px;
     overflow: hidden;
     background-repeat: no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 

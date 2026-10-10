@@ -21,7 +21,7 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = (props) => 
             <CatalogFirstProductSelectorWidgetView />
             <Grid style={{ gridTemplateRows: hasDetails ? 'auto minmax(0, 1fr) auto' : 'minmax(0, 1fr) auto' }}>
                 {hasDetails && (
-                    <div className="col-span-12 octane-catalog-bundle-details">
+                    <div className="col-span-12 volt-catalog-bundle-details">
                         <Text small>{page.localization.getText(1)}</Text>
                     </div>
                 )}
@@ -30,23 +30,23 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = (props) => 
                         <>
                             <Text
                                 aria-hidden
-                                className="octane-catalog-bundle-header-spacer"
+                                className="volt-catalog-bundle-header-spacer"
                                 dangerouslySetInnerHTML={{ __html: SanitizeHtml(page.localization.getText(2)) }}
                             />
                             <Text
                                 aria-hidden
-                                className="octane-catalog-bundle-header-spacer"
+                                className="volt-catalog-bundle-header-spacer"
                                 dangerouslySetInnerHTML={{ __html: SanitizeHtml(page.localization.getText(2)) }}
                             />
                         </>
                     )}
                     <Flex alignItems="center" gap={2}>
                         {mainIconUrl && (
-                            <div className="octane-catalog-bundle-main-item">
-                                <img alt="" className="octane-catalog-grid-offer-icon" draggable={false} src={mainIconUrl} />
+                            <div className="volt-catalog-bundle-main-item">
+                                <img alt="" className="volt-catalog-grid-offer-icon" draggable={false} src={mainIconUrl} />
                             </div>
                         )}
-                        <div className="octane-catalog-bundle-price">
+                        <div className="volt-catalog-bundle-price">
                             <CatalogSimplePriceWidgetView />
                         </div>
                     </Flex>
@@ -59,16 +59,16 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = (props) => 
                     {!!page.localization.getText(2) && (
                         <Text
                             aria-hidden
-                            className="octane-catalog-bundle-header-spacer"
+                            className="volt-catalog-bundle-header-spacer"
                             dangerouslySetInnerHTML={{ __html: SanitizeHtml(page.localization.getText(2)) }}
                         />
                     )}
                     {!!page.localization.getText(2) && <Text dangerouslySetInnerHTML={{ __html: SanitizeHtml(page.localization.getText(2)) }} />}
-                    <Column className="octane-catalog-bundle-frame has-classic-scrollbar" overflow="hidden">
-                        <CatalogBundleGridWidgetView hideMainProduct fullWidth className="octane-catalog-layout-bundle-grid" columnCount={4} />
+                    <Column className="volt-catalog-bundle-frame has-classic-scrollbar" overflow="hidden">
+                        <CatalogBundleGridWidgetView hideMainProduct fullWidth className="volt-catalog-layout-bundle-grid" columnCount={4} />
                     </Column>
                 </Column>
-                <div className="col-span-12 octane-catalog-bundle-actions">
+                <div className="col-span-12 volt-catalog-bundle-actions">
                     <CatalogPurchaseWidgetView />
                 </div>
             </Grid>

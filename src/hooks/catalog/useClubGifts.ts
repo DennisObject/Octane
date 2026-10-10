@@ -1,8 +1,8 @@
-import { ClubGiftInfoEvent, ClubGiftInfoParser, GetClubGiftInfo } from '@octane/renderer';
+import { ClubGiftInfoEvent, ClubGiftInfoParser, GetClubGiftInfo } from '@volt/renderer';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useOctaneEventInvalidator, useOctaneQuery } from '../../api/octane-query';
+import { useVoltEventInvalidator, useVoltQuery } from '../../api/volt-query';
 
-const CLUB_GIFTS_KEY = ['octane', 'catalog', 'clubGifts'] as const;
+const CLUB_GIFTS_KEY = ['volt', 'catalog', 'clubGifts'] as const;
 
 /**
  * Habbo Club gift availability (counts of pending gifts, days until
@@ -11,7 +11,7 @@ const CLUB_GIFTS_KEY = ['octane', 'catalog', 'clubGifts'] as const;
  * a gift via SelectClubGiftComposer — so the cache needs to be
  * invalidated on each push, not just hydrated by the first response.
  *
- * Pair the query with useOctaneEventInvalidator so unsolicited pushes
+ * Pair the query with useVoltEventInvalidator so unsolicited pushes
  * mark the slot stale; the next render of any consumer triggers a
  * re-fetch (which, since the server just pushed, will resolve almost
  * immediately with the fresh data the server already sent us).
@@ -20,7 +20,7 @@ const CLUB_GIFTS_KEY = ['octane', 'catalog', 'clubGifts'] as const;
  * `parser` into `catalogOptions.clubGifts`.
  */
 export const useClubGifts = (options: { enabled?: boolean } = {}): UseQueryResult<ClubGiftInfoParser> => {
-    const query = useOctaneQuery<ClubGiftInfoEvent, ClubGiftInfoParser>({
+    const query = useVoltQuery<ClubGiftInfoEvent, ClubGiftInfoParser>({
         key: CLUB_GIFTS_KEY as unknown as string[],
         request: () => new GetClubGiftInfo(),
         parser: ClubGiftInfoEvent,
@@ -29,7 +29,7 @@ export const useClubGifts = (options: { enabled?: boolean } = {}): UseQueryResul
         staleTime: Infinity
     });
 
-    useOctaneEventInvalidator<ClubGiftInfoEvent>(ClubGiftInfoEvent, CLUB_GIFTS_KEY as unknown as string[]);
+    useVoltEventInvalidator<ClubGiftInfoEvent>(ClubGiftInfoEvent, CLUB_GIFTS_KEY as unknown as string[]);
 
     return query;
 };

@@ -9,10 +9,10 @@ import {
     RoomEngineTriggerWidgetEvent,
     RoomObjectVariable,
     RoomSessionEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CanManipulateFurniture, GetRoomSession, SendMessageComposer } from '../../../../api';
-import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useMessageEvent, useVoltEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine/useFurniRemovedEvent';
 
 const SLIDER_RANGE = 10;
@@ -209,7 +209,7 @@ export const useFurnitureStackHeightWidget = () => {
         updateAuthoritativeHeight(Number.isNaN(parser.height) ? 0 : parser.height);
     });
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_STACK_HEIGHT, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_STACK_HEIGHT, (event) => {
         if (!CanManipulateFurniture(GetRoomSession(), event.objectId, event.category)) return;
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
         if (!roomObject) return;
@@ -233,12 +233,12 @@ export const useFurnitureStackHeightWidget = () => {
         setMultiWalk(Number(roomObject.model.getValue(RoomObjectVariable.FURNITURE_EXTRAS)) === 1);
     });
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.CLOSE_WIDGET, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.CLOSE_WIDGET, (event) => {
         const state = interaction.current;
         if (event.objectId === state.objectId && event.roomId === state.roomId && event.category === state.category) onClose();
     });
 
-    useOctaneEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, (event) => {
+    useVoltEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, (event) => {
         if (event.session.roomId === interaction.current.roomId) onClose();
     });
 

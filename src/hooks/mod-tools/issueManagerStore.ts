@@ -1,5 +1,5 @@
-import { IssueMessageData } from '@octane/renderer';
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { IssueMessageData } from '@volt/renderer';
+import { createVoltStore } from '../../state/createVoltStore';
 
 export const ISSUE_STATE_OPEN = 1;
 export const ISSUE_STATE_PICKED = 2;
@@ -163,7 +163,7 @@ interface IssueManagerState {
     version: number;
 }
 
-export const useIssueManagerStore = createOctaneStore<IssueManagerState>()(() => ({
+export const useIssueManagerStore = createVoltStore<IssueManagerState>()(() => ({
     issues: new Map(),
     bundles: new Map(),
     issueBundle: new Map(),

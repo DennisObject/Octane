@@ -1,6 +1,6 @@
 import { FC, useRef } from 'react';
 import { LocalizeText, YoutubeVideoPlaybackStateEnum } from '../../../../api';
-import { AutoGrid, AutoGridProps, LayoutGridItem, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { AutoGrid, AutoGridProps, LayoutGridItem, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useFurnitureYoutubeWidget } from '../../../../hooks';
 import ReactPlayer from '../../../youtube/YoutubeReactPlayer';
 
@@ -39,9 +39,9 @@ export const FurnitureYoutubeDisplayView: FC<{}> = (FurnitureYoutubeDisplayViewP
     const playing = currentVideoState === null ? true : currentVideoState === YoutubeVideoPlaybackStateEnum.PLAYING;
 
     return (
-        <OctaneCardView className="youtube-tv-widget">
-            <OctaneCardHeaderView headerText={LocalizeText('catalog.page.youtube_tvs')} onCloseClick={onClose} />
-            <OctaneCardContentView>
+        <VoltCardView className="youtube-tv-widget">
+            <VoltCardHeaderView headerText={LocalizeText('catalog.page.youtube_tvs')} onCloseClick={onClose} />
+            <VoltCardContentView>
                 <div className="row size-full">
                     <div className="youtube-video-container col-span-9 overflow-hidden">
                         {videoId && videoId.length > 0 && (
@@ -86,7 +86,7 @@ export const FurnitureYoutubeDisplayView: FC<{}> = (FurnitureYoutubeDisplayViewP
                         </AutoGrid>
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

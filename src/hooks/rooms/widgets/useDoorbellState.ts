@@ -1,6 +1,6 @@
-import { RoomSessionDoorbellEvent } from '@octane/renderer';
+import { RoomSessionDoorbellEvent } from '@volt/renderer';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { useOctaneEvent } from '../../events';
+import { useVoltEvent } from '../../events';
 
 /**
  * Reduces the three doorbell events (DOORBELL, RSDE_ACCEPTED, RSDE_REJECTED)
@@ -32,9 +32,9 @@ export const useDoorbellState = (): readonly string[] => {
         setUsers(next);
     }, []);
 
-    useOctaneEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.DOORBELL, handleAdd);
-    useOctaneEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.RSDE_ACCEPTED, handleRemove);
-    useOctaneEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.RSDE_REJECTED, handleRemove);
+    useVoltEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.DOORBELL, handleAdd);
+    useVoltEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.RSDE_ACCEPTED, handleRemove);
+    useVoltEvent<RoomSessionDoorbellEvent>(RoomSessionDoorbellEvent.RSDE_REJECTED, handleRemove);
 
     return users;
 };

@@ -1,4 +1,4 @@
-import { NodeData } from '@octane/renderer';
+import { NodeData } from '@volt/renderer';
 import { ICatalogNode } from './ICatalogNode';
 
 let nextNodeId = 1;

@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 
 export const InventoryBotImageView: FC<{ figure: string; gender: string; preview?: boolean }> = ({ figure, gender, preview = false }) => {

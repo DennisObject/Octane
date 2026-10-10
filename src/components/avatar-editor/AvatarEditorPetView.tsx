@@ -1,4 +1,4 @@
-import { AvatarFigurePartType } from '@octane/renderer';
+import { AvatarFigurePartType } from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AvatarEditorThumbnailsHelper, CreateLinkEvent, GetClubMemberLevel, IAvatarEditorCategory, IAvatarEditorCategoryPartItem } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
@@ -75,27 +75,27 @@ export const AvatarEditorPetView: FC<{
     }, [selectEditorPart]);
 
     if (!petCategory || !petCategory.partItems || !petCategory.partItems.length) {
-        return <div className="octane-avatar-editor-empty-state">No companion pets available.</div>;
+        return <div className="volt-avatar-editor-empty-state">No companion pets available.</div>;
     }
 
     return (
-        <div className="octane-avatar-editor-model octane-avatar-editor-pet-model">
-            <div className="octane-avatar-editor-subcategories octane-avatar-editor-pet-subcategories">
+        <div className="volt-avatar-editor-model volt-avatar-editor-pet-model">
+            <div className="volt-avatar-editor-subcategories volt-avatar-editor-pet-subcategories">
                 <button type="button" className="category-item" aria-pressed="true">
                     <AvatarEditorIcon icon="pt" selected />
                 </button>
-                <div className="octane-avatar-editor-pet-equipped">
+                <div className="volt-avatar-editor-pet-equipped">
                     {selectedPartItem && slotThumbUrl ? <img src={slotThumbUrl} alt="" draggable={false} /> : <AvatarEditorIcon icon="pt" />}
                     <span>{selectedPartItem ? 'Companion equipped' : 'No companion selected'}</span>
                     {selectedPartItem && (
-                        <button type="button" className="octane-avatar-editor-pet-remove" aria-label="Remove companion" onClick={removePet}>
+                        <button type="button" className="volt-avatar-editor-pet-remove" aria-label="Remove companion" onClick={removePet}>
                             <AvatarEditorIcon icon="clear" />
                         </button>
                     )}
                 </div>
             </div>
 
-            <div className="octane-avatar-editor-parts-grid">
+            <div className="volt-avatar-editor-parts-grid">
                 <AvatarEditorFigureSetView category={petCategory} columnCount={6} />
             </div>
 
@@ -103,13 +103,13 @@ export const AvatarEditorPetView: FC<{
                 <>
                     <button
                         type="button"
-                        className={`octane-avatar-editor-advanced-color${advancedColorMode ? ' is-active' : ''}`}
+                        className={`volt-avatar-editor-advanced-color${advancedColorMode ? ' is-active' : ''}`}
                         onClick={() => (hasHC ? setAdvancedColorMode((prev) => !prev) : CreateLinkEvent('habboUI/open/hccenter'))}
                     >
                         Advanced Color
                         <LayoutCurrencyIcon type="hc" />
                     </button>
-                    <div className={`octane-avatar-editor-palettes${maxPaletteCount === 2 ? ' dual-palette' : ''}`}>
+                    <div className={`volt-avatar-editor-palettes${maxPaletteCount === 2 ? ' dual-palette' : ''}`}>
                         {maxPaletteCount >= 1 && (
                             <div className="avatar-editor-palette-set-view">
                                 {advancedColorMode ? (

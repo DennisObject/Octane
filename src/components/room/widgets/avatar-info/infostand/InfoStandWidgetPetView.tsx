@@ -1,4 +1,4 @@
-import { CreateLinkEvent, PetRespectComposer, PetType, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType } from '@octane/renderer';
+import { CreateLinkEvent, PetRespectComposer, PetType, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType } from '@volt/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { GetConfigurationValue, LocalizeText, ProcessRoomObjectOperation, SendMessageComposer } from '../../../../../api';
 import { Button, Column, Flex, LayoutPetImageView } from '../../../../../common';
@@ -61,14 +61,14 @@ const PetStatusBar: FC<{ top: number; label: string; icon: string; value: number
 
     return (
         <>
-            <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top }} width={169}>
+            <InfoStandCenteredText className="volt-pet-infostand__label" style={{ top }} width={169}>
                 {label}
             </InfoStandCenteredText>
-            <img alt="" className="octane-pet-infostand__status-icon" draggable={false} src={icon} style={{ top: top + 14 }} />
-            <div className="octane-pet-infostand__bar" style={{ top: top + 15 }}>
-                <div className="octane-pet-infostand__bar-fill" style={{ width: fill * 160, background: color }} />
-                <div className="octane-pet-infostand__bar-highlight" style={{ width: fill * 160, background: highlight }} />
-                <InfoStandCenteredText className="octane-pet-infostand__bar-value" width={160}>
+            <img alt="" className="volt-pet-infostand__status-icon" draggable={false} src={icon} style={{ top: top + 14 }} />
+            <div className="volt-pet-infostand__bar" style={{ top: top + 15 }}>
+                <div className="volt-pet-infostand__bar-fill" style={{ width: fill * 160, background: color }} />
+                <div className="volt-pet-infostand__bar-highlight" style={{ width: fill * 160, background: highlight }} />
+                <InfoStandCenteredText className="volt-pet-infostand__bar-value" width={160}>
                     {text ?? value + '/' + maximum}
                 </InfoStandCenteredText>
             </div>
@@ -195,7 +195,7 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
     ];
 
     const actions = (
-        <Flex className="octane-infostand-actions octane-infostand-actions--tight octane-pet-actions" justifyContent="end">
+        <Flex className="volt-infostand-actions volt-infostand-actions--tight volt-pet-actions" justifyContent="end">
             {[...buttons].reverse().map(
                 (button) =>
                     button.condition && (
@@ -209,19 +209,19 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
 
     if (avatarInfo.petType !== PetType.MONSTERPLANT)
         return (
-            <Column alignItems="end" className="octane-pet-infostand-stack">
-                <div className="octane-infostand octane-pet-infostand">
-                    <button type="button" className="octane-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
-                    <InfoStandCenteredText className="octane-pet-infostand__name" width={173}>
+            <Column alignItems="end" className="volt-pet-infostand-stack">
+                <div className="volt-infostand volt-pet-infostand">
+                    <button type="button" className="volt-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
+                    <InfoStandCenteredText className="volt-pet-infostand__name" width={173}>
                         {avatarInfo.name}
                     </InfoStandCenteredText>
-                    <InfoStandCenteredText className="octane-pet-infostand__breed" width={173}>
+                    <InfoStandCenteredText className="volt-pet-infostand__breed" width={173}>
                         {LocalizeText(`pet.breed.${avatarInfo.petType}.${avatarInfo.petBreed}`)}
                     </InfoStandCenteredText>
-                    <div className="octane-pet-infostand__image">
+                    <div className="volt-pet-infostand__image">
                         <LayoutPetImageView direction={2} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
                     </div>
-                    <div className="octane-pet-infostand__level">
+                    <div className="volt-pet-infostand__level">
                         {LocalizeText('pet.level', ['level', 'maxlevel'], [avatarInfo.level.toString(), avatarInfo.maximumLevel.toString()])}
                     </div>
                     <PetStatusBar
@@ -251,14 +251,14 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                         top={189}
                         value={avatarInfo.energy}
                     />
-                    <InfoStandCenteredText className="octane-pet-infostand__respect" width={173}>
+                    <InfoStandCenteredText className="volt-pet-infostand__respect" width={173}>
                         {LocalizeText('infostand.text.petrespect', ['count'], [avatarInfo.respect.toString()])}
                         <img alt="" draggable={false} src={respectIcon} />
                     </InfoStandCenteredText>
-                    <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 281 }} width={173}>
+                    <InfoStandCenteredText className="volt-pet-infostand__line" style={{ top: 281 }} width={173}>
                         {LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}
                     </InfoStandCenteredText>
-                    <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 294 }} width={173}>
+                    <InfoStandCenteredText className="volt-pet-infostand__line" style={{ top: 294 }} width={173}>
                         {LocalizeText('infostand.text.petowner', ['name'], [avatarInfo.ownerName])}
                     </InfoStandCenteredText>
                 </div>
@@ -272,13 +272,13 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
     const wellbeing = avatarInfo.dead ? 0 : Math.max(0, remainingTimeToLive);
 
     return (
-        <Column alignItems="end" className="octane-pet-infostand-stack">
-            <div className="octane-infostand octane-pet-infostand octane-pet-infostand--plant">
-                <button type="button" className="octane-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
-                <InfoStandCenteredText className="octane-pet-infostand__name" width={173}>
+        <Column alignItems="end" className="volt-pet-infostand-stack">
+            <div className="volt-infostand volt-pet-infostand volt-pet-infostand--plant">
+                <button type="button" className="volt-infostand__close" aria-label={LocalizeText('generic.close')} title={LocalizeText('generic.close')} onClick={onClose} />
+                <InfoStandCenteredText className="volt-pet-infostand__name" width={173}>
                     {avatarInfo.name}
                 </InfoStandCenteredText>
-                <div className="octane-pet-infostand__image">
+                <div className="volt-pet-infostand__image">
                     <LayoutPetImageView direction={4} figure={avatarInfo.petFigure} posture={avatarInfo.posture} />
                 </div>
                 <PetStatusBar
@@ -293,11 +293,11 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                 />
                 {remainingGrowTime > 0 && (
                     <>
-                        <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top: 147 }} width={169}>
+                        <InfoStandCenteredText className="volt-pet-infostand__label" style={{ top: 147 }} width={169}>
                             {LocalizeText('infostand.pet.text.growth')}
                         </InfoStandCenteredText>
                         {clock.map((value, index) => (
-                            <div key={index} className="octane-pet-infostand__clock" style={{ left: 46 + index * 36, backgroundImage: `url(${clockBackground})` }}>
+                            <div key={index} className="volt-pet-infostand__clock" style={{ left: 46 + index * 36, backgroundImage: `url(${clockBackground})` }}>
                                 <span>{value}</span>
                                 <em>{clockUnits[index]}</em>
                                 {index < 2 && <i>:</i>}
@@ -305,16 +305,16 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = ({ avatar
                         ))}
                     </>
                 )}
-                <InfoStandCenteredText className="octane-pet-infostand__label" style={{ top: 201 }} width={169}>
+                <InfoStandCenteredText className="volt-pet-infostand__label" style={{ top: 201 }} width={169}>
                     {LocalizeText('infostand.pet.text.raritylevel', ['level'], [LocalizeText(`infostand.pet.raritylevel.${avatarInfo.rarityLevel}`)])}
                 </InfoStandCenteredText>
-                <div className="octane-pet-infostand__rarity">
+                <div className="volt-pet-infostand__rarity">
                     <div>{avatarInfo.rarityLevel}</div>
                 </div>
-                <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 272 }} width={173}>
+                <InfoStandCenteredText className="volt-pet-infostand__line" style={{ top: 272 }} width={173}>
                     {LocalizeText('pet.age', ['age'], [avatarInfo.age.toString()])}
                 </InfoStandCenteredText>
-                <InfoStandCenteredText className="octane-pet-infostand__line" style={{ top: 285 }} width={173}>
+                <InfoStandCenteredText className="volt-pet-infostand__line" style={{ top: 285 }} width={173}>
                     {LocalizeText('infostand.text.petowner', ['name'], [avatarInfo.ownerName])}
                 </InfoStandCenteredText>
             </div>

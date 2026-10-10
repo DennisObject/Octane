@@ -1,4 +1,4 @@
-import { AvatarEditorFigureCategory, AvatarFigurePartType, FigureDataContainer } from '@octane/renderer';
+import { AvatarEditorFigureCategory, AvatarFigurePartType, FigureDataContainer } from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IAvatarEditorCategory, LocalizeText } from '../../api';
 import { NativeText } from '../../common/native-text/NativeText';
@@ -60,17 +60,17 @@ export const AvatarEditorModelView: FC<{
     if (!activeCategory) return null;
 
     return (
-        <div ref={container} className="octane-avatar-editor-model">
-            <div className={`octane-avatar-editor-subcategories${name === AvatarEditorFigureCategory.GENERIC ? ' is-gender' : ''}`}>
+        <div ref={container} className="volt-avatar-editor-model">
+            <div className={`volt-avatar-editor-subcategories${name === AvatarEditorFigureCategory.GENERIC ? ' is-gender' : ''}`}>
                 {name === AvatarEditorFigureCategory.GENERIC && (
                     <>
                         <button type="button" className="category-item gender-category-item" onClick={() => setGender(AvatarFigurePartType.MALE)}>
                             <AvatarEditorIcon icon="male" selected={gender === FigureDataContainer.MALE} />
-                            <NativeText className="octane-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.boy')} textStyle="u_bold" background={0xe9e9e1} />
+                            <NativeText className="volt-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.boy')} textStyle="u_bold" background={0xe9e9e1} />
                         </button>
                         <button type="button" className="category-item gender-category-item" onClick={() => setGender(AvatarFigurePartType.FEMALE)}>
                             <AvatarEditorIcon icon="female" selected={gender === FigureDataContainer.FEMALE} />
-                            <NativeText className="octane-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.girl')} textStyle="u_bold" background={0xe9e9e1} />
+                            <NativeText className="volt-avatar-editor-gender-text" text={LocalizeText('avatareditor.generic.girl')} textStyle="u_bold" background={0xe9e9e1} />
                         </button>
                     </>
                 )}
@@ -88,11 +88,11 @@ export const AvatarEditorModelView: FC<{
                     ))}
             </div>
 
-            <div className="octane-avatar-editor-parts-grid">
+            <div className="volt-avatar-editor-parts-grid">
                 <AvatarEditorFigureSetView category={activeCategory} columnCount={6} />
             </div>
 
-            <div className={`octane-avatar-editor-palettes${maxPaletteCount === 2 ? ' dual-palette' : ''}`}>
+            <div className={`volt-avatar-editor-palettes${maxPaletteCount === 2 ? ' dual-palette' : ''}`}>
                 {maxPaletteCount >= 1 && (
                     <div className="avatar-editor-palette-set-view">
                         <AvatarEditorPaletteSetView category={activeCategory} columnCount={maxPaletteCount === 2 ? 9 : 20} paletteIndex={0} />

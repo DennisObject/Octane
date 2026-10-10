@@ -1,4 +1,4 @@
-import { GetRoomEngine, GetSessionDataManager, RoomObjectCategory, RoomObjectVariable } from '@octane/renderer';
+import { GetRoomEngine, GetSessionDataManager, RoomObjectCategory, RoomObjectVariable } from '@volt/renderer';
 import { FC, KeyboardEvent, ReactNode, useMemo, useState } from 'react';
 import { GetRoomSession, giveableVariables, parseInt32, profileToEntries, VariablesWebApiClient, WebApiVariable } from '../../api';
 import wiredGlobalPlaceholderImage from '../../assets/images/wiredtools/wired_global_placeholder.png';

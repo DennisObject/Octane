@@ -13,8 +13,8 @@ export const useAvatarEditorGridWheel = (container: RefObject<HTMLDivElement | n
         const onWheel = (event: WheelEvent) => {
             if (!event.deltaY || !(event.target instanceof Element)) return;
 
-            const area = event.target.closest('.octane-classic-scroll-area');
-            const viewport = area?.querySelector<HTMLDivElement>('.octane-classic-scroll-area-viewport');
+            const area = event.target.closest('.volt-classic-scroll-area');
+            const viewport = area?.querySelector<HTMLDivElement>('.volt-classic-scroll-area-viewport');
             if (!viewport || !element.contains(viewport)) return;
 
             event.preventDefault();

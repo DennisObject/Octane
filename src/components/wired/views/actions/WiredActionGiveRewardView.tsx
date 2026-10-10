@@ -4,7 +4,7 @@ import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../
 import { Button, Text } from '../../../../common';
 import { WiredLegacySlider as Slider } from '../WiredSlider';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -235,7 +235,7 @@ export const WiredActionGiveRewardView: FC<{}> = (props) => {
                         <option value="1">Once every {limitationInterval} days</option>
                     </select>
                     {rewardTime > 0 && (
-                        <OctaneInput type="number" value={limitationInterval} onChange={(event) => setLimitationInterval(Number(event.target.value))} />
+                        <VoltInput type="number" value={limitationInterval} onChange={(event) => setLimitationInterval(Number(event.target.value))} />
                     )}
                 </div>
             </div>
@@ -295,7 +295,7 @@ export const WiredActionGiveRewardView: FC<{}> = (props) => {
                                     <Text small bold>
                                         {getRewardValuePlaceholder(reward.rewardType)}
                                     </Text>
-                                    <OctaneInput
+                                    <VoltInput
                                         aria-label={getRewardValuePlaceholder(reward.rewardType)}
                                         placeholder={getRewardValuePlaceholder(reward.rewardType)}
                                         type={reward.rewardType === 'badge' ? 'text' : 'number'}
@@ -313,7 +313,7 @@ export const WiredActionGiveRewardView: FC<{}> = (props) => {
                                                 Unique
                                             </Text>
                                         ) : (
-                                            <OctaneInput
+                                            <VoltInput
                                                 aria-label="Chance %"
                                                 min={0}
                                                 max={100}
@@ -328,7 +328,7 @@ export const WiredActionGiveRewardView: FC<{}> = (props) => {
                                             <Text small bold>
                                                 {getExtraFieldLabel(reward.rewardType)}
                                             </Text>
-                                            <OctaneInput
+                                            <VoltInput
                                                 aria-label={getExtraFieldLabel(reward.rewardType)}
                                                 min={0}
                                                 placeholder={getExtraFieldPlaceholder(reward.rewardType)}

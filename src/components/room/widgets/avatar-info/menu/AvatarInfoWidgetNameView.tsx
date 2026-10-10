@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { AvatarInfoName, MessengerFriend } from '../../../../../api';
 import { loadNativeFont, measureNativeText } from '../../../../../common/native-text/NativeFont';
@@ -88,7 +88,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = (prop
             userType={nameInfo.userType}
             onClose={onClose}
         >
-            {relationIconClass && <div className={`air-name-bubble__relation octane-friends-spritesheet ${relationIconClass}`} />}
+            {relationIconClass && <div className={`air-name-bubble__relation volt-friends-spritesheet ${relationIconClass}`} />}
             <NativeText background={isFriendEntry ? 0x72893f : 0x2c2c2b} className="air-name-bubble__name" overrides={{ size: 11, color: 0xffffff }} text={nameInfo.name} textStyle="u_regular" />
         </ContextMenuView>
     );

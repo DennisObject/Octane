@@ -1,7 +1,7 @@
-import { OctaneEvent } from '@octane/renderer';
+import { VoltEvent } from '@volt/renderer';
 import { CatalogWidgetEvent } from './CatalogWidgetEvent';
 
-export class CatalogPurchaseOverrideEvent extends OctaneEvent {
+export class CatalogPurchaseOverrideEvent extends VoltEvent {
     private _callback: Function;
 
     constructor(callback: Function) {

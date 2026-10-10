@@ -1,4 +1,4 @@
-import { GetRoomEngine, RoomObjectCategory, RoomUnitWalkComposer } from '@octane/renderer';
+import { GetRoomEngine, RoomObjectCategory, RoomUnitWalkComposer } from '@volt/renderer';
 import { useEffect, useRef } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useKeyboardMovement } from '../useKeyboardMovement';

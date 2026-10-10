@@ -1,4 +1,4 @@
-import { MouseEventType } from '@octane/renderer';
+import { MouseEventType } from '@volt/renderer';
 import { FC, KeyboardEvent, MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfigurationValue, GetProductIconUrl, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
 import dealIconNarrow from '../../../../../assets/images/catalog/air/ctlg-pic-deal-icon-narrow.png';
@@ -54,7 +54,7 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                     observer.disconnect();
                 }
             },
-            { root: element.closest('.octane-catalog-default-layout, .octane-catalog-window') ?? null, rootMargin: '120px' }
+            { root: element.closest('.volt-catalog-default-layout, .volt-catalog-window') ?? null, rootMargin: '120px' }
         );
         observer.observe(element);
         return () => observer.disconnect();
@@ -133,11 +133,11 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                 {...rest}
             >
                 {iconVisible && offer.pricingModel === Offer.PRICING_MODEL_BUNDLE && bundleCounter > 0 && (
-                    <span className="octane-catalog-grid-bundle-counter">{bundleCounter}</span>
+                    <span className="volt-catalog-grid-bundle-counter">{bundleCounter}</span>
                 )}
                 {iconUrl && (isBundleOffer || (product.productType !== ProductTypeEnum.HABBICON && product.productType !== ProductTypeEnum.ROBOT)) && (
                     <img
-                        className="octane-catalog-grid-offer-icon"
+                        className="volt-catalog-grid-offer-icon"
                         src={iconUrl}
                         draggable={false}
                         style={!isBundleOffer && tintColor ? { filter: 'url(#guild-furni-recolor)', transform: 'translateZ(0)' } : undefined}
@@ -150,25 +150,25 @@ export const CatalogOfferTileView: FC<CatalogOfferTileViewProps> = (props) => {
                     />
                 )}
                 {!isBundleOffer && product.productType === ProductTypeEnum.HABBICON && (
-                    <LayoutHabbiconImageView className="octane-catalog-grid-habbicon-icon" id={product.productClassId} />
+                    <LayoutHabbiconImageView className="volt-catalog-grid-habbicon-icon" id={product.productClassId} />
                 )}
                 {!isBundleOffer && product.productType === ProductTypeEnum.ROBOT && <LayoutAvatarImageView direction={2} figure={product.extraParam} fit />}
                 {offer.clubLevel > 0 && (
-                    <span aria-label="Habbo Club" className="octane-catalog-grid-club-level" title="Habbo Club">
-                        <i aria-hidden="true" className="octane-icon icon-catalogue-hc_small" />
+                    <span aria-label="Habbo Club" className="volt-catalog-grid-club-level" title="Habbo Club">
+                        <i aria-hidden="true" className="volt-icon icon-catalogue-hc_small" />
                     </span>
                 )}
                 {showPrices && prices.length > 0 && (
-                    <span className={`octane-catalog-grid-price ${prices.length > 1 ? 'is-multi-price' : 'is-single-price'}`}>
+                    <span className={`volt-catalog-grid-price ${prices.length > 1 ? 'is-multi-price' : 'is-single-price'}`}>
                         {prices.map((price, index) => (
-                            <span key={`${price.type}-${index}`} className="octane-catalog-grid-price-entry">
-                                {index > 0 && <span className="octane-catalog-grid-price-plus">+</span>}
-                                <span className="octane-catalog-grid-price-amount">{price.amount}</span>
+                            <span key={`${price.type}-${index}`} className="volt-catalog-grid-price-entry">
+                                {index > 0 && <span className="volt-catalog-grid-price-plus">+</span>}
+                                <span className="volt-catalog-grid-price-amount">{price.amount}</span>
                                 {UsesActivityPointIcon(price.type) ? (
                                     <LayoutActivityPointIcon type={price.type} />
                                 ) : (
                                     !!getCurrencyIconUrl(price.type) && (
-                                        <img className="octane-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
+                                        <img className="volt-catalog-grid-price-currency" src={getCurrencyIconUrl(price.type)} draggable={false} />
                                     )
                                 )}
                             </span>

@@ -6,8 +6,8 @@ import {
     RoomObjectCategory,
     RoomObjectPlacementSource,
     RoomObjectType
-} from '@octane/renderer';
-import { SendMessageComposer } from '../octane';
+} from '@volt/renderer';
+import { SendMessageComposer } from '../volt';
 import { FurniCategory } from './FurniCategory';
 import { GroupItem } from './GroupItem';
 import { IBotItem } from './IBotItem';

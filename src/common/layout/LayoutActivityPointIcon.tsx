@@ -21,7 +21,7 @@ export const LayoutActivityPointIcon: FC<LayoutActivityPointIconProps> = (props)
     return (
         <span
             aria-hidden="true"
-            className={`octane-activity-point-icon ${className}`.trim()}
+            className={`volt-activity-point-icon ${className}`.trim()}
             data-currency-type={type}
             style={{
                 display: 'inline-block',

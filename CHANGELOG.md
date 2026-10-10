@@ -1,25 +1,25 @@
 # Changelog
 
-## Octane Rebrand — nitro → octane naming (2026-09-05)
+## Volt Rebrand — nitro → volt naming (2026-09-05)
 
-Project-wide rename of the inherited "nitro" naming to Octane, across both
+Project-wide rename of the inherited "nitro" naming to Volt, across both
 the UI and the renderer.
 
 ### Renamed
-- npm scope `@nitrots/*` → `@octane/*`; root renderer package is now
-  `@octane/renderer`; the UI package is `octane-react`.
-- All `Nitro*` classes, components, hooks, and types → `Octane*`
-  (`NitroCardView` → `OctaneCardView`, `useNitroEvent` → `useOctaneEvent`,
-  `NitroLogger` → `OctaneLogger`, …), including the matching file,
-  directory, and CSS class names (`nitro-*` → `octane-*`; update custom
+- npm scope `@nitrots/*` → `@volt/*`; root renderer package is now
+  `@volt/renderer`; the UI package is `volt-react`.
+- All `Nitro*` classes, components, hooks, and types → `Volt*`
+  (`NitroCardView` → `VoltCardView`, `useNitroEvent` → `useVoltEvent`,
+  `NitroLogger` → `VoltLogger`, …), including the matching file,
+  directory, and CSS class names (`nitro-*` → `volt-*`; update custom
   themes accordingly — the bundled themes are already updated).
 - Window globals `NitroConfig` / `NitroPlugins` / `NitroClientMode` /
-  `NitroSecureApiUrl` → `Octane*`. Legacy aliases remain so existing
+  `NitroSecureApiUrl` → `Volt*`. Legacy aliases remain so existing
   external scripts and plugins keep working.
 - Build env vars `NITRO_JSON_MODE` / `NITRO_SINGLE_BUNDLE` /
-  `NITRO_RENDERER_DIR` → `OCTANE_*` (legacy names still accepted), and
-  `.nitro-build.json` → `.octane-build.json` (legacy file still read).
-- The `:nitro` chat command is now `:octane` (`:nitro` kept as an alias).
+  `NITRO_RENDERER_DIR` → `VOLT_*` (legacy names still accepted), and
+  `.nitro-build.json` → `.volt-build.json` (legacy file still read).
+- The `:nitro` chat command is now `:volt` (`:nitro` kept as an alias).
 
 ### Deliberately NOT renamed (compatibility)
 - The `.nitro` asset bundle extension and all existing compiled assets.
@@ -37,7 +37,7 @@ the UI and the renderer.
 
 Long-running work on the `feat/react19-modernization` branch.
 Companion changes shipped on `feat/react19-event-bus` in
-[`octane-renderer`](../octane-renderer) — see that repo's CLAUDE.md
+[`volt-renderer`](../volt-renderer) — see that repo's CLAUDE.md
 for the renderer-side notes.
 
 ### Pattern #1: `useNitroEventState` + companions

@@ -1,7 +1,7 @@
-import { EditEventMessageComposer } from '@octane/renderer';
+import { EditEventMessageComposer } from '@volt/renderer';
 import { FC, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../../../common';
 import { NativeText } from '../../../../../common/native-text/NativeText';
 import { useNativeTextSampling } from '../../../../../common/native-text/NativeTextScale';
 import { useAirFieldWidth } from '../../../../achievements/AchievementText';
@@ -64,9 +64,9 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
     };
 
     return (
-        <OctaneCardView
+        <VoltCardView
             aria-label={caption}
-            className={`octane-room-promote-edit${isSurfaceDrawn ? ' is-native-surface' : ''}`}
+            className={`volt-room-promote-edit${isSurfaceDrawn ? ' is-native-surface' : ''}`}
             dragStyle={isSurfaceDrawn ? { filter: 'none' } : undefined}
             frameStyle={3}
             isResizable={false}
@@ -74,17 +74,17 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
             role="dialog"
             uniqueKey="room-promote-edit"
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={onClose}>
+            <VoltCardHeaderView headerText="" onCloseClick={onClose}>
                 <NativeText
                     background={0x377998}
-                    className="octane-room-promote-edit__title"
+                    className="volt-room-promote-edit__title"
                     nativeResolution
                     overrides={{ color: 0xffffff }}
                     style={captionLeft === undefined ? undefined : { left: captionLeft, transform: 'none' }}
                     text={caption}
                     textStyle="u_frame_title"
                 />
-            </OctaneCardHeaderView>
+            </VoltCardHeaderView>
             {isFractional && (
                 <RoomPromoteEditSurface
                     caption={caption}
@@ -98,11 +98,11 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     onStateChange={setSurface}
                 />
             )}
-            <div className="octane-room-promote-edit__client">
-                <div className="octane-room-promote-edit__label" style={{ top: 4 }}>
+            <div className="volt-room-promote-edit__client">
+                <div className="volt-room-promote-edit__label" style={{ top: 4 }}>
                     <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.name')} textStyle="u_bold" />
                 </div>
-                {hasNameError && <div className="octane-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
+                {hasNameError && <div className="volt-room-promote-edit__error">{LocalizeText('navigator.eventsettings.nameerr')}</div>}
                 <RoomPromoteField
                     isEditing={focusedField === 'name'}
                     isError={hasNameError}
@@ -116,7 +116,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     onChange={setName}
                     onEditingChange={(editing) => setFocusedField((current) => (editing ? 'name' : current === 'name' ? null : current))}
                 />
-                <div className="octane-room-promote-edit__label" style={{ top: 40 }}>
+                <div className="volt-room-promote-edit__label" style={{ top: 40 }}>
                     <NativeText background={0xe9e9e1} nativeResolution text={LocalizeText('navigator.eventsettings.desc')} textStyle="u_bold" />
                 </div>
                 <RoomPromoteField
@@ -133,6 +133,6 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = ({ 
                     onEditingChange={(editing) => setFocusedField((current) => (editing ? 'description' : current === 'description' ? null : current))}
                 />
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

@@ -1,6 +1,6 @@
-import { CatalogAdminLoadOfferComposer, CatalogAdminOfferDetailsEvent } from '@octane/renderer';
+import { CatalogAdminLoadOfferComposer, CatalogAdminOfferDetailsEvent } from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
-import { SendMessageComposer } from '../../api/octane/SendMessageComposer';
+import { SendMessageComposer } from '../../api/volt/SendMessageComposer';
 import { LocalizeText } from '../../api/utils/LocalizeText';
 import { useCatalogAdmin } from '../../components/catalog/CatalogAdminContext';
 import { useMessageEvent } from '../events/useMessageEvent';

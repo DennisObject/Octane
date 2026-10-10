@@ -16,9 +16,9 @@ export const CatalogColourGridWidgetView: FC<CatalogColourGridWidgetViewProps> =
     const { variants = [], selectedOffer = null, onSelect = null } = props;
 
     return (
-        <div className="octane-catalog-colour-grid-shell">
+        <div className="volt-catalog-colour-grid-shell">
             <ClassicScrollAreaView className="h-full min-h-0">
-                <div aria-label="Colours" className="octane-catalog-colour-grid" role="radiogroup">
+                <div aria-label="Colours" className="volt-catalog-colour-grid" role="radiogroup">
                     {variants.map(({ offer, colour }) => {
                         const isChosen = selectedOffer?.offerId === offer.offerId;
 
@@ -27,9 +27,9 @@ export const CatalogColourGridWidgetView: FC<CatalogColourGridWidgetViewProps> =
                                 key={offer.offerId}
                                 aria-checked={isChosen}
                                 aria-label={offer.localizationName}
-                                className={`octane-catalog-colour-swatch ${isChosen ? 'is-chosen' : ''}`}
+                                className={`volt-catalog-colour-swatch ${isChosen ? 'is-chosen' : ''}`}
                                 role="radio"
-                                style={{ '--octane-swatch-colour': toCssColour(colour) } as CSSProperties}
+                                style={{ '--volt-swatch-colour': toCssColour(colour) } as CSSProperties}
                                 title={offer.localizationName}
                                 type="button"
                                 onClick={() => onSelect(offer)}

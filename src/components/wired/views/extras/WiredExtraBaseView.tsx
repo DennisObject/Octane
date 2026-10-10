@@ -1,4 +1,4 @@
-import { WiredActionDefinition } from '@octane/renderer';
+import { WiredActionDefinition } from '@volt/renderer';
 import { CSSProperties, FC, PropsWithChildren, ReactNode, useEffect } from 'react';
 import { WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';

@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredDateToString, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { VoltInput } from '../../../../layout';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 export const WiredConditionDateRangeView: FC<{}> = (props) => {
@@ -43,11 +43,11 @@ export const WiredConditionDateRangeView: FC<{}> = (props) => {
         <WiredConditionBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
             <div className="flex flex-col gap-1">
                 <Text bold>{LocalizeText('wiredfurni.params.startdate')}</Text>
-                <OctaneInput type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <VoltInput type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1">
                 <Text bold>{LocalizeText('wiredfurni.params.enddate')}</Text>
-                <OctaneInput type="text" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <VoltInput type="text" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
         </WiredConditionBaseView>
     );

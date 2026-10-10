@@ -24,7 +24,7 @@ import {
     RequestFriendComposer,
     RequestOfflineMessagesComposer,
     SetRelationshipStatusComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import {

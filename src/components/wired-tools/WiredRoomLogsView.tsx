@@ -1,7 +1,7 @@
-import { IWiredLogEntry, WiredLogPageEvent, WiredRoomLogsPageComposer } from '@octane/renderer';
+import { IWiredLogEntry, WiredLogPageEvent, WiredRoomLogsPageComposer } from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer } from '../../api';
-import { Button, DraggableWindowPosition, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, DraggableWindowPosition, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useMessageEvent } from '../../hooks';
 import { useWiredPageRequests } from '../../hooks/wired-tools/useWiredPageRequests';
 import { MONITOR_ERROR_INFO, MONITOR_LOG_ORDER } from './WiredCreatorTools.constants';
@@ -182,7 +182,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
 
     return (
         // Official logs_overview: frame 3, 700 wide, 508 high, resizable in height between 380 and 700.
-        <OctaneCardView
+        <VoltCardView
             className="h-[508px] max-h-[700px] min-h-[380px] w-[700px]"
             frameStyle={3}
             resizeAxis="vertical"
@@ -192,8 +192,8 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
             offsetLeft={40}
             offsetTop={40}
         >
-            <OctaneCardHeaderView headerText={localizeWithFallback('wiredmenu.logs_overview.title', 'Wired room logs')} onCloseClick={onClose} />
-            <OctaneCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 min-h-0" overflow="hidden">
+            <VoltCardHeaderView headerText={localizeWithFallback('wiredmenu.logs_overview.title', 'Wired room logs')} onCloseClick={onClose} />
+            <VoltCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 min-h-0" overflow="hidden">
                 <div className="rounded border border-[#c8c2b2] bg-white p-3 flex items-center justify-between gap-3">
                     <Text>
                         {localizeWithFallback(
@@ -280,7 +280,7 @@ export const WiredRoomLogsView = ({ onClose }: WiredRoomLogsViewProps) => {
                     scrollResetKey={scrollKey}
                     bodyClassName="min-h-0 grow"
                 />
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

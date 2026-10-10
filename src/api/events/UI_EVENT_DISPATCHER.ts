@@ -1,3 +1,3 @@
-import { EventDispatcher, IEventDispatcher } from '@octane/renderer';
+import { EventDispatcher, IEventDispatcher } from '@volt/renderer';
 
 export const UI_EVENT_DISPATCHER: IEventDispatcher = new EventDispatcher();

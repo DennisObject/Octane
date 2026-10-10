@@ -12,11 +12,11 @@ import {
     RoomOccupiedTilesMessageEvent,
     RoomVisualizationSettingsEvent,
     UpdateFloorPropertiesMessageComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { GetLocalStorage, LocalizeText, SendMessageComposer, SetLocalStorage } from '../../api';
-import { Base, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
-import { useMessageEvent, useOctaneEvent } from '../../hooks';
+import { Base, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../common';
+import { useMessageEvent, useVoltEvent } from '../../hooks';
 import { useFloorplanLiveSync } from '../../hooks/rooms/widgets/useFloorplanLiveSync';
 import { useFloorplanReducer } from './hooks/useFloorplanReducer';
 import { MAX_WALL_HEIGHT, MIN_WALL_HEIGHT } from './state/constants';
@@ -45,7 +45,7 @@ type Props = {
     externalSession?: FloorplanEditorExternalSession;
 };
 
-export const PREVIEW_3D_STORAGE_KEY = 'octane.floorplan.preview3d';
+export const PREVIEW_3D_STORAGE_KEY = 'volt.floorplan.preview3d';
 
 const readPreview3dPreference = (): boolean => {
     try {
@@ -84,7 +84,7 @@ export const FloorplanEditorLegacyView: FC<Props> = ({ externalSession }) => {
 
     const { setBaseline, mergeBaseline, revert: revertLivePreview } = useFloorplanLiveSync({ enabled: !isExternal && liveSync && isVisible, state });
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => {
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.DISPOSED, () => {
         if (!isExternal) setRoomVisible(false);
     });
 
@@ -282,9 +282,9 @@ export const FloorplanEditorLegacyView: FC<Props> = ({ externalSession }) => {
     return (
         <>
             {isVisible && (
-                <OctaneCardView uniqueKey="floorpan-editor" className="w-[1010px] h-[620px]" classNames={['octane-floorplan-window']} theme="primary-slim" isResizable={false}>
-                    <OctaneCardHeaderView headerText={externalSession?.title ?? LocalizeText('floor.plan.editor.title')} onCloseClick={closeEditor} />
-                    <OctaneCardContentView overflow="hidden" className="flex flex-col">
+                <VoltCardView uniqueKey="floorpan-editor" className="w-[1010px] h-[620px]" classNames={['volt-floorplan-window']} theme="primary-slim" isResizable={false}>
+                    <VoltCardHeaderView headerText={externalSession?.title ?? LocalizeText('floor.plan.editor.title')} onCloseClick={closeEditor} />
+                    <VoltCardContentView overflow="hidden" className="flex flex-col">
                         <div className="fp-body">
                             <div className="fp-controls">
                                 <FloorplanToolbar
@@ -397,8 +397,8 @@ export const FloorplanEditorLegacyView: FC<Props> = ({ externalSession }) => {
                                 </div>
                             </div>
                         </div>
-                    </OctaneCardContentView>
-                </OctaneCardView>
+                    </VoltCardContentView>
+                </VoltCardView>
             )}
             {importExportVisible && (
                 <FloorplanImportExport

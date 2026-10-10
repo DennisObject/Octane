@@ -3,6 +3,7 @@
 // are single use, so every page load starts a new session (login, remember-me
 // or a website hand-off) that hands out its own token; nothing is stored.
 const LEGACY_STORAGE_KEYS = ['nitro.access.token', 'nitro.access.token.exp'];
+// Written by the client while it was still called Octane.
 const LEGACY_SESSION_KEY = 'octane.access.token';
 
 interface HeldAccessToken {

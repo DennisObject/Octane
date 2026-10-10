@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { Permission } from '../../api/permissions';
 import { CalendarItemState, ICalendarItem, LocalizeText } from '../../api';
-import { Button, Column, Grid, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { Button, Column, Grid, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { useHasPermission } from '../../hooks';
 import { CalendarItemView } from './CalendarItemView';
 
@@ -98,9 +98,9 @@ export const CalendarView: FC<CalendarViewProps> = (props) => {
     };
 
     return (
-        <OctaneCardView className="octane-campaign-calendar" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText(`campaign.calendar.${campaignName}.title`)} onCloseClick={onClose} />
-            <OctaneCardContentView>
+        <VoltCardView className="volt-campaign-calendar" theme="primary-slim">
+            <VoltCardHeaderView headerText={LocalizeText(`campaign.calendar.${campaignName}.title`)} onCloseClick={onClose} />
+            <VoltCardContentView>
                 <Grid alignItems="center" fullHeight={false} justifyContent="between">
                     <Column size={1} />
                     <Column size={10}>
@@ -147,7 +147,7 @@ export const CalendarView: FC<CalendarViewProps> = (props) => {
                         <div className="campaign-spritesheet next cursor-pointer" onClick={onClickNext} />
                     </div>
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

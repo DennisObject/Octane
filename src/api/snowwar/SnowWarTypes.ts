@@ -1,4 +1,4 @@
-import type { IObjectData } from '@octane/renderer';
+import type { IObjectData } from '@volt/renderer';
 
 // Public contract of the SnowStorm engine (AIR `SnowWarEngine`) and of `useSnowWar`.
 // Views read these shapes; the engine owns the deterministic lockstep simulation.

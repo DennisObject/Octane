@@ -8,7 +8,7 @@ import {
     RoomEngineObjectEvent,
     RoomEnterEffect,
     RoomSessionDanceEvent
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import {
     AvatarInfoFurni,
@@ -19,7 +19,7 @@ import {
     RoomWidgetUpdateRentableBotChatEvent
 } from '../../../../api';
 import { Column, LayoutFurniIconImageView } from '../../../../common';
-import { useAvatarInfoWidget, useFurniPickupGuard, useOctaneEvent, useRoom, useUiEvent } from '../../../../hooks';
+import { useAvatarInfoWidget, useFurniPickupGuard, useVoltEvent, useRoom, useUiEvent } from '../../../../hooks';
 import { AvatarInfoPetTrainingPanelView } from './AvatarInfoPetTrainingPanelView';
 import { AvatarInfoRentableBotChatView } from './AvatarInfoRentableBotChatView';
 import { AvatarInfoUseProductConfirmView } from './AvatarInfoUseProductConfirmView';
@@ -67,21 +67,21 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
     const updateAvatarClickControl = (updates: { suppressMenuUntil?: number; suppressRotateUntil?: number }) => {
         const globalScope = globalThis as any;
 
-        if (!globalScope.__octaneAvatarClickControl) {
-            globalScope.__octaneAvatarClickControl = {
+        if (!globalScope.__voltAvatarClickControl) {
+            globalScope.__voltAvatarClickControl = {
                 suppressMenuUntil: 0,
                 suppressRotateUntil: 0
             };
         }
 
-        Object.assign(globalScope.__octaneAvatarClickControl, updates);
+        Object.assign(globalScope.__voltAvatarClickControl, updates);
     };
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.NORMAL_MODE, (event) => {
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.NORMAL_MODE, (event) => {
         if (isGameMode) setGameMode(false);
     });
 
-    useOctaneEvent<RoomEngineEvent>(RoomEngineEvent.GAME_MODE, (event) => {
+    useVoltEvent<RoomEngineEvent>(RoomEngineEvent.GAME_MODE, (event) => {
         if (!isGameMode) setGameMode(true);
     });
 
@@ -95,7 +95,7 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
         return () => query.removeEventListener('change', updateTouchLayout);
     }, []);
 
-    useOctaneEvent<RoomSessionDanceEvent>(RoomSessionDanceEvent.RSDE_DANCE, (event) => {
+    useVoltEvent<RoomSessionDanceEvent>(RoomSessionDanceEvent.RSDE_DANCE, (event) => {
         if (event.roomIndex !== roomSession.ownRoomIndex) return;
 
         setIsDancing(event.danceId !== 0);
@@ -103,9 +103,9 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
 
     useUiEvent<RoomWidgetUpdateRentableBotChatEvent>(RoomWidgetUpdateRentableBotChatEvent.UPDATE_CHAT, (event) => setRentableBotChatEvent(event));
 
-    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_PICKUP, (event) => pickupRoomObject(event.objectId, event.category));
+    useVoltEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_PICKUP, (event) => pickupRoomObject(event.objectId, event.category));
 
-    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_MANIPULATION, (event) => {
+    useVoltEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.REQUEST_MANIPULATION, (event) => {
         if (!(avatarInfo instanceof AvatarInfoFurni)) return;
         if (event.category !== avatarInfo.category || event.objectId !== avatarInfo.id) return;
 
@@ -219,7 +219,7 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
 
                     if (!mobileFurniDetailsOpen) {
                         return (
-                            <button className="octane-mobile-furni-infostand-trigger" type="button" onClick={() => setMobileFurniDetailsOpen(true)}>
+                            <button className="volt-mobile-furni-infostand-trigger" type="button" onClick={() => setMobileFurniDetailsOpen(true)}>
                                 <LayoutFurniIconImageView productType={info.productType} productClassId={info.spriteId} />
                             </button>
                         );

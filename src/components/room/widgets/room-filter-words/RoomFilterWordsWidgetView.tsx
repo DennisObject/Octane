@@ -1,7 +1,7 @@
-import { GetCustomRoomFilterMessageComposer, UpdateRoomFilterMessageComposer } from '@octane/renderer';
+import { GetCustomRoomFilterMessageComposer, UpdateRoomFilterMessageComposer } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { ClassicScrollAreaView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { ClassicScrollAreaView, VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../../../common';
 import { useFilterWordsWidget, useNavigatorData } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from '../../../navigator/views/room-settings/NavigatorRoomSettingsAtView';
 
@@ -40,9 +40,9 @@ export const RoomFilterWordsWidgetView: FC<{}> = (props) => {
     if (!isVisible) return null;
 
     return (
-        <OctaneCardView className="octane-ros-filter" frameStyle={3} isResizable={false} uniqueKey="octane-room-filter">
-            <OctaneCardHeaderView headerText={LocalizeText('navigator.roomsettings.roomfilter')} onCloseClick={() => onClose()} />
-            <OctaneCardContentView className="octane-ros-filter-content" gap={0}>
+        <VoltCardView className="volt-ros-filter" frameStyle={3} isResizable={false} uniqueKey="volt-room-filter">
+            <VoltCardHeaderView headerText={LocalizeText('navigator.roomsettings.roomfilter')} onCloseClick={() => onClose()} />
+            <VoltCardContentView className="volt-ros-filter-content" gap={0}>
                 <NavigatorRoomSettingsAtView className="ros-list-border" h={30} w={130} x={5} y={8}>
                     <input
                         className="ros-filter-word"
@@ -76,7 +76,7 @@ export const RoomFilterWordsWidgetView: FC<{}> = (props) => {
                         <span className="ros-button-label">{LocalizeText('navigator.roomsettings.roomfilter.removeword')}</span>
                     </button>
                 </NavigatorRoomSettingsAtView>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

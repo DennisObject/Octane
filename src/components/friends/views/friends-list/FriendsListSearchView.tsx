@@ -1,4 +1,4 @@
-import { GetSessionDataManager, HabboSearchComposer, HabboSearchResultData } from '@octane/renderer';
+import { GetSessionDataManager, HabboSearchComposer, HabboSearchResultData } from '@volt/renderer';
 import { FC, FormEvent } from 'react';
 import { GetConfigurationValue, GetUserProfile, LocalizeText, OpenMessengerChat, SendMessageComposer } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';

@@ -7,7 +7,7 @@ import { FC, RefObject, useEffect, useRef } from 'react';
 // The routine is fixed to this one proven filter and only reachable through NativeFrameShadow, which bounds the frame size before anything is allocated.
 const FRAME_3_SHADOW = { distance: 4, angle: 45, color: 0, alpha: 0.35, blurX: 4, blurY: 4, strength: 1, quality: 1 };
 
-// habbo_skin_frame_3: 10px corners, 33px title and 10px footer cut from frame-ubuntu-3.png, the same slices OctaneCardView.css gives border-image.
+// habbo_skin_frame_3: 10px corners, 33px title and 10px footer cut from frame-ubuntu-3.png, the same slices VoltCardView.css gives border-image.
 const FRAME_URL = new URL('../../assets/images/habbo-skin/slices/frame-ubuntu-3.png', import.meta.url).href;
 const SLICE_TOP = 33;
 const SLICE_SIDE = 10;
@@ -262,5 +262,5 @@ export const NativeFrameShadow: FC<NativeFrameShadowProps> = ({ targetRef, onRea
         };
     }, [targetRef, onReadyChange]);
 
-    return <canvas ref={canvasRef} aria-hidden="true" className="octane-native-frame-shadow" />;
+    return <canvas ref={canvasRef} aria-hidden="true" className="volt-native-frame-shadow" />;
 };

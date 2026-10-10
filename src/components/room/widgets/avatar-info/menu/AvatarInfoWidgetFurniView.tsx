@@ -1,4 +1,4 @@
-import { RoomControllerLevel, RoomObjectOperationType } from '@octane/renderer';
+import { RoomControllerLevel, RoomObjectOperationType } from '@volt/renderer';
 import { FC } from 'react';
 import { FaArrowsAlt, FaSyncAlt, FaTrashRestore } from 'react-icons/fa';
 import { AvatarInfoFurni, ProcessRoomObjectOperation } from '../../../../../api';

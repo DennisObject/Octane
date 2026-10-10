@@ -1,4 +1,4 @@
-import { GetConfigurationValue } from '../octane/GetConfigurationValue';
+import { GetConfigurationValue } from '../volt/GetConfigurationValue';
 import { localizeWithFallback } from '../utils/localizeWithFallback';
 
 export type HabbiconEntry = {

@@ -10,7 +10,7 @@ interface FieldProps<T> {
     className?: string;
 }
 
-const FieldError: FC<{ error?: string }> = ({ error = '' }) => (error ? <span className="octane-staff-error-text">{error}</span> : null);
+const FieldError: FC<{ error?: string }> = ({ error = '' }) => (error ? <span className="volt-staff-error-text">{error}</span> : null);
 
 type TextFieldProps = Omit<FieldProps<string>, 'onChange'> & {
     placeholder?: string;
@@ -92,7 +92,7 @@ export const CatalogAdminSelectField: FC<FieldProps<string> & { options: { value
 };
 
 export const CatalogAdminCheckbox: FC<FieldProps<boolean>> = ({ label, value, onChange, disabled = false }) => (
-    <label className="octane-staff-row octane-catalog-admin-checkbox">
+    <label className="volt-staff-row volt-catalog-admin-checkbox">
         <input checked={value} disabled={disabled} type="checkbox" onChange={(event) => onChange(event.target.checked)} />
         <span>{label}</span>
     </label>

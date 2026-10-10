@@ -1,4 +1,4 @@
-import { IPartColor } from '@octane/renderer';
+import { IPartColor } from '@volt/renderer';
 import { IAvatarEditorCategoryPartItem } from './IAvatarEditorCategoryPartItem';
 
 export interface IAvatarEditorCategory {

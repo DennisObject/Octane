@@ -1,7 +1,7 @@
-import { IObjectData, OctaneEvent } from '@octane/renderer';
+import { IObjectData, VoltEvent } from '@volt/renderer';
 import { IPurchasableOffer } from '../../api';
 
-export class SetRoomPreviewerStuffDataEvent extends OctaneEvent {
+export class SetRoomPreviewerStuffDataEvent extends VoltEvent {
     public static UPDATE_STUFF_DATA: string = 'SRPSA_UPDATE_STUFF_DATA';
 
     private _offer: IPurchasableOffer;

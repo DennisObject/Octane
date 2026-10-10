@@ -1,4 +1,4 @@
-import { AchievementLevelUpData } from '@octane/renderer';
+import { AchievementLevelUpData } from '@volt/renderer';
 import { NotificationBubbleItem } from './NotificationBubbleItem';
 import { NotificationBubbleType } from './NotificationBubbleType';
 

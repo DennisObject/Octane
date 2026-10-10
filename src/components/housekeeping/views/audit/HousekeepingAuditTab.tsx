@@ -32,7 +32,7 @@ export const HousekeepingAuditTab: FC = () => {
 
     return (
         <>
-            <div className="octane-staff-row">
+            <div className="volt-staff-row">
                 <select aria-label={LocalizeText('housekeeping.audit.filter.target')} value={targetFilter} onChange={(event) => setTargetFilter(event.target.value as TargetFilter)}>
                     {TARGET_FILTERS.map((filter) => (
                         <option key={filter} value={filter}>
@@ -59,7 +59,7 @@ export const HousekeepingAuditTab: FC = () => {
                 </Button>
             </div>
             {filtered.length ? (
-                <div className="octane-staff-list octane-housekeeping-log">
+                <div className="volt-staff-list volt-housekeeping-log">
                     {filtered.map((entry) => (
                         <HousekeepingLogRow key={entry.id} entry={entry} />
                     ))}

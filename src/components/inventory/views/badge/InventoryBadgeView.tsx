@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, localizeWithFallback, UnseenItemCategory } from '../../../../api';
 import { LayoutBadgeImageView } from '../../../../common';
 import { useInventoryBadges, useInventoryUnseenTracker } from '../../../../hooks';
-import { OctaneButton } from '../../../../layout';
+import { VoltButton } from '../../../../layout';
 import { InventoryBadgeItemView } from './InventoryBadgeItemView';
 
 const ActiveBadgeSlot: FC<{
@@ -17,7 +17,7 @@ const ActiveBadgeSlot: FC<{
 
     return (
         <div
-            className={`octane-inventory-badge-slot ${badgeCode ? 'has-badge octane-inventory-thumb octane-inventory-badge-cell' : 'is-empty'} ${isSelected ? 'is-selected' : ''} ${isDragOver ? 'is-dragover' : ''}`}
+            className={`volt-inventory-badge-slot ${badgeCode ? 'has-badge volt-inventory-thumb volt-inventory-badge-cell' : 'is-empty'} ${isSelected ? 'is-selected' : ''} ${isDragOver ? 'is-dragover' : ''}`}
             draggable={!!badgeCode}
             onDragEnd={() => undefined}
             onDragLeave={() => setIsDragOver(false)}
@@ -116,10 +116,10 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
     const rarityText = localizeWithFallback('badge.rarity.badge', `${rarityLabel} badge`, ['rarity'], [rarityLabel]);
 
     return (
-        <div className="octane-inventory-badges">
-            <div className="octane-inventory-badges-main">
+        <div className="volt-inventory-badges">
+            <div className="volt-inventory-badges-main">
                 <div
-                    className={`octane-inventory-badges-owned ${isDragOverInventory && isDraggingFromActive ? 'is-drop-remove' : ''}`}
+                    className={`volt-inventory-badges-owned ${isDragOverInventory && isDraggingFromActive ? 'is-drop-remove' : ''}`}
                     onDragLeave={() => {
                         setIsDragOverInventory(false);
                         setIsDraggingFromActive(false);
@@ -139,13 +139,13 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                         if (source === 'active' && badgeCode) removeBadge(badgeCode);
                     }}
                 >
-                    <div className="octane-inventory-badges-owned-grid" key={currentPage}>
+                    <div className="volt-inventory-badges-owned-grid" key={currentPage}>
                         {inactiveCodes.slice(currentPage * 200, (currentPage + 1) * 200).map((code) => (
                             <InventoryBadgeItemView key={code} badgeCode={code} />
                         ))}
                     </div>
                     {pageCount > 1 && (
-                        <div className="octane-inventory-badges-pages">
+                        <div className="volt-inventory-badges-pages">
                             {Array.from({ length: pageCount }, (_, index) => (
                                 <button key={index} type="button" className={currentPage === index ? 'is-active' : ''} onClick={() => setPage(index)}>
                                     {index}
@@ -154,9 +154,9 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                         </div>
                     )}
                 </div>
-                <div className="octane-inventory-badges-wearing">
-                    <div className="octane-inventory-badges-wearing-title">{localizeWithFallback('inventory.badges.activebadges', 'Wearing')}</div>
-                    <div className="octane-inventory-badges-wearing-grid">
+                <div className="volt-inventory-badges-wearing">
+                    <div className="volt-inventory-badges-wearing-title">{localizeWithFallback('inventory.badges.activebadges', 'Wearing')}</div>
+                    <div className="volt-inventory-badges-wearing-grid">
                         {Array.from({ length: maxSlots }).map((_, index) => (
                             <ActiveBadgeSlot
                                 key={index}
@@ -171,37 +171,37 @@ export const InventoryBadgeView: FC<{ filteredBadgeCodes?: string[] }> = (props)
                     </div>
                 </div>
             </div>
-            <div className="octane-inventory-badges-footer">
+            <div className="volt-inventory-badges-footer">
                 {selectedBadgeCode ? (
                     <>
-                        <div className="octane-inventory-badges-footer-image">
+                        <div className="volt-inventory-badges-footer-image">
                             <LayoutBadgeImageView badgeCode={selectedBadgeCode} />
                         </div>
-                        <div className="octane-inventory-badges-footer-details">
-                            <div className="octane-inventory-badges-footer-name">{LocalizeBadgeName(selectedBadgeCode)}</div>
+                        <div className="volt-inventory-badges-footer-details">
+                            <div className="volt-inventory-badges-footer-name">{LocalizeBadgeName(selectedBadgeCode)}</div>
                             {description && description !== selectedBadgeCode && description !== `badge_desc_${selectedBadgeCode}` && (
-                                <div className="octane-inventory-badges-footer-desc">{description}</div>
+                                <div className="volt-inventory-badges-footer-desc">{description}</div>
                             )}
-                            <div className="octane-inventory-badges-footer-meta">
-                                <span className="octane-inventory-badge-rarity">{rarityText}</span>
+                            <div className="volt-inventory-badges-footer-meta">
+                                <span className="volt-inventory-badge-rarity">{rarityText}</span>
                             </div>
                         </div>
-                        <div className="octane-inventory-badges-footer-actions">
-                            <OctaneButton
-                                className={`button-shiny octane-inventory-btn-wear ${isWearingBadge(selectedBadgeCode) ? 'is-clear' : ''}`}
+                        <div className="volt-inventory-badges-footer-actions">
+                            <VoltButton
+                                className={`button-shiny volt-inventory-btn-wear ${isWearingBadge(selectedBadgeCode) ? 'is-clear' : ''}`}
                                 disabled={!isWearingBadge(selectedBadgeCode) && !canWearBadges()}
                                 onClick={() => toggleBadge(selectedBadgeCode)}
                             >
                                 {isWearingBadge(selectedBadgeCode)
                                     ? localizeWithFallback('inventory.badges.clearbadge', 'Clear badge')
                                     : localizeWithFallback('inventory.badges.wearbadge', 'Wear badge')}
-                            </OctaneButton>
+                            </VoltButton>
                         </div>
                     </>
                 ) : (
-                    <OctaneButton className="button-shiny octane-inventory-btn-wear octane-inventory-badge-wear-empty" disabled>
+                    <VoltButton className="button-shiny volt-inventory-btn-wear volt-inventory-badge-wear-empty" disabled>
                         {localizeWithFallback('inventory.badges.wearbadge', 'Wear badge')}
-                    </OctaneButton>
+                    </VoltButton>
                 )}
             </div>
         </div>

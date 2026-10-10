@@ -1,4 +1,4 @@
-import { QuestMessageData } from '@octane/renderer';
+import { QuestMessageData } from '@volt/renderer';
 import { CSSProperties, FC, useCallback, useState } from 'react';
 import {
     getCampaignCounterStyle,

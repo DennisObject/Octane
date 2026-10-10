@@ -62,13 +62,13 @@ describe('badge display catalog layout', () => {
     it('renders dedicated product, badge, preview and purchase regions', () => {
         render(<CatalogLayoutBadgeDisplayView page={page} hideNavigation={() => undefined} />);
 
-        const layout = document.querySelector('.octane-catalog-badge-display-layout');
+        const layout = document.querySelector('.volt-catalog-badge-display-layout');
 
         expect(layout).toBeInTheDocument();
-        expect(layout.querySelector('.octane-catalog-badge-product-picker')).toContainElement(screen.getByTestId('offer-grid'));
-        expect(layout.querySelector('.octane-catalog-badge-picker')).toContainElement(screen.getByTestId('badge-selector'));
-        expect(layout.querySelector('.octane-catalog-badge-preview')).toBeInTheDocument();
-        expect(layout.querySelector('.octane-catalog-badge-purchase')).toBeInTheDocument();
+        expect(layout.querySelector('.volt-catalog-badge-product-picker')).toContainElement(screen.getByTestId('offer-grid'));
+        expect(layout.querySelector('.volt-catalog-badge-picker')).toContainElement(screen.getByTestId('badge-selector'));
+        expect(layout.querySelector('.volt-catalog-badge-preview')).toBeInTheDocument();
+        expect(layout.querySelector('.volt-catalog-badge-purchase')).toBeInTheDocument();
         expect(screen.getByTestId('offer-grid')).toHaveAttribute('data-column-count', '1');
         expect(screen.getByTestId('offer-grid')).toHaveAttribute('data-column-height', '70');
         expect(screen.getByTestId('offer-grid')).toHaveAttribute('data-column-width', '70');
@@ -101,8 +101,8 @@ describe('badge display catalog layout', () => {
         expect(screen.getByText(/Badge Cabinet Display your badge/)).toBeInTheDocument();
         expect(screen.getByTestId('product-preview')).toHaveAttribute('data-height', '240');
         expect(screen.getByTestId('total-price')).toBeInTheDocument();
-        expect(screen.getByTestId('total-price').closest('.octane-catalog-preview-price')).toBeInTheDocument();
-        expect(screen.getByTestId('total-price').closest('.octane-catalog-price-frame')).toBeInTheDocument();
+        expect(screen.getByTestId('total-price').closest('.volt-catalog-preview-price')).toBeInTheDocument();
+        expect(screen.getByTestId('total-price').closest('.volt-catalog-price-frame')).toBeInTheDocument();
         expect(screen.getByTestId('purchase')).toBeInTheDocument();
     });
 });

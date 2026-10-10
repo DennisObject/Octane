@@ -1,4 +1,4 @@
-import { RoomDataParser } from '@octane/renderer';
+import { RoomDataParser } from '@volt/renderer';
 
 export interface INavigatorData {
     homeRoomId: number;

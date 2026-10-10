@@ -1,7 +1,7 @@
-import { AddLinkEventTracker, CreateLinkEvent, DailyTaskData, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, CreateLinkEvent, DailyTaskData, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { getDailyTaskImageUrl, getDailyTasksWindowCaption, localizeWithFallback } from '../../api';
-import { ClassicScrollAreaView, LayoutBadgeImageView, LayoutCurrencyIcon, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { ClassicScrollAreaView, LayoutBadgeImageView, LayoutCurrencyIcon, VoltCardHeaderView, VoltCardView } from '../../common';
 import { NativeText } from '../../common/native-text/NativeText';
 import { useDailyTasks } from '../../hooks';
 import { AchievementText, useAirFieldWidth } from '../achievements/AchievementText';
@@ -322,8 +322,8 @@ export const DailyTasksView: FC<{}> = () => {
 
     return (
         <>
-            <OctaneCardView
-                className="octane-daily-tasks-air"
+            <VoltCardView
+                className="volt-daily-tasks-air"
                 uniqueKey="daily-tasks"
                 frameStyle={3}
                 isResizable={false}
@@ -333,10 +333,10 @@ export const DailyTasksView: FC<{}> = () => {
                 style={{ height: windowHeight, width: windowWidth }}
                 dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
             >
-                <OctaneCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
+                <VoltCardHeaderView headerText="" onCloseClick={() => setIsVisible(false)}>
                     <FrameTitle oddOffset text={getDailyTasksWindowCaption(maxSecondsLeft)} />
-                </OctaneCardHeaderView>
-                <div className="air-dt-content octane-card-content-shell">
+                </VoltCardHeaderView>
+                <div className="air-dt-content volt-card-content-shell">
                     {unclaimedTasks.length > 0 && (
                         <UnclaimedButtonView onClick={() => setShowUnclaimed(true)} />
                     )}
@@ -362,10 +362,10 @@ export const DailyTasksView: FC<{}> = () => {
                         )}
                     </div>
                 </div>
-            </OctaneCardView>
+            </VoltCardView>
             {showUnclaimed && (
-                <OctaneCardView
-                    className="octane-daily-tasks-air octane-daily-tasks-unclaimed"
+                <VoltCardView
+                    className="volt-daily-tasks-air volt-daily-tasks-unclaimed"
                     uniqueKey="daily-tasks-unclaimed"
                     frameStyle={3}
                     isResizable={false}
@@ -374,13 +374,13 @@ export const DailyTasksView: FC<{}> = () => {
                     style={{ height: 426, width: 452 }}
                     dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
                 >
-                    <OctaneCardHeaderView headerText="" onCloseClick={() => setShowUnclaimed(false)}>
+                    <VoltCardHeaderView headerText="" onCloseClick={() => setShowUnclaimed(false)}>
                         <FrameTitle text={localizeWithFallback('dailytasks.unclaimed', 'Unclaimed rewards')} />
-                    </OctaneCardHeaderView>
-                    <div className="air-dt-content octane-card-content-shell">
+                    </VoltCardHeaderView>
+                    <div className="air-dt-content volt-card-content-shell">
                         <DailyTaskListView tasks={unclaimedTasks} height={373} top={10} scrolling onClaim={onClaim} />
                     </div>
-                </OctaneCardView>
+                </VoltCardView>
             )}
         </>
     );

@@ -1,4 +1,4 @@
-import { createOctaneStore } from '../../state/createOctaneStore';
+import { createVoltStore } from '../../state/createVoltStore';
 
 export interface ModAlert {
     id: number;
@@ -15,7 +15,7 @@ interface ModAlertState {
 let nextAlertId = 1;
 
 // Classic v75 windowManager.alert(title, message): a window of its own that stays until its button is pressed.
-export const useModAlertStore = createOctaneStore<ModAlertState>()((set) => ({
+export const useModAlertStore = createVoltStore<ModAlertState>()((set) => ({
     alerts: [],
     show: (message, title = 'Alert') => set((state) => ({ alerts: [...state.alerts, { id: nextAlertId++, title, message }] })),
     close: (id) => set((state) => ({ alerts: state.alerts.filter((alert) => alert.id !== id) }))

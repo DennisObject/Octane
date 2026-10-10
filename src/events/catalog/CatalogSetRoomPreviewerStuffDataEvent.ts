@@ -1,7 +1,7 @@
-import { IObjectData, OctaneEvent } from '@octane/renderer';
+import { IObjectData, VoltEvent } from '@volt/renderer';
 import { CatalogWidgetEvent } from './CatalogWidgetEvent';
 
-export class CatalogSetRoomPreviewerStuffDataEvent extends OctaneEvent {
+export class CatalogSetRoomPreviewerStuffDataEvent extends VoltEvent {
     private _stuffData: IObjectData;
 
     constructor(stuffData: IObjectData) {

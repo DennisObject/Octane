@@ -67,13 +67,13 @@ import './css/staff/CatalogAdmin.css';
 import './css/staff/FurniEditor.css';
 import './css/staff/Housekeeping.css';
 
-import './css/octanecard/OctaneCardView.css';
+import './css/voltcard/VoltCardView.css';
 import './css/achievements/AchievementsView.css';
 
 import './css/notification/NotificationCenterView.css';
 import './css/notification/HotelAlertToast.css';
 
-import './css/octanepedia/OctanepediaView.css';
+import './css/voltpedia/VoltpediaView.css';
 
 import './css/purse/PurseView.css';
 import './css/radio/RadioView.css';

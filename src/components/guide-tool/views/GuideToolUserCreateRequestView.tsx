@@ -1,4 +1,4 @@
-import { GuideSessionCreateMessageComposer } from '@octane/renderer';
+import { GuideSessionCreateMessageComposer } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../api';
 import { Button, Text } from '../../../common';

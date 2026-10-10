@@ -1,14 +1,14 @@
-import { GetGuestRoomMessageComposer, GetGuestRoomResultEvent, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@octane/renderer';
+import { GetGuestRoomMessageComposer, GetGuestRoomResultEvent, GetRoomEngine, RoomEngineTriggerWidgetEvent, RoomObjectVariable } from '@volt/renderer';
 import { useState } from 'react';
 import { SendMessageComposer } from '../../../../api';
-import { useMessageEvent, useOctaneEvent } from '../../../events';
+import { useMessageEvent, useVoltEvent } from '../../../events';
 
 const INTERNALLINK = 'internalLink';
 
 const useFurnitureRoomLinkWidgetState = () => {
     const [roomIdToEnter, setRoomIdToEnter] = useState(0);
 
-    useOctaneEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_ROOM_LINK, (event) => {
+    useVoltEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_ROOM_LINK, (event) => {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
 
         if (!roomObject) return;

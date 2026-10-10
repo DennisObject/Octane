@@ -1,6 +1,6 @@
 /* room_tools_toolbar_xml: window at x=-5, bottom 55px above the screen edge, as tall as its visible items.
    window_bg (1,0) 164px style-2 0x24231e blend 0.8; list at (24,6); side bar 19px style-2 0x3b3933. */
-.octane-room-tools-container {
+.volt-room-tools-container {
     --room-tools-height: 148px;
     position: absolute;
     bottom: 55px;
@@ -9,13 +9,13 @@
     width: 165px;
     height: var(--room-tools-height);
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 
     > * {
         pointer-events: auto;
     }
 
-    .octane-room-tools {
+    .volt-room-tools {
         position: absolute;
         left: 1px;
         top: 0;
@@ -26,7 +26,7 @@
         color: #cccccc;
     }
 
-    .octane-room-tools::before {
+    .volt-room-tools::before {
         content: "";
         position: absolute;
         inset: 0;
@@ -37,10 +37,10 @@
         border-image-slice: 24 fill;
         border-image-width: 6px;
         border-image-repeat: stretch;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
-    &.is-collapsed .octane-room-tools {
+    &.is-collapsed .volt-room-tools {
         transform: translateX(-146px);
         pointer-events: none;
     }
@@ -176,7 +176,7 @@
         justify-content: flex-start;
     }
 
-    .room-tool-icon .octane-icon {
+    .room-tool-icon .volt-icon {
         flex: 0 0 auto;
         background-repeat: no-repeat !important;
         background-position: center center !important;
@@ -207,7 +207,7 @@
         height: 43px;
     }
 
-    .room-history-controls .octane-icon {
+    .room-history-controls .volt-icon {
         position: absolute;
         background-repeat: no-repeat !important;
         background-position: 0 0 !important;
@@ -267,7 +267,7 @@
 
     /* room_tools_history_xml: 152px style-2 0x24231e panel, items 24px with 2px spacing at (5,5),
        right edge on the tools window's right edge (x=160), bottom on its top. */
-    .octane-room-tools-history {
+    .volt-room-tools-history {
         position: absolute;
         left: 13px;
         bottom: 100%;
@@ -280,7 +280,7 @@
         pointer-events: auto;
     }
 
-    .octane-room-tools-history::before {
+    .volt-room-tools-history::before {
         content: "";
         position: absolute;
         inset: 0;
@@ -291,7 +291,7 @@
         border-image-slice: 24 fill;
         border-image-width: 6px;
         border-image-repeat: stretch;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
     .room-history-item {
@@ -364,7 +364,7 @@
     width: 22px;
 }
 
-.octane-widget-doorbell {
+.volt-widget-doorbell {
     width: 300px;
     height: 200px;
 }
@@ -414,7 +414,7 @@
     }
 }
 
-.octane-chat-input-container {
+.volt-chat-input-container {
     .input-sizer {
         display: inline-grid;
         vertical-align: top;
@@ -442,7 +442,7 @@
     }
 }
 
-.octane-chat-input-container.swf-chat-input {
+.volt-chat-input-container.swf-chat-input {
     /* chatinput_window_new: input_border 400x38 at x=11, styles 57x38 at x=0, extra button 41x38 at x=427. */
     width: 100% !important;
     max-width: 471px;
@@ -454,7 +454,7 @@
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-style-trigger {
@@ -469,7 +469,7 @@
     margin: 0;
     padding: 0;
     background: url('@/assets/images/chat-input-swf/chat_style_block.png') 0 0 / 57px 38px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-style-arrow {
@@ -479,7 +479,7 @@
     width: 10px;
     height: 5px;
     background: url('@/assets/images/chat-input-swf/chat_style_arrow.png') 0 0 no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-style-icon {
@@ -489,7 +489,7 @@
     width: 17px;
     height: 19px;
     background: url('@/assets/images/chat-input-swf/chat_styles.png') center / auto no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* styleselector_menu_new_xml: style-2 border 0x24231e blend 0.8, item grid at (6,5) of 55x34 cells spaced 1px,
@@ -503,7 +503,7 @@
     padding: 5px 6px 0;
     border: 0;
     background: transparent;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-style-menu::before {
@@ -518,7 +518,7 @@
     border-image-slice: 24 fill;
     border-image-width: 6px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-style-menu-grid {
@@ -538,7 +538,7 @@
     border: 0;
     background: transparent;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* background_color: a style-2 border, shown only on the clicked cell (white; 0xd0d0d0 while hovered). */
@@ -556,7 +556,7 @@
     top: 5px;
     visibility: hidden;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* border 56x26 style-2 black blend 0.3 stretched over the band, flush with the bottom edge. */
@@ -577,7 +577,7 @@
     border-image: url("../../assets/images/habbo-skin/slices/border-2-black.png") 5 fill / 5px stretch;
     opacity: 0.3;
     content: "";
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 /* font_size_title (15,49): glyphs 3px right of the band-relative origin on v75 */
@@ -640,7 +640,7 @@
     border-radius: 0;
     box-sizing: border-box;
     background: transparent !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-input-sizer::before,
@@ -658,7 +658,7 @@
     border-image-slice: 20 fill;
     border-image-width: 10px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-input-sizer::after,
@@ -728,7 +728,7 @@
     padding: 0;
     border: 0;
     background: url('@/assets/images/habbo-skin/slices/help-3-default.png') 0 0 no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .swf-chat-help-button:hover {
@@ -761,7 +761,7 @@
     width: 18px;
     height: 15px;
     background: url('@/assets/images/chat-input-swf/clip.png') center / auto no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .swf-chat-input .habbicon-chat-trigger::after {
@@ -772,10 +772,10 @@
     width: 12px;
     height: 12px;
     background: url('@/assets/images/chat-input-swf/sticky_note2.png') center / auto no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-mobile-furni-infostand-trigger {
+.volt-mobile-furni-infostand-trigger {
     pointer-events: auto;
     display: flex;
     align-items: center;
@@ -791,16 +791,16 @@
         0 4px 10px rgba(0, 0, 0, 0.24);
 }
 
-.octane-mobile-furni-infostand-trigger .object-preview {
+.volt-mobile-furni-infostand-trigger .object-preview {
     width: 32px;
     height: 32px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-mobile-user-infostand-avatar {
+.volt-mobile-user-infostand-avatar {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -815,19 +815,19 @@
     transform-origin: center center;
 }
 
-.octane-mobile-user-infostand-avatar-image {
+.volt-mobile-user-infostand-avatar-image {
     display: block;
     width: auto !important;
     height: auto !important;
     max-width: 54px;
     max-height: 62px;
     object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     margin: 0;
     pointer-events: none;
 }
 
-.octane-mobile-user-infostand-trigger {
+.volt-mobile-user-infostand-trigger {
     position: relative;
     width: 42px;
     height: 42px;
@@ -835,11 +835,11 @@
     overflow: hidden;
 }
 
-.octane-avatar-action-menu {
+.volt-avatar-action-menu {
     min-width: 151px;
 }
 
-.octane-context-menu {
+.volt-context-menu {
     position: absolute;
     z-index: 40;
     width: 151px;
@@ -858,7 +858,7 @@
     pointer-events: auto;
 }
 
-.octane-context-menu .octane-context-menu-header {
+.volt-context-menu .volt-context-menu-header {
     min-width: 0;
     height: 16px;
     margin: 0 0 4px;
@@ -878,7 +878,7 @@
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
 }
 
-.octane-context-menu .octane-context-menu-item {
+.volt-context-menu .volt-context-menu-item {
     position: relative;
     height: 26px;
     min-height: 26px;
@@ -897,36 +897,36 @@
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
 }
 
-.octane-context-menu .octane-context-menu-item + .octane-context-menu-item {
+.volt-context-menu .volt-context-menu-item + .volt-context-menu-item {
     border-top: 1px solid #151515;
 }
 
-.octane-context-menu .octane-context-menu-item:hover {
+.volt-context-menu .volt-context-menu-item:hover {
     background: #45413d;
 }
 
-.octane-context-menu .octane-context-menu-item.disabled {
+.volt-context-menu .volt-context-menu-item.disabled {
     color: #9a9895;
     cursor: default;
     opacity: 1;
 }
 
-.octane-context-menu .octane-context-menu-item .right.fa-icon,
-.octane-context-menu .octane-context-menu-item .left.fa-icon {
+.volt-context-menu .volt-context-menu-item .right.fa-icon,
+.volt-context-menu .volt-context-menu-item .left.fa-icon {
     position: absolute;
     top: 7px;
     font-size: 11px;
 }
 
-.octane-context-menu .octane-context-menu-item .right.fa-icon {
+.volt-context-menu .volt-context-menu-item .right.fa-icon {
     right: 7px;
 }
 
-.octane-context-menu .octane-context-menu-item .left.fa-icon {
+.volt-context-menu .volt-context-menu-item .left.fa-icon {
     left: 7px;
 }
 
-.octane-context-menu .octane-context-menu-footer {
+.volt-context-menu .volt-context-menu-footer {
     position: relative;
     height: 18px;
     margin: 0;
@@ -936,7 +936,7 @@
     cursor: pointer;
 }
 
-.octane-context-menu .octane-context-menu-footer .fa-icon {
+.volt-context-menu .volt-context-menu-footer .fa-icon {
     font-size: 12px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
 }
@@ -956,7 +956,7 @@
 }
 
 /* Share the compact avatar bubble skin between self and peer menus. */
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) {
     z-index: 72;
     isolation: isolate;
     box-sizing: border-box;
@@ -975,11 +975,11 @@
     font-size: 12px;
     line-height: 16px;
     text-shadow: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     -webkit-font-smoothing: antialiased;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own)::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own)::before {
     position: absolute;
     inset: 6px;
     z-index: -2;
@@ -992,10 +992,10 @@
     border-image-width: 5px 5px 6px;
     border-image-repeat: stretch;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own)::after {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own)::after {
     position: absolute;
     bottom: 0;
     left: calc(50% - 6px);
@@ -1006,7 +1006,7 @@
     pointer-events: none;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-header {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-header {
     position: relative;
     box-sizing: border-box;
     width: 107px;
@@ -1031,7 +1031,7 @@
     justify-content: center !important;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-header::after {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-header::after {
     position: absolute;
     top: 20px;
     left: 2px;
@@ -1042,7 +1042,7 @@
     pointer-events: none;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-header:hover {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-header:hover {
     color: #91c2ff;
 }
 
@@ -1054,7 +1054,7 @@
     gap: 1px;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item {
+.air-avatar-menu-buttons > .volt-context-menu-item {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
@@ -1079,7 +1079,7 @@
     text-shadow: none;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item::before {
+.air-avatar-menu-buttons > .volt-context-menu-item::before {
     position: absolute;
     top: -4px;
     left: -3px;
@@ -1093,64 +1093,64 @@
     border-image-slice: 5 fill;
     border-image-width: 5px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item + .octane-context-menu-item {
+.air-avatar-menu-buttons > .volt-context-menu-item + .volt-context-menu-item {
     border-top: 0;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item:hover {
+.air-avatar-menu-buttons > .volt-context-menu-item:hover {
     background: transparent;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item:hover::before {
+.air-avatar-menu-buttons > .volt-context-menu-item:hover::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-thick-hover.png');
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item:active::before {
+.air-avatar-menu-buttons > .volt-context-menu-item:active::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-thick-pressed.png');
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.disabled,
-.air-avatar-menu-buttons > .octane-context-menu-item.disabled:hover {
+.air-avatar-menu-buttons > .volt-context-menu-item.disabled,
+.air-avatar-menu-buttons > .volt-context-menu-item.disabled:hover {
     background: transparent;
     color: #585553;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.disabled::before,
-.air-avatar-menu-buttons > .octane-context-menu-item.disabled:hover::before,
-.air-avatar-menu-buttons > .octane-context-menu-item.disabled:active::before {
+.air-avatar-menu-buttons > .volt-context-menu-item.disabled::before,
+.air-avatar-menu-buttons > .volt-context-menu-item.disabled:hover::before,
+.air-avatar-menu-buttons > .volt-context-menu-item.disabled:active::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-thick-disabled.png');
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--locked {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--locked {
     color: #585553;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--locked::before,
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--locked:hover::before,
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--locked:active::before {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--locked::before,
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--locked:hover::before,
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--locked:active::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-thick-disabled.png');
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--link {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--link {
     text-decoration: underline;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--link:hover {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--link:hover {
     color: #91c2ff;
 }
 
 /* own_pet_menu toggle rows: 101x40 with a 107x46 button skin, checkbox at (9,17), label at (26,3) 78 wide. */
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--toggle {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--toggle {
     height: 40px;
     min-height: 40px;
     flex: 0 0 40px;
     padding: 0;
 }
 
-.air-avatar-menu-buttons > .octane-context-menu-item.air-avatar-menu-item--toggle::before {
+.air-avatar-menu-buttons > .volt-context-menu-item.air-avatar-menu-item--toggle::before {
     height: 46px;
 }
 
@@ -1185,17 +1185,17 @@
 }
 
 /* pet_menu / own_pet_menu: the name block is 28px high, so the rule and the rows sit 4px lower than in the avatar menus. */
-.octane-avatar-action-menu--pet .octane-context-menu-header {
+.volt-avatar-action-menu--pet .volt-context-menu-header {
     height: 20px;
     min-height: 20px;
     flex-basis: 20px;
 }
 
-.octane-avatar-action-menu--pet .octane-context-menu-header::after {
+.volt-avatar-action-menu--pet .volt-context-menu-header::after {
     top: 24px;
 }
 
-.octane-avatar-action-menu--pet.octane-avatar-action-menu--own .octane-context-menu-footer {
+.volt-avatar-action-menu--pet.volt-avatar-action-menu--own .volt-context-menu-footer {
     height: 14px;
     min-height: 14px;
 }
@@ -1216,7 +1216,7 @@
     width: 15px;
     height: 15px;
     background: url('../../assets/images/avatar-menu/air/vip.png') 0 0 / 15px 15px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-avatar-menu-signs-grid {
@@ -1241,7 +1241,7 @@
     gap: 1px;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
@@ -1264,11 +1264,11 @@
     text-shadow: none;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell:hover {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell:hover {
     background: transparent;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell::before {
     position: absolute;
     top: -3px;
     left: -3px;
@@ -1282,18 +1282,18 @@
     border-image-slice: 3 fill;
     border-image-width: 3px;
     border-image-repeat: stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell:hover::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell:hover::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-grid-hover.png');
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell:active::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell:active::before {
     border-image-source: url('../../assets/images/avatar-menu/air/button-grid-pressed.png');
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .air-avatar-menu-sign-cell + .air-avatar-menu-sign-cell {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .air-avatar-menu-sign-cell + .air-avatar-menu-sign-cell {
     border: 0;
 }
 
@@ -1302,7 +1302,7 @@
     display: block;
     background-position: 0 0;
     background-repeat: no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .air-avatar-menu-sign-icon--heart {
@@ -1361,7 +1361,7 @@
     background-image: url('../../assets/images/avatar-menu/air/sign-red.png');
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-footer {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-footer {
     position: relative;
     width: 100px;
     min-width: 100px;
@@ -1374,7 +1374,7 @@
     color: transparent;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-footer::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-footer::before {
     position: absolute;
     top: 7px;
     left: 45px;
@@ -1384,18 +1384,18 @@
     /* The icon-set arrows are 10x5 bitmaps drawn from the top-left of their icon box
        (habbo_skin_icon_set_xml icon_6 / icon_7), not centred in it. */
     background: url('../../assets/images/avatar-menu/air/arrow-down.png') left top / 10px 5px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-footer:hover::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-footer:hover::before {
     background-image: url('../../assets/images/avatar-menu/air/arrow-down-hover.png');
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own) .octane-context-menu-footer .fa-icon {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own) .volt-context-menu-footer .fa-icon {
     display: none;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own).menu-hidden {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own).menu-hidden {
     width: 45px;
     min-width: 45px;
     max-width: 45px;
@@ -1404,7 +1404,7 @@
     padding: 0;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own).menu-hidden .octane-context-menu-footer {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own).menu-hidden .volt-context-menu-footer {
     width: 38px;
     min-width: 38px;
     height: 30px;
@@ -1413,7 +1413,7 @@
     background: transparent;
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own).menu-hidden .octane-context-menu-footer::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own).menu-hidden .volt-context-menu-footer::before {
     top: 11px;
     left: 14px;
     width: 15px;
@@ -1421,89 +1421,89 @@
     background-image: url('../../assets/images/avatar-menu/air/arrow-up.png');
 }
 
-:is(.octane-avatar-action-menu--classic, .octane-avatar-action-menu--own).menu-hidden .octane-context-menu-footer:hover::before {
+:is(.volt-avatar-action-menu--classic, .volt-avatar-action-menu--own).menu-hidden .volt-context-menu-footer:hover::before {
     background-image: url('../../assets/images/avatar-menu/air/arrow-up-hover.png');
 }
 
 /* avatar_menu_widget of other users: the bubble is 34px wider than the own-avatar menu. */
-.octane-avatar-action-menu--wide {
+.volt-avatar-action-menu--wide {
     width: 149px;
     min-width: 149px;
     max-width: 149px;
 }
 
-.octane-avatar-action-menu--wide .octane-context-menu-header {
+.volt-avatar-action-menu--wide .volt-context-menu-header {
     width: 141px;
     min-width: 141px;
 }
 
-.octane-avatar-action-menu--wide .octane-context-menu-header::after {
+.volt-avatar-action-menu--wide .volt-context-menu-header::after {
     width: 137px;
 }
 
-.octane-avatar-action-menu--wide .air-avatar-menu-buttons {
+.volt-avatar-action-menu--wide .air-avatar-menu-buttons {
     width: 139px;
 }
 
-.octane-avatar-action-menu--wide .air-avatar-menu-buttons > .octane-context-menu-item {
+.volt-avatar-action-menu--wide .air-avatar-menu-buttons > .volt-context-menu-item {
     width: 137px;
     min-width: 137px;
     max-width: 137px;
 }
 
-.octane-avatar-action-menu--wide .air-avatar-menu-buttons > .octane-context-menu-item::before {
+.volt-avatar-action-menu--wide .air-avatar-menu-buttons > .volt-context-menu-item::before {
     width: 143px;
 }
 
-.octane-avatar-action-menu--wide .octane-context-menu-footer {
+.volt-avatar-action-menu--wide .volt-context-menu-footer {
     width: 134px;
     min-width: 134px;
 }
 
-.octane-avatar-action-menu--wide .octane-context-menu-footer::before {
+.volt-avatar-action-menu--wide .volt-context-menu-footer::before {
     left: 62px;
 }
 
 /* Rentable bot menu: RentableBotMenuView builds the avatar_menu_widget layout (151 wide, 4px margins, 143 wide header, separator and list at x=2 on 139,
    items 137 on 143 wide buttons, minimize region at x=3 on 136 with its icon at x=62). Scoped to the bot menu; the other users' menu keeps its own sizes. */
-.octane-avatar-action-menu--rentable-bot {
+.volt-avatar-action-menu--rentable-bot {
     width: 151px;
     min-width: 151px;
     max-width: 151px;
 }
 
-.octane-avatar-action-menu--rentable-bot .octane-context-menu-header {
+.volt-avatar-action-menu--rentable-bot .volt-context-menu-header {
     width: 143px;
     min-width: 143px;
     padding: 0 32px 0 31px;
 }
 
-.octane-avatar-action-menu--rentable-bot .octane-context-menu-header::after {
+.volt-avatar-action-menu--rentable-bot .volt-context-menu-header::after {
     width: 139px;
 }
 
-.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons {
+.volt-avatar-action-menu--rentable-bot .air-avatar-menu-buttons {
     width: 139px;
     margin-left: 6px;
 }
 
-.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .octane-context-menu-item {
+.volt-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .volt-context-menu-item {
     width: 137px;
     min-width: 137px;
     max-width: 137px;
 }
 
-.octane-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .octane-context-menu-item::before {
+.volt-avatar-action-menu--rentable-bot .air-avatar-menu-buttons > .volt-context-menu-item::before {
     width: 143px;
 }
 
-.octane-avatar-action-menu--rentable-bot .octane-context-menu-footer {
+.volt-avatar-action-menu--rentable-bot .volt-context-menu-footer {
     width: 136px;
     min-width: 136px;
     margin-left: 7px;
 }
 
-.octane-avatar-action-menu--rentable-bot .octane-context-menu-footer::before {
+.volt-avatar-action-menu--rentable-bot .volt-context-menu-footer::before {
     left: 62px;
     width: 12px;
     height: 11px;
@@ -1511,7 +1511,7 @@
 
 /* avatar_info_widget: the 129x39 AIR bubble. The skin body sits 6px inside the window and the 13x9 pointer is bottom centred; the relationship icon (16x14 at 2,4) paints at 10,12.
    Native auto_size keeps the name field at x=16 with a 32px remainder. The name view's 24/24 (left 24px, width raster+48) is Dennis's requested centering; the +48 total stays supported. */
-.octane-context-menu.air-name-bubble {
+.volt-context-menu.air-name-bubble {
     isolation: isolate;
     box-sizing: border-box;
     width: 129px;
@@ -1525,10 +1525,10 @@
     background: transparent;
     box-shadow: none;
     color: #ffffff;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-context-menu.air-name-bubble::before {
+.volt-context-menu.air-name-bubble::before {
     position: absolute;
     inset: 6px;
     z-index: -2;
@@ -1541,10 +1541,10 @@
     border-image-width: 5px 5px 6px;
     border-image-repeat: stretch;
     pointer-events: none;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-context-menu.air-name-bubble::after {
+.volt-context-menu.air-name-bubble::after {
     position: absolute;
     bottom: 0;
     left: calc(50% - 6px);
@@ -1555,11 +1555,11 @@
     pointer-events: none;
 }
 
-.octane-context-menu.air-name-bubble--friend::before {
+.volt-context-menu.air-name-bubble--friend::before {
     border-image-source: url('../../assets/images/avatar-menu/air/bubble-name-friend.png');
 }
 
-.octane-context-menu.air-name-bubble--friend::after {
+.volt-context-menu.air-name-bubble--friend::after {
     background-image: url('../../assets/images/avatar-menu/air/bubble-pointer-down-name-friend.png');
 }
 
@@ -1578,13 +1578,13 @@
     white-space: nowrap;
 }
 
-.octane-camera-viewfinder {
+.volt-camera-viewfinder {
     display: block;
     background: #000;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-pet-package-preview {
+.volt-pet-package-preview {
     align-self: stretch;
     min-height: 110px;
     border: 1px solid #6f6f6f;
@@ -1594,7 +1594,7 @@
 }
 
 /* iro_event_info_xml: 195px wide, placed at x=0 of the 192px extension grid (desktop width - 195). Every child is addressed in the layout's own coordinates. */
-.octane-event-info {
+.volt-event-info {
     position: relative;
     align-self: flex-start;
     flex: 0 0 auto;
@@ -1605,15 +1605,15 @@
     line-height: 1;
 }
 
-.octane-event-info.is-expanded {
+.volt-event-info.is-expanded {
     height: 135px;
 }
 
-.octane-event-info > * {
+.volt-event-info > * {
     position: absolute;
 }
 
-.octane-event-info__bg {
+.volt-event-info__bg {
     top: 0;
     left: 0;
     max-width: none;
@@ -1621,27 +1621,27 @@
     image-rendering: pixelated;
 }
 
-.octane-event-info__region {
+.volt-event-info__region {
     inset: 0;
     cursor: pointer;
 }
 
-.octane-event-info__text {
+.volt-event-info__text {
     position: absolute;
     white-space: nowrap;
     pointer-events: none;
 }
 
-.octane-event-info__text.is-clipped {
+.volt-event-info__text.is-clipped {
     overflow: hidden;
 }
 
-.octane-event-info__text.is-link {
+.volt-event-info__text.is-link {
     cursor: pointer;
     pointer-events: auto;
 }
 
-.octane-event-info__icon {
+.volt-event-info__icon {
     top: 2px;
     left: 5px;
     max-width: none;
@@ -1650,7 +1650,7 @@
 }
 
 /* iro_event_settings_xml: 241x191 frame, fields addressed in its client coordinates. */
-.octane-room-promote-edit.octane-card-shell.octane-card-frame-3 {
+.volt-room-promote-edit.volt-card-shell.volt-card-frame-3 {
     box-sizing: border-box;
     width: 241px !important;
     min-width: 241px !important;
@@ -1665,18 +1665,18 @@
     color: #000;
 }
 
-.octane-room-promote-edit .octane-room-promote-edit__title {
+.volt-room-promote-edit .volt-room-promote-edit__title {
     position: absolute !important;
     top: 3px;
     left: calc(50% - 0.01px);
     transform: translateX(-50%);
 }
 
-.octane-room-promote-edit.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-room-promote-edit.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     right: 3px !important;
 }
 
-.octane-room-promote-edit__client {
+.volt-room-promote-edit__client {
     position: absolute;
     left: 11px;
     top: 33px;
@@ -1684,14 +1684,14 @@
     z-index: 1;
 }
 
-.octane-room-promote-edit__label {
+.volt-room-promote-edit__label {
     position: absolute;
     left: 0;
     margin: 0;
     white-space: nowrap;
 }
 
-.octane-room-promote-edit__input {
+.volt-room-promote-edit__input {
     position: absolute;
     left: 0;
     box-sizing: border-box;
@@ -1707,31 +1707,31 @@
     resize: none;
 }
 
-textarea.octane-room-promote-edit__input {
+textarea.volt-room-promote-edit__input {
     padding: 2px 3px;
 }
 
-.octane-room-promote-edit__input.is-raster {
+.volt-room-promote-edit__input.is-raster {
     color: transparent;
     -webkit-text-fill-color: transparent;
 }
 
-.octane-room-promote-edit__raster {
+.volt-room-promote-edit__raster {
     position: absolute;
     left: 0;
     overflow: hidden;
     pointer-events: none;
 }
 
-.octane-room-promote-edit__raster.is-hidden {
+.volt-room-promote-edit__raster.is-hidden {
     visibility: hidden;
 }
 
-.octane-room-promote-edit__input.is-error {
+.volt-room-promote-edit__input.is-error {
     background: #ffe91b;
 }
 
-.octane-room-promote-edit__error {
+.volt-room-promote-edit__error {
     position: absolute;
     left: 0;
     top: -14px;
@@ -1744,7 +1744,7 @@ textarea.octane-room-promote-edit__input {
 
 /* Fractional device pixel ratio: the surface (RoomPromoteEditSurface) paints the window as one bitmap. Only leaf visuals are hidden - never the input or an ancestor of it - so the
    browser's caret, selection and IME text stay visible; the input keeps its own text unless the surface shows that exact text (is-raster). */
-.octane-room-promote-edit__surface {
+.volt-room-promote-edit__surface {
     position: absolute;
     left: 0;
     top: 0;
@@ -1753,7 +1753,7 @@ textarea.octane-room-promote-edit__input {
     image-rendering: pixelated;
 }
 
-.octane-room-promote-edit__sources {
+.volt-room-promote-edit__sources {
     position: absolute;
     width: 0;
     height: 0;
@@ -1761,24 +1761,24 @@ textarea.octane-room-promote-edit__input {
     pointer-events: none;
 }
 
-.octane-room-promote-edit.is-native-surface.octane-card-shell.octane-card-frame-3::before {
+.volt-room-promote-edit.is-native-surface.volt-card-shell.volt-card-frame-3::before {
     opacity: 0;
 }
 
-.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__title canvas,
-.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__label canvas {
+.volt-room-promote-edit.is-native-surface .volt-room-promote-edit__title canvas,
+.volt-room-promote-edit.is-native-surface .volt-room-promote-edit__label canvas {
     visibility: hidden;
 }
 
-.octane-room-promote-edit.is-native-surface.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+.volt-room-promote-edit.is-native-surface.volt-card-shell.volt-card-frame-3 > .volt-card-header-shell .volt-card-close-button {
     background-image: none !important;
 }
 
-.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__raster {
+.volt-room-promote-edit.is-native-surface .volt-room-promote-edit__raster {
     visibility: hidden;
 }
 
-.octane-room-promote-edit.is-native-surface .octane-room-promote-edit__input {
+.volt-room-promote-edit.is-native-surface .volt-room-promote-edit__input {
     border-color: transparent !important;
     background: transparent !important;
     caret-color: #000;
@@ -1786,17 +1786,17 @@ textarea.octane-room-promote-edit__input {
 
 /* Furniture context menus: the *_menu layouts (115 wide, 4px content margin) on the shared avatar-menu bubble. Each layout places its own title (--air-menu-title-x), the
    items are 101 wide on 107 wide buttons and the minimize control sits one pixel below a single item (guild_furni_menu keeps a fixed 3 item list). */
-.octane-avatar-action-menu--furni:not(.menu-hidden) {
+.volt-avatar-action-menu--furni:not(.menu-hidden) {
     height: 86px;
     padding-bottom: 9px;
 }
 
-.octane-avatar-action-menu--furni-guild:not(.menu-hidden) {
+.volt-avatar-action-menu--furni-guild:not(.menu-hidden) {
     height: 140px;
     padding-bottom: 10px;
 }
 
-.octane-avatar-action-menu--furni .octane-context-menu-header {
+.volt-avatar-action-menu--furni .volt-context-menu-header {
     padding: 0 0 0 var(--air-menu-title-x, 23px);
     justify-content: flex-start !important;
     font-size: 11px;
@@ -1804,30 +1804,30 @@ textarea.octane-room-promote-edit__input {
     text-overflow: clip;
 }
 
-.octane-avatar-action-menu--furni:not(.octane-avatar-action-menu--furni-guild) .octane-context-menu-header:hover {
+.volt-avatar-action-menu--furni:not(.volt-avatar-action-menu--furni-guild) .volt-context-menu-header:hover {
     color: #ffffff;
 }
 
-.octane-avatar-action-menu--furni .air-avatar-menu-buttons {
+.volt-avatar-action-menu--furni .air-avatar-menu-buttons {
     width: 103px;
     margin-left: 6px;
 }
 
-.octane-avatar-action-menu--furni-guild .air-avatar-menu-buttons {
+.volt-avatar-action-menu--furni-guild .air-avatar-menu-buttons {
     min-height: 80px;
 }
 
-.octane-avatar-action-menu--furni .air-avatar-menu-buttons > .octane-context-menu-item {
+.volt-avatar-action-menu--furni .air-avatar-menu-buttons > .volt-context-menu-item {
     width: 101px;
     min-width: 101px;
     max-width: 101px;
     font-size: 11px;
 }
 
-.octane-avatar-action-menu--furni .air-avatar-menu-buttons > .octane-context-menu-item::before {
+.volt-avatar-action-menu--furni .air-avatar-menu-buttons > .volt-context-menu-item::before {
     width: 107px;
 }
 
-.octane-avatar-action-menu--furni:not(.octane-avatar-action-menu--furni-guild) .octane-context-menu-footer {
+.volt-avatar-action-menu--furni:not(.volt-avatar-action-menu--furni-guild) .volt-context-menu-footer {
     margin-top: 1px;
 }

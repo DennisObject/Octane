@@ -1,4 +1,4 @@
-import { HousekeepingAccessSnapshot } from '@octane/renderer';
+import { HousekeepingAccessSnapshot } from '@volt/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText } from '../../api';
 import { HousekeepingRolesApi } from '../../api/housekeeping/HousekeepingRolesApi';

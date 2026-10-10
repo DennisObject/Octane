@@ -1,4 +1,4 @@
-import { CreateLinkEvent, GetSessionDataManager, IUserCurrentBadgeData, RelationshipStatusInfoMessageParser, UserProfileParser } from '@octane/renderer';
+import { CreateLinkEvent, GetSessionDataManager, IUserCurrentBadgeData, RelationshipStatusInfoMessageParser, UserProfileParser } from '@volt/renderer';
 import { FC, MouseEvent, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FriendlyTime, GetConfigurationValue, LocalizeBadgeDescription, LocalizeBadgeName, LocalizeText, localizeWithFallback, SanitizeHtml } from '../../api';
@@ -81,11 +81,11 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
     }, [userProfile]);
 
     return (
-        <div className={`octane-extended-profile${hasNativeProfileFields ? ' has-native-fields' : ''}${isBlocked ? ' is-blocked' : ''}`}>
+        <div className={`volt-extended-profile${hasNativeProfileFields ? ' has-native-fields' : ''}${isBlocked ? ' is-blocked' : ''}`}>
             {!isOwnProfile && onToggleBlock && (
                 <button
                     type="button"
-                    className={`octane-extended-profile__block-button${isBlocked ? ' is-active' : ''}`}
+                    className={`volt-extended-profile__block-button${isBlocked ? ' is-active' : ''}`}
                     title={isBlocked ? localizeWithFallback('extendedprofile.unblock_player.title', 'Unblock user') : localizeWithFallback('extendedprofile.block_player.title', 'Block user')}
                     aria-pressed={isBlocked}
                     onClick={onToggleBlock}
@@ -94,25 +94,25 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     <img src={profileBlockIcon} alt="" draggable={false} />
                 </button>
             )}
-            <div className="octane-extended-profile__top">
-                <div className="octane-extended-profile__left">
-                    <div className="octane-extended-profile__identity">
-                        <div className="octane-extended-profile__avatar-shell">
+            <div className="volt-extended-profile__top">
+                <div className="volt-extended-profile__left">
+                    <div className="volt-extended-profile__identity">
+                        <div className="volt-extended-profile__avatar-shell">
                             <ProfileAvatarImage figure={userProfile.figure} />
                         </div>
-                        <div className="octane-extended-profile__identity-copy">
+                        <div className="volt-extended-profile__identity-copy">
                             <UserIdentityView
-                                className="octane-extended-profile__username"
+                                className="volt-extended-profile__username"
                                 username={userProfile.username}
                             />
-                            <p className="octane-extended-profile__motto">{userProfile.motto || '\u00A0'}</p>
-                            <p className="octane-extended-profile__meta octane-extended-profile__meta--created">
+                            <p className="volt-extended-profile__motto">{userProfile.motto || '\u00A0'}</p>
+                            <p className="volt-extended-profile__meta volt-extended-profile__meta--created">
                                 <span
                                     dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('extendedprofile.created').replace(/%\w+%/g, '').trim()) }}
                                 />{' '}
                                 {userProfile.registration}
                             </p>
-                            <p className="octane-extended-profile__meta octane-extended-profile__meta--login">
+                            <p className="volt-extended-profile__meta volt-extended-profile__meta--login">
                                 <span
                                     dangerouslySetInnerHTML={{ __html: SanitizeHtml(LocalizeText('extendedprofile.last.login').replace(/%\w+%/g, '').trim()) }}
                                 />{' '}
@@ -120,33 +120,33 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                             </p>
                             {showActivityPoints && (
                                 <p
-                                    className="octane-extended-profile__meta octane-extended-profile__meta--activity"
+                                    className="volt-extended-profile__meta volt-extended-profile__meta--activity"
                                     dangerouslySetInnerHTML={{
                                         __html: SanitizeHtml(LocalizeText('extendedprofile.activitypoints', ['activitypoints'], [userProfile.achievementPoints.toString()]))
                                     }}
                                 />
                             )}
-                            <div className="octane-extended-profile__status">
-                                <div className="octane-extended-profile__presence">
+                            <div className="volt-extended-profile__status">
+                                <div className="volt-extended-profile__presence">
                                     <img className={presenceStatus === 1 ? 'is-online' : ''}
                                         src={presenceStatus === 2 ? hiddenIcon : presenceStatus === 1 ? onlineIcon : offlineIcon} alt="" />
                                 </div>
-                                <div className="octane-extended-profile__status-copy">
+                                <div className="volt-extended-profile__status-copy">
                                     {canSendFriendRequest && (
-                                        <button className="octane-extended-profile__friend-button" type="button" onClick={addFriend}>
-                                            <NativeText background={0xffffff} className="octane-extended-profile__friend-label" text={LocalizeText('extendedprofile.addasafriend')} textStyle="u_regular" />
+                                        <button className="volt-extended-profile__friend-button" type="button" onClick={addFriend}>
+                                            <NativeText background={0xffffff} className="volt-extended-profile__friend-label" text={LocalizeText('extendedprofile.addasafriend')} textStyle="u_regular" />
                                         </button>
                                     )}
                                     {(isOwnProfile || userProfile.isMyFriend) && (
                                         <>
-                                            <i className="octane-icon icon-pf-tick" />
-                                            <span className="octane-extended-profile__status-text">
+                                            <i className="volt-icon icon-pf-tick" />
+                                            <span className="volt-extended-profile__status-text">
                                                 {LocalizeText(userProfile.isMyFriend ? 'extendedprofile.friend' : 'extendedprofile.me')}
                                             </span>
                                         </>
                                     )}
                                     {(requestSent || userProfile.requestSent) && (
-                                        <span className="octane-extended-profile__request-sent">{LocalizeText('extendedprofile.friendrequestsent')}</span>
+                                        <span className="volt-extended-profile__request-sent">{LocalizeText('extendedprofile.friendrequestsent')}</span>
                                     )}
                                 </div>
                             </div>
@@ -154,19 +154,19 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     </div>
 
                     {isOwnProfile && (
-                        <div className="octane-extended-profile__actions">
-                            <button className="octane-extended-profile__link" type="button" onClick={() => CreateLinkEvent('avatar-editor/show')}>
+                        <div className="volt-extended-profile__actions">
+                            <button className="volt-extended-profile__link" type="button" onClick={() => CreateLinkEvent('avatar-editor/show')}>
                                 {LocalizeText('extended.profile.change.looks')}
                             </button>
-                            <button className="octane-extended-profile__link" type="button" onClick={() => CreateLinkEvent('inventory/show/badges')}>
+                            <button className="volt-extended-profile__link" type="button" onClick={() => CreateLinkEvent('inventory/show/badges')}>
                                 {LocalizeText('extended.profile.change.badges')}
                             </button>
                         </div>
                     )}
 
-                    <div className="octane-extended-profile__badges">
+                    <div className="volt-extended-profile__badges">
                         {[0, 1, 2, 3, 4].map((index) => (
-                            <div key={index} className="octane-extended-profile__badge-slot"
+                            <div key={index} className="volt-extended-profile__badge-slot"
                                 onMouseEnter={(event) => showBadgePopup(event, index)} onMouseLeave={() => setBadgePopup(null)}>
                                 {selectedBadges[index] && <LayoutBadgeImageView badgeCode={selectedBadges[index].badgeCode} />}
                             </div>
@@ -174,54 +174,54 @@ export const UserContainerView: FC<UserContainerViewProps> = (props) => {
                     </div>
                 </div>
 
-                <div className="octane-extended-profile__separator" />
+                <div className="volt-extended-profile__separator" />
 
-                <div className="octane-extended-profile__right">
+                <div className="volt-extended-profile__right">
                     <p
-                        className="octane-extended-profile__friend-count"
+                        className="volt-extended-profile__friend-count"
                         dangerouslySetInnerHTML={{
                             __html: SanitizeHtml(LocalizeText('extendedprofile.friends.count', ['count'], [userProfile.friendsCount < 0 ? '-' : userProfile.friendsCount.toString()]))
                         }}
                     />
-                    <p className="octane-extended-profile__relationships-label">{LocalizeText('extendedprofile.relstatus')}</p>
+                    <p className="volt-extended-profile__relationships-label">{LocalizeText('extendedprofile.relstatus')}</p>
                     {userRelationships && <RelationshipsContainerView relationships={userRelationships} onClose={onClose} />}
 
                 </div>
             </div>
 
-            <div className="octane-extended-profile__summary-bar">
-                <button className="octane-extended-profile__summary-button" type="button" onClick={onOpenRooms}>
-                    <img className="octane-extended-profile__summary-icon" src={profileRoomsIcon} alt="" />
-                    <span className="octane-extended-profile__summary-label">{LocalizeText('extendedprofile.rooms')}</span>
+            <div className="volt-extended-profile__summary-bar">
+                <button className="volt-extended-profile__summary-button" type="button" onClick={onOpenRooms}>
+                    <img className="volt-extended-profile__summary-icon" src={profileRoomsIcon} alt="" />
+                    <span className="volt-extended-profile__summary-label">{LocalizeText('extendedprofile.rooms')}</span>
                 </button>
                 <button
-                    className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center"
+                    className="volt-extended-profile__summary-button volt-extended-profile__summary-button--center"
                     type="button"
                     onClick={() => CreateLinkEvent('badge_leaderboard/0/-1/0')}
                 >
-                    <img className="octane-extended-profile__summary-icon octane-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
-                    <span className="octane-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
-                    <span className="octane-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.totalBadges : userBadges.length}</span>
-                    {hasNativeProfileFields && userProfile.badgeRank >= 0 && <span className="octane-extended-profile__summary-rank">(#{userProfile.badgeRank})</span>}
+                    <img className="volt-extended-profile__summary-icon volt-extended-profile__summary-icon--badge" src={badgeEmblemDefault} alt="" />
+                    <span className="volt-extended-profile__summary-label">{LocalizeText('inventory.badges')}</span>
+                    <span className="volt-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.totalBadges : userBadges.length}</span>
+                    {hasNativeProfileFields && userProfile.badgeRank >= 0 && <span className="volt-extended-profile__summary-rank">(#{userProfile.badgeRank})</span>}
                 </button>
-                <div className="octane-extended-profile__summary-button octane-extended-profile__summary-button--center octane-extended-profile__summary-button--level">
-                    <img className="octane-extended-profile__summary-icon" src={profileLevelIcon} alt="" />
-                    <span className="octane-extended-profile__summary-label">{LocalizeText(hasNativeProfileFields ? 'generic.level' : 'extendedprofile.achievementscore')}</span>
-                    <span className="octane-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.level : userProfile.achievementPoints}</span>
+                <div className="volt-extended-profile__summary-button volt-extended-profile__summary-button--center volt-extended-profile__summary-button--level">
+                    <img className="volt-extended-profile__summary-icon" src={profileLevelIcon} alt="" />
+                    <span className="volt-extended-profile__summary-label">{LocalizeText(hasNativeProfileFields ? 'generic.level' : 'extendedprofile.achievementscore')}</span>
+                    <span className="volt-extended-profile__summary-value">{hasNativeProfileFields ? userProfile.level : userProfile.achievementPoints}</span>
                 </div>
             </div>
             {visibleBadgePopup && createPortal(
-                <div className="octane-profile-badge-details" role="tooltip"
+                <div className="volt-profile-badge-details" role="tooltip"
                     style={{ left: visibleBadgePopup.x, top: visibleBadgePopup.y, zIndex: visibleBadgePopup.layer }}>
-                    <div className="octane-profile-badge-details__name">{LocalizeBadgeName(visibleBadgePopup.badgeCode)}</div>
-                    {badgeDescription && <div className="octane-profile-badge-details__description">{badgeDescription}</div>}
-                    {popupBadge && <div className="octane-profile-badge-details__rarity">
-                        <span className="octane-profile-badge-details__rarity-skin" aria-hidden="true" style={{ filter: raritySkinFilter }} />
-                        <span className="octane-profile-badge-details__rarity-text">
+                    <div className="volt-profile-badge-details__name">{LocalizeBadgeName(visibleBadgePopup.badgeCode)}</div>
+                    {badgeDescription && <div className="volt-profile-badge-details__description">{badgeDescription}</div>}
+                    {popupBadge && <div className="volt-profile-badge-details__rarity">
+                        <span className="volt-profile-badge-details__rarity-skin" aria-hidden="true" style={{ filter: raritySkinFilter }} />
+                        <span className="volt-profile-badge-details__rarity-text">
                             {LocalizeText('badge.rarity.badge', ['rarity'], [rarityLabel ? LocalizeText(`badge.rarity.${rarityLabel}`) : ''])}
                         </span>
                     </div>}
-                    {popupBadge?.ownerCount > 0 && popupBadge.ownerCount < 1000 && <div className="octane-profile-badge-details__owners">
+                    {popupBadge?.ownerCount > 0 && popupBadge.ownerCount < 1000 && <div className="volt-profile-badge-details__owners">
                         {LocalizeText('badge.owner_count', ['count'], [popupBadge.ownerCount.toString()])}
                     </div>}
                 </div>, document.body

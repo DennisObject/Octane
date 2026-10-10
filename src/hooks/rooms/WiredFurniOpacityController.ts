@@ -1,4 +1,4 @@
-import { RoomObjectCategory, RoomObjectVariable, WiredFurniOpacityUpdate } from '@octane/renderer';
+import { RoomObjectCategory, RoomObjectVariable, WiredFurniOpacityUpdate } from '@volt/renderer';
 
 export interface WiredOpacityObjectModel {
     getValue<T>(key: string): T;

@@ -10,12 +10,12 @@ import {
     FurniEditorUpdateFurnidataComposer,
     GetCommunication,
     IMessageComposer,
-    OctaneEvent,
-    OctaneEventType
-} from '@octane/renderer';
+    VoltEvent,
+    VoltEventType
+} from '@volt/renderer';
 import { useCallback, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
-import { useMessageEvent, useOctaneEvent } from '../events';
+import { useMessageEvent, useVoltEvent } from '../events';
 import {
     DEFAULT_SEARCH_CRITERIA,
     FurniEditorDetail,
@@ -436,8 +436,8 @@ export const useFurniEditorStore = () => {
     // Socket boundary: the old socket is gone (closed, or reopened but not
     // authenticated yet), so no reply of it can arrive. The wire is reset and
     // held; PlusEMU drops staff packets sent before authentication.
-    useOctaneEvent(
-        [OctaneEventType.SOCKET_CLOSED, OctaneEventType.SOCKET_RECONNECTING, OctaneEventType.SOCKET_RECONNECTED, OctaneEventType.SOCKET_OPENED],
+    useVoltEvent(
+        [VoltEventType.SOCKET_CLOSED, VoltEventType.SOCKET_RECONNECTING, VoltEventType.SOCKET_RECONNECTED, VoltEventType.SOCKET_OPENED],
         useCallback(() => {
             const released = traffic.disconnect();
 
@@ -452,11 +452,11 @@ export const useFurniEditorStore = () => {
     // reconnect (sent once the connection is authenticated and flushing), or
     // the connection state turning authenticated on a fresh login. Only then
     // does the queue resume and the dropped write's furni get re-read.
-    useOctaneEvent(
-        [OctaneEventType.SOCKET_REAUTHENTICATED, OctaneEventType.CONNECTION_STATE_CHANGED],
+    useVoltEvent(
+        [VoltEventType.SOCKET_REAUTHENTICATED, VoltEventType.CONNECTION_STATE_CHANGED],
         useCallback(
-            (event: OctaneEvent) => {
-                if (event.type === OctaneEventType.CONNECTION_STATE_CHANGED && !GetCommunication().connection.connectionState.authenticated) return;
+            (event: VoltEvent) => {
+                if (event.type === VoltEventType.CONNECTION_STATE_CHANGED && !GetCommunication().connection.connectionState.authenticated) return;
                 if (!traffic.resume()) return;
 
                 const released = releasedWriteRef.current;

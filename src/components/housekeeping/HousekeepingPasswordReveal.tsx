@@ -58,15 +58,15 @@ export const HousekeepingPasswordReveal: FC = () => {
 
     return (
         <StaffSection
-            className="octane-housekeeping-password"
+            className="volt-housekeeping-password"
             title={LocalizeText('housekeeping.password.title', ['username', 'id'], [passwordReveal.username || '-', String(passwordReveal.userId)])}
         >
-            <div className="octane-staff-row">
+            <div className="volt-staff-row">
                 <input
                     readOnly
                     aria-label={LocalizeText('housekeeping.password.value_label')}
                     autoComplete="off"
-                    className="octane-housekeeping-password-value grow"
+                    className="volt-housekeeping-password-value grow"
                     spellCheck={false}
                     type="text"
                     value={passwordReveal.password}
@@ -79,7 +79,7 @@ export const HousekeepingPasswordReveal: FC = () => {
                     {LocalizeText('housekeeping.password.dismiss')}
                 </Button>
             </div>
-            <span className="octane-staff-muted">{LocalizeText('housekeeping.password.hint')}</span>
+            <span className="volt-staff-muted">{LocalizeText('housekeeping.password.hint')}</span>
         </StaffSection>
     );
 };

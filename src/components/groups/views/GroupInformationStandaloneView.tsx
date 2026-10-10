@@ -1,7 +1,7 @@
-import { GroupInformationEvent, GroupInformationParser } from '@octane/renderer';
+import { GroupInformationEvent, GroupInformationParser } from '@volt/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText } from '../../../api';
-import { OctaneCardHeaderView, OctaneCardView } from '../../../common';
+import { VoltCardHeaderView, VoltCardView } from '../../../common';
 import { useMessageEvent } from '../../../hooks';
 import { GroupInformationView } from './GroupInformationView';
 import { GroupWindowTitle } from './GroupNativeLayout';
@@ -18,17 +18,17 @@ export const GroupInformationStandaloneView: FC<{}> = (props) => {
     if (!groupInformation) return null;
 
     return (
-        <OctaneCardView
+        <VoltCardView
             aria-label={LocalizeText('group.window.title')}
-            className="octane-group-info"
+            className="volt-group-info"
             frameStyle={3}
             isResizable={false}
             role="dialog"
             uniqueKey="group-information"
         >
-            <OctaneCardHeaderView headerText="" onCloseClick={() => setGroupInformation(null)} />
+            <VoltCardHeaderView headerText="" onCloseClick={() => setGroupInformation(null)} />
             <GroupWindowTitle title={LocalizeText('group.window.title')} width={363} />
             <GroupInformationView groupInformation={groupInformation} />
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

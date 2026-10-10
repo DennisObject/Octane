@@ -1,4 +1,4 @@
-.octane-friends-spritesheet {
+.volt-friends-spritesheet {
     background: url('@/assets/images/friends/friends-spritesheet.png') transparent no-repeat;
 
     &.icon-friendbar-visit {
@@ -104,7 +104,7 @@
     height: 25px;
 }
 
-.octane-friends {
+.volt-friends {
     width: min(332px, calc(100vw - 16px));
     height: 445px;
     min-width: 0;
@@ -121,18 +121,18 @@
         font-family: Ubuntu, sans-serif !important;
     }
 
-    & .octane-card-content-shell {
+    & .volt-card-content-shell {
         padding: 0 !important;
         gap: 0 !important;
         background: #f3f3ef;
     }
 
-    & .octane-card-accordion-set {
+    & .volt-card-accordion-set {
         background: transparent;
         border: 0;
     }
 
-    & .octane-card-accordion-set-header {
+    & .volt-card-accordion-set-header {
         min-height: 24px;
         padding: 3px 7px !important;
         color: #111;
@@ -141,23 +141,23 @@
         border: 0 !important;
     }
 
-    & .octane-card-accordion-set-header span {
+    & .volt-card-accordion-set-header span {
         font-size: 12px;
         color: #111 !important;
     }
 
-    & .octane-card-accordion-set-header .fa-icon {
+    & .volt-card-accordion-set-header .fa-icon {
         width: 10px;
         height: 10px;
         color: #000;
     }
 
-    & .octane-card-accordion-set.active {
+    & .volt-card-accordion-set.active {
         min-height: 0;
         border: 0 !important;
     }
 
-    & .octane-card-accordion-set-content {
+    & .volt-card-accordion-set-content {
         overflow-y: auto !important;
     }
 
@@ -244,12 +244,12 @@
         gap: 3px;
     }
 
-    & .octane-friends-spritesheet.icon-follow {
+    & .volt-friends-spritesheet.icon-follow {
         width: 15px;
         height: 14px;
     }
 
-    & .octane-friends-spritesheet.icon-chat {
+    & .volt-friends-spritesheet.icon-chat {
         width: 17px;
         height: 16px;
     }
@@ -373,9 +373,9 @@
     bottom: 7px;
 }
 
-.octane-friends-room-invite-summary,
-.octane-friends-room-invite-note,
-.octane-friends-remove-confirmation-text {
+.volt-friends-room-invite-summary,
+.volt-friends-room-invite-note,
+.volt-friends-remove-confirmation-text {
     position: absolute;
     box-sizing: border-box;
     padding: 2px;
@@ -385,14 +385,14 @@
     overflow: hidden;
 }
 
-.octane-friends-room-invite-summary {
+.volt-friends-room-invite-summary {
     left: 10px;
     top: 5px;
     width: 180px;
     height: 20px;
 }
 
-.octane-friends-room-invite-textarea {
+.volt-friends-room-invite-textarea {
     position: absolute;
     box-sizing: border-box;
     left: 10px;
@@ -414,18 +414,18 @@
     scrollbar-width: none;
 }
 
-.octane-friends-room-invite-textarea::-webkit-scrollbar {
+.volt-friends-room-invite-textarea::-webkit-scrollbar {
     display: none;
 }
 
-.octane-friends-room-invite-note {
+.volt-friends-room-invite-note {
     left: 10px;
     top: 98px;
     width: 180px;
     height: 20px;
 }
 
-.octane-friends-remove-confirmation-text {
+.volt-friends-remove-confirmation-text {
     left: 10px;
     top: 10px;
     width: 130px;
@@ -442,7 +442,7 @@
     height: 21px;
 }
 
-.octane-friends-remove-confirmation .friends-dialog-actions {
+.volt-friends-remove-confirmation .friends-dialog-actions {
     top: 147px;
     width: 148px;
 }
@@ -469,7 +469,7 @@
     left: 139px;
 }
 
-.octane-friends-remove-confirmation .friends-dialog-button:last-child {
+.volt-friends-remove-confirmation .friends-dialog-button:last-child {
     left: 88px;
 }
 
@@ -556,7 +556,7 @@
         border-radius: 0;
         background: transparent;
         box-shadow: none;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
 
         &:hover:not(.is-disabled):not(:disabled) .friend-bar-browse-arrow {
             filter: brightness(1.15);
@@ -574,7 +574,7 @@
     & .friend-bar-browse-arrow {
         position: absolute;
         pointer-events: none;
-        image-rendering: var(--octane-pixel-art, pixelated);
+        image-rendering: var(--volt-pixel-art, pixelated);
     }
 
     & .friend-bar-browse-bg {
@@ -615,7 +615,7 @@
 }
 
 @media (max-width: 520px), (max-height: 470px) {
-    .octane-friends {
+    .volt-friends {
         width: calc(100vw - 16px) !important;
         max-width: calc(100vw - 16px) !important;
         height: min(445px, calc(100vh - 16px)) !important;
@@ -638,7 +638,7 @@
         font-family: Ubuntu, sans-serif !important;
     }
 
-    & .octane-card-content-shell {
+    & .volt-card-content-shell {
         padding: 0 !important;
         gap: 0 !important;
         background: #f3f3ef;
@@ -1034,7 +1034,7 @@
 }
 
 /* Category manager: keep the list scrollable */
-.octane-friends-category-manager {
+.volt-friends-category-manager {
     width: min(270px, calc(100vw - 16px));
     min-width: 0;
     max-width: calc(100vw - 16px);
@@ -1042,12 +1042,12 @@
     resize: none !important;
 }
 
-.octane-friends-category-manager .octane-card-content-shell {
+.volt-friends-category-manager .volt-card-content-shell {
     color: #111;
     background: #f3f3ef;
 }
 
-.octane-friends-category-manager :where(input, select, textarea) {
+.volt-friends-category-manager :where(input, select, textarea) {
     min-height: 22px;
     border: 1px solid #858585 !important;
     border-radius: 3px !important;
@@ -1057,17 +1057,17 @@
     font-size: 11px !important;
 }
 
-.octane-friends-category-manager :where(input:focus, select:focus, textarea:focus) {
+.volt-friends-category-manager :where(input:focus, select:focus, textarea:focus) {
     border-color: #4a7d8c !important;
     box-shadow: 0 0 0 2px rgba(74, 125, 140, 0.24), inset 0 1px 0 rgba(0, 0, 0, 0.14) !important;
     outline: none !important;
 }
 
-.octane-friends-category-manager :where(.text-muted, .text-dark) {
+.volt-friends-category-manager :where(.text-muted, .text-dark) {
     color: #565656 !important;
 }
 
-.octane-friends-category-manager .friends-category-list {
+.volt-friends-category-manager .friends-category-list {
     max-height: 220px;
     overflow-y: auto;
 }
@@ -1122,7 +1122,7 @@
     opacity: 0.7;
 }
 
-.octane-friends .friends-list-avatar {
+.volt-friends .friends-list-avatar {
     position: relative !important;
     width: 23px;
     height: 23px;
@@ -1130,7 +1130,7 @@
     overflow: hidden;
 }
 
-.octane-friends .friends-list-avatar .avatar-image {
+.volt-friends .friends-list-avatar .avatar-image {
     position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
@@ -1142,8 +1142,8 @@
     image-rendering: auto !important;
 }
 
-.octane-friends .octane-card-accordion-set-header > div,
-.octane-friends .octane-card-accordion-set-header span {
+.volt-friends .volt-card-accordion-set-header > div,
+.volt-friends .volt-card-accordion-set-header span {
     font-size: 12px !important;
     font-weight: 700 !important;
     line-height: 1.15 !important;
@@ -1215,7 +1215,7 @@
 .swf-messenger-window {
     font-family: Ubuntu, Arial, sans-serif;
     color: #000;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     text-shadow: none;
 }
 
@@ -1481,7 +1481,7 @@ button.swf-friends-section-header {
     background-size: 42px auto !important;
     background-position: -10px -12px !important;
     transform: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
 .swf-friends-window .friends-list-name {
@@ -1502,13 +1502,13 @@ button.swf-friends-section-header {
     gap: 3px;
 }
 
-.swf-friends-window .octane-friends-spritesheet.icon-follow {
+.swf-friends-window .volt-friends-spritesheet.icon-follow {
     width: 16px;
     height: 14px;
     background: url("@/assets/images/friends/swf/follow_friend.png") center center / auto no-repeat !important;
 }
 
-.swf-friends-window .octane-friends-spritesheet.icon-chat {
+.swf-friends-window .volt-friends-spritesheet.icon-chat {
     width: 17px;
     height: 16px;
     background: url("@/assets/images/friends/swf/friendlist_chat.png") center center / auto no-repeat !important;
@@ -1530,10 +1530,10 @@ button.swf-friends-section-header {
     border-top: 5px solid #000;
 }
 
-.swf-friends-window .octane-friends-spritesheet.icon-heart,
-.swf-friends-window .octane-friends-spritesheet.icon-smile,
-.swf-friends-window .octane-friends-spritesheet.icon-bobba,
-.swf-friends-window .octane-friends-spritesheet.icon-none {
+.swf-friends-window .volt-friends-spritesheet.icon-heart,
+.swf-friends-window .volt-friends-spritesheet.icon-smile,
+.swf-friends-window .volt-friends-spritesheet.icon-bobba,
+.swf-friends-window .volt-friends-spritesheet.icon-none {
     width: 16px;
     height: 14px;
 }
@@ -1910,7 +1910,7 @@ button.swf-friends-section-header {
 }
 /* END SWF_FRIENDS_EXACT_DOM */
 
-/* The friend list and messenger deliberately avoid generic Octane cards. The
+/* The friend list and messenger deliberately avoid generic Volt cards. The
  * original SWF used fixed, pixel-aligned rows and nested plain containers. */
 .swf-friends-window .friends-list-profile {
     display: block;
@@ -2125,7 +2125,7 @@ button.swf-friends-section-header {
     line-height: 13px;
     position: relative;
 }
-.swf-messenger-window .swf-messenger-notification img { display: block; width: auto; height: auto; min-width: 25px; margin-top: 1px; image-rendering: var(--octane-pixel-art, pixelated); }
+.swf-messenger-window .swf-messenger-notification img { display: block; width: auto; height: auto; min-width: 25px; margin-top: 1px; image-rendering: var(--volt-pixel-art, pixelated); }
 .swf-messenger-window .swf-messenger-status-notification {
     margin: 4px 8px;
     color: #686868;
@@ -3417,7 +3417,7 @@ button.swf-friends-section-header {
     border-image-width: 8px;
     border-image-repeat: stretch;
     box-sizing: border-box;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
 .friend-bar-add-tab.frame-74dbfa { border-image-source: url("../../assets/images/toolbar/air/friend-tab-border-74dbfa.png"); }

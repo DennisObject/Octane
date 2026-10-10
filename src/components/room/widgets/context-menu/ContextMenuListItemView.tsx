@@ -16,7 +16,7 @@ export const ContextMenuListItemView: FC<ContextMenuListItemViewProps> = (props)
 
     const getClassNames = useMemo(() => {
         const newClassNames: string[] = [
-            'octane-context-menu-item',
+            'volt-context-menu-item',
             'cursor-pointer'
         ];
 

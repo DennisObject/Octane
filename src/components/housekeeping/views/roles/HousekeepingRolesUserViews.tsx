@@ -1,4 +1,4 @@
-import { HousekeepingAccessAudit, HousekeepingAccessMembers, HousekeepingAccessOverrides } from '@octane/renderer';
+import { HousekeepingAccessAudit, HousekeepingAccessMembers, HousekeepingAccessOverrides } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText } from '../../../../api';
 import { HousekeepingRolesApi } from '../../../../api/housekeeping/HousekeepingRolesApi';
@@ -11,7 +11,7 @@ const validExpiry = (value: string) => !value || Number.isFinite(expiry(value)) 
 const date = (value: number) => value ? new Date(value * 1000).toLocaleString() : t('permanent');
 const failed = (setStatus: HousekeepingRolesState['setStatus']) => setStatus({ ok: false, message: LocalizeText('housekeeping.action.error') });
 
-const Pager: FC<{ offset: number; total: number; disabled: boolean; onChange: (offset: number) => void }> = ({ offset, total, disabled, onChange }) => <div className="octane-staff-row">
+const Pager: FC<{ offset: number; total: number; disabled: boolean; onChange: (offset: number) => void }> = ({ offset, total, disabled, onChange }) => <div className="volt-staff-row">
     <Button variant="secondary" disabled={disabled || offset === 0} onClick={() => onChange(Math.max(0, offset - 25))}>{t('previous')}</Button>
     <span>{total ? `${offset + 1}–${Math.min(offset + 25, total)} / ${total}` : '0'}</span>
     <Button variant="secondary" disabled={disabled || offset + 25 >= total} onClick={() => onChange(offset + 25)}>{t('next')}</Button>
@@ -57,9 +57,9 @@ export const HousekeepingRoleMembersView: FC<{ admin: HousekeepingRolesState; us
             <StaffField label={t('expiry')}><input type="datetime-local" value={expiresAt} onChange={event => setExpiresAt(event.target.value)} /></StaffField>
             <Button disabled={busy || !editable || !name.trim() || !validExpiry(expiresAt)} onClick={() => run(() => HousekeepingRolesApi.assign(snapshot.revision, name, roleId, expiry(expiresAt)))}>{t('assign')}</Button>
         </StaffSection>
-        <div className="octane-roles-scroll">
+        <div className="volt-roles-scroll">
             {loading && <StaffEmpty>{t('loading')}</StaffEmpty>}
-            {page?.members.map(member => <div key={member.id} className="octane-roles-member"><span><strong>{member.username}</strong><br />{date(member.expiresAt)}</span><Button variant="danger" disabled={busy || !editable} onClick={() => run(() => HousekeepingRolesApi.revoke(snapshot.revision, member.id, roleId))}>{t('revoke')}</Button></div>)}
+            {page?.members.map(member => <div key={member.id} className="volt-roles-member"><span><strong>{member.username}</strong><br />{date(member.expiresAt)}</span><Button variant="danger" disabled={busy || !editable} onClick={() => run(() => HousekeepingRolesApi.revoke(snapshot.revision, member.id, roleId))}>{t('revoke')}</Button></div>)}
             {page && page.total === 0 && <StaffEmpty>{t('empty')}</StaffEmpty>}
         </div>
         {page && <Pager offset={page.offset} total={page.total} disabled={busy || loading} onChange={setOffset} />}
@@ -119,9 +119,9 @@ export const HousekeepingRoleOverridesView: FC<{ admin: HousekeepingRolesState; 
                 if (await run(() => HousekeepingRolesApi.setOverride(snapshot.revision, name, key, deny, reason, expiry(expiresAt)))) setLookup(name.trim());
             }}>{t('save')}</Button>
         </StaffSection>
-        <div className="octane-roles-scroll">
+        <div className="volt-roles-scroll">
             {page && page.userId > 0 && <strong>{page.username}</strong>}
-            {page?.overrides.map(row => <div key={row.key} className="octane-roles-member"><span><strong>{row.key}</strong> · {row.effect}<br />{row.reason}<br />{date(row.expiresAt)}</span><Button variant="secondary" disabled={busy} onClick={() => run(() => HousekeepingRolesApi.removeOverride(snapshot.revision, page.userId, row.key))}>{t('remove')}</Button></div>)}
+            {page?.overrides.map(row => <div key={row.key} className="volt-roles-member"><span><strong>{row.key}</strong> · {row.effect}<br />{row.reason}<br />{date(row.expiresAt)}</span><Button variant="secondary" disabled={busy} onClick={() => run(() => HousekeepingRolesApi.removeOverride(snapshot.revision, page.userId, row.key))}>{t('remove')}</Button></div>)}
             {page && page.userId > 0 && page.overrides.length === 0 && <StaffEmpty>{t('empty')}</StaffEmpty>}
         </div>
     </>;
@@ -157,8 +157,8 @@ export const HousekeepingRolesAuditView: FC<{ admin: HousekeepingRolesState }> =
     }, [offset, snapshot, setStatus]);
 
     return <>
-        <div className="octane-roles-scroll">
-            {page?.entries.map(entry => <details key={entry.id} className="octane-roles-audit"><summary><strong>{entry.actorName}</strong> · {entry.action} → {entry.targetName}<br /><span className="octane-staff-muted">#{entry.id} · {date(entry.createdAt)}</span></summary><pre>{entry.payload}</pre></details>)}
+        <div className="volt-roles-scroll">
+            {page?.entries.map(entry => <details key={entry.id} className="volt-roles-audit"><summary><strong>{entry.actorName}</strong> · {entry.action} → {entry.targetName}<br /><span className="volt-staff-muted">#{entry.id} · {date(entry.createdAt)}</span></summary><pre>{entry.payload}</pre></details>)}
             {page?.total === 0 && <StaffEmpty>{t('empty')}</StaffEmpty>}
         </div>
         {page && <Pager offset={page.offset} total={page.total} disabled={loading} onChange={setOffset} />}

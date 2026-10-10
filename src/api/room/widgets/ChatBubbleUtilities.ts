@@ -7,8 +7,8 @@ import {
     PetFigureData,
     TextureUtils,
     Vector3d
-} from '@octane/renderer';
-import { GetConfigurationValue } from '../../octane/GetConfigurationValue';
+} from '@volt/renderer';
+import { GetConfigurationValue } from '../../volt/GetConfigurationValue';
 
 export class ChatBubbleUtilities {
     private static MAX_CACHE_SIZE: number = 200;
@@ -79,7 +79,7 @@ export class ChatBubbleUtilities {
     /**
      * The face icon the official client builds with HabboFaceFocuser: the head centred, chin near the bottom
      * (a bubble shows the icon's bottom rows). The official fixed crop assumes its own avatar canvas, which
-     * Octane's head image does not share, so the head is placed by its visible pixels instead.
+     * Volt's head image does not share, so the head is placed by its visible pixels instead.
      */
     private static focusFace(head: HTMLCanvasElement | HTMLImageElement, size: number): HTMLCanvasElement {
         const width = head.width;

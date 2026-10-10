@@ -21,12 +21,12 @@ describe('CatalogItemGridWidgetView responsive grid ownership', () => {
     it('applies the shared auto-fill grid class to every multi-column offer template', () => {
         render(<CatalogItemGridWidgetView columnCount={6} />);
 
-        expect(screen.getByRole('listbox', { name: 'Catalog items' })).toHaveClass('octane-catalog-grid');
+        expect(screen.getByRole('listbox', { name: 'Catalog items' })).toHaveClass('volt-catalog-grid');
     });
 
     it('does not turn a specialized single-column selector into an auto-fill grid', () => {
         render(<CatalogItemGridWidgetView columnCount={1} />);
 
-        expect(screen.getByRole('listbox', { name: 'Catalog items' })).not.toHaveClass('octane-catalog-grid');
+        expect(screen.getByRole('listbox', { name: 'Catalog items' })).not.toHaveClass('volt-catalog-grid');
     });
 });

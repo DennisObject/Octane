@@ -87,26 +87,26 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
                         y={5}
                         onClick={() => setVariablesType(element.key)}
                     >
-                        <img alt={element.label} className="octane-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
+                        <img alt={element.label} className="volt-wired-menu__type-icon" draggable={false} src={TYPE_ICONS[element.key] ?? element.icon} />
                     </WiredMenuButton>
                 ))}
             </WiredMenuPanel>
             <WiredMenuTitle h={19} w={165} x={14} y={94}>
                 Variable picker:
             </WiredMenuTitle>
-            <WiredMenuItem className="octane-wired-menu__box" h={219} w={188} x={14} y={114}>
-                <div className="octane-wired-menu__picker-list has-classic-scrollbar">
+            <WiredMenuItem className="volt-wired-menu__box" h={219} w={188} x={14} y={114}>
+                <div className="volt-wired-menu__picker-list has-classic-scrollbar">
                     {variablePickerDefinitions.map((variable) => (
                         <button
                             key={variable.key}
-                            className={`octane-wired-menu__picker-row ${selectedVariableDefinition?.key === variable.key ? 'is-selected' : ''}`}
+                            className={`volt-wired-menu__picker-row ${selectedVariableDefinition?.key === variable.key ? 'is-selected' : ''}`}
                             type="button"
                             onClick={() => onPickVariable(variable.key)}
                         >
                             {variable.key}
                         </button>
                     ))}
-                    {!variablePickerDefinitions.length && <div className="octane-wired-menu__empty">{emptyPickerText || 'Nothing to display'}</div>}
+                    {!variablePickerDefinitions.length && <div className="volt-wired-menu__empty">{emptyPickerText || 'Nothing to display'}</div>}
                 </div>
             </WiredMenuItem>
             {showHighlight && (
@@ -118,7 +118,7 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
                 Manage
             </WiredMenuButton>
             <WiredMenuButton danger={true} disabled={!canVariableClear} h={25} w={25} x={176} y={342} title={clearLabel ?? localizeWithFallback('wiredmenu.variable_overview.delete_all.title', 'Clear this variable')} onClick={onClearVariable}>
-                <img alt="" className="octane-wired-menu__trash-icon" draggable={false} src={trashIcon} />
+                <img alt="" className="volt-wired-menu__trash-icon" draggable={false} src={trashIcon} />
             </WiredMenuButton>
             {showArrayInspector && arrayInspectorCanOpen && (
                 <WiredMenuButton h={25} w={73} x={14} y={372} onClick={onOpenArrayInspector}>

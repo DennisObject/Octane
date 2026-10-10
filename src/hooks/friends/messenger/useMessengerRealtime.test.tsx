@@ -19,7 +19,7 @@ vi.mock('./useMessengerStore', () => ({
     useMessengerStore: () => ({ state: {}, dispatch: mocks.dispatch })
 }));
 
-vi.mock('@octane/renderer', () => ({
+vi.mock('@volt/renderer', () => ({
     GetSessionDataManager: () => ({ userId: 1 }),
     MessengerConversationsEvent: class {},
     MessengerHistoryEvent: class {},

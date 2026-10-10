@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@octane/renderer';
+import { RoomObjectCategory } from '@volt/renderer';
 import { FC, PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { AddAnimationTickerCallback, GetRoomObjectBounds } from '../../../../api';
 import { useRoom, useWiredVariableFxEvents, useWiredVariableFxStore } from '../../../../hooks';
@@ -42,7 +42,7 @@ const WiredVariableFxEntityView: FC<PropsWithChildren<WiredVariableFxEntityViewP
     }, [roomId, userEntity, entityId]);
 
     return (
-        <div ref={elementRef} className="octane-wired-fx-overlay__entity" style={{ visibility: 'hidden' }} data-testid="fx-entity">
+        <div ref={elementRef} className="volt-wired-fx-overlay__entity" style={{ visibility: 'hidden' }} data-testid="fx-entity">
             {children}
         </div>
     );
@@ -64,9 +64,9 @@ export const WiredVariableFxOverlayView: FC<{}> = () => {
     if (!roomSession || (!groups.entities.length && !groups.bosses.length)) return null;
 
     return (
-        <div className="octane-wired-fx-overlay" data-testid="fx-overlay">
+        <div className="volt-wired-fx-overlay" data-testid="fx-overlay">
             {groups.bosses.length > 0 && (
-                <div className="octane-wired-fx-overlay__bosses">
+                <div className="volt-wired-fx-overlay__bosses">
                     {groups.bosses.map((drawn) => (
                         <WiredVariableFxStatusView key={drawn.entry.key} config={drawn.config} entry={drawn.entry} />
                     ))}

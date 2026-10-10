@@ -3,11 +3,11 @@ import {
     GetSessionDataManager,
     ILinkEventTracker,
     RemoveLinkEventTracker,
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaDiscord } from 'react-icons/fa';
 import { GetConfigurationValue, LocalizeText, OpenUrl } from '../../api';
-import { LayoutAvatarImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../common';
+import { LayoutAvatarImageView, VoltCardContentView, VoltCardHeaderView, VoltCardView, Text } from '../../common';
 import { DiscordPreferences, useDiscordSettings } from '../../hooks';
 
 const localizeWithFallback = (key: string, fallback: string) => {
@@ -181,8 +181,8 @@ export const DiscordSettingsView: FC = () => {
     const subOptionDisabled = !preferences.showHabbo || !preferences.shareActivity;
 
     return (
-        <OctaneCardView className="discord-settings-window w-[390px]" theme="primary-slim" uniqueKey="discord-settings">
-            <OctaneCardHeaderView
+        <VoltCardView className="discord-settings-window w-[390px]" theme="primary-slim" uniqueKey="discord-settings">
+            <VoltCardHeaderView
                 headerText={localizeWithFallback('discord.settings.title', 'Impostazioni Discord')}
                 onCloseClick={() => setIsVisible(false)}
             />
@@ -201,7 +201,7 @@ export const DiscordSettingsView: FC = () => {
                 </div>
             </div>
 
-            <OctaneCardContentView className="flex flex-col gap-2 text-black">
+            <VoltCardContentView className="flex flex-col gap-2 text-black">
                 <DiscordPresencePreview preferences={preferences} />
 
                 <CheckboxRow
@@ -261,7 +261,7 @@ export const DiscordSettingsView: FC = () => {
                         configKey="origins.discord.link"
                     />
                 </div>
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

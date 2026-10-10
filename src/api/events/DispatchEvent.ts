@@ -1,3 +1,3 @@
-import { IEventDispatcher, OctaneEvent } from '@octane/renderer';
+import { IEventDispatcher, VoltEvent } from '@volt/renderer';
 
-export const DispatchEvent = (eventDispatcher: IEventDispatcher, event: OctaneEvent) => eventDispatcher.dispatchEvent(event);
+export const DispatchEvent = (eventDispatcher: IEventDispatcher, event: VoltEvent) => eventDispatcher.dispatchEvent(event);

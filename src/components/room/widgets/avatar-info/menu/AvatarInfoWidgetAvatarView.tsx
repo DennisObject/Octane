@@ -9,7 +9,7 @@ import {
     RoomUnitGiveHandItemComposer,
     SetRelationshipStatusComposer,
     TradingOpenComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import {
@@ -260,7 +260,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
     return (
         <ContextMenuView
             category={RoomObjectCategory.UNIT}
-            classNames={['octane-avatar-action-menu', 'octane-avatar-action-menu--classic', 'octane-avatar-action-menu--wide']}
+            classNames={['volt-avatar-action-menu', 'volt-avatar-action-menu--classic', 'volt-avatar-action-menu--wide']}
             collapsable={true}
             freezePositionOnHover={true}
             maximumVerticalLeadRatio={0.05}
@@ -432,13 +432,13 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = (
                     <>
                         <Flex className="air-avatar-menu-relationships">
                             <ContextMenuListItemView classNames={['air-avatar-menu-sign-cell']} onClick={(event) => processAction('rship_heart')}>
-                                <div className="octane-friends-spritesheet icon-heart cursor-pointer" />
+                                <div className="volt-friends-spritesheet icon-heart cursor-pointer" />
                             </ContextMenuListItemView>
                             <ContextMenuListItemView classNames={['air-avatar-menu-sign-cell']} onClick={(event) => processAction('rship_smile')}>
-                                <div className="octane-friends-spritesheet icon-smile cursor-pointer" />
+                                <div className="volt-friends-spritesheet icon-smile cursor-pointer" />
                             </ContextMenuListItemView>
                             <ContextMenuListItemView classNames={['air-avatar-menu-sign-cell']} onClick={(event) => processAction('rship_bobba')}>
-                                <div className="octane-friends-spritesheet icon-bobba cursor-pointer" />
+                                <div className="volt-friends-spritesheet icon-bobba cursor-pointer" />
                             </ContextMenuListItemView>
                         </Flex>
                         <ContextMenuListItemView onClick={(event) => processAction('rship_none')}>

@@ -1,4 +1,4 @@
-import { MessengerMessageType } from '@octane/renderer';
+import { MessengerMessageType } from '@volt/renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { MessengerThread, MessengerThreadChat, MessengerThreadChatGroup } from '../../../../../api';
 import { FriendsMessengerThreadGroup } from './FriendsMessengerThreadGroup';

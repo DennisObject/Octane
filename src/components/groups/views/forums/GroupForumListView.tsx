@@ -1,4 +1,4 @@
-import { CreateLinkEvent, ForumData, ForumsListMessageEvent, GetForumsListMessageComposer, UpdateForumReadMarkerEntry, UpdateForumReadMarkerMessageComposer } from '@octane/renderer';
+import { CreateLinkEvent, ForumData, ForumsListMessageEvent, GetForumsListMessageComposer, UpdateForumReadMarkerEntry, UpdateForumReadMarkerMessageComposer } from '@volt/renderer';
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
 import { ClassicScrollAreaView, LayoutBadgeImageView } from '../../../../common';
@@ -53,8 +53,8 @@ export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, page
     return (
         <>
             <GroupText background={FORUM_SURFACE} height={25} overrides={flatText(16, { bold: true, color: 0xa6a6a2 })} text={LocalizeText(`groupforum.view.forums_list.${listCode}`)} width={541} x={0} y={115} />
-            <div className="octane-forum__list">
-                <ClassicScrollAreaView className="octane-forum__scroll" contentClassName="octane-forum__scroll-content" minThumbSize={26} scrollStep={42}>
+            <div className="volt-forum__list">
+                <ClassicScrollAreaView className="volt-forum__scroll" contentClassName="volt-forum__scroll-content" minThumbSize={26} scrollStep={42}>
                     {forums.map((forum, rowIndex) => {
                         const isUnread = forum.unreadMessages > 0;
                         const background = rowIndex % 2 === 1 ? 0xb2e6fa : 0xeefeff;
@@ -68,15 +68,15 @@ export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, page
                         );
 
                         return (
-                            <div key={forum.groupId} className="octane-forum__forum" onClick={() => onOpenForum(forum.groupId)}>
-                                <div className="octane-forum__forum-badge" style={{ background: rowColor }}>
+                            <div key={forum.groupId} className="volt-forum__forum" onClick={() => onOpenForum(forum.groupId)}>
+                                <div className="volt-forum__forum-badge" style={{ background: rowColor }}>
                                     <LayoutBadgeImageView badgeCode={forum.icon} isGroup={true} />
                                 </div>
-                                <div className="octane-forum__forum-body" style={{ left: 42, width: ROW_WIDTH - 42 - 1 - 100, background: rowColor }}>
+                                <div className="volt-forum__forum-body" style={{ left: 42, width: ROW_WIDTH - 42 - 1 - 100, background: rowColor }}>
                                     <GroupText background={background} overrides={isUnread ? { bold: true } : undefined} text={forum.name} x={0} y={0} />
                                     <GroupText background={background} overrides={flatText(10)} text={details} x={0} y={16} />
                                 </div>
-                                <div className="octane-forum__forum-counts" style={{ left: ROW_WIDTH - 100, background: rowColor }}>
+                                <div className="volt-forum__forum-counts" style={{ left: ROW_WIDTH - 100, background: rowColor }}>
                                     <GroupText
                                         background={background}
                                         overrides={flatText(10, { bold: isUnread })}
@@ -97,11 +97,11 @@ export const GroupForumListView: FC<GroupForumListViewProps> = ({ listCode, page
                     })}
                 </ClassicScrollAreaView>
             </div>
-            <div className="octane-forum__footer">
+            <div className="volt-forum__footer">
                 <ForumButton label={LocalizeText('groupforum.view.mark_read')} width={95} x={10} onClick={markAsRead} />
                 <ForumPager pageCount={pageCount} pageIndex={pageIndex} onPage={onPageChange} />
             </div>
-            <div className="octane-forum__status is-list">
+            <div className="volt-forum__status is-list">
                 <GroupText background={FORUM_SURFACE} className="is-static" overrides={flatText(11)} text={before} x={0} y={0} />
                 {linkText && (
                     <GroupText background={FORUM_SURFACE} className="is-static is-link" overrides={flatText(11, { underline: true })} text={linkText} x={0} y={0} onClick={() => CreateLinkEvent('catalog/open/guild_forum')} />

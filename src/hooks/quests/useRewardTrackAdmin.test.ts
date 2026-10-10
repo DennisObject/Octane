@@ -51,7 +51,7 @@ describe('useRewardTrackAdmin', () => {
     });
 
     it('keeps the server choices and tracks, and clears pending on the answer', async () => {
-        const { RewardTrackAdminDataMessageEvent, RewardTrackAdminResultMessageEvent } = await import('@octane/renderer');
+        const { RewardTrackAdminDataMessageEvent, RewardTrackAdminResultMessageEvent } = await import('@volt/renderer');
         const { result } = renderHook(() => useRewardTrackAdmin());
 
         expect(result.current.loaded).toBe(false);

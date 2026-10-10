@@ -5,8 +5,8 @@ import {
     GetSessionDataManager,
     MarketPlaceOffersEvent,
     MarketplaceBuyOfferResultEvent,
-    OctaneEventType
-} from '@octane/renderer';
+    VoltEventType
+} from '@volt/renderer';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
     IMarketplaceSearchOptions,
@@ -17,7 +17,7 @@ import {
     SendMessageComposer
 } from '../../../../../../api';
 import { Button, Column, Text } from '../../../../../../common';
-import { useMessageEvent, useNotification, useOctaneEvent, usePurse } from '../../../../../../hooks';
+import { useMessageEvent, useNotification, useVoltEvent, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, PUBLIC_OFFER } from './CatalogLayoutMarketplaceItemView';
 import { SearchFormView } from './CatalogLayoutMarketplaceSearchFormView';
@@ -45,7 +45,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     }, []);
 
     // The server forgets a buy with its socket and answers nothing for it on the next connection.
-    useOctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED, () =>
+    useVoltEvent(VoltEventType.CONNECTION_STATE_CHANGED, () =>
     {
         if (GetCommunication().connection.connectionState.authenticated) return;
 
@@ -223,7 +223,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                 <Text shrink truncate fontWeight="bold">
                     {LocalizeText('catalog.marketplace.items_found', ['count'], [offers.size.toString()])}
                 </Text>
-                <Column className="octane-catalog-layout-marketplace-grid" overflow="auto">
+                <Column className="volt-catalog-layout-marketplace-grid" overflow="auto">
                     {Array.from(offers.values()).map((entry, index) => (
                         <CatalogLayoutMarketplaceItemView key={index} offerData={entry} type={PUBLIC_OFFER} onClick={purchaseItem} />
                     ))}

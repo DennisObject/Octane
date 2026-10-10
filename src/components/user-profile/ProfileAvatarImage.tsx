@@ -1,4 +1,4 @@
-import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@octane/renderer';
+import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager, IAvatarImage } from '@volt/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { dataUrlToBlob } from '../../common/layout/avatarImageCrop';
 
@@ -102,6 +102,6 @@ export const ProfileAvatarImage: FC<{ figure: string }> = ({ figure }) => {
     );
 
     return shown?.figure === figure ? (
-        <img alt="" className="octane-extended-profile__avatar-image" draggable={false} src={shown.url} style={{ marginLeft: shown.left }} />
+        <img alt="" className="volt-extended-profile__avatar-image" draggable={false} src={shown.url} style={{ marginLeft: shown.left }} />
     ) : null;
 };

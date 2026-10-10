@@ -1,4 +1,4 @@
-import { createOctaneStore } from './createOctaneStore';
+import { createVoltStore } from './createVoltStore';
 
 export interface VariablesExplorerPrefill {
     roomId?: number;
@@ -16,7 +16,7 @@ interface VariablesExplorerState {
 }
 
 /** The Variables Explorer window, opened from the web api box editor and the wired creator tools. */
-export const useVariablesExplorerStore = createOctaneStore<VariablesExplorerState>()((set) => ({
+export const useVariablesExplorerStore = createVoltStore<VariablesExplorerState>()((set) => ({
     isOpen: false,
     prefill: null,
     openCount: 0,

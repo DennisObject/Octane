@@ -16,7 +16,7 @@ import {
     WiredTradeItemsEvent,
     WiredTradeOfferItemsComposer,
     WiredTradeOpenEvent,
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { localizeWithFallback, SendMessageComposer } from '../../api';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';

@@ -25,7 +25,7 @@ export const useAirScrollInput = (viewport: HTMLDivElement | null, { wheelStep, 
             viewport.scrollBy({ top: Math.sign(event.deltaY) * wheelStep, behavior: 'auto' });
         };
 
-        const arrows = [...viewport.parentElement.querySelectorAll<HTMLButtonElement>('.octane-classic-scrollbar-button')];
+        const arrows = [...viewport.parentElement.querySelectorAll<HTMLButtonElement>('.volt-classic-scrollbar-button')];
         const onArrowDown = (event: PointerEvent) => {
             const isUp = (event.currentTarget as HTMLElement).classList.contains('is-up');
 

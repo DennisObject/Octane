@@ -1,9 +1,9 @@
-import { GetOfficialSongIdMessageComposer, GetSoundManager, MusicPriorities, OfficialSongIdMessageEvent, SongInfoReceivedEvent } from '@octane/renderer';
+import { GetOfficialSongIdMessageComposer, GetSoundManager, MusicPriorities, OfficialSongIdMessageEvent, SongInfoReceivedEvent } from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { LayoutFurniImageView } from '../../../../../common';
-import { getCatalogGridMetrics, useCatalogData, useCatalogDisplayPreferences, useMessageEvent, useOctaneEvent } from '../../../../../hooks';
-import { OctaneButton } from '../../../../../layout';
+import { getCatalogGridMetrics, useCatalogData, useCatalogDisplayPreferences, useMessageEvent, useVoltEvent } from '../../../../../hooks';
+import { VoltButton } from '../../../../../layout';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
 import { CatalogPriceDisplayWidgetView } from '../widgets/CatalogPriceDisplayWidgetView';
 import { CatalogPurchaseSelectionPrompt } from '../widgets/CatalogPurchaseSelectionPrompt';
@@ -50,7 +50,7 @@ export const CatalogLayoutSoundMachineView: FC<CatalogLayoutProps> = (props) => 
         setSongId(parser.songId > 0 ? parser.songId : -1);
     });
 
-    useOctaneEvent<SongInfoReceivedEvent>(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, (event) => {
+    useVoltEvent<SongInfoReceivedEvent>(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, (event) => {
         if (event.id !== songId) return;
 
         updateSongLength(event.id);
@@ -99,14 +99,14 @@ export const CatalogLayoutSoundMachineView: FC<CatalogLayoutProps> = (props) => 
     }, [songLength]);
 
     return (
-        <div className="octane-catalog-sound-layout">
-            <section className="octane-catalog-sound-product">
+        <div className="volt-catalog-sound-layout">
+            <section className="volt-catalog-sound-product">
                 {currentOffer ? (
                     <>
-                        <strong className="octane-catalog-sound-title">{currentOffer.localizationName}</strong>
-                        <span className="octane-catalog-sound-description">{currentOffer.localizationDescription}</span>
-                        <span className="octane-catalog-sound-length">{formattedSongLength}</span>
-                        <div className="octane-catalog-sound-product-render">
+                        <strong className="volt-catalog-sound-title">{currentOffer.localizationName}</strong>
+                        <span className="volt-catalog-sound-description">{currentOffer.localizationDescription}</span>
+                        <span className="volt-catalog-sound-length">{formattedSongLength}</span>
+                        <div className="volt-catalog-sound-product-render">
                             <LayoutFurniImageView
                                 direction={2}
                                 extraData={currentOffer.product.extraParam}
@@ -114,36 +114,36 @@ export const CatalogLayoutSoundMachineView: FC<CatalogLayoutProps> = (props) => 
                                 productType={currentOffer.product.productType}
                             />
                         </div>
-                        <div className="octane-catalog-sound-price">
+                        <div className="volt-catalog-sound-price">
                             <CatalogPriceDisplayWidgetView offer={currentOffer} />
                         </div>
                         {currentOffer.product.extraParam.length > 0 && (
-                            <div className="octane-catalog-sound-listen-panel">
+                            <div className="volt-catalog-sound-listen-panel">
                                 <span>{LocalizeText('play_preview')}</span>
-                                <OctaneButton
-                                    className="octane-catalog-sound-listen-button"
+                                <VoltButton
+                                    className="volt-catalog-sound-listen-button"
                                     disabled={songId <= 0 || songLength === null}
                                     onClick={() => previewSong(songId)}
                                 >
                                     {LocalizeText('play_preview_button')}
-                                </OctaneButton>
+                                </VoltButton>
                             </div>
                         )}
                     </>
                 ) : (
-                    <span className="octane-catalog-sound-select-product">{LocalizeText('catalog_selectproduct')}</span>
+                    <span className="volt-catalog-sound-select-product">{LocalizeText('catalog_selectproduct')}</span>
                 )}
             </section>
 
-            <div className="octane-catalog-sound-grid">
+            <div className="volt-catalog-sound-grid">
                 <CatalogItemGridWidgetView
-                    className={`octane-catalog-grid octane-catalog-grid-density-${density}`}
+                    className={`volt-catalog-grid volt-catalog-grid-density-${density}`}
                     showPrices={showTilePrices}
                     {...gridMetrics}
                 />
             </div>
 
-            <div className="octane-catalog-sound-purchase">{currentOffer ? <CatalogPurchaseWidgetView /> : <CatalogPurchaseSelectionPrompt />}</div>
+            <div className="volt-catalog-sound-purchase">{currentOffer ? <CatalogPurchaseWidgetView /> : <CatalogPurchaseSelectionPrompt />}</div>
         </div>
     );
 };

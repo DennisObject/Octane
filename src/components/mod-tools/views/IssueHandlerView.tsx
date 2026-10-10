@@ -1,4 +1,4 @@
-import { CallForHelpCategoryData, CloseIssuesMessageComposer, ModeratorInitData } from '@octane/renderer';
+import { CallForHelpCategoryData, CloseIssuesMessageComposer, ModeratorInitData } from '@volt/renderer';
 import { FC, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../api';
 import issueHandlerXml from '../../../assets/mod-tools/xml/issue_handler.xml?raw';

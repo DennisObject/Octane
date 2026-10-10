@@ -82,9 +82,9 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
     };
 
     return (
-        <div className="octane-wired__shell-header drag-handler" onPointerDown={() => setMenuPosition(null)}>
+        <div className="volt-wired__shell-header drag-handler" onPointerDown={() => setMenuPosition(null)}>
             {isWiredVolterStyle(shellStyle) && (
-                <svg className="octane-wired__volter-header-skin" aria-hidden="true">
+                <svg className="volt-wired__volter-header-skin" aria-hidden="true">
                     <defs>
                         <pattern id={headerPatternId} width={6} height={15} patternUnits="userSpaceOnUse">
                             <image href={volterAtlas} x={-headerOffsets[shellStyle]} y={-300} width={490} height={360} />
@@ -94,14 +94,14 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                     <rect width="100%" height="100%" fill={`url(#${headerPatternId})`} />
                 </svg>
             )}
-            <span className="octane-wired__shell-caption">{title}</span>
+            <span className="volt-wired__shell-caption">{title}</span>
             {(shellStyle === 'illumina' || shellStyle === 'volter') && (
                 <button
                     ref={toggleRef}
                     aria-expanded={!!menuPosition}
                     aria-haspopup="menu"
                     aria-label={localizeWithFallback('wiredfurni.params.menu', 'Menu')}
-                    className="octane-wired__shell-menu-toggle"
+                    className="volt-wired__shell-menu-toggle"
                     type="button"
                     onPointerDown={(event) => {
                         event.stopPropagation();
@@ -115,7 +115,7 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
             )}
             <button
                 aria-label={localizeWithFallback('generic.close', 'Close')}
-                className="octane-wired__shell-close"
+                className="volt-wired__shell-close"
                 type="button"
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={onClose}
@@ -124,7 +124,7 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                 createPortal(
                     <div
                         ref={menuRef}
-                        className={`octane-wired__shell-menu octane-wired__shell-menu--${shellStyle}`}
+                        className={`volt-wired__shell-menu volt-wired__shell-menu--${shellStyle}`}
                         role="menu"
                         aria-label={localizeWithFallback('wiredfurni.params.menu', 'Menu')}
                         style={menuPosition}
@@ -143,7 +143,7 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                                 <button
                                     key={item.id}
                                     aria-checked={item.checked}
-                                    className="octane-wired__shell-menu-item"
+                                    className="volt-wired__shell-menu-item"
                                     disabled={item.disabled}
                                     role={item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'}
                                     tabIndex={-1}
@@ -157,12 +157,12 @@ export const WiredShellHeaderView: FC<WiredShellHeaderViewProps> = ({ shellStyle
                                     }}
                                 >
                                     {item.checked !== undefined && (
-                                        <span aria-hidden="true" className={`octane-wired__shell-menu-check ${item.checked ? 'is-checked' : ''}`} />
+                                        <span aria-hidden="true" className={`volt-wired__shell-menu-check ${item.checked ? 'is-checked' : ''}`} />
                                     )}
                                     <span>{item.label}</span>
                                 </button>
                             ) : (
-                                <div key={`spacer-${index}`} className="octane-wired__shell-menu-spacer" role="separator" />
+                                <div key={`spacer-${index}`} className="volt-wired__shell-menu-spacer" role="separator" />
                             )
                         )}
                     </div>,
@@ -220,15 +220,15 @@ export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { sh
     );
 
     return (
-        <button {...props} className={`octane-wired__shell-button octane-wired__shell-button--${shellStyle} ${className}`} type="button">
-            <span className="octane-wired__shell-button-skin" aria-hidden="true">
-                {regions.map((rect, index) => region(rect, `octane-wired__shell-button-patch ${index % 3 === 2 ? 'is-right' : ''}`, index))}
+        <button {...props} className={`volt-wired__shell-button volt-wired__shell-button--${shellStyle} ${className}`} type="button">
+            <span className="volt-wired__shell-button-skin" aria-hidden="true">
+                {regions.map((rect, index) => region(rect, `volt-wired__shell-button-patch ${index % 3 === 2 ? 'is-right' : ''}`, index))}
             </span>
             {isIllumina && (
                 <>
-                    {region([1, 31, 3, 5], 'octane-wired__shell-button-curve is-left', 9)}
-                    {region([7, 31, 3, 5], 'octane-wired__shell-button-curve is-right', 10)}
-                    <span className="octane-wired__shell-button-etching" aria-hidden="true">
+                    {region([1, 31, 3, 5], 'volt-wired__shell-button-curve is-left', 9)}
+                    {region([7, 31, 3, 5], 'volt-wired__shell-button-curve is-right', 10)}
+                    <span className="volt-wired__shell-button-etching" aria-hidden="true">
                         {[
                             [0, 137, 6, 5],
                             [6, 137, 1, 5],
@@ -237,7 +237,7 @@ export const WiredShellButton: FC<ButtonHTMLAttributes<HTMLButtonElement> & { sh
                     </span>
                 </>
             )}
-            <span className="octane-wired__shell-button-label">{children}</span>
+            <span className="volt-wired__shell-button-label">{children}</span>
         </button>
     );
 };

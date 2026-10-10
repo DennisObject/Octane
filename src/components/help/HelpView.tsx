@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker, RoomObjectType } from '@octane/renderer';
+import { AddLinkEventTracker, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker, RoomObjectType } from '@volt/renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatEntryType, LocalizeText, ReportState, ReportType } from '../../api';
 import { DraggableWindow, LayoutAvatarImageView } from '../../common';
@@ -97,7 +97,7 @@ export const HelpView: FC = () => {
             if (!(event.target instanceof HTMLElement)) return;
             const higherWindow = getHigherWindow();
             if (higherWindow) {
-                if ((higherWindow.matches('.octane-alert') || higherWindow.querySelector('.octane-alert')) && !higherWindow.contains(event.target))
+                if ((higherWindow.matches('.volt-alert') || higherWindow.querySelector('.volt-alert')) && !higherWindow.contains(event.target))
                     getFocusableControls(higherWindow)[0]?.focus({ preventScroll: true });
                 return;
             }
@@ -108,7 +108,7 @@ export const HelpView: FC = () => {
             if (event.key !== 'Tab') return;
             const higherWindow = getHigherWindow();
             // A notification above Help owns focus until it closes. Other higher windows manage their own focus.
-            if (higherWindow && !higherWindow.matches('.octane-alert') && !higherWindow.querySelector('.octane-alert')) return;
+            if (higherWindow && !higherWindow.matches('.volt-alert') && !higherWindow.querySelector('.volt-alert')) return;
             const focusOwner = higherWindow || modal;
             const controls = getFocusableControls(focusOwner);
             if (!controls.length) {
@@ -190,23 +190,23 @@ export const HelpView: FC = () => {
         <HelpAlertContext.Provider value={setAlertKey}>
             {isOpen && (
                 <DraggableWindow disableDrag initialPosition={MODAL_ORIGIN} unconstrainedPosition>
-                    <div className="octane-help-modal">
-                        <div className="octane-help-backdrop" aria-hidden="true" />
+                    <div className="volt-help-modal">
+                        <div className="volt-help-backdrop" aria-hidden="true" />
                         <section
                             ref={modalRef}
-                            className="octane-help octane-card-shell octane-card-frame-3 has-classic-scrollbar"
+                            className="volt-help volt-card-shell volt-card-frame-3 has-classic-scrollbar"
                             role="dialog"
                             aria-modal="true"
-                            aria-labelledby="octane-help-title"
+                            aria-labelledby="volt-help-title"
                             tabIndex={-1}
                         >
-                            <div className="octane-card-header-shell">
-                                <span id="octane-help-title" className="octane-card-title">
+                            <div className="volt-card-header-shell">
+                                <span id="volt-help-title" className="volt-card-title">
                                     <HelpFrameTitle text={LocalizeText('help.button.cfh')} width={448} />
                                 </span>
-                                <button type="button" className="octane-card-close-button" aria-label={LocalizeText('generic.close')} onClick={onClose} />
+                                <button type="button" className="volt-card-close-button" aria-label={LocalizeText('generic.close')} onClick={onClose} />
                             </div>
-                            <svg className="octane-help-filters" aria-hidden="true">
+                            <svg className="volt-help-filters" aria-hidden="true">
                                 <defs>
                                     <filter id="help-green" colorInterpolationFilters="sRGB">
                                         <feColorMatrix type="matrix" values="0 0 0 0 0  0 .6666667 0 0 0  0 0 0 0 0  0 0 0 1 0" />
@@ -219,7 +219,7 @@ export const HelpView: FC = () => {
                                     </filter>
                                 </defs>
                             </svg>
-                            <div className="octane-help-content">
+                            <div className="volt-help-content">
                                 {showUser && (
                                     <div className="help-reported-user">
                                         {!isRoom && !isForum && (

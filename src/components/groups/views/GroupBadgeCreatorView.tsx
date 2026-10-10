@@ -22,9 +22,9 @@ const LIST_Y = 29;
 const ROW_PITCH = 51;
 
 export const GroupColorChip: FC<{ color: string; selected: boolean; onSelect: () => void }> = ({ color, selected, onSelect }) => (
-    <button className="octane-group-native__color" style={{ '--group-color': '#' + color } as CSSProperties} type="button" onClick={onSelect}>
+    <button className="volt-group-native__color" style={{ '--group-color': '#' + color } as CSSProperties} type="button" onClick={onSelect}>
         <img alt="" draggable={false} src={colorChooserBg} />
-        <span className="octane-group-native__color-fill" />
+        <span className="volt-group-native__color-fill" />
         {selected && <img alt="" draggable={false} src={colorChooserSelected} />}
     </button>
 );
@@ -70,19 +70,19 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
         const isBase = part.type === GroupBadgePart.BASE;
 
         return (
-            <div key={partIndex} className="octane-group-native__layer" style={{ left: EDIT_X, top: y }}>
+            <div key={partIndex} className="volt-group-native__layer" style={{ left: EDIT_X, top: y }}>
                 <GroupBox height={49} kind="dark" width={247} x={0} y={0} />
-                <button className="octane-group-native__layer-part" type="button" onClick={() => setSelectedIndex(partIndex)}>
+                <button className="volt-group-native__layer-part" type="button" onClick={() => setSelectedIndex(partIndex)}>
                     {part.previewCode ? (
-                        <div className="octane-group-native__badge">
+                        <div className="volt-group-native__badge">
                             <LayoutBadgeImageView badgeCode={part.previewCode} isGroup={true} />
                         </div>
                     ) : (
-                        <img alt="" className="octane-group-native__badge" draggable={false} src={badgePartAdd} />
+                        <img alt="" className="volt-group-native__badge" draggable={false} src={badgePartAdd} />
                     )}
                 </button>
                 {!isBase && (
-                    <div className="octane-group-native__layer-position" onPointerDown={(event) => selectPosition(partIndex, event)}>
+                    <div className="volt-group-native__layer-position" onPointerDown={(event) => selectPosition(partIndex, event)}>
                         <img alt="" draggable={false} src={positionGrid} />
                         <img
                             alt=""
@@ -92,7 +92,7 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
                         />
                     </div>
                 )}
-                <div className="octane-group-native__layer-colors">
+                <div className="volt-group-native__layer-colors">
                     {groupCustomize.badgePartColors.map((item) => (
                         <GroupColorChip key={item.id} color={item.color} selected={part.color === item.id} onSelect={() => setPartProperty(partIndex, 'color', item.id)} />
                     ))}
@@ -111,24 +111,24 @@ export const GroupBadgeCreatorView: FC<GroupBadgeCreatorViewProps> = (props) => 
                 <GroupText textStyle="u_bold" text={LocalizeText('group.edit.badge.pick.symbol')} width={78} x={EDIT_X} y={8} />
                 <GroupBox height={274} kind="dark" width={247} x={EDIT_X} y={LIST_Y}>
                     <GroupBox height={266} kind="slot" width={239} x={4} y={4}>
-                        <ClassicScrollAreaView className="octane-group-native__part-scroll" contentClassName="octane-group-native__part-scroll-content" minThumbSize={26} scrollStep={43}>
-                            <div className="octane-group-native__part-grid">
+                        <ClassicScrollAreaView className="volt-group-native__part-scroll" contentClassName="volt-group-native__part-scroll-content" minThumbSize={26} scrollStep={43}>
+                            <div className="volt-group-native__part-grid">
                                 {isSymbol && (
-                                    <button className="octane-group-native__part-item" type="button" onClick={() => setPartProperty(selectedIndex, 'key', 0)}>
+                                    <button className="volt-group-native__part-item" type="button" onClick={() => setPartProperty(selectedIndex, 'key', 0)}>
                                         <GroupBox height={41} kind="tan" width={41} x={0} y={0} />
                                         <img alt="" src={badgePartEmpty} style={{ left: 2, top: 2 }} />
-                                        {selected.key === 0 && <img alt="" className="octane-group-native__part-selected" src={badgePartPicker} />}
+                                        {selected.key === 0 && <img alt="" className="volt-group-native__part-selected" src={badgePartPicker} />}
                                     </button>
                                 )}
                                 {items.map((item) => (
-                                    <button key={item.id} className="octane-group-native__part-item" type="button" onClick={() => setPartProperty(selectedIndex, 'key', item.id)}>
+                                    <button key={item.id} className="volt-group-native__part-item" type="button" onClick={() => setPartProperty(selectedIndex, 'key', item.id)}>
                                         <GroupBox height={41} kind="tan" width={41} x={0} y={0} />
-                                        <div className="octane-group-native__part-clip">
-                                            <div className="octane-group-native__badge">
+                                        <div className="volt-group-native__part-clip">
+                                            <div className="volt-group-native__badge">
                                                 <LayoutBadgeImageView badgeCode={GroupBadgePart.getCode(selected.type, item.id, selected.color, selected.position)} isGroup={true} />
                                             </div>
                                         </div>
-                                        {selected.key === item.id && <img alt="" className="octane-group-native__part-selected" src={badgePartPicker} />}
+                                        {selected.key === item.id && <img alt="" className="volt-group-native__part-selected" src={badgePartPicker} />}
                                     </button>
                                 ))}
                             </div>

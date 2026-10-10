@@ -1,4 +1,4 @@
-import { IsFirstLoginOfDayEvent } from '@octane/renderer';
+import { IsFirstLoginOfDayEvent } from '@volt/renderer';
 import { useState } from 'react';
 import { registerSharedHook, useSharedHook } from '@/state/useSharedHook';
 import { useMessageEvent } from '../events';

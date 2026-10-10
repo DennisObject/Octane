@@ -14,7 +14,7 @@ interface CatalogAdminPageContentViewProps {
 /** Images and texts a catalog page shows. Texts are edited as plain text, never rendered here. */
 export const CatalogAdminPageContentView: FC<CatalogAdminPageContentViewProps> = ({ draft, patch, fieldErrors }) => (
     <StaffSection title={LocalizeText('catalog.admin.page.section.content')}>
-        <div className="octane-staff-grid">
+        <div className="volt-staff-grid">
             <CatalogAdminTextField
                 label={LocalizeText('catalog.admin.page.headline')}
                 error={fieldErrors.pageHeadline}

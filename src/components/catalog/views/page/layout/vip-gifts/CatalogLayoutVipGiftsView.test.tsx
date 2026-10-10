@@ -1,4 +1,4 @@
-import { SelectClubGiftComposer } from '@octane/renderer';
+import { SelectClubGiftComposer } from '@volt/renderer';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SendMessageComposer } from '../../../../../../api';
@@ -94,7 +94,7 @@ describe('club gifts page', () => {
 
     it('lists each gift with its requirement, description and vip mark, by days required', () => {
         const { container } = renderView();
-        const rows = container.querySelectorAll('.octane-catalog-club-gift');
+        const rows = container.querySelectorAll('.volt-catalog-club-gift');
 
         expect(rows).toHaveLength(2);
 
@@ -103,12 +103,12 @@ describe('club gifts page', () => {
         expect(within(clubGift).getByText('roomItem.name.10')).toBeInTheDocument();
         expect(within(clubGift).getByText('roomItem.desc.10')).toBeInTheDocument();
         expect(within(clubGift).getByText('catalog.club_gift.selectable')).toBeInTheDocument();
-        expect(clubGift.querySelector('.octane-club-compact-mark.is-vip')).toBeNull();
+        expect(clubGift.querySelector('.volt-club-compact-mark.is-vip')).toBeNull();
 
         expect(within(vipGift).getByText('roomItem.name.20')).toBeInTheDocument();
         expect(within(vipGift).getByText('roomItem.desc.20')).toBeInTheDocument();
         expect(within(vipGift).getByText('catalog.club_gift.vip_missing.long:18,2')).toBeInTheDocument();
-        expect(vipGift.querySelector('.octane-club-compact-mark.is-vip')).not.toBeNull();
+        expect(vipGift.querySelector('.volt-club-compact-mark.is-vip')).not.toBeNull();
     });
 
     it('enables the select button only for a selectable gift while gifts are available', () => {

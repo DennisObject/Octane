@@ -12,12 +12,12 @@ import {
     UserProfileEvent,
     UserProfileParser,
     UserRelationshipsComposer
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useState } from 'react';
 import { CreateLinkEvent, GetRoomSession, GetUserProfile, LocalizeText, localizeWithFallback, SanitizeHtml, SendMessageComposer } from '../../api';
 import { frankStop } from '../../assets/images/user-profile';
-import { OctaneCardHeaderView, OctaneCardView } from '../../common';
-import { useIsUserBlocked, useMessageEvent, useNotification, useOctaneEvent } from '../../hooks';
+import { VoltCardHeaderView, VoltCardView } from '../../common';
+import { useIsUserBlocked, useMessageEvent, useNotification, useVoltEvent } from '../../hooks';
 import { GroupsContainerView } from './GroupsContainerView';
 import { UserContainerView } from './UserContainerView';
 
@@ -109,7 +109,7 @@ export const UserProfileView: FC<{}> = () => {
         GetUserProfile(parser.userId);
     });
 
-    useOctaneEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.SELECTED, (event) => {
+    useVoltEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.SELECTED, (event) => {
         if (!userProfile) return;
 
         if (event.category !== RoomObjectCategory.UNIT) return;
@@ -125,17 +125,17 @@ export const UserProfileView: FC<{}> = () => {
     const isProfileHidden = userProfile.hasNativeProfileFields && userProfile.isHidden && userProfile.id !== GetSessionDataManager().userId;
 
     return (
-        <OctaneCardView className="octane-extended-profile-window" uniqueKey="octane-user-profile" frameStyle={3} isResizable={false}
+        <VoltCardView className="volt-extended-profile-window" uniqueKey="volt-user-profile" frameStyle={3} isResizable={false}
             initialPosition={windowPosition} onPositionChange={setWindowPosition} unconstrainedPosition>
-            <OctaneCardHeaderView headerText={LocalizeText('extendedprofile.caption')} onCloseClick={onClose} />
-            <div className="octane-extended-profile-window__content">
+            <VoltCardHeaderView headerText={LocalizeText('extendedprofile.caption')} onCloseClick={onClose} />
+            <div className="volt-extended-profile-window__content">
                 {isBlocked && (
                     // Official blocked_container: the drama text, whose "event:profile/unblock" link
                     // opens the unblock confirm (it carries no href, so it is never followed as a
                     // page), and Frank's stop sign.
-                    <div className="octane-extended-profile__blocked-overlay">
+                    <div className="volt-extended-profile__blocked-overlay">
                         <div
-                            className="octane-extended-profile__blocked-text"
+                            className="volt-extended-profile__blocked-text"
                             onClick={(event) => {
                                 if (!(event.target as HTMLElement).closest('a')) return;
 
@@ -143,7 +143,7 @@ export const UserProfileView: FC<{}> = () => {
                                 toggleBlock();
                             }}
                         >
-                            <div className="octane-extended-profile__blocked-copy" dangerouslySetInnerHTML={{
+                            <div className="volt-extended-profile__blocked-copy" dangerouslySetInnerHTML={{
                                 __html: SanitizeHtml(
                                     localizeWithFallback('extendedprofile.blocked', 'You are blocking this user. <a href="event:profile/unblock">Unblock</a>')
                                         .split(' href="event:profile/unblock"')
@@ -151,7 +151,7 @@ export const UserProfileView: FC<{}> = () => {
                                 )
                             }} />
                         </div>
-                        <img className="octane-extended-profile__blocked-frank" src={frankStop} alt="" draggable={false} />
+                        <img className="volt-extended-profile__blocked-frank" src={frankStop} alt="" draggable={false} />
                     </div>
                 )}
                 <UserContainerView
@@ -163,9 +163,9 @@ export const UserProfileView: FC<{}> = () => {
                     onOpenRooms={onOpenRooms}
                     onClose={onClose}
                 />
-                <div className="octane-extended-profile-window__body">
+                <div className="volt-extended-profile-window__body">
                     {isProfileHidden ? (
-                        <div className="octane-extended-profile__hidden-profile">
+                        <div className="volt-extended-profile__hidden-profile">
                             <p>{localizeWithFallback('profile.full_profile_hidden', 'The full profile of this user is hidden')}</p>
                         </div>
                     ) : <GroupsContainerView
@@ -175,6 +175,6 @@ export const UserProfileView: FC<{}> = () => {
                     />}
                 </div>
             </div>
-        </OctaneCardView>
+        </VoltCardView>
     );
 };

@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@octane/renderer';
+import { GetSessionDataManager } from '@volt/renderer';
 import { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
     CatalogPage,
@@ -128,11 +128,11 @@ export const CatalogSearchView: FC<{}> = () => {
     const hasQuery = searchValue.length > 0;
 
     return (
-        <div className="octane-catalog-search">
+        <div className="volt-catalog-search">
             <input
                 ref={inputRef}
                 aria-label={LocalizeText('catalog.search')}
-                className="octane-catalog-search-input"
+                className="volt-catalog-search-input"
                 placeholder={LocalizeText('catalog.search')}
                 type="text"
                 value={searchValue}
@@ -141,7 +141,7 @@ export const CatalogSearchView: FC<{}> = () => {
             />
             <button
                 aria-label={hasQuery ? localizeWithFallback('generic.clear', 'Clear') : LocalizeText('catalog.search')}
-                className={`octane-catalog-search-pen${hasQuery ? ' is-filled' : ' is-empty'}`}
+                className={`volt-catalog-search-pen${hasQuery ? ' is-filled' : ' is-empty'}`}
                 type="button"
                 onClick={clearSearch}
             />

@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@volt/renderer';
 import { FC, useEffect, useMemo } from 'react';
 import { Permission } from '../../api/permissions';
 import { getHousekeepingMode, HousekeepingTabId, isHousekeepingEnabled, isHousekeepingTabAvailable, LocalizeText } from '../../api';
@@ -137,7 +137,7 @@ export const HousekeepingView: FC = () => {
         <WidgetErrorBoundary name="HousekeepingView">
             <StaffWindow<HousekeepingTabId>
                 activeTab={activeTab}
-                className={`octane-housekeeping ${activeTab === HousekeepingTabId.ROLES ? 'is-roles' : ''}`}
+                className={`volt-housekeeping ${activeTab === HousekeepingTabId.ROLES ? 'is-roles' : ''}`}
                 tabs={tabs}
                 title={LocalizeText('housekeeping.title')}
                 uniqueKey="housekeeping"

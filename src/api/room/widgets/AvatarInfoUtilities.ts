@@ -16,9 +16,9 @@ import {
     RoomObjectVariable,
     RoomTradingLevelEnum,
     RoomWidgetEnumItemExtradataParameter
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { HasPermission, Permission } from '../../permissions';
-import { GetRoomSession, IsOwnerOfFurniture } from '../../octane';
+import { GetRoomSession, IsOwnerOfFurniture } from '../../volt';
 import { LocalizeText } from '../../utils';
 import { AvatarInfoFurni } from './AvatarInfoFurni';
 import { AvatarInfoName } from './AvatarInfoName';

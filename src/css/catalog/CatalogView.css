@@ -1,4 +1,4 @@
-.octane-catalog-window {
+.volt-catalog-window {
     --catalog-standard-bg: #ecece4;
     --catalog-standard-panel: #f7f7f2;
     --catalog-standard-panel-2: #e7e7df;
@@ -36,29 +36,29 @@
     box-sizing: border-box;
 }
 
-.draggable-window:has(> .octane-catalog-window) {
+.draggable-window:has(> .volt-catalog-window) {
     width: 570px !important;
     min-width: 570px !important;
     max-width: 570px !important;
 }
 
-.octane-catalog-window img,
-.octane-catalog-window canvas,
-.octane-catalog-window .octane-icon,
-.octane-catalog-window [class*='octane-catalog-standard-button'],
-.octane-catalog-window [class*='octane-catalog-standard-buy-button'],
-.octane-catalog-window [class*='octane-catalog-standard-gift-button'] {
-    image-rendering: var(--octane-pixel-art, pixelated);
+.volt-catalog-window img,
+.volt-catalog-window canvas,
+.volt-catalog-window .volt-icon,
+.volt-catalog-window [class*='volt-catalog-standard-button'],
+.volt-catalog-window [class*='volt-catalog-standard-buy-button'],
+.volt-catalog-window [class*='volt-catalog-standard-gift-button'] {
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-mobile-header,
-.octane-catalog-layout-header-shell,
-.octane-catalog-layout-hero,
-.octane-catalog-window .octane-catalog-header {
+.volt-catalog-mobile-header,
+.volt-catalog-layout-header-shell,
+.volt-catalog-layout-hero,
+.volt-catalog-window .volt-catalog-header {
     display: none !important;
 }
 
-.octane-catalog-window .octane-catalog-header-publish {
+.volt-catalog-window .volt-catalog-header-publish {
     position: absolute !important;
     top: 5px !important;
     right: 32px !important;
@@ -73,16 +73,16 @@
     z-index: 10 !important;
 }
 
-.octane-catalog-window .octane-catalog-header-publish.has-pending {
-    animation: octanePublishPulse 1.4s ease-in-out infinite;
+.volt-catalog-window .volt-catalog-header-publish.has-pending {
+    animation: voltPublishPulse 1.4s ease-in-out infinite;
 }
 
-@keyframes octanePublishPulse {
+@keyframes voltPublishPulse {
     0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 0 0 rgba(61, 204, 69, 0); }
     50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 0 8px rgba(61, 204, 69, 0.75); }
 }
 
-.octane-catalog-window .octane-catalog-default-admin {
+.volt-catalog-window .volt-catalog-default-admin {
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 6px !important;
@@ -91,7 +91,7 @@
     overflow-y: visible !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button {
+.volt-catalog-window .volt-catalog-default-admin button {
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;
@@ -113,23 +113,23 @@
     box-shadow: none !important;
     cursor: pointer !important;
     white-space: nowrap !important;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button:hover {
+.volt-catalog-window .volt-catalog-default-admin button:hover {
     filter: none;
     border-image-source: var(--habbo-skin-button-hover) !important;
     color: #111111 !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button:active {
+.volt-catalog-window .volt-catalog-default-admin button:active {
     filter: none;
     border-image-source: var(--habbo-skin-button-pressed) !important;
     box-shadow: none !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button.text-success,
-.octane-catalog-window .octane-catalog-default-admin button[class*="success"] {
+.volt-catalog-window .volt-catalog-default-admin button.text-success,
+.volt-catalog-window .volt-catalog-default-admin button[class*="success"] {
     border-width: 5px !important;
     border-style: solid !important;
     border-color: transparent !important;
@@ -142,56 +142,56 @@
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35) !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button.text-success:hover,
-.octane-catalog-window .octane-catalog-default-admin button[class*="success"]:hover {
+.volt-catalog-window .volt-catalog-default-admin button.text-success:hover,
+.volt-catalog-window .volt-catalog-default-admin button[class*="success"]:hover {
     border-image-source: var(--habbo-skin-shiny-thick-green-hover) !important;
     color: #ffffff !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button svg {
+.volt-catalog-window .volt-catalog-default-admin button svg {
     width: 11px !important;
     height: 11px !important;
     fill: currentColor !important;
     flex-shrink: 0 !important;
 }
 
-.octane-catalog-window .octane-catalog-default-admin button .font-mono {
+.volt-catalog-window .volt-catalog-default-admin button .font-mono {
     color: #4a4a44 !important;
     font-weight: 600 !important;
     margin-left: 4px !important;
 }
 
-.octane-catalog-tabs-shell .octane-card-tab-item.octane-catalog-admin-tab {
+.volt-catalog-tabs-shell .volt-card-tab-item.volt-catalog-admin-tab {
     flex: 0 0 auto !important;
     margin-left: 0 !important;
 }
 
-.octane-catalog-window :where(.bg-white, .bg-gray-50, .bg-card-grid-item),
-.octane-catalog-window :where(.bg-gray-100, .bg-light) {
+.volt-catalog-window :where(.bg-white, .bg-gray-50, .bg-card-grid-item),
+.volt-catalog-window :where(.bg-gray-100, .bg-light) {
     background: var(--catalog-standard-panel) !important;
     color: var(--catalog-standard-text) !important;
     box-shadow: none !important;
 }
 
-.octane-catalog-window :where(.bg-white\/50, .bg-white\/80) {
+.volt-catalog-window :where(.bg-white\/50, .bg-white\/80) {
     background: rgba(247, 247, 242, 0.82) !important;
     color: var(--catalog-standard-text) !important;
 }
 
-.octane-catalog-window :where(.border, .border-card-grid-item-border, .border-muted, .border-white, .border-white\/10, .border-white\/20, .border-white\/30) {
+.volt-catalog-window :where(.border, .border-card-grid-item-border, .border-muted, .border-white, .border-white\/10, .border-white\/20, .border-white\/30) {
     border-color: var(--catalog-standard-border) !important;
     box-shadow: none !important;
 }
 
-.octane-catalog-window :where(.text-muted, .text-dark) {
+.volt-catalog-window :where(.text-muted, .text-dark) {
     color: var(--catalog-standard-muted) !important;
 }
 
-.octane-catalog-window :where(.text-primary) {
+.volt-catalog-window :where(.text-primary) {
     color: var(--catalog-standard-blue-dark) !important;
 }
 
-.octane-catalog-window :where(input, select, textarea) {
+.volt-catalog-window :where(input, select, textarea) {
     min-height: 22px;
     border: 1px solid var(--catalog-standard-border-dark) !important;
     border-radius: 3px !important;
@@ -201,19 +201,19 @@
     font-size: 11px !important;
 }
 
-.octane-catalog-window :where(input:focus, select:focus, textarea:focus) {
+.volt-catalog-window :where(input:focus, select:focus, textarea:focus) {
     border-color: var(--catalog-standard-blue) !important;
     box-shadow: 0 0 0 2px rgba(99, 197, 233, 0.32), inset 0 1px 0 rgba(0, 0, 0, 0.16) !important;
 }
 
-.octane-catalog-window :where(input[type="checkbox"], input[type="radio"]) {
+.volt-catalog-window :where(input[type="checkbox"], input[type="radio"]) {
     min-height: 0;
     accent-color: var(--catalog-standard-blue);
     box-shadow: none !important;
 }
 
 /* standard: bordo esterno #376275 (2px), body #0e3f52 -> border 2px + bg body. */
-.octane-catalog-standard-header {
+.volt-catalog-standard-header {
     position: relative;
     flex: 0 0 90px;
     height: 90px;
@@ -227,7 +227,7 @@
 /* standard: header image blend 0.1, greyscale, zoom 2, pivot center.
    L'immagine reale per-pagina arriva inline da currentPage.getImage(0);
    se assente resta il body #0e3f52 (nessun finto gradiente). */
-.octane-catalog-standard-header-bg {
+.volt-catalog-standard-header-bg {
     position: absolute;
     inset: -2px;
     opacity: 0.1;
@@ -240,7 +240,7 @@
     transform-origin: center;
 }
 
-.octane-catalog-standard-header-icon {
+.volt-catalog-standard-header-icon {
     position: absolute;
     left: 22px;
     top: 28px;
@@ -252,7 +252,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-standard-header-icon img {
+.volt-catalog-standard-header-icon img {
     width: 20px !important;
     height: 20px !important;
     max-width: none !important;
@@ -261,7 +261,7 @@
     transform-origin: center;
 }
 
-.octane-catalog-standard-header-copy {
+.volt-catalog-standard-header-copy {
     position: absolute;
     left: 78px;
     top: 9px;
@@ -270,7 +270,7 @@
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
 }
 
-.octane-catalog-standard-header-title {
+.volt-catalog-standard-header-title {
     height: 24px;
     min-height: 24px;
     overflow: hidden;
@@ -281,7 +281,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-standard-header-description {
+.volt-catalog-standard-header-description {
     margin-top: -1px;
     font-family: UbuntuRegular, Ubuntu, sans-serif;
     font-size: 12px;
@@ -296,12 +296,12 @@
     overflow: hidden;
 }
 
-.octane-catalog-standard-header-description b,
-.octane-catalog-standard-header-description strong {
+.volt-catalog-standard-header-description b,
+.volt-catalog-standard-header-description strong {
     font-weight: 400;
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell {
+.volt-catalog-window .volt-catalog-tabs-shell {
     flex: 0 0 35px;
     height: 35px;
     min-height: 35px;
@@ -317,7 +317,7 @@
     background: var(--catalog-standard-bg);
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item {
+.volt-catalog-window .volt-catalog-tabs-shell .volt-card-tab-item {
     display: inline-flex;
     align-items: center !important;
     justify-content: center;
@@ -336,11 +336,11 @@
     overflow: hidden;
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item:last-of-type {
+.volt-catalog-window .volt-catalog-tabs-shell .volt-card-tab-item:last-of-type {
     margin-right: 0;
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item > .octane-card-tab-item-label {
+.volt-catalog-window .volt-catalog-tabs-shell .volt-card-tab-item > .volt-card-tab-item-label {
     display: flex;
     align-items: center !important;
     justify-content: center !important;
@@ -351,12 +351,12 @@
     line-height: 17px;
 }
 
-.octane-catalog-window .octane-catalog-tabs-shell .octane-card-tab-item-label > div {
+.volt-catalog-window .volt-catalog-tabs-shell .volt-card-tab-item-label > div {
     width: 100%;
     min-width: 0;
 }
 
-.octane-catalog-tab-label {
+.volt-catalog-tab-label {
     display: block;
     width: 100%;
     text-align: center;
@@ -366,7 +366,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-content-shell {
+.volt-catalog-content-shell {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
@@ -375,7 +375,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-stage {
+.volt-catalog-stage {
     display: grid;
     grid-template-columns: 184px 360px;
     gap: 8px;
@@ -384,11 +384,11 @@
     min-height: 0;
 }
 
-.octane-catalog-stage.is-navigation-hidden {
+.volt-catalog-stage.is-navigation-hidden {
     grid-template-columns: 1fr;
 }
 
-.octane-catalog-sidebar {
+.volt-catalog-sidebar {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -397,7 +397,7 @@
 }
 
 /* standard search: border x8 y131 w184 h24 style 105 (inset chiaro). */
-.octane-catalog-search-shell {
+.volt-catalog-search-shell {
     position: relative;
     display: flex;
     align-items: center;
@@ -410,8 +410,8 @@
     box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.07);
 }
 
-.octane-catalog-search-shell input,
-.octane-catalog-search-input {
+.volt-catalog-search-shell input,
+.volt-catalog-search-input {
     flex: 1 1 auto;
     width: 100% !important;
     height: 18px !important;
@@ -427,17 +427,17 @@
     vertical-align: middle !important;
 }
 
-.octane-catalog-search-input::placeholder {
+.volt-catalog-search-input::placeholder {
     color: rgba(0, 0, 0, 0.5);
 }
 
-.octane-catalog-search {
+.volt-catalog-search {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.octane-catalog-search-pen {
+.volt-catalog-search-pen {
     position: absolute;
     top: 1px;
     right: 3px;
@@ -449,19 +449,19 @@
     background-position: center;
     background-repeat: no-repeat;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-search-pen.is-empty {
+.volt-catalog-search-pen.is-empty {
     background-image: url('../../assets/images/catalog/air/skin/common-small-pen.png');
 }
 
-.octane-catalog-search-pen.is-filled {
+.volt-catalog-search-pen.is-filled {
     background-image: url('../../assets/images/catalog/air/skin/icons-close.png');
 }
 
 /* standard navigationContainer: x8 y159 w184 h433 style 6 (bordo beveled inset). */
-.octane-catalog-navigation-shell {
+.volt-catalog-navigation-shell {
     flex: 1 1 auto;
     min-height: 0;
     padding: 5px 3px;
@@ -474,16 +474,16 @@
     overflow: auto;
 }
 
-.octane-catalog-navigation-list {
+.volt-catalog-navigation-list {
     display: flex;
     flex-direction: column;
 }
 
-.octane-catalog-navigation-node {
+.volt-catalog-navigation-node {
     min-height: 21px;
 }
 
-.octane-catalog-navigation-item {
+.volt-catalog-navigation-item {
     position: relative;
     display: flex;
     align-items: center;
@@ -502,13 +502,13 @@
     text-shadow: 0 1px 0 #b4b4ae;
 }
 
-.octane-catalog-navigation-node.is-child .octane-catalog-navigation-item {
+.volt-catalog-navigation-node.is-child .volt-catalog-navigation-item {
     padding-left: 15px;
     color: #52819a;
     font-style: italic;
 }
 
-.octane-catalog-navigation-item::before {
+.volt-catalog-navigation-item::before {
     position: absolute;
     inset: 0 1px 1px 1px;
     z-index: 0;
@@ -518,21 +518,21 @@
     background: linear-gradient(180deg, var(--catalog-standard-select-outer) 0 2px, var(--catalog-standard-select) 2px calc(100% - 2px), var(--catalog-standard-select-outer) calc(100% - 2px));
 }
 
-.octane-catalog-navigation-item:hover::before,
-.octane-catalog-navigation-item.is-active::before {
+.volt-catalog-navigation-item:hover::before,
+.volt-catalog-navigation-item.is-active::before {
     display: block;
 }
 
-.octane-catalog-navigation-icon,
-.octane-catalog-navigation-label,
-.octane-catalog-navigation-caret,
-.octane-catalog-navigation-favorite,
-.octane-catalog-navigation-admin {
+.volt-catalog-navigation-icon,
+.volt-catalog-navigation-label,
+.volt-catalog-navigation-caret,
+.volt-catalog-navigation-favorite,
+.volt-catalog-navigation-admin {
     position: relative;
     z-index: 1;
 }
 
-.octane-catalog-navigation-icon {
+.volt-catalog-navigation-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -541,15 +541,15 @@
     height: 20px;
 }
 
-.octane-catalog-navigation-icon img,
-.octane-catalog-navigation-icon canvas {
+.volt-catalog-navigation-icon img,
+.volt-catalog-navigation-icon canvas {
     width: auto;
     height: auto;
     max-width: 20px;
     max-height: 20px;
 }
 
-.octane-catalog-navigation-label {
+.volt-catalog-navigation-label {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -557,7 +557,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-navigation-caret {
+.volt-catalog-navigation-caret {
     position: absolute;
     right: 5px;
     top: 5px;
@@ -565,7 +565,7 @@
     font-size: 9px;
 }
 
-.octane-catalog-layout-shell {
+.volt-catalog-layout-shell {
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -576,7 +576,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-layout-container {
+.volt-catalog-layout-container {
     flex: 1 1 auto;
     min-height: 0;
     padding: 0;
@@ -584,21 +584,21 @@
     overflow: hidden;
 }
 
-.octane-catalog-window .octane-catalog-forum-text {
+.volt-catalog-window .volt-catalog-forum-text {
     font-size: 12px;
     line-height: 15px;
 }
 
-.octane-catalog-window .octane-catalog-forum-text p,
-.octane-catalog-window .octane-catalog-forum-text div {
+.volt-catalog-window .volt-catalog-forum-text p,
+.volt-catalog-window .volt-catalog-forum-text div {
     margin: 0 0 8px;
 }
 
-.octane-catalog-window .octane-catalog-forum-text > :last-child {
+.volt-catalog-window .volt-catalog-forum-text > :last-child {
     margin-bottom: 0;
 }
 
-.octane-catalog-window .octane-catalog-guild-join-btn {
+.volt-catalog-window .volt-catalog-guild-join-btn {
     min-height: 20px !important;
     width: auto !important;
     padding: 1px 10px !important;
@@ -612,16 +612,16 @@
     text-shadow: none !important;
 }
 
-.octane-catalog-window .octane-catalog-guild-join-btn:hover {
+.volt-catalog-window .volt-catalog-guild-join-btn:hover {
     background: linear-gradient(180deg, #ffffff 0%, #f2f2f2 55%, #e2e2e2 100%) !important;
 }
 
-.octane-catalog-window .octane-catalog-guild-join-btn:active {
+.volt-catalog-window .volt-catalog-guild-join-btn:active {
     background: linear-gradient(180deg, #d8d8d8 0%, #eaeaea 100%) !important;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
-.octane-catalog-default-layout {
+.volt-catalog-default-layout {
     position: relative;
     display: block !important;
     width: 100%;
@@ -630,19 +630,19 @@
     max-height: none;
 }
 
-.octane-catalog-grid-shell,
-.octane-catalog-price-row,
-.octane-catalog-purchase-row {
+.volt-catalog-grid-shell,
+.volt-catalog-price-row,
+.volt-catalog-purchase-row {
     width: 100% !important;
 }
 
-.octane-catalog-grid-shell {
+.volt-catalog-grid-shell {
     border: 1px solid #b4b4ae;
     border-radius: 5px;
     background: var(--catalog-standard-panel);
 }
 
-.octane-catalog-product-view {
+.volt-catalog-product-view {
     position: relative;
     top: 0;
     left: 0;
@@ -655,22 +655,22 @@
     background: transparent;
 }
 
-.octane-catalog-product-view::before {
+.volt-catalog-product-view::before {
     display: none;
 }
 
-.octane-catalog-offer-panel {
+.volt-catalog-offer-panel {
     position: relative;
     z-index: 1;
     width: 100%;
     height: 100%;
 }
 
-.octane-catalog-offer-panel:has(> .octane-catalog-offer-info) {
+.volt-catalog-offer-panel:has(> .volt-catalog-offer-info) {
     justify-content: center;
 }
 
-.octane-catalog-offer-preview {
+.volt-catalog-offer-preview {
     position: relative;
     height: 100%;
     padding: 0;
@@ -679,12 +679,12 @@
 }
 
 /* Follows the product view now that the product view follows the page. */
-.octane-catalog-offer-panel > .octane-catalog-offer-preview {
+.volt-catalog-offer-panel > .volt-catalog-offer-preview {
     width: 100%;
     min-width: 0;
 }
 
-.octane-catalog-preview-title {
+.volt-catalog-preview-title {
     position: absolute;
     top: 12px;
     left: 12px;
@@ -696,7 +696,7 @@
     text-shadow: 0 1px 0 #000;
 }
 
-.octane-catalog-offer-preview > .shadow-room-previewer {
+.volt-catalog-offer-preview > .shadow-room-previewer {
     position: absolute !important;
     top: 0;
     left: 0;
@@ -709,20 +709,20 @@
     box-shadow: none !important;
 }
 
-.octane-catalog-offer-preview > .shadow-room-previewer > .shadow-room-previewer-canvas {
+.volt-catalog-offer-preview > .shadow-room-previewer > .shadow-room-previewer-canvas {
     display: block;
     width: 100% !important;
     height: 100% !important;
     max-width: 100%;
     max-height: 100%;
     border-radius: 0 !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     transform: none;
     transform-origin: center center;
     transition: transform 180ms ease-out;
 }
 
-.octane-catalog-offer-preview:has(.octane-catalog-preview-zoom-btn[aria-pressed="true"])
+.volt-catalog-offer-preview:has(.volt-catalog-preview-zoom-btn[aria-pressed="true"])
     > .shadow-room-previewer
     > .shadow-room-previewer-canvas {
     transform: translateY(-41px) scale(2);
@@ -730,21 +730,21 @@
 
 /* Badge offers: the black 3D-preview stage is meant for furni room previews.
    Badges get a light panel, a dark title and a larger, centered badge. */
-.octane-catalog-offer-preview.is-badge {
+.volt-catalog-offer-preview.is-badge {
     background: var(--catalog-standard-panel, #e9e9e1);
 }
 
-.octane-catalog-offer-preview.is-badge .octane-catalog-preview-title {
+.volt-catalog-offer-preview.is-badge .volt-catalog-preview-title {
     color: #33332e !important;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.octane-catalog-offer-preview.is-badge .group-badge,
-.octane-catalog-offer-preview.is-badge > *:not(.octane-catalog-preview-title) {
-    image-rendering: var(--octane-pixel-art, pixelated);
+.volt-catalog-offer-preview.is-badge .group-badge,
+.volt-catalog-offer-preview.is-badge > *:not(.volt-catalog-preview-title) {
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-badge-display-layout {
+.volt-catalog-badge-display-layout {
     position: relative;
     width: 100%;
     max-width: 360px;
@@ -755,7 +755,7 @@
     background: var(--catalog-standard-bg, #e4e3db);
 }
 
-.octane-catalog-badge-product-picker {
+.volt-catalog-badge-product-picker {
     position: absolute;
     top: 245px;
     left: 0;
@@ -768,17 +768,17 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-product-picker .octane-catalog-item-grid-scroll-area,
-.octane-catalog-badge-product-picker .octane-classic-scroll-area-viewport {
+.volt-catalog-badge-product-picker .volt-catalog-item-grid-scroll-area,
+.volt-catalog-badge-product-picker .volt-classic-scroll-area-viewport {
     width: 87px;
     height: 167px;
 }
 
-.octane-catalog-badge-product-picker .octane-classic-scroll-area-viewport {
+.volt-catalog-badge-product-picker .volt-classic-scroll-area-viewport {
     padding-right: 17px;
 }
 
-.octane-catalog-badge-offer-list {
+.volt-catalog-badge-offer-list {
     display: grid !important;
     grid-template-columns: 70px !important;
     grid-auto-rows: 70px !important;
@@ -789,7 +789,7 @@
 }
 
 @layer utilities {
-    .octane-catalog-window .octane-catalog-badge-offer-list .layout-grid-item {
+    .volt-catalog-window .volt-catalog-badge-offer-list .layout-grid-item {
         width: 70px !important;
         min-width: 70px !important;
         height: 70px !important;
@@ -798,7 +798,7 @@
     }
 }
 
-.octane-catalog-badge-picker {
+.volt-catalog-badge-picker {
     position: absolute;
     top: 245px;
     left: 105px;
@@ -807,7 +807,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-selector {
+.volt-catalog-badge-selector {
     position: absolute;
     top: 0;
     left: 0;
@@ -816,7 +816,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-scroll-area {
+.volt-catalog-badge-scroll-area {
     position: absolute;
     top: 30px;
     left: 0;
@@ -824,13 +824,13 @@
     height: 145px;
 }
 
-.octane-catalog-badge-scroll-area .octane-classic-scroll-area-viewport {
+.volt-catalog-badge-scroll-area .volt-classic-scroll-area-viewport {
     width: 255px;
     height: 145px;
     padding-right: 17px;
 }
 
-.octane-catalog-badge-grid {
+.volt-catalog-badge-grid {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, 44px) !important;
     grid-auto-rows: 44px !important;
@@ -842,7 +842,7 @@
 }
 
 @layer utilities {
-    .octane-catalog-window .octane-catalog-badge-tile {
+    .volt-catalog-window .volt-catalog-badge-tile {
         width: 44px !important;
         min-width: 44px !important;
         height: 44px !important;
@@ -854,24 +854,24 @@
         overflow: hidden !important;
     }
 
-    .octane-catalog-window .octane-catalog-badge-tile:hover {
+    .volt-catalog-window .volt-catalog-badge-tile:hover {
         background: #e5e8e1 !important;
     }
 
-    .octane-catalog-window .octane-catalog-badge-tile.is-grid-active {
+    .volt-catalog-window .volt-catalog-badge-tile.is-grid-active {
         border-color: #222 !important;
         background: #fff !important;
         box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #222 !important;
     }
 }
 
-.octane-catalog-badge-tile > div {
+.volt-catalog-badge-tile > div {
     max-width: 40px;
     max-height: 40px;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-badge-empty {
+.volt-catalog-badge-empty {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -884,7 +884,7 @@
     text-align: center;
 }
 
-.octane-catalog-badge-preview {
+.volt-catalog-badge-preview {
     position: absolute;
     top: 0;
     left: 0;
@@ -894,14 +894,14 @@
     background: #000;
 }
 
-.octane-catalog-badge-preview.is-empty {
+.volt-catalog-badge-preview.is-empty {
     top: 0;
     left: 0;
     width: 360px;
     height: 240px;
 }
 
-.octane-catalog-badge-product-copy {
+.volt-catalog-badge-product-copy {
     position: absolute;
     top: 12px;
     left: 10px;
@@ -915,7 +915,7 @@
     pointer-events: none;
 }
 
-.octane-catalog-badge-product-name {
+.volt-catalog-badge-product-name {
     width: 165px;
     min-height: 17px;
     overflow: hidden;
@@ -926,7 +926,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-badge-product-description {
+.volt-catalog-badge-product-description {
     width: 165px;
     max-height: 30px;
     overflow: hidden;
@@ -936,7 +936,7 @@
     text-overflow: ellipsis;
 }
 
-.octane-catalog-badge-product-render {
+.volt-catalog-badge-product-render {
     position: absolute;
     top: 0;
     left: 0;
@@ -945,7 +945,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-product-render .shadow-room-previewer {
+.volt-catalog-badge-product-render .shadow-room-previewer {
     width: 360px !important;
     max-width: 360px !important;
     height: 240px !important;
@@ -954,7 +954,7 @@
     border-radius: 0 !important;
 }
 
-.octane-catalog-badge-intro {
+.volt-catalog-badge-intro {
     position: absolute;
     top: 0;
     left: 0;
@@ -972,7 +972,7 @@
     color: #fff;
 }
 
-.octane-catalog-badge-intro img {
+.volt-catalog-badge-intro img {
     width: auto;
     height: auto;
     max-width: 96px;
@@ -980,7 +980,7 @@
     object-fit: contain;
 }
 
-.octane-catalog-badge-limited {
+.volt-catalog-badge-limited {
     position: absolute;
     top: 20px;
     left: 180px;
@@ -989,7 +989,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-total-price {
+.volt-catalog-badge-total-price {
     position: absolute;
     right: 6px;
     bottom: 7px;
@@ -997,7 +997,7 @@
     min-width: 90px;
 }
 
-.octane-catalog-badge-purchase {
+.volt-catalog-badge-purchase {
     position: absolute;
     top: 430px;
     left: 0;
@@ -1011,25 +1011,25 @@
     overflow: hidden;
 }
 
-.octane-catalog-badge-purchase .octane-catalog-standard-gift-button,
-.octane-catalog-badge-purchase .octane-catalog-standard-buy-button {
+.volt-catalog-badge-purchase .volt-catalog-standard-gift-button,
+.volt-catalog-badge-purchase .volt-catalog-standard-buy-button {
     width: 170px !important;
     min-width: 170px !important;
     max-width: 170px !important;
 }
 
-.octane-catalog-badge-product-copy .octane-catalog-product-details-name,
-.octane-catalog-badge-product-copy .octane-catalog-product-details-description {
+.volt-catalog-badge-product-copy .volt-catalog-product-details-name,
+.volt-catalog-badge-product-copy .volt-catalog-product-details-description {
     color: #fff !important;
     opacity: 1 !important;
 }
 
-.octane-catalog-badge-preview .octane-catalog-preview-controls {
+.volt-catalog-badge-preview .volt-catalog-preview-controls {
     top: 8px;
     right: 6px;
 }
 
-.octane-catalog-badge-search {
+.volt-catalog-badge-search {
     position: absolute;
     top: 0;
     left: 0;
@@ -1039,7 +1039,7 @@
     background: #fff;
 }
 
-.octane-catalog-badge-search input {
+.volt-catalog-badge-search input {
     position: absolute;
     top: 3px;
     left: 6px;
@@ -1054,11 +1054,11 @@
     line-height: 20px;
 }
 
-.octane-catalog-badge-search input:focus {
+.volt-catalog-badge-search input:focus {
     outline: 0;
 }
 
-.octane-catalog-badge-search-clear {
+.volt-catalog-badge-search-clear {
     position: absolute;
     top: 3px;
     left: 232px;
@@ -1073,7 +1073,7 @@
     cursor: pointer;
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame {
+.volt-catalog-badge-preview .volt-catalog-price-frame {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -1092,20 +1092,20 @@
     box-shadow: none;
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame .octane-catalog-standard-price-display {
+.volt-catalog-badge-preview .volt-catalog-price-frame .volt-catalog-standard-price-display {
     height: 13px;
     min-height: 13px;
     gap: 1px;
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame .octane-catalog-standard-price-pill {
+.volt-catalog-badge-preview .volt-catalog-price-frame .volt-catalog-standard-price-pill {
     min-width: 0;
     height: 13px;
     gap: 1px;
     padding: 0;
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame .octane-catalog-standard-price-text {
+.volt-catalog-badge-preview .volt-catalog-price-frame .volt-catalog-standard-price-text {
     color: #111 !important;
     font-family: Ubuntu, Arial, sans-serif;
     font-size: 14px !important;
@@ -1114,19 +1114,19 @@
     text-shadow: none !important;
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame .octane-currency-icon {
+.volt-catalog-badge-preview .volt-catalog-price-frame .volt-currency-icon {
     flex: 0 0 22px;
     width: 22px !important;
     height: 22px !important;
     background-size: auto;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-badge-preview .octane-catalog-price-frame .is-credits .octane-currency-icon {
+.volt-catalog-badge-preview .volt-catalog-price-frame .is-credits .volt-currency-icon {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAD/SURBVEhLtZSBDYMwDAQzTTtNR2GmrlBW6SBlhFSO9OFsnJRKraUngPH5ZSCl1lr+oXZ43i8HtWQpdhhqWhuTBNZtrlGDA1hQFa7LXGxATgvdIFSF2+pFt3bNBoQ7MKECqXC57mA7l9hAcAeObgnmqrwacGR03cEZNILlUhCtmevTYCq6jNdfgW2lToBvHSw3hBMc8wSz2WmwxDydfwRbIhZzLMpRbKAX68DRdSwcic8ZuEMF5g8i5ywcSUA1GoHdSASO89a5VgO/HgGqzw1gu+lczcAGTKApuMOzmVMAOuhhE3Jb3v4gizPRZYNmm1AMV3RCPiZgRQRE5SHwr/UG8Hq+iW3+jYQAAAAASUVORK5CYII=") !important;
 }
 
-.octane-catalog-sound-layout {
+.volt-catalog-sound-layout {
     position: relative;
     width: 100%;
     max-width: none;
@@ -1137,7 +1137,7 @@
     background: var(--catalog-standard-bg, #e4e3db);
 }
 
-.octane-catalog-sound-product {
+.volt-catalog-sound-product {
     position: absolute;
     top: 0;
     left: 0;
@@ -1147,9 +1147,9 @@
     background: var(--catalog-standard-bg, #e4e3db);
 }
 
-.octane-catalog-sound-title,
-.octane-catalog-sound-description,
-.octane-catalog-sound-length {
+.volt-catalog-sound-title,
+.volt-catalog-sound-description,
+.volt-catalog-sound-length {
     position: absolute;
     left: 10px;
     z-index: 3;
@@ -1159,28 +1159,28 @@
     white-space: nowrap;
 }
 
-.octane-catalog-sound-title {
+.volt-catalog-sound-title {
     top: 16px;
     height: 17px;
     font-size: 12px;
     line-height: 17px;
 }
 
-.octane-catalog-sound-description {
+.volt-catalog-sound-description {
     top: 34px;
     height: 15px;
     font-size: 10px;
     line-height: 15px;
 }
 
-.octane-catalog-sound-length {
+.volt-catalog-sound-length {
     top: 53px;
     height: 15px;
     font-size: 10px;
     line-height: 15px;
 }
 
-.octane-catalog-sound-product-render {
+.volt-catalog-sound-product-render {
     position: absolute;
     top: 70px;
     right: auto;
@@ -1193,19 +1193,19 @@
     overflow: hidden;
 }
 
-.octane-catalog-sound-product-render .furni-image {
+.volt-catalog-sound-product-render .furni-image {
     flex: 0 0 auto;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-sound-price {
+.volt-catalog-sound-price {
     position: absolute;
     right: 7px;
     bottom: 10px;
     z-index: 4;
 }
 
-.octane-catalog-sound-listen-panel {
+.volt-catalog-sound-listen-panel {
     position: absolute;
     top: 195px;
     left: 7px;
@@ -1217,7 +1217,7 @@
     font-size: 10px;
 }
 
-.octane-catalog-sound-listen-panel > span {
+.volt-catalog-sound-listen-panel > span {
     position: absolute;
     top: 11px;
     left: 9px;
@@ -1226,7 +1226,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-sound-listen-button {
+.volt-catalog-sound-listen-button {
     position: absolute !important;
     top: 8px;
     left: 102px;
@@ -1246,24 +1246,24 @@
     box-shadow: inset 0 0 0 1px #ffffff, 0 1px 0 rgba(0, 0, 0, 0.16) !important;
 }
 
-.octane-catalog-sound-listen-button:hover:not(:disabled) {
+.volt-catalog-sound-listen-button:hover:not(:disabled) {
     background: linear-gradient(180deg, #ffffff 0%, #e9e9e9 100%) !important;
     filter: none;
 }
 
-.octane-catalog-sound-listen-button:active:not(:disabled) {
+.volt-catalog-sound-listen-button:active:not(:disabled) {
     background: linear-gradient(180deg, #cdcdcd 0%, #eeeeee 100%) !important;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24) !important;
 }
 
-.octane-catalog-sound-select-product {
+.volt-catalog-sound-select-product {
     position: absolute;
     top: 130px;
     left: 6px;
     font-size: 10px;
 }
 
-.octane-catalog-sound-grid {
+.volt-catalog-sound-grid {
     position: absolute;
     top: 245px;
     left: 0;
@@ -1277,11 +1277,11 @@
     background: #c9c9c3;
 }
 
-.octane-catalog-sound-grid .octane-classic-scroll-area-viewport {
+.volt-catalog-sound-grid .volt-classic-scroll-area-viewport {
     padding-right: 17px;
 }
 
-.octane-catalog-sound-purchase {
+.volt-catalog-sound-purchase {
     position: absolute;
     top: 430px;
     left: 0;
@@ -1293,19 +1293,19 @@
     gap: 6px;
 }
 
-.octane-catalog-sound-purchase > button {
+.volt-catalog-sound-purchase > button {
     flex: 1 1 0;
     width: auto;
     min-width: 0;
     height: 24px;
 }
 
-.octane-catalog-marketplace-item-icon {
+.volt-catalog-marketplace-item-icon {
     width: 40px;
     height: 40px;
 }
 
-.octane-catalog-vip-hc-banner {
+.volt-catalog-vip-hc-banner {
     width: 34px;
     height: 20px;
     background-position: center;
@@ -1313,35 +1313,35 @@
     background-size: contain;
 }
 
-.octane-catalog-trophy-card {
+.volt-catalog-trophy-card {
     box-shadow: 0 0 8px rgba(255, 193, 7, 0.15);
 }
 
-.octane-catalog-trophy-preview {
+.volt-catalog-trophy-preview {
     background: linear-gradient(180deg, #fff9e6 0%, #fff3cc 100%);
 }
 
-.octane-catalog-trophy-inscription {
+.volt-catalog-trophy-inscription {
     background: #ffffff;
 }
 
-.octane-catalog-trophy-inscription.has-text {
+.volt-catalog-trophy-inscription.has-text {
     background: linear-gradient(180deg, #fffdf5 0%, #fff8e8 100%);
     border-color: rgba(255, 193, 7, 0.4) !important;
 }
 
-.octane-catalog-offer-info {
+.volt-catalog-offer-info {
     display: none !important;
 }
 
-.octane-catalog-offer-info .octane-text,
-.octane-catalog-offer-info span,
-.octane-catalog-offer-info div {
+.volt-catalog-offer-info .volt-text,
+.volt-catalog-offer-info span,
+.volt-catalog-offer-info div {
     color: inherit;
 }
 
 
-.octane-catalog-welcome {
+.volt-catalog-welcome {
     position: relative;
     z-index: 1;
     width: 100%;
@@ -1350,7 +1350,7 @@
     color: var(--catalog-standard-muted);
 }
 
-.octane-catalog-welcome img {
+.volt-catalog-welcome img {
     width: auto !important;
     height: auto !important;
     max-width: 96px;
@@ -1359,12 +1359,12 @@
     background: transparent;
 }
 
-.octane-catalog-welcome.is-image-only img {
+.volt-catalog-welcome.is-image-only img {
     max-width: 100%;
     max-height: 100%;
 }
 
-.octane-catalog-grid-shell {
+.volt-catalog-grid-shell {
     position: absolute;
     left: 0;
     top: 245px;
@@ -1376,13 +1376,13 @@
     overflow: auto;
 }
 
-.octane-catalog-default-layout:has(.octane-catalog-default-admin) .octane-catalog-grid-shell {
+.volt-catalog-default-layout:has(.volt-catalog-default-admin) .volt-catalog-grid-shell {
     top: 280px !important;
 }
 
-.octane-catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(var(--octane-grid-column-min-width, 53px), 1fr)) !important;
-    grid-auto-rows: var(--octane-grid-column-min-height, 70px);
+.volt-catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--volt-grid-column-min-width, 53px), 1fr)) !important;
+    grid-auto-rows: var(--volt-grid-column-min-height, 70px);
     align-content: start;
     justify-content: start;
     column-gap: 3px !important;
@@ -1390,44 +1390,44 @@
     overflow: visible !important;
 }
 
-.octane-catalog-grid-virtual .grid {
+.volt-catalog-grid-virtual .grid {
     column-gap: 3px !important;
     row-gap: 3px !important;
 }
 
-.octane-catalog-grid-density-standard,
-.octane-catalog-grid-virtual.octane-catalog-grid-density-standard .grid {
-    grid-template-columns: repeat(var(--octane-air-column-count, 6), 53px) !important;
+.volt-catalog-grid-density-standard,
+.volt-catalog-grid-virtual.volt-catalog-grid-density-standard .grid {
+    grid-template-columns: repeat(var(--volt-air-column-count, 6), 53px) !important;
     row-gap: 0 !important;
 }
 
-.octane-catalog-grid-density-standard.uses-base-grid-template,
-.octane-catalog-grid-virtual.octane-catalog-grid-density-standard.uses-base-grid-template .grid {
-    grid-template-columns: repeat(var(--octane-air-column-count, 8), 36px) !important;
+.volt-catalog-grid-density-standard.uses-base-grid-template,
+.volt-catalog-grid-virtual.volt-catalog-grid-density-standard.uses-base-grid-template .grid {
+    grid-template-columns: repeat(var(--volt-air-column-count, 8), 36px) !important;
     grid-auto-rows: 36px;
 }
 
-.octane-catalog-air-mixed-grid.uses-mixed-grid-template {
-    --octane-grid-column-min-width: 53px;
-    --octane-grid-column-min-height: 74px;
+.volt-catalog-air-mixed-grid.uses-mixed-grid-template {
+    --volt-grid-column-min-width: 53px;
+    --volt-grid-column-min-height: 74px;
     display: block !important;
     position: relative;
     grid-template-columns: none !important;
     grid-auto-rows: auto;
 }
 
-.octane-catalog-item-grid-scroll-area:has(.octane-catalog-grid-density-standard) > .octane-classic-scroll-area-viewport,
-.octane-catalog-grid-virtual.octane-catalog-grid-density-standard .octane-classic-scroll-area > .octane-classic-scroll-area-viewport {
+.volt-catalog-item-grid-scroll-area:has(.volt-catalog-grid-density-standard) > .volt-classic-scroll-area-viewport,
+.volt-catalog-grid-virtual.volt-catalog-grid-density-standard .volt-classic-scroll-area > .volt-classic-scroll-area-viewport {
     padding-right: 17px;
     overflow-x: auto;
 }
 
 @layer utilities {
-    .octane-catalog-window .layout-grid-item {
+    .volt-catalog-window .layout-grid-item {
         width: 100% !important;
-        height: var(--octane-grid-column-min-height, 70px) !important;
+        height: var(--volt-grid-column-min-height, 70px) !important;
         min-width: 0 !important;
-        min-height: var(--octane-grid-column-min-height, 70px) !important;
+        min-height: var(--volt-grid-column-min-height, 70px) !important;
         border: 0 !important;
         border-radius: 0 !important;
         background-image: none !important;
@@ -1435,35 +1435,35 @@
         overflow: visible !important;
     }
 
-    .octane-catalog-window .layout-grid-item:not(.has-highlight) {
+    .volt-catalog-window .layout-grid-item:not(.has-highlight) {
         background-color: #e4e7df !important;
         border: 2px solid transparent !important;
         border-radius: 4px !important;
         box-shadow: none !important;
     }
 
-    .octane-catalog-window .octane-catalog-pet-breeds .layout-grid-item {
+    .volt-catalog-window .volt-catalog-pet-breeds .layout-grid-item {
         width: 84px !important;
         min-width: 84px !important;
         height: 74px !important;
         min-height: 74px !important;
     }
 
-    .octane-catalog-window .layout-grid-item:not(.has-highlight):not(.is-active):hover {
+    .volt-catalog-window .layout-grid-item:not(.has-highlight):not(.is-active):hover {
         background-image: none !important;
         border-color: transparent !important;
         box-shadow: none !important;
     }
 
-    .octane-catalog-window .layout-grid-item.is-active {
+    .volt-catalog-window .layout-grid-item.is-active {
         background-color: #ffffff !important;
         background-image: none !important;
         border: 2px solid #62c4e8 !important;
         box-shadow: none !important;
     }
 
-    .octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item:not(.has-highlight),
-    .octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active {
+    .volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item:not(.has-highlight),
+    .volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.is-active {
         border: 0 !important;
         border-radius: 0 !important;
         background-color: transparent !important;
@@ -1471,7 +1471,7 @@
     }
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active::before {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.is-active::before {
     content: "";
     position: absolute;
     top: 0;
@@ -1487,23 +1487,23 @@
     pointer-events: none;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active.uses-single-price-template::before {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.is-active.uses-single-price-template::before {
     height: 62px;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template {
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
     min-height: 36px !important;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.is-active.uses-base-grid-template::before {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.is-active.uses-base-grid-template::before {
     width: 36px;
     height: 36px;
 }
 
-.octane-catalog-window .layout-grid-item.has-highlight {
+.volt-catalog-window .layout-grid-item.has-highlight {
     width: 26px !important;
     height: 26px !important;
     min-width: 26px !important;
@@ -1517,7 +1517,7 @@
     cursor: pointer !important;
 }
 
-.octane-catalog-window .layout-grid-item.has-highlight:hover {
+.volt-catalog-window .layout-grid-item.has-highlight:hover {
     border-color: #000 !important;
     box-shadow:
         inset 1px 1px 0 rgba(255, 255, 255, 0.5),
@@ -1525,7 +1525,7 @@
         0 0 0 1px rgba(0, 0, 0, 0.45) !important;
 }
 
-.octane-catalog-window .layout-grid-item.has-highlight.is-active {
+.volt-catalog-window .layout-grid-item.has-highlight.is-active {
     border-color: #000 !important;
     box-shadow:
         inset 0 0 0 2px #ffffff,
@@ -1533,17 +1533,17 @@
         0 0 0 1px #63c5e9 !important;
 }
 
-.octane-catalog-grid-offer-icon {
+.volt-catalog-grid-offer-icon {
     width: auto !important;
     height: auto !important;
     max-width: 100% !important;
     max-height: 100% !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     object-fit: contain;
     pointer-events: none;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item > .octane-catalog-grid-offer-icon {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item > .volt-catalog-grid-offer-icon {
     position: absolute;
     top: 2px;
     left: 8px;
@@ -1557,7 +1557,7 @@
 }
 
 /* gridItem bundleCounter is Volter Bold #cccc66 at x=18,y=18 of the 36px icon. */
-.octane-catalog-grid-bundle-counter {
+.volt-catalog-grid-bundle-counter {
     position: absolute;
     z-index: 2;
     top: 18px;
@@ -1570,22 +1570,22 @@
     pointer-events: none;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item:not(.uses-base-grid-template) > .octane-catalog-grid-bundle-counter {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item:not(.uses-base-grid-template) > .volt-catalog-grid-bundle-counter {
     top: 20px;
     left: 26px;
 }
 
 /* The selected tile paints an opaque plate through ::before at z-index 0, so the
    habbicon has to be lifted over it the way the furni icon already is. */
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item > .octane-catalog-grid-habbicon-icon {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item > .volt-catalog-grid-habbicon-icon {
     position: relative;
     z-index: 1;
 }
 
 /* AIR gridItem_with_price: multiContainer is painted after the 36px image at
    icon-local x=18/y=21, so the quantity badge sits above its lower-right edge. */
-.octane-catalog-window
-    .octane-catalog-grid-density-standard
+.volt-catalog-window
+    .volt-catalog-grid-density-standard
     .layout-grid-item:not(.uses-base-grid-template):not(.unique-item)
     > .layout-item-count {
     top: 23px !important;
@@ -1605,15 +1605,15 @@
     line-height: 11px !important;
 }
 
-.octane-catalog-window
-    .octane-catalog-grid-density-standard
+.volt-catalog-window
+    .volt-catalog-grid-density-standard
     .layout-grid-item:not(.uses-base-grid-template):not(.unique-item)
     > .layout-item-count::before {
     content: "x";
 }
 
-.octane-catalog-window
-    .octane-catalog-grid-density-standard
+.volt-catalog-window
+    .volt-catalog-grid-density-standard
     .layout-grid-item.uses-base-grid-template:not(.unique-item)
     > .layout-item-count {
     top: 21px !important;
@@ -1622,15 +1622,15 @@
     z-index: 6;
 }
 
-.octane-catalog-window
-    .octane-catalog-grid-density-standard
+.volt-catalog-window
+    .volt-catalog-grid-density-standard
     .layout-grid-item.uses-base-grid-template:not(.unique-item)
-    > .octane-catalog-grid-offer-icon {
+    > .volt-catalog-grid-offer-icon {
     top: 0;
     left: 0;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item > .avatar-image {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item > .avatar-image {
     top: 2px !important;
     right: auto !important;
     bottom: auto !important;
@@ -1639,7 +1639,7 @@
     height: 36px !important;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template > .avatar-image {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template > .avatar-image {
     top: 0 !important;
     left: 0 !important;
 }
@@ -1651,12 +1651,12 @@
    of the flow, layer the icon between the backdrop (z-2) and the glass (z-4),
    and overlay the price as a chip so double-currency offers can't overflow.
    Scoped to the catalog window: inventory/trade LTD tiles are untouched. */
-.octane-catalog-window .unique-item .unique-bg-override {
+.volt-catalog-window .unique-item .unique-bg-override {
     position: absolute !important;
     inset: 0 !important;
 }
 
-.octane-catalog-window .unique-item .octane-catalog-grid-offer-icon {
+.volt-catalog-window .unique-item .volt-catalog-grid-offer-icon {
     position: relative;
     z-index: 3;
     /* keep the furni inside the glass, clear of the bottom counter strip */
@@ -1664,7 +1664,7 @@
     margin-bottom: 8px;
 }
 
-.octane-catalog-window .unique-item .octane-catalog-grid-price {
+.volt-catalog-window .unique-item .volt-catalog-grid-price {
     position: absolute;
     left: 50%;
     bottom: 12px;
@@ -1678,7 +1678,7 @@
     background: rgba(255, 255, 255, 0.85);
 }
 
-.octane-catalog-window .unique-item .octane-catalog-grid-price.is-multi-price {
+.volt-catalog-window .unique-item .volt-catalog-grid-price.is-multi-price {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
@@ -1686,8 +1686,8 @@
     row-gap: 0;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.unique-item:not(.is-active)::before,
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.unique-item::after {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.unique-item:not(.is-active)::before,
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.unique-item::after {
     top: 2px;
     left: 8px;
     right: auto;
@@ -1696,15 +1696,15 @@
     height: 36px;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.unique-item > .unique-bg-override {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.unique-item > .unique-bg-override {
     display: none;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.unique-item > .octane-catalog-grid-offer-icon {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.unique-item > .volt-catalog-grid-offer-icon {
     z-index: 2;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .layout-grid-item.unique-item > .unique-item-counter {
+.volt-catalog-window .volt-catalog-grid-density-standard .layout-grid-item.unique-item > .unique-item-counter {
     top: 28px;
     right: auto;
     bottom: auto;
@@ -1714,7 +1714,7 @@
     margin: 0;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .unique-item .octane-catalog-grid-price {
+.volt-catalog-window .volt-catalog-grid-density-standard .unique-item .volt-catalog-grid-price {
     right: auto;
     bottom: auto;
     transform: none;
@@ -1725,7 +1725,7 @@
     background: none;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .unique-item .octane-catalog-grid-price.is-single-price {
+.volt-catalog-window .volt-catalog-grid-density-standard .unique-item .volt-catalog-grid-price.is-single-price {
     top: 36px;
     left: -3px;
     width: 54px;
@@ -1733,7 +1733,7 @@
     min-height: 19px;
 }
 
-.octane-catalog-window .octane-catalog-grid-density-standard .unique-item .octane-catalog-grid-price.is-multi-price {
+.volt-catalog-window .volt-catalog-grid-density-standard .unique-item .volt-catalog-grid-price.is-multi-price {
     top: 36px;
     left: 8px;
     display: block;
@@ -1743,7 +1743,7 @@
 }
 
 
-.octane-catalog-grid-price {
+.volt-catalog-grid-price {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1759,7 +1759,7 @@
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price {
     position: absolute;
     z-index: 2;
     gap: 1px;
@@ -1770,9 +1770,9 @@
     text-shadow: none;
 }
 
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .octane-catalog-grid-price,
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item:has(> .avatar-image) > .octane-catalog-grid-price,
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .avatar-image ~ .octane-catalog-grid-price {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .volt-catalog-grid-price,
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item:has(> .avatar-image) > .volt-catalog-grid-price,
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .avatar-image ~ .volt-catalog-grid-price {
     /* Without absolute positioning the bottom/left offsets below are ignored
        on the statically-positioned badge while translateX(-50%) still applies,
        leaving the price floating mid-tile and shifted left (bots page). */
@@ -1800,7 +1800,7 @@
    The avatar img itself arrives with its transparent border already
    cropped off (LayoutAvatarImageView fit variant), so object-contain
    centers the actual figure in this box. */
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item > .avatar-image {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item > .avatar-image {
     bottom: 18px;
 }
 
@@ -1808,15 +1808,15 @@
    plus the price strip doesn't fit in 74px, and the multi-currency price pill
    (e.g. "35 credits + 5 diamonds") is wider than a 6-column tile. 4 columns
    makes the tiles wide enough for the pill; the height !important is needed
-   to beat the grid's inline --octane-grid-column-min-height (set by AutoGrid);
+   to beat the grid's inline --volt-grid-column-min-height (set by AutoGrid);
    grid-auto-rows and the tile height both read this variable. */
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard):has(.layout-grid-item > .avatar-image) {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard):has(.layout-grid-item > .avatar-image) {
     grid-template-columns: repeat(4, 1fr) !important;
-    --octane-grid-column-min-height: 100px !important;
+    --volt-grid-column-min-height: 100px !important;
 }
 
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .octane-catalog-grid-price-entry,
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .avatar-image ~ .octane-catalog-grid-price .octane-catalog-grid-price-entry {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .volt-catalog-grid-price-entry,
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .avatar-image ~ .volt-catalog-grid-price .volt-catalog-grid-price-entry {
     height: auto !important;
     line-height: 1 !important;
     align-items: center !important;
@@ -1824,8 +1824,8 @@
     gap: 3px !important;
 }
 
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .octane-catalog-grid-price-currency,
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .avatar-image ~ .octane-catalog-grid-price .octane-catalog-grid-price-currency {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .volt-catalog-grid-price-currency,
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .avatar-image ~ .volt-catalog-grid-price .volt-catalog-grid-price-currency {
     width: 13px !important;
     height: 13px !important;
     object-fit: contain !important;
@@ -1833,12 +1833,12 @@
     display: inline-block !important;
 }
 
-.octane-catalog-grid-price.is-single-price {
+.volt-catalog-grid-price.is-single-price {
     height: auto;
     min-height: 0;
 }
 
-.octane-catalog-grid-price.is-multi-price {
+.volt-catalog-grid-price.is-multi-price {
     height: auto;
     min-height: 0;
     flex-direction: column;
@@ -1846,7 +1846,7 @@
     row-gap: 1px;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-single-price {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-single-price {
     top: 36px;
     left: -3px;
     width: 54px;
@@ -1854,7 +1854,7 @@
     min-height: 19px;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-multi-price {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-multi-price {
     top: 36px;
     left: 8px;
     display: block;
@@ -1863,7 +1863,7 @@
     min-height: 34px;
 }
 
-.octane-catalog-grid-price-entry {
+.volt-catalog-grid-price-entry {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1872,36 +1872,36 @@
     white-space: nowrap;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price-entry {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price-entry {
     justify-content: flex-end;
     gap: 1px;
     height: 19px;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-single-price .octane-catalog-grid-price-entry {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-single-price .volt-catalog-grid-price-entry {
     width: 54px;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-multi-price .octane-catalog-grid-price-entry {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-multi-price .volt-catalog-grid-price-entry {
     position: absolute;
     right: 0;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-multi-price .octane-catalog-grid-price-entry:first-child {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-multi-price .volt-catalog-grid-price-entry:first-child {
     top: 0;
     width: 32px;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price.is-multi-price .octane-catalog-grid-price-entry:nth-child(2) {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price.is-multi-price .volt-catalog-grid-price-entry:nth-child(2) {
     top: 15px;
     width: 43px;
 }
 
-.octane-catalog-grid-price-plus {
+.volt-catalog-grid-price-plus {
     padding-right: 1px;
 }
 
-.octane-catalog-grid-price-currency {
+.volt-catalog-grid-price-currency {
     width: auto !important;
     height: auto !important;
     max-width: none !important;
@@ -1911,7 +1911,7 @@
     object-fit: none !important;
 }
 
-.octane-catalog-grid-density-standard .octane-catalog-grid-price-currency {
+.volt-catalog-grid-density-standard .volt-catalog-grid-price-currency {
     /* Match the 13px coin size used by the legacy grid rows. */
     width: 12px !important;
     height: 12px !important;
@@ -1920,7 +1920,7 @@
     object-fit: contain !important;
 }
 
-.octane-catalog-price-row {
+.volt-catalog-price-row {
     position: absolute;
     left: 0;
     bottom: 30px;
@@ -1930,7 +1930,7 @@
     overflow: visible;
 }
 
-.octane-catalog-spinner-slot {
+.volt-catalog-spinner-slot {
     position: absolute;
     left: 0;
     top: 0;
@@ -1938,7 +1938,7 @@
     height: 25px;
 }
 
-.octane-catalog-total-price-slot {
+.volt-catalog-total-price-slot {
     position: absolute;
     left: 180px;
     top: 0;
@@ -1950,7 +1950,7 @@
     padding: 0;
 }
 
-.octane-catalog-total-price-label {
+.volt-catalog-total-price-label {
     position: absolute;
     top: 3px;
     left: 20px;
@@ -1964,7 +1964,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-total-price-value {
+.volt-catalog-total-price-value {
     position: absolute !important;
     top: 1px;
     left: 85px;
@@ -1975,7 +1975,7 @@
     padding: 0;
 }
 
-.octane-catalog-purchase-row {
+.volt-catalog-purchase-row {
     position: absolute;
     left: 0;
     bottom: 0;
@@ -1985,7 +1985,7 @@
     overflow: hidden;
 }
 
-.octane-catalog-offer-actions {
+.volt-catalog-offer-actions {
     display: flex !important;
     flex-direction: row;
     align-items: flex-start;
@@ -1999,11 +1999,11 @@
     padding: 0;
 }
 
-.octane-catalog-default-layout .octane-catalog-offer-actions > .octane-catalog-standard-buy-button {
+.volt-catalog-default-layout .volt-catalog-offer-actions > .volt-catalog-standard-buy-button {
     margin-left: auto !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-button {
+.volt-catalog-window .volt-catalog-standard-button {
     appearance: none;
     display: inline-flex !important;
     align-items: center !important;
@@ -2028,35 +2028,35 @@
     text-shadow: none !important;
     box-shadow: none !important;
     cursor: pointer;
-    image-rendering: var(--octane-pixel-art, pixelated) !important;
+    image-rendering: var(--volt-pixel-art, pixelated) !important;
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn,
-.octane-catalog-window button.octane-catalog-preview-btn *,
-.octane-catalog-window button.octane-catalog-preview-btn svg {
+.volt-catalog-window button.volt-catalog-preview-btn,
+.volt-catalog-window button.volt-catalog-preview-btn *,
+.volt-catalog-window button.volt-catalog-preview-btn svg {
     border-radius: 0 !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-button:hover {
+.volt-catalog-window .volt-catalog-standard-button:hover {
     border-image-source: var(--habbo-skin-button-hover) !important;
     filter: none !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-button:active {
+.volt-catalog-window .volt-catalog-standard-button:active {
     border-image-source: var(--habbo-skin-button-pressed) !important;
     filter: none !important;
     box-shadow: none !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-button.pointer-events-none,
-.octane-catalog-window .octane-catalog-standard-button:disabled {
+.volt-catalog-window .volt-catalog-standard-button.pointer-events-none,
+.volt-catalog-window .volt-catalog-standard-button:disabled {
     border-image-source: var(--habbo-skin-button-disabled) !important;
     color: #777777 !important;
     opacity: 1 !important;
     cursor: not-allowed !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-buy-button {
+.volt-catalog-window .volt-catalog-standard-buy-button {
     width: 170px !important;
     min-width: 170px !important;
     height: 24px !important;
@@ -2073,7 +2073,7 @@
     color: #ffffff !important;
 }
 
-.octane-catalog-window .octane-catalog-standard-gift-button {
+.volt-catalog-window .volt-catalog-standard-gift-button {
     width: 170px !important;
     min-width: 170px !important;
     height: 24px !important;
@@ -2089,25 +2089,25 @@
     background: transparent !important;
 }
 
-.octane-catalog-pet-card .octane-catalog-standard-buy-button {
+.volt-catalog-pet-card .volt-catalog-standard-buy-button {
     width: auto !important;
     min-width: 0 !important;
     padding: 0 14px !important;
 }
 
-.octane-catalog-window .layout-grid,
-.octane-catalog-window [class*="grid-cols-["] {
+.volt-catalog-window .layout-grid,
+.volt-catalog-window [class*="grid-cols-["] {
     overflow-x: hidden !important;
 }
 
-.octane-catalog-standard-spinner {
+.volt-catalog-standard-spinner {
     position: relative;
     width: 200px;
     height: 25px;
     color: #000;
 }
 
-.octane-catalog-standard-spinner-label {
+.volt-catalog-standard-spinner-label {
     position: absolute;
     left: 0;
     top: 3px;
@@ -2123,7 +2123,7 @@
     text-overflow: ellipsis;
 }
 
-.octane-catalog-standard-spinner-input-frame {
+.volt-catalog-standard-spinner-input-frame {
     position: absolute;
     top: 0;
     left: 54px;
@@ -2132,7 +2132,7 @@
     z-index: 2;
 }
 
-.octane-catalog-standard-spinner-discount {
+.volt-catalog-standard-spinner-discount {
     position: absolute;
     top: 0;
     left: 65px;
@@ -2145,18 +2145,18 @@
 
 /* AIR border style 3: the white border-slot alpha mask colorized to the
    discount container's #92d27c window color. */
-.octane-catalog-standard-spinner-discount::before {
+.volt-catalog-standard-spinner-discount::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 0;
     background: #92d27c;
     -webkit-mask-box-image: url("../../assets/images/catalog/air/gift/border-slot-e9e9e9.png") 3 fill / 3px / 0 stretch;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-catalog-standard-spinner-discount-copy {
+.volt-catalog-standard-spinner-discount-copy {
     /* Keep the localized "+ N free!" visible between the requested plus
        control and AIR's fixed x=173 bonus star. */
     position: absolute;
@@ -2176,7 +2176,7 @@
     white-space: nowrap;
 }
 
-.octane-catalog-standard-spinner-discount-star {
+.volt-catalog-standard-spinner-discount-star {
     position: absolute;
     top: -2px;
     left: 108px;
@@ -2184,10 +2184,10 @@
     width: 30px;
     height: 30px;
     background: url("../../assets/images/catalog/air/bundle-star.png") 0 0 / 29px 29px no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-standard-spinner-input-frame::before {
+.volt-catalog-standard-spinner-input-frame::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -2201,11 +2201,11 @@
     border-image-width: 6px !important;
     border-image-repeat: stretch !important;
     background: transparent !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
     pointer-events: none;
 }
 
-.octane-catalog-window .octane-catalog-standard-spinner-value {
+.volt-catalog-window .volt-catalog-standard-spinner-value {
     position: absolute;
     left: 3px;
     top: 5px;
@@ -2227,13 +2227,13 @@
     text-align: left;
 }
 
-.octane-catalog-window .octane-catalog-standard-spinner-value:focus {
+.volt-catalog-window .volt-catalog-standard-spinner-value:focus {
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
 }
 
-.octane-catalog-standard-price-display {
+.volt-catalog-standard-price-display {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -2243,7 +2243,7 @@
     font-size: 11px;
 }
 
-.octane-catalog-standard-price-pill {
+.volt-catalog-standard-price-pill {
     display: inline-flex;
     align-items: center;
     gap: 2px;
@@ -2255,14 +2255,14 @@
     background: transparent !important;
 }
 
-.octane-catalog-standard-price-text {
+.volt-catalog-standard-price-text {
     color: #222 !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     line-height: 17px !important;
 }
 
-.octane-catalog-standard-price-original {
+.volt-catalog-standard-price-original {
     position: relative;
     display: inline-block;
     color: #999999 !important;
@@ -2271,7 +2271,7 @@
     line-height: 17px !important;
 }
 
-.octane-catalog-standard-price-original::after {
+.volt-catalog-standard-price-original::after {
     content: "";
     position: absolute;
     top: 8px;
@@ -2282,7 +2282,7 @@
     pointer-events: none;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-display {
+.volt-catalog-total-price-value .volt-catalog-standard-price-display {
     align-items: flex-start;
     width: max-content;
     height: 24px;
@@ -2292,7 +2292,7 @@
     margin-left: auto;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-pill {
+.volt-catalog-total-price-value .volt-catalog-standard-price-pill {
     align-items: flex-start;
     height: 24px;
     min-width: 0;
@@ -2300,21 +2300,21 @@
     padding: 0;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-text {
+.volt-catalog-total-price-value .volt-catalog-standard-price-text {
     font-size: 12px !important;
     margin-top: 3px;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-original {
+.volt-catalog-total-price-value .volt-catalog-standard-price-original {
     font-size: 12px !important;
     margin-top: 3px;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-original::after {
+.volt-catalog-total-price-value .volt-catalog-standard-price-original::after {
     top: 7px;
 }
 
-.octane-catalog-total-price-value .octane-catalog-standard-price-plus {
+.volt-catalog-total-price-value .volt-catalog-standard-price-plus {
     display: inline-block;
     width: 8px;
     height: 17px;
@@ -2327,7 +2327,7 @@
     text-align: left;
 }
 
-.octane-catalog-total-price-value .octane-currency-icon {
+.volt-catalog-total-price-value .volt-currency-icon {
     width: 22px !important;
     height: 22px !important;
     min-width: 22px !important;
@@ -2337,19 +2337,19 @@
     background-repeat: no-repeat !important;
 }
 
-.octane-catalog-total-price-value [data-currency-type="-1"] .octane-currency-icon {
+.volt-catalog-total-price-value [data-currency-type="-1"] .volt-currency-icon {
     background-image: url("../../assets/images/catalog/air/currency-credit-big.png") !important;
 }
 
-.octane-catalog-total-price-value [data-currency-type="0"] .octane-currency-icon {
+.volt-catalog-total-price-value [data-currency-type="0"] .volt-currency-icon {
     background-image: url("../../assets/images/catalog/air/currency-ducket-big.png") !important;
 }
 
-.octane-catalog-total-price-value [data-currency-type="5"] .octane-currency-icon {
+.volt-catalog-total-price-value [data-currency-type="5"] .volt-currency-icon {
     background-image: url("../../assets/images/catalog/air/currency-diamond-big.png") !important;
 }
 
-.octane-catalog-window .octane-catalog-preview-price .octane-catalog-standard-price-text {
+.volt-catalog-window .volt-catalog-preview-price .volt-catalog-standard-price-text {
     color: #ffffff !important;
     text-shadow:
         0 0 2px #000,
@@ -2359,7 +2359,7 @@
         -1px -1px 1px #000 !important;
 }
 
-.octane-catalog-standard-price-plus {
+.volt-catalog-standard-price-plus {
     display: inline-block;
     width: 7px;
     height: 17px;
@@ -2370,7 +2370,7 @@
     text-align: center;
 }
 
-.octane-catalog-preview-btn {
+.volt-catalog-preview-btn {
     position: absolute;
     z-index: 4;
     width: 25px;
@@ -2385,7 +2385,7 @@
     justify-content: center !important;
 }
 
-.octane-catalog-preview-btn svg {
+.volt-catalog-preview-btn svg {
     width: 14px !important;
     height: 14px !important;
     color: #111 !important;
@@ -2394,17 +2394,17 @@
     display: block !important;
 }
 
-.octane-catalog-preview-rotate {
+.volt-catalog-preview-rotate {
     top: 8px;
     right: 35px;
 }
 
-.octane-catalog-preview-state {
+.volt-catalog-preview-state {
     top: 8px;
     right: 6px;
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn {
+.volt-catalog-window button.volt-catalog-preview-btn {
     width: 25px !important;
     height: 24px !important;
     min-width: 25px !important;
@@ -2419,7 +2419,7 @@
     z-index: 10 !important;
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn::before {
+.volt-catalog-window button.volt-catalog-preview-btn::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -2434,28 +2434,28 @@
     pointer-events: none;
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn:hover::before {
+.volt-catalog-window button.volt-catalog-preview-btn:hover::before {
     border-image-source: var(--habbo-skin-shiny-large-hover);
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn:active::before {
+.volt-catalog-window button.volt-catalog-preview-btn:active::before {
     border-image-source: var(--habbo-skin-shiny-large-pressed);
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn:disabled::before {
+.volt-catalog-window button.volt-catalog-preview-btn:disabled::before {
     border-image-source: var(--habbo-skin-shiny-large-disabled);
 }
 
-.octane-catalog-window button.octane-catalog-preview-btn > svg {
+.volt-catalog-window button.volt-catalog-preview-btn > svg {
     position: relative;
     z-index: 1;
 }
 
-.octane-catalog-breadcrumb {
+.volt-catalog-breadcrumb {
     display: none;
 }
 
-.octane-catalog-preview-controls {
+.volt-catalog-preview-controls {
     position: absolute;
     top: 8px;
     right: 6px;
@@ -2464,7 +2464,7 @@
     height: 77px;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-btn {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-btn {
     position: absolute;
     top: 0;
     width: 25px !important;
@@ -2474,19 +2474,19 @@
     overflow: hidden;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-btn.is-left {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-btn.is-left {
     left: 0;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-btn.is-right {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-btn.is-right {
     left: 29px;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-btn:disabled {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-btn:disabled {
     opacity: 1 !important;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-region {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-region {
     position: absolute;
     left: 31px;
     display: block;
@@ -2498,7 +2498,7 @@
     box-shadow: none !important;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-zoom-btn {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-zoom-btn {
     top: 29px;
     width: 20px !important;
     min-width: 20px !important;
@@ -2506,7 +2506,7 @@
     min-height: 22px !important;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-action-btn {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-action-btn {
     top: 55px;
     width: 22px !important;
     min-width: 22px !important;
@@ -2514,15 +2514,15 @@
     min-height: 22px !important;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-region:hover {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-region:hover {
     filter: brightness(1.12);
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.octane-catalog-preview-region:active {
+.volt-catalog-window .volt-catalog-preview-controls button.volt-catalog-preview-region:active {
     filter: brightness(0.9);
 }
 
-.octane-catalog-window .octane-catalog-preview-controls .octane-catalog-preview-arrow {
+.volt-catalog-window .volt-catalog-preview-controls .volt-catalog-preview-arrow {
     position: absolute;
     top: 7px;
     display: block;
@@ -2533,44 +2533,44 @@
     object-fit: none !important;
     z-index: 1;
     filter: none !important;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.is-left .octane-catalog-preview-arrow {
+.volt-catalog-window .volt-catalog-preview-controls button.is-left .volt-catalog-preview-arrow {
     left: 7px;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls button.is-right .octane-catalog-preview-arrow {
+.volt-catalog-window .volt-catalog-preview-controls button.is-right .volt-catalog-preview-arrow {
     left: 9px;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls .octane-icon.icon-zoom-more {
+.volt-catalog-window .volt-catalog-preview-controls .volt-icon.icon-zoom-more {
     position: absolute;
     top: 0;
     left: 3px;
     width: 13px;
     height: 22px;
     background-repeat: no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-window .octane-catalog-preview-controls .octane-icon.icon-zoom-more:hover,
-.octane-catalog-window .octane-catalog-preview-controls .octane-icon.icon-zoom-more:active {
+.volt-catalog-window .volt-catalog-preview-controls .volt-icon.icon-zoom-more:hover,
+.volt-catalog-window .volt-catalog-preview-controls .volt-icon.icon-zoom-more:active {
     transform: none;
     filter: none;
 }
 
-.octane-catalog-window .octane-catalog-preview-controls .octane-catalog-preview-action-icon {
+.volt-catalog-window .volt-catalog-preview-controls .volt-catalog-preview-action-icon {
     position: absolute;
     top: 0;
     left: -10px;
     width: 41px;
     height: 22px;
     background: url("@/assets/images/catalog/preview-avatar-action.svg") no-repeat;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-grid-club-level {
+.volt-catalog-grid-club-level {
     position: absolute;
     top: 4px;
     left: 23px;
@@ -2579,18 +2579,18 @@
     pointer-events: none;
 }
 
-.octane-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template .octane-catalog-grid-club-level {
+.volt-catalog-grid-density-standard .layout-grid-item.uses-base-grid-template .volt-catalog-grid-club-level {
     top: 2px;
     left: 15px;
 }
 
 /* Bots (avatar offers): pin the HC badge to the tile's top-left corner —
    the default 23px offset suits furni tiles. */
-.octane-catalog-grid:not(.octane-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .octane-catalog-grid-club-level {
+.volt-catalog-grid:not(.volt-catalog-grid-density-standard) .layout-grid-item:has(.avatar-image) .volt-catalog-grid-club-level {
     left: 4px;
 }
 
-.octane-catalog-purchase-selection-prompt {
+.volt-catalog-purchase-selection-prompt {
     align-self: center;
     color: var(--bs-secondary-color);
     font-size: 11px;
@@ -2598,7 +2598,7 @@
 }
 
 @media (max-width: 640px), (orientation: landscape) and (max-height: 520px) {
-    .octane-catalog-window {
+    .volt-catalog-window {
         width: 100vw !important;
         min-width: 0 !important;
         max-width: 100vw !important;
@@ -2608,33 +2608,33 @@
         border-radius: 0 !important;
     }
 
-    .draggable-window:has(> .octane-catalog-window) {
+    .draggable-window:has(> .volt-catalog-window) {
         transform: none !important;
         left: 0 !important;
         top: 0 !important;
     }
 
-    .octane-catalog-tabs-shell {
+    .volt-catalog-tabs-shell {
         overflow-x: auto;
         overflow-y: hidden;
     }
 
-    .octane-catalog-content-shell {
+    .volt-catalog-content-shell {
         padding: 6px !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
     }
 
-    .octane-catalog-welcome {
+    .volt-catalog-welcome {
         display: none !important;
     }
 
-    .octane-catalog-product-view:has(> .octane-catalog-welcome) {
+    .volt-catalog-product-view:has(> .volt-catalog-welcome) {
         display: none !important;
     }
 
-    .octane-catalog-stage,
-    .octane-catalog-stage.is-navigation-hidden {
+    .volt-catalog-stage,
+    .volt-catalog-stage.is-navigation-hidden {
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -2643,12 +2643,12 @@
         min-height: 0;
     }
 
-    .octane-catalog-sidebar {
+    .volt-catalog-sidebar {
         flex: 0 0 auto;
         max-height: 30vh;
     }
 
-    .octane-catalog-layout-shell {
+    .volt-catalog-layout-shell {
         flex: 0 0 auto;
         width: 100%;
         height: auto;
@@ -2656,27 +2656,27 @@
         overflow: visible;
     }
 
-    .octane-catalog-layout-container {
+    .volt-catalog-layout-container {
         flex: 0 0 auto;
         height: auto;
         min-height: 460px;
         overflow: visible;
     }
 
-    .octane-catalog-default-layout {
+    .volt-catalog-default-layout {
         width: 100%;
         height: 460px;
         min-height: 460px;
         overflow: visible;
     }
 
-    .octane-catalog-grid:not(.octane-catalog-grid-density-standard) {
-        grid-template-columns: repeat(auto-fill, minmax(var(--octane-grid-column-min-width, 47px), 1fr)) !important;
+    .volt-catalog-grid:not(.volt-catalog-grid-density-standard) {
+        grid-template-columns: repeat(auto-fill, minmax(var(--volt-grid-column-min-width, 47px), 1fr)) !important;
     }
 }
 
 /* Bundle layout (single_bundle / room_bundle): main hero item + framed "What's Included" container */
-.octane-catalog-bundle-main-item {
+.volt-catalog-bundle-main-item {
     display: flex;
     flex-shrink: 0;
     box-sizing: border-box;
@@ -2689,16 +2689,16 @@
     background: #e4e7df;
 }
 
-.octane-catalog-bundle-main-item > .octane-catalog-grid-offer-icon {
+.volt-catalog-bundle-main-item > .volt-catalog-grid-offer-icon {
     width: auto !important;
     height: auto !important;
     max-width: 100% !important;
     max-height: 100% !important;
     object-fit: contain;
-    image-rendering: var(--octane-pixel-art, pixelated);
+    image-rendering: var(--volt-pixel-art, pixelated);
 }
 
-.octane-catalog-bundle-frame {
+.volt-catalog-bundle-frame {
     box-sizing: border-box;
     padding: 8px;
     border: 1px solid #8a8882;
@@ -2709,15 +2709,15 @@
 
 /* Show at most 5 rows of items; scroll when the bundle holds more. Rows are pinned
    to the tile height and top-aligned so a partly-filled grid doesn't stretch. */
-.octane-catalog-bundle-frame .octane-catalog-layout-bundle-grid {
-    height: calc(var(--octane-grid-column-min-height, 40px) * 5 + 2rem);
+.volt-catalog-bundle-frame .volt-catalog-layout-bundle-grid {
+    height: calc(var(--volt-grid-column-min-height, 40px) * 5 + 2rem);
     grid-template-rows: none !important;
-    grid-auto-rows: var(--octane-grid-column-min-height, 40px);
+    grid-auto-rows: var(--volt-grid-column-min-height, 40px);
     align-content: start;
 }
 
 /* Currency sits at the right of the top row on the classic golden credits panel. */
-.octane-catalog-bundle-price {
+.volt-catalog-bundle-price {
     display: inline-flex;
     align-items: center;
     box-sizing: border-box;
@@ -2730,14 +2730,14 @@
     box-shadow: inset 0 0 0 2px #e3c47c;
 }
 
-.octane-catalog-bundle-price > div {
+.volt-catalog-bundle-price > div {
     padding: 0 !important;
     background: transparent !important;
 }
 
 /* page_text_details sits at the top of a room bundle (e.g. "Also available in the Credit
    page") — small, muted and left-aligned, above both columns. */
-.octane-catalog-bundle-details {
+.volt-catalog-bundle-details {
     color: #6b6b6b;
     line-height: 1.2;
 }
@@ -2745,7 +2745,7 @@
 /* Invisible one-line stand-in for the "What's included" header in the left column: it
    reserves the header's height so the currency plate lines up with the top of the furni
    container on the right. Kept to a single line to match the (short) real header. */
-.octane-catalog-bundle-header-spacer {
+.volt-catalog-bundle-header-spacer {
     visibility: hidden;
     white-space: nowrap;
     overflow: hidden;
@@ -2754,7 +2754,7 @@
 
 /* Room bundles use the classic grey pixel plate for the currency instead of the golden
    panel: a white outer edge, a thick black rounded border and a flat grey fill. */
-.octane-catalog-bundle-price.octane-catalog-bundle-price--room {
+.volt-catalog-bundle-price.volt-catalog-bundle-price--room {
     padding: 3px 10px;
     /* 1px black outer edge, then a 2px white ring, then the grey plate face. */
     border: 1px solid #000000;
@@ -2764,13 +2764,13 @@
 }
 
 /* Gift + Buy share one line at the bottom of the bundle's left column. */
-.octane-catalog-bundle-actions {
+.volt-catalog-bundle-actions {
     display: flex;
     flex-direction: row;
     gap: 4px;
 }
 
-.octane-catalog-bundle-actions > .octane-catalog-standard-button {
+.volt-catalog-bundle-actions > .volt-catalog-standard-button {
     flex: 1 1 0;
     width: auto !important;
     min-width: 0 !important;

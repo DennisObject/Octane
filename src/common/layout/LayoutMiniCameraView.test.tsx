@@ -6,13 +6,13 @@ const mocks = vi.hoisted(() => ({
     createTextureFromRoom: vi.fn(() => ({ id: 'texture' }))
 }));
 
-vi.mock('@octane/renderer', async () => {
-    const actual = await vi.importActual<typeof import('@octane/renderer')>('@octane/renderer');
+vi.mock('@volt/renderer', async () => {
+    const actual = await vi.importActual<typeof import('@volt/renderer')>('@volt/renderer');
 
     return {
         ...actual,
         GetRoomEngine: () => ({ createTextureFromRoom: mocks.createTextureFromRoom }),
-        OctaneRectangle: class {}
+        VoltRectangle: class {}
     };
 });
 

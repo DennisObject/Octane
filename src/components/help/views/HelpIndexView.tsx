@@ -1,4 +1,4 @@
-import { GetCfhStatusMessageComposer, GetSessionDataManager, RoomObjectType } from '@octane/renderer';
+import { GetCfhStatusMessageComposer, GetSessionDataManager, RoomObjectType } from '@volt/renderer';
 import { ButtonHTMLAttributes, FC } from 'react';
 import {
     ChatEntryType,

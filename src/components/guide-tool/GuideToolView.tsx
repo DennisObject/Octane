@@ -15,10 +15,10 @@ import {
     PerkAllowancesMessageEvent,
     PerkEnum,
     RemoveLinkEventTracker
-} from '@octane/renderer';
+} from '@volt/renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { GetConfigurationValue, GuideSessionState, GuideToolMessage, GuideToolMessageGroup, LocalizeText, SendMessageComposer } from '../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../common';
+import { VoltCardContentView, VoltCardHeaderView, VoltCardView } from '../../common';
 import { GuideToolEvent } from '../../events';
 import { useMessageEvent, useNotification, useUiEvent } from '../../hooks';
 import { GuideToolAcceptView } from './views/GuideToolAcceptView';
@@ -332,9 +332,9 @@ export const GuideToolView: FC<{}> = (props) => {
     if (!isVisible) return null;
 
     return (
-        <OctaneCardView className="octane-guide-tool" theme="primary-slim">
-            <OctaneCardHeaderView headerText={headerText} noCloseButton={noCloseButton} onCloseClick={(event) => processAction('close')} />
-            <OctaneCardContentView className="text-black">
+        <VoltCardView className="volt-guide-tool" theme="primary-slim">
+            <VoltCardHeaderView headerText={headerText} noCloseButton={noCloseButton} onCloseClick={(event) => processAction('close')} />
+            <VoltCardContentView className="text-black">
                 {sessionState === GuideSessionState.GUIDE_TOOL_MENU && (
                     <GuideToolMenuView
                         guardiansOnDuty={guardiansOnDuty}
@@ -371,7 +371,7 @@ export const GuideToolView: FC<{}> = (props) => {
                 {sessionState === GuideSessionState.USER_THANKS && <GuideToolUserThanksView />}
                 {sessionState === GuideSessionState.USER_NO_HELPERS && <GuideToolUserNoHelpersView />}
                 {sessionState === GuideSessionState.USER_SOMETHING_WRONG && <GuideToolUserSomethingWrogView />}
-            </OctaneCardContentView>
-        </OctaneCardView>
+            </VoltCardContentView>
+        </VoltCardView>
     );
 };

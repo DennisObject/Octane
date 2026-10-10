@@ -1,6 +1,6 @@
-import { CatalogAdminLoadPageComposer, CatalogAdminPageDetailsEvent } from '@octane/renderer';
+import { CatalogAdminLoadPageComposer, CatalogAdminPageDetailsEvent } from '@volt/renderer';
 import { useEffect, useRef, useState } from 'react';
-import { SendMessageComposer } from '../../api/octane/SendMessageComposer';
+import { SendMessageComposer } from '../../api/volt/SendMessageComposer';
 import { LocalizeText } from '../../api/utils/LocalizeText';
 import { useCatalogAdmin } from '../../components/catalog/CatalogAdminContext';
 import { isReadOnlyCatalogAdminLayout } from '../../components/catalog/views/page/layout/catalogLayoutRegistry';

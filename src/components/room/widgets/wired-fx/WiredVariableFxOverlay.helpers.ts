@@ -1,4 +1,4 @@
-import { IWiredVariableFxConfig } from '@octane/renderer';
+import { IWiredVariableFxConfig } from '@volt/renderer';
 import { WIRED_FX_CATEGORY } from '../../../../api';
 import { IWiredVariableFxStatusEntry } from '../../../../hooks';
 

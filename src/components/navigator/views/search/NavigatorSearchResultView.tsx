@@ -1,4 +1,4 @@
-import { NavigatorSearchResultList, NavigatorSearchSaveComposer } from '@octane/renderer';
+import { NavigatorSearchResultList, NavigatorSearchSaveComposer } from '@volt/renderer';
 import { FC } from 'react';
 import { LocalizeText, localizeWithFallback, NavigatorSearchResultViewDisplayMode, SendMessageComposer } from '../../../../api';
 import categoryCollapse from '../../../../assets/images/navigator/air/category-collapse.png';
@@ -63,11 +63,11 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
     const eventTitle = isEventView(searchResult.code) || isEventView(parentCode);
 
     return (
-        <section className={`octane-navigator-air__category${isExtended ? '' : ' is-collapsed'}`}>
-            <header className="octane-navigator-air__category-header">
+        <section className={`volt-navigator-air__category${isExtended ? '' : ' is-collapsed'}`}>
+            <header className="volt-navigator-air__category-header">
                 <button
                     type="button"
-                    className="octane-navigator-air__category-toggle"
+                    className="volt-navigator-air__category-toggle"
                     aria-label={resultTitle}
                     aria-expanded={isExtended}
                     onClick={() => useNavigatorUiStore.getState().setResultCollapsed(searchResult.code, isExtended)}
@@ -75,11 +75,11 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                     {(!isExtended || searchResult.action !== 2) && <img src={isExtended ? categoryCollapse : categoryExpand} alt="" />}
                     <span>{resultTitle}</span>
                 </button>
-                <div className="octane-navigator-air__category-controls">
+                <div className="volt-navigator-air__category-controls">
                     {isExtended && displayMode === NavigatorSearchResultViewDisplayMode.LIST && (
                         <button
                             type="button"
-                            className="octane-navigator-air__icon-button"
+                            className="volt-navigator-air__icon-button"
                             aria-label={tileViewLabel}
                             title={tileViewLabel}
                             onClick={toggleDisplayMode}
@@ -90,7 +90,7 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                     {isExtended && isTileMode && (
                         <button
                             type="button"
-                            className="octane-navigator-air__icon-button"
+                            className="volt-navigator-air__icon-button"
                             aria-label={listViewLabel}
                             title={listViewLabel}
                             onClick={toggleDisplayMode}
@@ -99,19 +99,19 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                         </button>
                     )}
                     {searchResult.action > 0 && searchResult.action === 1 && (
-                        <button type="button" className="octane-navigator-air__icon-button" title={LocalizeText('navigator.more.rooms')} onClick={showMore}>
+                        <button type="button" className="volt-navigator-air__icon-button" title={LocalizeText('navigator.more.rooms')} onClick={showMore}>
                             <img src={categoryShowMore} alt="" />
                         </button>
                     )}
                     {isExtended && searchResult.action === 2 && (
-                        <button type="button" className="octane-navigator-air__icon-button" title={LocalizeText('navigator.back')} onClick={showMore}>
+                        <button type="button" className="volt-navigator-air__icon-button" title={LocalizeText('navigator.back')} onClick={showMore}>
                             <img src={navViewMini} alt="" />
                         </button>
                     )}
                     {!hideSave && (
                         <button
                             type="button"
-                            className="octane-navigator-air__category-save"
+                            className="volt-navigator-air__category-save"
                             aria-label={LocalizeText('navigator.tooltip.add.saved.search')}
                             title={LocalizeText('navigator.tooltip.add.saved.search')}
                             onClick={() => SendMessageComposer(new NavigatorSearchSaveComposer(searchResult.code, parentFilter))}
@@ -122,7 +122,7 @@ export const NavigatorSearchResultView: FC<NavigatorSearchResultViewProps> = (pr
                 </div>
             </header>
             {isExtended && (
-                <div className={isTileMode ? 'octane-navigator-air__tiles' : 'octane-navigator-air__rows'}>
+                <div className={isTileMode ? 'volt-navigator-air__tiles' : 'volt-navigator-air__rows'}>
                     {searchResult.rooms.map((room, index) => (
                         <NavigatorSearchResultItemView
                             key={room.roomId || index}

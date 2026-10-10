@@ -1,4 +1,4 @@
-import { RoomObjectVariable } from '@octane/renderer';
+import { RoomObjectVariable } from '@volt/renderer';
 import { FC, useMemo } from 'react';
 import { GetOwnRoomObject, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
@@ -64,7 +64,7 @@ export const WiredHandItemField: FC<WiredHandItemFieldProps> = (props) => {
             <WiredSection title={LocalizeText(labelKey)}>
                 <WiredDropdown options={[0, ...options].map((id) => ({ id, label: getLabel(id) }))} value={handItemId} onChange={onChange} />
                 {showCopyButton && (
-                    <WiredShellButton className="octane-wired__wide-button" shellStyle="illumina" onClick={copyOwnHandItem}>
+                    <WiredShellButton className="volt-wired__wide-button" shellStyle="illumina" onClick={copyOwnHandItem}>
                         {LocalizeText('wiredfurni.params.capture.handitem')}
                     </WiredShellButton>
                 )}

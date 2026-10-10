@@ -1,4 +1,4 @@
-import { GetRoomEngine } from '@octane/renderer';
+import { GetRoomEngine } from '@volt/renderer';
 import { GetRoomSession, RoomObjectItem } from '../../../api';
 
 /**
