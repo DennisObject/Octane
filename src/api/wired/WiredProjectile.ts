@@ -34,7 +34,7 @@ export const PROJECTILE_PARAM_BOUNDS: ReadonlyArray<readonly [number, number]> =
     [0, 1],
     [0, 1],
     [1, 100_000],
-    [0, 3],
+    [-20, 1], // Discrete native target; clampProjectileParam checks its four codes.
     [0, 1],
     [0, 1],
     [0, 1],
@@ -46,7 +46,7 @@ export const PROJECTILE_PARAM_BOUNDS: ReadonlyArray<readonly [number, number]> =
     [0, 2],
     [0, 1],
     [-64, 64],
-    [0, 3],
+    [-20, 1], // Discrete native target; clampProjectileParam checks its four codes.
     [-1000, 1000],
     [0, 1_000],
     [0, 1_000],
@@ -66,13 +66,13 @@ export const PROJECTILE_DISTANCE_FIXED = 2;
 
 /** Bit order of the internal variables mask. */
 export const PROJECTILE_INTERNAL_VARIABLES: ReadonlyArray<string> = [
+    '@projectile.animation.tiles_travelled',
+    '@projectile.animation.user_collisions',
+    '@projectile.animation.furni_collisions',
     '@projectile.animation.position.x',
     '@projectile.animation.position.y',
     '@projectile.animation.position.altitude',
-    '@projectile.animation.is_traveling',
-    '@projectile.animation.tiles_traveled',
-    '@projectile.animation.furni_collisions',
-    '@projectile.animation.user_collisions'
+    '@projectile.animation.is_travelling'
 ];
 
 export const defaultProjectileParams = (): number[] => {
@@ -80,11 +80,17 @@ export const defaultProjectileParams = (): number[] => {
 
     params[PROJECTILE_PARAM_ROTATE] = 1;
     params[PROJECTILE_PARAM_TIME_PER_TILE] = PROJECTILE_TIME_PER_TILE_DEFAULT;
+    params[PROJECTILE_PARAM_TIME_TARGET] = 1;
+    params[PROJECTILE_PARAM_DISTANCE_TARGET] = 1;
 
     return params;
 };
 
 export const clampProjectileParam = (index: number, value: number): number => {
+    if (index === PROJECTILE_PARAM_TIME_TARGET || index === PROJECTILE_PARAM_DISTANCE_TARGET) {
+        return [0, 1, -10, -20].includes(value) ? value : 0;
+    }
+
     const [min, max] = PROJECTILE_PARAM_BOUNDS[index] ?? [0, 0];
     const whole = Number.isFinite(value) ? Math.trunc(value) : min;
 
@@ -105,6 +111,8 @@ export const normalizeProjectileParams = (raw: number[] | null | undefined): num
 
     if (raw.length > PROJECTILE_PARAM_TIME_PER_TILE && !(raw[PROJECTILE_PARAM_TIME_PER_TILE] > 0)) {
         params[PROJECTILE_PARAM_TIME_PER_TILE] = PROJECTILE_TIME_PER_TILE_DEFAULT;
+    params[PROJECTILE_PARAM_TIME_TARGET] = 1;
+    params[PROJECTILE_PARAM_DISTANCE_TARGET] = 1;
     }
 
     return params;
