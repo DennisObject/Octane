@@ -1,15 +1,158 @@
-.octane-vault-content {
-    min-height: 0;
-    overflow-y: auto;
+/* vault_view_xml (HabboCatalogCom): 422px frame, a row per earning 37px apart, each a 185px label box over a 223px grey value area. */
+.octane-vault.octane-card-shell.octane-card-frame-3 {
+    box-sizing: border-box;
+    width: var(--vault-width);
+    min-width: var(--vault-width);
+    max-width: var(--vault-width);
+    height: var(--vault-height);
+    min-height: var(--vault-height);
+    max-height: var(--vault-height);
+    padding: 0 !important;
+    color: #000;
+    font-family: Ubuntu, sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    image-rendering: pixelated;
 }
 
-@media (max-width: 460px) {
-    .octane-vault-content > div {
-        align-items: stretch;
-        flex-wrap: wrap;
-    }
+.octane-vault .octane-vault__title {
+    position: absolute !important;
+    top: 3px;
+    left: calc(50% - 0.01px);
+    transform: translateX(calc(-50% - 1px));
+}
 
-    .octane-vault-content > div > button {
-        margin-left: auto;
-    }
+.octane-vault.octane-card-shell.octane-card-frame-3 > .octane-card-header-shell .octane-card-close-button {
+    right: 3px !important;
+}
+
+.octane-vault-content {
+    position: absolute;
+    left: 9px;
+    top: 40px;
+    width: 404px;
+    z-index: 1;
+}
+
+.octane-vault-content img {
+    max-width: none;
+}
+
+.octane-vault__row {
+    position: absolute;
+    left: 0;
+    width: 404px;
+    height: 34px;
+}
+
+.octane-vault__row > * {
+    position: absolute;
+}
+
+.octane-vault__extended {
+    left: 179px;
+    top: 0;
+    width: 223px;
+    height: 34px;
+    box-sizing: border-box;
+    border: 4px solid transparent;
+    border-image: url('../../assets/images/vault/earnings-extended.png') 4 fill / 4px stretch;
+}
+
+.octane-vault__label {
+    left: 0;
+    top: 0;
+    width: 185px;
+    height: 34px;
+    box-sizing: border-box;
+    border: 5px solid transparent;
+    border-image: url('../../assets/images/habbo-skin/slices/border-5.png') 5 fill / 5px stretch;
+}
+
+.octane-vault__category-icon {
+    position: absolute;
+    pointer-events: none;
+}
+
+.octane-vault__label-text {
+    position: absolute;
+    left: 29px;
+    top: 3px;
+}
+
+.octane-vault__slot {
+    top: 0;
+    width: 70px;
+    height: 34px;
+}
+
+.octane-vault__slot-icon {
+    position: absolute;
+    left: 0;
+    top: 7px;
+    display: block;
+    line-height: 0;
+}
+
+.octane-vault__icon.is-product {
+    margin-top: -1px;
+}
+
+.octane-vault__value {
+    position: absolute;
+    top: 7px;
+}
+
+.octane-vault__button {
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 5px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    image-rendering: pixelated;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.octane-vault__button.is-claim {
+    padding-left: 2px;
+    border-image: var(--habbo-skin-shiny) 5 fill / 5px stretch;
+}
+
+.octane-vault__button.is-claim:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-hover);
+}
+
+.octane-vault__button.is-claim:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-pressed);
+}
+
+.octane-vault__button.is-claim:disabled {
+    border-image-source: var(--habbo-skin-shiny-disabled);
+    cursor: default;
+}
+
+.octane-vault__button.is-claim-all {
+    border-image: var(--habbo-skin-shiny-thick) 5 fill / 5px stretch;
+}
+
+.octane-vault__button.is-claim-all:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-thick-hover);
+}
+
+.octane-vault__button.is-claim-all:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-thick-pressed);
+}
+
+.octane-vault__button.is-claim-all:disabled {
+    border-image-source: var(--habbo-skin-shiny-thick-disabled);
+    cursor: default;
+}
+
+.octane-vault__button-label {
+    mix-blend-mode: multiply;
 }
