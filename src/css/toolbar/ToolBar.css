@@ -232,6 +232,16 @@
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.28));
 }
 
+/* bottom_bar_left main_toolbar sibling, not the arrow container: style-2 #3b3933 border at (-6, 0), 20x43, clipped by the bar. The collapse regions have no hover skin. */
+.tb-collapse--left,
+.tb-collapse--right {
+    overflow: hidden;
+    background-image: url("../../assets/images/toolbar/air/collapse-border-3b3933.png");
+    background-repeat: no-repeat;
+    background-position: -6px 0;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
 .tb-toggle {
     display: flex;
     width: 32px;

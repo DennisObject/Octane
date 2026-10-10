@@ -35,7 +35,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = (prop
         }
     }, [nameInfo]);
 
-    const [bubbleWidth, setBubbleWidth] = useState<number | null>(null);
+    const [measuredBubble, setMeasuredBubble] = useState<{ name: string; width: number } | null>(null);
 
     useEffect(() =>
     {
@@ -49,15 +49,23 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = (prop
 
                 const textWidth = measureNativeText(loaded.font, name, nameMeasureStyle);
 
-                setBubbleWidth(Math.ceil(textWidth) + NAME_RASTER_GUTTER + NAME_BUBBLE_INSET * 2);
+                setMeasuredBubble({ name, width: Math.ceil(textWidth) + NAME_RASTER_GUTTER + NAME_BUBBLE_INSET * 2 });
             })
-            .catch(() => undefined);
+            .catch(() =>
+            {
+                if (disposed) return;
+
+                setMeasuredBubble(null);
+            });
 
         return () =>
         {
             disposed = true;
         };
     }, [nameInfo.name]);
+
+    // A stored width is used only for the name it was measured for. A changed name or a failed font load falls back to the 129px skin.
+    const bubbleWidth = measuredBubble !== null && measuredBubble.name === (nameInfo.name ?? '') ? measuredBubble.width : null;
 
     const bubbleStyle = useMemo(() => (bubbleWidth === null ? undefined : { width: bubbleWidth, minWidth: bubbleWidth }), [bubbleWidth]);
 
