@@ -1,7 +1,7 @@
 import { BannedUserData, BannedUsersFromRoomEvent, RoomBannedUsersComposer, RoomModerationSettings, RoomUnbanUserComposer } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { UserProfileIconView } from '../../../../common';
+import { ClassicScrollAreaView, UserProfileIconView } from '../../../../common';
 import { HabboDropMenuView } from '../../../../common/dropmenu/HabboDropMenuView';
 import { useMessageEvent } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
@@ -93,7 +93,7 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                 />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={156} w={172} x={8} y={200}>
-                <div className="ros-list" style={{ left: 3, top: 3, width: 146, height: 150 }}>
+                <ClassicScrollAreaView className="ros-scroll ros-scroll-banned" style={{ left: 3, top: 3, width: 165, height: 149 }} viewportClassName="ros-scroll-viewport">
                     {bannedUsers.map((user, index) => (
                         <div key={user.userId} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}${selectedUserId === user.userId ? ' is-selected' : ''}`}>
                             <button type="button" className="ros-user-bg" onClick={(event) => setSelectedUserId(user.userId)}>
@@ -102,13 +102,13 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                             <UserProfileIconView className="ros-user-eye" userId={user.userId} />
                         </div>
                     ))}
-                </div>
+                </ClassicScrollAreaView>
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-text" h={23} w={125} x={190} y={236}>
-                {`${LocalizeText('navigator.roomsettings.moderation.banned.users')} (${bannedUsers.length})`}
+                {LocalizeText('navigator.roomsettings.moderation.banned.users')}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView h={32} x={190} y={261}>
-                <button type="button" className="ros-button ros-button-fit" disabled={selectedUserId <= 0} onClick={(event) => unBanUser(selectedUserId)}>
+                <button type="button" className="ros-button ros-button-fit" onClick={() => selectedUserId > 0 && unBanUser(selectedUserId)}>
                     <span className="ros-button-label">{LocalizeText('navigator.roomsettings.moderation.unban')}</span>
                 </button>
             </NavigatorRoomSettingsAtView>

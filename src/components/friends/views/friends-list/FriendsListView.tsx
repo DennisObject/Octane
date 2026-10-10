@@ -113,7 +113,23 @@ export const FriendsListView: FC<{}> = (props) => {
     const friendScrollPositionRef = useRef(0);
     const { simpleAlert } = useNotificationActions();
     const [closedCategories, setClosedCategories] = useState(() => new Set([-1]));
-    const { onlineFriends = [], offlineFriends = [], requestRows: requests = [], searchResults, settings, requestFriend = null, requestResponse = null, clearRequestOutcomes } = useFriends();
+    const { onlineFriends = [], offlineFriends = [], requestRows: requests = [], searchResults, settings, friendListReceived = false, requestFriend = null, requestResponse = null, clearRequestOutcomes } = useFriends();
+    const categoryManagementEnabled = GetConfigurationValue<boolean>('friendship.category.management.enabled', false) && GetConfigurationValue<number>('spaweb', 0) !== 1;
+    const friendListReceivedRef = useRef(false);
+
+    useEffect(() => {
+        if (!friendListReceived || friendListReceivedRef.current) return;
+
+        friendListReceivedRef.current = true;
+        setClosedCategories((previous) => {
+            const next = new Set(previous);
+
+            if (onlineFriends.length) next.add(-1);
+            else next.delete(-1);
+
+            return next;
+        });
+    }, [friendListReceived, onlineFriends.length]);
 
     const changeVisibility = useCallback((visible: boolean) => {
         if (isVisible && !visible && activePanel === 'requests') clearRequestOutcomes();
@@ -333,8 +349,8 @@ export const FriendsListView: FC<{}> = (props) => {
                 uniqueKey="octane-friends"
                 handleSelector=".hfl-titlebar"
                 windowPosition={DraggableWindowPosition.TOP_LEFT}
-                offsetLeft={110}
-                offsetTop={50}
+                offsetLeft={60}
+                offsetTop={0}
             >
                 <div
                     ref={windowRef}
@@ -354,7 +370,7 @@ export const FriendsListView: FC<{}> = (props) => {
                             aria-expanded={activePanel === 'friends'}
                             onClick={() => changePanel(activePanel === 'friends' ? null : 'friends')}
                         >
-                            {`${LocalizeText('friendlist.friends')} (${onlineFriends.filter((friend) => friend.categoryId === 0).length})`}
+                            {LocalizeText('friendlist.friends')}
                         </button>
                     </div>
                     {activePanel !== null && (
@@ -474,13 +490,30 @@ export const FriendsListView: FC<{}> = (props) => {
                             {...hoverTip('friendlist.tip.tab.2')}
                             onClick={() => changePanel(activePanel === 'requests' ? null : 'requests')}
                         >
-                            {`${LocalizeText('friendlist.tab.friendrequests')} (${pendingRequestCount})`}
+                            {LocalizeText('friendlist.tab.friendrequests')}
                         </button>
                     )}
                     <button type="button" {...hoverTip('friendlist.tip.tab.3')} className="hfl-search-strip" onClick={() => changePanel(activePanel === 'search' ? null : 'search')}>
-                        {`${LocalizeText('generic.search')} (${(searchResults?.friends.length ?? 0) + (searchResults?.others.length ?? 0)})`}
+                        {LocalizeText('generic.search')}
                     </button>
-                    <div className="hfl-bottom"><span className="hfl-info-text">{hoverInfo}</span></div>
+                    <div className="hfl-bottom">
+                        {categoryManagementEnabled && (
+                            <button
+                                type="button"
+                                className="hfl-edit-categories"
+                                {...hoverTip('friendlist.tip.preferences')}
+                                onClick={() => {
+                                    const url = GetOptionalConfigurationValue<string>('link.format.friendlist.pref', '');
+
+                                    if (url) HabboWebTools.openWebPage(url);
+                                }}
+                            >
+                                <i className="hfl-edit-categories-icon" />
+                                <span>{LocalizeText('friendlist.settings')}</span>
+                            </button>
+                        )}
+                        <span className="hfl-info-text">{hoverInfo}</span>
+                    </div>
                     <div className="hfl-resize-handle" aria-hidden="true" onPointerDown={startResize} onPointerMove={resizeWindow}
                         onPointerUp={stopResize} onPointerCancel={stopResize} onLostPointerCapture={stopResize} />
                 </div>

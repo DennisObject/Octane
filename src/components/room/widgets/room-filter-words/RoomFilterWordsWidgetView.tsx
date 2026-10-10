@@ -1,7 +1,7 @@
 import { GetCustomRoomFilterMessageComposer, UpdateRoomFilterMessageComposer } from '@octane/renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
+import { ClassicScrollAreaView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../../common';
 import { useFilterWordsWidget, useNavigatorData } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from '../../../navigator/views/room-settings/NavigatorRoomSettingsAtView';
 
@@ -58,7 +58,7 @@ export const RoomFilterWordsWidgetView: FC<{}> = (props) => {
                     </button>
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView className="ros-list-border" h={100} w={235} x={5} y={50}>
-                    <div className="ros-filter-list">
+                    <ClassicScrollAreaView className="ros-scroll ros-scroll-filter" style={{ left: 3, top: 3, width: 229, height: 96 }} viewportClassName="ros-scroll-viewport">
                         {(wordsFilter ?? []).map((badWord, index) => (
                             <button
                                 key={index}
@@ -69,7 +69,7 @@ export const RoomFilterWordsWidgetView: FC<{}> = (props) => {
                                 {badWord}
                             </button>
                         ))}
-                    </div>
+                    </ClassicScrollAreaView>
                 </NavigatorRoomSettingsAtView>
                 <NavigatorRoomSettingsAtView h={30} w={137} x={140} y={155}>
                     <button type="button" className="ros-button ros-button-fit" onClick={removeWord}>

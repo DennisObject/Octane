@@ -374,6 +374,7 @@ const useFriendsStore = () => {
         dismissedRequestIds,
         setDismissedRequestIds,
         settings,
+        friendListReceived: offlineMessagesReady,
         onlineFriends,
         offlineFriends,
         getFriend,
