@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -41,70 +42,45 @@ export const WiredActionJoinTeamView: FC<{}> = (props) => {
         }
     }, [trigger]);
 
+    // class_4212: "Pick team" in two columns, then "Choose type:". The join mode section is an Octane addition
+    // (smallest/random team) that the official dialog does not have; it stays last so the native part keeps its layout.
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.choose_type')}</Text>
-                {[
-                    { value: 0, key: 'wiredfurni.params.team.game.0', label: 'Wired' },
-                    { value: 1, key: 'wiredfurni.params.team.game.1', label: 'Banzai' },
-                    { value: 2, key: 'wiredfurni.params.team.game.2', label: 'Freeze' }
-                ].map((option) => {
-                    return (
-                        <div key={option.value} className="flex gap-1">
-                            <input
-                                checked={selectedTeamType === option.value}
-                                className="form-check-input"
-                                id={`selectedTeamType${option.value}`}
-                                name="selectedTeamType"
-                                type="radio"
-                                onChange={() => setSelectedTeamType(option.value)}
-                            />
-                            <Text>{localizeWithFallback(option.key, option.label)}</Text>
-                        </div>
-                    );
-                })}
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.team.join_mode', 'Join')}</Text>
-                {JOIN_TEAM_MODES.map((mode) => (
-                    <div key={mode.value} className="flex gap-1">
-                        <input
-                            checked={joinMode === mode.value}
-                            className="form-check-input"
-                            id={`joinMode${mode.value}`}
-                            name="joinMode"
-                            type="radio"
-                            onChange={() => setJoinMode(mode.value)}
-                        />
-                        <Text>{localizeWithFallback(`wiredfurni.params.team.join_mode.${mode.value}`, mode.fallback)}</Text>
-                    </div>
-                ))}
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.team')}</Text>
-                {[1, 2, 3, 4].map((team) => {
-                    return (
-                        <div key={team} className="flex gap-1">
-                            <input
-                                checked={selectedTeam === team}
-                                className="form-check-input"
-                                disabled={joinMode !== 0}
-                                id={`selectedTeam${team}`}
-                                name="selectedTeam"
-                                type="radio"
-                                onChange={(event) => setSelectedTeam(team)}
-                            />
-                            <Text>{LocalizeText(`wiredfurni.params.team.${team}`)}</Text>
-                        </div>
-                    );
-                })}
-            </div>
+            <WiredSection title={LocalizeText('wiredfurni.params.team')}>
+                <WiredRadioGroup
+                    columns={2}
+                    name="selectedTeam"
+                    options={[1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.team.${id}`), disabled: joinMode !== 0 }))}
+                    value={selectedTeam}
+                    onChange={setSelectedTeam}
+                />
+            </WiredSection>
+            <WiredSection title={LocalizeText('wiredfurni.params.choose_type')}>
+                <WiredRadioGroup
+                    name="selectedTeamType"
+                    options={[
+                        { id: 0, label: localizeWithFallback('wiredfurni.params.team_type.0', 'Wired') },
+                        { id: 1, label: localizeWithFallback('wiredfurni.params.team_type.1', 'Battle Banzai') },
+                        { id: 2, label: localizeWithFallback('wiredfurni.params.team_type.2', 'Freeze') }
+                    ]}
+                    value={selectedTeamType}
+                    onChange={setSelectedTeamType}
+                />
+            </WiredSection>
+            <WiredSection title={localizeWithFallback('wiredfurni.params.team.join_mode', 'Join')}>
+                <WiredRadioGroup
+                    name="joinMode"
+                    options={JOIN_TEAM_MODES.map((mode) => ({ id: mode.value, label: localizeWithFallback(`wiredfurni.params.team.join_mode.${mode.value}`, mode.fallback) }))}
+                    value={joinMode}
+                    onChange={setJoinMode}
+                />
+            </WiredSection>
         </WiredActionBaseView>
     );
 };

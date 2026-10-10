@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
+import { WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';
 import { WiredHandItemField } from '../WiredHandItemField';
+import { WiredQuantifierSection } from '../WiredOptions';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
@@ -30,26 +30,17 @@ export const WiredConditionActorHasHandItemView: FC<WiredConditionActorHasHandIt
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
-            footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
+            footer={
+                <>
+                    <WiredQuantifierSection kind="users" name="handItemQuantifier" negative={negative} value={quantifier} onChange={setQuantifier} />
+                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
+                </>
+            }
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.quantifier_selection')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={quantifier === value}
-                            className="form-check-input"
-                            name="handItemQuantifier"
-                            type="radio"
-                            onChange={() => setQuantifier(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.quantifier.users${negative ? '.neg' : ''}.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
-            <WiredHandItemField handItemId={handItemId} onChange={setHandItemId} showCopyButton={true} />
+            <WiredHandItemField handItemId={handItemId} nativeSection={true} showCopyButton={true} onChange={setHandItemId} />
         </WiredConditionBaseView>
     );
 };

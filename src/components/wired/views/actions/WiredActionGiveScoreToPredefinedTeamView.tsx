@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
-import { WiredLegacySlider as Slider } from '../WiredSlider';
+import { LocalizeText, localizeWithFallback, WiredFurniType, WIRED_SLIDER_ECHO } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
+import { WiredSliderSection } from '../WiredSlider';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 export const WiredActionGiveScoreToPredefinedTeamView: FC<{}> = (props) => {
@@ -25,45 +26,30 @@ export const WiredActionGiveScoreToPredefinedTeamView: FC<{}> = (props) => {
         }
     }, [trigger]);
 
+    // class_3987 = GiveScore's points slider and effect type, plus the team in two columns. The times-per-game
+    // slider is hidden like GiveScore.onEditStart does for a 0 count; this server keeps no such count.
     return (
-        <WiredActionBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <Text bold>{localizeWithFallback('wiredfurni.params.setpoints2', LocalizeText('wiredfurni.params.setpoints', ['points'], [points.toString()]), ['points'], [points.toString()])}</Text>
-                <Slider max={1000} min={1} value={points} onChange={(event) => setPoints(event)} />
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.choose_type')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={operation === value}
-                            className="form-check-input"
-                            name="pointsOperation"
-                            type="radio"
-                            onChange={() => setOperation(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.points_operation.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.team')}</Text>
-                {[1, 2, 3, 4].map((value) => {
-                    return (
-                        <div key={value} className="flex gap-1">
-                            <input
-                                checked={selectedTeam === value}
-                                className="form-check-input"
-                                id={`selectedTeam${value}`}
-                                name="selectedTeam"
-                                type="radio"
-                                onChange={(event) => setSelectedTeam(value)}
-                            />
-                            <Text>{LocalizeText('wiredfurni.params.team.' + value)}</Text>
-                        </div>
-                    );
-                })}
-            </div>
+        <WiredActionBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={1000} min={1} titleKey="wiredfurni.params.setpoints2" value={points} onChange={setPoints} />
+            {/* GiveScore's "times per game" slider stays in the list while hidden, so its section spacing remains. */}
+            <div aria-hidden="true" />
+            <WiredSection title={localizeWithFallback('wiredfurni.params.points_operation', 'Type of effect:')}>
+                <WiredRadioGroup
+                    name="pointsOperation"
+                    options={[0, 1].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.points_operation.${id}`) }))}
+                    value={operation}
+                    onChange={setOperation}
+                />
+            </WiredSection>
+            <WiredSection title={LocalizeText('wiredfurni.params.team')}>
+                <WiredRadioGroup
+                    columns={2}
+                    name="selectedTeam"
+                    options={[1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.team.${id}`) }))}
+                    value={selectedTeam}
+                    onChange={setSelectedTeam}
+                />
+            </WiredSection>
         </WiredActionBaseView>
     );
 };

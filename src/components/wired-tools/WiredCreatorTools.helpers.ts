@@ -1,3 +1,4 @@
+import { MONITOR_COLOR_GREEN, MONITOR_COLOR_ORANGE, MONITOR_COLOR_RED } from './WiredCreatorTools.constants';
 import type { HotelDateTimeParts, MonitorSnapshot, VariableTextValue } from './WiredCreatorTools.types';
 
 const HOTEL_TIME_FORMATTERS: Map<string, Intl.DateTimeFormat> = new Map();
@@ -139,4 +140,15 @@ export const toVariableTextValues = (textConnector?: Array<{ key: number; value:
     if (!textConnector?.length) return undefined;
 
     return textConnector.map((entry) => ({ value: String(entry.key), text: entry.value }));
+};
+
+/** WiredMenuMonitorTab.colorize: share of the cap below t1 is green, below t2 orange, else (including 0/0) red. */
+export const colorizeMonitorStat = (amount: number, cap: number, t1: number, t2: number): string =>
+{
+    const ratio = amount / cap;
+
+    if (ratio < t1) return MONITOR_COLOR_GREEN;
+    if (ratio < t2) return MONITOR_COLOR_ORANGE;
+
+    return MONITOR_COLOR_RED;
 };

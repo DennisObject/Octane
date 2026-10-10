@@ -39,6 +39,8 @@ export const WiredActionGiveScoreView: FC<{}> = (props) => {
             footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
         >
             <WiredSliderSection converter={WIRED_SLIDER_ECHO} max={1000} min={1} titleKey="wiredfurni.params.setpoints2" value={points} onChange={setPoints} />
+            {/* GiveScore's "times per game" slider stays in the list while hidden, so its section spacing remains. */}
+            <div aria-hidden="true" />
             <WiredSection title={localizeWithFallback('wiredfurni.params.points_operation', 'Type of effect:')}>
                 <WiredRadioGroup
                     name="pointsOperation"

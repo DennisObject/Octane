@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { OctaneInput } from '../../../../layout';
+import { WiredSection } from '../WiredSection';
+import { WiredTextInput } from '../WiredTextInput';
 import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
@@ -44,12 +44,12 @@ export const WiredActionBotTeleportView: FC<{}> = (props) => {
     return (
         <WiredActionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={requiresFurni}
             save={save}
             footer={
-                <div className="flex flex-col gap-2">
+                <>
                     <WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />
-                    <hr className="m-0 bg-dark" />
                     <WiredSourcesSelector
                         showUsers={true}
                         userSource={botSource}
@@ -57,14 +57,13 @@ export const WiredActionBotTeleportView: FC<{}> = (props) => {
                         usersTitle="wiredfurni.params.sources.users.title.bots"
                         onChangeUsers={(value) => setBotSource(normalizeBotSource(value, botName.length > 0))}
                     />
-                </div>
+                </>
             }
         >
             {botSource === 100 && (
-                <div className="flex flex-col gap-1">
-                    <Text bold>{LocalizeText('wiredfurni.params.bot.name')}</Text>
-                    <OctaneInput maxLength={32} type="text" value={botName} onChange={(event) => setBotName(event.target.value)} />
-                </div>
+                <WiredSection title={LocalizeText('wiredfurni.params.bot.name')}>
+                    <WiredTextInput maxLength={32} value={botName} onChange={setBotName} />
+                </WiredSection>
             )}
         </WiredActionBaseView>
     );

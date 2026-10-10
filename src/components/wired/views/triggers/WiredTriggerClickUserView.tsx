@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
+import { localizeWithFallback, WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredCheckboxGroup, WiredCheckboxOption } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
 export const WiredTriggerClickUserView: FC<{}> = () => {
@@ -17,29 +18,22 @@ export const WiredTriggerClickUserView: FC<{}> = () => {
     }, [trigger]);
 
     return (
-        <WiredTriggerBaseView hasSpecialInput={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
-            <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
-                    <input
+        <WiredTriggerBaseView hasSpecialInput={true} nativeLayout={true} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE} save={save}>
+            <WiredSection title={localizeWithFallback('wiredfurni.params.click_user.settings', 'When a user is clicked:')}>
+                <WiredCheckboxGroup>
+                    <WiredCheckboxOption
                         checked={blockMenuOpen}
-                        className="form-check-input"
-                        id="clickUserBlockMenuOpen"
-                        type="checkbox"
-                        onChange={(event) => setBlockMenuOpen(event.target.checked)}
+                        label={localizeWithFallback('wiredfurni.params.click_user.block_menu_open', 'Do not open avatar menu')}
+                        onChange={setBlockMenuOpen}
                     />
-                    <Text>{LocalizeText('wiredfurni.params.click_user.block_menu_open')}</Text>
-                </div>
-                <div className="flex items-center gap-1">
-                    <input
+                    <WiredCheckboxOption
                         checked={doNotRotate}
-                        className="form-check-input"
-                        id="clickUserDoNotRotate"
-                        type="checkbox"
-                        onChange={(event) => setDoNotRotate(event.target.checked)}
+                        label={localizeWithFallback('wiredfurni.params.click_user.do_not_rotate', 'Do not rotate')}
+                        last={true}
+                        onChange={setDoNotRotate}
                     />
-                    <Text>{LocalizeText('wiredfurni.params.click_user.do_not_rotate')}</Text>
-                </div>
-            </div>
+                </WiredCheckboxGroup>
+            </WiredSection>
         </WiredTriggerBaseView>
     );
 };

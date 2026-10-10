@@ -2,6 +2,10 @@ import { RoomObjectVariable } from '@octane/renderer';
 import { FC, useMemo } from 'react';
 import { GetOwnRoomObject, LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
+import { WiredDropdown } from './WiredDropdown';
+import { useWiredNative } from './WiredNativeContext';
+import { WiredSection } from './WiredSection';
+import { WiredShellButton } from './WiredShellHeaderView';
 
 export const DEFAULT_HAND_ITEM_IDS: number[] = [2, 5, 7, 8, 9, 10, 27];
 
@@ -14,15 +18,19 @@ interface WiredHandItemFieldProps {
     // shared default (e.g. BOT_GIVE_HAND_ITEM adds 1126/1127/1128, which the
     // condition/selector variants do NOT have).
     extraItemIds?: number[];
+    /** Native section: dropdown and a full-width capture button in a vertical list (class_3968 / class_3977). */
+    nativeSection?: boolean;
 }
 
 export const WiredHandItemField: FC<WiredHandItemFieldProps> = (props) => {
+    const isNative = useWiredNative();
     const {
         handItemId = 0,
         onChange = null,
         labelKey = 'wiredfurni.params.handitem',
         showCopyButton = false,
         extraItemIds = [],
+        nativeSection = false
     } = props;
 
     const options = useMemo(() => {
@@ -50,6 +58,18 @@ export const WiredHandItemField: FC<WiredHandItemFieldProps> = (props) => {
 
         onChange && onChange(copiedHandItem);
     };
+
+    if (nativeSection && isNative)
+        return (
+            <WiredSection title={LocalizeText(labelKey)}>
+                <WiredDropdown options={[0, ...options].map((id) => ({ id, label: getLabel(id) }))} value={handItemId} onChange={onChange} />
+                {showCopyButton && (
+                    <WiredShellButton className="octane-wired__wide-button" shellStyle="illumina" onClick={copyOwnHandItem}>
+                        {LocalizeText('wiredfurni.params.capture.handitem')}
+                    </WiredShellButton>
+                )}
+            </WiredSection>
+        );
 
     return (
         <div className="flex flex-col gap-1">

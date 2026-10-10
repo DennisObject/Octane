@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
@@ -38,25 +39,19 @@ export const WiredConditionFurniHasAvatarOnView: FC<WiredConditionFurniHasAvatar
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={requiresFurni}
             save={save}
             footer={<WiredSourcesSelector showFurni={true} furniSource={furniSource} onChangeFurni={onChangeFurniSource} />}
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.requireall')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={requireAll === value}
-                            className="form-check-input"
-                            name="furniHasAvatarRequireAll"
-                            type="radio"
-                            onChange={() => setRequireAll(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.${negative ? 'not_requireall' : 'requireall'}.${value + 2}`)}</Text>
-                    </label>
-                ))}
-            </div>
+            <WiredSection title={LocalizeText('wiredfurni.params.requireall')}>
+                <WiredRadioGroup
+                    name="furniHasAvatarRequireAll"
+                    options={[0, 1].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.${negative ? 'not_requireall' : 'requireall'}.${id + 2}`) }))}
+                    value={requireAll}
+                    onChange={setRequireAll}
+                />
+            </WiredSection>
         </WiredConditionBaseView>
     );
 };

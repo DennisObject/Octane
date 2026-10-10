@@ -31,7 +31,7 @@ import {
     WiredMonitorRequestComposer,
     WiredUserInspectMoveComposer
 } from '@octane/renderer';
-import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, KeyboardEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     AddAnimationTickerCallback,
     AvatarInfoUtilities,
@@ -72,8 +72,11 @@ import {
     EDITABLE_FURNI_VARIABLES,
     EDITABLE_USER_VARIABLES,
     INSPECTION_ELEMENTS,
+    MONITOR_COLOR_GREEN,
+    MONITOR_COLOR_ORANGE,
     MONITOR_ERROR_INFO,
     MONITOR_LOG_ORDER,
+    MONITOR_STAT_CAPTIONS,
     MONTH_NAMES,
     TABS,
     TEAM_COLOR_NAMES,
@@ -87,10 +90,12 @@ import {
     WIRED_INSPECTION_REFRESH_MS,
     WIRED_MONITOR_ACTION_CLEAR_LOGS,
     WIRED_MONITOR_ACTION_FETCH,
+    WIRED_MONITOR_CLEAR_LOCK_MS,
     WIRED_MONITOR_POLL_MS,
     WIRED_VARIABLES_POLL_MS
 } from './WiredCreatorTools.constants';
 import {
+    colorizeMonitorStat,
     formatMonitorHistoryOccurrence,
     formatMonitorLatestOccurrence,
     formatMonitorSource,
@@ -239,6 +244,24 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     const selectedVariableKeys = useWiredCreatorToolsUiStore((s) => s.selectedVariableKeys);
     const setSelectedVariableKeys = useWiredCreatorToolsUiStore((s) => s.setSelectedVariableKeys);
     const { roomSession = null } = useRoom();
+    // WiredMenuMonitorTab.isDataReady: the tab stays in its loading state until the server answers. The answer is remembered for the room the monitor is
+    // being viewed in; leaving that room, closing the tab or closing the window clears it, so every opening or room change starts in the loading state again.
+    const monitorViewKey = isVisible && activeTab === 'monitor' && roomSession?.roomId ? roomSession.roomId : 0;
+    const [monitorLoadedKey, setMonitorLoadedKey] = useState(0);
+    const monitorViewKeyRef = useRef(0);
+    const [isMonitorClearLocked, setIsMonitorClearLocked] = useState(false);
+    const monitorClearLockTimerRef = useRef<number>(0);
+
+    useEffect(() => () => window.clearTimeout(monitorClearLockTimerRef.current), []);
+    const monitorLoaded = monitorViewKey !== 0 && monitorLoadedKey === monitorViewKey;
+
+    useLayoutEffect(() =>
+    {
+        monitorViewKeyRef.current = monitorViewKey;
+    });
+
+    // Any change of the viewed room (A -> B -> A included) or closing the tab starts a new view: the loading state returns until an answer arrives for it.
+    if (monitorLoadedKey !== 0 && monitorLoadedKey !== monitorViewKey) setMonitorLoadedKey(0);
     const { ownUser: tradeOwnUser = null, otherUser: tradeOtherUser = null, isTrading = false } = useInventoryTrade();
     const {
         roomSettings,
@@ -706,6 +729,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
             logs: [...(parser.logs ?? [])],
             history: [...(parser.history ?? [])]
         });
+        setMonitorLoadedKey(monitorViewKeyRef.current);
     });
 
     useMessageEvent<WiredFurniRuntimeStateEvent>(WiredFurniRuntimeStateEvent, (event) => {
@@ -1096,59 +1120,51 @@ export const WiredCreatorToolsView: FC<{}> = () => {
         }
     }, [inspectionType]);
     const monitorStats = useMemo<MonitorStat[]>(() => {
-        if (!roomSession) {
-            return [
-                { label: 'Wired usage', value: '0/0' },
-                { label: 'Is heavy', value: 'No' },
-                { label: 'Room furni', value: '0/0' },
-                { label: 'Wall furni', value: '0/0' },
-                { label: 'Delayed events', value: '0/0' },
-                { label: 'Average execution', value: '0ms' },
-                { label: 'Peak execution', value: '0ms' },
-                { label: 'Recursion', value: '0/0' },
-                { label: 'Killed remaining', value: '0s' },
-                { label: 'Permanent furni vars', value: '0/60' }
-            ];
-        }
+        // WiredMenuMonitorTab.updateRoomStatsUI rows. Until the room stats arrive the html fields keep their
+        // layout captions, so the values stay empty. This server reports no permanent user/global variable
+        // counts; those two rows keep their caption only.
+        if (!monitorLoaded) return MONITOR_STAT_CAPTIONS.map((label) => ({ label, value: '' }));
 
-        const roomFurniValue =
-            monitorRoomStats.roomItemLimit > 0
-                ? `${monitorRoomStats.roomFurniCount}/${monitorRoomStats.roomItemLimit}`
-                : String(monitorRoomStats.roomFurniCount);
-        const wallFurniValue =
-            monitorRoomStats.roomItemLimit > 0
-                ? `${monitorRoomStats.wallFurniCount}/${monitorRoomStats.roomItemLimit}`
-                : String(monitorRoomStats.wallFurniCount);
-        const usageValue = `${monitorSnapshot.usageCurrentWindow}/${Math.max(0, monitorSnapshot.usageLimitPerWindow)}`;
-        const delayedValue = `${monitorSnapshot.delayedEventsPending}/${Math.max(0, monitorSnapshot.delayedEventsLimit)}`;
+        const floorFurniCount = monitorRoomStats.roomFurniCount - monitorRoomStats.wallFurniCount;
+        const usageColor = colorizeMonitorStat(monitorSnapshot.usageCurrentWindow, monitorSnapshot.usageLimitPerWindow, 0.3, 0.7);
 
         return [
-            { label: 'Wired usage', value: usageValue },
-            { label: 'Is heavy', value: monitorSnapshot.isHeavy ? 'Yes' : 'No' },
-            { label: 'Room furni', value: roomFurniValue },
-            { label: 'Wall furni', value: wallFurniValue },
-            { label: 'Delayed events', value: delayedValue },
+            { label: MONITOR_STAT_CAPTIONS[0], value: `${monitorSnapshot.usageCurrentWindow}/${Math.max(0, monitorSnapshot.usageLimitPerWindow)}`, color: usageColor },
+            {
+                label: MONITOR_STAT_CAPTIONS[1],
+                value: monitorSnapshot.isHeavy ? localizeWithFallback('wiredmenu.bool.yes', 'Yes') : localizeWithFallback('wiredmenu.bool.no', 'No'),
+                color: monitorSnapshot.isHeavy ? MONITOR_COLOR_ORANGE : MONITOR_COLOR_GREEN
+            },
+            // AIR colours these rows from WiredRoomStatsData (server counts and separate floor/wall caps). The monitor packet carries neither, and the room's
+            // single item limit from the guest room data is not that per-category cap, so the client-side counts are shown without a cap or a colour.
+            { label: MONITOR_STAT_CAPTIONS[2], value: `${floorFurniCount}` },
+            { label: MONITOR_STAT_CAPTIONS[3], value: `${monitorRoomStats.wallFurniCount}` },
+            { label: MONITOR_STAT_CAPTIONS[4], value: `${monitorRoomStats.permanentFurniVariables}` },
+            { label: MONITOR_STAT_CAPTIONS[5], value: '' },
+            { label: MONITOR_STAT_CAPTIONS[6], value: '' },
+            // Octane's executor metrics, not part of the official list: kept after the official rows.
+            { label: 'Delayed events', value: `${monitorSnapshot.delayedEventsPending}/${Math.max(0, monitorSnapshot.delayedEventsLimit)}` },
             { label: 'Average execution', value: `${monitorSnapshot.averageExecutionMs}ms` },
             { label: 'Peak execution', value: `${monitorSnapshot.peakExecutionMs}ms` },
             { label: 'Recursion', value: `${monitorSnapshot.recursionDepthCurrent}/${Math.max(0, monitorSnapshot.recursionDepthLimit)}` },
-            { label: 'Killed remaining', value: `${Math.max(0, monitorSnapshot.killedRemainingSeconds)}s` },
-            { label: 'Permanent furni vars', value: `${monitorRoomStats.permanentFurniVariables}/60` }
+            { label: 'Killed remaining', value: `${Math.max(0, monitorSnapshot.killedRemainingSeconds)}s` }
         ];
-    }, [roomSession, monitorRoomStats, monitorSnapshot]);
+    }, [monitorLoaded, monitorRoomStats, monitorSnapshot]);
+    // ErrorDataTableObject rows: exactly the errors the server lists, none while loading.
     const monitorLogs = useMemo<MonitorLog[]>(() => {
-        return MONITOR_LOG_ORDER.map((type) => {
-            const log = monitorSnapshot.logs.find((entry) => entry.type === type);
-            const fallbackInfo = MONITOR_ERROR_INFO[type];
+        if (!monitorLoaded) return [];
+
+        return monitorSnapshot.logs.map((log) => {
             const amount = Number(log?.amount ?? 0);
 
             return {
-                type,
-                category: String(log?.severity ?? fallbackInfo?.severity ?? 'ERROR'),
+                type: log.type,
+                category: String(log?.severity ?? MONITOR_ERROR_INFO[log.type]?.severity ?? 'ERROR'),
                 amount: String(amount),
                 latest: amount > 0 ? formatMonitorLatestOccurrence(Number(log?.latestOccurrenceSeconds ?? 0), globalClock) : '/'
             };
         });
-    }, [monitorSnapshot.logs, globalClock]);
+    }, [monitorLoaded, monitorSnapshot.logs, globalClock]);
     const monitorHistoryRows = useMemo(() => {
         return monitorSnapshot.history.map((entry, index) => ({
             id: `${entry.type}-${entry.occurredAtSeconds}-${index}`,
@@ -1208,7 +1224,7 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 lines: [
                     `Room furni: ${monitorRoomStats.roomFurniCount}/${Math.max(0, monitorRoomStats.roomItemLimit) || 0}`,
                     `Wall furni: ${monitorRoomStats.wallFurniCount}/${Math.max(0, monitorRoomStats.roomItemLimit) || 0}`,
-                    `Permanent furni vars: ${monitorRoomStats.permanentFurniVariables}/60 renderer-side custom variable entries currently attached to room items.`
+                    `Permanent furni vars: ${monitorRoomStats.permanentFurniVariables} renderer-side custom variable entries currently attached to room items.`
                 ]
             }
         ];
@@ -2389,6 +2405,10 @@ export const WiredCreatorToolsView: FC<{}> = () => {
     }, [selectedManagedVariableEntry, selectedManagedHolderVariableEntry, roomSettings.canModify, variablesType, removeUserVariable, removeFurniVariable]);
 
     const clearMonitorLogs = () => {
+        // updateButtonsUI: Clear is disabled for CLEAR_LOGS_TIMEOUT after it was pressed.
+        setIsMonitorClearLocked(true);
+        window.clearTimeout(monitorClearLockTimerRef.current);
+        monitorClearLockTimerRef.current = window.setTimeout(() => setIsMonitorClearLocked(false), WIRED_MONITOR_CLEAR_LOCK_MS);
         setSelectedMonitorError(null);
         setIsMonitorHistoryOpen(false);
         setIsMonitorInfoOpen(false);
@@ -3112,14 +3132,18 @@ export const WiredCreatorToolsView: FC<{}> = () => {
                 activeTab={activeTab}
                 headerTitle={MENU_HEADER_TITLES[activeTab]}
                 tabs={TABS}
-                title={localizeWithFallback('wiredmenu.title', 'Wired Creator Tools - Loading')}
+                title={
+                    activeTab === 'monitor' && !monitorLoaded
+                        ? localizeWithFallback('wiredmenu.title.loading', 'Wired Creator Tools - Loading')
+                        : localizeWithFallback('wiredmenu.title', 'Wired Creator Tools (:wired)')
+                }
                 onClose={() => setIsVisible(false)}
                 onTabChange={(tab) => setActiveTab(tab as WiredToolsTab)}
             >
                 {(
                     <>
                     {activeTab === 'monitor' && (
-                        <WiredMonitorTabView
+                        <WiredMonitorTabView loading={!monitorLoaded} canClear={roomSettings.canModify && !isMonitorClearLocked} canOpenLogs={roomSettings.canInspect}
                             monitorStats={monitorStats}
                             monitorLogs={monitorLogs}
                             monitorHistoryRows={monitorHistoryRows}

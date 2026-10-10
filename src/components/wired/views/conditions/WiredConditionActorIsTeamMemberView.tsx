@@ -1,11 +1,10 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Text } from '../../../../common';
+import { LocalizeText, localizeWithFallback, WiredFurniType } from '../../../../api';
 import { useWired } from '../../../../hooks';
+import { WiredQuantifierSection, WiredRadioGroup } from '../WiredOptions';
+import { WiredSection } from '../WiredSection';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
-
-const teamIds: number[] = [1, 2, 3, 4];
 
 interface WiredConditionActorIsTeamMemberViewProps {
     negative?: boolean;
@@ -28,46 +27,28 @@ export const WiredConditionActorIsTeamMemberView: FC<WiredConditionActorIsTeamMe
         setQuantifier(trigger.intData.length > 2 ? (trigger.intData[2] === 1 ? 1 : 0) : 1);
     }, [trigger]);
 
+    // class_3962: "any" on its own row, then the four teams in two columns.
+    const teamOptions = [
+        { id: 0, label: localizeWithFallback('wiredfurni.params.team.any', 'Any team'), newLine: true },
+        ...[1, 2, 3, 4].map((id) => ({ id, label: LocalizeText(`wiredfurni.params.team.${id}`) }))
+    ];
+
     return (
         <WiredConditionBaseView
             hasSpecialInput={true}
+            nativeLayout={true}
             requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_NONE}
             save={save}
-            footer={<WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />}
+            footer={
+                <>
+                    <WiredQuantifierSection kind="users" name="teamMemberQuantifier" negative={negative} value={quantifier} onChange={setQuantifier} />
+                    <WiredSourcesSelector showUsers={true} userSource={userSource} onChangeUsers={setUserSource} />
+                </>
+            }
         >
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.quantifier_selection')}</Text>
-                {[0, 1].map((value) => (
-                    <label key={value} className="flex items-center gap-1">
-                        <input
-                            checked={quantifier === value}
-                            className="form-check-input"
-                            name="teamMemberQuantifier"
-                            type="radio"
-                            onChange={() => setQuantifier(value)}
-                        />
-                        <Text>{LocalizeText(`wiredfurni.params.quantifier.users${negative ? '.neg' : ''}.${value}`)}</Text>
-                    </label>
-                ))}
-            </div>
-            <div className="flex flex-col gap-1">
-                <Text bold>{LocalizeText('wiredfurni.params.team')}</Text>
-                {teamIds.map((value) => {
-                    return (
-                        <div key={value} className="items-center gap-1">
-                            <input
-                                checked={selectedTeam === value}
-                                className="form-check-input"
-                                id={`selectedTeam${value}`}
-                                name="selectedTeam"
-                                type="radio"
-                                onChange={(event) => setSelectedTeam(value)}
-                            />
-                            <Text>{LocalizeText(`wiredfurni.params.team.${value}`)}</Text>
-                        </div>
-                    );
-                })}
-            </div>
+            <WiredSection title={LocalizeText('wiredfurni.params.team')}>
+                <WiredRadioGroup columns={2} name="selectedTeam" options={teamOptions} value={selectedTeam} onChange={setSelectedTeam} />
+            </WiredSection>
         </WiredConditionBaseView>
     );
 };

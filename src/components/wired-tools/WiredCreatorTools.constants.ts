@@ -16,7 +16,10 @@ export const MONITOR_LOG_ORDER: string[] = ['EXECUTION_CAP', 'DELAYED_EVENTS_CAP
 
 export const WIRED_MONITOR_ACTION_FETCH = 0;
 export const WIRED_MONITOR_ACTION_CLEAR_LOGS = 1;
-export const WIRED_MONITOR_POLL_MS = 250;
+// WiredMenuMonitorTab.POLL_MONITOR_MS
+export const WIRED_MONITOR_POLL_MS = 500;
+// WiredMenuMonitorTab.CLEAR_LOGS_TIMEOUT: Clear stays disabled this long after it was pressed.
+export const WIRED_MONITOR_CLEAR_LOCK_MS = 4000;
 export const WIRED_VARIABLES_POLL_MS = 250;
 export const WIRED_INSPECTION_REFRESH_MS = 50;
 export const WIRED_CLOCK_REFRESH_MS = 50;
@@ -236,3 +239,18 @@ export const TEAM_COLOR_NAMES: Record<number, string> = {
 export const WEEKDAY_NAMES: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export const MONTH_NAMES: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 export const DIRECTION_NAMES: string[] = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
+
+/** wired_menu_view statistics html captions, in WiredMenuMonitorTab.updateRoomStatsUI order. */
+export const MONITOR_STAT_CAPTIONS: string[] = [
+    'Wired usage:',
+    'Is heavy:',
+    'Floor furni:',
+    'Wall furni:',
+    'Permanent furni vars:',
+    'Permanent user vars:',
+    'Permanent global vars:'
+];
+
+export const MONITOR_COLOR_RED = 'ff5733';
+export const MONITOR_COLOR_ORANGE = 'BD7800';
+export const MONITOR_COLOR_GREEN = '008000';
