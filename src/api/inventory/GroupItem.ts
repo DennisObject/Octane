@@ -305,7 +305,23 @@ export class GroupItem {
     }
 
     private setDescription(): void {
-        this._description = '';
+        const k = this.getLastItem();
+
+        if (!k || this._category === FurniCategory.TRAX_SONG)
+        {
+            this._description = '';
+
+            return;
+        }
+
+        let key = '';
+
+        if (this._category === FurniCategory.POSTER) key = 'poster_' + k.stuffData.getLegacyString() + '_desc';
+        else key = (this.isWallItem ? 'wallItem.desc.' : 'roomItem.desc.') + k.type;
+
+        const value = LocalizeText(key);
+
+        this._description = value && value !== key ? value : '';
     }
 
     private setIcon(): void {

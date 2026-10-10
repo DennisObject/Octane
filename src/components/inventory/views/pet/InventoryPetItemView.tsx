@@ -44,6 +44,7 @@ export const InventoryPetItemView: FC<PropsWithChildren<{ petItem: IPetItem }>> 
             <span className="octane-inventory-animal-thumb-image">
                 <InventoryPetImageView pet={petItem.petData} />
             </span>
+            <span className="octane-inventory-animal-level">{petItem.petData.level}</span>
             {children}
         </div>
     );

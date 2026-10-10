@@ -26,16 +26,17 @@ const FILTER_LABELS: Record<string, string> = {
     'inventory.furni.filter.main.all': 'All',
     'inventory.furni.filter.main.floor_items': 'Floor items',
     'inventory.furni.filter.main.wall_items': 'Wall items',
-    'inventory.furni.filter.main.room_layout': 'Room layout',
+    'inventory.furni.filter.main.room_layout': 'Room Layout',
     'inventory.furni.filter.type.any': 'Any type',
     'inventory.furni.filter.type.sittable': 'Sittable',
     'inventory.furni.filter.type.layable': 'Layable',
-    'inventory.furni.filter.type.tiles_or_rugs': 'Tiles or rugs',
-    'inventory.furni.filter.type.ltd': 'Limited edition',
+    'inventory.furni.filter.type.tiles_or_rugs': 'Tiles/rugs',
+    'inventory.furni.filter.type.ltd': 'Ltd',
     'inventory.furni.filter.type.wired': 'Wired',
     'inventory.furni.filter.type.credit_furni': 'Credit furni',
     'inventory.furni.filter.type.clothes': 'Clothes',
     'inventory.furni.filter.type.pet_food': 'Pet food',
+    'inventory.furni.filter.type.collectibles': 'Collectibles',
     'inventory.furni.filter.type.tradable': 'Tradable',
     'inventory.furni.filter.type.non_tradable': 'Non-tradable',
     'inventory.furni.filter.type.recyclable': 'Recyclable',
@@ -53,12 +54,15 @@ const FILTER_LABELS: Record<string, string> = {
     'inventory.badges.filter.rarity.common': 'Common'
 };
 
+// The v75 captions are fixed external texts, so they win over whatever the hotel texts spell differently.
 const localizeOr = (key: string, fallback: string) => {
+    if (FILTER_LABELS[key]) return FILTER_LABELS[key];
+
     const value = LocalizeText(key);
 
     if (value && value !== key) return value;
 
-    return FILTER_LABELS[key] || fallback;
+    return fallback;
 };
 
 export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> = (props) => {
@@ -143,6 +147,7 @@ export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> =
                         <option value={BADGE_MAIN_ACHIEVEMENTS}>{localizeOr('inventory.badges.filter.achievements', 'Achievements')}</option>
                     </InventoryFilterSelect>
                     <InventoryFilterSelect
+                        disabled
                         value={typeFilter}
                         aria-label={isBadges ? localizeOr('inventory.badges.filter.rarity.all', 'Rarity') : localizeOr('inventory.filter.type', 'Type')}
                         onChange={(value) => onTypeFilterChange?.(value)}

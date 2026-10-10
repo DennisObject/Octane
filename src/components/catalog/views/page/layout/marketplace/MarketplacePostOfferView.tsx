@@ -1,145 +1,259 @@
-import { MakeOfferMessageComposer } from '@octane/renderer';
+import { GetMarketplaceItemStatsComposer, GetSessionDataManager, MakeOfferMessageComposer, MarketplaceItemStatsEvent } from '@octane/renderer';
 import { FC, useEffect, useState } from 'react';
 import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } from '../../../../../../api';
-import { Button, Column, Grid, LayoutFurniImageView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView, Text } from '../../../../../../common';
+import { LayoutFurniImageView, OctaneCardHeaderView, OctaneCardView } from '../../../../../../common';
+import { NativeText } from '../../../../../../common/native-text/NativeText';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../../../events';
-import { useMarketplaceConfiguration, useNotification, useUiEvent } from '../../../../../../hooks';
-import { OctaneInput } from '../../../../../../layout';
+import { useMarketplaceConfiguration, useMessageEvent, useNotification, useUiEvent } from '../../../../../../hooks';
+import { OctaneButton } from '../../../../../../layout';
 
-let isPostingMarketplaceOffer = false;
+const DEFAULT_BULK_OFFER_LIMIT = 500;
 
-export const MarketplacePostOfferView: FC<{}> = (props) => {
+interface MarketplaceItemStats {
+    averagePrice: number;
+    historyLength: number;
+    lowestCurrentPrice: number;
+    suggestedPrice: number;
+}
+
+export const MarketplacePostOfferView: FC<{}> = () =>
+{
     const [item, setItem] = useState<FurnitureItem>(null);
-    const [askingPrice, setAskingPrice] = useState(0);
-    const [tempAskingPrice, setTempAskingPrice] = useState('0');
+    const [itemIds, setItemIds] = useState<number[]>([]);
+    const [priceText, setPriceText] = useState('');
+    const [amountText, setAmountText] = useState('1');
+    const [itemStats, setItemStats] = useState<MarketplaceItemStats>(null);
     const { data: marketplaceConfiguration = null } = useMarketplaceConfiguration({ enabled: !!item });
     const { showConfirm = null } = useNotification();
 
-    const updateAskingPrice = (price: string) => {
-        setTempAskingPrice(price);
+    useUiEvent<CatalogPostMarketplaceOfferEvent>(CatalogPostMarketplaceOfferEvent.POST_MARKETPLACE, (event) =>
+    {
+        setItem(event.item);
+        setItemIds(event.itemIds);
+        setPriceText('');
+        setAmountText('1');
+        setItemStats(null);
+    });
 
-        const newValue = parseInt(price);
+    useMessageEvent<MarketplaceItemStatsEvent>(MarketplaceItemStatsEvent, (event) =>
+    {
+        const parser = event.getParser();
 
-        if (isNaN(newValue) || newValue === askingPrice) return;
+        if (!item || parser.furniTypeId !== item.type || parser.furniCategoryId !== (item.isWallItem ? 2 : 1)) return;
 
-        setAskingPrice(parseInt(price));
-    };
-
-    useUiEvent<CatalogPostMarketplaceOfferEvent>(CatalogPostMarketplaceOfferEvent.POST_MARKETPLACE, (event) => setItem(event.item));
+        setItemStats({
+            averagePrice: parser.averagePrice,
+            historyLength: parser.historyLength,
+            lowestCurrentPrice: parser.lowestCurrentPrice,
+            suggestedPrice: parser.suggestedPrice
+        });
+    });
 
     useEffect(() => {
         if (!item) return;
 
-        return () => setAskingPrice(0);
+        SendMessageComposer(new GetMarketplaceItemStatsComposer(item.isWallItem ? 2 : 1, item.type));
+
+        return () =>
+        {
+            setPriceText('');
+            setAmountText('1');
+            setItemStats(null);
+        };
     }, [item]);
 
-    if (!marketplaceConfiguration || !item) return null;
+    if (!item || !marketplaceConfiguration) return null;
 
-    const getFurniTitle = item ? LocalizeText(item.isWallItem ? 'wallItem.name.' + item.type : 'roomItem.name.' + item.type) : '';
-    const getFurniDescription = item ? LocalizeText(item.isWallItem ? 'wallItem.desc.' + item.type : 'roomItem.desc.' + item.type) : '';
+    const minimumPrice = marketplaceConfiguration.minimumPrice;
+    const maximumPrice = marketplaceConfiguration.maximumPrice;
+    const maxAmount = Math.max(1, Math.min(itemIds.length, DEFAULT_BULK_OFFER_LIMIT));
 
-    const getCommission = () => Math.max(Math.ceil(marketplaceConfiguration.commission * 0.01 * askingPrice), 1);
+    const askingPrice = parseInt(priceText);
+    const amount = parseInt(amountText);
+    const isPriceValid = !isNaN(askingPrice) && askingPrice >= minimumPrice && askingPrice <= maximumPrice;
+    const isAmountValid = !isNaN(amount) && amount >= 1 && amount <= maxAmount;
+
+    const furniTitle = LocalizeText(item.isWallItem ? 'wallItem.name.' + item.type : 'roomItem.name.' + item.type);
+    // MarketplaceView.calculateFinalPrice: the parser only accepts a configuration whose halfTaxLimit is positive.
+    const finalPrice = (price: number) =>
+        price -
+        Math.ceil(
+            Math.round(1000 * price * (marketplaceConfiguration.sellingFeePercentage / 100 + (0.5 * price) / marketplaceConfiguration.halfTaxLimit)) / 1000
+        );
+    const revenue = finalPrice(askingPrice);
+    const suggestedPrice = itemStats?.suggestedPrice ?? 0;
+
+    const close = () => setItem(null);
 
     const postItem = () => {
-        if (!item || askingPrice < marketplaceConfiguration.minimumPrice || isPostingMarketplaceOffer) return;
+        if (!isPriceValid || !isAmountValid) return;
+
+        const ids = itemIds.slice(0, amount);
+
+        let submitted = false;
+        const sessionUserId = GetSessionDataManager().userId;
 
         showConfirm(
-            LocalizeText('inventory.marketplace.confirm_offer.info', ['furniname', 'price'], [getFurniTitle, askingPrice.toString()]),
+            amount > 1
+                ? LocalizeText(
+                    'inventory.marketplace.confirm_offer.info.multiple',
+                    ['amount', 'furniname', 'price', 'total'],
+                    [amount.toString(), furniTitle, askingPrice.toString(), (revenue * amount).toString()]
+                )
+                : LocalizeText('inventory.marketplace.confirm_offer.info', ['furniname', 'price'], [furniTitle, revenue.toString()]),
             () => {
-                if (isPostingMarketplaceOffer) return;
+                // A confirmation left open across a logout must not list the old session's items in another user's.
+                if (submitted || GetSessionDataManager().userId !== sessionUserId) return;
 
-                isPostingMarketplaceOffer = true;
-                setTimeout(() => (isPostingMarketplaceOffer = false), 5000);
-
-                SendMessageComposer(new MakeOfferMessageComposer(askingPrice, item.isWallItem ? 2 : 1, item.id));
-                setItem(null);
+                submitted = true;
+                SendMessageComposer(new MakeOfferMessageComposer(askingPrice, item.isWallItem ? 2 : 1, ...ids));
             },
-            () => {
-                setItem(null);
-            },
+            null,
             null,
             null,
             LocalizeText('inventory.marketplace.confirm_offer.title')
         );
+
+        close();
     };
 
+    const infoText = !isPriceValid
+        ? LocalizeText('shop.marketplace.invalid.price', ['minPrice', 'maxPrice'], [minimumPrice.toString(), maximumPrice.toString()])
+        : `${LocalizeText('sell.in.marketplace.revenue.label')}: ${revenue}`;
+
     return (
-        <OctaneCardView className="octane-catalog-layout-marketplace-post-offer" theme="primary-slim">
-            <OctaneCardHeaderView headerText={LocalizeText('inventory.marketplace.make_offer.title')} onCloseClick={(event) => setItem(null)} />
-            <OctaneCardContentView overflow="hidden">
-                <Grid fullHeight>
-                    <Column center className="bg-muted rounded p-2" overflow="hidden" size={4}>
-                        <LayoutFurniImageView
-                            extraData={item.extra.toString()}
-                            productClassId={item.type}
-                            productType={item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR}
-                        />
-                    </Column>
-                    <Column justifyContent="between" overflow="hidden" size={8}>
-                        <Column grow gap={1}>
-                            <Text fontWeight="bold">{getFurniTitle}</Text>
-                            <Text shrink truncate>
-                                {getFurniDescription}
-                            </Text>
-                        </Column>
-                        <Column overflow="auto">
-                            <Text italics>
-                                {LocalizeText('inventory.marketplace.make_offer.expiration_info', ['time'], [marketplaceConfiguration.offerTime.toString()])}
-                            </Text>
-                            <div className="input-group has-validation">
-                                <OctaneInput
-                                    min={0}
-                                    placeholder={LocalizeText('inventory.marketplace.make_offer.price_request')}
-                                    type="number"
-                                    value={tempAskingPrice}
-                                    onChange={(event) => updateAskingPrice(event.target.value)}
+        <OctaneCardView
+            className="octane-market-offer"
+            frameStyle={3}
+            isResizable={false}
+            initialPosition={{ x: Math.round((window.innerWidth - 300) / 2), y: Math.round((window.innerHeight - 429) / 2) }}
+            uniqueKey="marketplace-offer"
+        >
+            <OctaneCardHeaderView headerText={LocalizeText('inventory.marketplace.make_offer.title')} onCloseClick={close} />
+            <div className="octane-market-offer-body">
+                <div className="octane-market-offer-image">
+                    <LayoutFurniImageView
+                        direction={90}
+                        style={{ backgroundColor: '#eeeeee' }}
+                        extraData={item.extra.toString()}
+                        productClassId={item.type}
+                        productType={item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR}
+                    />
+                </div>
+                <div className="octane-market-offer-name">
+                    <NativeText text={furniTitle} textStyle="u_headline_medium" background={0xe9e9e1} maxWidth={190} />
+                </div>
+                <div className="octane-market-offer-expiration">
+                    <NativeText
+                        text={LocalizeText(
+                            'inventory.marketplace.make_offer.expiration_info_days',
+                            ['days'],
+                            [String(marketplaceConfiguration.offerTime / 24)]
+                        )}
+                        textStyle="u_regular"
+                        background={0xe9e9e1}
+                        maxWidth={268}
+                    />
+                </div>
+                <div className="octane-market-offer-label is-price">
+                    <NativeText text={LocalizeText('inventory.marketplace.make_offer.price_request')} textStyle="u_headline_small" background={0xe9e9e1} />
+                </div>
+                <div className="octane-market-offer-field is-price">
+                    <input
+                        inputMode="numeric"
+                        value={priceText}
+                        onChange={(event) =>
+                        {
+                            const value = event.target.value.replace(/\D/g, '');
+                            setPriceText(parseInt(value, 10) > maximumPrice ? String(maximumPrice) : value);
+                        }}
+                    />
+                </div>
+                <div className="octane-market-offer-label is-amount">
+                    <NativeText
+                        text={LocalizeText('sellinmarketplace.amount', ['max_amount'], [maxAmount.toString()])}
+                        textStyle="u_headline_small"
+                        background={0xe9e9e1}
+                    />
+                </div>
+                <div className="octane-market-offer-field is-amount">
+                    <input
+                        inputMode="numeric"
+                        value={amountText}
+                        onChange={(event) => setAmountText(String(Math.max(1, Math.min(parseInt(event.target.value.replace(/\D/g, ''), 10) || 1, maxAmount))))}
+                    />
+                </div>
+                <div className="octane-market-offer-list">
+                    {itemStats?.averagePrice > 0 && (
+                        <div className="octane-market-offer-stat">
+                            <NativeText
+                                text={LocalizeText(
+                                    'inventory.marketplace.make_offer.average_price',
+                                    ['days', 'price', 'price_no_commission'],
+                                    [
+                                        marketplaceConfiguration.displayTime.toString(),
+                                        itemStats.averagePrice.toString(),
+                                        finalPrice(itemStats.averagePrice).toString()
+                                    ]
+                                )}
+                                textStyle="u_regular"
+                                background={0xe9e9e1}
+                            />
+                        </div>
+                    )}
+                    {itemStats?.lowestCurrentPrice > 0 && (
+                        <div className="octane-market-offer-stat">
+                            <NativeText
+                                text={LocalizeText('inventory.marketplace.make_offer.lowest_price', ['price'], [itemStats.lowestCurrentPrice.toString()])}
+                                textStyle="u_regular"
+                                background={0xe9e9e1}
+                            />
+                        </div>
+                    )}
+                    {suggestedPrice > 0 && (
+                        <>
+                            <div className="octane-market-offer-stat">
+                                <NativeText
+                                    text={LocalizeText('inventory.marketplace.make_offer.suggested_price', ['price'], [suggestedPrice.toString()])}
+                                    textStyle="u_regular"
+                                    background={0xe9e9e1}
                                 />
-                                {(askingPrice < marketplaceConfiguration.minimumPrice || isNaN(askingPrice)) && (
-                                    <div className="invalid-feedback d-block">
-                                        {LocalizeText(
-                                            'inventory.marketplace.make_offer.min_price',
-                                            ['minprice'],
-                                            [marketplaceConfiguration.minimumPrice.toString()]
-                                        )}
-                                    </div>
-                                )}
-                                {askingPrice > marketplaceConfiguration.maximumPrice && !isNaN(askingPrice) && (
-                                    <div className="invalid-feedback d-block">
-                                        {LocalizeText(
-                                            'inventory.marketplace.make_offer.max_price',
-                                            ['maxprice'],
-                                            [marketplaceConfiguration.maximumPrice.toString()]
-                                        )}
-                                    </div>
-                                )}
-                                {!(
-                                    askingPrice < marketplaceConfiguration.minimumPrice ||
-                                    askingPrice > marketplaceConfiguration.maximumPrice ||
-                                    isNaN(askingPrice)
-                                ) && (
-                                    <div className="invalid-feedback d-block">
-                                        {LocalizeText(
-                                            'inventory.marketplace.make_offer.final_price',
-                                            ['commission', 'finalprice'],
-                                            [getCommission().toString(), (askingPrice + getCommission()).toString()]
-                                        )}
-                                    </div>
-                                )}
                             </div>
-                            <Button
-                                disabled={
-                                    askingPrice < marketplaceConfiguration.minimumPrice ||
-                                    askingPrice > marketplaceConfiguration.maximumPrice ||
-                                    isNaN(askingPrice)
-                                }
-                                onClick={postItem}
+                            <OctaneButton
+                                className="octane-market-offer-copy"
+                                onClick={() =>
+                                {
+                                    setPriceText(String(Math.min(suggestedPrice, maximumPrice)));
+                                    navigator.clipboard?.writeText(suggestedPrice.toString()).catch(() => undefined);
+                                }}
                             >
-                                {LocalizeText('inventory.marketplace.make_offer.post')}
-                            </Button>
-                        </Column>
-                    </Column>
-                </Grid>
-            </OctaneCardContentView>
+                                <NativeText
+                                    text={LocalizeText('inventory.marketplace.make_offer.copy_suggested_price')}
+                                    textStyle="button_shiny_regular"
+                                    background={0xffffff}
+                                />
+                            </OctaneButton>
+                        </>
+                    )}
+                    <div className="octane-market-offer-final">
+                        <div className="octane-market-offer-final-text">
+                            <NativeText text={infoText} textStyle="u_regular" background={0xffffff} maxWidth={257} align="center" />
+                        </div>
+                    </div>
+                    <div className="octane-market-offer-buttons">
+                        <OctaneButton className="octane-market-offer-post" disabled={!isPriceValid || !isAmountValid} onClick={postItem}>
+                            <NativeText
+                                text={LocalizeText('inventory.marketplace.make_offer.post')}
+                                textStyle="button_shiny_regular"
+                                background={isPriceValid && isAmountValid ? 0xffffff : 0xc3c3c1}
+                            />
+                        </OctaneButton>
+                        <OctaneButton className="octane-market-offer-cancel" onClick={close}>
+                            <NativeText text={LocalizeText('inventory.marketplace.make_offer.cancel')} textStyle="button_shiny_regular" background={0xffffff} />
+                        </OctaneButton>
+                    </div>
+                </div>
+            </div>
         </OctaneCardView>
     );
 };

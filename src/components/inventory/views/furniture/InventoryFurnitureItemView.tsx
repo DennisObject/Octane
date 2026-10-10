@@ -2,13 +2,16 @@ import { MouseEventType } from '@octane/renderer';
 import { FC, MouseEvent, useState } from 'react';
 import { attemptItemPlacement, GroupItem } from '../../../../api';
 import { classNames, InfiniteGrid } from '../../../../layout';
+import { InventoryThumbIconView } from '../InventoryThumbIconView';
 
 export const InventoryFurnitureItemView: FC<{
     groupItem: GroupItem;
     isActive: boolean;
     onSelect: (groupItem: GroupItem) => void;
+    // Set while a trade is open: v75 offers the item on double click and never drags it into the room.
+    onOffer?: (groupItem: GroupItem) => void;
 }> = (props) => {
-    const { groupItem = null, isActive = false, onSelect = null } = props;
+    const { groupItem = null, isActive = false, onSelect = null, onOffer = null } = props;
     const [isMouseDown, setMouseDown] = useState(false);
 
     const onMouseEvent = (event: MouseEvent) => {
@@ -21,12 +24,13 @@ export const InventoryFurnitureItemView: FC<{
                 setMouseDown(false);
                 return;
             case MouseEventType.ROLL_OUT:
-                if (!isMouseDown || !isActive) return;
+                if (onOffer || !isMouseDown || !isActive) return;
 
                 attemptItemPlacement(groupItem);
                 return;
             case 'dblclick':
-                attemptItemPlacement(groupItem);
+                if (onOffer) onOffer(groupItem);
+                else attemptItemPlacement(groupItem);
                 return;
         }
     };
@@ -46,11 +50,7 @@ export const InventoryFurnitureItemView: FC<{
             onMouseOut={onMouseEvent}
             onMouseUp={onMouseEvent}
         >
-            {groupItem.stuffData.uniqueNumber <= 0 && (
-                <div className="octane-inventory-thumb-image">
-                    <img src={groupItem.iconUrl} alt="" draggable={false} />
-                </div>
-            )}
+            {groupItem.stuffData.uniqueNumber <= 0 && <InventoryThumbIconView iconUrl={groupItem.iconUrl} />}
         </InfiniteGrid.Item>
     );
 };
