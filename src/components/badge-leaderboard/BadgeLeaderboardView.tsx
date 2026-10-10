@@ -1,364 +1,533 @@
-import { AddLinkEventTracker, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
-import { CSSProperties, FC, useEffect, useMemo, useState } from 'react';
-import { BadgeLeaderboardBoard, BadgeLeaderboardEntry, BadgeRarityKey, fetchBadgeLeaderboard, getCachedBadgeLeaderboard, LocalizeText } from '../../api';
+import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@octane/renderer';
+import { CSSProperties, FC, Ref, RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
-    badgeEmblemAchievement,
-    badgeEmblemCommon,
-    badgeEmblemDefault,
-    badgeEmblemEpic,
-    badgeEmblemLegendary,
-    badgeEmblemMythical,
-    badgeEmblemRare,
-    badgeEmblemUnique,
-    frameLeaderboardAchievement,
-    frameLeaderboardRarityCommon,
-    frameLeaderboardRarityEpic,
-    frameLeaderboardRarityLegendary,
-    frameLeaderboardRarityMythical,
-    frameLeaderboardRarityRare,
-    frameLeaderboardRarityUnique,
-    frameLeaderboardTotal,
+    BadgeLeaderboardEntry,
+    fetchBadgeLeaderboard,
+    getCachedBadgeLeaderboard,
+    GetConfigurationValue,
+    GetUserProfile,
+    localizeWithFallback
+} from '../../api';
+import {
     leaderboardButtonCloseSwf,
-    leaderboardDivider,
-    leaderboardDropdownOpener
+    leaderboardDropdownOpener,
+    leaderboardEntryEven,
+    leaderboardEntrySelf,
+    leaderboardEntryUneven,
+    leaderboardHeader,
+    leaderboardRankDefault,
+    leaderboardRankFirst,
+    leaderboardRankSecond,
+    leaderboardRankThird
 } from '../../assets/images/leaderboard_badge';
-import { Column, DraggableWindow, DraggableWindowPosition, Flex, LayoutAvatarImageView, Text } from '../../common';
+import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { NativeText } from '../../common/native-text/NativeText';
+import { BadgeLeaderboardFace } from './BadgeLeaderboardFace';
+import {
+    getAssetsFor,
+    getBoard,
+    getRarityDescriptor,
+    getSupportedRarities,
+    LEADERBOARD_TEXT_FALLBACKS,
+    LeaderboardRarity,
+    LeaderboardTarget,
+    normalizeTarget,
+    PAGE_SIZE,
+    parseLeaderboardLink
+} from './badgeLeaderboardPages';
 
-type LeaderboardPage =
-    | { key: 'totalBadges'; board: BadgeLeaderboardBoard; frame: string; emblem: string; title: () => string; info: () => string; option: () => string }
-    | { key: 'achievementLevel'; board: BadgeLeaderboardBoard; frame: string; emblem: string; title: () => string; info: () => string; option: () => string }
-    | {
-          key: `rarity-${BadgeRarityKey}`;
-          rarity: BadgeRarityKey;
-          board: BadgeLeaderboardBoard;
-          frame: string;
-          emblem: string;
-          title: () => string;
-          info: () => string;
-          option: () => string;
-      };
+// BadgeLeaderboardDataServer: a chunk older than a minute is requested again.
+const STALE_AFTER_MS = 60000;
+const DEFAULT_TARGET: LeaderboardTarget = { type: 0, rarity: -1, page: 0 };
+// hidden_dropdown: 19px per option inside 6px of padding and border, 139px for the default seven options and one row taller with the uncommon board.
+const MENU_ITEM_HEIGHT = 19;
+const MENU_CHROME = 6;
 
-type LeaderboardRarity = Exclude<BadgeRarityKey, 'common'>;
+const text = (key: string, parameters: string[] = null, replacements: string[] = null) =>
+{
+    // The fallback copies keep the official placeholders; they are filled the way LocalizeText fills a loaded text.
+    let fallback = LEADERBOARD_TEXT_FALLBACKS[key] ?? key;
 
-// The uncommon emblem is not in the extracted client assets, so it borrows the lowest-tier art.
-const RARITY_ASSETS: Record<LeaderboardRarity, { frame: string; emblem: string }> = {
-    uncommon: { frame: frameLeaderboardRarityCommon, emblem: badgeEmblemCommon },
-    rare: { frame: frameLeaderboardRarityRare, emblem: badgeEmblemRare },
-    epic: { frame: frameLeaderboardRarityEpic, emblem: badgeEmblemEpic },
-    mythical: { frame: frameLeaderboardRarityMythical, emblem: badgeEmblemMythical },
-    legendary: { frame: frameLeaderboardRarityLegendary, emblem: badgeEmblemLegendary },
-    unique: { frame: frameLeaderboardRarityUnique, emblem: badgeEmblemUnique }
+    parameters?.forEach((parameter, index) => (fallback = fallback.replaceAll(`%${parameter}%`, replacements?.[index] ?? '')));
+
+    return localizeWithFallback(key, fallback, parameters, replacements);
 };
 
-// WIN63 BadgeLeaderboardController: uncommon (when enabled), rare, epic, mythical, legendary, unique. No common board.
-const RARITY_ORDER: LeaderboardRarity[] = ['uncommon', 'rare', 'epic', 'mythical', 'legendary', 'unique'];
-const PAGE_SIZE = 10;
+// The official texts keep line breaks as a literal backslash-n; the v75 text loader turns them into real ones.
+const lines = (value: string) => value.replace(/\\n/g, '\n').replace(/\n+$/, '');
 
-export const BadgeLeaderboardView: FC<{}> = (props) => {
+const rankText = (rank: number) => (rank < 0 ? '--' : String(rank));
+
+const rankImage = (rank: number) =>
+    rank === 1 ? leaderboardRankFirst : rank === 2 ? leaderboardRankSecond : rank === 3 ? leaderboardRankThird : leaderboardRankDefault;
+
+interface LeaderboardTextProps {
+    value: string;
+    x: number;
+    y: number;
+    /** Anchor the right edge of the text at `x` (inside a parent `parentWidth` wide) instead of its left edge. */
+    parentWidth?: number;
+    bold?: boolean;
+    size?: number;
+    color?: number;
+    thickness?: number;
+    blend?: 'multiply' | 'screen';
+    maxWidth?: number;
+    className?: string;
+    innerRef?: Ref<HTMLDivElement>;
+}
+
+/** One v75 TextField at its layout rectangle. Black text multiplies over white, white text screens over black, so it can sit on any skin. */
+const LeaderboardText: FC<LeaderboardTextProps> = ({
+    value,
+    x,
+    y,
+    parentWidth,
+    bold = false,
+    size,
+    color,
+    thickness,
+    blend = 'multiply',
+    maxWidth,
+    className = '',
+    innerRef
+}) => (
+    <div
+        ref={innerRef}
+        className={`octane-badge-leaderboard__text ${className}`}
+        style={{ ...(parentWidth === undefined ? { left: x } : { right: parentWidth - x }), top: y, mixBlendMode: blend }}
+    >
+        <NativeText
+            background={blend === 'screen' ? 0x000000 : 0xffffff}
+            maxWidth={maxWidth}
+            overrides={{ ...(size ? { size } : {}), ...(color !== undefined ? { color } : {}), ...(thickness !== undefined ? { thickness } : {}) }}
+            text={value}
+            textStyle={bold ? 'u_bold' : 'u_regular'}
+        />
+    </div>
+);
+
+/** rank_type_extended_img: a bitmap in the middle of its 65x47 box; the v75 runtime lands it 3px below the container top plus half the free height. */
+/** rank_type_info: a 295x40 field whose text sits in the middle of its height. */
+const InfoText: FC<{ value: string }> = ({ value }) =>
+{
+    const textRef = useRef<HTMLDivElement>(null);
+    const { height } = useElementSize(textRef, value);
+
+    return (
+        <LeaderboardText
+            color={0x222222}
+            innerRef={textRef}
+            maxWidth={295}
+            size={11}
+            value={value}
+            x={74}
+            y={6 + Math.max(0, Math.ceil((40 - (height || 28)) / 2))}
+        />
+    );
+};
+
+const HeaderEmblem: FC<{ src: string; yOffset: number }> = ({ src, yOffset }) =>
+{
+    const [size, setSize] = useState<[number, number]>([25, 25]);
+
+    return (
+        <img
+            alt=""
+            className="octane-badge-leaderboard__info-emblem"
+            draggable={false}
+            src={src}
+            style={{ left: 4 + Math.floor((65 - size[0]) / 2), top: Math.ceil((54 - size[1]) / 2) + yOffset }}
+            onLoad={(event) => setSize([event.currentTarget.naturalWidth, event.currentTarget.naturalHeight])}
+        />
+    );
+};
+
+/** Track an element's size: NativeText fills its field after the font has loaded, so the first layout pass is not the final one. */
+const useElementSize = (ref: RefObject<HTMLElement>, dependency: unknown): { width: number; height: number } =>
+{
+    const [size, setSize] = useState({ width: 0, height: 0 });
+
+    useLayoutEffect(() =>
+    {
+        const element = ref.current;
+
+        if (!element) return;
+
+        const measure = () =>
+            setSize((previous) =>
+                previous.width === element.offsetWidth && previous.height === element.offsetHeight
+                    ? previous
+                    : { width: element.offsetWidth, height: element.offsetHeight }
+            );
+        const observer = new ResizeObserver(measure);
+
+        measure();
+        observer.observe(element);
+
+        return () => observer.disconnect();
+    }, [ref, dependency]);
+
+    return size;
+};
+
+/** rank_border (border style 14, 25x25) grows with its number so it always holds it, and stays centred in the 45px rank_container. */
+const RankBubble: FC<{ rank: number; isOwn: boolean }> = ({ rank, isOwn }) =>
+{
+    const textRef = useRef<HTMLDivElement>(null);
+    const { width: textWidth } = useElementSize(textRef, rank);
+    const width = Math.max(25, (textWidth || 13) + 12);
+
+    return (
+        <div
+            className="octane-badge-leaderboard__rank"
+            style={{ left: 5 + Math.floor((45 - width) / 2), top: isOwn ? 9 : 8, width, ['--rank-image' as string]: `url(${rankImage(rank)})` }}
+        >
+            <LeaderboardText bold size={15} value={rankText(rank)} x={7} y={3} />
+            <LeaderboardText blend="screen" bold color={0xffffff} innerRef={textRef} size={15} value={rankText(rank)} x={6} y={2} />
+        </div>
+    );
+};
+
+interface EntryRowProps {
+    entry: BadgeLeaderboardEntry;
+    emblem: string;
+    isOwn: boolean;
+    isEven: boolean;
+    onProfile: (userId: number) => void;
+}
+
+// entry_template (362x41) and own_container (370x43): the rank bubble, the face region, the name and the right-aligned score + emblem.
+const EntryRow: FC<EntryRowProps> = ({ entry, emblem, isOwn, isEven, onProfile }) =>
+{
+    const [emblemWidth, setEmblemWidth] = useState(25);
+    const right = isOwn ? 359 : 351;
+
+    return (
+        <div className={`octane-badge-leaderboard__entry ${isOwn ? 'is-own' : ''}`} data-user-id={entry.userId}>
+            <img
+                alt=""
+                className="octane-badge-leaderboard__entry-bg"
+                draggable={false}
+                src={isOwn ? leaderboardEntrySelf : isEven ? leaderboardEntryEven : leaderboardEntryUneven}
+            />
+            <RankBubble isOwn={isOwn} rank={entry.rank} />
+            <button
+                aria-label={entry.username}
+                className="octane-badge-leaderboard__profile"
+                style={{ left: 51, top: isOwn ? 4 : 3 }}
+                type="button"
+                onClick={() => onProfile(entry.userId)}
+                onPointerDown={(event) => event.stopPropagation()}
+            >
+                <span className="octane-badge-leaderboard__face-holder">
+                    <BadgeLeaderboardFace figure={entry.figure} />
+                </span>
+            </button>
+            <LeaderboardText value={entry.username} x={isOwn ? 97 : 98} y={isOwn ? 13 : 12} />
+            <img
+                alt=""
+                className="octane-badge-leaderboard__emblem"
+                draggable={false}
+                src={emblem}
+                style={{ left: right - emblemWidth, top: 7 }}
+                onLoad={(event) => setEmblemWidth(event.currentTarget.naturalWidth)}
+            />
+            <LeaderboardText bold parentWidth={isOwn ? 370 : 362} value={String(entry.score)} x={right - emblemWidth - 7} y={12} />
+        </div>
+    );
+};
+
+export const BadgeLeaderboardView: FC<{}> = () =>
+{
     const [isVisible, setIsVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [loadError, setLoadError] = useState<string>(null);
+    // The board asked for (a link, the menu or the pager); it is normalized against the rarities known now, so a link that names the uncommon board before the
+    // response says the hotel has one shows it as soon as that is known.
+    const [request, setRequest] = useState<{ type: number; rarity: number; page: number }>(DEFAULT_TARGET);
     const [version, setVersion] = useState(0);
-    const [categoryIndex, setCategoryIndex] = useState(0);
-    const [entryPageIndex, setEntryPageIndex] = useState(0);
-    const [isCategoryMenuVisible, setIsCategoryMenuVisible] = useState(false);
+    const [loadError, setLoadError] = useState<string>(null);
+    const [, setLoadedAt] = useState(0);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const lastFetchRef = useRef(0);
+    const titleRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) => {
-                const parts = url.split('/');
+    const response = getCachedBadgeLeaderboard();
+    const hasUncommon = GetConfigurationValue<boolean>('badge_rarity.uncommon', false) || (response?.leaderboards?.rarity?.uncommon?.totalPlayers ?? 0) > 0;
+    const supported = useMemo(() => getSupportedRarities(hasUncommon), [hasUncommon]);
+    const target = useMemo(() => normalizeTarget(request.type, request.rarity, request.page, supported), [request, supported]);
 
-                if (parts.length < 2) return;
+    // Opening, switching category and paging all go through native showBadgeLeaderboard(type, rarity, page).
+    const show = useCallback(
+        (type: number, rarity: number, page: number) =>
+        {
+            setRequest({ type, rarity, page });
+            setIsMenuOpen(false);
+            setIsVisible(true);
+            setVersion((value) => value + 1);
+        },
+        []
+    );
 
-                switch (parts[1]) {
-                    case 'show':
-                        setIsVisible(true);
-                        return;
-                    case 'hide':
-                        setIsVisible(false);
-                        return;
-                    case 'toggle':
-                        setIsVisible((value) => !value);
-                        return;
-                    case 'refresh':
-                        setVersion((value) => value + 1);
-                        return;
-                }
-            },
-            eventUrlPrefix: 'badge-leaderboard/'
+    useEffect(() =>
+    {
+        const linkReceived = (url: string) =>
+        {
+            const nativeLink = parseLeaderboardLink(url);
+
+            if (nativeLink)
+            {
+                show(nativeLink.type, nativeLink.rarity, nativeLink.page);
+
+                return;
+            }
+
+            const parts = url.split('/');
+
+            if (parts.length < 2) return;
+
+            switch (parts[1])
+            {
+                case 'show':
+                    show(0, -1, 0);
+                    return;
+                case 'hide':
+                    setIsVisible(false);
+                    return;
+                case 'toggle':
+                    setIsVisible((value) => !value);
+                    return;
+                case 'refresh':
+                    lastFetchRef.current = 0;
+                    setVersion((value) => value + 1);
+                    return;
+            }
         };
+        const trackers: ILinkEventTracker[] = [
+            { linkReceived, eventUrlPrefix: 'badge-leaderboard/' },
+            { linkReceived, eventUrlPrefix: 'badge_leaderboard/' }
+        ];
 
-        AddLinkEventTracker(linkTracker);
+        for (const tracker of trackers) AddLinkEventTracker(tracker);
 
-        return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+        return () =>
+        {
+            for (const tracker of trackers) RemoveLinkEventTracker(tracker);
+        };
+    }, [show]);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (!isVisible) return;
 
         let cancelled = false;
 
-        setIsLoading(true);
-        setLoadError(null);
+        if (getCachedBadgeLeaderboard() && Date.now() - lastFetchRef.current <= STALE_AFTER_MS) return;
 
-        fetchBadgeLeaderboard(version > 0)
-            .then(() => {
-                if (cancelled) return;
+        fetchBadgeLeaderboard(true)
+            .then(() =>
+            {
+                lastFetchRef.current = Date.now();
 
-                setIsLoading(false);
+                if (!cancelled)
+                {
+                    setLoadError(null);
+                    setLoadedAt(Date.now());
+                }
             })
-            .catch((error) => {
-                if (cancelled) return;
-
-                setLoadError(String((error as Error)?.message || error));
-                setIsLoading(false);
+            .catch((error) =>
+            {
+                if (!cancelled) setLoadError(String((error as Error)?.message || error));
             });
 
-        return () => {
+        return () =>
+        {
             cancelled = true;
         };
     }, [isVisible, version]);
 
-    const leaderboard = getCachedBadgeLeaderboard();
+    useEffect(() =>
+    {
+        if (!isMenuOpen) return;
 
-    const pages = useMemo<LeaderboardPage[]>(() => {
-        if (!leaderboard) return [];
+        const close = () => setIsMenuOpen(false);
 
-        const built: LeaderboardPage[] = [
-            {
-                key: 'totalBadges',
-                board: leaderboard.leaderboards.totalBadges,
-                frame: frameLeaderboardTotal,
-                emblem: badgeEmblemDefault,
-                title: () => LocalizeText('badge_leaderboard.title.total_badges'),
-                info: () => LocalizeText('badge_leaderboard.info.total_badges'),
-                option: () => LocalizeText('badge_leaderboard.option.total_badges')
-            },
-            {
-                key: 'achievementLevel',
-                board: leaderboard.leaderboards.achievementLevel,
-                frame: frameLeaderboardAchievement,
-                emblem: badgeEmblemAchievement,
-                title: () => LocalizeText('badge_leaderboard.title.achievement_level'),
-                info: () => LocalizeText('badge_leaderboard.info.achievement_level'),
-                option: () => LocalizeText('badge_leaderboard.option.achievement_level')
-            }
-        ];
+        window.addEventListener('pointerdown', close);
 
-        for (const rarity of RARITY_ORDER) {
-            const board = leaderboard.leaderboards.rarity?.[rarity];
+        return () => window.removeEventListener('pointerdown', close);
+    }, [isMenuOpen]);
 
-            if (!board?.totalPlayers) continue;
+    const assets = getAssetsFor(target);
+    const board = getBoard(response, target);
+    const entries = board?.entries ?? [];
+    // The pager follows what the data holds: the server's totalEntries, never more than the entries that reached the client.
+    const totalEntries = board ? Math.min(board.totalPlayers ?? entries.length, entries.length) : 0;
+    const canGoNext = (target.page + 1) * PAGE_SIZE < totalEntries;
+    const canGoPrevious = target.page > 0;
+    const pageEntries = entries.slice(target.page * PAGE_SIZE, target.page * PAGE_SIZE + PAGE_SIZE);
+    const ownEntry = board?.viewerEntry?.userId ? (board.viewerEntry as BadgeLeaderboardEntry) : null;
 
-            const assets = RARITY_ASSETS[rarity];
-            const rarityText = LocalizeText(`badge.rarity.${rarity}`);
+    const rarityName = (rarity: number) => text(getRarityDescriptor(rarity)?.textKey ?? '');
+    const titleText =
+        target.type === 1
+            ? text('badge_leaderboard.title.rarity', ['rarity'], [rarityName(target.rarity)])
+            : target.type === 2
+                ? text('badge_leaderboard.title.achievement_level')
+                : text('badge_leaderboard.title.total_badges');
+    const infoText =
+        target.type === 1
+            ? text(getRarityDescriptor(target.rarity).infoKey)
+            : target.type === 2
+                ? text('badge_leaderboard.info.achievement_level')
+                : text('badge_leaderboard.info.total_badges');
+    const options = [
+        { label: text('badge_leaderboard.option.total_badges'), type: 0, rarity: -1 },
+        { label: text('badge_leaderboard.option.achievement_level'), type: 2, rarity: -1 },
+        ...supported.map((rarity) => ({ label: text('badge_leaderboard.option.rarity', ['rarity'], [rarityName(rarity)]), type: 1, rarity }))
+    ];
+    const selectedIndex = target.type === 0 ? 0 : target.type === 2 ? 1 : Math.max(0, supported.indexOf(target.rarity as LeaderboardRarity)) + 2;
 
-            built.push({
-                key: `rarity-${rarity}`,
-                rarity,
-                board,
-                frame: assets.frame,
-                emblem: assets.emblem,
-                title: () => LocalizeText('badge_leaderboard.title.rarity', ['rarity'], [rarityText]),
-                info: () => LocalizeText(`badge_leaderboard.info.rarity.${rarity}`),
-                option: () => LocalizeText('badge_leaderboard.option.rarity', ['rarity'], [rarityText])
-            });
-        }
+    // The title and its arrow are one centred row (itemlist_horizontal, spacing 6).
+    const { width: titleWidth } = useElementSize(titleRef, isVisible);
+    const titleLeft = titleWidth > 0 ? Math.ceil((412 - titleWidth) / 2) : null;
 
-        return built;
-    }, [leaderboard]);
-
-    useEffect(() => {
-        if (!pages.length) return;
-        if (categoryIndex < pages.length) return;
-
-        setCategoryIndex(0);
-    }, [categoryIndex, pages.length]);
-
-    useEffect(() => setEntryPageIndex(0), [categoryIndex]);
-
-    useEffect(() => {
-        if (!isCategoryMenuVisible) return;
-
-        const onWindowPointerDown = () => setIsCategoryMenuVisible(false);
-
-        window.addEventListener('pointerdown', onWindowPointerDown);
-
-        return () => window.removeEventListener('pointerdown', onWindowPointerDown);
-    }, [isCategoryMenuVisible]);
-
-    const currentPage = pages[categoryIndex] || null;
-    const allEntries = currentPage?.board?.entries || [];
-    const viewerEntry = useMemo(() => {
-        const fromBoard = currentPage?.board?.viewerEntry as BadgeLeaderboardEntry;
-
-        if (fromBoard?.userId) return fromBoard;
-        if (!leaderboard?.viewerUserId) return null;
-
-        const session = GetSessionDataManager();
-
-        if (!session || session.userId !== leaderboard.viewerUserId) return null;
-
-        return {
-            userId: session.userId,
-            username: session.userName || '',
-            figure: session.figure || '',
-            score: 0,
-            rank: 0
-        } as BadgeLeaderboardEntry;
-    }, [currentPage?.board?.viewerEntry, leaderboard?.viewerUserId]);
-    const rankedEntries = useMemo(() => {
-        if (!allEntries.length) return [];
-        if (!viewerEntry?.userId) return allEntries;
-
-        return allEntries.filter((entry) => entry.userId !== viewerEntry.userId);
-    }, [allEntries, viewerEntry?.userId]);
-    const viewerHasRankedScore = (viewerEntry?.rank || 0) > 0;
-    const rankedTotalPlayers = Math.max((currentPage?.board?.totalPlayers || 0) - (viewerHasRankedScore ? 1 : 0), rankedEntries.length);
-    const totalEntryPages = Math.max(1, Math.ceil(rankedTotalPlayers / PAGE_SIZE));
-    const clampedEntryPageIndex = Math.min(entryPageIndex, totalEntryPages - 1);
-    const pageStart = clampedEntryPageIndex * PAGE_SIZE;
-    const pageEntries = rankedEntries.slice(pageStart, pageStart + PAGE_SIZE);
-    const showViewerEntry = !!viewerEntry?.userId;
+    const openProfile = useCallback((userId: number) =>
+    {
+        if (userId > 0) GetUserProfile(userId);
+    }, []);
 
     if (!isVisible) return null;
 
     return (
         <div className="octane-badge-leaderboard fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
             <DraggableWindow
-                uniqueKey="badge-leaderboard"
                 handleSelector=".octane-badge-leaderboard__drag-handle"
+                uniqueKey="badge-leaderboard"
                 windowPosition={DraggableWindowPosition.CENTER}
             >
                 <div
                     className="octane-badge-leaderboard__window pointer-events-auto"
-                    style={{ '--badge-leaderboard-frame': `url(${currentPage?.frame || frameLeaderboardTotal})` } as CSSProperties}
+                    role="dialog"
+                    style={{ '--badge-leaderboard-frame': `url(${assets.frame})` } as CSSProperties}
                 >
-                    <div className="octane-badge-leaderboard__frame" aria-hidden="true" />
+                    <div aria-hidden="true" className="octane-badge-leaderboard__frame" />
                     <div className="octane-badge-leaderboard__drag-handle" />
+                    <div
+                        ref={titleRef}
+                        className="octane-badge-leaderboard__title"
+                        style={{ left: titleLeft ?? 0, visibility: titleLeft === null ? 'hidden' : 'visible' }}
+                    >
+                        <button
+                            className="octane-badge-leaderboard__title-text"
+                            type="button"
+                            onClick={() => setIsMenuOpen((value) => !value)}
+                            onPointerDown={(event) => event.stopPropagation()}
+                        >
+                            {[
+                                [0, 5],
+                                [1, 4],
+                                [2, 5],
+                                [1, 6]
+                            ].map(([x, y]) => (
+                                <LeaderboardText key={`${x}-${y}`} bold size={16} value={titleText} x={x} y={y} />
+                            ))}
+                            <LeaderboardText blend="screen" bold color={0xffffff} size={16} thickness={50} value={titleText} x={1} y={5} />
+                            <span className="octane-badge-leaderboard__title-sizer">
+                                <NativeText background={0xffffff} overrides={{ size: 16 }} text={titleText} textStyle="u_bold" />
+                            </span>
+                        </button>
+                        <button
+                            aria-label={options[selectedIndex]?.label}
+                            className="octane-badge-leaderboard__opener"
+                            type="button"
+                            onClick={() => setIsMenuOpen((value) => !value)}
+                            onPointerDown={(event) => event.stopPropagation()}
+                        >
+                            <img alt="" draggable={false} src={leaderboardDropdownOpener} />
+                        </button>
+                    </div>
                     <button
+                        aria-label="Close"
                         className="octane-badge-leaderboard__close"
                         type="button"
-                        onPointerDown={(event) => event.stopPropagation()}
                         onClick={() => setIsVisible(false)}
-                        aria-label="Close"
+                        onPointerDown={(event) => event.stopPropagation()}
                     >
-                        <span className="octane-badge-leaderboard__close-icon" style={{ backgroundImage: `url(${leaderboardButtonCloseSwf})` }} />
+                        <span style={{ backgroundImage: `url(${leaderboardButtonCloseSwf})` }} />
                     </button>
-                    <div className="octane-badge-leaderboard__header">
-                        <button
-                            className="octane-badge-leaderboard__category-button"
-                            type="button"
-                            onPointerDown={(event) => event.stopPropagation()}
-                            onClick={() => setIsCategoryMenuVisible((value) => !value)}
-                        >
-                            <Text className="octane-badge-leaderboard__header-title">
-                                {currentPage?.title() || LocalizeText('badge_leaderboard.title.total_badges')}
-                            </Text>
-                            <img className="octane-badge-leaderboard__header-arrow" src={leaderboardDropdownOpener} alt="" />
-                        </button>
-                        {isCategoryMenuVisible && (
-                            <div className="octane-badge-leaderboard__category-menu" onPointerDown={(event) => event.stopPropagation()}>
-                                {pages.map((page, index) => (
-                                    <button
-                                        key={page.key}
-                                        className={`octane-badge-leaderboard__category-option ${index === categoryIndex ? 'is-active' : ''}`}
-                                        type="button"
-                                        onClick={() => {
-                                            setCategoryIndex(index);
-                                            setIsCategoryMenuVisible(false);
-                                        }}
-                                    >
-                                        {page.option()}
-                                    </button>
-                                ))}
+                    {isMenuOpen && (
+                        <div className="octane-badge-leaderboard__menu" role="listbox" style={{ height: MENU_CHROME + options.length * MENU_ITEM_HEIGHT }} onPointerDown={(event) => event.stopPropagation()}>
+                            {options.map((option, index) => (
+                                <button
+                                    key={`${option.type}-${option.rarity}`}
+                                    aria-selected={index === selectedIndex}
+                                    className={`octane-badge-leaderboard__menu-item ${index === selectedIndex ? 'is-selected' : ''}`}
+                                    role="option"
+                                    type="button"
+                                    onClick={() => show(option.type, option.rarity, 0)}
+                                >
+                                    <LeaderboardText size={11} value={option.label} x={4} y={1} />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    <div className="octane-badge-leaderboard__info">
+                        <img alt="" className="octane-badge-leaderboard__info-bg" draggable={false} src={leaderboardHeader} />
+                        <HeaderEmblem src={assets.extended} yOffset={assets.extendedYOffset} />
+                        <InfoText value={lines(infoText)} />
+                    </div>
+                    <div className="octane-badge-leaderboard__list">
+                        {pageEntries.map((entry, index) => (
+                            <div
+                                key={`${target.type}-${target.rarity}-${target.page}-${entry.userId}-${index}`}
+                                className="octane-badge-leaderboard__slot"
+                                style={{ top: index * 43 }}
+                            >
+                                <EntryRow
+                                    emblem={assets.emblem}
+                                    entry={entry}
+                                    isEven={(target.page * PAGE_SIZE + index) % 2 === 0}
+                                    isOwn={false}
+                                    onProfile={openProfile}
+                                />
                             </div>
-                        )}
+                        ))}
+                        {loadError && !board && <div className="octane-badge-leaderboard__state">{loadError}</div>}
                     </div>
-                    <div className="octane-badge-leaderboard__content">
-                        {isLoading && !leaderboard && <div className="octane-badge-leaderboard__state">{LocalizeText('generic.loading')}</div>}
-                        {loadError && !leaderboard && <div className="octane-badge-leaderboard__state octane-badge-leaderboard__state--error">{loadError}</div>}
-                        {currentPage && (
-                            <>
-                                <div className="octane-badge-leaderboard__info-card">
-                                    <img className="octane-badge-leaderboard__info-icon" src={currentPage.emblem} alt="" />
-                                    <Text className="octane-badge-leaderboard__info-text" small wrap>
-                                        {currentPage.info()}
-                                    </Text>
-                                </div>
-                                <div className="octane-badge-leaderboard__list">
-                                    {pageEntries.map((entry, index) => (
-                                        <LeaderboardRow
-                                            key={`${currentPage.key}-${entry.userId}`}
-                                            entry={entry}
-                                            emblem={currentPage.emblem}
-                                            rowIndex={pageStart + index}
-                                            isCurrentUser={false}
-                                        />
-                                    ))}
-                                    {showViewerEntry && (
-                                        <LeaderboardRow entry={viewerEntry} emblem={currentPage.emblem} rowIndex={pageEntries.length} isCurrentUser={true} />
-                                    )}
-                                </div>
-                                <img className="octane-badge-leaderboard__divider" src={leaderboardDivider} alt="" />
-                                <Flex className="octane-badge-leaderboard__footer" justifyContent="between" alignItems="center">
-                                    <button
-                                        className="octane-badge-leaderboard__nav-button is-previous"
-                                        disabled={clampedEntryPageIndex <= 0}
-                                        onClick={() => setEntryPageIndex((value) => Math.max(0, value - 1))}
-                                    >
-                                        {LocalizeText('badge_leaderboard.previous')}
-                                    </button>
-                                    <Column gap={0} alignItems="center">
-                                        <Text small bold>
-                                            {currentPage.option()}
-                                        </Text>
-                                        <Text className="opacity-70" small>{`${clampedEntryPageIndex + 1} / ${totalEntryPages}`}</Text>
-                                    </Column>
-                                    <button
-                                        className="octane-badge-leaderboard__nav-button is-next"
-                                        disabled={clampedEntryPageIndex >= totalEntryPages - 1}
-                                        onClick={() => setEntryPageIndex((value) => Math.min(totalEntryPages - 1, value + 1))}
-                                    >
-                                        {LocalizeText('badge_leaderboard.next')}
-                                    </button>
-                                </Flex>
-                            </>
-                        )}
-                    </div>
+                    {ownEntry && (
+                        <div className="octane-badge-leaderboard__own">
+                            <EntryRow isEven isOwn emblem={assets.emblem} entry={ownEntry} onProfile={openProfile} />
+                        </div>
+                    )}
+                    <button
+                        className="octane-badge-leaderboard__button is-previous"
+                        disabled={!canGoPrevious}
+                        type="button"
+                        onClick={() => show(target.type, target.rarity, target.page - 1)}
+                    >
+                        <NativeText
+                            background={0xffffff}
+                            className="octane-badge-leaderboard__button-label"
+                            overrides={!canGoPrevious ? { color: 0x777777 } : undefined}
+                            text={text('badge_leaderboard.previous')}
+                            textStyle="u_regular"
+                        />
+                    </button>
+                    <button
+                        className="octane-badge-leaderboard__button is-next"
+                        disabled={!canGoNext}
+                        type="button"
+                        onClick={() => show(target.type, target.rarity, target.page + 1)}
+                    >
+                        <NativeText
+                            background={0xffffff}
+                            className="octane-badge-leaderboard__button-label"
+                            overrides={!canGoNext ? { color: 0x777777 } : undefined}
+                            text={text('badge_leaderboard.next')}
+                            textStyle="u_regular"
+                        />
+                    </button>
                 </div>
             </DraggableWindow>
-        </div>
-    );
-};
-
-interface LeaderboardRowProps {
-    entry: BadgeLeaderboardEntry;
-    emblem: string;
-    rowIndex?: number;
-    isCurrentUser?: boolean;
-}
-
-const LeaderboardRow: FC<LeaderboardRowProps> = (props) => {
-    const { entry = null, emblem = null, rowIndex = 0, isCurrentUser = false } = props;
-
-    if (!entry) return null;
-
-    const rankClassName = entry.rank === 1 ? 'is-rank-1' : entry.rank === 2 ? 'is-rank-2' : entry.rank === 3 ? 'is-rank-3' : '';
-
-    return (
-        <div className={`octane-badge-leaderboard__row ${isCurrentUser ? 'is-current-user' : ''} ${rowIndex % 2 === 0 ? 'is-even' : 'is-odd'}`}>
-            <div className={`octane-badge-leaderboard__rank ${rankClassName}`}>{entry.rank}</div>
-            <div className="octane-badge-leaderboard__avatar">
-                <LayoutAvatarImageView figure={entry.figure} headOnly direction={2} />
-            </div>
-            <Text className="octane-badge-leaderboard__username" bold>
-                {entry.username}
-            </Text>
-            <Text className="octane-badge-leaderboard__score" bold>
-                {entry.score}
-            </Text>
-            <img className="octane-badge-leaderboard__row-emblem" src={emblem} alt="" />
         </div>
     );
 };
