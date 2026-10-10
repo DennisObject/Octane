@@ -1510,6 +1510,14 @@
     pointer-events: none;
 }
 
+.octane-context-menu.air-name-bubble--friend::before {
+    border-image-source: url('../../assets/images/avatar-menu/air/bubble-name-friend.png');
+}
+
+.octane-context-menu.air-name-bubble--friend::after {
+    background-image: url('../../assets/images/avatar-menu/air/bubble-pointer-down-name-friend.png');
+}
+
 .air-name-bubble__relation {
     position: absolute;
     top: 12px;
@@ -1749,6 +1757,10 @@ textarea.octane-room-promote-edit__input {
     font-size: 11px;
     text-align: left;
     text-overflow: clip;
+}
+
+.octane-avatar-action-menu--furni:not(.octane-avatar-action-menu--furni-guild) .octane-context-menu-header:hover {
+    color: #ffffff;
 }
 
 .octane-avatar-action-menu--furni .air-avatar-menu-buttons {

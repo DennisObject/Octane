@@ -256,7 +256,7 @@ export const AvatarInfoWidgetView: FC<{}> = (props) => {
                 </Column>
             )}
             {nameBubbles.length > 0 &&
-                nameBubbles.map((name, index) => <AvatarInfoWidgetNameView key={index} nameInfo={name} onClose={() => removeNameBubble(index)} />)}
+                nameBubbles.map((name, index) => <AvatarInfoWidgetNameView key={index} isFriendEntry={true} nameInfo={name} onClose={() => removeNameBubble(index)} />)}
             {productBubbles.length > 0 &&
                 productBubbles.map((item, index) => {
                     return (
