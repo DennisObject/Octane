@@ -636,3 +636,94 @@
 .octane-ros-filter .ros-button.ros-button-fit {
     height: 30px;
 }
+
+/* remove_link is centred in its 174px field; icon_9 (bb2200) sits 17px left of that text */
+.octane-room-settings .ros-link.ros-remove-link {
+    text-align: center;
+    text-indent: 0;
+}
+
+.octane-room-settings .ros-remove-link > span {
+    position: relative;
+    color: inherit;
+    font: inherit;
+}
+
+.octane-room-settings .ros-remove-icon {
+    position: absolute;
+    top: -1px;
+    left: -17px;
+    width: 13px;
+    height: 13px;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+/* scrollbar_vertical stays visible; with nothing to scroll it is the disabled skin and has no thumb */
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll {
+    position: absolute;
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] {
+    visibility: visible;
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-up {
+    background-image: url('../../assets/images/scrollbar/up_disabled.png');
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-button.is-down {
+    background-image: url('../../assets/images/scrollbar/down_disabled.png');
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-track {
+    background-image: url('../../assets/images/scrollbar/background_disabled.png');
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .octane-classic-scrollbar[data-visible='false'] .octane-classic-scrollbar-thumb {
+    display: none;
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .ros-scroll-viewport {
+    width: 121px;
+    scrollbar-width: none;
+}
+
+:is(.octane-room-settings, .octane-ros-filter) .ros-scroll .ros-scroll-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.octane-room-settings .ros-scroll-banned .ros-scroll-viewport {
+    width: 129px;
+    margin-top: 1px;
+}
+
+.octane-room-settings .ros-scroll-banned .octane-classic-scrollbar {
+    width: 19px;
+}
+
+:is(.octane-room-settings, .octane-ros-filter) :is(.ros-scroll-banned, .ros-scroll-filter) :is(.octane-classic-scrollbar-button, .octane-classic-scrollbar-track) {
+    background-position: left top;
+}
+
+/* filter_users_input is a 1px black text field on the search strip; the shared input skin is a border image */
+.octane-room-settings .ros-input.ros-filter-input {
+    border: 1px solid #000 !important;
+    border-image: none !important;
+    background-color: transparent !important;
+}
+
+:is(.octane-room-settings, .octane-ros-confirm, .octane-ros-filter) .ros-button.ros-button-thick {
+    padding: 0 8px 2px 10px;
+    font-weight: 700;
+}
+
+.octane-ros-filter .ros-scroll-filter .ros-scroll-viewport {
+    width: 226px;
+    height: 95px;
+    margin-top: 1px;
+}
+
+.octane-ros-filter .ros-scroll-filter .octane-classic-scrollbar {
+    width: 19px;
+    height: 94px;
+}

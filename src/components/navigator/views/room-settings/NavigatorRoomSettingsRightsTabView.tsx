@@ -8,7 +8,7 @@ import {
 } from '@octane/renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetConfigurationValue, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { UserProfileIconView } from '../../../../common';
+import { ClassicScrollAreaView, UserProfileIconView } from '../../../../common';
 import { useFriends, useMessageEvent } from '../../../../hooks';
 import { NavigatorRoomSettingsAtView } from './NavigatorRoomSettingsAtView';
 
@@ -116,7 +116,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                 {LocalizeText('navigator.flatctrls.filter')}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView h={23} w={216} x={97} y={9}>
-                <input className="ros-input" value={filter} onChange={(event) => setFilter(event.target.value)} />
+                <input className="ros-input ros-filter-input" value={filter} onChange={(event) => setFilter(event.target.value)} />
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-text ros-multi" h={34} w={150} x={0} y={44}>
                 {LocalizeText(
@@ -129,7 +129,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                 {LocalizeText('navigator.flatctrls.friends', ['displayed', 'total'], [shownFriends.length.toString(), friendsWithoutRights.length.toString()])}
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={0} y={74}>
-                <div className="ros-list" style={{ height: 246 }}>
+                <ClassicScrollAreaView className="ros-scroll" style={{ left: 4, top: 4, width: 142, height: 247 }} viewportClassName="ros-scroll-viewport">
                     {shownUsersWithRights.map(([id, name], index) => (
                         <div key={id} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}`}>
                             <button type="button" className="ros-user-bg" onClick={() => guardedSend(`take_${id}`, new RoomTakeRightsComposer(id))}>
@@ -139,7 +139,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                             <UserProfileIconView className="ros-user-eye" userId={id} />
                         </div>
                     ))}
-                </div>
+                </ClassicScrollAreaView>
                 <button
                     type="button"
                     className="ros-button ros-button-thick"
@@ -151,7 +151,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                 </button>
             </NavigatorRoomSettingsAtView>
             <NavigatorRoomSettingsAtView className="ros-list-border" h={289} w={150} x={173} y={74}>
-                <div className="ros-list" style={{ height: 281 }}>
+                <ClassicScrollAreaView className="ros-scroll" style={{ left: 4, top: 4, width: 142, height: 281 }} viewportClassName="ros-scroll-viewport">
                     {shownFriends.map((friend, index) => (
                         <div key={friend.id} className={`ros-user-row${index % 2 !== 0 ? ' is-odd' : ''}`}>
                             <button
@@ -165,7 +165,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                             <UserProfileIconView className="ros-user-eye" userId={friend.id} />
                         </div>
                     ))}
-                </div>
+                </ClassicScrollAreaView>
             </NavigatorRoomSettingsAtView>
         </div>
     );

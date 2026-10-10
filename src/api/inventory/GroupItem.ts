@@ -287,6 +287,15 @@ export class GroupItem {
         let key = '';
 
         switch (this._category) {
+            case FurniCategory.WALL_PAPER:
+                key = 'inventory.furni.item.wallpaper.name';
+                break;
+            case FurniCategory.FLOOR:
+                key = 'inventory.furni.item.floor.name';
+                break;
+            case FurniCategory.LANDSCAPE:
+                key = 'inventory.furni.item.landscape.name';
+                break;
             case FurniCategory.POSTER:
                 key = 'poster_' + k.stuffData.getLegacyString() + '_name';
                 break;

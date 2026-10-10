@@ -59,7 +59,7 @@
     box-sizing: border-box;
     width: 153px;
     margin-left: 5px;
-    padding: 2px 2px 3px;
+    padding: 2px 2px 2px;
     overflow-wrap: break-word;
     white-space: pre-wrap;
 }
@@ -72,7 +72,8 @@
 
 .octane-room-info .octane-room-info__quick-actions > :is(.is-home, .is-rights, .is-favourite) { position: absolute; top: 0; }
 .octane-room-info__quick-actions .is-rights { left: 163px; width: 18px; height: 22px; }
-.octane-room-info__quick-actions .is-home { left: 185px; width: 19px; height: 16px; }
+.octane-room-info__quick-actions .is-home { left: 185px; width: 18px; height: 16px; }
+.octane-room-info__quick-actions svg { position: absolute; top: 0; left: 0; }
 .octane-room-info__quick-actions .is-favourite { left: 206px; width: 18px; height: 16px; }
 
 .octane-room-info .octane-room-info__owner,
@@ -109,7 +110,7 @@
 .octane-room-info__tag:hover .octane-room-info__tag-skin.is-default { display: none; }
 .octane-room-info__tag:hover .octane-room-info__tag-skin.is-hovering { display: block; }
 
-.octane-room-info__description { box-sizing: border-box; width: 220px; margin-left: 5px; padding: 2px 2px 3px; overflow-wrap: break-word; white-space: pre-wrap; }
+.octane-room-info__description { box-sizing: border-box; width: 220px; margin-left: 5px; padding: 2px 2px 2px; overflow-wrap: break-word; white-space: pre-wrap; }
 .octane-room-info__thumbnail-container { position: relative; width: 227px; height: 114px; margin-left: 1px; }
 .octane-room-info__thumbnail {
     position: absolute !important;
@@ -134,7 +135,7 @@
 .octane-room-info .octane-room-info__embed-toggle { display: block; width: 230px; height: 20px; }
 .octane-room-info__embed-toggle img { position: absolute; top: 5px; left: 11px; image-rendering: pixelated; }
 .octane-room-info__embed-toggle span { position: absolute; top: 3px; left: 29px; padding: 2px; text-decoration: underline; }
-.octane-room-info .octane-room-info__embed-info { box-sizing: border-box; width: 216px; margin-left: 9px; padding: 2px 2px 3px; font: 400 10px/12px HabboAirUbuntu, Ubuntu, sans-serif !important; }
+.octane-room-info .octane-room-info__embed-info { box-sizing: border-box; width: 216px; margin-left: 9px; padding: 2px 2px 3px; font: 400 10px/11px HabboAirUbuntu, Ubuntu, sans-serif !important; }
 .octane-room-info__embed-source { display: block; box-sizing: border-box; width: 208px; height: 15px; margin: 2px 0 0 11px; padding: 0 2px; border: 1px solid #000; border-radius: 0; background: #fff; }
 
 .octane-room-info__actions { display: flex; width: 220px; margin-left: 5px; flex-direction: column; gap: 3px; }

@@ -1,0 +1,157 @@
+/* layout_frontpage_featured (class_1085): 552x460. First promo 184x460, scroll list at x=192, voucher border at (200,399). */
+.octane-cfp {
+    position: relative;
+    width: 552px;
+    height: 460px;
+    overflow: hidden;
+}
+
+.octane-cfp-list {
+    position: absolute;
+    top: 0;
+    left: 192px;
+    display: flex;
+    width: 360px;
+    height: 392px;
+    flex-direction: column;
+    gap: 7px;
+    overflow: auto;
+}
+
+.octane-cfp-item {
+    position: relative;
+    flex: 0 0 126px;
+    width: 360px;
+    height: 126px;
+}
+
+.octane-cfp-item.is-first {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 184px;
+    height: 460px;
+}
+
+.octane-cfp-item-image {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto;
+}
+
+.octane-cfp-item-title {
+    position: absolute;
+    top: 93px;
+    left: 5px;
+    box-sizing: border-box;
+    width: 346px;
+    height: 30px;
+    padding: 5px;
+    overflow: hidden;
+    background: rgba(51, 51, 51, 0.5);
+    color: #fff;
+    font-size: 18px;
+    line-height: 20px;
+}
+
+.octane-cfp-item.is-first .octane-cfp-item-title {
+    top: 428px;
+    width: 174px;
+    height: 29px;
+    padding: 0 5px;
+}
+
+.octane-cfp-item-region {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.octane-cfp-item.is-first .octane-cfp-item-region {
+    height: 422px;
+}
+
+.octane-cfp-voucher {
+    position: absolute;
+    top: 399px;
+    left: 200px;
+    box-sizing: border-box;
+    width: 345px;
+    height: 61px;
+}
+
+/* The 9-slice is the widget border. Children are placed from the widget origin, so the slice must not inset them. */
+.octane-cfp-voucher::before {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 6px solid transparent;
+    border-image: url('../../assets/images/catalog/air/skin/habbo-border-colorless-51bbee-13.png') 6 fill / 6px stretch;
+    content: '';
+    pointer-events: none;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-cfp-voucher-text {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    width: 272px;
+    height: 17px;
+    overflow: hidden;
+    color: #000;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+.octane-cfp-voucher-input {
+    position: absolute;
+    top: 25px;
+    left: 10px;
+    box-sizing: border-box;
+    width: 216px;
+    height: 25px;
+    border: 1px solid #c8c8c0;
+    background: #fff;
+}
+
+.octane-cfp-voucher-input input {
+    width: 206px;
+    height: 15px;
+    margin: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+.octane-cfp-voucher-button {
+    position: absolute;
+    top: 25px;
+    left: 274px;
+    width: 62px;
+    height: 22px;
+    padding: 0;
+    border: 3px solid transparent;
+    border-image: var(--habbo-skin-button) 3 fill / 3px stretch;
+    background: transparent;
+    color: #000;
+    font-size: 11px;
+    line-height: 16px;
+    cursor: pointer;
+}
+
+.octane-cfp-voucher-button:hover {
+    border-image-source: var(--habbo-skin-button-hover);
+}
+
+.octane-cfp-voucher-button:active {
+    border-image-source: var(--habbo-skin-button-pressed);
+}

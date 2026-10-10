@@ -1,42 +1,29 @@
 import { FrontPageItem } from '@octane/renderer';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { GetConfigurationValue } from '../../../../../../api';
-import { LayoutBackgroundImage, LayoutBackgroundImageProps } from '../../../../../../common';
-import { Text } from '../../../../../../common/Text';
 
-export interface CatalogLayoutFrontPageItemViewProps extends LayoutBackgroundImageProps {
+export interface CatalogLayoutFrontPageItemViewProps {
     item: FrontPageItem;
+    first?: boolean;
+    onSelect: (item: FrontPageItem) => void;
 }
 
+// featured_item_template / firstitem: the bitmap stays at its natural size (stretched_x/y false, pivot center).
+// The first item's click region stops above the title strip (184x422). List items use the full 360x126 cell.
 export const CatalogLayoutFrontPageItemView: FC<CatalogLayoutFrontPageItemViewProps> = (props) => {
-    const { item = null, position = 'relative', pointer = true, overflow = 'hidden', fullHeight = true, classNames = [], children = null, ...rest } = props;
-
-    const getClassNames = useMemo(() => {
-        const newClassNames: string[] = ['rounded', 'octane-front-page-item'];
-
-        if (classNames.length) newClassNames.push(...classNames);
-
-        return newClassNames;
-    }, [classNames]);
+    const { item = null, first = false, onSelect = null } = props;
 
     if (!item) return null;
 
-    const imageUrl = GetConfigurationValue<string>('image.library.url') + item.itemPromoImage;
+    const imageUrl = item.itemPromoImage ? GetConfigurationValue<string>('image.library.url', '') + item.itemPromoImage : null;
 
     return (
-        <LayoutBackgroundImage
-            classNames={getClassNames}
-            fullHeight={fullHeight}
-            imageUrl={imageUrl}
-            overflow={overflow}
-            pointer={pointer}
-            position={position}
-            {...rest}
-        >
-            <Text className="bg-dark rounded p-2 m-2 bottom-0" position="absolute" variant="white">
-                {item.itemName}
-            </Text>
-            {children}
-        </LayoutBackgroundImage>
+        <div className={`octane-cfp-item ${first ? 'is-first' : ''}`}>
+            <div className="octane-cfp-item-image" style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined} />
+            <div className="octane-cfp-item-title">
+                <span>{item.itemName}</span>
+            </div>
+            <button className="octane-cfp-item-region" type="button" onClick={() => onSelect(item)} />
+        </div>
     );
 };

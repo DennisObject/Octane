@@ -1,6 +1,6 @@
-import { BotRemoveComposer } from '@octane/renderer';
+import { BotRemoveComposer, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType } from '@octane/renderer';
 import { FC, useMemo } from 'react';
-import { AvatarInfoRentableBot, BotSkillsEnum, LocalizeText, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoRentableBot, BotSkillsEnum, LocalizeText, ProcessRoomObjectOperation, SendMessageComposer } from '../../../../../api';
 import { Button, LayoutBadgeImageView } from '../../../../../common';
 import { InfoStandAvatarView } from './InfoStandAvatarView';
 import { InfoStandHeaderView } from './InfoStandHeaderView';
@@ -22,6 +22,9 @@ export const InfoStandWidgetRentableBotView: FC<InfoStandWidgetRentableBotViewPr
 
         return true;
     }, [avatarInfo]);
+
+    // rentable_bot_view: move and rotate follow the room rights, pick up only the owner or any room controller.
+    const canManage = useMemo(() => !!avatarInfo && avatarInfo.ownerId > -1 && (avatarInfo.amIOwner || avatarInfo.amIAnyRoomController || avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST), [avatarInfo]);
 
     const pickupBot = () => SendMessageComposer(new BotRemoveComposer(avatarInfo.webID));
 
@@ -52,8 +55,18 @@ export const InfoStandWidgetRentableBotView: FC<InfoStandWidgetRentableBotViewPr
                 <div className="octane-infostand__description">{avatarInfo.motto}</div>
                 {avatarInfo.ownerId > -1 && <div className="octane-infostand__owner-line">{LocalizeText('infostand.text.botowner', ['name'], [avatarInfo.ownerName])}</div>}
             </div>
-            {canPickup && (
+            {(canManage || canPickup) && (
                 <div className="octane-infostand-actions octane-infostand-actions--tight">
+                    {canManage && (
+                        <>
+                            <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => ProcessRoomObjectOperation(avatarInfo.roomIndex, RoomObjectCategory.UNIT, RoomObjectOperationType.OBJECT_MOVE)}>
+                                {LocalizeText('infostand.button.move')}
+                            </Button>
+                            <Button variant="dark" size={null} className="habbo-btn-black" onClick={() => ProcessRoomObjectOperation(avatarInfo.roomIndex, RoomObjectCategory.UNIT, RoomObjectOperationType.OBJECT_ROTATE_POSITIVE)}>
+                                {LocalizeText('infostand.button.rotate')}
+                            </Button>
+                        </>
+                    )}
                     {canPickup && (
                         <Button variant="dark" size={null} className="habbo-btn-black" onClick={pickupBot}>
                             {LocalizeText('infostand.button.pickup')}

@@ -122,3 +122,20 @@ const READ_ONLY_ADMIN_LAYOUTS = new Set<string>(['recent_purchases']);
 
 export const isReadOnlyCatalogAdminLayout = (layout: string | null | undefined): boolean =>
     typeof layout === 'string' && READ_ONLY_ADMIN_LAYOUTS.has(layout);
+
+// CatalogViewer.showCatalogPage: page.x = frameWidth - pageWidth - 8, and the left pane hides when that x is below 130.
+// The Ubuntu frame is 570px. Every catalog page layout in WIN63-202609161723-93809945 is 360px except layout_frontpage_featured (552).
+// frontpage4 is rewritten to frontpage_featured before the asset lookup, so it uses that 552px window too.
+const CATALOG_FRAME_WIDTH = 570;
+const CATALOG_PAGE_RIGHT_MARGIN = 8;
+const CATALOG_LEFT_PANE_MIN_X = 130;
+const STANDARD_CATALOG_PAGE_WIDTH = 360;
+const FEATURED_FRONT_PAGE_WIDTH = 552;
+const FEATURED_FRONT_PAGE_LAYOUTS = new Set(['frontpage', 'frontpage4', 'frontpage_featured']);
+
+export const catalogPageHidesLeftPane = (layoutCode: string | null | undefined): boolean =>
+{
+    const pageWidth = layoutCode && FEATURED_FRONT_PAGE_LAYOUTS.has(layoutCode) ? FEATURED_FRONT_PAGE_WIDTH : STANDARD_CATALOG_PAGE_WIDTH;
+
+    return CATALOG_FRAME_WIDTH - pageWidth - CATALOG_PAGE_RIGHT_MARGIN < CATALOG_LEFT_PANE_MIN_X;
+};

@@ -3,6 +3,7 @@ import {
     GetCustomRoomFilterMessageComposer,
     GetGuestRoomMessageComposer,
     GetSessionDataManager,
+    PerkEnum,
     RemoveOwnRoomRightsRoomMessageComposer,
     RoomControllerLevel,
     RoomMuteComposer,
@@ -28,6 +29,7 @@ import nativeAtlas from '../../../assets/images/navigator/air/room-info-native-a
 import { LayoutBadgeImageView, LayoutRoomThumbnailView, OctaneCardContentView, OctaneCardHeaderView, OctaneCardView } from '../../../common';
 import { RoomWidgetThumbnailEvent } from '../../../events';
 import { useHasPermission, useHelp, useNavigatorData, useNavigatorFavourite, useNavigatorUiStore, useRoom } from '../../../hooks';
+import { usePerkAllowed } from '../../../state/perkAllowancesStore';
 
 const AtlasSprite = ({ x, y, width, height, className = '' }: { x: number; y: number; width: number; height: number; className?: string }) => (
     <svg aria-hidden="true" className={className} width={width} height={height} viewBox={`${x} ${y} ${width} ${height}`}>
@@ -118,8 +120,8 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
     const { navigatorData } = useNavigatorData();
     const { roomSession } = useRoom();
     const canManageAnyRoom = useHasPermission(Permission.RoomOwnerAny);
-    // Compatibility permission: the session facade does not expose the native thumbnail perk.
-    const canUseRoomThumbnailCamera = useHasPermission(Permission.CameraUse);
+    // thumbnail_container is present only with the NAVIGATOR_ROOM_THUMBNAIL_CAMERA perk.
+    const canUseRoomThumbnailCamera = usePerkAllowed(PerkEnum.NAVIGATOR_ROOM_THUMBNAIL_CAMERA);
     const canStaffPick = useHasPermission(Permission.NavigatorStaffPick);
     const room = navigatorData?.enteredGuestRoom;
     const roomId = room?.roomId ?? 0;
@@ -207,6 +209,8 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
             className="octane-room-info"
             frameStyle={3}
             isResizable={false}
+            offsetLeft={-0.5}
+            offsetTop={-0.5}
             dragStyle={{ filter: 'drop-shadow(2.828px 2.828px 2px rgba(0, 0, 0, 0.349))' }}
         >
             <OctaneCardHeaderView headerText={LocalizeText('navigator.roomsettings.roominfo')} onCloseClick={onCloseClick} />
@@ -226,7 +230,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                         )}
                         {isHome ? (
                             <span className="is-home" aria-label={LocalizeText('navigator.room.popup.room.info.home')}>
-                                <AtlasSprite x={24} y={0} width={19} height={14} />
+                                <AtlasSprite x={24} y={0} width={18} height={14} />
                             </span>
                         ) : (
                             <button
@@ -236,7 +240,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                                 title={LocalizeText('navigator.roominfo.makehome.tooltip')}
                                 onClick={() => processAction('set_home_room')}
                             >
-                                <AtlasSprite x={0} y={0} width={19} height={14} />
+                                <AtlasSprite x={0} y={0} width={18} height={14} />
                             </button>
                         )}
                         {!isOwner && (
@@ -294,20 +298,22 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = ({ onCloseC
                         </div>
                     )}
                     {room.description && <div className="octane-room-info__description">{room.description}</div>}
-                    <div className="octane-room-info__thumbnail-container">
-                        <LayoutRoomThumbnailView className="octane-room-info__thumbnail" customUrl={room.officialRoomPicRef} roomId={roomId} />
-                        {canEdit && canUseRoomThumbnailCamera && (
-                            <button
-                                type="button"
-                                className="octane-room-info__camera"
-                                aria-label={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
-                                title={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
-                                onClick={() => processAction('open_room_thumbnail_camera')}
-                            >
-                                <span />
-                            </button>
-                        )}
-                    </div>
+                    {canUseRoomThumbnailCamera && (
+                        <div className="octane-room-info__thumbnail-container">
+                            <LayoutRoomThumbnailView className="octane-room-info__thumbnail" customUrl={room.officialRoomPicRef} roomId={roomId} />
+                            {canEdit && (
+                                <button
+                                    type="button"
+                                    className="octane-room-info__camera"
+                                    aria-label={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
+                                    title={LocalizeText('tooltip.navigator.room.info.add.thumbnail')}
+                                    onClick={() => processAction('open_room_thumbnail_camera')}
+                                >
+                                    <span />
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
                 {room.habboGroupId > 0 && (
                     <button type="button" className="octane-room-info__group" onClick={() => GetGroupInformation(room.habboGroupId)}>

@@ -208,10 +208,12 @@
 
 .us-other-back {
     position: relative;
-    margin: 12px 0 12px 11px;
+    margin: 12px 0 11px 11px;
     display: block;
     width: 60px;
     height: 28px;
+    /* button_shiny label margins are 8,2,8,3; the caption sits 1px right and 1px high of a centred line */
+    padding: 0 7px 2px 9px;
 }
 
 /* volume rows: 285x28 at (15, 49/77/105) */
