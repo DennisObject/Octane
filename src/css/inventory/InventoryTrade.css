@@ -1,0 +1,410 @@
+/* v75 inventory_trading_xml: 478x272 trade table under the inventory tabs (subContentArea). */
+.octane-inventory-window.is-trading {
+    height: 577px !important;
+    min-height: 577px !important;
+    max-height: none !important;
+}
+
+.octane-inventory-window.is-trading.has-credit-note {
+    height: 612px !important;
+    min-height: 612px !important;
+}
+
+.octane-inventory-window.is-trading.is-minimized {
+    height: 415px !important;
+    min-height: 415px !important;
+}
+
+.octane-inventory-window .octane-inventory-subcontent {
+    position: relative;
+    flex: 0 0 auto;
+    width: 478px;
+    margin-top: 5px;
+}
+
+.octane-trade {
+    position: relative;
+    width: 478px;
+    height: 272px;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    color: #000;
+}
+
+.octane-trade-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+    width: 478px;
+    height: 233px;
+    border: 0 solid transparent;
+    border-image: url('@/assets/images/inventory/trading/border-sunk.png') 14 1 4 8 fill / 14px 1px 4px 8px stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-help {
+    position: absolute;
+    left: 8px;
+    top: 7px;
+    display: flex;
+    justify-content: center;
+    width: 461px;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0.6;
+}
+
+.octane-trade-offer {
+    position: absolute;
+    top: 29px;
+    width: 200px;
+    height: 200px;
+}
+
+.octane-trade-offer.is-own {
+    left: 17px;
+}
+
+.octane-trade-offer.is-other {
+    left: 263px;
+}
+
+.octane-trade-offer-title {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    width: 200px;
+    height: 17px;
+    white-space: nowrap;
+}
+
+.octane-trade-offer-name {
+    font-weight: 700;
+}
+
+.octane-trade-offer-grid {
+    position: absolute;
+    left: 36px;
+    top: 26px;
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    grid-auto-rows: 40px;
+    gap: 4px;
+    width: 132px;
+    height: 132px;
+}
+
+.octane-trade-offer-grid[hidden] {
+    display: none;
+}
+
+.octane-trade-offer-info {
+    position: absolute;
+    left: 34px;
+    top: 23px;
+    width: 132px;
+    height: 132px;
+    overflow: hidden;
+}
+
+.octane-trade-slot {
+    position: relative;
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border: 0 solid transparent;
+    border-image: url('@/assets/images/inventory/trading/border-sunk.png') 14 1 4 8 fill / 14px 1px 4px 8px stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-slot > .octane-trade-item {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: default;
+}
+
+.octane-trade-slot > .octane-trade-item.is-removable {
+    cursor: pointer;
+}
+
+/* inventory_thumb_xml number_container: the amount sits in the top right corner. */
+.octane-trade-slot .octane-inventory-thumb > .bg-red-700 {
+    top: 2px;
+    right: 3px;
+}
+
+.octane-trade-total {
+    position: absolute;
+    left: 80px;
+    white-space: nowrap;
+}
+
+.octane-trade-total.is-items {
+    top: 162px;
+}
+
+.octane-trade-total.is-credits {
+    top: 180px;
+}
+
+.octane-trade-lock {
+    position: absolute;
+    left: 45px;
+    top: 164px;
+    width: 32px;
+    height: 34px;
+    background: url('@/assets/images/inventory/trading/native-unlocked.png') center no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-lock.is-locked {
+    background-image: url('@/assets/images/inventory/trading/native-locked.png');
+}
+
+/* inventory_trading_minimized_xml: 478x68 box with the panic icon, a headline and Continue / Cancel. */
+.octane-trade.is-minimized {
+    height: 68px;
+}
+
+.octane-trade-minimized-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+    width: 478px;
+    height: 68px;
+    border: 0 solid transparent;
+    border-image: url('@/assets/images/inventory/trading/border-sunk.png') 14 1 4 8 fill / 14px 1px 4px 8px stretch;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-minimized-icon {
+    position: absolute;
+    left: 11px;
+    top: 6px;
+    width: 30px;
+    height: 30px;
+    background: url('@/assets/images/inventory/trading/native-panic.png') center no-repeat;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-minimized-help {
+    position: absolute;
+    left: 42px;
+    top: 8px;
+    width: 421px;
+    height: 24px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+}
+
+.octane-trade.is-minimized .octane-trade-buttons {
+    top: 36px;
+    height: 28px;
+}
+
+.octane-trade-buttons > .octane-trade-continue {
+    left: 7px;
+    width: 70px;
+}
+
+.octane-trade.is-minimized .octane-trade-buttons > .octane-trade-cancel {
+    left: 412px;
+}
+
+/* widget_type separator, vertical: 2px (20% black, 60% white) centred in a 30x160 box. */
+.octane-trade-separator {
+    position: absolute;
+    left: 238px;
+    top: 40px;
+    width: 2px;
+    height: 160px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0 1px, rgba(255, 255, 255, 0.6) 1px 2px);
+}
+
+.octane-trade-buttons {
+    position: absolute;
+    left: 0;
+    top: 240px;
+    width: 478px;
+    height: 32px;
+}
+
+.octane-trade-buttons > button {
+    position: absolute;
+    top: 0;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 5px 1px !important;
+    border: 5px solid transparent !important;
+    border-radius: 0 !important;
+    border-image-source: var(--habbo-skin-shiny) !important;
+    border-image-slice: 5 fill !important;
+    border-image-width: 5px !important;
+    border-image-repeat: stretch !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-family: HabboAirUbuntu, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-trade-buttons > button:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-hover) !important;
+}
+
+.octane-trade-buttons > button:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-pressed) !important;
+}
+
+.octane-trade-buttons > button:disabled {
+    border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important;
+    pointer-events: none;
+}
+
+.octane-trade-buttons > .octane-trade-accept {
+    left: 5px;
+    width: auto;
+    padding: 0 5.8px 1px !important;
+}
+
+.octane-trade-buttons > .octane-trade-cancel {
+    left: 415px;
+    width: 56px;
+}
+
+/* inventory furni preview: offertotrade_cnt (50x19) and offertotrade_btn (148x22). */
+.octane-inventory-offer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+
+.octane-inventory-window .octane-inventory-offer-count {
+    box-sizing: border-box;
+    width: 50px !important;
+    height: 19px !important;
+    min-height: 19px !important;
+    padding: 0 4px !important;
+    border: 3px solid transparent !important;
+    border-image: var(--habbo-skin-border-white) 6 fill / 3px stretch !important;
+    background: transparent !important;
+    color: #000;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px !important;
+    line-height: 13px;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.octane-inventory-window .octane-inventory-btn-offer {
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 60px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 5.8px 1px !important;
+    border: 5px solid transparent !important;
+    border-radius: 0 !important;
+    border-image-source: var(--habbo-skin-shiny) !important;
+    border-image-slice: 5 fill !important;
+    border-image-width: 5px !important;
+    border-image-repeat: stretch !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-family: HabboAirUbuntu, sans-serif;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 17px !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    image-rendering: var(--octane-pixel-art, pixelated);
+}
+
+.octane-inventory-window .octane-inventory-btn-offer:hover:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-hover) !important;
+}
+
+.octane-inventory-window .octane-inventory-btn-offer:active:not(:disabled) {
+    border-image-source: var(--habbo-skin-shiny-pressed) !important;
+}
+
+.octane-inventory-window .octane-inventory-btn-offer:disabled {
+    border-image-source: url('@/assets/images/habbo-skin/slices/button-shiny-disabled.png') !important;
+}
+
+/* info_border_highlighted: 466x28 orange plate under the table while credit furni is offered; the buttons drop 35px. */
+.octane-trade-note {
+    position: absolute;
+    left: 5px;
+    top: 240px;
+    box-sizing: border-box;
+    width: 466px;
+    height: 28px;
+    padding: 5px 0 0 7px;
+    border-style: solid;
+    border-width: 0 6px;
+    border-image: url('@/assets/images/inventory/trading/note-orange.png') 0 6 fill / 0 6px stretch;
+    color: #000;
+    white-space: nowrap;
+    image-rendering: pixelated;
+}
+
+.octane-trade-note ~ .octane-trade-buttons {
+    top: 275px;
+}
+
+.octane-trade:has(.octane-trade-note) {
+    height: 307px;
+}
+
+/* inventory_thumb_credits: the coin pile sits at (1,18) top centred and the amount runs across the top. */
+.octane-trade-item.is-credit .octane-trade-credit-icon {
+    position: absolute;
+    left: 7px;
+    top: 17px;
+    width: 25px;
+    height: 18px;
+    image-rendering: pixelated;
+}
+
+.octane-trade-credit-count {
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 38px;
+    font-family: HabboAirUbuntu, UbuntuRegular, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+    color: #000;
+}
+
+/* The trade grid shows the thumb clipped to 40x40: frame and icon start at the cell corner, not 1px in. */
+.octane-trade-item::before {
+    inset: 0;
+}
+
+.octane-trade-item .octane-inventory-thumb-image {
+    inset: 0;
+}

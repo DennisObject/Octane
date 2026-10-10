@@ -65,12 +65,33 @@ const useInventoryTradeState = () => {
         }
     };
 
+    // Items offered in a trade are locked in the inventory list; a closed trade releases them again.
+    const unlockTradeItems = () =>
+    {
+        setGroupItems((prevValue) =>
+        {
+            const newValue = [...prevValue];
+
+            for (const groupItem of newValue) groupItem.lockItemIds([]);
+
+            return newValue;
+        });
+    };
+
     const removeItem = (group: GroupItem) => {
         const item = group.getLastItem();
 
         if (!item) return;
 
         SendMessageComposer(new TradingListItemRemoveComposer(item.id));
+    };
+
+    // v75 minimized trade box: Cancel always sends the plain close message.
+    const closeTrade = () =>
+    {
+        if (!isTrading) return;
+
+        SendMessageComposer(new TradingCloseComposer());
     };
 
     const stopTrading = () => {
@@ -121,6 +142,7 @@ const useInventoryTradeState = () => {
             }
         }
 
+        unlockTradeItems();
         setOwnUser(null);
         setOtherUser(null);
         setTradeState(TradeState.TRADING_STATE_READY);
@@ -266,7 +288,7 @@ const useInventoryTradeState = () => {
         return () => deactivate(id);
     }, [tradeState, activate, deactivate]);
 
-    return { ownUser, otherUser, tradeState, setTradeState, isTrading, groupItems, progressTrade, removeItem, stopTrading };
+    return { ownUser, otherUser, tradeState, setTradeState, isTrading, groupItems, progressTrade, removeItem, stopTrading, closeTrade };
 };
 
 export const useInventoryTrade = () => useSharedHook(useInventoryTradeState);
