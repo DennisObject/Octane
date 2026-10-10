@@ -25,16 +25,20 @@ export const WiredTriggerAvatarSaysSomethingView: FC<WiredTriggerAvatarSaysSomet
     const [ownerOnly, setOwnerOnly] = useState(false);
     const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
 
+    const nativeSays = !usernameOnly && trigger?.code === 0;
+
     const save = () => {
         setStringParam(usernameOnly ? '' : message);
-        setIntParams([usernameOnly ? MATCH_CONTAINS : matchMode, hideMessage ? 1 : 0, ownerOnly ? 1 : 0]);
+        setIntParams(nativeSays
+            ? [ownerOnly ? 1 : 0, matchMode, hideMessage ? 1 : 0]
+            : [usernameOnly ? MATCH_CONTAINS : matchMode, hideMessage ? 1 : 0, ownerOnly ? 1 : 0]);
     };
 
     useEffect(() => {
         setMessage(trigger?.stringData ?? '');
-        setMatchMode(trigger?.intData?.length > 0 ? trigger.intData[0] : MATCH_CONTAINS);
-        setHideMessage(trigger?.intData?.length > 1 ? trigger.intData[1] === 1 : false);
-        setOwnerOnly(trigger?.intData?.length > 2 ? trigger.intData[2] === 1 : false);
+        setMatchMode(trigger?.intData?.length > 0 ? trigger.intData[nativeSays ? 1 : 0] : MATCH_CONTAINS);
+        setHideMessage(trigger?.intData?.length > 1 ? trigger.intData[nativeSays ? 2 : 1] === 1 : false);
+        setOwnerOnly(trigger?.intData?.length > 2 ? trigger.intData[nativeSays ? 0 : 2] === 1 : false);
     }, [trigger]);
 
     return (
@@ -48,7 +52,7 @@ export const WiredTriggerAvatarSaysSomethingView: FC<WiredTriggerAvatarSaysSomet
             )}
             {!usernameOnly && (
                 <WiredSection title={LocalizeText('wiredfurni.params.whatissaid')}>
-                    <WiredTextInput value={message} onChange={setMessage} />
+                    <WiredTextInput value={message} onChange={setMessage} maxLength={nativeSays ? 1000 : undefined} />
                 </WiredSection>
             )}
             {!usernameOnly && (
